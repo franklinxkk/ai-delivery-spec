@@ -1,0 +1,141 @@
+# AI Prompt Registry - v3.4 domain-clean template
+# Machine-readable prompt ops contract. Replace examples per project/domain.
+version: "1.3"
+last_updated: "2026-05-26"
+
+prompts:
+  - prompt_id: assessment_v1
+    agent: assessment-agent
+    model: default-frontier-model
+    model_fallback: [default-compact-model]
+    owner: ai_team
+    status: active
+    previous_version: assessment_v0
+    rollback_supported: true
+    linked_test_cases: [TC-001, TC-002, TC-003]
+    prompt_path: "prompts/assessment/v1/system.md"
+    input_schema:
+      target_entity_id: string
+      assessment_date: date
+      scope: [profile, activity, history]
+    output_schema:
+      result_level: enum(low, medium, high, critical)
+      score: float
+      reasoning: string
+      confidence: float
+      hallucination_score: float
+    constraints:
+      max_tokens: 2000
+      temperature: 0.1
+
+  - prompt_id: workflow_planning_v1
+    agent: workflow-agent
+    model: default-frontier-model
+    owner: ai_team
+    status: active
+    previous_version: workflow_planning_v0
+    rollback_supported: true
+    linked_test_cases: [TC-010, TC-011, TC-012]
+    prompt_path: "prompts/workflow_planning/v1/system.md"
+    input_schema:
+      target_entity_id: string
+      assessment_id: string
+      result_level: enum(high, critical)
+    output_schema:
+      task_type: enum(review, follow_up, escalation)
+      deadline: date
+      suggested_items: [string]
+      priority: enum(normal, urgent, critical)
+    requires_human_approval: true
+
+  - prompt_id: notification_v1
+    agent: notification-agent
+    model: default-frontier-model
+    owner: ai_team
+    status: active
+    rollback_supported: true
+    linked_test_cases: [TC-020, TC-021]
+    prompt_path: "prompts/notification/v1/system.md"
+    constraints:
+      max_message_length: 200
+      forbidden_phrases: ["一定", "保证", "肯定"]
+
+  - prompt_id: report_v1
+    agent: report-agent
+    model: default-compact-model
+    model_fallback: [default-frontier-model]
+    owner: ai_team
+    status: active
+    previous_version: report_v0
+    rollback_supported: true
+    linked_test_cases: [TC-030, TC-031]
+    prompt_path: "prompts/report/v1/system.md"
+
+  - prompt_id: test_validation_v1
+    agent: test-agent
+    execution_mode: llm_assisted_verifier
+    model: default-compact-model
+    model_fallback: [default-frontier-model]
+    owner: qa_team
+    status: active
+    rollback_supported: false
+    linked_test_cases: [TC-040, TC-041, TC-042]
+    prompt_path: "prompts/test_validation/v1/system.md"
+    input_schema:
+      test_suite_id: string
+      trace_id: string
+      scenario_steps: [object]
+      deterministic_results: [object]
+      dom_snapshot_ref: string
+      screenshot_refs: [string]
+    output_schema:
+      passed: boolean
+      failed_assertions: [string]
+      data_drift_detected: boolean
+      root_cause_summary: string
+      remediation_hint: string
+    constraints:
+      max_tokens: 1200
+      temperature: 0.0
+
+rollback_rules:
+  owner: ai_platform
+  trigger_source: "observability emits RollbackRequested; this registry owns rollback execution and test gate"
+  trigger_conditions:
+    - hallucination_rate > 0.15
+    - avg_confidence < 0.5
+    - linked_test_failure_rate > 0.20
+    - manual_rollback_request
+  rollback_procedure:
+    - "1. Mark current version rollback_pending and freeze new requests"
+    - "2. Load previous_version into canary/shadow, not directly active"
+    - "3. Run previous_version linked_test_cases"
+    - "4. If all pass, switch previous_version to active and deprecate current"
+    - "5. If any fail, keep current active, alert owner, and enter manual decision"
+    - "6. Write rollback_log: time/reason/operator/test_result"
+  safety_net:
+    min_confidence_before_rollback: 0.6
+
+test_binding:
+  rule: "Each prompt_id binds at least 2 test cases"
+  required_test_types: [happy_path, boundary_case, adversarial]
+  test_execution:
+    frequency: on_change
+    regression: weekly
+
+monitoring:
+  prompt_drift_detection:
+    check: "Detect output distribution drift every 24h"
+    threshold: "KL divergence > 0.3"
+  prompt_coupling_detection:
+    check: "For every upstream prompt change, run all direct downstream prompts on fixed regression cases"
+    method:
+      - "Read prompt_dependency_graph"
+      - "Run baseline_version and candidate_version on 100 golden cases per downstream prompt"
+      - "Compare schema_valid_rate, enum_distribution_kl, confidence_mean_delta, label_agreement"
+    thresholds:
+      schema_valid_rate_drop: "> 2pp"
+      enum_distribution_kl: "> 0.3"
+      confidence_mean_delta: "> 0.10"
+      label_agreement_drop: "> 5pp"
+    alert: "impacted_downstream > 3 -> change_review"
