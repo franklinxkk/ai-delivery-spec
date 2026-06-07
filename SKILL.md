@@ -2,7 +2,7 @@
 name: ai-delivery-spec
 description: >-
   AI-native product-engineering delivery protocol for PRD, prototype, reverse engineering,
-  AI agent design, runtime governance, observability, prompt ops, tool policy, testability,
+  AI agent design, AI-native harness engineering, runtime governance, observability, prompt ops, tool policy, testability,
   user-story inventory, role operation path verification, customer-demoable self-contained
   HTML prototypes, DDD handoff PRD, and domain-specific product delivery. Use for AI系统设计,
   智能体协同, PRD, 原型, 用户故事, 角色路径, 客户演示原型, DDD领域建模, 业务建模,
@@ -10,19 +10,20 @@ description: >-
   executable specification work, and traffic safety / transport supervision products.
 ---
 
-# AI Delivery Spec — AI Native 软件交付协议 (v3.7 Delivery-Acceptance Verified)
+# AI Delivery Spec — AI Native 软件交付协议 (v3.8 Harness-Engineering Verified)
 
-> 作者：李康（Li Kang） | 版本：v3.7 | 原则：公共协议去领域化，业务知识插件化，用户故事与角色路径先行，迭代原型交互保真，状态按钮矩阵强制化，原型客户演示自闭环，PRD按DDD可开发可测试
+> 作者：李康（Li Kang） | 版本：v3.8 | 原则：公共协议去领域化，业务知识插件化，用户故事与角色路径先行，AI Native Harness 工程化验证，迭代原型交互保真，状态按钮矩阵强制化，原型客户演示自闭环，PRD按DDD可开发可测试
 
 ## Why This Version
 
-v3.7 keeps the protocol layer domain-neutral and adds delivery-acceptance gates on top of v3.6 story-path verification:
+v3.8 keeps the protocol layer domain-neutral and adds AI-native harness engineering gates on top of v3.7 delivery-acceptance verification:
 
 1. **Story-Path Verification Gate**: every described function must map to at least one user story, role operation path, prototype demo path, state transition, and test case.
 2. **Demo-Closed Prototype Gate**: the HTML prototype must be self-contained and customer-demoable without a backend. Every core user story must be walkable end-to-end with in-memory mock data, visible state changes, modals/pages, role switching, success/error/empty states, and no dead buttons.
 3. **DDD Handoff PRD Gate**: the PRD must describe bounded contexts, aggregates, entities/value objects, domain events, commands/queries, invariants, state transitions, key sequence diagrams, inputs/outputs, processing logic, business transformation logic, API contracts, and feature-level test cases.
 4. **State-Button Matrix Gate**: every list/detail object with lifecycle state must define state → visible actions → forbidden actions → guard conditions → visible outcome before the prototype/PRD is accepted.
 5. **No Toast-Only Core Action Gate**: create/view/edit/configure/submit/review/enable/disable/export/analyze actions must produce a real visible page, modal, data mutation, table refresh, result view, or state transition. Toast may only be feedback, not the business outcome.
+6. **AI Native Harness Engineering Gate**: once an AI-native scenario and target outcome are defined, multi-agent feasibility review must verify whether context, tools, workflow, evaluation, observability, and release harnesses can support stable landing. The logic path and engineering path must be simulated before runtime development is accepted.
 
 When a new prototype is generated from an existing one, semantic annotations are not enough: the new version must preserve or explicitly de-scope the previous version's pages, actions, modals, handlers, data coverage, and critical workflows. A prototype that looks complete but cannot complete a user story is a failed delivery artifact.
 
@@ -36,6 +37,7 @@ When a new prototype is generated from an existing one, semantic annotations are
 | Apply final acceptance gates: interaction ledger, state-button matrix, no-toast rule, browser verification report | `references/delivery-acceptance-gates.md` |
 | Validate user stories, role operation paths, demo paths, scenarios, and test coverage | `references/story-path-verification.md` |
 | Design AI feature, agent runtime, tool calls, alerts, rollback, operations | `references/ai-runtime-ops.md` |
+| Validate AI-native scenario feasibility, harness engineering, multi-agent review, and engineering path simulation | `references/ai-native-harness-engineering.md` |
 | Company/industry domain context, metrics, entities, scenarios, UI patterns | current domain module, default `references/domain-traffic.md` |
 | Validate traffic safety / transport supervision scenarios in depth | `references/domain-traffic-safety-scenarios.md` |
 | Register/update LLM prompts and linked tests | `references/prompt-registry.yaml` |
@@ -50,23 +52,26 @@ Decision tree:
 只有普通业务功能，无 AI → delivery-core + prototype-testability
 单个 AI 调用 → delivery-core + ai-runtime-ops + prompt-registry
 多个 Agent / 工具 / 回滚 / 监控 → delivery-core + ai-runtime-ops + prompt-registry
+AI Native 业务流程重构 / Agentic workflow / 高风险自动化 → delivery-core + ai-native-harness-engineering + ai-runtime-ops + prompt-registry
 行业/公司/业务域知识 → add current domain module (default: domain-traffic; replace when company changes)
 ```
 
 ## Collaboration Model
 
-Every AI feature must align four contracts before development starts:
+Every AI feature must align five contracts before development starts:
 
 | Contract | Owner | Required Artifact | Gate |
 |----------|-------|-------------------|------|
 | Business invariant | PM + Sponsor | Problem, state machine, guards, success metrics | SIM 1 + Gate 1 |
 | Runtime contract | Dev Lead + AI Platform | Agent registry, events, write_scope, fallback, human gates | Stage 3.5 |
+| Harness contract | AI Product + AI Architect + QA + Ops | Scenario card, context map, tool sandbox, eval set, replay trace, release gate | Stage 3.2 |
 | Evaluation contract | PM + QA | Scenario matrix, linked_test_cases, testid map, complexity count | SIM 1 + SIM 2 |
 | Operations contract | AI Platform + Ops | Trace fields, alert executor, rollback path, on-call/retrain owner | Stage 5.5 |
 
 Rules:
 - PM owns what must be true; do not hand-wave AI failure states.
 - Engineering owns how it safely runs; reject specs missing write_scope, idempotency, or precondition policy.
+- AI Product owns AI-native scenario value and target metrics; do not start runtime work before harness feasibility is reviewed.
 - AI Platform owns model/prompt/tool behavior; every LLM agent must have prompt registration and tests.
 - QA owns executable scenarios, including AI ambiguity, rollback, batch operations, multi-step flows.
 - Ops owns alert executors and escalation paths; no alert ships with only intention-style action.
@@ -75,7 +80,7 @@ AI change control: every prompt/model/tool/runtime/UI change must declare `impac
 
 Prototype iteration control: when an existing prototype or HTML file is used as input, Stage 0 must produce an interaction baseline ledger. Stage 5 must compare the new prototype against that ledger. Do not reduce interaction coverage unless the removed behavior is listed in a de-scope note with owner and reason. For lifecycle-heavy products, Stage 4 must also produce a state-button matrix before final UI or PRD generation.
 
-## Hard Gates: Story-Path Verification + Demo-Closed Prototype + DDD PRD
+## Hard Gates: Story-Path Verification + AI Native Harness + Demo-Closed Prototype + DDD PRD
 
 These gates are mandatory when generating or reviewing a PRD, HTML prototype, product design prototype, customer demo artifact, or development handoff package.
 
@@ -97,6 +102,25 @@ Story/path fail conditions:
 - A user story has no expected domain result or state transition.
 - A role appears in the PRD but has no operation path.
 - A test case cannot be traced back to a story, or a story cannot be traced forward to a test.
+
+### Gate A2: AI Native Harness Engineering
+
+AI-native scenarios must prove engineering feasibility before runtime design starts. A scenario that cannot be simulated through context, tools, workflow, evaluation, observability, and release harness is not ready for development.
+
+Required:
+- Build an AI-native scenario card with business goal, trigger, current workflow, AI-native workflow, target metrics, risk level, required context, required tools, allowed auto actions, human gates, forbidden actions, latency, and cost targets.
+- Run multi-agent feasibility review with Sponsor, Domain Workflow, AI Architect, Backend Integration, Data/RAG, QA/Eval, and Ops/SRE perspectives.
+- Define context harness, tool/API harness, workflow harness, evaluation harness, observability harness, and release harness.
+- Simulate the business logic path and engineering path before Stage 3.5 runtime contract is accepted.
+- Produce fixture replay, dry-run, failure-injection, and release gate plan for high-risk AI-native workflows.
+
+Harness fail conditions:
+- AI-native scenario lacks measurable business outcome.
+- Required context is unavailable, stale, unscoped, or not permission-safe.
+- Tool execution cannot be stubbed, sandboxed, or replayed.
+- High-risk action lacks human gate.
+- Agent workflow cannot be expressed as events, states, tools, fallback, and trace.
+- No golden evaluation cases, human rubric, trace replay, rollback, or kill switch exists.
 
 ### Gate B: Customer-Demoable Prototype
 
@@ -170,6 +194,7 @@ Stage 1.5: Research            → Research brief
 Stage 2: Stakeholder profile   → Sponsor + User + Dev portraits
 Stage 3: Requirement design    → Solution + scope + metrics
      ↓ SIM 1: solution review
+Stage 3.2: AI Native harness   → scenario card + multi-agent feasibility review + engineering path simulation
 Stage 3.5: Agent runtime       → Agent/event/write_scope/fallback policy
 Stage 4: Stories + state       → user-story-inventory.md + role-path-matrix.md + guarded state machine
 Stage 5: PRD + prototype       → REQUIREMENT.md + PROTOTYPE.html + demo-paths.json + story-path-coverage.md + state-button-matrix.md

@@ -2,7 +2,7 @@
 
 AI Delivery Spec 是一套面向产品经理、AI 产品负责人、研发负责人和测试团队的 **AI Native 软件交付协议 / Codex Skill**。
 
-它把 PRD、交互原型、用户故事、角色路径、DDD 研发交接、AI Agent 运行治理、Prompt/Tool 管理、可观测性和测试验收统一成一套可执行标准，帮助产研团队从“写需求文档”升级到“交付可开发、可测试、可演示、可治理的产品规格”。
+它把 PRD、交互原型、用户故事、角色路径、DDD 研发交接、AI Native Harness 工程化验证、AI Agent 运行治理、Prompt/Tool 管理、可观测性和测试验收统一成一套可执行标准，帮助产研团队从“写需求文档”升级到“交付可开发、可测试、可演示、可治理、可稳定落地的产品规格”。
 
 ## 适合谁用
 
@@ -19,6 +19,7 @@ AI Delivery Spec 是一套面向产品经理、AI 产品负责人、研发负责
 - PRD 写了很多功能名，但没有完整用户故事和角色路径。
 - 原型看起来完整，但按钮不可点、核心流程无法演示。
 - AI 功能只写“接入大模型”，没有失败兜底、人工确认、可观测性和回滚机制。
+- AI Native 场景目标看起来成立，但没有证明上下文、工具、工作流、评估、发布工程是否支撑稳定落地。
 - 开发拿不到清晰的业务对象、状态机、输入输出、领域事件和测试用例。
 - 测试只能凭感觉验收，无法从需求追溯到原型、状态、接口和用例。
 
@@ -31,6 +32,7 @@ AI Delivery Spec 强制把每个核心功能映射到：
 - DDD 业务对象
 - 测试用例
 - AI 运行与治理契约
+- AI Native Harness 工程化验证
 
 ## 核心能力
 
@@ -54,7 +56,15 @@ AI Delivery Spec 强制把每个核心功能映射到：
 - Story -> Prototype `data-testid` / `data-action` -> Test Case 的可追溯链路。
 - 每个角色至少有 happy path 和 exception/permission path。
 
-### 4. AI Agent 治理
+### 4. AI Native Harness 工程化验证
+
+- 场景和目标确定后，先验证工程化承载能力，再进入 runtime 开发。
+- 多智能体可行性评审：Sponsor、Domain Workflow、AI Architect、Backend Integration、Data/RAG、QA/Eval、Ops/SRE。
+- Harness 六层：context、tool/API、workflow、evaluation、observability、release。
+- 模拟业务逻辑路径和工程路径：trigger -> context -> agent -> tool -> human gate -> write -> trace -> evaluation。
+- 支持 fixture replay、dry-run、shadow、canary、failure injection。
+
+### 5. AI Agent 治理
 
 - Agent runtime contract。
 - Prompt/Agent Registry。
@@ -63,7 +73,7 @@ AI Delivery Spec 强制把每个核心功能映射到：
 - Fallback、human gate、write_scope、precondition、rollback。
 - AI 变更必须声明 impact_surface、linked_test_cases、rollback_owner、observability_signal。
 
-### 5. 测试与验收
+### 6. 测试与验收
 
 - Story-Path Verification Gate。
 - State-Button Matrix Gate。
@@ -82,6 +92,7 @@ ai-delivery-spec/
     ├── demo-closed-ddd-handoff.md
     ├── delivery-acceptance-gates.md
     ├── story-path-verification.md
+    ├── ai-native-harness-engineering.md
     ├── ai-runtime-ops.md
     ├── prompt-registry.yaml
     ├── domain-traffic.md
@@ -121,6 +132,14 @@ git clone https://github.com/franklinxkk/ai-delivery-spec.git ai-delivery-spec
 ```text
 使用 ai-delivery-spec，设计一个 AI Agent 功能：
 必须包含 runtime contract、prompt registry、tool policy、trace log、fallback、human gate、evaluation cases 和 observability。
+```
+
+### 评审 AI Native 场景工程可行性
+
+```text
+使用 ai-delivery-spec，对这个 AI Native 场景做 harness engineering review：
+先输出 AI Native scenario card，然后让 Sponsor、Domain Workflow、AI Architect、Backend Integration、Data/RAG、QA/Eval、Ops/SRE 多视角评审。
+必须模拟业务逻辑路径和工程路径，判断 context、tool/API、workflow、evaluation、observability、release harness 是否支撑稳定落地。
 ```
 
 ### 审查原型交互完整度
@@ -185,10 +204,13 @@ observability
 
 ## 版本
 
-当前版本：`v3.7 Delivery-Acceptance Verified`
+当前版本：`v3.8 Harness-Engineering Verified`
 
-v3.7 重点增强：
+v3.8 重点增强：
 
+- AI Native Harness Engineering Gate
+- Multi-Agent Feasibility Review
+- Engineering Path Simulation
 - Story-Path Verification Gate
 - Demo-Closed Prototype Gate
 - DDD Handoff PRD Gate
@@ -199,4 +221,3 @@ v3.7 重点增强：
 ## 作者
 
 李康（Li Kang）
-
