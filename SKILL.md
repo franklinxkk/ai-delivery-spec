@@ -4,19 +4,20 @@ description: >-
   AI-native product-engineering delivery protocol for PRD, prototype, reverse engineering,
   AI agent design, AI-native harness engineering, runtime governance, observability, prompt ops, tool policy, testability,
   user-story inventory, role operation path verification, customer-demoable self-contained
-  HTML prototypes, DDD handoff PRD, and domain-specific product delivery. Use for AI系统设计,
-  智能体协同, PRD, 原型, 用户故事, 角色路径, 客户演示原型, DDD领域建模, 业务建模,
+  HTML prototypes, mobile/mini-program delivery, AI effect evaluation, DDD handoff PRD,
+  and domain-specific product delivery. Use for AI系统设计,
+  智能体协同, PRD, 原型, 移动端, 小程序, 用户故事, 角色路径, 客户演示原型, DDD领域建模, 业务建模,
   指标体系, 逆向工程, software delivery, product-engineering collaboration,
   executable specification work, and traffic safety / transport supervision products.
 ---
 
-# AI Delivery Spec — AI Native 软件交付协议 (v3.8 Harness-Engineering Verified)
+# AI Delivery Spec — AI Native 软件交付协议 (v3.9 Mobile-AI-Native Verified)
 
-> 作者：李康（Li Kang） | 版本：v3.8 | 原则：公共协议去领域化，业务知识插件化，用户故事与角色路径先行，AI Native Harness 工程化验证，迭代原型交互保真，状态按钮矩阵强制化，原型客户演示自闭环，PRD按DDD可开发可测试
+> 作者：李康（Li Kang） | 版本：v3.9 | 原则：公共协议去领域化，业务知识插件化，移动端交付显式化，AI Native Harness 工程化验证，AI效果评估分级，用户故事与角色路径先行，迭代原型交互保真，状态按钮矩阵强制化，原型客户演示自闭环，PRD按DDD可开发可测试
 
 ## Why This Version
 
-v3.8 keeps the protocol layer domain-neutral and adds AI-native harness engineering gates on top of v3.7 delivery-acceptance verification:
+v3.9 keeps the protocol layer domain-neutral and adds mobile delivery, domain module templating, and AI effect evaluation on top of v3.8 harness-engineering verification:
 
 1. **Story-Path Verification Gate**: every described function must map to at least one user story, role operation path, prototype demo path, state transition, and test case.
 2. **Demo-Closed Prototype Gate**: the HTML prototype must be self-contained and customer-demoable without a backend. Every core user story must be walkable end-to-end with in-memory mock data, visible state changes, modals/pages, role switching, success/error/empty states, and no dead buttons.
@@ -24,6 +25,9 @@ v3.8 keeps the protocol layer domain-neutral and adds AI-native harness engineer
 4. **State-Button Matrix Gate**: every list/detail object with lifecycle state must define state → visible actions → forbidden actions → guard conditions → visible outcome before the prototype/PRD is accepted.
 5. **No Toast-Only Core Action Gate**: create/view/edit/configure/submit/review/enable/disable/export/analyze actions must produce a real visible page, modal, data mutation, table refresh, result view, or state transition. Toast may only be feedback, not the business outcome.
 6. **AI Native Harness Engineering Gate**: once an AI-native scenario and target outcome are defined, multi-agent feasibility review must verify whether context, tools, workflow, evaluation, observability, and release harnesses can support stable landing. The logic path and engineering path must be simulated before runtime development is accepted.
+7. **Mobile Product Delivery Gate**: mini-program/H5/app/mobile workflows must define mobile role paths, authorization, weak-network behavior, video/quiz/upload/message patterns, non-interruption rules, and mobile testid naming.
+8. **Domain Module Template Gate**: cross-domain migration must replace only the domain module unless public protocol behavior changes; every domain module must define entities, events, metrics, AI context, workflows, policies, UI/mobile patterns, test scenarios, and acceptance checklist.
+9. **AI Effect Evaluation Gate**: any AI claim about efficiency, quality, behavior change, risk reduction, learning effect, cost, conversion, safety, or compliance must declare evidence level, baseline/post windows, metrics, confounders, comparison design, and guardrails.
 
 When a new prototype is generated from an existing one, semantic annotations are not enough: the new version must preserve or explicitly de-scope the previous version's pages, actions, modals, handlers, data coverage, and critical workflows. A prototype that looks complete but cannot complete a user story is a failed delivery artifact.
 
@@ -33,12 +37,15 @@ When a new prototype is generated from an existing one, semantic annotations are
 |------|------|
 | Reverse-engineer an existing HTML/prototype, write PRD, plan stages, state machine, SIM review | `references/delivery-core.md` |
 | Generate/review an HTML prototype, data-testid, visual/test automation, AD5 patterns | `references/prototype-testability.md` |
+| Design/review mini-program, H5, mobile web, app, field/mobile workflow, video learning, quiz, push, consent, weak network | `references/mobile-product-delivery.md` |
 | Produce customer-demoable prototype + DDD PRD handoff with hard gates | `references/demo-closed-ddd-handoff.md` |
 | Apply final acceptance gates: interaction ledger, state-button matrix, no-toast rule, browser verification report | `references/delivery-acceptance-gates.md` |
 | Validate user stories, role operation paths, demo paths, scenarios, and test coverage | `references/story-path-verification.md` |
 | Design AI feature, agent runtime, tool calls, alerts, rollback, operations | `references/ai-runtime-ops.md` |
 | Validate AI-native scenario feasibility, harness engineering, multi-agent review, and engineering path simulation | `references/ai-native-harness-engineering.md` |
+| Evaluate AI product effect claims, baseline/post windows, evidence level, behavior change, learning effect, risk reduction | `references/ai-effect-evaluation.md` |
 | Company/industry domain context, metrics, entities, scenarios, UI patterns | current domain module, default `references/domain-traffic.md` |
+| Create or replace a domain module for a new industry/company/product | `references/domain-module-template.md` |
 | Validate traffic safety / transport supervision scenarios in depth | `references/domain-traffic-safety-scenarios.md` |
 | Register/update LLM prompts and linked tests | `references/prompt-registry.yaml` |
 
@@ -50,10 +57,13 @@ Decision tree:
 已有原型/HTML/竞品/旧系统 → delivery-core
 要写 PRD 或开发交接 → delivery-core + prototype-testability
 只有普通业务功能，无 AI → delivery-core + prototype-testability
+移动端 / 小程序 / H5 / App / 一线外勤 → delivery-core + prototype-testability + mobile-product-delivery
 单个 AI 调用 → delivery-core + ai-runtime-ops + prompt-registry
 多个 Agent / 工具 / 回滚 / 监控 → delivery-core + ai-runtime-ops + prompt-registry
 AI Native 业务流程重构 / Agentic workflow / 高风险自动化 → delivery-core + ai-native-harness-engineering + ai-runtime-ops + prompt-registry
+AI声称提效/质量提升/行为改变/风险降低/学习效果 → ai-effect-evaluation
 行业/公司/业务域知识 → add current domain module (default: domain-traffic; replace when company changes)
+换行业/换公司/做通用化 → domain-module-template + new domain module
 ```
 
 ## Collaboration Model
@@ -63,16 +73,20 @@ Every AI feature must align five contracts before development starts:
 | Contract | Owner | Required Artifact | Gate |
 |----------|-------|-------------------|------|
 | Business invariant | PM + Sponsor | Problem, state machine, guards, success metrics | SIM 1 + Gate 1 |
+| Mobile contract | PM + Frontend + QA | Mobile role paths, permission gates, weak-network rules, mobile testids | Stage 4/5 when mobile |
 | Runtime contract | Dev Lead + AI Platform | Agent registry, events, write_scope, fallback, human gates | Stage 3.5 |
 | Harness contract | AI Product + AI Architect + QA + Ops | Scenario card, context map, tool sandbox, eval set, replay trace, release gate | Stage 3.2 |
 | Evaluation contract | PM + QA | Scenario matrix, linked_test_cases, testid map, complexity count | SIM 1 + SIM 2 |
+| Effect contract | PM + Data + Sponsor | Evidence level, baseline/post windows, metrics, confounders, guardrails | Stage 3/5.5 |
 | Operations contract | AI Platform + Ops | Trace fields, alert executor, rollback path, on-call/retrain owner | Stage 5.5 |
 
 Rules:
 - PM owns what must be true; do not hand-wave AI failure states.
 - Engineering owns how it safely runs; reject specs missing write_scope, idempotency, or precondition policy.
 - AI Product owns AI-native scenario value and target metrics; do not start runtime work before harness feasibility is reviewed.
+- Mobile PM/Frontend owns mobile usability, permission, weak-network, and non-interruption rules.
 - AI Platform owns model/prompt/tool behavior; every LLM agent must have prompt registration and tests.
+- PM + Data own effect claims; do not claim causality when only correlation or proxy evidence exists.
 - QA owns executable scenarios, including AI ambiguity, rollback, batch operations, multi-step flows.
 - Ops owns alert executors and escalation paths; no alert ships with only intention-style action.
 
@@ -197,9 +211,11 @@ Stage 3: Requirement design    → Solution + scope + metrics
 Stage 3.2: AI Native harness   → scenario card + multi-agent feasibility review + engineering path simulation
 Stage 3.5: Agent runtime       → Agent/event/write_scope/fallback policy
 Stage 4: Stories + state       → user-story-inventory.md + role-path-matrix.md + guarded state machine
-Stage 5: PRD + prototype       → REQUIREMENT.md + PROTOTYPE.html + demo-paths.json + story-path-coverage.md + state-button-matrix.md
+Stage 4.5: Mobile contract     → mobile-role-path-matrix.md + permission-gates.md + weak-network-matrix.md (when mobile)
+Stage 5: PRD + prototype       → REQUIREMENT.md + PROTOTYPE.html + demo-paths.json + story-path-coverage.md + state-button-matrix.md + mobile-testid-map.md
 Stage 5.5: Observability       → trace fields + alert rules + dashboards
 Stage 5.6: Tool contract       → tool registry + call policy + audit
+Stage 5.7: Effect evaluation   → evidence-level + baseline/post windows + guardrails (when AI effect is claimed)
      ↓ SIM 2: prototype review + browser/demo-path verification + delivery acceptance gates
 Delivery: PRD + customer-demoable prototype + interaction ledger + state-button matrix + demo verification report + developer prompt + review report
 ```

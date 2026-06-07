@@ -2,12 +2,13 @@
 
 AI Delivery Spec 是一套面向产品经理、AI 产品负责人、研发负责人和测试团队的 **AI Native 软件交付协议 / Codex Skill**。
 
-它把 PRD、交互原型、用户故事、角色路径、DDD 研发交接、AI Native Harness 工程化验证、AI Agent 运行治理、Prompt/Tool 管理、可观测性和测试验收统一成一套可执行标准，帮助产研团队从“写需求文档”升级到“交付可开发、可测试、可演示、可治理、可稳定落地的产品规格”。
+它把 PRD、交互原型、移动端/小程序交付、用户故事、角色路径、DDD 研发交接、AI Native Harness 工程化验证、AI 效果评估、AI Agent 运行治理、Prompt/Tool 管理、可观测性和测试验收统一成一套可执行标准，帮助产研团队从“写需求文档”升级到“交付可开发、可测试、可演示、可治理、可稳定落地的产品规格”。
 
 ## 适合谁用
 
 - 产品经理：输出更标准的 PRD、用户故事、角色操作路径、原型验收说明。
 - AI 产品负责人：设计 AI 功能、智能体协同、Prompt/Tool/Agent 治理和评估体系。
+- 移动端/小程序产品经理：定义移动端角色路径、弱网、授权、消息、视频学习、考试和移动端 testid。
 - 研发负责人：拿到更清晰的 DDD 研发交接、状态机、API/命令查询契约和边界条件。
 - 测试/QA：基于用户故事、角色路径、状态按钮矩阵和 data-testid 进行自动化验收。
 - ToB/ToG 团队：把复杂业务、审批流、监管合规、数据报表、AI 辅助决策做成可落地交付物。
@@ -20,6 +21,8 @@ AI Delivery Spec 是一套面向产品经理、AI 产品负责人、研发负责
 - 原型看起来完整，但按钮不可点、核心流程无法演示。
 - AI 功能只写“接入大模型”，没有失败兜底、人工确认、可观测性和回滚机制。
 - AI Native 场景目标看起来成立，但没有证明上下文、工具、工作流、评估、发布工程是否支撑稳定落地。
+- 小程序/H5/App 只是把 PC 页面缩小，没有移动端路径、授权、弱网和非打扰规则。
+- AI 提效、风险降低、学习效果等价值主张没有证据分级和效果评估设计。
 - 开发拿不到清晰的业务对象、状态机、输入输出、领域事件和测试用例。
 - 测试只能凭感觉验收，无法从需求追溯到原型、状态、接口和用例。
 
@@ -33,6 +36,8 @@ AI Delivery Spec 强制把每个核心功能映射到：
 - 测试用例
 - AI 运行与治理契约
 - AI Native Harness 工程化验证
+- 移动端交付协议
+- AI 效果评估协议
 
 ## 核心能力
 
@@ -56,7 +61,15 @@ AI Delivery Spec 强制把每个核心功能映射到：
 - Story -> Prototype `data-testid` / `data-action` -> Test Case 的可追溯链路。
 - 每个角色至少有 happy path 和 exception/permission path。
 
-### 4. AI Native Harness 工程化验证
+### 4. 移动端 / 小程序交付
+
+- 小程序、H5、移动 Web、App 的 mobile surface 定义。
+- 移动端角色路径矩阵。
+- 底部 Tab、Sticky Action、Bottom Sheet、视频学习、考试、扫码、上传、订阅消息 testid。
+- 弱网、离线、重复点击、提交失败、软键盘、安全区。
+- 隐私授权、订阅消息、驾驶/作业中非打扰规则。
+
+### 5. AI Native Harness 工程化验证
 
 - 场景和目标确定后，先验证工程化承载能力，再进入 runtime 开发。
 - 多智能体可行性评审：Sponsor、Domain Workflow、AI Architect、Backend Integration、Data/RAG、QA/Eval、Ops/SRE。
@@ -64,7 +77,7 @@ AI Delivery Spec 强制把每个核心功能映射到：
 - 模拟业务逻辑路径和工程路径：trigger -> context -> agent -> tool -> human gate -> write -> trace -> evaluation。
 - 支持 fixture replay、dry-run、shadow、canary、failure injection。
 
-### 5. AI Agent 治理
+### 6. AI Agent 治理
 
 - Agent runtime contract。
 - Prompt/Agent Registry。
@@ -73,7 +86,14 @@ AI Delivery Spec 强制把每个核心功能映射到：
 - Fallback、human gate、write_scope、precondition、rollback。
 - AI 变更必须声明 impact_surface、linked_test_cases、rollback_owner、observability_signal。
 
-### 6. 测试与验收
+### 7. AI 效果评估
+
+- 区分输出可用、用户采纳、短期代理指标、效果佐证、因果证明。
+- 定义 baseline/post window、primary metrics、guardrail metrics、confounders。
+- 支持司机培训、知识学习、客服提效、销售转化、内容生产等效果评估。
+- 防止产品对外过度承诺“减少事故”“提升收入”等未验证结果。
+
+### 8. 测试与验收
 
 - Story-Path Verification Gate。
 - State-Button Matrix Gate。
@@ -89,12 +109,15 @@ ai-delivery-spec/
 └── references/
     ├── delivery-core.md
     ├── prototype-testability.md
+    ├── mobile-product-delivery.md
     ├── demo-closed-ddd-handoff.md
     ├── delivery-acceptance-gates.md
     ├── story-path-verification.md
     ├── ai-native-harness-engineering.md
     ├── ai-runtime-ops.md
+    ├── ai-effect-evaluation.md
     ├── prompt-registry.yaml
+    ├── domain-module-template.md
     ├── domain-traffic.md
     └── domain-traffic-safety-scenarios.md
 ```
@@ -134,12 +157,26 @@ git clone https://github.com/franklinxkk/ai-delivery-spec.git ai-delivery-spec
 必须包含 runtime contract、prompt registry、tool policy、trace log、fallback、human gate、evaluation cases 和 observability。
 ```
 
+### 设计移动端 / 小程序功能
+
+```text
+使用 ai-delivery-spec，按 mobile-product-delivery 标准设计这个小程序功能：
+输出 mobile surface、移动端角色路径、底部导航、授权门禁、弱网策略、订阅消息规则、视频/考试状态、移动端 testid 和验收用例。
+```
+
 ### 评审 AI Native 场景工程可行性
 
 ```text
 使用 ai-delivery-spec，对这个 AI Native 场景做 harness engineering review：
 先输出 AI Native scenario card，然后让 Sponsor、Domain Workflow、AI Architect、Backend Integration、Data/RAG、QA/Eval、Ops/SRE 多视角评审。
 必须模拟业务逻辑路径和工程路径，判断 context、tool/API、workflow、evaluation、observability、release harness 是否支撑稳定落地。
+```
+
+### 评估 AI 功能真实效果
+
+```text
+使用 ai-delivery-spec，对这个 AI 功能做 effect evaluation：
+定义证据等级、baseline/post window、主指标、护栏指标、混杂因素、对照方式和允许/禁止对外宣称的效果。
 ```
 
 ### 审查原型交互完整度
@@ -158,7 +195,7 @@ git clone https://github.com/franklinxkk/ai-delivery-spec.git ai-delivery-spec
 - `references/domain-traffic.md`
 - `references/domain-traffic-safety-scenarios.md`
 
-如果你换到其他行业，只需要替换领域模块，公共协议层可以继续复用。一个合格的 domain module 应包含：
+如果你换到其他行业，优先替换领域模块，公共协议层可以继续复用。建议按 `references/domain-module-template.md` 创建新领域模块。一个合格的 domain module 应包含：
 
 - 领域实体
 - 指标体系
@@ -204,10 +241,13 @@ observability
 
 ## 版本
 
-当前版本：`v3.8 Harness-Engineering Verified`
+当前版本：`v3.9 Mobile-AI-Native Verified`
 
-v3.8 重点增强：
+v3.9 重点增强：
 
+- Mobile Product Delivery Gate
+- Domain Module Template Gate
+- AI Effect Evaluation Gate
 - AI Native Harness Engineering Gate
 - Multi-Agent Feasibility Review
 - Engineering Path Simulation
