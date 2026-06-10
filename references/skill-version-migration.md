@@ -14,6 +14,16 @@ Use this file when upgrading projects or the skill itself across major versions.
 | ToB/ToG patterns added | approval, RBAC, multitenancy become reusable public patterns |
 | Reporting/Analytics pattern added | metric/report/dashboard products get a fitting DDD model |
 
+## v4.0 -> v4.0.1 Defensive Hardening
+
+| Change | Impact |
+|---|---|
+| Spec Tiering / Anti-Bloating added | Simple CRUD and deterministic workflows no longer inherit unnecessary prompt/DAG/multi-agent contracts |
+| Shadow-Data Isolation added | Automated browser agents cannot pollute production/preprod business data, indicator libraries, or reports |
+| Contract Version Semantics added | Prompt tests and baselines declare API/event/domain/schema dependency versions |
+| Edge-Fallback Gateway added | Mobile/field/weak-network AI flows have local fallback and offline queue rules |
+| Human Overrule contract added | Automated acceptance is a release signal with auditable human override, not an unchallengeable judge |
+
 ## Gate Mapping
 
 | v3.9 Gate | v4.0 Equivalent |

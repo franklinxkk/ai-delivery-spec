@@ -12,9 +12,9 @@ description: >-
   brainstorming, quick copy edits, or isolated drafts that do not require gates.
 ---
 
-# AI Delivery Spec — AI Native 软件交付协议 (v4.0 Tiered ToB/ToG Delivery)
+# AI Delivery Spec — AI Native 软件交付协议 (v4.0.1 Defensive Hardening)
 
-> 作者：李康（Li Kang） | 版本：v4.0 | 原则：分级交付、条件 Gate、ToB/ToG 通用模式、AI Native 与 AI 嵌入分流、多端一致性、领域插件化、构建与版本治理、可演示可开发可测试。
+> 作者：李康（Li Kang） | 版本：v4.0.1 | 原则：分级交付、条件 Gate、ToB/ToG 通用模式、AI Native 与 AI 嵌入分流、多端一致性、领域插件化、构建与版本治理、防御性运行契约、可演示可开发可测试。
 
 ## 1. Core Rule
 

@@ -208,6 +208,40 @@ Exit conditions:
 - timeout exceeded -> TIMEOUT;
 - manual stop -> ABORTED.
 
+## Test State Self-Healing / Shadow-Data Isolation
+
+Automated browser agents must not pollute real business data, indicator libraries, reports, or production statistics.
+
+Rules:
+
+- Any automated scenario that may call a backend must carry `data-test-scenario` and a unique `data-test-run-id`.
+- The deterministic test runner or gateway must inject `X-Agent-Test-Mode: true` on outbound requests for automated scenarios.
+- Backend/API gateway must route test-mode writes to one of:
+  - shadow table / shadow database;
+  - tenant-scoped test workspace;
+  - transaction rollback after assertion;
+  - Saga compensation with verified cleanup.
+- Test data must include `test_run_id`, `trace_id`, creator, timestamp, and expiry.
+- Reporting, metric, BI, index library, and dashboard queries must exclude test-mode records by default.
+- Production writes are forbidden for automated browser verification unless shadow isolation is active and verified.
+- Cleanup must be idempotent. Re-running cleanup for the same `test_run_id` must be safe.
+
+Minimum backend contract:
+
+```yaml
+test_mode_isolation:
+  request_header: X-Agent-Test-Mode
+  required_when: data-test-scenario present
+  write_routing: shadow_db | shadow_table | rollback_transaction | saga_compensation
+  cleanup:
+    key: test_run_id
+    idempotent: true
+    max_ttl: 24h
+  metrics_exclusion: test_mode == true
+```
+
+Fail if an automated acceptance run can create customer-visible data, affect KPI/statistics, trigger real notifications, or mutate master data without shadow isolation.
+
 ## Prototype Helper Contract
 
 Include a minimal test helper when possible:
@@ -255,6 +289,7 @@ window._test = {
 
 - [ ] All interactive elements have `data-testid`.
 - [ ] All commands have `data-action`.
+- [ ] Backend-writing automated scenarios have shadow-data isolation or are explicitly disabled.
 - [ ] All `data-action` commands have implemented handlers and visible outcomes.
 - [ ] No placeholder attributes remain, such as `${action}`.
 - [ ] All stateful containers have `data-state`.

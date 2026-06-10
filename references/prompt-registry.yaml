@@ -1,7 +1,7 @@
 # AI Prompt Registry - v3.4 domain-clean template
 # Machine-readable prompt ops contract. Replace examples per project/domain.
-version: "1.3"
-last_updated: "2026-05-26"
+version: "1.4"
+last_updated: "2026-06-10"
 
 prompts:
   - prompt_id: assessment_v1
@@ -14,6 +14,13 @@ prompts:
     rollback_supported: true
     linked_test_cases: [TC-001, TC-002, TC-003]
     prompt_path: "prompts/assessment/v1/system.md"
+    contract_dependencies:
+      api_dependency_version: "^1.2.0"
+      event_schema_version: "^1.0.0"
+      domain_schema_version: "^1.0.0"
+      output_schema_version: "1.0.0"
+      compatibility_mode: strict
+      breaking_change_policy: require_migration
     input_schema:
       target_entity_id: string
       assessment_date: date
@@ -37,6 +44,13 @@ prompts:
     rollback_supported: true
     linked_test_cases: [TC-010, TC-011, TC-012]
     prompt_path: "prompts/workflow_planning/v1/system.md"
+    contract_dependencies:
+      api_dependency_version: "^1.2.0"
+      event_schema_version: "^1.0.0"
+      domain_schema_version: "^1.0.0"
+      output_schema_version: "1.0.0"
+      compatibility_mode: strict
+      breaking_change_policy: block_release
     input_schema:
       target_entity_id: string
       assessment_id: string
@@ -56,6 +70,12 @@ prompts:
     rollback_supported: true
     linked_test_cases: [TC-020, TC-021]
     prompt_path: "prompts/notification/v1/system.md"
+    contract_dependencies:
+      api_dependency_version: "^1.0.0"
+      event_schema_version: "^1.0.0"
+      output_schema_version: "1.0.0"
+      compatibility_mode: compatible
+      breaking_change_policy: mark_deprecated
     constraints:
       max_message_length: 200
       forbidden_phrases: ["一定", "保证", "肯定"]
@@ -70,6 +90,12 @@ prompts:
     rollback_supported: true
     linked_test_cases: [TC-030, TC-031]
     prompt_path: "prompts/report/v1/system.md"
+    contract_dependencies:
+      api_dependency_version: "^1.2.0"
+      domain_schema_version: "^1.0.0"
+      output_schema_version: "1.0.0"
+      compatibility_mode: compatible
+      breaking_change_policy: require_migration
 
   - prompt_id: test_validation_v1
     agent: test-agent
@@ -81,6 +107,12 @@ prompts:
     rollback_supported: false
     linked_test_cases: [TC-040, TC-041, TC-042]
     prompt_path: "prompts/test_validation/v1/system.md"
+    contract_dependencies:
+      api_dependency_version: "^1.0.0"
+      ui_contract_version: "^1.0.0"
+      output_schema_version: "1.0.0"
+      compatibility_mode: compatible
+      breaking_change_policy: mark_deprecated
     input_schema:
       test_suite_id: string
       trace_id: string
@@ -122,6 +154,29 @@ test_binding:
   test_execution:
     frequency: on_change
     regression: weekly
+
+contract_version_governance:
+  semver_rules:
+    compatible_minor:
+      - optional_field_added
+      - non_breaking_description_change
+      - new_enum_value_when_consumer_has_unknown_fallback
+    breaking_major:
+      - required_field_added
+      - field_removed
+      - field_type_changed
+      - enum_semantic_changed
+      - validation_rule_tightened
+  on_breaking_change:
+    - "1. Build impacted_prompt_list from contract_dependencies"
+    - "2. Mark inactive historical baselines DEPRECATED"
+    - "3. Mark active affected prompts NEEDS_MIGRATION"
+    - "4. Run compatibility adapter tests if adapter exists"
+    - "5. Block release only for prompts whose breaking_change_policy is block_release or whose active path has no fallback"
+  deprecated_prompt_policy:
+    requires_owner: true
+    requires_expiry_date: true
+    max_deprecated_days: 30
 
 monitoring:
   prompt_drift_detection:

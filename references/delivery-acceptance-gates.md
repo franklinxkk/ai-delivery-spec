@@ -93,6 +93,38 @@ For large HTML prototypes also verify:
 - All split entry pages are synced from the validated main file.
 - Tail integrity: `</script>`, `</body>`, `</html>`.
 
+### Automated Verification Authority
+
+Browser/DOM automation is a release signal, not the sole release judge.
+
+Rules:
+
+- Automated failures default to blocking until triaged.
+- A human overrule is allowed only with Sponsor or accountable owner approval, Dev/QA acknowledgement, risk reason, affected test ids, rollback plan, and expiry date.
+- Human overrule cannot bypass security, privacy, permission, destructive-operation, legal/compliance, or test-data isolation guards.
+- If overruled, the failed checks must remain visible in the final delivery package as accepted risk, not be deleted from the report.
+- Automated browser agents must run with shadow-data isolation when backend writes are possible. See `prototype-testability.md`.
+
+Overrule log:
+
+```yaml
+human_overrule:
+  allowed: true
+  approver: sponsor_or_owner
+  acknowledged_by: [dev_lead, qa]
+  affected_checks: [AC-001, TC-LOGIN-003]
+  reason: string
+  rollback_plan: string
+  expires_at: date
+  forbidden_to_overrule:
+    - security
+    - privacy
+    - permission_boundary
+    - destructive_operation
+    - legal_compliance
+    - test_data_isolation
+```
+
 ## 7. Final Delivery Package
 
 Final answer or handoff should include:
@@ -106,6 +138,7 @@ Final answer or handoff should include:
 | Interaction ledger/regression note | Yes when iterating old prototypes |
 | Test handoff checklist | Yes |
 | Unresolved risks | Yes, even when non-blocking |
+| Human overrule log | Required if any automated check is overridden |
 
 ## 8. Common Failure Patterns
 

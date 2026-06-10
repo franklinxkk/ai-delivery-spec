@@ -2,7 +2,7 @@
 
 AI Delivery Spec 是一套面向产品经理、AI 产品负责人、研发负责人和测试团队的 **AI Native 软件交付协议 / Codex Skill**。
 
-它的目标不是让 PRD 变厚，而是让产品交付物真正可开发、可演示、可测试、可治理。v4.0 采用分级交付模型和条件 Gate：先判断项目复杂度，再按需加载移动端、多端一致性、ToB/ToG 审批、多租户/RBAC、报表指标、低代码工作流、AI 嵌入、AI Native Harness、Prompt Ops、效果评估等协议。
+它的目标不是让 PRD 变厚，而是让产品交付物真正可开发、可演示、可测试、可治理。v4.0.1 采用分级交付模型和条件 Gate：先判断项目复杂度，再按需加载移动端、多端一致性、ToB/ToG 审批、多租户/RBAC、报表指标、低代码工作流、AI 嵌入、AI Native Harness、Prompt Ops、效果评估等协议，并补充生产落地所需的防御性契约。
 
 ## 适合谁
 
@@ -12,9 +12,9 @@ AI Delivery Spec 是一套面向产品经理、AI 产品负责人、研发负责
 - 测试/QA：基于 story path、state-button matrix、data-testid、验收 Gate 做自动化和人工验收。
 - ToB/ToG 团队：把审批流、多租户、权限、监管、报表、AI 辅助决策做成可落地交付物。
 
-## v4.0 核心变化
+## v4.0.1 核心变化
 
-v4.0 解决了早期版本“全量协议过重”的问题。
+v4.0 解决了早期版本“全量协议过重”的问题。v4.0.1 在不改变主架构的前提下，补齐企业真实交付中的防御性边界。
 
 | 能力 | 说明 |
 |---|---|
@@ -25,6 +25,17 @@ v4.0 解决了早期版本“全量协议过重”的问题。
 | ToB/ToG 模式 | 审批流、RBAC、多租户、License、组织树、审计、工单升级 |
 | Workflow / Low-Code | 覆盖 n8n、Dify、Flowise 类节点工作流、连接器、凭证、执行历史、回放 |
 | Domain Module | 行业知识插件化，换行业优先换 domain module，不改公共协议层 |
+| Defensive Hardening | 防止概念过载、测试脏数据、契约演进崩塌、弱网 AI 失效和自动验收误判 |
+
+## v4.0.1 防御性契约
+
+| 风险 | 补充契约 | 文件 |
+|---|---|---|
+| Prompt / Agent / DAG 过度工程化 | Spec Tiering / Anti-Bloating：普通 CRUD 和线性流程不强制多智能体 DAG | `references/delivery-core.md` |
+| 自动验收污染真实数据 | Shadow-Data Isolation：测试 Header、影子库/影子表、事务回滚、指标排除 | `references/prototype-testability.md` |
+| API/Schema 演进导致历史 Prompt 测试崩塌 | Contract Version Semantics：声明 API/event/domain/schema 版本依赖和弃用策略 | `references/prompt-registry-integration.md`, `references/prompt-registry.yaml` |
+| 移动端/现场弱网导致 AI Runtime 不可用 | Edge-Fallback Gateway：3000ms/5xx 触发 `local_fallback`，100ms 内切本地安全模式 | `references/ai-runtime-ops.md` |
+| Browser Agent 被误当最终上线裁判 | Human Overrule：自动验收是 release signal，可审计人工 override，但不能绕过安全/合规/隔离 | `references/delivery-acceptance-gates.md` |
 
 ## 解决什么问题
 

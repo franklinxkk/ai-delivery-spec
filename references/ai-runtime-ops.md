@@ -13,6 +13,7 @@ AI-specific states:
 | `ai_low_confidence` | confidence below threshold | confidence < threshold | manual decision / retry |
 | `ai_failed` | inference failed | timeout / model / data shortage | retry / manual fallback |
 | `ai_reference_expired` | referenced policy/knowledge source stale | source version changed | retry |
+| `local_fallback` | edge-side local safety mode | network timeout / 5xx / circuit breaker open | reconnect + precondition recheck |
 
 Freeze rule:
 - During `ai_analyzing`, write operations on the entity are blocked except read-only viewing.
@@ -39,6 +40,44 @@ ai_state_transition:
   referenced_data_sources: [string]
   processing_time_ms: number
 ```
+
+## Edge-Fallback Gateway
+
+Mobile, field, vehicle, safety, inspection, medical, and operational scenarios must not depend on cloud AI availability for basic continuity.
+
+```yaml
+edge_fallback_gateway:
+  network_probe_timeout_ms: 3000
+  fallback_transition_budget_ms: 100
+  trigger:
+    - network_timeout
+    - model_api_5xx
+    - gateway_504
+    - circuit_breaker_open
+    - offline_detected
+  fallback_state: local_fallback
+  local_engine: expression_rules | cached_policy | offline_queue | static_decision_table
+  allowed_actions:
+    - read_cached_data
+    - save_draft_locally
+    - local_validation
+    - queue_for_sync
+    - show_emergency_contact_or_manual_path
+  forbidden_actions:
+    - cloud_agent_call
+    - final_decision_write
+    - external_send
+    - permission_change
+  ui_message: "Local safe mode active"
+```
+
+Rules:
+
+- If network probing exceeds `3000ms` or returns 5xx/504, the runtime must enter `local_fallback` within `100ms`.
+- In `local_fallback`, all cloud agent calls are blocked. The UI must hand control to local deterministic rules, cached policies, or manual path.
+- Local writes are drafts or offline queue items only. They need idempotency keys and must recheck permission, entity state, policy version, and master data before sync.
+- When connectivity recovers, runtime does not auto-commit old AI results. It re-enters normal flow through precondition check.
+- Trace logs must record fallback trigger, local rule version, offline duration, queued writes, sync result, and user-visible message.
 
 ## AI Action Governance
 
@@ -336,6 +375,7 @@ Prompt coupling detection:
 ## AI Acceptance Checklist
 
 - [ ] AI states and freeze rules defined.
+- [ ] Edge fallback and local safe mode defined for mobile/field/weak-network scenarios.
 - [ ] Human approval thresholds defined.
 - [ ] Evidence chain includes model, prompt, data source, policy/knowledge refs.
 - [ ] Agents declare trigger/output/write_scope/forbidden_write/fallback.

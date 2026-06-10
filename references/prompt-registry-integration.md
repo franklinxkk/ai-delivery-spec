@@ -49,6 +49,31 @@ prompt:
   rollback_owner: ai-platform
 ```
 
+## Contract Version Semantics
+
+Prompt tests depend on API schemas, event schemas, domain schemas, and UI contracts. Treat those dependencies as versioned contracts, not invisible assumptions.
+
+Every prompt entry that consumes or emits structured data should declare:
+
+```yaml
+contract_dependencies:
+  api_dependency_version: "^1.2.0"
+  event_schema_version: "^1.0.0"
+  domain_schema_version: "^2.1.0"
+  output_schema_version: "1.0.0"
+  compatibility_mode: strict | compatible | deprecated
+  breaking_change_policy: mark_deprecated | require_migration | block_release
+```
+
+Rules:
+
+- Additive optional fields are compatible minor changes.
+- Required field additions, field removals, type changes, enum semantic changes, and validation rule changes are breaking changes.
+- When a dependency has a breaking change, affected historical prompt baselines should be marked `DEPRECATED` or `NEEDS_MIGRATION` instead of being counted as product regressions.
+- Active production prompts cannot remain on deprecated dependencies without owner, expiry date, fallback behavior, and migration ticket.
+- CI should separate `contract_migration_required` from `prompt_quality_regression`; do not hide real prompt failures behind schema migration noise.
+- A compatibility adapter is allowed only when it is versioned, tested, and has a removal date.
+
 ## Fail Conditions
 
 - Prompt exists in prose but not registry.
@@ -56,3 +81,4 @@ prompt:
 - Prompt has no linked test case.
 - Prompt can write business data without runtime write policy.
 - Rollback path is undefined.
+- Prompt depends on an unversioned API/event/domain schema.

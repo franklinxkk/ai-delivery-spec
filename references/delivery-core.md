@@ -104,6 +104,32 @@ Interaction parity checks:
 - Preserve role-specific navigation and task flows unless explicitly removed.
 - Semantic annotations improve testability, but they do not replace working prototype behavior.
 
+## Spec Tiering / Anti-Bloating
+
+Use the smallest contract that can safely deliver the feature. Do not introduce multi-agent topology, prompt graph, DAG router, or prompt registry complexity when ordinary product logic is cheaper and more reliable.
+
+| Spec Tier | Use When | Required Contract | Do Not Require |
+|---|---|---|---|
+| Tier 1: Standard CRUD / Linear Workflow | list/detail, create/edit, simple approval, query/report, deterministic rules, low-risk AI summary/classification | role path, state-button matrix, prototype actions, tests, optional AI Feature Injection | dynamic DAG, multi-agent graph, prompt topology, autonomous tool planning |
+| Tier 2: Advanced Cognitive / Agentic Workflow | long-chain decision, AI chooses tools/routes, high-impact recommendation, automated workflow write, compliance/money/safety impact, multi-agent collaboration | AI Native Harness, runtime contract, prompt/tool registry, eval, observability, rollback, human gate | direct production write without harness |
+
+Escalate from Tier 1 to Tier 2 only when at least one is true:
+
+- AI selects tools, routes, or downstream workflow steps.
+- AI output writes business state or creates workflow tasks.
+- The decision affects compliance, money, customer commitment, safety, or legal accountability.
+- A single linear prompt cannot be tested and operated safely.
+- Failure recovery needs shadow/canary/replay/rollback at runtime.
+
+Downgrade from Tier 2 to Tier 1 when:
+
+- a deterministic rule engine or normal backend code is simpler than prompt orchestration;
+- prompt maintenance cost exceeds the feature's business value;
+- the team cannot name the agent write scope, fallback, eval set, and owner;
+- the feature is only UI display, CRUD, filtering, export, or manual review support.
+
+Rule: prompt and agent architecture must reduce delivery risk. If it mainly increases vocabulary, documents, and maintenance load, use code, configuration, or a single linear AI feature contract.
+
 ## Stage 1-5 Product Workflow
 
 Stage 1 Brainstorm:
@@ -238,3 +264,4 @@ Gate 3 Dev Pre-review:
 - Dev Lead can restate core logic.
 - Risks have mitigation.
 - Estimate is concrete.
+- Spec tier is justified; simple CRUD/linear workflow is not over-modeled as multi-agent DAG.
