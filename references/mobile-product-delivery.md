@@ -15,7 +15,7 @@ mobile_surface:
   device_context:
     network: stable | weak | offline_possible
     usage_context: resting | driving | field_work | indoor | customer_visit | learning
-    input_modes: touch | camera | scan | voice | keyboard | location
+    input_modes: touch | camera | scan | microphone | speaker | voice | keyboard | location | avatar_stream
   auth_context:
     login: phone | wechat | sso | account_password
     consent_required: true
@@ -76,9 +76,17 @@ Required naming:
 | quiz container | `quiz-{quizId}` |
 | quiz question | `quiz-question-{quizId}-{questionNo}` |
 | answer option | `quiz-option-{quizId}-{questionNo}-{optionKey}` |
+| AI digital human/avatar | `ai-avatar-{agentId}` |
+| avatar status | `ai-avatar-status-{agentId}` |
+| voice input | `voice-input-{agentId}` |
+| transcript panel | `transcript-{sessionId}` |
+| interrupt button | `btn-interrupt-ai-{agentId}` |
+| fallback text input | `input-fallback-text-{agentId}` |
+| citation/evidence card | `citation-card-{agentId}-{sourceId}` |
 | scan button | `btn-scan-{purpose}` |
 | upload button | `btn-upload-{purpose}` |
 | location permission | `permission-location-{purpose}` |
+| microphone permission | `permission-microphone-{purpose}` |
 | subscribe message permission | `permission-subscribe-{purpose}` |
 | privacy consent | `consent-{purpose}` |
 
@@ -112,6 +120,9 @@ PRD must declare authorization and privacy boundaries:
 | phone/login | auth provider, binding rule, fallback |
 | subscription message | template id, trigger, user opt-in, frequency cap |
 | location | purpose, precision, retention, fallback |
+| microphone / audio recording | purpose, recording boundary, retention, fallback to text input |
+| speech recognition / TTS | provider, latency target, transcript policy, failure fallback |
+| avatar/video streaming | provider, rendering fallback, bandwidth policy, accessibility fallback |
 | camera/scan | purpose, upload policy, failure path |
 | file/media upload | size, type, compression, retry |
 | behavior profile | consent, data minimization, usage boundary |
@@ -153,6 +164,53 @@ btn-submit-quiz-{quizId}
 quiz-result-{quizId}
 ```
 
+## AI Digital Human / Conversational Tutor Pattern
+
+Use this section when the mobile product contains AI 数字人、语音助教、AI 学习助教、AI 客服数字人、avatar tutor, voice tutor, or real-time conversational coaching.
+
+Required conversation states:
+
+```text
+idle -> permission_check -> listening -> understanding -> responding -> awaiting_user
+     -> completed | low_confidence | interrupted | fallback_text | human_handoff | failed
+```
+
+Required behavior:
+
+- the user can see whether the AI is listening, thinking, speaking, interrupted, or failed;
+- microphone permission is requested only when needed and has text-input fallback;
+- the transcript is visible or retrievable when the business requires learning/audit trace;
+- AI answers must show citation/evidence when using enterprise knowledge, regulation, courseware, or assessment data;
+- low-confidence or out-of-scope questions must enter `low_confidence` with safe fallback, not fabricated answers;
+- the user can interrupt a long AI response;
+- avatar/rendering failure falls back to audio-only or text-only without losing the session;
+- session memory boundary is declared: what is remembered, for how long, and whether the user can clear it;
+- if the user may be driving or operating equipment, voice/quiz prompts must obey the non-interruption policy.
+
+Latency and media contract:
+
+| Item | Required Contract |
+|---|---|
+| STT latency | target and timeout; fallback after timeout |
+| LLM response latency | target and loading state |
+| TTS latency | target and fallback to text |
+| avatar render latency | target and fallback to audio/text |
+| interruption | expected stop time after user interrupt |
+| bandwidth downgrade | avatar -> audio-only -> text-only |
+
+Required testids:
+
+```text
+ai-avatar-{agentId}
+ai-avatar-status-{agentId}
+permission-microphone-{purpose}
+voice-input-{agentId}
+transcript-{sessionId}
+btn-interrupt-ai-{agentId}
+input-fallback-text-{agentId}
+citation-card-{agentId}-{sourceId}
+```
+
 ## Quiz / Exam Pattern
 
 Required:
@@ -185,10 +243,47 @@ Every mobile workflow must define:
 | API failure | retry button + preserved user input |
 | submit failure | keep draft + idempotent retry |
 | video unavailable | fallback content or retry |
+| STT/TTS failure | fallback to text input/output |
+| avatar stream failure | downgrade to audio-only or text-only |
+| conversation timeout | preserve transcript + retry last turn |
 | offline | show cached list/detail when allowed |
 | duplicate tap | disable button + idempotency |
 
 No mobile flow is accepted if a network failure can silently lose user input.
+
+## Required Mobile Artifact Schemas
+
+Use these schemas for Stage 4.5 deliverables. QA may reject mobile delivery if these files are missing or use incompatible columns.
+
+### `mobile-role-path-matrix.md`
+
+| Story ID | Role | Platform | Entry | Core Steps | State Before | State After | Permission Gate | Weak-Network Behavior | Non-Interruption Rule | Exit/Next Action | Prototype Testids |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+
+Minimum rules:
+- Include one row per mobile role path, not one row per page.
+- `Core Steps` must be executable in the prototype or explicitly marked future scope.
+- `Prototype Testids` must include page root, entry control, primary action, and result state.
+
+### `permission-gates.md`
+
+| Capability | Trigger | User Prompt | Required Consent | Data Scope | Retention | Fallback If Denied | Audit/Testid |
+|---|---|---|---|---|---|---|---|
+
+Minimum rules:
+- Include login, phone binding, subscription message, location, camera/upload, behavior profile, and sensitive records when applicable.
+- A permission cannot be required silently; denied permission must have a fallback path.
+- Sensitive capability rows must declare retention and data scope.
+
+### `weak-network-matrix.md`
+
+| Flow | Network Case | Preserved Data | UI State | Retry/Resume Action | Idempotency Key | Failure Boundary | Testid |
+|---|---|---|---|---|---|---|---|
+
+Minimum rules:
+- Cover initial load, API failure, submit failure, offline state, duplicate tap, and media unavailable when relevant.
+- Every submit flow must state preserved data and idempotency key.
+- No row may end with only "show toast"; it must preserve, retry, resume, or explicitly discard with user confirmation.
 
 ## Safety / Non-Interruption Gate
 
@@ -222,6 +317,6 @@ non_interruption_policy:
 - [ ] Permission/consent gates are explicit and testable.
 - [ ] Subscription messages include opt-in and frequency cap.
 - [ ] Video/quiz flows have states, progress, retry, result, and audit.
+- [ ] AI digital human / conversational tutor flows define microphone permission, transcript, latency, interruption, fallback, evidence/citation, and memory boundary where relevant.
 - [ ] Safety/non-interruption policy exists where relevant.
 - [ ] Mobile `data-testid` naming is applied.
-

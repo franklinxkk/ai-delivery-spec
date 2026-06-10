@@ -101,6 +101,7 @@ Prototype mapping:
 - `data-action`:
 - `data-state`:
 - Expected visible result:
+- Expected domain result:
 
 Test cases:
 - Happy path:
@@ -109,6 +110,20 @@ Test cases:
 - State conflict:
 - Batch action:
 - Regression against previous prototype:
+
+## Developer Fast-Lane
+
+Add this compact section before development starts. It is the fixed consumption entry for Dev Lead and QA; do not force developers to hunt across a long narrative PRD.
+
+| Module | Command/Query | Aggregate/Entity | State Before -> After | Guard/Permission | Domain Event/Audit | API/Business Contract | Prototype Action/Testid | Test Case |
+|---|---|---|---|---|---|---|---|---|
+| Customer issue ticket | `escalateTicket` command | Ticket / ResponseTask | `待客户确认` -> `已升级` | customer not satisfied; role in service/sales/boss | `TicketEscalated`, response task created | idempotency key + SLA rule | `data-action=escalate-ticket` | TC-TICKET-ESC-001 |
+
+Fast-lane fail conditions:
+- A primary prototype action has no command/query row.
+- A state transition has no guard and no domain event/audit row.
+- A create/submit/escalate/review action has no idempotency or duplicate-submit rule.
+- Dev Lead cannot identify the aggregate and expected domain result for a primary action in under 10 minutes.
 
 ## Demo Path Contract
 

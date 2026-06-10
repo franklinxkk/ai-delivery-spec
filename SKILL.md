@@ -1,356 +1,263 @@
 ---
 name: ai-delivery-spec
 description: >-
-  AI-native product-engineering delivery protocol for PRD, prototype, reverse engineering,
-  AI agent design, AI-native harness engineering, runtime governance, observability, prompt ops, tool policy, testability,
-  user-story inventory, role operation path verification, customer-demoable self-contained
-  HTML prototypes, mobile/mini-program delivery, AI effect evaluation, DDD handoff PRD,
-  and domain-specific product delivery. Use for AI系统设计,
-  智能体协同, PRD, 原型, 移动端, 小程序, 用户故事, 角色路径, 客户演示原型, DDD领域建模, 业务建模,
-  指标体系, 逆向工程, software delivery, product-engineering collaboration,
-  executable specification work, and traffic safety / transport supervision products.
+  Use when the task requires producing or reviewing a gate-verified product
+  delivery artifact: exploratory HTML prototype, PRD, role/user-story path
+  inventory, DDD developer handoff, ToB/ToG approval/RBAC/multitenancy contract,
+  multi-surface PC/mobile/mini-program delivery, reporting/analytics product
+  spec, AI feature injection, AI-native agent/runtime/harness spec, or AI effect
+  evaluation. Use for AI系统设计, 智能体协同, 可开发PRD, 可演示原型, 角色路径,
+  DDD领域建模, 移动端/小程序交付, ToB/ToG审批流, 多租户/RBAC, 指标报表,
+  AI效果评估, low-code/workflow automation, and executable software delivery. Do not trigger for casual
+  brainstorming, quick copy edits, or isolated drafts that do not require gates.
 ---
 
-# AI Delivery Spec — AI Native 软件交付协议 (v3.9 Mobile-AI-Native Verified)
+# AI Delivery Spec — AI Native 软件交付协议 (v4.0 Tiered ToB/ToG Delivery)
 
-> 作者：李康（Li Kang） | 版本：v3.9 | 原则：公共协议去领域化，业务知识插件化，移动端交付显式化，AI Native Harness 工程化验证，AI效果评估分级，用户故事与角色路径先行，迭代原型交互保真，状态按钮矩阵强制化，原型客户演示自闭环，PRD按DDD可开发可测试
+> 作者：李康（Li Kang） | 版本：v4.0 | 原则：分级交付、条件 Gate、ToB/ToG 通用模式、AI Native 与 AI 嵌入分流、多端一致性、领域插件化、构建与版本治理、可演示可开发可测试。
 
-## Why This Version
+## 1. Core Rule
 
-v3.9 keeps the protocol layer domain-neutral and adds mobile delivery, domain module templating, and AI effect evaluation on top of v3.8 harness-engineering verification:
+Do not force every task through the full pipeline. Start by choosing a delivery tier, then apply only the required core gates and conditional plugins.
 
-1. **Story-Path Verification Gate**: every described function must map to at least one user story, role operation path, prototype demo path, state transition, and test case.
-2. **Demo-Closed Prototype Gate**: the HTML prototype must be self-contained and customer-demoable without a backend. Every core user story must be walkable end-to-end with in-memory mock data, visible state changes, modals/pages, role switching, success/error/empty states, and no dead buttons.
-3. **DDD Handoff PRD Gate**: the PRD must describe bounded contexts, aggregates, entities/value objects, domain events, commands/queries, invariants, state transitions, key sequence diagrams, inputs/outputs, processing logic, business transformation logic, API contracts, and feature-level test cases.
-4. **State-Button Matrix Gate**: every list/detail object with lifecycle state must define state → visible actions → forbidden actions → guard conditions → visible outcome before the prototype/PRD is accepted.
-5. **No Toast-Only Core Action Gate**: create/view/edit/configure/submit/review/enable/disable/export/analyze actions must produce a real visible page, modal, data mutation, table refresh, result view, or state transition. Toast may only be feedback, not the business outcome.
-6. **AI Native Harness Engineering Gate**: once an AI-native scenario and target outcome are defined, multi-agent feasibility review must verify whether context, tools, workflow, evaluation, observability, and release harnesses can support stable landing. The logic path and engineering path must be simulated before runtime development is accepted.
-7. **Mobile Product Delivery Gate**: mini-program/H5/app/mobile workflows must define mobile role paths, authorization, weak-network behavior, video/quiz/upload/message patterns, non-interruption rules, and mobile testid naming.
-8. **Domain Module Template Gate**: cross-domain migration must replace only the domain module unless public protocol behavior changes; every domain module must define entities, events, metrics, AI context, workflows, policies, UI/mobile patterns, test scenarios, and acceptance checklist.
-9. **AI Effect Evaluation Gate**: any AI claim about efficiency, quality, behavior change, risk reduction, learning effect, cost, conversion, safety, or compliance must declare evidence level, baseline/post windows, metrics, confounders, comparison design, and guardrails.
-
-When a new prototype is generated from an existing one, semantic annotations are not enough: the new version must preserve or explicitly de-scope the previous version's pages, actions, modals, handlers, data coverage, and critical workflows. A prototype that looks complete but cannot complete a user story is a failed delivery artifact.
-
-## Module Map
-
-| Need | Load |
-|------|------|
-| Reverse-engineer an existing HTML/prototype, write PRD, plan stages, state machine, SIM review | `references/delivery-core.md` |
-| Generate/review an HTML prototype, data-testid, visual/test automation, AD5 patterns | `references/prototype-testability.md` |
-| Design/review mini-program, H5, mobile web, app, field/mobile workflow, video learning, quiz, push, consent, weak network | `references/mobile-product-delivery.md` |
-| Produce customer-demoable prototype + DDD PRD handoff with hard gates | `references/demo-closed-ddd-handoff.md` |
-| Apply final acceptance gates: interaction ledger, state-button matrix, no-toast rule, browser verification report | `references/delivery-acceptance-gates.md` |
-| Validate user stories, role operation paths, demo paths, scenarios, and test coverage | `references/story-path-verification.md` |
-| Design AI feature, agent runtime, tool calls, alerts, rollback, operations | `references/ai-runtime-ops.md` |
-| Validate AI-native scenario feasibility, harness engineering, multi-agent review, and engineering path simulation | `references/ai-native-harness-engineering.md` |
-| Evaluate AI product effect claims, baseline/post windows, evidence level, behavior change, learning effect, risk reduction | `references/ai-effect-evaluation.md` |
-| Company/industry domain context, metrics, entities, scenarios, UI patterns | current domain module, default `references/domain-traffic.md` |
-| Create or replace a domain module for a new industry/company/product | `references/domain-module-template.md` |
-| Validate traffic safety / transport supervision scenarios in depth | `references/domain-traffic-safety-scenarios.md` |
-| Register/update LLM prompts and linked tests | `references/prompt-registry.yaml` |
-
-Domain module contract: the current domain module may be replaced when the company or industry changes. A valid domain module should define domain entities, metrics, workflows, scenarios, UI patterns, policy constraints, and acceptance checklist. Public protocol files must stay domain-neutral.
-
-Decision tree:
+Every accepted deliverable must answer:
 
 ```text
-已有原型/HTML/竞品/旧系统 → delivery-core
-要写 PRD 或开发交接 → delivery-core + prototype-testability
-只有普通业务功能，无 AI → delivery-core + prototype-testability
-移动端 / 小程序 / H5 / App / 一线外勤 → delivery-core + prototype-testability + mobile-product-delivery
-单个 AI 调用 → delivery-core + ai-runtime-ops + prompt-registry
-多个 Agent / 工具 / 回滚 / 监控 → delivery-core + ai-runtime-ops + prompt-registry
-AI Native 业务流程重构 / Agentic workflow / 高风险自动化 → delivery-core + ai-native-harness-engineering + ai-runtime-ops + prompt-registry
-AI声称提效/质量提升/行为改变/风险降低/学习效果 → ai-effect-evaluation
-行业/公司/业务域知识 → add current domain module (default: domain-traffic; replace when company changes)
-换行业/换公司/做通用化 → domain-module-template + new domain module
+who uses it -> what path they walk -> what visible result appears
+-> what domain result changes -> how dev/test can verify it
 ```
 
-## Collaboration Model
+## 2. Loading Strategy
 
-Every AI feature must align five contracts before development starts:
+Load only what is needed.
 
-| Contract | Owner | Required Artifact | Gate |
-|----------|-------|-------------------|------|
-| Business invariant | PM + Sponsor | Problem, state machine, guards, success metrics | SIM 1 + Gate 1 |
-| Mobile contract | PM + Frontend + QA | Mobile role paths, permission gates, weak-network rules, mobile testids | Stage 4/5 when mobile |
-| Runtime contract | Dev Lead + AI Platform | Agent registry, events, write_scope, fallback, human gates | Stage 3.5 |
-| Harness contract | AI Product + AI Architect + QA + Ops | Scenario card, context map, tool sandbox, eval set, replay trace, release gate | Stage 3.2 |
-| Evaluation contract | PM + QA | Scenario matrix, linked_test_cases, testid map, complexity count | SIM 1 + SIM 2 |
-| Effect contract | PM + Data + Sponsor | Evidence level, baseline/post windows, metrics, confounders, guardrails | Stage 3/5.5 |
-| Operations contract | AI Platform + Ops | Trace fields, alert executor, rollback path, on-call/retrain owner | Stage 5.5 |
+1. Always start with this `SKILL.md`.
+2. Load `references/delivery-tier-model.md` when tier or scope is unclear.
+3. Load `references/delivery-core.md` for Stage 0 reverse engineering, PRD, story/state, or standard delivery.
+4. Load conditional references only when their trigger applies.
+5. Do not preload all references at Stage 0.
+
+## 3. Tiered Delivery Model
+
+| Tier | Use When | Required Artifacts | Required Gates | Gates Skipped by Default |
+|---|---|---|---|---|
+| L0 Exploration Prototype | idea demo, quick HTML, workshop prototype, no dev handoff | `PROTOTYPE.html`, demo path notes, known gaps | Gate 2 Lite + Gate 4 Lite | DDD, AI harness, full PRD |
+| L1 Prototype + Light PRD | feature explanation, internal alignment, simple CRUD/workflow | prototype, light PRD, story/path list, state notes | Gate 1 Lite + Gate 2 + Gate 4 Lite | full DDD unless lifecycle-heavy |
+| L2 Standard Product Delivery | ToB/ToG module, bid/demo package, dev handoff | PRD, prototype, story matrix, state-button matrix, acceptance report | Gate 1-4 | AI Native unless triggered |
+| L3 AI Native / High-Risk Delivery | agentic workflow, AI writes/acts, compliance/money/safety impact, multi-agent | L2 package + AI runtime/harness/effect/ops contracts | Gate 1-4 + conditional AI gates | none unless explicitly de-scoped |
 
 Rules:
-- PM owns what must be true; do not hand-wave AI failure states.
-- Engineering owns how it safely runs; reject specs missing write_scope, idempotency, or precondition policy.
-- AI Product owns AI-native scenario value and target metrics; do not start runtime work before harness feasibility is reviewed.
-- Mobile PM/Frontend owns mobile usability, permission, weak-network, and non-interruption rules.
-- AI Platform owns model/prompt/tool behavior; every LLM agent must have prompt registration and tests.
-- PM + Data own effect claims; do not claim causality when only correlation or proxy evidence exists.
-- QA owns executable scenarios, including AI ambiguity, rollback, batch operations, multi-step flows.
-- Ops owns alert executors and escalation paths; no alert ships with only intention-style action.
+- A lower-tier artifact is not a failure just because it skips a higher-tier gate.
+- If a lower-tier artifact is later used for development, upgrade it to L1/L2 first.
+- If AI output triggers business write, workflow task, customer commitment, compliance action, money, or safety impact, escalate to L3 or justify AI Feature Injection instead.
+- Tier choice must be recorded in the final answer or handoff package.
 
-AI change control: every prompt/model/tool/runtime/UI change must declare `impact_surface`, `linked_test_cases`, `rollback_owner`, and `observability_signal`.
+## 4. Core Gates
 
-Prototype iteration control: when an existing prototype or HTML file is used as input, Stage 0 must produce an interaction baseline ledger. Stage 5 must compare the new prototype against that ledger. Do not reduce interaction coverage unless the removed behavior is listed in a de-scope note with owner and reason. For lifecycle-heavy products, Stage 4 must also produce a state-button matrix before final UI or PRD generation.
+### Gate 1: Story-Path Verification
 
-## Hard Gates: Story-Path Verification + AI Native Harness + Demo-Closed Prototype + DDD PRD
+Every scoped function maps to a user story, role path, prototype action, state/domain result, and test case.
 
-These gates are mandatory when generating or reviewing a PRD, HTML prototype, product design prototype, customer demo artifact, or development handoff package.
+Fail if:
+- feature has no user story;
+- role has no executable path;
+- path has UI result but no domain result;
+- state-changing action has no transition/test.
 
-### Gate A: User Story and Role Path Verification
+Use: `references/story-path-verification.md`.
 
-Requirement completeness is judged by paths, not by feature names. Every described function must be backed by a user story and an executable role operation path.
+### Gate 2: Demo-Closed Prototype
 
-Required:
-- Build a user story inventory before writing the PRD or prototype: role, goal, trigger, preconditions, path steps, expected visible result, domain result, exception path, state transition, and test case id.
-- Build a role operation path matrix for each role: start page, action sequence, data touched, state before/after, permissions, audit/event, and next step.
-- Every feature mentioned in PRD scope must map to at least one user story id. Every user story id must map to prototype `data-testid`/`data-action` and at least one test case.
-- Every role must have at least one complete happy path and one exception/permission path.
-- Scenario validation must include domain-specific cases, not only generic CRUD paths.
-- During review, use the path matrix to click through the prototype and mark each story PASS/FAIL/BLOCKED. BLOCKED stories must be fixed or explicitly de-scoped.
+The prototype must be executable enough for the selected tier.
 
-Story/path fail conditions:
-- A function is described but has no user story.
-- A user story exists but cannot be clicked through in the prototype.
-- A user story has no expected domain result or state transition.
-- A role appears in the PRD but has no operation path.
-- A test case cannot be traced back to a story, or a story cannot be traced forward to a test.
+Minimum:
+- every primary `data-action` has a visible outcome;
+- core create/view/edit/submit/review/analyze actions are not toast-only;
+- mock data covers relevant happy/error/permission/state variants;
+- old prototype iterations preserve or explicitly de-scope critical interactions.
 
-### Gate A2: AI Native Harness Engineering
+Use: `references/prototype-testability.md`, `references/demo-closed-ddd-handoff.md`.
 
-AI-native scenarios must prove engineering feasibility before runtime design starts. A scenario that cannot be simulated through context, tools, workflow, evaluation, observability, and release harness is not ready for development.
+### Gate 3: Development Contract
+
+For L2/L3, the PRD must be a development contract, not only a product narrative.
 
 Required:
-- Build an AI-native scenario card with business goal, trigger, current workflow, AI-native workflow, target metrics, risk level, required context, required tools, allowed auto actions, human gates, forbidden actions, latency, and cost targets.
-- Run multi-agent feasibility review with Sponsor, Domain Workflow, AI Architect, Backend Integration, Data/RAG, QA/Eval, and Ops/SRE perspectives.
-- Define context harness, tool/API harness, workflow harness, evaluation harness, observability harness, and release harness.
-- Simulate the business logic path and engineering path before Stage 3.5 runtime contract is accepted.
-- Produce fixture replay, dry-run, failure-injection, and release gate plan for high-risk AI-native workflows.
+- inputs, outputs, processing logic, business transformation logic;
+- aggregate/entity/value object/state/event/command/query/policy/invariant where applicable;
+- Developer Fast-Lane table for coding entry;
+- concrete tests with UI result and domain result.
 
-Harness fail conditions:
-- AI-native scenario lacks measurable business outcome.
-- Required context is unavailable, stale, unscoped, or not permission-safe.
-- Tool execution cannot be stubbed, sandboxed, or replayed.
-- High-risk action lacks human gate.
-- Agent workflow cannot be expressed as events, states, tools, fallback, and trace.
-- No golden evaluation cases, human rubric, trace replay, rollback, or kill switch exists.
+Use: `references/demo-closed-ddd-handoff.md`.
 
-### Gate B: Customer-Demoable Prototype
+### Gate 4: Acceptance Package
 
-The prototype is the executable requirement. It must be usable for a complete customer demo even when no backend exists.
+Final delivery includes the artifacts appropriate to the tier:
+- prototype path;
+- PRD/story/state files when required;
+- verification report;
+- unresolved risks and de-scope notes;
+- test handoff checklist;
+- packaging manifest when the output is a bid/customer/internal package.
 
-Required:
-- Every core user story has a runnable start point, operation path, visible result, and reversible/next action.
-- Every visible `data-action` has an implemented handler and a visible outcome: state mutation, page switch, modal, table update, form update, validation message, or toast plus state change.
-- Core actions must not be toast-only. Create/view/edit/configure/submit/review/freeze/analyze actions must open a real page/modal or mutate mock state.
-- Use in-memory mock data to cover happy path, empty state, validation failure, permission boundary, in-progress state, completed state, rejected state, and frozen snapshot state.
-- Role-based workflows must be demoable by switching roles in the prototype, not only described in PRD.
-- Workbench actions should live inside their business module. Do not promote workflow actions such as “new task” or “template builder” into top-level navigation unless that is truly how users work.
-- The prototype must include enough sample rows and state variants for a customer to understand the end-to-end business story.
-- Before delivery, run a browser verification over the highest-risk paths. If browser automation is unavailable, run a deterministic DOM/action audit and explicitly state the verification gap.
+Use: `references/delivery-acceptance-gates.md`, `references/artifact-packaging.md`.
 
-Prototype fail conditions:
-- A primary button does nothing, only logs to console, or only shows a placeholder toast.
-- A detail/preview button cannot show the underlying business data.
-- A create flow cannot produce a visible new object in the prototype.
-- A state transition is described but cannot be demonstrated with mock state.
-- A role or permission boundary is only written in PRD and not represented in the UI.
+## 5. Conditional Gates
 
-### Gate C: DDD Handoff PRD
+| Trigger | Gate | Load |
+|---|---|---|
+| Existing HTML/prototype/legacy version | Interaction Baseline + Drift Detection | `delivery-core.md`, `build-governance.md` |
+| AI added to normal product but does not own workflow | AI Feature Injection Gate | `ai-feature-injection.md`, `prompt-registry-integration.md` |
+| AI-native workflow, agentic automation, high-risk AI write/action | AI Native Harness Gate | `ai-native-harness-engineering.md`, `ai-runtime-ops.md`, `ai-effect-evaluation.md` |
+| Mobile/H5/app/mini-program/field user | Mobile Delivery Gate | `mobile-product-delivery.md` |
+| PC + mobile + mini-program/app surfaces | Multi-Surface Consistency Gate | `multi-surface-consistency.md` |
+| ToB/ToG approval, escalation, audit workflow | Approval Workflow Gate | `approval-workflow.md` |
+| SaaS, org tree, multi-tenant, RBAC, license/seat | SaaS Multitenancy Gate | `saas-multitenancy.md` |
+| Indicator, report, BI, data mart, dashboard, report builder | Reporting/Analytics Gate | `reporting-analytics.md` |
+| Prompt/model/tool registry, rollback, prompt tests | Prompt Ops Gate | `prompt-registry-integration.md`, `prompt-registry.yaml` |
+| Low-code app builder, node workflow, connector/integration automation | Workflow Automation / Low-Code Gate | `workflow-automation-lowcode.md` |
+| Patch scripts, generated HTML, repeated transforms | Build Governance Gate | `build-governance.md` |
+| New industry/company/domain module | Domain Switch Gate | `domain-module-template.md`, current domain module |
+| Skill upgrade or old project re-evaluation | Skill Version Migration Gate | `skill-version-migration.md` |
 
-The PRD must be a development contract, not only a product narrative.
+## 6. Module Map
 
-Required per bounded context/module:
-- Business purpose and actors.
-- Inputs: user input, system context, upstream data, AI/tool output, file imports, and permissions.
-- Outputs: UI result, domain object changes, domain events, notifications, exports, reports, and audit logs.
-- Processing logic: validation, matching, calculations, aggregation, persistence intent, idempotency, and error handling.
-- Business transformation logic: how inputs become entities, value objects, state transitions, snapshots, or downstream tasks.
-- DDD model: bounded context, aggregate root, entities, value objects, domain services, repositories/contracts, domain events, commands, queries, policies, and invariants.
-- State machine: states, transitions, triggers, guards, post-actions, rollback/reopen path.
-- Sequence diagram for each critical flow: user action, frontend, domain service/API, AI/tool if any, persistence, notification/audit, UI refresh.
-- API/business contract: method/path or command/query name, request, response, guards, idempotency key, permission rule, audit rule.
-- Test cases: happy path, validation failure, permission failure, state conflict, async/AI ambiguity, batch action, and regression against prior prototype.
+| Need | Load |
+|---|---|
+| Tier selection and gate downgrade/upgrade | `references/delivery-tier-model.md` |
+| Reverse-engineer existing artifacts | `references/delivery-core.md` |
+| Prototype semantic annotations and testids | `references/prototype-testability.md` |
+| Story, role path, coverage matrix | `references/story-path-verification.md` |
+| Customer-demoable prototype + DDD handoff | `references/demo-closed-ddd-handoff.md` |
+| Delivery acceptance report | `references/delivery-acceptance-gates.md` |
+| AI Feature Injection lightweight contract | `references/ai-feature-injection.md` |
+| AI Native harness | `references/ai-native-harness-engineering.md` |
+| AI runtime/ops | `references/ai-runtime-ops.md` |
+| AI effect evaluation | `references/ai-effect-evaluation.md` |
+| Mobile product delivery | `references/mobile-product-delivery.md` |
+| Multi-surface consistency | `references/multi-surface-consistency.md` |
+| ToB/ToG approval workflow | `references/approval-workflow.md` |
+| SaaS multitenancy/RBAC/license | `references/saas-multitenancy.md` |
+| Reporting/data mart/dashboard | `references/reporting-analytics.md` |
+| Low-code/workflow automation/app builder | `references/workflow-automation-lowcode.md` |
+| Build/patch governance | `references/build-governance.md` |
+| Artifact package standards | `references/artifact-packaging.md` |
+| Prompt registry integration | `references/prompt-registry-integration.md` |
+| Domain replacement | `references/domain-module-template.md` |
+| Traffic safety domain | `references/domain-traffic.md`, `references/domain-traffic-safety-scenarios.md` |
+| CRM domain validation example | `references/domain-crm.md` |
+| Skill upgrade path | `references/skill-version-migration.md` |
+| Skill structure benchmark | `references/skill-design-benchmark.md` |
 
-PRD fail conditions:
-- A module lacks inputs, outputs, processing logic, or business transformation logic.
-- A state transition lacks trigger, guard, and post-action.
-- A prototype action lacks a corresponding PRD command/query or test case.
-- A test case says only “verify normal” without concrete steps and expected visible/domain result.
-- DDD terms are listed but not tied to actual business objects and behaviors.
-
-### Gate D: Delivery Acceptance
-
-Before final delivery, run the acceptance gates in `references/delivery-acceptance-gates.md`.
-
-Required:
-- Existing-prototype iterations include an interaction ledger and regression comparison.
-- Every lifecycle object includes a state-button matrix.
-- Every primary action has a visible business outcome; core actions are not toast-only.
-- Every role has at least one complete demo path and one exception/permission path.
-- Browser or deterministic DOM verification covers the highest-risk user paths.
-- Final delivery includes prototype path, PRD path, verification report, unresolved risks, and test handoff checklist.
-
-Acceptance fail conditions:
-- A workflow action is placed outside its business module without a stated product reason.
-- A created object is not visible in the relevant list/detail after creation.
-- A detail/progress/result button cannot show underlying mock business data.
-- State-specific forbidden actions still appear in the UI.
-- The PRD describes a behavior that cannot be demonstrated in the prototype and is not explicitly marked as future scope.
-
-## Delivery Pipeline
+## 7. Decision Tree
 
 ```text
-Stage 0: Reverse-engineer      → stage0-output.json + interaction-ledger.json
-Stage 1: Brainstorm            → Opportunity brief
-Stage 1.5: Research            → Research brief
-Stage 2: Stakeholder profile   → Sponsor + User + Dev portraits
-Stage 3: Requirement design    → Solution + scope + metrics
-     ↓ SIM 1: solution review
-Stage 3.2: AI Native harness   → scenario card + multi-agent feasibility review + engineering path simulation
-Stage 3.5: Agent runtime       → Agent/event/write_scope/fallback policy
-Stage 4: Stories + state       → user-story-inventory.md + role-path-matrix.md + guarded state machine
-Stage 4.5: Mobile contract     → mobile-role-path-matrix.md + permission-gates.md + weak-network-matrix.md (when mobile)
-Stage 5: PRD + prototype       → REQUIREMENT.md + PROTOTYPE.html + demo-paths.json + story-path-coverage.md + state-button-matrix.md + mobile-testid-map.md
-Stage 5.5: Observability       → trace fields + alert rules + dashboards
-Stage 5.6: Tool contract       → tool registry + call policy + audit
-Stage 5.7: Effect evaluation   → evidence-level + baseline/post windows + guardrails (when AI effect is claimed)
-     ↓ SIM 2: prototype review + browser/demo-path verification + delivery acceptance gates
-Delivery: PRD + customer-demoable prototype + interaction ledger + state-button matrix + demo verification report + developer prompt + review report
+只是快速想法/演示 HTML?
+  -> L0 + Gate 2 Lite + Gate 4 Lite
+
+需要产品说明但不进入开发?
+  -> L1 + Gate 1 Lite + Gate 2 + Gate 4 Lite
+
+要交给开发/测试/投标/客户演示?
+  -> L2 + Gate 1-4
+
+AI 会影响业务决策、工作流、客户承诺、合规、金额、安全?
+  -> L3 + AI Native Harness + Runtime + Effect
+
+只是给已有产品加 AI 分类/摘要/审核/推荐?
+  -> L1/L2 + AI Feature Injection
+
+有 PC + 移动/小程序/App?
+  -> add Mobile + Multi-Surface Consistency
+
+有审批/多级监管/会签/转审/撤回/超时?
+  -> add Approval Workflow
+
+有组织、租户、角色、数据隔离、席位/license?
+  -> add SaaS Multitenancy
+
+有指标、报表、数据集市、大屏、报告生成?
+  -> add Reporting/Analytics
+
+Has low-code app builder, node workflow, connector, or automation orchestration?
+  -> add Workflow Automation / Low-Code
 ```
 
-Stage selection:
+## 8. Pipeline
 
-| Trigger | Start |
-|---------|-------|
-| "已有原型 / 竞品 / 从 HTML 反推需求" | Stage 0 |
-| "Brainstorm / idea / opportunity" | Stage 1 |
-| "调研 / research / discovery" | Stage 1.5 |
-| "方案 / feature spec" | Stage 3 |
-| "用户故事 / 状态机" | Stage 4 |
-| "PRD / 原型 / 开发交接" | Stage 5 |
-| No stage specified | Full pipeline |
+Core stages stay simple. Conditional plugins attach to the relevant stage.
 
-## Complexity Budget
-
-Budget: PRD <= 15pp / states <= 20 / actions <= 50 / APIs <= 30 / tools <= 12 / agents <= 8.
-
-Counting rules:
-- PRD pages: rendered A4 pages, excluding appendices and review reports.
-- states: unique business + AI states; nested substates count if they have independent transitions.
-- actions: user-visible commands and system-triggered actions; CRUD variants count separately when guards differ.
-- APIs: unique endpoint + method contracts referenced by PRD or prototype `data-api`.
-- tools: unique AI tools in the tool contract.
-- agents: unique runtime agents.
-- Peer PM must count each item in SIM 1 and output PASS/FAIL. Over-budget requires exception reason, owner, and mitigation.
-
-## SIM Review
-
-Run SIM 1 after Stage 3 and SIM 2 after Stage 5.
-
-| Agent | Persona | Output |
-|-------|---------|--------|
-| Sponsor | 业务发起方，关注合规、审计、成本、结果 | PASS/NEEDS_REVISION + Top concerns |
-| End User | 一线用户，不理解设计意图，只按真实任务操作 | Walkthrough + pain points |
-| Peer PM | ToG/ToB PM，抓范围蔓延和逻辑矛盾 | Cross-check + state audit + complexity PASS/FAIL |
-| Dev Lead | 后端/架构视角，关注可实现性和工期 | Feasibility + hidden complexity |
-
-Report format:
-
-```markdown
-# Review Report: SIM [1/2] - [Feature]
-## Verdicts | Agent | Verdict | Top Concern |
-## Required Actions
-- [ ] Action: Owner by Date
-## Next Step
-[Proceed / Revise / Escalate]
+```text
+Stage 0  Existing artifact / reverse engineering
+Stage 1  Opportunity and scope
+Stage 2  Stakeholder and tier
+Stage 3  Requirement design
+Stage 4  Stories, role paths, states
+Stage 5  PRD, prototype, acceptance package
 ```
 
-## Mandatory Gates
+Optional plugins:
+- Stage 0: interaction ledger, patch-chain drift, build manifest.
+- Stage 3: AI feature injection, AI-native scenario, approval/multitenancy/reporting/workflow domain model.
+- Stage 4: mobile/multi-surface paths, RBAC matrix, approval state machine, indicator lineage, workflow graph and connector contracts.
+- Stage 5: DDD handoff, Developer Fast-Lane, prompt registry, effect evaluation, workflow execution acceptance, packaging manifest.
 
-Gate 1: Requirement review after Stage 3. Business side can restate problem, confirm metrics, accept Out of Scope, and add at least one missing scenario.
+## 9. Complexity Budget
 
-Gate 2: Prototype walkthrough after Stage 5. Give users tasks without hints; observe silently; record where they fail. The prototype fails Gate 2 if any primary user story cannot be completed inside the HTML with mock state and visible output.
+Budget is tier-aware.
 
-Gate 3: Dev pre-review after Gate 2. Dev Lead can click through the prototype and infer each feature's command/query, state transition, domain object, validation rule, and expected result even before reading the PRD.
+| Tier | PRD | States | Actions | APIs | AI Agents | Expected Fit |
+|---|---:|---:|---:|---:|---:|---|
+| L0 | optional | <= 8 | <= 20 | optional | 0 | demo only |
+| L1 | <= 6pp | <= 12 | <= 30 | <= 10 | <= 1 | internal alignment |
+| L2 | <= 15pp | <= 25 | <= 60 | <= 30 | <= 3 | standard dev |
+| L3 | modular | per bounded context | per module | per service | <= 8 | AI-native/high-risk |
 
-## Developer Handoff Rules
+Counting:
+- action = business action name + guard combination + domain result;
+- same action across surfaces counts once if guard/domain result match;
+- reporting metric actions count by query/calculation/write behavior, not by chart count;
+- over-budget is allowed only with owner, reason, de-scope or split plan.
 
-PRD is a business script, not a technical blueprint. It should not contain DB table names, framework choices, implementation code, or pseudo APIs unless those are business contracts.
+## 10. Review Model
 
-Prototype must make behavior inspectable:
-- `data-testid` on every interactive/verifiable element.
-- `data-action` on commands.
-- `data-state` on stateful containers.
-- `data-api` + `data-method` where backend contract is implied.
-- `data-visible-role` where role visibility differs.
-- If iterating from an older prototype, preserve baseline interaction coverage unless explicitly de-scoped.
-- Business workbench/detail views must show the real mock business data behind each list item, not only metadata summaries.
-- Create flows must visibly create mock records; edit flows must visibly mutate mock records; submit/review/freeze flows must visibly change state.
-- Customer demo data must cover at least one complete journey per role and one state variant per critical lifecycle state.
-- The prototype must expose a test helper such as `window._test.scan()` and `window._test.missingHandlers()` or an equivalent deterministic DOM/action audit.
+Run only the reviewers needed by tier and triggers.
 
-Cross-file consistency checks:
-- Every PRD feature maps to a user story id.
-- Every user story id maps to role path steps, prototype actions, state transitions, and test cases.
-- PRD state machine states match prototype `data-state`.
-- ACTION IDs match prototype `data-action`.
-- ACTION IDs have implemented handlers and visible outcomes.
-- API contract matches `data-api` + `data-method`.
-- Field definitions match `data-field` / `data-bind`.
-- Role matrix matches `data-visible-role`.
-- PRD commands/queries/events match prototype actions and visible domain state changes.
-- PRD test cases cover every primary demo path in `demo-paths.json` or equivalent browser verification script.
+| Reviewer | Required When | Checks |
+|---|---|---|
+| Sponsor | L1+ | outcome, cost, compliance, overclaim |
+| End User | L0+ | path usability, missing steps |
+| Peer PM | L1+ | scope, state, story completeness, tier fit |
+| Dev Lead | L2+ | implementation contract, hidden complexity |
+| QA/Eval | L2+ or AI | testability, regression, eval design |
+| AI Architect | AI Feature Injection / L3 | context, prompt/tool/runtime feasibility |
+| Ops/SRE | L3 or production automation | observability, rollback, kill switch |
 
-## Quality Checklist
+## 11. Cross-File Consistency Rules
 
-Stage 0:
-- [ ] Input pattern detected: semantic / inline / file-route / external SPA.
-- [ ] External dependencies scanned.
-- [ ] Entities, views, features, states, roles extracted.
-- [ ] If iterating, interaction baseline ledger extracted from the prior prototype.
-- [ ] Regression diff lists removed views/actions/handlers/data sets and de-scope reasons.
-- [ ] Confidence labels: CONFIRMED / INFERRED / UNKNOWN.
-- [ ] `stage0-output.json` produced.
+- Every PRD feature maps to a story id.
+- Every story id maps to role path, prototype action, state/domain result, and test case.
+- Every lifecycle object has a state-button matrix.
+- Every primary prototype action maps to command/query or is explicitly prototype-only.
+- Every domain write has audit/event and permission guard.
+- Every AI prompt/model/tool change declares impact surface, linked tests, rollback owner, and observability signal.
+- Every multi-surface feature declares what is shared and what differs by surface.
 
-Stage 1-3:
-- [ ] Problem has 3+ evidence sources.
-- [ ] Epic hypothesis is falsifiable.
-- [ ] Out of Scope has 5+ items with revisit conditions.
-- [ ] Success metrics have baseline, target, timeline.
+## 12. Required Scripts
 
-Stage 4:
-- [ ] User story inventory exists and every story has role, trigger, precondition, path, expected UI result, expected domain result, exception path, state transition, and test id.
-- [ ] Role operation path matrix exists for every role.
-- [ ] Every scoped feature maps to at least one user story.
-- [ ] Stories follow INVEST.
-- [ ] Every AC has happy, error, boundary paths.
-- [ ] Every state transition has Trigger + Guard + Action.
-- [ ] Cross-entity guards are explicit.
+When analyzing old prototypes, prefer the bundled ledger extractor:
 
-Stage 5:
-- [ ] PRD has all 10 chapters.
-- [ ] Story-path coverage table maps feature -> story -> role path -> prototype action -> state transition -> API/command -> test case.
-- [ ] PRD is DDD-complete for each bounded context: aggregates, entities, value objects, commands, queries, events, policies, invariants.
-- [ ] Each module has inputs, outputs, processing logic, business transformation logic, exceptions/guards, API/business contract, sequence diagram, state diagram, and concrete tests.
-- [ ] Prototype has complete semantic annotations.
-- [ ] Prototype preserves prior interaction coverage or documents approved de-scope.
-- [ ] Every `data-action` has a handler and visible state/view/modal/toast effect.
-- [ ] Every core create/view/edit/configure/submit/review/freeze/analyze flow is demoable end-to-end using in-memory mock data.
-- [ ] No primary action is toast-only; each primary action opens a real view/modal or mutates mock state.
-- [ ] Workbench/detail views show item-level business data and not just summaries.
-- [ ] Browser/demo-path verification passes; failures are fixed before delivery or documented as approved exceptions.
-- [ ] Test scenarios cover core, error, permission, async, concurrent, batch, and mobile.
+```powershell
+python references/../scripts/extract_interaction_ledger.py --input path/to/prototype.html --output interaction-ledger.json
+```
 
-AI protocol checks:
-- [ ] AI states, confidence, ambiguity, and evidence chain defined.
-- [ ] Agents have trigger_event, output_event, write_scope, forbidden_write, timeout, retry, fallback.
-- [ ] Tool calls have class, allowed_when, forbidden_when, audit, approval gates.
-- [ ] Alerts have executor and owner.
-- [ ] Prompts are registered in `prompt-registry.yaml` with linked tests.
+If the script misses minified/external behavior, supplement with browser/DOM verification and mark UNKNOWN.
 
-ToG/ToB mandatory:
-- [ ] Data retention, desensitization, audit trail, org isolation, SLA defined.
-- [ ] Approval workflows and escalation paths identified.
-- [ ] Requirement gaps documented with owners and deadlines.
+## 13. Final Response Rule
+
+When delivering work, state:
+- selected tier;
+- triggered conditional gates;
+- created/updated artifacts;
+- verification performed;
+- unresolved risks or approved de-scopes.

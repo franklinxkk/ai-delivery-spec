@@ -99,6 +99,35 @@ Dimension examples:
 - 人员岗位, 培训类型;
 - 隐患等级.
 
+## Regulatory Hierarchy / ToG Workflow
+
+Traffic supervision products usually have hierarchical visibility and escalation:
+
+```text
+province -> city -> district/county -> enterprise
+```
+
+| Level | Typical Role | Data Scope | Allowed Actions | Forbidden Actions |
+|---|---|---|---|---|
+| province | provincial regulator | cross-city aggregate + drilldown by policy | publish policy, inspect summary, escalate | edit enterprise self-fill records |
+| city | city regulator | city + districts | assign inspection, review district progress | approve enterprise evidence without district rule |
+| district/county | local regulator | own district enterprises | issue rectification, review evidence, accept closure | view other districts unless authorized |
+| enterprise | enterprise safety/admin | own enterprise only | submit evidence, fill reports, view own alerts | view other enterprise data |
+
+Common approval/rectification state:
+
+```text
+draft -> issued -> enterprise_processing -> submitted_for_review
+-> returned | accepted | escalated | closed
+```
+
+Rules:
+- Every rectification/inspection task must record issuing level, responsible enterprise, deadline, evidence requirement, and acceptance role.
+- Upper-level override or escalation must create audit evidence and reason.
+- Enterprise-submitted evidence is not final until regulator acceptance.
+- Cross-level dashboard data may aggregate broadly, but item-level evidence follows org-scope permission.
+- Use `approval-workflow.md` for review/return/acceptance behavior and `saas-multitenancy.md` for org-scope isolation.
+
 ## Data Mart / Report Template Pattern
 
 Use this pattern for 运管数据集市:

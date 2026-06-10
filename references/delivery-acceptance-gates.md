@@ -51,10 +51,14 @@ Toast is allowed only as secondary feedback.
 
 For each role, provide at least one happy path and one exception/permission path.
 
-| Role | Story ID | Start | Steps | Data Touched | State Before/After | Expected Visible Result | Test Case |
-|---|---|---|---|---|---|---|---|
+| Role | Story ID | Start | Steps | Data Touched | State Before/After | Expected Visible Result | Expected Domain Result | Test Case |
+|---|---|---|---|---|---|---|---|---|
 
 Fail if a role only appears in PRD text but cannot be walked through in the prototype.
+
+Mobile role path sub-checks:
+- Mobile roles have separate paths or an explicit "same as desktop after mobile validation" note.
+- Mobile paths include entry, exit, permission gate, weak-network behavior, and mobile `data-testid`.
 
 ## 5. Customer Demo Closure
 
@@ -113,3 +117,16 @@ Final answer or handoff should include:
 - AI/Excel import skips ambiguous-field confirmation.
 - Enterprise and admin paths are mixed without role visibility or data isolation.
 - PRD names a module but omits inputs, outputs, processing logic, and testable transitions.
+
+## 8.5 Mobile Acceptance
+
+When the product has mini-program, H5, app, mobile web, driver, field, learner, customer, or sales-on-phone workflows, apply `mobile-product-delivery.md` before final delivery.
+
+Required:
+- `mobile-role-path-matrix.md` follows the schema in `mobile-product-delivery.md`.
+- `permission-gates.md` follows the schema in `mobile-product-delivery.md`.
+- `weak-network-matrix.md` follows the schema in `mobile-product-delivery.md`.
+- Mobile prototype paths demonstrate touch entry, sticky primary action, permission denial fallback, weak-network retry, and role-specific result state.
+- Safety/non-interruption policy is present for driving, operating, medical, field, or safety-critical contexts.
+
+Fail if the mobile flow can lose user input silently, requires desktop-only interaction patterns, or claims mobile delivery while only showing a shrunken desktop page.

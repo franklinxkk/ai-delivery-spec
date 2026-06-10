@@ -80,6 +80,8 @@ agent:
   max_retry: 3
   retry_backoff: exponential
   idempotent_key: target_entity_id + assessment_date
+  idempotent_ttl: business_event_window + max_retry_total_time + clock_skew_buffer
+  idempotent_ttl_example: 24h + 7s + 5m
   fallback: manual_review_queue
 ```
 
@@ -102,11 +104,13 @@ The deterministic runner performs DOM location, assertions, and screenshots. The
 ```yaml
 events:
   AssessmentRequested:
+    schema_version: 1.0.0
     source: cron | human_trigger
     payload: { target_entity_id: string, assessment_date: date, scope: [profile, activity, history] }
     consumers: [assessment-agent]
 
   AssessmentCompleted:
+    schema_version: 1.0.0
     source: assessment-agent
     payload:
       target_entity_id: string
@@ -120,14 +124,29 @@ events:
       - report-agent
 
   WorkflowTaskCreated:
+    schema_version: 1.0.0
     source: workflow-agent
     payload: { task_id: string, target_entity_id: string, task_type: string, deadline: datetime, approved_by: string }
     consumers: [notification-agent, test-agent]
 
   VerificationResult:
+    schema_version: 1.0.0
     source: test-agent
     payload: { test_suite_id: string, passed: boolean, failed_assertions: [string], data_drift_detected: boolean }
 ```
+
+Event schema versioning rules:
+- Every runtime event must include `schema_version`.
+- Additive optional fields are backward-compatible minor changes.
+- Required field additions, field removals, type changes, semantic changes, and consumer-breaking enum changes require a major version.
+- A major version requires a consumer impact table: consumer, current version, target version, migration owner, fallback behavior.
+- Producers may emit parallel versions during migration; consumers must declare the versions they accept.
+
+Idempotency TTL rule:
+- `TTL = business_event_window + max_retry_total_time + clock_skew_buffer`.
+- `max_retry_total_time` is the sum of all retry backoff intervals, e.g. exponential retries `1s + 2s + 4s = 7s`.
+- Use a default `clock_skew_buffer` of `5m` unless the system has stricter time sync.
+- Example: a daily assessment with 3 retries has `24h + 7s + 5m`, rounded up to `25h`.
 
 ## Runtime Conflict Policy
 
@@ -261,6 +280,25 @@ Executors:
 - `manual`: PM/business/data science handling with owner and SLA.
 
 Monitoring triggers events. Rollback procedure lives in `prompt-registry.yaml`.
+
+## Circuit Breaker
+
+```yaml
+circuit_breaker:
+  open_when: consecutive_failures >= 5
+  cooldown: 300s
+  half_open_probe_count: 3
+  half_open_success_threshold: 3
+  half_open_fail_action: reset_cooldown
+  close_when: half_open_success_count >= half_open_success_threshold
+```
+
+Rules:
+- In `open`, block new non-critical calls and use fallback.
+- After cooldown, enter `half_open` and allow only `half_open_probe_count` controlled probe requests.
+- If all probe requests succeed, close the breaker.
+- If any probe fails, return to `open` and restart cooldown.
+- Probe requests must be tagged in trace logs.
 
 ## Prompt Ops
 

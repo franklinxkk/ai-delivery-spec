@@ -161,6 +161,22 @@ Fail the domain module if:
 - it leaks domain-specific rules into public protocol files;
 - it does not define what AI is forbidden to do.
 
+## Domain Switch Verification Checklist
+
+When replacing a domain module, run this checklist before using the protocol in the new company or industry.
+
+| Layer | Check | Pass Rule |
+|---|---|---|
+| Vocabulary | Old domain terms removed or intentionally mapped | No unmapped old-domain entity appears in new PRD/prototype/testids |
+| State machines | New aggregates have explicit states and transitions | No old regulatory/workflow state is reused without mapping |
+| Policy/privacy | Retention, desensitization, consent, approval, audit rules fit the new domain | Policy source and owner are named |
+| AI context | Context sources, freshness, permission scope, and forbidden AI actions are domain-specific | No AI precondition relies on old-domain data |
+| Metrics | Metric caliber/source/dimensions/owner are replaced | No old indicator is copied without a new source of truth |
+| UI/testids | Domain-specific testid prefixes and role paths are updated | Automated tests can identify new-domain paths |
+| Acceptance scenarios | At least 5 domain-specific happy/error/edge scenarios exist | Scenarios use new-domain entities and risks |
+
+Fail migration if the new domain file passes structurally but still contains old-domain preconditions, regulation triggers, privacy rules, state names, or testid naming assumptions.
+
 ## Example: Knowledge Learning Domain Outline
 
 ```markdown
@@ -186,4 +202,3 @@ Fail the domain module if:
 | content catalog | CMS | daily/versioned | public/published |
 | knowledge graph | knowledge base | versioned | product |
 ```
-

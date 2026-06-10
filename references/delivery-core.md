@@ -131,9 +131,10 @@ Stage 3 Requirement Design:
 
 Stage 4 Stories + State Machine:
 - Story format: As a [persona], I want [action], so that [value].
-- AC format: Given / When / Then.
+- AC format: Given / When / Then + Expected UI Result + Expected Domain Result.
 - Every story includes happy, error, and boundary paths.
 - Every state transition includes Trigger + Guard + Action.
+- A story is not Stage-4 complete if it only states a visible UI result. It must also state the domain object change, domain event, audit record, task creation, notification, or measurable state change.
 
 Stage 5 PRD + Prototype:
 

@@ -2,136 +2,99 @@
 
 AI Delivery Spec 是一套面向产品经理、AI 产品负责人、研发负责人和测试团队的 **AI Native 软件交付协议 / Codex Skill**。
 
-它把 PRD、交互原型、移动端/小程序交付、用户故事、角色路径、DDD 研发交接、AI Native Harness 工程化验证、AI 效果评估、AI Agent 运行治理、Prompt/Tool 管理、可观测性和测试验收统一成一套可执行标准，帮助产研团队从“写需求文档”升级到“交付可开发、可测试、可演示、可治理、可稳定落地的产品规格”。
+它的目标不是让 PRD 变厚，而是让产品交付物真正可开发、可演示、可测试、可治理。v4.0 采用分级交付模型和条件 Gate：先判断项目复杂度，再按需加载移动端、多端一致性、ToB/ToG 审批、多租户/RBAC、报表指标、低代码工作流、AI 嵌入、AI Native Harness、Prompt Ops、效果评估等协议。
 
-## 适合谁用
+## 适合谁
 
-- 产品经理：输出更标准的 PRD、用户故事、角色操作路径、原型验收说明。
-- AI 产品负责人：设计 AI 功能、智能体协同、Prompt/Tool/Agent 治理和评估体系。
-- 移动端/小程序产品经理：定义移动端角色路径、弱网、授权、消息、视频学习、考试和移动端 testid。
-- 研发负责人：拿到更清晰的 DDD 研发交接、状态机、API/命令查询契约和边界条件。
-- 测试/QA：基于用户故事、角色路径、状态按钮矩阵和 data-testid 进行自动化验收。
-- ToB/ToG 团队：把复杂业务、审批流、监管合规、数据报表、AI 辅助决策做成可落地交付物。
+- 产品经理：输出标准 PRD、用户故事、角色路径、原型验收说明。
+- AI 产品负责人：设计 AI 功能、智能体协同、Prompt/Tool/Agent 治理和效果评估。
+- 研发负责人：拿到 DDD 开发交接、状态机、命令/查询、领域事件、边界条件。
+- 测试/QA：基于 story path、state-button matrix、data-testid、验收 Gate 做自动化和人工验收。
+- ToB/ToG 团队：把审批流、多租户、权限、监管、报表、AI 辅助决策做成可落地交付物。
+
+## v4.0 核心变化
+
+v4.0 解决了早期版本“全量协议过重”的问题。
+
+| 能力 | 说明 |
+|---|---|
+| Tiered Delivery Model | L0 探索原型、L1 轻 PRD、L2 标准交付、L3 AI Native / 高风险交付 |
+| Core Gate 1-4 | Story-Path、Demo-Closed Prototype、Development Contract、Acceptance Package |
+| Conditional Gates | 按需加载移动端、多端、审批、多租户、报表、AI、低代码工作流等协议 |
+| AI 分流 | 普通 AI 嵌入走 AI Feature Injection，高风险自主动作走 AI Native Harness |
+| ToB/ToG 模式 | 审批流、RBAC、多租户、License、组织树、审计、工单升级 |
+| Workflow / Low-Code | 覆盖 n8n、Dify、Flowise 类节点工作流、连接器、凭证、执行历史、回放 |
+| Domain Module | 行业知识插件化，换行业优先换 domain module，不改公共协议层 |
 
 ## 解决什么问题
 
 传统产品交付常见问题：
 
-- PRD 写了很多功能名，但没有完整用户故事和角色路径。
-- 原型看起来完整，但按钮不可点、核心流程无法演示。
-- AI 功能只写“接入大模型”，没有失败兜底、人工确认、可观测性和回滚机制。
-- AI Native 场景目标看起来成立，但没有证明上下文、工具、工作流、评估、发布工程是否支撑稳定落地。
-- 小程序/H5/App 只是把 PC 页面缩小，没有移动端路径、授权、弱网和非打扰规则。
-- AI 提效、风险降低、学习效果等价值主张没有证据分级和效果评估设计。
-- 开发拿不到清晰的业务对象、状态机、输入输出、领域事件和测试用例。
+- PRD 有功能名，但没有完整用户故事和角色操作路径。
+- 原型看起来完整，但按钮不可点、流程不可演示、状态不可验证。
+- 开发拿不到清晰的输入、输出、处理逻辑、状态机和边界规则。
 - 测试只能凭感觉验收，无法从需求追溯到原型、状态、接口和用例。
+- AI 功能只写“接入大模型”，没有人工确认、失败兜底、回滚、评估和可观测。
+- AI Native 场景没有证明上下文、工具、工作流、评估、发布工程是否支撑稳定落地。
+- 移动端/小程序只是 PC 缩小版，没有弱网、授权、消息、非打扰和移动端 testid。
+- 报表/数据集市只有图表清单，没有指标定义、口径、血缘、模板和验收。
+- 低代码/工作流只有画布，没有节点契约、连接器凭证、执行历史和版本发布规则。
 
-AI Delivery Spec 强制把每个核心功能映射到：
+AI Delivery Spec 要求每个核心功能至少能映射到：
 
-- 用户故事
-- 角色操作路径
-- 原型演示路径
-- 状态变化
-- DDD 业务对象
-- 测试用例
-- AI 运行与治理契约
-- AI Native Harness 工程化验证
-- 移动端交付协议
-- AI 效果评估协议
-
-## 核心能力
-
-### 1. PRD 与研发交接
-
-- Stage 0 反向解析已有 HTML/原型/旧系统。
-- Stage 1-5 从机会、调研、方案、用户故事、状态机到 PRD/原型交付。
-- DDD Handoff PRD：输出 bounded context、aggregate、entity/value object、domain event、command/query、invariant、state machine、sequence diagram、API contract、feature test cases。
-
-### 2. 可演示原型验收
-
-- Customer-demoable prototype gate。
-- 每个核心故事必须能在无后端情况下通过 mock data 演示。
-- 核心动作不能只 toast：创建、查看、编辑、提交、审核、启用、停用、导出、分析必须产生真实可见结果。
-- 原型迭代必须保留上一版页面、动作、弹窗、状态、数据覆盖和关键路径，除非明确 de-scope。
-
-### 3. 用户故事与角色路径
-
-- User Story Inventory。
-- Role Operation Path Matrix。
-- Story -> Prototype `data-testid` / `data-action` -> Test Case 的可追溯链路。
-- 每个角色至少有 happy path 和 exception/permission path。
-
-### 4. 移动端 / 小程序交付
-
-- 小程序、H5、移动 Web、App 的 mobile surface 定义。
-- 移动端角色路径矩阵。
-- 底部 Tab、Sticky Action、Bottom Sheet、视频学习、考试、扫码、上传、订阅消息 testid。
-- 弱网、离线、重复点击、提交失败、软键盘、安全区。
-- 隐私授权、订阅消息、驾驶/作业中非打扰规则。
-
-### 5. AI Native Harness 工程化验证
-
-- 场景和目标确定后，先验证工程化承载能力，再进入 runtime 开发。
-- 多智能体可行性评审：Sponsor、Domain Workflow、AI Architect、Backend Integration、Data/RAG、QA/Eval、Ops/SRE。
-- Harness 六层：context、tool/API、workflow、evaluation、observability、release。
-- 模拟业务逻辑路径和工程路径：trigger -> context -> agent -> tool -> human gate -> write -> trace -> evaluation。
-- 支持 fixture replay、dry-run、shadow、canary、failure injection。
-
-### 6. AI Agent 治理
-
-- Agent runtime contract。
-- Prompt/Agent Registry。
-- Tool Registry。
-- Trace Log。
-- Fallback、human gate、write_scope、precondition、rollback。
-- AI 变更必须声明 impact_surface、linked_test_cases、rollback_owner、observability_signal。
-
-### 7. AI 效果评估
-
-- 区分输出可用、用户采纳、短期代理指标、效果佐证、因果证明。
-- 定义 baseline/post window、primary metrics、guardrail metrics、confounders。
-- 支持司机培训、知识学习、客服提效、销售转化、内容生产等效果评估。
-- 防止产品对外过度承诺“减少事故”“提升收入”等未验证结果。
-
-### 8. 测试与验收
-
-- Story-Path Verification Gate。
-- State-Button Matrix Gate。
-- Delivery Acceptance Gate。
-- Complexity Budget：PRD、states、actions、APIs、tools、agents 均需计数。
-- SIM Review：Sponsor、End User、Peer PM、Dev Lead 多视角评审。
+```text
+用户故事 -> 角色路径 -> 原型动作 -> 状态/领域结果 -> 测试用例
+```
 
 ## 文件结构
 
 ```text
 ai-delivery-spec/
 ├── SKILL.md
+├── scripts/
+│   └── extract_interaction_ledger.py
 └── references/
+    ├── delivery-tier-model.md
     ├── delivery-core.md
+    ├── story-path-verification.md
     ├── prototype-testability.md
-    ├── mobile-product-delivery.md
     ├── demo-closed-ddd-handoff.md
     ├── delivery-acceptance-gates.md
-    ├── story-path-verification.md
+    ├── mobile-product-delivery.md
+    ├── multi-surface-consistency.md
+    ├── approval-workflow.md
+    ├── saas-multitenancy.md
+    ├── reporting-analytics.md
+    ├── workflow-automation-lowcode.md
+    ├── ai-feature-injection.md
     ├── ai-native-harness-engineering.md
     ├── ai-runtime-ops.md
     ├── ai-effect-evaluation.md
+    ├── prompt-registry-integration.md
     ├── prompt-registry.yaml
+    ├── build-governance.md
+    ├── artifact-packaging.md
     ├── domain-module-template.md
     ├── domain-traffic.md
-    └── domain-traffic-safety-scenarios.md
+    ├── domain-traffic-safety-scenarios.md
+    ├── domain-crm.md
+    ├── skill-version-migration.md
+    └── skill-design-benchmark.md
 ```
 
 ## 如何安装到 Codex
-
-将仓库克隆到 Codex skills 目录：
 
 ```powershell
 cd $env:USERPROFILE\.codex\skills
 git clone https://github.com/franklinxkk/ai-delivery-spec.git ai-delivery-spec
 ```
 
-安装后，在 Codex 中提出 PRD、原型、AI Agent、DDD 交付、用户故事、角色路径、测试验收等任务时，会触发该 skill。
+如果本地已经安装过旧版：
+
+```powershell
+cd $env:USERPROFILE\.codex\skills\ai-delivery-spec
+git pull
+```
 
 ## 推荐使用方式
 
@@ -139,125 +102,65 @@ git clone https://github.com/franklinxkk/ai-delivery-spec.git ai-delivery-spec
 
 ```text
 使用 ai-delivery-spec，先对这个 HTML 做 Stage 0：
-提取页面、角色、状态、数据动作、handler、实体、指标字段、mock data 和未闭合问题。
+提取页面、角色、状态、data-action、handler、实体、指标字段、mock data 和未闭合问题。
 然后输出 PRD、用户故事矩阵、角色路径矩阵和交互验收报告。
 ```
 
 ### 生成可开发 PRD
 
 ```text
-使用 ai-delivery-spec，按 DDD Handoff PRD 标准输出：
-业务目标、角色、用户故事、状态机、命令/查询、领域事件、输入输出、处理逻辑、异常路径、测试用例。
+使用 ai-delivery-spec，按 L2 标准交付输出：
+业务目标、角色、用户故事、状态机、命令/查询、领域事件、输入输出、处理逻辑、异常路径和测试用例。
 ```
 
-### 设计 AI 智能体功能
+### 设计 AI 功能
 
 ```text
-使用 ai-delivery-spec，设计一个 AI Agent 功能：
-必须包含 runtime contract、prompt registry、tool policy、trace log、fallback、human gate、evaluation cases 和 observability。
+使用 ai-delivery-spec，判断这是 AI Feature Injection 还是 AI Native。
+如果只是分类/摘要/推荐/审核，输出轻量 AI 契约。
+如果 AI 会写业务状态、选择工具、影响客户承诺/合规/金额/安全，升级到 L3 + AI Native Harness。
 ```
 
-### 设计移动端 / 小程序功能
+### 设计小程序 / 移动端功能
 
 ```text
-使用 ai-delivery-spec，按 mobile-product-delivery 标准设计这个小程序功能：
-输出 mobile surface、移动端角色路径、底部导航、授权门禁、弱网策略、订阅消息规则、视频/考试状态、移动端 testid 和验收用例。
+使用 ai-delivery-spec，加载 mobile-product-delivery 和 multi-surface-consistency：
+输出移动端角色路径、授权门禁、弱网策略、订阅消息、非打扰规则、移动端 testid 和验收用例。
 ```
 
-### 评审 AI Native 场景工程可行性
+### 设计低代码 / 工作流 / AI 中台
 
 ```text
-使用 ai-delivery-spec，对这个 AI Native 场景做 harness engineering review：
-先输出 AI Native scenario card，然后让 Sponsor、Domain Workflow、AI Architect、Backend Integration、Data/RAG、QA/Eval、Ops/SRE 多视角评审。
-必须模拟业务逻辑路径和工程路径，判断 context、tool/API、workflow、evaluation、observability、release harness 是否支撑稳定落地。
+使用 ai-delivery-spec，加载 workflow-automation-lowcode：
+定义 Workflow、Node、Edge、Trigger、Connector、Credential、Execution、Template、Environment，
+并补充节点输入输出、凭证安全、执行历史、重试、回放、版本发布和权限边界。
 ```
 
-### 评估 AI 功能真实效果
+## 领域模块
+
+公共协议层尽量保持领域中立。
+
+当前仓库包含两个示例领域模块：
+
+- `references/domain-traffic.md`：交通安全 / 运输监管领域。
+- `references/domain-crm.md`：CRM / 客服 / 销售 SaaS 领域验证样例。
+
+如果换行业，优先按 `references/domain-module-template.md` 创建新的 domain module。公共协议层不要混入行业专有知识。
+
+## GitHub 仓库建议
+
+Description:
 
 ```text
-使用 ai-delivery-spec，对这个 AI 功能做 effect evaluation：
-定义证据等级、baseline/post window、主指标、护栏指标、混杂因素、对照方式和允许/禁止对外宣称的效果。
+AI-native product delivery protocol for PRD, prototypes, user stories, DDD handoff, mobile delivery, ToB/ToG workflows, low-code automation, AI agent governance, prompt ops, observability, and testable product-engineering collaboration.
 ```
 
-### 审查原型交互完整度
+Topics:
 
 ```text
-使用 ai-delivery-spec，对比旧版和新版 HTML 原型：
-输出 interaction ledger、页面/动作/弹窗/handler/mock data 差异、缺失路径和修复建议。
+ai-product, product-management, prd, prototype, ddd, ai-agent, ai-native, low-code, workflow-automation, tob, tog, rbac, codex-skill
 ```
 
-## 领域模块说明
+## License
 
-协议层尽量保持领域中立。
-
-当前仓库默认带有交通安全 / 运输监管领域模块：
-
-- `references/domain-traffic.md`
-- `references/domain-traffic-safety-scenarios.md`
-
-如果你换到其他行业，优先替换领域模块，公共协议层可以继续复用。建议按 `references/domain-module-template.md` 创建新领域模块。一个合格的 domain module 应包含：
-
-- 领域实体
-- 指标体系
-- 核心工作流
-- 业务场景
-- UI 模式
-- 政策/合规约束
-- 验收清单
-
-## 推荐 GitHub 仓库信息
-
-Description：
-
-```text
-AI-native product delivery protocol for PRD, prototypes, user stories, DDD handoff, AI agent governance, prompt ops, observability, and testable product-engineering collaboration.
-```
-
-Website：
-
-```text
-https://github.com/franklinxkk/ai-delivery-spec
-```
-
-Topics：
-
-```text
-ai-product-management
-prd
-product-requirements
-product-management
-ai-agent
-ai-native
-prompt-engineering
-ddd
-software-delivery
-prototype
-testability
-product-engineering
-codex-skill
-agent-governance
-observability
-```
-
-## 版本
-
-当前版本：`v3.9 Mobile-AI-Native Verified`
-
-v3.9 重点增强：
-
-- Mobile Product Delivery Gate
-- Domain Module Template Gate
-- AI Effect Evaluation Gate
-- AI Native Harness Engineering Gate
-- Multi-Agent Feasibility Review
-- Engineering Path Simulation
-- Story-Path Verification Gate
-- Demo-Closed Prototype Gate
-- DDD Handoff PRD Gate
-- State-Button Matrix Gate
-- No Toast-Only Core Action Gate
-- Delivery Acceptance Gate
-
-## 作者
-
-李康（Li Kang）
+目前未声明开源许可证。对外公开使用前建议补充 LICENSE。

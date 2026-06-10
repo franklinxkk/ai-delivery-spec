@@ -57,6 +57,10 @@ ai_native_scenario:
   required_tools: [string]
   target_latency_ms: number
   target_cost_per_run: number
+  realtime_or_multimodal:
+    enabled: true | false
+    modes: [text, voice, stt, tts, avatar, video, screen, image]
+    fallback_modes: [text, audio_only, cached_content, human_handoff]
 ```
 
 If the scenario cannot express the current workflow, AI-native workflow, business outcome, risk level, and required context, it is not ready for engineering review.
@@ -73,6 +77,16 @@ Every AI-native scenario must define six harness layers.
 | Evaluation harness | golden cases, adversarial cases, schema checks, human rubric, business metric checks | no repeatable way to prove quality |
 | Observability harness | trace schema, replay fields, cost/latency, confidence, hallucination, tool audit | failures cannot be replayed or explained |
 | Release harness | dry-run, shadow, canary, rollback, kill switch, owner/SLA | no safe path from prototype to production |
+
+For real-time or multimodal AI scenarios such as AI 数字人、语音助教、avatar tutor, voice customer service, or AI learning coach, add a media harness:
+
+| Media Harness Area | Required Definition | Fail If Missing |
+|---|---|---|
+| STT/TTS harness | provider, latency target, timeout, transcript policy, retry/fallback | voice path cannot be replayed or falls back silently |
+| Avatar/render harness | renderer/provider, bandwidth downgrade, audio/text fallback, accessibility fallback | avatar failure blocks the business task |
+| Conversation turn harness | turn state, interrupt behavior, low-confidence fallback, memory boundary | long responses cannot be stopped or audited |
+| Mobile permission harness | microphone/camera/speaker consent, denial fallback, retention | sensitive capture starts without explicit consent |
+| Evidence/citation harness | knowledge refs, source cards, hallucination checks | tutor/digital human answers cannot be traced |
 
 ## Multi-Agent Feasibility Review
 
@@ -161,6 +175,7 @@ failure-injection-matrix.md
 trace-replay-schema.yaml
 release-gate-plan.md
 harness-review-report.md
+media-harness-contract.yaml (when voice, avatar, video, or streaming is used)
 ```
 
 ## Hard Fail Conditions
@@ -173,6 +188,7 @@ harness-review-report.md
 - No golden cases or human evaluation rubric exists.
 - No trace/replay path exists.
 - Production release has no dry-run, shadow/canary, rollback, or kill switch.
+- Voice/avatar/streaming scenarios have no STT/TTS/avatar fallback, transcript/replay, or interrupt behavior.
 
 ## Acceptance Checklist
 
@@ -184,5 +200,5 @@ harness-review-report.md
 - [ ] Engineering path simulation covers happy, low-confidence, stale context, tool failure, permission failure.
 - [ ] Trace/replay schema can reproduce a run from input to output.
 - [ ] Release plan includes dry-run, shadow/canary, rollback, kill switch, owner, SLA.
+- [ ] Media harness defines STT/TTS/avatar latency, permission, fallback, transcript, interruption, and replay when real-time/multimodal AI is used.
 - [ ] Multi-agent feasibility review returns PASS or CONDITIONAL_PASS with fixes assigned.
-

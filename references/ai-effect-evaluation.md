@@ -18,6 +18,11 @@ Rule: most early AI-native product releases should claim L1-L3, not L4.
 
 ## Evaluation Card
 
+Stage rule:
+- Stage 3 records only `claimed_effect`, `evidence_level_target`, and `unit_of_analysis` as an effect intent.
+- Stage 5.7 completes the full evaluation card after observability fields, data sources, baseline feasibility, and measurement windows are known.
+- SIM 2 must check prototype/demo copy against the evidence level; unsupported numbers or causal wording fail review.
+
 ```yaml
 ai_effect_evaluation:
   id: AEE-001
@@ -47,7 +52,7 @@ ai_effect_evaluation:
     - active_safety_alerts
     - training_records
     - exam_records
-  review_owner: PM + QA + Data
+  review_owner: PM + Data + Sponsor + QA
 ```
 
 ## Metric Types
@@ -176,6 +181,7 @@ ai_effect_evaluation:
 - [ ] Confounders are listed.
 - [ ] Comparison design is selected.
 - [ ] Product copy does not overclaim beyond evidence level.
+- [ ] Sponsor and QA have checked demo copy, dashboard numbers, and sales-facing wording against the evaluation card.
 - [ ] Pilot report separates observed correlation, effect evidence, and causal claims.
 
 ## Hard Fail Conditions
@@ -186,4 +192,3 @@ ai_effect_evaluation:
 - No guardrail metrics.
 - No data source freshness/quality check.
 - No separation between AI recommendation and human/manual intervention.
-

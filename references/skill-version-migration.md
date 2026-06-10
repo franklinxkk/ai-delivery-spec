@@ -1,0 +1,49 @@
+# Skill Version Migration
+
+Use this file when upgrading projects or the skill itself across major versions.
+
+## v3.9.x -> v4.0 Changes
+
+| Change | Impact |
+|---|---|
+| Tiered Delivery Model added | L0/L1 work can skip heavy gates with explicit tier |
+| Gate names simplified | Gate A/B/C/D map to Gate 1/2/3/4 |
+| Conditional plugins introduced | AI, mobile, approval, multitenancy, reporting, build governance load only when triggered |
+| AI Feature Injection split from AI Native | lightweight AI in normal products no longer needs full harness |
+| Multi-Surface Consistency added | PC/mobile/mini-program cross-surface contract is explicit |
+| ToB/ToG patterns added | approval, RBAC, multitenancy become reusable public patterns |
+| Reporting/Analytics pattern added | metric/report/dashboard products get a fitting DDD model |
+
+## Gate Mapping
+
+| v3.9 Gate | v4.0 Equivalent |
+|---|---|
+| Gate A Story-Path | Gate 1 Story-Path |
+| Gate B Demo-Closed | Gate 2 Demo-Closed Prototype |
+| Gate C DDD Handoff | Gate 3 Development Contract |
+| Gate D Acceptance | Gate 4 Acceptance Package |
+| Gate A2 AI Native Harness | Conditional AI Native Harness Gate |
+| Mobile Product Delivery Gate | Conditional Mobile + Multi-Surface Gates |
+| AI Effect Evaluation Gate | Conditional Effect Evaluation Gate |
+
+## Project Upgrade Path
+
+| Old Project Type | Recommended v4.0 Treatment |
+|---|---|
+| quick HTML prototype | classify L0, add demo path and known gaps only |
+| prototype + light PRD | classify L1, add story/path lite and state notes |
+| standard dev PRD/prototype | classify L2, add Developer Fast-Lane and acceptance report |
+| AI agent / AI-native workflow | classify L3, add runtime/harness/effect/ops |
+| data dashboard/report builder | add Reporting/Analytics Gate |
+| ToB/ToG SaaS | add Approval + SaaS Multitenancy |
+| PC + mobile/mini-program | add Multi-Surface Consistency |
+
+## Migration Checklist
+
+- [ ] Select tier.
+- [ ] Map old gates to new gates.
+- [ ] Identify conditional plugins.
+- [ ] Preserve old interaction ledger or document de-scope.
+- [ ] Add missing Developer Fast-Lane if project enters development.
+- [ ] Add package manifest if delivering externally.
+- [ ] Record what remains intentionally below full L3.
