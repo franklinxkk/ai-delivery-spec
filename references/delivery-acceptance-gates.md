@@ -73,6 +73,26 @@ A customer-demoable prototype must be able to demonstrate:
 
 Workflow actions should live inside their business module. For example, "new task" belongs in the task list context unless there is a clear product reason for top-level navigation.
 
+## 5.5 Gate 2 Surface Branches
+
+Gate 2 checks demo closure by surface. Do not fail a native app, mini-program, or backend-admin module only because it is not an HTML prototype.
+
+| Surface | Acceptable Demo Artifact | Required Test Identity | Minimum Pass Rule |
+|---|---|---|---|
+| PC Web / H5 | interactive HTML, local app, or deployed URL | `data-testid`, `data-action`, route/view id | primary paths clickable with visible result |
+| Mini-program | devtools build, screen flow, or interactive H5 approximation | stable component id / `data-testid` mapping / route path | role path, permission, weak-network, submit result covered |
+| Native App | dev build, TestFlight/APK, clickable prototype, or recorded walkthrough plus screen map | accessibility id / test tag / screen id | native-only flows such as permission, offline, push, camera, file upload covered |
+| Backend/Admin API | API console, Swagger/Postman collection, admin screen, or CLI dry run | endpoint id, command id, test case id | command/query result and domain event visible in logs/report |
+| Workflow/Low-Code Canvas | workflow editor, exported graph, or interactive mock | workflow id, node id, edge id, execution id | test run and execution trace visible |
+
+Rules:
+
+- Surface branch must be declared before Gate 2 review.
+- If a surface cannot be made interactive, provide a screen map, operation path, recorded walkthrough, and test case evidence.
+- Native App and mini-program must reference `mobile-product-delivery.md` for permission, weak-network, offline, push/message, and safe-area behavior.
+- Multi-surface products must also reference `multi-surface-consistency.md`.
+- The same business state machine must remain consistent across surfaces unless an explicit surface difference is approved.
+
 ## 6. Browser/DOM Verification
 
 Before final delivery, run browser verification for highest-risk paths. If a real browser is unavailable, run deterministic DOM/action audit and state the gap.
@@ -139,6 +159,7 @@ Final answer or handoff should include:
 | Test handoff checklist | Yes |
 | Unresolved risks | Yes, even when non-blocking |
 | Human overrule log | Required if any automated check is overridden |
+| System readiness record | Required before staging/pilot/production/customer demo with real data |
 
 ## 8. Common Failure Patterns
 

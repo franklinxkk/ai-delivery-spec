@@ -74,6 +74,22 @@ Rules:
 - CI should separate `contract_migration_required` from `prompt_quality_regression`; do not hide real prompt failures behind schema migration noise.
 - A compatibility adapter is allowed only when it is versioned, tested, and has a removal date.
 
+## Golden Case Tiering
+
+Do not make prompt evaluation all-or-nothing. A small team must still keep a cheap P0 layer even when it cannot afford large benchmark runs.
+
+| Tier | Purpose | Minimum | Run Timing | Required For |
+|---|---|---:|---|---|
+| P0 Smoke | must-pass schema and core business cases | 3 | every prompt change | all prompts |
+| P1 Regression | common business variants | 20 | release / weekly | production prompts |
+| P2 Benchmark | adversarial, long-tail, high-risk | 100 | major release / model upgrade | high-risk / autonomous prompts |
+
+Rule:
+
+- No budget is not a reason to remove Prompt Ops.
+- If budget is tight, keep P0 smoke tests and deterministic schema validation.
+- P1/P2 can be scheduled by release risk, but P0 must run before activating an active prompt.
+
 ## Fail Conditions
 
 - Prompt exists in prose but not registry.

@@ -24,6 +24,16 @@ Use this file when upgrading projects or the skill itself across major versions.
 | Edge-Fallback Gateway added | Mobile/field/weak-network AI flows have local fallback and offline queue rules |
 | Human Overrule contract added | Automated acceptance is a release signal with auditable human override, not an unchallengeable judge |
 
+## v4.0.1 -> v4.0.2 Practical Adoption
+
+| Change | Impact |
+|---|---|
+| Apache-2.0 license added | The protocol can be reused and adapted as an open-source project |
+| Reusable templates added | Junior PMs can start from L1/L2/L3 PRD and readiness templates instead of blank documents |
+| Golden case tiering added | Prompt Ops can start with low-cost P0 smoke cases and scale to P1/P2 by risk |
+| Gate 2 surface branches added | PC Web, H5, mini-program, Native App, API/admin, and workflow canvas can pass Gate 2 with fitting evidence |
+| System Readiness Gate added | PRD/prototype acceptance is separated from launch readiness and operational safety |
+
 ## Gate Mapping
 
 | v3.9 Gate | v4.0 Equivalent |

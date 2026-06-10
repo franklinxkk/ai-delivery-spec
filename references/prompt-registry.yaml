@@ -1,6 +1,6 @@
 # AI Prompt Registry - v3.4 domain-clean template
 # Machine-readable prompt ops contract. Replace examples per project/domain.
-version: "1.4"
+version: "1.5"
 last_updated: "2026-06-10"
 
 prompts:
@@ -151,6 +151,31 @@ rollback_rules:
 test_binding:
   rule: "Each prompt_id binds at least 2 test cases"
   required_test_types: [happy_path, boundary_case, adversarial]
+  golden_case_tiers:
+    P0_smoke:
+      purpose: "Low-cost must-pass cases; prevents teams from abandoning prompt ops because of evaluation cost"
+      min_cases: 3
+      recommended_cases: 5-10
+      run_timing: [every_prompt_change, before_release]
+      required_for: [all_prompts]
+      fail_policy: block_release_for_active_prompt
+    P1_regression:
+      purpose: "Common business variants and schema stability"
+      min_cases: 20
+      recommended_cases: 20-50
+      run_timing: [release_candidate, weekly]
+      required_for: [medium_risk, high_risk, production_prompts]
+      fail_policy: require_owner_triage
+    P2_benchmark:
+      purpose: "Adversarial, long-tail, policy, safety, and high-impact scenarios"
+      min_cases: 100
+      recommended_cases: 100+
+      run_timing: [major_release, monthly, model_upgrade]
+      required_for: [high_risk, critical_risk, autonomous_write]
+      fail_policy: block_release_unless_human_overrule_allowed
+  budget_fallback:
+    no_eval_budget: "Run P0_smoke only; do not skip prompt registry entirely"
+    no_llm_eval_budget: "Use deterministic schema validation + fixed expected outputs + manual sample review"
   test_execution:
     frequency: on_change
     regression: weekly

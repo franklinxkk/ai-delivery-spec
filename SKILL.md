@@ -5,16 +5,16 @@ description: >-
   delivery artifact: exploratory HTML prototype, PRD, role/user-story path
   inventory, DDD developer handoff, ToB/ToG approval/RBAC/multitenancy contract,
   multi-surface PC/mobile/mini-program delivery, reporting/analytics product
-  spec, AI feature injection, AI-native agent/runtime/harness spec, or AI effect
+  spec, reusable PRD/checklist templates, AI feature injection, AI-native agent/runtime/harness spec, system readiness, or AI effect
   evaluation. Use for AI系统设计, 智能体协同, 可开发PRD, 可演示原型, 角色路径,
   DDD领域建模, 移动端/小程序交付, ToB/ToG审批流, 多租户/RBAC, 指标报表,
   AI效果评估, low-code/workflow automation, and executable software delivery. Do not trigger for casual
   brainstorming, quick copy edits, or isolated drafts that do not require gates.
 ---
 
-# AI Delivery Spec — AI Native 软件交付协议 (v4.0.1 Defensive Hardening)
+# AI Delivery Spec — AI Native 软件交付协议 (v4.0.2 Practical Adoption)
 
-> 作者：李康（Li Kang） | 版本：v4.0.1 | 原则：分级交付、条件 Gate、ToB/ToG 通用模式、AI Native 与 AI 嵌入分流、多端一致性、领域插件化、构建与版本治理、防御性运行契约、可演示可开发可测试。
+> 作者：李康（Li Kang） | 版本：v4.0.2 | 原则：分级交付、条件 Gate、模板化落地、ToB/ToG 通用模式、AI Native 与 AI 嵌入分流、多端一致性、领域插件化、构建与版本治理、防御性运行契约、可演示可开发可测试。
 
 ## 1. Core Rule
 
@@ -116,6 +116,7 @@ Use: `references/delivery-acceptance-gates.md`, `references/artifact-packaging.m
 | Indicator, report, BI, data mart, dashboard, report builder | Reporting/Analytics Gate | `reporting-analytics.md` |
 | Prompt/model/tool registry, rollback, prompt tests | Prompt Ops Gate | `prompt-registry-integration.md`, `prompt-registry.yaml` |
 | Low-code app builder, node workflow, connector/integration automation | Workflow Automation / Low-Code Gate | `workflow-automation-lowcode.md` |
+| Production launch, release, migration, rollback, on-call readiness | System Readiness Gate | `system-readiness-checklist.md` |
 | Patch scripts, generated HTML, repeated transforms | Build Governance Gate | `build-governance.md` |
 | New industry/company/domain module | Domain Switch Gate | `domain-module-template.md`, current domain module |
 | Skill upgrade or old project re-evaluation | Skill Version Migration Gate | `skill-version-migration.md` |
@@ -140,12 +141,14 @@ Use: `references/delivery-acceptance-gates.md`, `references/artifact-packaging.m
 | SaaS multitenancy/RBAC/license | `references/saas-multitenancy.md` |
 | Reporting/data mart/dashboard | `references/reporting-analytics.md` |
 | Low-code/workflow automation/app builder | `references/workflow-automation-lowcode.md` |
+| System readiness before launch | `references/system-readiness-checklist.md` |
 | Build/patch governance | `references/build-governance.md` |
 | Artifact package standards | `references/artifact-packaging.md` |
 | Prompt registry integration | `references/prompt-registry-integration.md` |
 | Domain replacement | `references/domain-module-template.md` |
 | Traffic safety domain | `references/domain-traffic.md`, `references/domain-traffic-safety-scenarios.md` |
 | CRM domain validation example | `references/domain-crm.md` |
+| Reusable PRD/checklist templates | `references/templates/prd-light-template.md`, `references/templates/prd-standard-template.md`, `references/templates/ai-native-prd-template.md`, `references/templates/system-readiness-checklist-template.md` |
 | Skill upgrade path | `references/skill-version-migration.md` |
 | Skill structure benchmark | `references/skill-design-benchmark.md` |
 
@@ -200,7 +203,7 @@ Optional plugins:
 - Stage 0: interaction ledger, patch-chain drift, build manifest.
 - Stage 3: AI feature injection, AI-native scenario, approval/multitenancy/reporting/workflow domain model.
 - Stage 4: mobile/multi-surface paths, RBAC matrix, approval state machine, indicator lineage, workflow graph and connector contracts.
-- Stage 5: DDD handoff, Developer Fast-Lane, prompt registry, effect evaluation, workflow execution acceptance, packaging manifest.
+- Stage 5: DDD handoff, Developer Fast-Lane, prompt registry, effect evaluation, workflow execution acceptance, system readiness, packaging manifest.
 
 ## 9. Complexity Budget
 
