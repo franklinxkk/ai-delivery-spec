@@ -5,16 +5,16 @@ description: >-
   delivery artifact: exploratory HTML prototype, PRD, role/user-story path
   inventory, DDD developer handoff, ToB/ToG approval/RBAC/multitenancy contract,
   multi-surface PC/mobile/mini-program delivery, reporting/analytics product
-  spec, reusable PRD/checklist templates, AI feature injection, AI-native agent/runtime/harness spec, system readiness, or AI effect
+  spec, strategy-to-delivery handoff, reusable PRD/checklist templates, AI feature injection, AI-native agent/runtime/harness spec, system readiness, or AI effect
   evaluation. Use for AI系统设计, 智能体协同, 可开发PRD, 可演示原型, 角色路径,
   DDD领域建模, 移动端/小程序交付, ToB/ToG审批流, 多租户/RBAC, 指标报表,
   AI效果评估, low-code/workflow automation, and executable software delivery. Do not trigger for casual
   brainstorming, quick copy edits, or isolated drafts that do not require gates.
 ---
 
-# AI Delivery Spec — AI Native 软件交付协议 (v4.0.2 Practical Adoption)
+# AI Delivery Spec — AI Native 软件交付协议 (v4.0.3 Strategy Handoff)
 
-> 作者：李康（Li Kang） | 版本：v4.0.2 | 原则：分级交付、条件 Gate、模板化落地、ToB/ToG 通用模式、AI Native 与 AI 嵌入分流、多端一致性、领域插件化、构建与版本治理、防御性运行契约、可演示可开发可测试。
+> 作者：李康（Li Kang） | 版本：v4.0.3 | 原则：战略发现与执行交付分层、分级交付、条件 Gate、模板化落地、ToB/ToG 通用模式、AI Native 与 AI 嵌入分流、多端一致性、领域插件化、构建与版本治理、防御性运行契约、可演示可开发可测试。
 
 ## 1. Core Rule
 
@@ -106,6 +106,7 @@ Use: `references/delivery-acceptance-gates.md`, `references/artifact-packaging.m
 
 | Trigger | Gate | Load |
 |---|---|---|
+| New product/market, major investment, repositioning, commercialization, board/fundraising decision | Strategic Discovery Handoff Gate | `strategy-discovery-handoff.md` |
 | Existing HTML/prototype/legacy version | Interaction Baseline + Drift Detection | `delivery-core.md`, `build-governance.md` |
 | AI added to normal product but does not own workflow | AI Feature Injection Gate | `ai-feature-injection.md`, `prompt-registry-integration.md` |
 | AI-native workflow, agentic automation, high-risk AI write/action | AI Native Harness Gate | `ai-native-harness-engineering.md`, `ai-runtime-ops.md`, `ai-effect-evaluation.md` |
@@ -125,6 +126,7 @@ Use: `references/delivery-acceptance-gates.md`, `references/artifact-packaging.m
 
 | Need | Load |
 |---|---|
+| Strategy/discovery evidence entering delivery | `references/strategy-discovery-handoff.md` |
 | Tier selection and gate downgrade/upgrade | `references/delivery-tier-model.md` |
 | Reverse-engineer existing artifacts | `references/delivery-core.md` |
 | Prototype semantic annotations and testids | `references/prototype-testability.md` |
@@ -184,6 +186,9 @@ AI 会影响业务决策、工作流、客户承诺、合规、金额、安全?
 
 Has low-code app builder, node workflow, connector, or automation orchestration?
   -> add Workflow Automation / Low-Code
+
+Is this a new product/market, major investment, repositioning, or commercialization decision?
+  -> add Strategic Discovery Handoff before Stage 1
 ```
 
 ## 8. Pipeline
@@ -200,6 +205,7 @@ Stage 5  PRD, prototype, acceptance package
 ```
 
 Optional plugins:
+- Before Stage 1: strategic discovery handoff for new product/market, major investment, repositioning, or commercialization.
 - Stage 0: interaction ledger, patch-chain drift, build manifest.
 - Stage 3: AI feature injection, AI-native scenario, approval/multitenancy/reporting/workflow domain model.
 - Stage 4: mobile/multi-surface paths, RBAC matrix, approval state machine, indicator lineage, workflow graph and connector contracts.
@@ -245,6 +251,7 @@ Run only the reviewers needed by tier and triggers.
 - Every domain write has audit/event and permission guard.
 - Every AI prompt/model/tool change declares impact surface, linked tests, rollback owner, and observability signal.
 - Every multi-surface feature declares what is shared and what differs by surface.
+- Strategic market, competitor, and differentiation claims are required only when the Strategic Discovery Handoff Gate triggers; every claim must identify evidence, assumptions, confidence, and validation plan.
 
 ## 12. Required Scripts
 

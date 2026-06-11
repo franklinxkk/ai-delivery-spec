@@ -2,6 +2,8 @@
 
 Use this file when deciding how much process a project needs. The goal is to prevent L0/L1 prototypes from being judged by L3 AI-native standards while still making upgrade paths explicit.
 
+The Strategic Discovery Handoff Gate is independent of L0-L3. For a new product/market, major investment, repositioning, or commercialization decision, complete the strategic handoff first, then select the delivery tier. It is not a reason to classify ordinary non-AI work as L3.
+
 ## Tier Selection
 
 | Tier | Best For | Decision Question |

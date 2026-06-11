@@ -34,6 +34,16 @@ Use this file when upgrading projects or the skill itself across major versions.
 | Gate 2 surface branches added | PC Web, H5, mini-program, Native App, API/admin, and workflow canvas can pass Gate 2 with fitting evidence |
 | System Readiness Gate added | PRD/prototype acceptance is separated from launch readiness and operational safety |
 
+## v4.0.2 -> v4.0.3 Strategy Handoff
+
+| Change | Impact |
+|---|---|
+| Strategic Discovery Handoff Gate added | New product/market, major investment, repositioning, and commercialization decisions carry evidence into delivery |
+| TAM/SAM/SOM made conditional | Ordinary feature PRDs do not inherit unnecessary market-sizing work |
+| Competitive analysis broadened | Status quo, indirect alternatives, switching barriers, and build/buy/partner options are considered |
+| Differentiation evidence contract added | Positioning claims must describe provable outcomes or a validation plan |
+| Strategy and delivery boundaries clarified | External discovery toolkits can feed Stage 1 without being copied into the delivery protocol |
+
 ## Gate Mapping
 
 | v3.9 Gate | v4.0 Equivalent |
@@ -57,10 +67,12 @@ Use this file when upgrading projects or the skill itself across major versions.
 | data dashboard/report builder | add Reporting/Analytics Gate |
 | ToB/ToG SaaS | add Approval + SaaS Multitenancy |
 | PC + mobile/mini-program | add Multi-Surface Consistency |
+| new product/market, major investment, repositioning, commercialization | add Strategic Discovery Handoff before Stage 1 |
 
 ## Migration Checklist
 
 - [ ] Select tier.
+- [ ] Decide whether Strategic Discovery Handoff is triggered.
 - [ ] Map old gates to new gates.
 - [ ] Identify conditional plugins.
 - [ ] Preserve old interaction ledger or document de-scope.

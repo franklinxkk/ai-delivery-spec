@@ -38,8 +38,25 @@ This template keeps the familiar PRD structure but adds the missing engineering 
 | Flowchart | |
 | Research / competitor notes | |
 | Data report | |
+| Strategic Discovery Handoff | required only for new product/market, major investment, repositioning, or commercialization |
 
 ## 4. Background And Opportunity
+
+### Strategic Discovery Handoff (Conditional)
+
+Complete only when `strategy-discovery-handoff.md` is triggered.
+
+| Field | Value |
+|---|---|
+| Decision | GO / GO_WITH_ASSUMPTIONS / VALIDATE_FIRST / NO_GO |
+| Target Segment | |
+| Market Size Required | Yes / No; link to TAM/SAM/SOM evidence if applicable |
+| Competitive Alternatives | link / summary |
+| Differentiated Outcome | |
+| Riskiest Assumptions | |
+| Validation Milestones | |
+
+Do not add TAM/SAM/SOM or positioning sections to ordinary feature PRDs when the strategic gate is not triggered.
 
 ### Product / Data Current State
 
