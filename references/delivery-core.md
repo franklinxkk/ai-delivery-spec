@@ -2,6 +2,16 @@
 
 Use this file for reverse engineering, PRD generation, state machines, guards, SIM review, and developer handoff.
 
+## Contents
+
+- Stage 0 Reverse Engineering
+- Engineering Profile / Anti-Bloating
+- Stage 1-5 Product Workflow
+- Guard Protocol
+- SIM Review
+- Developer Prompt Skeleton
+- Quality Gate Summary
+
 ## Stage 0 Reverse Engineering
 
 Use Stage 0 when the input is an existing HTML prototype, legacy system, screenshot, Excel template, or competitor product.
@@ -99,29 +109,31 @@ approved_by: reviewer
 Interaction parity checks:
 - Count both semantic actions (`data-action`) and inline handlers (`onclick`).
 - Compare named views, not only route counts.
-- Compare action-to-handler binding; every command must produce a visible view, state, modal, toast, or data change.
+- Compare action-to-handler binding; every primary command must produce a visible view, state, modal, or data change. Toast may be secondary feedback, not the sole result.
 - Compare representative data volume for mock data arrays; do not shrink data sets so far that empty, long-tail, or permission states disappear.
 - Preserve role-specific navigation and task flows unless explicitly removed.
 - Semantic annotations improve testability, but they do not replace working prototype behavior.
 
-## Spec Tiering / Anti-Bloating
+## Engineering Profile / Anti-Bloating
 
 Use the smallest contract that can safely deliver the feature. Do not introduce multi-agent topology, prompt graph, DAG router, or prompt registry complexity when ordinary product logic is cheaper and more reliable.
 
-| Spec Tier | Use When | Required Contract | Do Not Require |
-|---|---|---|---|
-| Tier 1: Standard CRUD / Linear Workflow | list/detail, create/edit, simple approval, query/report, deterministic rules, low-risk AI summary/classification | role path, state-button matrix, prototype actions, tests, optional AI Feature Injection | dynamic DAG, multi-agent graph, prompt topology, autonomous tool planning |
-| Tier 2: Advanced Cognitive / Agentic Workflow | long-chain decision, AI chooses tools/routes, high-impact recommendation, automated workflow write, compliance/money/safety impact, multi-agent collaboration | AI Native Harness, runtime contract, prompt/tool registry, eval, observability, rollback, human gate | direct production write without harness |
+Do not call these profiles “tiers”; delivery tiers are L0-L3. Classify per module.
 
-Escalate from Tier 1 to Tier 2 only when at least one is true:
+| Engineering Profile | Use When | Required Contract | Do Not Require |
+|---|---|---|---|
+| Profile S: Deterministic / AI-Supporting | list/detail, create/edit, approval, query/report, deterministic rules, or AI assistance with a valid manual path | role path, state-button matrix, prototype actions, tests, optional AI Feature Injection | dynamic DAG, multi-agent graph, prompt topology, autonomous tool planning |
+| Profile A: AI-Core / Agentic | primary outcome depends on AI, AI chooses tools/routes, autonomous workflow write, or multi-agent collaboration | AI Native Harness, runtime contract, prompt/tool registry, eval, observability, rollback, human gate | direct production write without harness |
+
+Escalate from Profile S to Profile A only when at least one is true:
 
 - AI selects tools, routes, or downstream workflow steps.
 - AI output writes business state or creates workflow tasks.
-- The decision affects compliance, money, customer commitment, safety, or legal accountability.
+- AI directly determines a consequential compliance, money, customer, safety, or legal outcome without independent qualified human verification.
 - A single linear prompt cannot be tested and operated safely.
 - Failure recovery needs shadow/canary/replay/rollback at runtime.
 
-Downgrade from Tier 2 to Tier 1 when:
+Downgrade from Profile A to Profile S when:
 
 - a deterministic rule engine or normal backend code is simpler than prompt orchestration;
 - prompt maintenance cost exceeds the feature's business value;
@@ -132,13 +144,14 @@ Rule: prompt and agent architecture must reduce delivery risk. If it mainly incr
 
 ## Stage 1-5 Product Workflow
 
+Run only the stages needed by the selected artifact scope and execution mode. Skip stages whose inputs are already supplied and validated.
+
 Stage 1 Brainstorm:
-- Frame opportunity: inward -> outward -> reframe.
-- Write JTBD: When I [situation], I want to [motivation], so I can [outcome].
-- Score ICE: impact x confidence x ease.
+- When opportunity framing is in scope, frame the opportunity and write a testable outcome/JTBD.
+- Use ICE or another prioritization method only when comparing options.
 
 Stage 1.5 Research:
-- Use company/domain context, policy constraints, competitor patterns.
+- Run only when evidence, policy, market, domain, or competitor uncertainty affects the decision.
 - Output domain norms, gaps, policy notes, interview questions.
 
 Stage 2 Stakeholder Profile:
@@ -153,7 +166,7 @@ Stage 3 Requirement Design:
 - Write solution overview: what and why, not how and pixel.
 - Metrics format: `[Metric]: [Current] -> [Target] in [Timeline]`.
 - Epic hypothesis must be falsifiable.
-- Out of Scope must include at least 5 items and revisit conditions.
+- Out of Scope lists material exclusions and revisit conditions; do not pad it to an arbitrary count.
 
 Stage 4 Stories + State Machine:
 - Story format: As a [persona], I want [action], so that [value].

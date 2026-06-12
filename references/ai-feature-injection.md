@@ -2,7 +2,7 @@
 
 Use this file when AI is embedded into a normal product but does not redesign or own the whole business workflow. Examples: AI classification, extraction, summarization, draft generation, risk hint, document review, ticket routing, report narrative.
 
-Do not use the full AI Native Harness unless AI output triggers autonomous workflow writes/actions, high-risk recommendations, compliance/safety/money impact, or multi-agent orchestration.
+Do not use the full AI Native Harness unless AI is core to the scoped outcome, triggers autonomous workflow writes/actions, selects/chains tools or agents, or cannot be safely removed from a consequential decision path.
 
 ## Lightweight Contract
 
@@ -50,8 +50,15 @@ ai_feature_injection:
 - AI output creates or changes workflow tasks automatically.
 - AI writes final business state.
 - AI chains multiple tools/agents.
-- AI affects compliance, money, safety, customer commitment, punishment, or service restriction.
+- The primary user outcome or critical path fails without AI.
+- AI advice directly determines compliance, money, safety, customer commitment, punishment, or service restriction without independent qualified human verification.
 - The PM claims measurable business effect beyond output quality.
+
+High-impact but non-binding advice may remain AI Feature Injection only when:
+- a qualified human independently verifies source evidence and owns the decision;
+- AI cannot execute the consequential write/action;
+- deterministic/manual fallback remains valid;
+- evaluation, audit, and overclaim checks are added.
 
 ## Prototype Requirements
 

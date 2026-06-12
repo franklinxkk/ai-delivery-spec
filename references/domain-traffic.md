@@ -1,55 +1,105 @@
-# Domain + Traffic Context
+# Domain: Traffic Safety And Transport Supervision
 
-Use this file for 运管/交通监管/道路运输/数据集市/指标库 products.
+Use this replaceable domain module for 运管、交通监管、道路运输、交通安全、数据集市和指标库产品. A replacement `domain-*.md` must preserve the same 14 section headings used here and in `domain-module-template.md`.
 
-This is the replaceable domain module. If the company/industry changes, replace this file with a new `domain-*.md` that preserves the same section types: domain model, metric governance, workflows, scenarios, UI patterns, and checklist.
+## Contents
 
-## Domain Modeling
+- Domain Purpose
+- Vocabulary
+- Aggregates and Entities
+- Domain Events
+- State Machines
+- Metric / Indicator Governance
+- AI Context Sources
+- Content / Knowledge Assets
+- Core Workflows
+- Role Path Patterns
+- UI / Mobile Patterns
+- Policy / Privacy Constraints
+- Domain Test Scenarios
+- Acceptance Checklist
 
-Core aggregates:
+## Domain Purpose
+
+- Business outcome: make regulated enterprises, vehicles, personnel, risks, inspections, rectification, training, maintenance, and reports visible and closable.
+- Primary users: province/city/district regulators, inspectors, enterprise safety managers, drivers/personnel, platform administrators.
+- Sensitive areas: identity documents, qualifications, vehicle location/trajectory, enforcement evidence, enterprise operating data.
+- AI may optimize: document extraction, anomaly detection, risk hints, inspection assistance, report drafting.
+- AI must not autonomously decide: punishment, license restriction, final major-hazard classification, forced service suspension, or other binding enforcement actions.
+
+## Vocabulary
+
+| Term | Meaning | Source Of Truth |
+|---|---|---|
+| Regulated Enterprise | enterprise within an institution/department supervision scope | enterprise master + org scope |
+| Two-Type Personnel | principal and safety manager requiring safety assessment qualification | personnel/certificate records |
+| Safety Code | governed enterprise/vehicle/person risk score and color | risk/safety-code service |
+| Alert | machine, external platform, or rule-detected risk signal | alert source/event store |
+| Safety Inspection | regulator-created online/offline inspection with items and evidence | inspection aggregate |
+| Hidden Danger | problem requiring rectification and, when applicable, acceptance | hidden-danger aggregate |
+| Rectification | enterprise evidence and action submitted against an issue | rectification record |
+| Indicator | versioned metric with caliber, source, dimensions, owner, and quality rules | indicator registry |
+| Report Task | period-specific execution using frozen template/indicator versions | report service |
+
+## Aggregates and Entities
 
 | Aggregate | Owns | Notes |
-|-----------|------|-------|
-| Enterprise | enterprise profile, license state, district scope | master data is human/system authoritative |
-| Vehicle | vehicle profile, license, maintenance, GPS/online status | often joins enterprise |
-| Driver/Personnel | qualification, training, position | personal data needs desensitization |
-| RiskAssessment | risk score, risk level, evidence, AI reasoning | AI writable with audit |
-| Alert | alert type, source, handling state | high-volume operational flow |
-| EnforcementTask | inspection/rectification/penalty task | human approval required |
-| ReportTemplate | report columns, indicators, fill columns, dimensions | PM/business configurable |
-| Indicator | metric name, caliber, SQL/source, dimensions, owner, status | must be governed |
-| FillTask | enterprise submission task, deadline, fill status | cross-role workflow |
+|---|---|---|
+| Enterprise | profile, industries, licenses, signer, district scope | authoritative master data; multi-industry license union |
+| Vehicle | profile, certificates, maintenance, insurance, GPS identity | often joins enterprise; trajectory remains external/event data |
+| Driver/Personnel | employment, post, qualification, training | personal data requires masking and retention rules |
+| RiskAssessment | risk score/level, evidence, rule/model version | AI/rule writable with audit; not a punishment decision |
+| Alert | source, object, severity, disposition state | high-volume operational flow |
+| SafetyInspection | plan/list, items, evidence, signatures, result | human-owned inspection and classification |
+| HiddenDanger | source, level, rectification rounds, acceptance | history is append-only across returned rounds |
+| EnforcementTask | inspection/rectification/escalation task | binding action requires authorized human approval |
+| Indicator | caliber, source, dimensions, owner, version, status | governed reusable metric |
+| ReportTemplate | indicators, fill columns, formulas, dimensions | reusable definition |
+| ReportTask | period, scope, template snapshot, progress/result | execution record distinct from template |
 
-Event storming:
+## Domain Events
 
 ```yaml
-event:
-  name: RiskAssessmentCompleted
-  actor: risk-analysis-agent
-  trigger: RiskAssessmentRequested
-  payload:
-    enterprise_id: string
-    risk_level: low | medium | high | critical
-    confidence: float
-    evidence_refs: [string]
-  downstream:
-    - EnforcementTaskCreated if risk_level >= high
-    - NotificationSent if risk_level >= medium
+events:
+  RiskAssessmentCompleted:
+    payload: { enterprise_id, risk_level, confidence, evidence_refs, rule_version }
+  AlertAssigned:
+    payload: { alert_id, owner_id, assigned_at }
+  InspectionCompleted:
+    payload: { inspection_id, enterprise_id, result, evidence_refs, signer_refs }
+  RectificationIssued:
+    payload: { inspection_id, hidden_danger_ids, deadline, issuer_id }
+  RectificationSubmitted:
+    payload: { hidden_danger_id, round, evidence_refs, submitted_at }
+  RectificationAccepted:
+    payload: { hidden_danger_id, reviewer_id, accepted_at }
+  ReportSnapshotFrozen:
+    payload: { report_task_id, template_version, metric_versions, cutoff_time }
 ```
 
-State consistency must be explicit across systems:
+## State Machines
 
-| Business Concept | Source of Truth | Consumers | Consistency Need |
-|------------------|-----------------|-----------|------------------|
-| enterprise status | enterprise master | risk/enforcement/report | strong before enforcement |
-| vehicle online state | GPS/monitoring | alert/risk/report | eventual ok for dashboard |
-| license expiry | license facts | alert/report | daily freshness |
-| fill submission | report/fill service | dashboard/export | strong for final report |
-| enforcement result | enforcement workflow | risk/report/audit | human-confirmed |
+```text
+Alert: created -> pending_review -> assigned -> processing -> closed | escalated
+Inspection: draft -> inspecting -> pending_rectification -> pending_acceptance -> qualified
+Inspection: pending_acceptance -> pending_rectification (returned)
+HiddenDanger: reported -> rectifying -> pending_acceptance -> accepted
+HiddenDanger: pending_acceptance -> rectifying (rejected)
+ReportTask: draft -> published -> executing -> completed | failed | cancelled
+e-Waybill: draft -> submitted -> reviewed -> in_transport -> completed | rejected | cancelled
+```
 
-## Indicator Governance
+State consistency:
 
-Indicator minimum:
+| Business Concept | Source Of Truth | Consumers | Consistency Need |
+|---|---|---|---|
+| enterprise status | enterprise master | risk/inspection/report | strong before regulated action |
+| vehicle online state | GPS/monitoring | alert/risk/report | eventual for dashboard |
+| license expiry | license facts | alert/report | governed freshness |
+| rectification result | hidden-danger workflow | inspection/risk/report/audit | human-confirmed |
+| final report | report snapshot | dashboard/export/submission | immutable snapshot |
+
+## Metric / Indicator Governance
 
 ```yaml
 indicator:
@@ -57,195 +107,111 @@ indicator:
   name: string
   category: hidden_danger | monitoring | license | training | maintenance | baseline
   caliber: string
-  source_table: string
+  source: string
   dimensions: [enterprise, district, vehicle_type, date]
   compute_type: count | distinct | sum | avg | ratio | score | mom | chain
   sql_or_rule: string
   owner: role_or_team
+  version: semver
   status: draft | pending_review | active | deprecated
-  updated_at: date
-  quality_checks:
-    - no_duplicate_name
-    - source_exists
-    - dimension_join_valid
-    - null_rate_threshold
-```
-
-Quality rules:
-- no active indicator without caliber;
-- no template column may reference an indicator with different semantic meaning;
-- duplicate names require disambiguating dimension/scope suffix;
-- SQL-derived indicators must declare source tables and dimensions;
-- AI-generated indicators start as draft and require human review;
-- every indicator used by report template increments `refCount`.
-
-## Transport Metric Categories
-
-Common categories:
-
-| Category | Examples | Source |
-|----------|----------|--------|
-| 隐患闭环 | 待整改数, 待验收数, 安全闭环指数, 年度办结率 | `dwd_hidden_danger` |
-| 动态监控 | 三超一疲劳预警处理率, 待处理数, 长期未处理数, 未在线车辆数 | `dwd_vehicle_alarm` |
-| 证照预警 | 企业/人员/车辆证件超期数, 老旧车辆数 | `dwd_license_expire` |
-| 培训教育 | 岗前培训不达标, 安全培训达标率, 学时不达标 | `dwd_training_record` |
-| 维修维护 | 无年度计划, 维护异常, 里程超期, 周期超期 | `dwd_maintenance_record` |
-| 基础底数 | 企业数, 车辆数, 驾驶员数, 押运员数 | dimension tables |
-
-Dimension examples:
-- 企业, 区县, 区域;
-- 日期, 月份, 季度;
-- 车辆类型, 车辆类型详细;
-- 人员岗位, 培训类型;
-- 隐患等级.
-
-## Regulatory Hierarchy / ToG Workflow
-
-Traffic supervision products usually have hierarchical visibility and escalation:
-
-```text
-province -> city -> district/county -> enterprise
-```
-
-| Level | Typical Role | Data Scope | Allowed Actions | Forbidden Actions |
-|---|---|---|---|---|
-| province | provincial regulator | cross-city aggregate + drilldown by policy | publish policy, inspect summary, escalate | edit enterprise self-fill records |
-| city | city regulator | city + districts | assign inspection, review district progress | approve enterprise evidence without district rule |
-| district/county | local regulator | own district enterprises | issue rectification, review evidence, accept closure | view other districts unless authorized |
-| enterprise | enterprise safety/admin | own enterprise only | submit evidence, fill reports, view own alerts | view other enterprise data |
-
-Common approval/rectification state:
-
-```text
-draft -> issued -> enterprise_processing -> submitted_for_review
--> returned | accepted | escalated | closed
+  quality_checks: [source_exists, dimension_join_valid, null_rate_threshold]
 ```
 
 Rules:
-- Every rectification/inspection task must record issuing level, responsible enterprise, deadline, evidence requirement, and acceptance role.
-- Upper-level override or escalation must create audit evidence and reason.
-- Enterprise-submitted evidence is not final until regulator acceptance.
-- Cross-level dashboard data may aggregate broadly, but item-level evidence follows org-scope permission.
-- Use `approval-workflow.md` for review/return/acceptance behavior and `saas-multitenancy.md` for org-scope isolation.
+- no active indicator without business caliber, owner, source, dimensions, and version;
+- AI-generated indicators start as draft and require human review;
+- final reports freeze template, indicator versions, scope, and cutoff time;
+- chart count is not indicator count; semantically identical metrics reuse one definition.
 
-## Data Mart / Report Template Pattern
+Common categories:
 
-Use this pattern for 运管数据集市:
+| Category | Examples |
+|---|---|
+| Hidden danger | pending rectification, pending acceptance, first-pass rate, closure rate |
+| Dynamic monitoring | speeding/fatigue alerts, unhandled alerts, offline vehicles |
+| License | expired enterprise/personnel/vehicle certificates |
+| Training | pre-job completion, monthly training rate, learning hours |
+| Maintenance | no plan, overdue, mileage anomaly, provider anomaly |
+| Baseline | enterprises, vehicles, drivers, escorts, safety managers |
 
-```yaml
-report_template:
-  id: string
-  name: string
-  type: 上级常用报表 | 专项报表 | 基础台账 | 本单位自建模板
-  main_dimension: 企业 | 区县 | 车辆类型 | 人员岗位 | 隐患等级
-  columns:
-    - kind: sys
-      indicator_id: string
-      label: string
-    - kind: ext
-      label: string
-      fill_required: true
-    - kind: formula
-      label: string
-      expression: string
-      dependencies: [column_label]
-  filters:
-    dimensions: []
-    indicator_filters: []
-  lifecycle: draft | active | deprecated
-```
+## AI Context Sources
 
-Workflow:
-1. PM/运管员 selects or creates template.
-2. System validates indicator references and dimensions.
-3. User adds fill columns if source data is incomplete.
-4. Report task is created for period and enterprise scope.
-5. Enterprises fill missing columns.
-6. Regulator reviews/returns/exports.
-7. Final report freezes data snapshot and audit log.
+| Context | Source | Freshness | Permission / Reliability Rule |
+|---|---|---|---|
+| enterprise/industry/license | enterprise master and license records | real-time/daily | org/data scope; authoritative fields identified |
+| personnel qualification | employment and certificate records | real-time | identity fields minimized/masked |
+| vehicle maintenance/insurance | vehicle and maintenance services | daily/real-time | distinguish missing from expired |
+| trajectory and warnings | 809/GPS/active-defense platform | streaming/eventual | retain source timestamp and outage state |
+| inspection/hidden danger | inspection and rectification records | real-time | signed evidence and human result are authoritative |
+| regulations/checklists | approved knowledge base | versioned | cite effective version; no unsupported legal conclusion |
 
-## Traffic Scenarios
+## Content / Knowledge Assets
 
-### 1. Alert Disposition Center
+| Asset | Minimum Metadata | Governance |
+|---|---|---|
+| laws/regulations | title, issuing authority, effective date, region, version | legal/business review before activation |
+| inspection standards/templates | owner institution, applicable industry, version, item/evidence rules | district configuration with audit |
+| certificate dictionaries | certificate type, applicable role/industry, validity rule | shared dictionary, versioned |
+| training/course content | target role, risk topic, duration, assessment | content review and evidence level |
+| notification/report templates | issuing level, audience, required signature/reply | controlled publishing and history |
+| map/geofence data | coordinate system, source, update time | accuracy and access boundary recorded |
 
-Goal: detect and handle vehicle/enterprise risk alerts.
+## Core Workflows
 
-Core flow:
-`alert_created -> pending_review -> assigned -> processing -> closed | escalated`
+1. Enterprise initialization: transport-platform export -> AI/rule extraction -> validation -> human confirmation -> master-data import -> exception repair.
+2. Risk handling: source event -> alert/risk calculation -> evidence review -> assign/handle/escalate -> close with audit.
+3. Safety inspection: create -> field/online execution -> evidence/signatures -> classify issue -> issue rectification -> enterprise submission -> accept/return -> archive.
+4. Special campaign: publish scope/deadline -> enterprises self-check/report -> rectification -> regulator progress/acceptance -> summary.
+5. Report delivery: select/create template -> validate indicators -> create period task -> fill missing fields -> review/return -> freeze/export.
 
-Required views:
-- alert list with severity, source, enterprise, time;
-- detail evidence chain;
-- handling action;
-- batch reminder/assignment;
-- audit timeline.
+## Role Path Patterns
 
-### 2. Enterprise Compliance Dashboard
+| Level / Role | Data Scope | Allowed Actions | Forbidden Actions |
+|---|---|---|---|
+| province regulator | cross-city aggregate and authorized drilldown | publish policy, inspect summary, escalate | edit enterprise self-fill records |
+| city regulator | city and districts | assign inspection, review progress | bypass district evidence rules without authority |
+| district/county regulator | own scoped enterprises | issue notice/inspection/rectification, accept closure | view other districts without authorization |
+| inspector | assigned enterprises/tasks | execute items, capture evidence, sign, submit result | alter final evidence after submission |
+| enterprise safety manager | own enterprise | maintain data, sign/submit evidence, rectify | view other enterprises or self-approve regulated closure |
+| driver/personnel | own permitted tasks/data | training, exam, acknowledgement | access enterprise-wide sensitive data |
 
-Goal: one-page compliance health for enterprise and regulator.
+## UI / Mobile Patterns
 
-Content:
-- risk score and trend;
-- hidden danger closure;
-- license/training/maintenance status;
-- alert handling rate;
-- drilldown by vehicle/personnel.
+- dense operational list with filters, saved views, scope label, and status-driven actions;
+- detail drawer/page with evidence, source, timestamp, and audit timeline;
+- mobile field inspection with stable test ids, camera/location permission fallback, weak-network draft, and idempotent sync;
+- map only when spatial context is central; show stale/offline source state;
+- batch actions require selection count, permission guard, confirmation, per-item result, and retry;
+- multi-step e-Waybill or inspection flows use step indicators and stable next/back/submit test ids.
 
-### 3. Driver Fatigue Intervention
+## Policy / Privacy Constraints
 
-Goal: identify fatigue driving and trigger intervention.
+- Province/city/district/enterprise data isolation applies to list, detail, export, statistics, AI context, and embedded third-party pages.
+- Identity, phone, certificate, trajectory, and enforcement evidence follow least access, masking, retention, and audit rules.
+- AI recommendation shows source, confidence, missing context, and rule/model version.
+- Punishment, service restriction, major-hazard classification, and closure acceptance require authorized human accountability.
+- Test agents use shadow data or rollback-safe fixtures and must not pollute production statistics.
+- Reports and enforcement evidence retain immutable snapshots according to approved retention policy.
 
-AI constraints:
-- AI may recommend risk level;
-- enforcement or suspension requires human approval;
-- evidence must include vehicle track, time window, regulation refs.
+## Domain Test Scenarios
 
-### 4. e-Waybill
+| Scenario | Role | Expected Result |
+|---|---|---|
+| high-risk alert disposition | regulator | alert assigned, handled/escalated, evidence and audit visible |
+| multi-industry enterprise license check | regulator/enterprise | required license set is the union of active industries |
+| two-type personnel certificate expiry | regulator | risk shown without deleting personnel; source certificate traceable |
+| field inspection under weak network | inspector | local draft preserved; idempotent sync; no duplicate inspection result |
+| rejected rectification | enterprise/regulator | new rectification round created; previous evidence immutable |
+| report task with mixed auto/fill data | regulator/enterprise | progress, fill assignments, frozen result, and export are traceable |
+| driver fatigue recommendation | regulator | AI evidence visible; binding intervention requires human decision |
+| e-Waybill lifecycle | enterprise/regulator | multi-step path and state guards match across PC/mobile |
 
-Goal: manage electronic waybill lifecycle.
+## Acceptance Checklist
 
-State:
-`draft -> submitted -> reviewed -> in_transport -> completed | rejected | cancelled`
-
-Prototype must use multi-step testid naming for waybill create/edit flows.
-
-### 5. Real-Time Tracking + Geofence
-
-Goal: map-based supervision.
-
-Core:
-- vehicle marker;
-- track replay;
-- geofence alert;
-- offline state;
-- drilldown to enterprise/vehicle.
-
-## UI Patterns for Traffic Products
-
-Recommended operational screens:
-- dense table with filters and saved views;
-- metric cards for operational totals;
-- drilldown drawer/modal for evidence;
-- timeline for audit and state changes;
-- map only when spatial context is central;
-- role switcher for regulator/enterprise preview;
-- data scope label for district/org isolation.
-
-Required annotations:
-
-```html
-<section data-testid="data-scope-banner" data-org-scope="district:东坡区"></section>
-<table data-testid="enterprise-risk-table" data-api="/api/v1/enterprises/risk" data-method="GET"></table>
-<button data-testid="btn-batch-remind-fill" data-action="batch-remind-fill"></button>
-```
-
-## Transport Product Checklist
-
-- [ ] Roles include regulator, supervisor, enterprise user, admin.
-- [ ] District/org data isolation is explicit.
-- [ ] Every regulated action has audit trail.
-- [ ] Report/export freezes source snapshot.
-- [ ] Indicator caliber, source, dimension, owner, status are present.
-- [ ] AI recommendations show confidence, evidence, and human gate.
-- [ ] Batch actions and multi-step forms have stable testids.
-- [ ] Mobile/field use is considered for enterprise filling and inspection.
+- [ ] All 14 domain module sections are present.
+- [ ] Regulator, inspector, enterprise, driver/personnel, and admin paths are explicit where relevant.
+- [ ] Organization and enterprise data isolation is enforced across UI, API, export, analytics, AI, and embedded systems.
+- [ ] Enterprise, vehicle, personnel, inspection, hidden-danger, alert, indicator, and report lifecycles are consistent.
+- [ ] Regulations, templates, indicators, rules, and AI outputs are versioned and traceable.
+- [ ] Every binding regulated action has human accountability and audit evidence.
+- [ ] Batch, multi-step, mobile weak-network, and exception paths are testable.

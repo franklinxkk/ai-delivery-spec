@@ -4,6 +4,19 @@ Use this file after an AI-native scenario and target outcome are defined, before
 
 AI Native delivery fails when the scenario is attractive but the engineering harness cannot support stable execution. Every AI-native feature must prove that its context, agent workflow, tools, evaluation, observability, and release path can be simulated before development is accepted.
 
+## Contents
+
+- Core Principle
+- When Required
+- Required Inputs
+- Harness Minimum
+- Multi-Agent Feasibility Review
+- AI Native Harness Review
+- Engineering Path Simulation
+- Required Harness Artifacts
+- Hard Fail Conditions
+- Acceptance Checklist
+
 ## Core Principle
 
 AI Native is not "add an LLM call to a workflow". It is a new operating loop:

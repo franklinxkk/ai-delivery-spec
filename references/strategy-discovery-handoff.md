@@ -4,6 +4,19 @@ Use this reference when strategic discovery must be converted into an executable
 
 This is a handoff contract, not a full strategy methodology. Upstream work may come from Product-Manager-Skills, internal research, consulting reports, customer interviews, sales evidence, policy analysis, or executive workshops. AI Delivery Spec checks whether the evidence is sufficient to enter Stage 1 and delivery planning.
 
+## Contents
+
+- 1. Trigger
+- 2. Required Handoff
+- 3. Evidence Rules
+- 4. TAM / SAM / SOM Contract
+- 5. Competitive Alternative Matrix
+- 6. Positioning And Differentiation
+- 7. Decision Outcomes
+- 8. Handoff Template
+- 9. Gate Acceptance
+- 10. Relationship To Delivery
+
 ## 1. Trigger
 
 Apply this gate when at least one is true:

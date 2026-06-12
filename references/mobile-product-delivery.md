@@ -4,6 +4,21 @@ Use this file for mini-program, H5, mobile web, or app products. Load it when th
 
 Mobile delivery is not a compressed desktop page. The PRD/prototype must define mobile role paths, device constraints, authorization, notification rules, weak-network behavior, and testable mobile UI patterns.
 
+## Contents
+
+- Mobile Scope
+- Mobile Role Path Matrix
+- Navigation Patterns
+- Mobile Testid Naming
+- Mini-Program Authorization
+- Video Learning Pattern
+- AI Digital Human / Conversational Tutor Pattern
+- Quiz / Exam Pattern
+- Weak Network and Offline
+- Required Mobile Artifact Schemas
+- Safety / Non-Interruption Gate
+- Mobile Acceptance Checklist
+
 ## Mobile Scope
 
 Declare the target surface:

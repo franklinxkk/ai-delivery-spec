@@ -4,6 +4,18 @@ Use this file when an AI feature claims efficiency improvement, quality improvem
 
 Do not let AI product claims jump from "generated output" to "business impact" without an evaluation design.
 
+## Contents
+
+- Evidence Levels
+- Evaluation Card
+- Metric Types
+- Baseline / Post Window
+- Comparison Designs
+- Driver Training Example
+- Knowledge Learning Example
+- Acceptance Checklist
+- Hard Fail Conditions
+
 ## Evidence Levels
 
 | Level | Meaning | Acceptable Claim |

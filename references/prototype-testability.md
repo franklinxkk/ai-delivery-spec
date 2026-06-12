@@ -2,6 +2,21 @@
 
 Use this file when generating, reviewing, or repairing an HTML prototype.
 
+## Contents
+
+- Five-Layer Test Annotation
+- Command and State Annotations
+- Interaction Completeness Gate
+- Assertion Modes
+- Multi-Step Forms
+- Batch Operations
+- Scenario Test Template
+- Verification Loop
+- Test State Self-Healing / Shadow-Data Isolation
+- Prototype Helper Contract
+- Visual Design Rules
+- Prototype Acceptance Checklist
+
 ## Five-Layer Test Annotation
 
 Every verifiable element should expose identity, expected value, rule, scenario, and assertion.

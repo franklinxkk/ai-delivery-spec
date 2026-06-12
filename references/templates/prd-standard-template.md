@@ -4,6 +4,27 @@ Use for development handoff, bid/demo package, ToB/ToG modules, SaaS features, r
 
 This template keeps the familiar PRD structure but adds the missing engineering contracts: story path, state machine, prototype acceptance, DDD module handoff, testability, and readiness.
 
+## Contents
+
+- 1. Version Information
+- 2. Change Log
+- 3. Document Notes
+- 4. Background And Opportunity
+- 5. Goals, Metrics, And Scope
+- 6. Users, Roles, And Permissions
+- 7. Information Architecture
+- 8. User Story And Role Path Matrix
+- 9. Feature Details
+- 10. Business Processes
+- 11. State Machine And Button Matrix
+- 12. Prototype And Interaction Contract
+- 13. Development Contract
+- 14. Data, Metrics, And Tracking
+- 15. Non-Functional Requirements
+- 16. Acceptance And Readiness
+- 17. Risks, Decisions, And Open Questions
+- 18. Appendix
+
 ## 1. Version Information
 
 | Field | Value |

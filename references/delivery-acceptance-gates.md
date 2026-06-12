@@ -2,6 +2,19 @@
 
 Use this reference before final delivery of a PRD, HTML prototype, customer-demoable artifact, or development handoff package.
 
+## Contents
+
+- 1. Interaction Ledger
+- 2. State-Button Matrix
+- 3. No Toast-Only Core Actions
+- 4. Role Path Verification
+- 5. Customer Demo Closure
+- 5.5 Gate 2 Surface Branches
+- 6. Browser/DOM Verification
+- 7. Final Delivery Package
+- 8. Common Failure Patterns
+- 8.5 Mobile Acceptance
+
 ## 1. Interaction Ledger
 
 Required when iterating from an existing prototype or old PRD.
@@ -147,19 +160,20 @@ human_overrule:
 
 ## 7. Final Delivery Package
 
-Final answer or handoff should include:
+Package only the current artifact scope. A single-artifact review must not create the rest of a full package automatically.
 
-| Artifact | Required |
+| Artifact | Required When |
 |---|---|
-| Prototype path | Yes |
-| PRD path | Yes for PRD/prototype delivery |
-| Verification report | Yes |
-| State-button matrix | Yes for lifecycle-heavy products |
-| Interaction ledger/regression note | Yes when iterating old prototypes |
-| Test handoff checklist | Yes |
-| Unresolved risks | Yes, even when non-blocking |
-| Human overrule log | Required if any automated check is overridden |
-| System readiness record | Required before staging/pilot/production/customer demo with real data |
+| Prototype/demo path | prototype, demo surface, or interaction claim is in scope |
+| PRD path | PRD or development contract is in scope |
+| Verification report | always, scaled to Lite/Standard/Full mode |
+| State-button matrix | lifecycle-heavy object is in scope |
+| Interaction ledger/regression note | iterating an old prototype/PRD |
+| Test handoff checklist | development or QA handoff is in scope |
+| Package gap list | the request is narrower than a full L2/L3 package |
+| Unresolved risks | always, even when non-blocking |
+| Human overrule log | any automated check is overridden |
+| System readiness record | staging/pilot/production/customer demo with real data |
 
 ## 8. Common Failure Patterns
 

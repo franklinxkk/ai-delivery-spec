@@ -2,6 +2,20 @@
 
 Use this file for AI features, LLM agents, multi-agent workflows, tool calling, observability, rollback, and operations.
 
+## Contents
+
+- AI State Model
+- Edge-Fallback Gateway
+- AI Action Governance
+- Agent Runtime Contract
+- Event Bus
+- Runtime Conflict Policy
+- Tool Contract
+- Observability
+- Circuit Breaker
+- Prompt Ops
+- AI Acceptance Checklist
+
 ## AI State Model
 
 AI-specific states:

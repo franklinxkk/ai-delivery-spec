@@ -2,6 +2,18 @@
 
 Use this file when upgrading projects or the skill itself across major versions.
 
+## Contents
+
+- v3.9.x -> v4.0 Changes
+- v4.0 -> v4.0.1 Defensive Hardening
+- v4.0.1 -> v4.0.2 Practical Adoption
+- v4.0.2 -> v4.0.3 Strategy Handoff
+- v4.0.3 -> v4.0.4 Trigger and Lite Mode
+- v4.0.4 -> v4.0.5 Scope And Consistency Hardening
+- Gate Mapping
+- Project Upgrade Path
+- Migration Checklist
+
 ## v3.9.x -> v4.0 Changes
 
 | Change | Impact |
@@ -44,6 +56,29 @@ Use this file when upgrading projects or the skill itself across major versions.
 | Differentiation evidence contract added | Positioning claims must describe provable outcomes or a validation plan |
 | Strategy and delivery boundaries clarified | External discovery toolkits can feed Stage 1 without being copied into the delivery protocol |
 
+## v4.0.3 -> v4.0.4 Trigger and Lite Mode
+
+| Change | Impact |
+|---|---|
+| Description reduced and narrowed | Improves trigger precision and explicitly excludes pure coding, casual brainstorming, and copy editing |
+| Lite/Standard/Full execution modes added | Quick validation stops after the requested artifact and lite evidence instead of expanding into the full pipeline |
+| Iteration stop conditions added | Agents have an explicit completion boundary and cannot keep generating optional artifacts |
+| AI centrality replaces binary AI detection | Mixed products classify AI per module as AI-core, AI-supporting, or AI-incidental |
+| Pipeline clarified as routing, not checklist | Supplied/validated stages are skipped; Stage 0 runs only for existing artifacts |
+
+## v4.0.4 -> v4.0.5 Scope And Consistency Hardening
+
+| Change | Impact |
+|---|---|
+| Artifact scope separated from mode and tier | A PRD-only or prototype-only request no longer expands into a full package |
+| Lite/Standard/Full made tier-independent | Non-AI launch work can be Full L2; narrow L3 reviews can remain Lite scope |
+| Completion states added | Gate failures remain failures under REVIEW_COMPLETE_WITH_GAPS instead of becoming implicit passes |
+| AI high-impact advice clarified | Human-verified, non-binding advice can remain AI-supporting with stronger evaluation/evidence controls |
+| Package requirements made conditional | Prototype, PRD, test handoff, and readiness records are required only when their scope triggers |
+| Domain module and consistency validator restored | Traffic/CRM examples follow the 14-section contract and future changes get deterministic regression checks |
+| Engineering profile renamed | Deterministic vs AI-core classification no longer overloads the L0-L3 “Tier” term |
+| Arbitrary mandatory output removed | Research, ICE, out-of-scope counts, and diagrams are conditional on decision value |
+
 ## Gate Mapping
 
 | v3.9 Gate | v4.0 Equivalent |
@@ -71,7 +106,10 @@ Use this file when upgrading projects or the skill itself across major versions.
 
 ## Migration Checklist
 
+- [ ] Select Lite, Standard, or Full execution mode.
+- [ ] Select artifact scope: single artifact, module package, or full package.
 - [ ] Select tier.
+- [ ] Classify AI per module as core, supporting, or incidental.
 - [ ] Decide whether Strategic Discovery Handoff is triggered.
 - [ ] Map old gates to new gates.
 - [ ] Identify conditional plugins.

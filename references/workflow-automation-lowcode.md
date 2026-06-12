@@ -4,6 +4,18 @@ Use this reference when the product contains a visual workflow builder, low-code
 
 This gate is inspired by products such as n8n, Dify, Flowise, Activepieces, NocoBase, Appsmith, ToolJet, and Budibase. It applies before AI Native Harness when the workflow itself is the product contract.
 
+## Contents
+
+- 1. Trigger
+- 2. Core Objects
+- 3. Workflow State Machines
+- 4. Node Contract
+- 5. Connector And Credential Safety
+- 6. PRD Additions
+- 7. Prototype Requirements
+- 8. Acceptance Checklist
+- 9. Relationship To Other Gates
+
 ## 1. Trigger
 
 Load this file when any of these are true:

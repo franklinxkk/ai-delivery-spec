@@ -2,7 +2,7 @@
 
 AI Delivery Spec 是一套面向产品经理、AI 产品负责人、研发负责人和测试团队的 **AI Native 软件交付协议 / Codex Skill**。
 
-它的目标不是让 PRD 变厚，而是让产品交付物真正可开发、可演示、可测试、可治理。v4.0.3 在 v4.0.2 基础上增加战略发现交接：市场、竞品、定位等上游证据只在新产品、新市场、重大投资、重新定位或商业化决策时进入交付流程，普通功能 PRD 不被强制增加战略分析。
+它的目标不是让 PRD 变厚，而是让产品交付物真正可开发、可演示、可测试、可治理。v4.0.5 进一步把“单一产物、模块包、完整交付包”与 Lite/Standard/Full、L0-L3 分开，避免 PRD-only 请求被自动扩写为原型全家桶，也避免普通非 AI 上线被误判成 L3。
 
 ## 适合谁
 
@@ -12,16 +12,19 @@ AI Delivery Spec 是一套面向产品经理、AI 产品负责人、研发负责
 - 测试/QA：基于 story path、state-button matrix、data-testid、验收 Gate 做自动化和人工验收。
 - ToB/ToG 团队：把审批流、多租户、权限、监管、报表、AI 辅助决策做成可落地交付物。
 
-## v4.0.3 核心变化
+## v4.0.5 核心变化
 
-v4.0 解决了早期版本“全量协议过重”的问题。v4.0.1 补齐企业真实交付中的防御性边界。v4.0.2 降低产品团队采用成本。v4.0.3 明确“战略发现”和“执行交付”的边界。
+v4.0 解决早期版本“全量协议过重”的问题；v4.0.1-v4.0.4 依次补齐防御性边界、模板、战略交接、精准触发和 Lite Mode。v4.0.5 重点消除内部规则对 Lite Mode 的反向覆盖。
 
 | 能力 | 说明 |
 |---|---|
+| Artifact Scope | 单一产物、模块包、完整交付包分开，缺失包件只报告不自动生成 |
+| Execution Modes | Lite 单一产物/快速验证、Standard 常规交付、Full 完整包/正式验收/上线准备 |
+| Stop Conditions | 使用 PASS / REVIEW_COMPLETE_WITH_GAPS / BLOCKED 明确终止，不把失败包装成通过 |
 | Tiered Delivery Model | L0 探索原型、L1 轻 PRD、L2 标准交付、L3 AI Native / 高风险交付 |
 | Core Gate 1-4 | Story-Path、Demo-Closed Prototype、Development Contract、Acceptance Package |
 | Conditional Gates | 按需加载移动端、多端、审批、多租户、报表、AI、低代码工作流等协议 |
-| AI 分流 | 普通 AI 嵌入走 AI Feature Injection，高风险自主动作走 AI Native Harness |
+| AI 分流 | 按模块判断 AI-core、AI-supporting、AI-incidental，混合产品不再整体误升 L3 |
 | ToB/ToG 模式 | 审批流、RBAC、多租户、License、组织树、审计、工单升级 |
 | Workflow / Low-Code | 覆盖 n8n、Dify、Flowise 类节点工作流、连接器、凭证、执行历史、回放 |
 | Domain Module | 行业知识插件化，换行业优先换 domain module，不改公共协议层 |

@@ -1,6 +1,17 @@
 # Demo-Closed Prototype + DDD PRD Handoff Reference
 
-Use this reference whenever the user asks for a PRD, prototype HTML, product handoff, development handoff, customer demo prototype, or prototype iteration from an existing HTML.
+Use this reference for a requested prototype, development handoff, customer demo, or full L2/L3 delivery package. For a PRD-only request, use the PRD module and Developer Fast-Lane sections without forcing creation of a prototype.
+
+## Contents
+
+- Non-Negotiable Delivery Standard
+- Full Package Artifacts
+- Prototype Definition Of Done
+- PRD Module Template
+- Developer Fast-Lane
+- Demo Path Contract
+- Diagram Requirements
+- Review Questions
 
 ## Non-Negotiable Delivery Standard
 
@@ -8,14 +19,19 @@ The prototype is an executable requirement. It must let a PM or pre-sales person
 
 The PRD is the domain contract. It must let development and testing implement the same behavior without guessing business rules.
 
-## Required Artifact Package
+## Full Package Artifacts
 
-Deliver at least:
+When the user requests a full L2/L3 package, deliver at least:
 
 1. `PROTOTYPE.html`: self-contained HTML/CSS/JS with mock data and complete user paths.
 2. `PRD.md`: DDD-oriented product/development/test contract.
 3. `demo-paths.json` or equivalent section in PRD: core user stories, steps, expected UI/domain result.
 4. `verification-report`: browser/DOM audit result, list of passed demo paths, remaining exceptions if any.
+
+For single-artifact or Lite requests:
+- produce only the requested artifact and its applicable verification evidence;
+- report missing package artifacts as gaps;
+- do not silently expand a PRD-only request into a prototype build, or a prototype-only request into a full PRD.
 
 ## Prototype Definition Of Done
 
@@ -145,15 +161,17 @@ Each core path should be written as:
 }
 ```
 
-## Mandatory Diagrams
+## Diagram Requirements
 
-Use Mermaid for:
+For a full L2/L3 development package, use Mermaid where the diagram removes implementation ambiguity. Mark non-applicable diagrams N/A with a reason instead of generating decorative diagrams.
 
-- Context map.
-- Aggregate relationship or ER model.
-- State machine for each lifecycle aggregate.
-- Sequence diagram for each critical command.
-- Flowchart for each multi-step user story.
+Candidates:
+
+- Context map when multiple bounded contexts/services interact.
+- Aggregate relationship or ER model when ownership/relations are non-obvious.
+- State machine for each in-scope lifecycle aggregate.
+- Sequence diagram for critical async, cross-system, AI, or failure-sensitive commands.
+- Flowchart for complex multi-step user stories.
 
 ## Review Questions
 

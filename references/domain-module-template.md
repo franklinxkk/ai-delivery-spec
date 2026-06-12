@@ -4,6 +4,31 @@ Use this file when creating or replacing a domain module such as `domain-traffic
 
 The public protocol stays domain-neutral. Domain knowledge must live in a replaceable domain module.
 
+## Contents
+
+- Replacement Rule
+- Domain Module Skeleton
+- Domain Purpose
+- Vocabulary
+- Aggregates and Entities
+- Domain Events
+- State Machines
+- Metric / Indicator Governance
+- AI Context Sources
+- Content / Knowledge Assets
+- Core Workflows
+- Role Path Patterns
+- UI / Mobile Patterns
+- Policy / Privacy Constraints
+- Domain Test Scenarios
+- Acceptance Checklist
+- Mapping From Old Domain to New Domain
+- Domain Quality Gate
+- Domain Switch Verification Checklist
+- Example: Knowledge Learning Domain Outline
+- Aggregates and Entities
+- AI Context Sources
+
 ## Replacement Rule
 
 A valid domain module must preserve these section types:

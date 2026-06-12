@@ -2,6 +2,20 @@
 
 Use when AI writes business state, chooses tools/routes, affects customer commitment, compliance, money, safety, or coordinates multiple agents.
 
+## Contents
+
+- 1. Version And Risk
+- 2. Business Outcome
+- 3. AI Scenario Card
+- 4. Agent / Runtime Design
+- 5. Context And Data Sources
+- 6. Tool / API Contract
+- 7. Prompt Registry
+- 8. Evaluation Contract
+- 9. State And Fallback
+- 10. Observability And Operations
+- 11. Acceptance
+
 ## 1. Version And Risk
 
 | Field | Value |

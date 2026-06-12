@@ -4,6 +4,23 @@ Use this file for CRM, sales pipeline, customer service, partner service, custom
 
 This file validates that the domain module contract can migrate beyond traffic safety.
 
+## Contents
+
+- Domain Purpose
+- Vocabulary
+- Aggregates and Entities
+- Domain Events
+- State Machines
+- Metric / Indicator Governance
+- AI Context Sources
+- Content / Knowledge Assets
+- Core Workflows
+- Role Path Patterns
+- UI / Mobile Patterns
+- Policy / Privacy Constraints
+- Domain Test Scenarios
+- Acceptance Checklist
+
 ## Domain Purpose
 
 - Business outcome: prevent missed opportunities, delayed customer responses, unresolved issues, and invisible product feedback.
@@ -81,6 +98,16 @@ ResponseTask: pending -> overdue -> escalated -> closed
 | contract/payment | finance module | real-time | masked by role |
 | product issue history | ticket/demand module | daily/real-time | service/product roles |
 
+## Content / Knowledge Assets
+
+| Asset | Minimum Metadata | Governance |
+|---|---|---|
+| sales playbook | stage, target customer, owner, version | approved by sales leadership |
+| response/SLA policy | object type, priority, deadline, escalation | versioned and auditable |
+| product FAQ/solution | product/version, audience, effective date | product review before publishing |
+| contract/payment policy | contract type, approval role, financial boundary | finance/legal authority |
+| service templates | ticket type, response text, attachment requirements | service owner and revision history |
+
 ## Core Workflows
 
 | Workflow | Trigger | End State |
@@ -91,7 +118,7 @@ ResponseTask: pending -> overdue -> escalated -> closed
 | product feedback loop | repeated tickets | demand evaluated/scheduled |
 | partner service | partner introduces lead | feedback sent to partner |
 
-## Role Paths
+## Role Path Patterns
 
 | Role | Entry | Core Actions | Forbidden Actions | Exit |
 |---|---|---|---|---|
@@ -109,7 +136,7 @@ ResponseTask: pending -> overdue -> escalated -> closed
 - mobile sales: customer lookup, followup, ticket submission, weak-network draft;
 - boss path: exception -> object detail -> owner action -> status verification.
 
-## Policy / Privacy
+## Policy / Privacy Constraints
 
 - customer contacts and contract amounts are masked by role;
 - export requires audit;
