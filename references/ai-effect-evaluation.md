@@ -9,6 +9,7 @@ Do not let AI product claims jump from "generated output" to "business impact" w
 - Evidence Levels
 - Evaluation Card
 - Metric Types
+- Locale / Regional Evaluation
 - Baseline / Post Window
 - Comparison Designs
 - Driver Training Example
@@ -77,6 +78,29 @@ ai_effect_evaluation:
 | behavior | recurrence delta, habit change, task completion | needs time window |
 | business | conversion, retention, renewal, incident reduction | needs stronger evidence |
 | safety/compliance | risk closure, audit pass, violation reduction | high-risk; avoid overclaim |
+
+## Locale / Regional Evaluation
+
+Do not average all markets into one global AI score. Evaluate each supported locale/market that can materially change language understanding, safety policy, knowledge sources, tools, user behavior, or legal/product claims.
+
+Minimum evaluation slices:
+
+| Slice | Required Evidence |
+|---|---|
+| locale/language | task success, human quality rating, hallucination, refusal, citation, structured-output validity |
+| market/region | local knowledge/policy freshness, tool availability, escalation path, product-claim validity |
+| dialect/code-switch | representative utterances, transcription/intent accuracy, unsafe misunderstanding rate |
+| model/provider route | golden-case parity, tool schema compatibility, safety/refusal compatibility |
+| user segment | age, accessibility, professional role, risk group where applicable and lawful |
+
+Rules:
+
+- Define locale-specific minimum sample size and release threshold; a high-resource language pass does not approve another locale.
+- Use qualified native/domain reviewers for consequential outputs. Machine translation alone is not evaluation evidence.
+- Track global aggregate and worst-locale result. A critical locale failure cannot be hidden by the global average.
+- Compare error severity, not only accuracy. Mistranslating a safety instruction, legal limitation, medical warning, or financial commitment is a release blocker.
+- Keep locale golden cases versioned with model, prompt, knowledge, tool, and policy dependencies.
+- Product and sales claims must name the evaluated markets/locales; do not generalize pilot evidence from one country to all markets.
 
 ## Baseline / Post Window
 

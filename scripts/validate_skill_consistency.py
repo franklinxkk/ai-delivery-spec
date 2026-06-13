@@ -53,12 +53,23 @@ def frontmatter_description(text):
     return " ".join(part for part in parts if part)
 
 
+def markdown_headings(path, level=2):
+    prefix = "#" * level + " "
+    headings = []
+    in_fence = False
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.lstrip().startswith("```"):
+            in_fence = not in_fence
+            continue
+        if not in_fence and line.startswith(prefix):
+            heading = line[len(prefix):].strip()
+            if heading != "Contents":
+                headings.append(heading)
+    return headings
+
+
 def level_two_headings(path):
-    return [
-        line[3:].strip()
-        for line in path.read_text(encoding="utf-8").splitlines()
-        if line.startswith("## ") and line.strip() != "## Contents"
-    ]
+    return markdown_headings(path, level=2)
 
 
 def contents_entries(text):
@@ -83,9 +94,15 @@ def main():
         word_count = len(description.split())
         if word_count > 60:
             fail(f"description has {word_count} words; maximum is 60", failures)
-        for exclusion in ("standalone coding", "generic HTML implementation", "copy editing"):
+        for exclusion in (
+            "code-only syntax/debugging",
+            "copy rewriting",
+            "idea exploration with no delivery intent",
+        ):
             if exclusion not in description:
                 fail(f"description missing exclusion: {exclusion}", failures)
+        if "generic HTML implementation" in description:
+            fail("description retains the ambiguous generic HTML exclusion", failures)
 
     if len(text.splitlines()) > 500:
         fail("SKILL.md exceeds 500 lines", failures)
@@ -99,6 +116,10 @@ def main():
         "AI-core",
         "AI-supporting",
         "AI-incidental",
+        "Primary Output Route",
+        "Product Plugins",
+        "Higher assurance wins",
+        "Global/Regional Readiness Profile",
     ]
     for marker in required_markers:
         if marker not in text:
@@ -115,6 +136,13 @@ def main():
                 fail(f"Contents is stale or incomplete: {path.relative_to(ROOT)}", failures)
         if path.name not in text:
             fail(f"reference not discoverable from SKILL.md: {path.relative_to(ROOT)}", failures)
+        headings = level_two_headings(path)
+        duplicates = sorted({heading for heading in headings if headings.count(heading) > 1})
+        if duplicates:
+            fail(
+                f"duplicate level-two headings: {path.relative_to(ROOT)} -> {', '.join(duplicates)}",
+                failures,
+            )
 
     for filename in ("domain-traffic.md", "domain-crm.md"):
         headings = level_two_headings(REFERENCES / filename)
@@ -131,6 +159,12 @@ def main():
     acceptance_text = (REFERENCES / "delivery-acceptance-gates.md").read_text(encoding="utf-8")
     tier_text = (REFERENCES / "delivery-tier-model.md").read_text(encoding="utf-8")
     ai_feature_text = (REFERENCES / "ai-feature-injection.md").read_text(encoding="utf-8")
+    delivery_core_text = (REFERENCES / "delivery-core.md").read_text(encoding="utf-8")
+    runtime_text = (REFERENCES / "ai-runtime-ops.md").read_text(encoding="utf-8")
+    readiness_text = (REFERENCES / "system-readiness-checklist.md").read_text(encoding="utf-8")
+    saas_text = (REFERENCES / "saas-multitenancy.md").read_text(encoding="utf-8")
+    mobile_text = (REFERENCES / "mobile-product-delivery.md").read_text(encoding="utf-8")
+    effect_text = (REFERENCES / "ai-effect-evaluation.md").read_text(encoding="utf-8")
 
     if "PRD-only request" not in demo_text:
         fail("demo handoff reference does not protect PRD-only scope", failures)
@@ -140,12 +174,77 @@ def main():
         fail("tier model does not distinguish single-artifact scope", failures)
     if "High-impact but non-binding advice" not in ai_feature_text:
         fail("AI Feature Injection lacks high-impact human-verified boundary", failures)
+    for marker in (
+        "Persona Walkthrough Script",
+        "Invalid Generic Response",
+        "Complexity Budget Counting",
+        "Do not claim a PRD page count",
+    ):
+        if marker not in delivery_core_text and marker not in text:
+            fail(f"delivery execution guidance missing marker: {marker}", failures)
+    for marker in (
+        "Dual State Coordination",
+        "Regional Model Routing",
+        "business_state",
+        "business_version",
+        "ai_state",
+        "precondition_violated",
+    ):
+        if marker not in runtime_text:
+            fail(f"AI/business state coordination missing marker: {marker}", failures)
+
+    global_contracts = {
+        "system readiness": (readiness_text, ("Global / Regional Readiness Profile", "data_boundary", "Cross-border basis")),
+        "SaaS": (saas_text, ("Regional Tenant Matrix", "home_region", "allowed_support_access_regions")),
+        "mobile": (mobile_text, ("Localization / RTL / Distribution", "privacy_or_data_safety", "RTL")),
+        "effect evaluation": (effect_text, ("Locale / Regional Evaluation", "worst-locale", "native/domain reviewers")),
+    }
+    for contract, (contract_text, markers) in global_contracts.items():
+        for marker in markers:
+            if marker not in contract_text:
+                fail(f"global readiness {contract} contract missing marker: {marker}", failures)
+
+    for stale_heading in ("## 5. Conditional Gates", "## 6. Module Map", "## 7. Decision Tree"):
+        if stale_heading in text:
+            fail(f"stale duplicate routing section remains: {stale_heading}", failures)
+
+    lifecycle_markers = (
+        "Lifecycle Artifact Review",
+        "operation/learning",
+        "Post-Launch Evidence Review",
+        "Retirement / Exit Readiness Profile",
+        "N/A (lifecycle governance)",
+    )
+    lifecycle_text = text + acceptance_text + readiness_text + tier_text
+    for marker in lifecycle_markers:
+        if marker not in lifecycle_text:
+            fail(f"lifecycle artifact coverage missing marker: {marker}", failures)
 
     agent_file = ROOT / "agents" / "openai.yaml"
     if not agent_file.exists():
         fail("agents/openai.yaml is missing", failures)
     elif "$ai-delivery-spec" not in agent_file.read_text(encoding="utf-8"):
         fail("agents/openai.yaml default_prompt must mention $ai-delivery-spec", failures)
+
+    routing_validator = ROOT / "scripts" / "validate_routing_scenarios.py"
+    if not routing_validator.exists():
+        fail("routing scenario validator is missing", failures)
+    else:
+        routing_text = routing_validator.read_text(encoding="utf-8")
+        for marker in (
+            "real patterns",
+            "cross-industry",
+            "global/AI-native",
+            "lifecycle stages",
+            "trigger boundaries",
+        ):
+            if marker not in routing_text:
+                fail(f"routing scenario validator missing coverage marker: {marker}", failures)
+
+    benchmark_text = (REFERENCES / "skill-design-benchmark.md").read_text(encoding="utf-8")
+    for marker in ("Evolution Governance", "three real projects", "two domains"):
+        if marker not in benchmark_text:
+            fail(f"skill evolution governance missing marker: {marker}", failures)
 
     if failures:
         print("FAIL")

@@ -8,6 +8,7 @@ Use this file for reverse engineering, PRD generation, state machines, guards, S
 - Engineering Profile / Anti-Bloating
 - Stage 1-5 Product Workflow
 - Guard Protocol
+- Complexity Budget Counting
 - SIM Review
 - Developer Prompt Skeleton
 - Quality Gate Summary
@@ -226,17 +227,62 @@ Guard types:
 
 Common failure: state diagrams show transitions but do not define who may trigger them or what data condition blocks them.
 
+## Complexity Budget Counting
+
+Count business contracts, not visual decoration or implementation trivia.
+
+| Item | Count One When | Do Not Count Separately When |
+|---|---|---|
+| state | it has an independent transition, guard, allowed/forbidden action, SLA, audit meaning, or domain result | it is only a loading skeleton, tab selection, hover, temporary animation, or display alias |
+| action | business action + guard combination + domain result is unique | the same action appears on PC/mobile with the same guard and domain result |
+| API | the consumer depends on a distinct command/query contract | multiple UI components call the same contract or one endpoint is merely paginated |
+| AI agent | it has an independent prompt/runtime identity, goal, write scope, failure policy, and owner | it is a deterministic tool, API adapter, prompt helper, or display component |
+| PRD page | the document is rendered with a declared page size and margins | the source is Markdown or an unrendered editor view; report page count as N/A |
+
+Boundary examples:
+
+| Case | Count | Result |
+|---|---:|---|
+| `submit` on PC and mobile uses the same permission, transition, and event | 1 action | PASS: surface duplication does not inflate scope |
+| `submit` as draft save and `submit` as final approval use different guards/events | 2 actions | PASS only if both are counted |
+| `pending_review` and `returned` expose different actions and audit meaning | 2 states | PASS only if both are counted |
+| `loading`, `empty`, and `error` are UI states without domain transitions | 0 business states; still verify as UI states | do not hide them, but do not inflate domain state count |
+| one orchestrator calls two deterministic APIs | 1 agent, 2 tool/API contracts | FAIL if adapters are reported as agents |
+| offline submit creates `queued_for_sync` before server acceptance | separate state/action path | count separately because guard and domain result differ |
+
+If a tier budget is exceeded, do not relabel items to make the count pass. Record the owner and reason, then split a bounded context/module, de-scope, or approve the exception.
+
 ## SIM Review
 
 SIM 1 after Stage 3: review solution before prototype.
 
 SIM 2 after Stage 5: review PRD + prototype together.
 
-Required outputs:
-- Sponsor: PASS/NEEDS_REVISION + business/control concerns.
-- End user: task walkthrough + pain points.
-- Peer PM: scope creep, state gaps, complexity budget PASS/FAIL.
-- Dev Lead: feasibility, hidden complexity, undefined dependencies.
+### Persona Walkthrough Script
+
+For each required reviewer, execute the review instead of generating a generic opinion:
+
+1. Give the persona one concrete task, start state, role/data scope, and only the cues visible in the artifact.
+2. Walk one action at a time. Do not reveal the intended design, hidden route, or expected answer.
+3. Record `step`, `visible cue`, `chosen action`, `visible result`, `domain result`, and `blocker/assumption`.
+4. If the next step cannot be inferred from the artifact, stop that path and mark the exact blockage. Do not invent a button or explain the design to the persona.
+5. After the walkthrough, produce the reviewer verdict and findings with artifact evidence.
+
+Minimum walkthrough record:
+
+| Step | Visible Cue | Persona Action | Visible Result | Domain Result | Blocker/Assumption |
+|---|---|---|---|---|---|
+
+Reviewer outputs and anti-patterns:
+
+| Reviewer | Required Output | Invalid Generic Response | Valid Evidence-Shaped Response |
+|---|---|---|---|
+| Sponsor | PASS/NEEDS_REVISION + outcome, cost, control concerns | “The design looks comprehensive.” | “No owner or SLA exists for overdue high-intent leads; business closure fails.” |
+| End User | task walkthrough + concrete pain points | “The DDD model is reasonable.” | “I clicked Submit, saw only a toast, and could not find the created record.” |
+| Peer PM | scope/state gaps + complexity PASS/FAIL | “The requirements are complete.” | “Returned state has no resubmit path; 2 actions are missing from the count.” |
+| Dev Lead | feasibility + undefined contracts/dependencies | “This should be feasible.” | “The approve command lacks idempotency, expected version, and rejection event.” |
+
+Do not let personas share hidden conclusions before their own walkthrough. Merge findings only after each required perspective produces evidence.
 
 ## Developer Prompt Skeleton
 
@@ -268,8 +314,8 @@ Gate 1 Requirement Review:
 - At least one missing scenario added.
 
 Gate 2 Prototype Walkthrough:
-- User completes core task without hints.
-- Confusion points are recorded, not explained away.
+- Run the Persona Walkthrough Script against each scoped primary task without design hints.
+- Record the exact step and visible cue where the persona blocks; do not explain the route during execution.
 - No major "if only it could..." gaps remain.
 - If this is an iteration, no unapproved loss appears in the interaction parity gate.
 

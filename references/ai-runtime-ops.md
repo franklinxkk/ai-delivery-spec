@@ -5,6 +5,8 @@ Use this file for AI features, LLM agents, multi-agent workflows, tool calling, 
 ## Contents
 
 - AI State Model
+- Dual State Coordination
+- Regional Model Routing
 - Edge-Fallback Gateway
 - AI Action Governance
 - Agent Runtime Contract
@@ -30,8 +32,9 @@ AI-specific states:
 | `local_fallback` | edge-side local safety mode | network timeout / 5xx / circuit breaker open | reconnect + precondition recheck |
 
 Freeze rule:
-- During `ai_analyzing`, write operations on the entity are blocked except read-only viewing.
+- During `ai_analyzing`, same-workflow edits to the analyzed fields are blocked except read-only viewing.
 - Batch operations are blocked to avoid overwriting AI work.
+- Authorized safety/compliance override, administrator disable, or trusted external synchronization may still change business state; the active AI snapshot is then invalidated.
 - Timeout releases freeze.
 - After freeze release, runtime preconditions must be rechecked.
 - If entity status, permission, policy/knowledge version, or key master data changed during analysis, discard the AI result and set `ai_failed` with reason `precondition_violated`.
@@ -54,6 +57,91 @@ ai_state_transition:
   referenced_data_sources: [string]
   processing_time_ms: number
 ```
+
+## Dual State Coordination
+
+Model AI execution state and business lifecycle state as two orthogonal state machines. Do not create a cross-product enum such as `pending_review_ai_analyzing`; it multiplies states and hides ownership.
+
+```yaml
+dual_state_contract:
+  entity_id: string
+  business_state: draft | pending_review | approved | rejected | disabled
+  business_version: integer
+  ai_state: idle | ai_analyzing | ai_suggestion_pending | ai_low_confidence | ai_failed | local_fallback
+  ai_run_id: string
+  analysis_snapshot:
+    expected_business_state: pending_review
+    expected_business_version: 12
+    permission_scope_version: string
+    policy_version: string
+    context_hash: string
+  commit_guard:
+    - current_business_state == analysis_snapshot.expected_business_state
+    - current_business_version == analysis_snapshot.expected_business_version
+    - actor_has_business_command_permission == true
+    - ai_state == ai_suggestion_pending
+    - evidence_and_human_gate_satisfied == true
+```
+
+Coordination rules:
+
+- AI transitions do not change `business_state` unless a named business command is executed through its normal guard and audit path.
+- Business transitions do not imply AI success. They may cancel, invalidate, or require recomputation of an active AI run.
+- Same-workflow edits are frozen during `ai_analyzing`; authorized safety/compliance override, administrator disable, and trusted external synchronization may still change business state. Such changes invalidate the snapshot.
+- Before applying an AI result, compare business state/version, permission scope, policy/knowledge version, and context hash. Any mismatch discards the result as `ai_failed: precondition_violated` or starts a new run.
+- AI failure leaves the business state unchanged unless the domain explicitly defines a separate failure command and transition.
+- Human acceptance executes a business command such as `ApproveAssessment` or `CreateRectificationTask`; it must not directly mutate the entity from the AI callback.
+- Store `ai_run_id` on the resulting command/event so business audit and AI trace can be joined without merging the state machines.
+
+Minimum coordination matrix:
+
+| Business Event During AI Run | AI Runtime Result | Business Result |
+|---|---|---|
+| no relevant change | continue; recheck snapshot before commit | normal guarded command may execute |
+| ordinary edit attempted in frozen workflow | reject edit or queue draft | business state/version unchanged |
+| administrator disables entity | cancel/discard AI result as `precondition_violated` | disabled state remains authoritative |
+| permission or tenant scope changes | discard result; require new authorization | no AI-originated write |
+| policy/knowledge version changes | mark reference expired and rerun | business state unchanged |
+| AI timeout/failure | enter fallback/manual path | business lifecycle does not auto-advance |
+
+## Regional Model Routing
+
+For overseas or multi-region AI systems, model routing is a governed policy, not a latency-only load balancer.
+
+```yaml
+regional_model_route:
+  market_id: eu-en
+  tenant_home_region: eu
+  request_locale: en-GB
+  data_classification: public | internal | personal | sensitive | regulated
+  allowed_routes:
+    - provider: string
+      model: string
+      endpoint_region: eu
+      prompt_log_region: eu
+      retention_mode: zero_or_approved
+      approved_locales: [en-GB, de-DE]
+      capability_profile: string
+  forbidden_routes:
+    - endpoint_region not_in approved_processing_regions
+    - provider not_in approved_subprocessors
+  fallback_order: [route_id]
+  fallback_requires:
+    - same_or_stricter_data_boundary
+    - locale_eval_passed
+    - safety_policy_compatible
+    - tool_schema_compatible
+  no_valid_route: local_or_manual_fallback
+```
+
+Rules:
+
+- Route by market, tenant home region, data classification, locale, capability, safety policy, cost, and latency. Region and compliance constraints override cost/latency.
+- Do not send prompts, embeddings, traces, evaluation samples, or support exports to an unapproved region during failover.
+- Provider/model fallback must pass the same locale golden cases, tool schemas, refusal/safety requirements, and output contract before activation.
+- Keep provider-specific prompt adaptations behind a versioned adapter; do not assume a prompt or structured-output behavior transfers unchanged between models.
+- Trace `market_id`, locale, endpoint region, provider/model version, policy version, transfer decision, and fallback reason without logging prohibited raw content.
+- If no approved route is available, enter deterministic/local/manual fallback. Do not silently choose a globally available model.
 
 ## Edge-Fallback Gateway
 

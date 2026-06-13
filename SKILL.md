@@ -1,27 +1,33 @@
 ---
 name: ai-delivery-spec
 description: >-
-  Use when a product delivery artifact must be ready for development, demonstration,
-  acceptance, or governance: PRD, executable prototype, role path, DDD handoff,
-  ToB/ToG workflow or RBAC contract, multi-surface or analytics spec, and AI
-  feature/agent/runtime/evaluation contract. Supports quick validation and full handoff.
-  Do not use for standalone coding, generic HTML implementation, casual brainstorming,
-  or copy editing.
+  Use whenever Codex must create or review a product lifecycle delivery artifact for
+  decision, development, verification, release, operation, or retirement: strategy handoff,
+  PRD, executable prototype, role path, DDD/API contract, test/UAT evidence, readiness record,
+  post-launch review, cross-border spec, or AI runtime/evaluation contract. Supports validation
+  and handoff. Do not use for code-only syntax/debugging, copy rewriting, or idea exploration
+  with no delivery intent.
 ---
 
-# AI Delivery Spec — AI Native 软件交付协议 (v4.0.5 Scope & Consistency Hardening)
+# AI Delivery Spec — AI Native 软件交付协议 (v4.1.0 Lifecycle Review Baseline)
 
-> 作者：李康（Li Kang） | 版本：v4.0.5 | 原则：精准触发、范围优先、快速路径、明确停止、分级交付、条件 Gate、ToB/ToG 通用模式、AI Native 与 AI 嵌入分流、多端一致性、领域插件化、可演示可开发可测试。
+> 作者：李康（Li Kang） | 版本：v4.1.0 | 原则：全生命周期单产物评审、精准触发、意图证据、范围优先、明确停止、分级交付、确定性路由、场景回归、区域配置、条件 Gate、ToB/ToG 通用模式、AI Native 与 AI 嵌入分流、领域插件化、可审计可开发可验证。
 
 ## 1. Core Rule
 
-Do not force every task through the full pipeline. Choose artifact scope, execution mode, and delivery tier, then apply only the relevant gates and conditional plugins.
+Do not force every artifact through the full pipeline. Identify its lifecycle stage, then choose artifact scope, execution mode, and delivery tier where applicable. Review only the requested artifact and the evidence required to judge it.
 
 Every accepted deliverable must answer:
 
 ```text
-who uses it -> what path they walk -> what visible result appears
--> what domain result changes -> how dev/test can verify it
+artifact purpose -> accountable consumer/decision -> evidence or contract
+-> downstream acceptance -> unresolved risk and next action
+```
+
+For behavior-defining artifacts, also preserve:
+
+```text
+user/role -> operation path -> visible result -> domain result -> verification
 ```
 
 ## 2. Loading Strategy
@@ -34,9 +40,11 @@ Load only what is needed.
 4. Load conditional references only when their trigger applies.
 5. Do not preload all references at Stage 0.
 
-### 2.1 Scope, Mode, And Tier
+### 2.1 Lifecycle Stage, Scope, Mode, And Tier
 
-These are independent decisions:
+First identify the artifact stage: `discovery`, `definition`, `design`, `engineering`, `verification`, `release`, `operation/learning`, or `retirement`. Stage selects review criteria; it does not expand scope or determine rigor.
+
+These remain independent decisions:
 - **Artifact scope**: one requested artifact, a bounded module package, or a full delivery package.
 - **Execution mode**: how broadly to work in this request.
 - **Delivery tier**: how rigorous the in-scope artifact must be.
@@ -51,12 +59,16 @@ Do not create missing package artifacts unless the user requests a package or th
 
 Mode rules:
 - Mode and tier are orthogonal. A Lite review may inspect one L2/L3 artifact without downgrading its rigor; a non-AI L2 production launch may use Full mode without becoming L3.
-- Explicit requests such as “快速验证 / 粗略原型 / 先看方向 / one-page / 只审这份 PRD” select Lite unless the user requests a package.
-- When ambiguous, choose the least costly mode that can satisfy the stated outcome and record the assumption.
+- Select mode from current destination evidence, not speculation about possible future use.
+- Lite signals: “先看方向 / 快速验证 / 粗略 / 草稿 / one-page / 只看这一个产物”, with no higher-assurance destination signal.
+- Standard signals: development team, QA/test cases, procurement, bid/tender, customer demo, implementation handoff, or a multi-role lifecycle.
+- Full signals: formal acceptance, production launch, migration/cutover, release readiness, on-call/rollback, or an explicitly complete package.
+- Higher assurance wins when signals conflict: `Full > Standard > Lite`. Example: “先快速做个原型，下周给客户演示” is Standard.
+- Mode never expands artifact scope by itself. “只审这份 PRD，开发下周开工” is a Standard single-artifact review, not an automatic full package.
+- When destination evidence is absent, choose Lite, state the assumption, and list concrete upgrade signals. Do not guess that an artifact may someday be used for development or bidding.
 - Lite is not permission to leave dead interactions: its scoped demo path must still close.
-- Upgrade Lite to Standard when the artifact will guide development, QA, procurement, bidding, customer acceptance, or a multi-role lifecycle.
-- Upgrade Standard to Full only when the user needs a complete package, formal acceptance, or launch readiness.
 - AI centrality changes tier/gates for the affected module; it does not automatically determine execution mode.
+- Pre-delivery strategy, post-launch evidence, incident review, and retirement artifacts inherit the product's approved tier when known. If no tier exists, record `tier: N/A (lifecycle governance)` and use destination/risk to choose review rigor; do not force them into L0-L3.
 
 ### 2.2 Iteration Stop Conditions
 
@@ -96,13 +108,15 @@ Rules:
 - A lower-tier artifact is not a failure just because it skips a higher-tier gate.
 - If a lower-tier artifact is later used for development, upgrade it to L1/L2 first.
 - If AI output triggers business write, workflow task, customer commitment, compliance action, money, or safety impact, escalate to L3 or justify AI Feature Injection instead.
-- Tier choice must be recorded in the final answer or handoff package.
+- Tier choice, inherited tier, or `N/A (lifecycle governance)` must be recorded in the final answer or handoff package.
 
 Gate applicability by artifact scope:
-- Gate 1 applies to story/path/PRD/prototype scope.
+- Strategic Discovery Handoff applies to strategy/discovery decision artifacts and new-market entry into delivery.
+- Gate 1 applies to requirement, story, path, PRD, prototype, and test-traceability scope.
 - Gate 2 applies only when a prototype, demo surface, executable workflow, or interaction claim is in scope.
-- Gate 3 applies when a PRD or development handoff is in scope.
+- Gate 3 applies when a PRD, product-linked architecture/API/data contract, or development handoff is in scope.
 - Gate 4 applies to every request, but packages only the artifacts actually requested; full L2/L3 packages must declare any missing artifact.
+- System Readiness applies to release/pilot/operation/retirement artifacts or real-environment claims.
 
 ## 4. Core Gates
 
@@ -144,9 +158,9 @@ Use: `references/demo-closed-ddd-handoff.md`.
 
 ### Gate 4: Acceptance Package
 
-Final delivery includes the artifacts appropriate to the tier:
-- prototype path;
-- PRD/story/state files when required;
+Final delivery includes only the artifacts required by the selected scope, tier, and triggered gates:
+- prototype/demo path when interaction or demo scope applies;
+- PRD/story/state files when PRD or development scope applies;
 - verification report;
 - unresolved risks and de-scope notes;
 - test handoff checklist;
@@ -154,101 +168,68 @@ Final delivery includes the artifacts appropriate to the tier:
 
 Use: `references/delivery-acceptance-gates.md`, `references/artifact-packaging.md`.
 
-## 5. Conditional Gates
+## 5. Ordered Routing
 
-| Trigger | Gate | Load |
+Route in three passes. Do not force conditional capabilities into one exclusive decision tree.
+
+1. **Choose one primary output route** from the requested deliverable.
+2. **Add input modifiers** such as reverse engineering, packaging, or migration.
+3. **Union all product plugins whose conditions are true**. Load each reference once; no matching condition means no plugin.
+
+### 5.1 Primary Output Route — Choose One
+
+| Requested Artifact | Review Route | Load |
 |---|---|---|
-| New product/market, major investment, repositioning, commercialization, board/fundraising decision | Strategic Discovery Handoff Gate | `strategy-discovery-handoff.md` |
-| Existing HTML/prototype/legacy version | Interaction Baseline + Drift Detection | `delivery-core.md`, `build-governance.md` |
-| AI-supporting module: deterministic/manual workflow remains valid | AI Feature Injection Gate | `ai-feature-injection.md`, `prompt-registry-integration.md` |
-| AI-core module: primary outcome depends on AI, agentic automation, or high-risk AI write/action | AI Native Harness Gate | `ai-native-harness-engineering.md`, `ai-runtime-ops.md`, `ai-effect-evaluation.md` |
-| Mobile/H5/app/mini-program/field user | Mobile Delivery Gate | `mobile-product-delivery.md` |
-| PC + mobile + mini-program/app surfaces | Multi-Surface Consistency Gate | `multi-surface-consistency.md` |
-| ToB/ToG approval, escalation, audit workflow | Approval Workflow Gate | `approval-workflow.md` |
-| SaaS, org tree, multi-tenant, RBAC, license/seat | SaaS Multitenancy Gate | `saas-multitenancy.md` |
-| Indicator, report, BI, data mart, dashboard, report builder | Reporting/Analytics Gate | `reporting-analytics.md` |
-| Prompt/model/tool registry, rollback, prompt tests | Prompt Ops Gate | `prompt-registry-integration.md`, `prompt-registry.yaml` |
-| Low-code app builder, node workflow, connector/integration automation | Workflow Automation / Low-Code Gate | `workflow-automation-lowcode.md` |
-| Production launch, release, migration, rollback, on-call readiness | System Readiness Gate | `system-readiness-checklist.md` |
-| Patch scripts, generated HTML, repeated transforms | Build Governance Gate | `build-governance.md` |
-| New industry/company/domain module | Domain Switch Gate | `domain-module-template.md`, current domain module |
-| Skill upgrade or old project re-evaluation | Skill Version Migration Gate | `skill-version-migration.md` |
+| strategy, research synthesis, business case, roadmap decision | pre-delivery/lifecycle review; propose downstream tier only after decision | `strategy-discovery-handoff.md`, `delivery-acceptance-gates.md` |
+| requirement, story inventory, role path, PRD, scope decision | L1/L2/L3 as destination/risk requires + Gate 1/3/4 | `delivery-core.md`, `story-path-verification.md`, `demo-closed-ddd-handoff.md`; load `templates/prd-light-template.md`, `templates/prd-standard-template.md`, or the AI Native template to match scope |
+| IA, UX flow, design handoff, executable prototype, customer demo | selected tier + Gate 1/2/4 | `prototype-testability.md`, `story-path-verification.md`, `delivery-acceptance-gates.md` |
+| product-linked architecture, API/schema/data/migration contract | L2/L3 + Gate 3/4; add readiness for real rollout | `demo-closed-ddd-handoff.md`, `delivery-acceptance-gates.md`, `system-readiness-checklist.md` when applicable |
+| test plan, test cases, traceability matrix, UAT/acceptance report | inherited/selected tier + Gate 4; apply Gate 1/2/3 to the evidence under test | `story-path-verification.md`, `delivery-acceptance-gates.md` |
+| pilot, release, rollout, runbook, operational readiness | inherited/selected tier + Full when production-critical + Readiness | `system-readiness-checklist.md`, `templates/system-readiness-checklist-template.md` |
+| post-launch metrics, experiment/effect report, incident or delivery retrospective | inherited tier or lifecycle governance + evidence review; add AI Effect when AI claims exist | `delivery-acceptance-gates.md`, `ai-effect-evaluation.md` when applicable |
+| deprecation, sunset, tenant/provider migration, data export/deletion, product retirement | inherited tier or lifecycle governance + Retirement Profile | `system-readiness-checklist.md`, `artifact-packaging.md` |
 
-## 6. Module Map
+### 5.2 Input And Governance Modifiers — Add When True
 
-| Need | Load |
-|---|---|
-| Strategy/discovery evidence entering delivery | `references/strategy-discovery-handoff.md` |
-| Tier selection and gate downgrade/upgrade | `references/delivery-tier-model.md` |
-| Reverse-engineer existing artifacts | `references/delivery-core.md` |
-| Prototype semantic annotations and testids | `references/prototype-testability.md` |
-| Story, role path, coverage matrix | `references/story-path-verification.md` |
-| Customer-demoable prototype + DDD handoff | `references/demo-closed-ddd-handoff.md` |
-| Delivery acceptance report | `references/delivery-acceptance-gates.md` |
-| AI Feature Injection lightweight contract | `references/ai-feature-injection.md` |
-| AI Native harness | `references/ai-native-harness-engineering.md` |
-| AI runtime/ops | `references/ai-runtime-ops.md` |
-| AI effect evaluation | `references/ai-effect-evaluation.md` |
-| Mobile product delivery | `references/mobile-product-delivery.md` |
-| Multi-surface consistency | `references/multi-surface-consistency.md` |
-| ToB/ToG approval workflow | `references/approval-workflow.md` |
-| SaaS multitenancy/RBAC/license | `references/saas-multitenancy.md` |
-| Reporting/data mart/dashboard | `references/reporting-analytics.md` |
-| Low-code/workflow automation/app builder | `references/workflow-automation-lowcode.md` |
-| System readiness before launch | `references/system-readiness-checklist.md` |
-| Build/patch governance | `references/build-governance.md` |
-| Artifact package standards | `references/artifact-packaging.md` |
-| Prompt registry integration | `references/prompt-registry-integration.md` |
-| Domain replacement | `references/domain-module-template.md` |
-| Traffic safety domain | `references/domain-traffic.md`, `references/domain-traffic-safety-scenarios.md` |
-| CRM domain validation example | `references/domain-crm.md` |
-| Reusable PRD/checklist templates | `references/templates/prd-light-template.md`, `references/templates/prd-standard-template.md`, `references/templates/ai-native-prd-template.md`, `references/templates/system-readiness-checklist-template.md` |
-| Skill upgrade path | `references/skill-version-migration.md` |
-| Skill structure benchmark | `references/skill-design-benchmark.md` |
+| Condition | Add | Load |
+|---|---|---|
+| existing HTML/prototype/legacy version/screenshot | interaction baseline and drift review | `delivery-core.md`, `build-governance.md` |
+| new product/market, major investment, repositioning, commercialization | strategic handoff before Stage 1 | `strategy-discovery-handoff.md` |
+| bid, customer, internal archive, acceptance, release, or retirement package | packaging manifest and package-specific evidence | `artifact-packaging.md` |
+| prompt/model/tool registry, rollback, prompt tests | Prompt Ops Gate | `prompt-registry-integration.md`, `prompt-registry.yaml` |
+| patch scripts, generated HTML, repeated transforms | Build Governance Gate | `build-governance.md` |
+| new industry/company/domain module | Domain Switch Gate | `domain-module-template.md` plus the selected domain module |
+| traffic safety domain | traffic domain contract and scenarios | `domain-traffic.md`, `domain-traffic-safety-scenarios.md` |
+| CRM domain | CRM domain contract | `domain-crm.md` |
+| skill upgrade or old project re-evaluation | migration review | `skill-version-migration.md`, `skill-design-benchmark.md` |
 
-## 7. Decision Tree
+### 5.3 Product Plugins — Add All Matching Rows
+
+| Condition | Add | Load |
+|---|---|---|
+| AI-supporting: manual/deterministic path remains valid | AI Feature Injection Gate | `ai-feature-injection.md`; add `prompt-registry-integration.md` for L2+/managed prompt lifecycle |
+| AI-core: primary outcome depends on AI or AI writes/routes/acts | AI Native Harness Gate and L3 rigor for that module | `ai-native-harness-engineering.md`, `ai-runtime-ops.md`, `ai-effect-evaluation.md`; add `templates/ai-native-prd-template.md` for PRD scope and Prompt Ops for L2+/production |
+| mobile/H5/app/mini-program/field user | Mobile Delivery Gate | `mobile-product-delivery.md` |
+| PC plus mobile/mini-program/app | Multi-Surface Consistency Gate | `multi-surface-consistency.md` |
+| approval, escalation, countersign, audit workflow | Approval Workflow Gate | `approval-workflow.md` |
+| SaaS, org tree, tenant, RBAC, license/seat | SaaS Multitenancy Gate | `saas-multitenancy.md` |
+| indicator, report, BI, data mart, dashboard | Reporting/Analytics Gate | `reporting-analytics.md` |
+| low-code builder, node workflow, connector automation | Workflow Automation / Low-Code Gate | `workflow-automation-lowcode.md` |
+| overseas launch, multiple countries/regions/languages, cross-border users/data, regional deployment | Global/Regional Readiness Profile | `system-readiness-checklist.md`; add `saas-multitenancy.md`, `ai-runtime-ops.md`, `mobile-product-delivery.md`, `ai-effect-evaluation.md` as applicable |
+| production launch, migration, rollback, on-call readiness | System Readiness Gate | `system-readiness-checklist.md`, `templates/system-readiness-checklist-template.md` |
+
+## 6. Lifecycle And Delivery Pipeline
+
+The product lifecycle is broader than the build pipeline:
 
 ```text
-只是快速想法/演示 HTML?
-  -> L0 + Gate 2 Lite + Gate 4 Lite
-
-需要产品说明但不进入开发?
-  -> L1 + Gate 1 Lite + Gate 2 + Gate 4 Lite
-
-要交给开发/测试/投标/客户演示?
-  -> L2 + Gate 1-4
-
-AI 是否是本次交付模块的核心，即没有 AI 就无法完成主要用户结果或关键路径?
-  -> 是: 该模块使用 L3 AI Native Harness + Runtime + Effect
-
-AI 只是辅助分类/提取/摘要/推荐/草拟，且人工或确定性流程仍可完成?
-  -> 是: 保持原 Tier + AI Feature Injection
-
-AI 只是被用来编写 PRD/原型/代码，而不是产品功能?
-  -> 不触发产品 AI Gate
-
-有 PC + 移动/小程序/App?
-  -> add Mobile + Multi-Surface Consistency
-
-有审批/多级监管/会签/转审/撤回/超时?
-  -> add Approval Workflow
-
-有组织、租户、角色、数据隔离、席位/license?
-  -> add SaaS Multitenancy
-
-有指标、报表、数据集市、大屏、报告生成?
-  -> add Reporting/Analytics
-
-Has low-code app builder, node workflow, connector, or automation orchestration?
-  -> add Workflow Automation / Low-Code
-
-Is this a new product/market, major investment, repositioning, or commercialization decision?
-  -> add Strategic Discovery Handoff before Stage 1
+Discover/Decide -> Define/Design -> Build -> Verify -> Release
+-> Operate/Learn -> Iterate or Retire
 ```
 
-## 8. Pipeline
+Review the artifact at its current stage. Do not require adjacent-stage artifacts unless they are necessary evidence or the user requests a package.
 
-Core stages stay simple. Conditional plugins attach to the relevant stage.
+Inside definition/build work, core stages stay simple. Conditional plugins attach to the relevant stage.
 
 The pipeline is a routing model, not a mandatory checklist. Skip any stage whose input is already supplied and validated. Stage 0 runs only when an existing artifact is being analyzed or iterated.
 
@@ -265,8 +246,9 @@ Optional plugins:
 - Before Stage 1: strategic discovery handoff for new product/market, major investment, repositioning, or commercialization.
 - Stage 0: interaction ledger, patch-chain drift, build manifest.
 - Stage 3: AI feature injection, AI-native scenario, approval/multitenancy/reporting/workflow domain model.
-- Stage 4: mobile/multi-surface paths, RBAC matrix, approval state machine, indicator lineage, workflow graph and connector contracts.
-- Stage 5: DDD handoff, Developer Fast-Lane, prompt registry, effect evaluation, workflow execution acceptance, system readiness, packaging manifest.
+- Stage 4: mobile/multi-surface paths, RBAC matrix, approval state machine, indicator lineage, workflow graph, connector contracts, locale/region behavior.
+- Stage 5: DDD handoff, Developer Fast-Lane, prompt registry, effect evaluation, regional readiness, workflow execution acceptance, system readiness, packaging manifest.
+- After Stage 5: UAT/acceptance, release readiness, post-launch evidence, incident learning, deprecation/retirement as independently reviewable artifacts.
 
 Lite fast path:
 
@@ -278,7 +260,7 @@ confirm requested artifact, outcome, and rigor tier
 -> stop
 ```
 
-## 9. Complexity Budget
+## 7. Complexity Budget
 
 Budget is tier-aware.
 
@@ -295,7 +277,9 @@ Counting:
 - reporting metric actions count by query/calculation/write behavior, not by chart count;
 - over-budget is allowed only with owner, reason, de-scope or split plan.
 
-## 10. Review Model
+Use `references/delivery-core.md` for state/action/API/agent counting boundaries and PASS/FAIL examples. Do not claim a PRD page count until it is rendered to a defined page size.
+
+## 8. Review Model
 
 Run only the reviewers needed by tier and triggers.
 
@@ -309,7 +293,7 @@ Run only the reviewers needed by tier and triggers.
 | AI Architect | AI Feature Injection / L3 | context, prompt/tool/runtime feasibility |
 | Ops/SRE | L3 or production automation | observability, rollback, kill switch |
 
-## 11. Cross-File Consistency Rules
+## 9. Cross-File Consistency Rules
 
 - Every PRD feature maps to a story id.
 - Every story id maps to role path, prototype action, state/domain result, and test case.
@@ -318,9 +302,10 @@ Run only the reviewers needed by tier and triggers.
 - Every domain write has audit/event and permission guard.
 - Every AI prompt/model/tool change declares impact surface, linked tests, rollback owner, and observability signal.
 - Every multi-surface feature declares what is shared and what differs by surface.
+- Every global/multi-region feature declares target markets, locale behavior, data/model region, transfer boundary, and per-locale evaluation evidence.
 - Strategic market, competitor, and differentiation claims are required only when the Strategic Discovery Handoff Gate triggers; every claim must identify evidence, assumptions, confidence, and validation plan.
 
-## 12. Required Scripts
+## 10. Required Scripts
 
 When analyzing old prototypes, prefer the bundled ledger extractor:
 
@@ -334,13 +319,15 @@ When modifying this skill, run:
 
 ```powershell
 python scripts/validate_skill_consistency.py
+python scripts/validate_routing_scenarios.py
 ```
 
-## 13. Final Response Rule
+## 11. Final Response Rule
 
 When delivering work, state:
-- selected artifact scope and execution mode;
-- selected tier;
+- lifecycle stage, artifact type, downstream consumer/decision;
+- selected artifact scope, execution mode, and destination evidence;
+- selected tier, inherited tier, or `N/A (lifecycle governance)`;
 - triggered conditional gates;
 - created/updated artifacts;
 - verification performed;

@@ -2,7 +2,7 @@
 
 AI Delivery Spec 是一套面向产品经理、AI 产品负责人、研发负责人和测试团队的 **AI Native 软件交付协议 / Codex Skill**。
 
-它的目标不是让 PRD 变厚，而是让产品交付物真正可开发、可演示、可测试、可治理。v4.0.5 进一步把“单一产物、模块包、完整交付包”与 Lite/Standard/Full、L0-L3 分开，避免 PRD-only 请求被自动扩写为原型全家桶，也避免普通非 AI 上线被误判成 L3。
+它的目标不是让 PRD 变厚，而是让产品全生命周期的单一交付物或完整交付包都能被准确触发、独立评审、正确路由并在明确边界停止。v4.1.0 将覆盖范围从“需求到上线”扩展到“发现、定义、设计、工程、验证、发布、运营学习和退役”。
 
 ## 适合谁
 
@@ -12,19 +12,35 @@ AI Delivery Spec 是一套面向产品经理、AI 产品负责人、研发负责
 - 测试/QA：基于 story path、state-button matrix、data-testid、验收 Gate 做自动化和人工验收。
 - ToB/ToG 团队：把审批流、多租户、权限、监管、报表、AI 辅助决策做成可落地交付物。
 
-## v4.0.5 核心变化
+## v4.1.0 核心变化
 
-v4.0 解决早期版本“全量协议过重”的问题；v4.0.1-v4.0.4 依次补齐防御性边界、模板、战略交接、精准触发和 Lite Mode。v4.0.5 重点消除内部规则对 Lite Mode 的反向覆盖。
+v4.0-v4.0.8 依次解决分级交付、防御性边界、模板、战略交接、精准触发、范围一致性、场景回归和全球化准备。v4.1.0 不新增公共 Gate，而是统一产品生命周期入口，使每个阶段的交付物可以单独进入评审，且不会因为缺少相邻阶段材料被误判失败。
 
 | 能力 | 说明 |
 |---|---|
+| Lifecycle Artifact Review | 调研、PRD、设计、技术契约、测试/UAT、发布、上线后复盘和退役材料均可独立进入评审 |
+| Artifact-Type Routing | 主路由由交付物类型决定；Mode、Tier、AI centrality 和条件插件保持正交 |
+| Lifecycle Tier Rule | 战略、上线后和退役材料继承产品 Tier；未知时使用 `N/A (lifecycle governance)`，不强塞入 L0-L3 |
+| Post-Launch Evidence | 评审指标口径、基线、对照、护栏、事故学习和后续决策，不把上线等同于成功 |
+| Retirement Readiness | 覆盖依赖盘点、客户迁移、数据导出删除、兼容窗口、通知、支持终止和关闭证据 |
 | Artifact Scope | 单一产物、模块包、完整交付包分开，缺失包件只报告不自动生成 |
+| Ordered Routing | 先选一个主输出路由，再叠加输入修饰和全部匹配插件，消除三套路由重复 |
+| Intent Evidence | 用开发、测试、投标、客户演示、正式验收、上线等当前可见信号选择 Mode，不猜测未来用途 |
+| Conflict Precedence | Mode 信号冲突时按 Full > Standard > Lite；Mode 不自动扩大产物范围 |
+| Trigger Boundary | HTML 原型交付会触发；纯语法、无交付意图的代码实现不会触发 |
+| Scenario Regression | 45 个场景覆盖 8 类真实项目、9 个跨行业组合、8 个全球化场景、12 个生命周期产物和 8 个触发边界 |
+| Evolution Governance | 新公共 Gate 需至少 3 个真实项目、2 个领域共同证明，避免被碎片建议持续膨胀 |
+| Global/Regional Profile | 目标市场、跨境数据、区域模型路由、多语言评测、RTL、应用商店、支付和区域运营 |
+| Global Scenario Regression | 新增欧盟、中东、东南亚、美国、日本和多国家 SaaS/AI Native 场景 |
 | Execution Modes | Lite 单一产物/快速验证、Standard 常规交付、Full 完整包/正式验收/上线准备 |
 | Stop Conditions | 使用 PASS / REVIEW_COMPLETE_WITH_GAPS / BLOCKED 明确终止，不把失败包装成通过 |
 | Tiered Delivery Model | L0 探索原型、L1 轻 PRD、L2 标准交付、L3 AI Native / 高风险交付 |
 | Core Gate 1-4 | Story-Path、Demo-Closed Prototype、Development Contract、Acceptance Package |
 | Conditional Gates | 按需加载移动端、多端、审批、多租户、报表、AI、低代码工作流等协议 |
 | AI 分流 | 按模块判断 AI-core、AI-supporting、AI-incidental，混合产品不再整体误升 L3 |
+| Dual State Coordination | AI 状态与业务状态分开建模，通过版本快照和命令 Guard 协调 |
+| Executable SIM Review | Persona 按可见线索逐步操作，卡点必须落到具体步骤和证据 |
+| Complexity Counting | 明确业务状态、UI 状态、跨端动作、API 与 Agent 的计数边界 |
 | ToB/ToG 模式 | 审批流、RBAC、多租户、License、组织树、审计、工单升级 |
 | Workflow / Low-Code | 覆盖 n8n、Dify、Flowise 类节点工作流、连接器、凭证、执行历史、回放 |
 | Domain Module | 行业知识插件化，换行业优先换 domain module，不改公共协议层 |

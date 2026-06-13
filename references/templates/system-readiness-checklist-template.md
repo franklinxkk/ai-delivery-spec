@@ -29,6 +29,45 @@ Use before staging, pilot, production, or external customer demo with real data.
 | 11 | Rollback | Rollback or disable path is tested | P0 | Dev Lead | PASS / FAIL | |
 | 12 | Support | Support FAQ/runbook/escalation path is ready | P1 | Ops/CS | PASS / FAIL / N/A | |
 | 13 | Compliance | Privacy, desensitization, license, data export controls checked | P0 | Sponsor/Legal | PASS / FAIL / N/A | |
+| 14 | Global/Regional | Target-market register and current official compliance evidence reviewed | P0 | Legal/Privacy | PASS / FAIL / N/A | |
+| 15 | Global/Regional | Data, model, log, analytics, backup, and support-access regions mapped | P0 | Architect/Privacy | PASS / FAIL / N/A | |
+| 16 | Global/Regional | Cross-border basis, subprocessors, and regional failover approved | P0 | Legal/Privacy/Ops | PASS / FAIL / N/A | |
+| 17 | Global/Regional | Locale/RTL/formats/platform declarations and support paths tested | P1 | PM/QA/Ops | PASS / FAIL / N/A | |
+| 18 | Global/Regional AI | Per-locale golden/eval sets pass, including worst-locale safety result | P0 | AI Owner/QA | PASS / FAIL / N/A | |
+| 19 | Retirement/Exit | Dependencies, customers, migration, export/retention/deletion, access, and shutdown sequence reviewed | P0 | PM/Dev/Ops/Legal | PASS / FAIL / N/A | |
+
+### 2.1 Regional Profile
+
+Complete once per launch market or materially different regional configuration.
+
+| Field | Value |
+|---|---|
+| Market ID / Countries | |
+| Locales / RTL | |
+| Tenant Home Region | |
+| Storage / Processing / Model Regions | |
+| Approved Transfer Basis / Subprocessors | |
+| Terms / Privacy / AI Disclosure Versions | |
+| App/Payment Distribution | |
+| Support Timezone / Escalation | |
+| Legal/Privacy Review Date and Official Sources | |
+
+### 2.2 Retirement / Exit Profile
+
+Complete for feature/API/model/provider/product/tenant/region deprecation or shutdown.
+
+| Field | Value |
+|---|---|
+| Object / Owner / Reason | |
+| Freeze / End-of-Sale / End-of-Support / Shutdown Dates | |
+| Affected Customers and Dependencies | |
+| Replacement / Compatibility / Migration Path | |
+| Notice Channels and Deadline | |
+| Export / Retention / Deletion Plan | |
+| Financial / Contract / License Closure | |
+| Credential / Job / Traffic / Vendor Shutdown Sequence | |
+| Rollback or Reopen Window | |
+| Closure Verification Evidence | |
 
 ## 3. Failed Checks
 

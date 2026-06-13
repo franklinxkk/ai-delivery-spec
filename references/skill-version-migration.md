@@ -10,6 +10,10 @@ Use this file when upgrading projects or the skill itself across major versions.
 - v4.0.2 -> v4.0.3 Strategy Handoff
 - v4.0.3 -> v4.0.4 Trigger and Lite Mode
 - v4.0.4 -> v4.0.5 Scope And Consistency Hardening
+- v4.0.5 -> v4.0.6 Execution Clarity
+- v4.0.6 -> v4.0.7 Intent And Scenario Validation
+- v4.0.7 -> v4.0.8 Global AI Readiness
+- v4.0.8 -> v4.1.0 Lifecycle Review Baseline
 - Gate Mapping
 - Project Upgrade Path
 - Migration Checklist
@@ -79,6 +83,51 @@ Use this file when upgrading projects or the skill itself across major versions.
 | Engineering profile renamed | Deterministic vs AI-core classification no longer overloads the L0-L3 “Tier” term |
 | Arbitrary mandatory output removed | Research, ICE, out-of-scope counts, and diagrams are conditional on decision value |
 
+## v4.0.5 -> v4.0.6 Execution Clarity
+
+| Change | Impact |
+|---|---|
+| Conditional Gates, Module Map, and Decision Tree unified | Select one primary output route, then add input modifiers and all matching product plugins |
+| Trigger wording tightened without keyword expansion | Create/review intent is explicit while standalone coding and general PM questions remain excluded |
+| AI/business dual state contract added | AI confidence/runtime state no longer gets merged into business lifecycle enums; snapshot revalidation controls writes |
+| SIM Review converted to persona walkthrough | Reviewers execute one visible step at a time and report evidence-shaped blockers instead of generic opinions |
+| Complexity budget boundaries added | UI state, business state, cross-surface action, API, and agent counts have deterministic examples |
+
+## v4.0.6 -> v4.0.7 Intent And Scenario Validation
+
+| Change | Impact |
+|---|---|
+| Ambiguous HTML exclusion removed | Handoff-ready HTML prototypes trigger the skill; code-only syntax/debugging remains excluded |
+| Mode intent signals added | Lite/Standard/Full selection uses current delivery destination evidence instead of predicted future use |
+| Mode conflict precedence added | Full > Standard > Lite, while artifact scope remains independent |
+| AI-core removed from primary output routes | AI centrality is consistently treated as a product plugin over PRD/prototype/acceptance outputs |
+| Prompt Ops loading narrowed | Lightweight AI concepts do not load managed prompt lifecycle rules until L2+/production or explicit registry scope |
+| Routing scenario regression added | Real workspace, cross-industry, and non-trigger cases are executable in CI/local validation |
+| Evolution governance threshold added | A new public Gate now needs evidence from three real projects across two domains; isolated needs stay in domain modules |
+
+## v4.0.7 -> v4.0.8 Global AI Readiness
+
+| Change | Impact |
+|---|---|
+| Global/Regional Readiness Profile added | Overseas/multi-country work composes existing readiness, runtime, SaaS, mobile, and evaluation contracts instead of adding an isolated Gate |
+| Regional model routing added | AI failover cannot silently move prompts/data to an unapproved provider or region |
+| Tenant home-region contract added | Storage, search/vector, logs, backup, support access, analytics, and exit are region-aware |
+| Mobile localization/distribution contract added | RTL, input methods, formats, subscriptions, privacy labels, and AI-content reporting become testable |
+| Per-locale AI evaluation added | Global averages cannot hide a failing locale, dialect, provider route, or safety-critical translation |
+| Global scenario regression added | EU, Middle East, Southeast Asia, US, Japan, cross-border commerce, global consumer AI, and multi-country BI are covered |
+
+## v4.0.8 -> v4.1.0 Lifecycle Review Baseline
+
+| Change | Impact |
+|---|---|
+| Lifecycle stage made explicit | Discovery, definition, design, engineering, verification, release, operation/learning, and retirement use stage-specific review criteria |
+| Primary routes changed to artifact types | Strategy, PRD, design/prototype, engineering contract, test/UAT, readiness, post-launch evidence, and retirement no longer compete with Tier selection |
+| Single-artifact lifecycle review added | A test plan, UAT report, incident review, or retirement plan can pass/fail independently without requiring the whole product package |
+| Lifecycle tier inheritance added | Strategy, post-launch, incident, and retirement artifacts inherit the product tier; unknown tier is recorded as `N/A (lifecycle governance)` |
+| Post-launch evidence review added | Metrics, baselines, comparison, guardrails, qualitative evidence, incident learning, and next action become reviewable contracts |
+| Retirement/exit readiness added | Dependency shutdown, customer migration, data portability/deletion, deprecation, notice, support end, and closure evidence are explicit |
+| Routing regression expanded | 45 scenarios now include 12 lifecycle-stage artifact cases in addition to real, cross-industry, global, and non-trigger coverage |
+
 ## Gate Mapping
 
 | v3.9 Gate | v4.0 Equivalent |
@@ -107,8 +156,9 @@ Use this file when upgrading projects or the skill itself across major versions.
 ## Migration Checklist
 
 - [ ] Select Lite, Standard, or Full execution mode.
+- [ ] Identify lifecycle stage and requested artifact type.
 - [ ] Select artifact scope: single artifact, module package, or full package.
-- [ ] Select tier.
+- [ ] Select, inherit, or mark the tier as `N/A (lifecycle governance)`.
 - [ ] Classify AI per module as core, supporting, or incidental.
 - [ ] Decide whether Strategic Discovery Handoff is triggered.
 - [ ] Map old gates to new gates.

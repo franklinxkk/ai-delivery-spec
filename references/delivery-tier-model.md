@@ -4,6 +4,17 @@ Use this file when deciding how much process a project needs. The goal is to pre
 
 The Strategic Discovery Handoff Gate is independent of L0-L3. For a new product/market, major investment, repositioning, or commercialization decision, complete the strategic handoff first, then select the delivery tier. It is not a reason to classify ordinary non-AI work as L3.
 
+## Contents
+
+- Scope And Execution Mode Before Tier
+- Tier Selection
+- Required Artifacts
+- Gate Downgrade Rules
+- Stop Conditions
+- AI Centrality
+- Upgrade Path
+- Tier Mismatch Failures
+
 ## Scope And Execution Mode Before Tier
 
 First choose artifact scope: one requested artifact, a bounded module package, or a full delivery package. Missing package artifacts are reported, not auto-generated, unless the user requests the package.
@@ -16,7 +27,22 @@ First choose artifact scope: one requested artifact, a bounded module package, o
 
 Choose the least costly mode that can satisfy the stated outcome. A mode controls execution breadth; a tier controls artifact rigor. A Lite review can inspect one L2/L3 artifact without downgrading it. A non-AI L2 launch can use Full mode without becoming L3.
 
+Select mode from current destination evidence:
+
+| Evidence In Request/Artifact | Mode |
+|---|---|
+| quick direction check, rough draft, one-page, one bounded artifact; no named handoff destination | Lite |
+| development/QA handoff, test-case authoring, procurement, tender/bid, customer demo, multi-role lifecycle | Standard |
+| formal acceptance, production launch, migration/cutover, release/rollback/on-call readiness, complete package | Full |
+
+Rules:
+- Higher assurance wins when signals conflict: `Full > Standard > Lite`.
+- Mode changes verification depth, not artifact scope. A Standard PRD-only review remains PRD-only.
+- When destination evidence is absent, select Lite and declare the assumption plus upgrade signals instead of predicting future use.
+
 ## Tier Selection
+
+L0-L3 primarily classify product definition, design, development, and release rigor. Strategy/discovery decisions before delivery and post-launch/retirement governance artifacts inherit the product tier when known. If no approved product tier exists, record `tier: N/A (lifecycle governance)` and choose review rigor from destination, impact, and reversibility.
 
 | Tier | Best For | Decision Question |
 |---|---|---|
@@ -64,6 +90,8 @@ L3 must not skip AI runtime, harness, observability, rollback, or effect-intent 
 
 Finish as PASS, REVIEW_COMPLETE_WITH_GAPS, or BLOCKED. Stop when the requested artifact/review is complete, every applicable gate has an honest result, in-scope paths have verification evidence, validation is complete, and unresolved items have impact plus a next decision. Do not generate optional artifacts after this point.
 
+Artifact PASS means the in-scope artifact is fit for its declared lifecycle stage and downstream decision. It does not approve the entire product, release, experiment claim, or retirement unless that complete decision package was requested and reviewed.
+
 ## AI Centrality
 
 - AI-core: the scoped module's primary outcome or critical path depends on AI. Apply L3 AI gates to that module.
@@ -86,3 +114,5 @@ Classify mixed products per module. Do not automatically escalate an entire prod
 - Using an L0 prototype as a dev contract without upgrade.
 - Calling an AI feature "AI Native" when it is only classification/summarization inside an existing workflow.
 - Treating a customer/bid package as L1 when it needs acceptance evidence.
+- Forcing a pre-delivery strategy brief, incident review, experiment report, or retirement plan into L0-L3 when no product tier exists.
+- Calling one artifact PASS and implying adjacent lifecycle stages or the full product are approved.

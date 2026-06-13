@@ -11,13 +11,16 @@ Use this file when delivering a bid package, customer demo package, internal dev
 | Customer Demo | sales/pre-sales/customer validation | self-contained prototype, demo script, sample data, de-scope notes |
 | Bid / Proposal | external formal delivery | service plan, architecture, PRD, prototype, user stories, screenshots, assumptions |
 | AI Runtime Package | AI production readiness | runtime contract, prompt registry, tool policy, eval set, observability, rollback |
+| Verification / UAT | test and business acceptance | test plan/cases, traceability matrix, evidence, defect disposition, acceptance decision |
+| Release / Pilot | controlled rollout and operations | release scope, readiness record, migration, observability, rollback, support/runbook |
+| Retirement / Exit | safe deprecation or shutdown | dependency/customer inventory, migration/export, retention/deletion, notice, closure evidence |
 
 ## Manifest
 
 ```yaml
 delivery_package:
   name: string
-  type: exploration | dev | customer_demo | bid | ai_runtime
+  type: exploration | dev | customer_demo | bid | ai_runtime | verification | release | retirement
   version: string
   tier: L0 | L1 | L2 | L3
   artifacts:
@@ -36,6 +39,9 @@ delivery_package:
 - Bid packages need assumptions, exclusions, and implementation boundary.
 - Internal dev packages need Developer Fast-Lane and test cases.
 - AI runtime packages need rollback and on-call owner.
+- Verification packages need reproducible evidence and unresolved-defect disposition.
+- Release packages need readiness decision, rollout/rollback, monitoring, and support ownership.
+- Retirement packages need migration/export, retention/deletion, customer communication, dependency closure, and shutdown evidence.
 - Every package needs version, owner, and date.
 
 ## Final Answer Checklist

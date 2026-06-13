@@ -7,6 +7,7 @@ Mobile delivery is not a compressed desktop page. The PRD/prototype must define 
 ## Contents
 
 - Mobile Scope
+- Localization / RTL / Distribution
 - Mobile Role Path Matrix
 - Navigation Patterns
 - Mobile Testid Naming
@@ -38,6 +39,37 @@ mobile_surface:
 ```
 
 Hard rule: if the usage context can involve driving, operating equipment, medical work, financial confirmation, or safety-critical field work, interruptive prompts and non-essential push messages are forbidden during active work.
+
+## Localization / RTL / Distribution
+
+For overseas or multi-locale mobile products, validate behavior rather than only translating strings.
+
+Required locale contract:
+
+```yaml
+mobile_locale:
+  market_id: string
+  locale: en-US
+  fallback_locale: en
+  direction: ltr | rtl
+  timezone: string
+  currency: string
+  date_number_address_formats: [string]
+  keyboards_and_input: [latin, arabic, cjk, ime, voice]
+  text_expansion_budget: 30_percent
+  app_distribution: app_store | google_play | enterprise | web
+  privacy_or_data_safety_declaration_version: string
+  local_support_and_complaint_path: string
+```
+
+Acceptance rules:
+
+- Test navigation, icons, step order, charts, gestures, drawers, and mixed LTR/RTL content under RTL; mirroring text alone is insufficient.
+- Test long translations, pluralization, truncation, dynamic type, screen readers, CJK/Arabic input, names, addresses, phone numbers, postal codes, currency, date, timezone, and decimal separators.
+- Localize AI examples, refusal messages, citations, consent, error recovery, human escalation, and generated-content reporting; do not leave safety paths in the source language.
+- App-store privacy labels or platform data-safety declarations must match actual SDK, analytics, ad, payment, identity, model, support, and crash-reporting flows.
+- Subscription, cancellation, refund, restore-purchase, tax/invoice, age gate, parental consent, and user-generated/AI-generated content reporting must follow the target distribution and market contract.
+- A locale is not launch-ready until the primary role path and AI low-confidence/failure path pass on a real device or representative build.
 
 ## Mobile Role Path Matrix
 

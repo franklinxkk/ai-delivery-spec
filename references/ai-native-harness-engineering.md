@@ -11,7 +11,6 @@ AI Native delivery fails when the scenario is attractive but the engineering har
 - Required Inputs
 - Harness Minimum
 - Multi-Agent Feasibility Review
-- AI Native Harness Review
 - Engineering Path Simulation
 - Required Harness Artifacts
 - Hard Fail Conditions

@@ -1,9 +1,10 @@
 # Delivery Acceptance Gates
 
-Use this reference before final delivery of a PRD, HTML prototype, customer-demoable artifact, or development handoff package.
+Use this reference to review a single product-lifecycle artifact or a final PRD, prototype, test/UAT, customer-demo, development, release, post-launch, or retirement package.
 
 ## Contents
 
+- 0. Lifecycle Artifact Review
 - 1. Interaction Ledger
 - 2. State-Button Matrix
 - 3. No Toast-Only Core Actions
@@ -12,8 +13,55 @@ Use this reference before final delivery of a PRD, HTML prototype, customer-demo
 - 5.5 Gate 2 Surface Branches
 - 6. Browser/DOM Verification
 - 7. Final Delivery Package
+- 7.5 Post-Launch Evidence Review
 - 8. Common Failure Patterns
 - 8.5 Mobile Acceptance
+
+## 0. Lifecycle Artifact Review
+
+Any lifecycle artifact may enter the skill independently. Review its fitness for the declared stage and downstream decision; do not fail it merely because adjacent-stage artifacts are absent.
+
+Minimum review record:
+
+```yaml
+lifecycle_artifact_review:
+  artifact:
+  lifecycle_stage: discovery | definition | design | engineering | verification | release | operation_learning | retirement
+  artifact_type:
+  scope: single_artifact | module_package | full_package
+  mode: Lite | Standard | Full
+  tier: L0 | L1 | L2 | L3 | inherited | N/A_lifecycle_governance
+  accountable_owner:
+  downstream_consumer_or_decision:
+  upstream_inputs_used: []
+  applicable_gates: []
+  decision: PASS | REVIEW_COMPLETE_WITH_GAPS | BLOCKED
+  evidence_checked: []
+  contradictions: []
+  missing_evidence: []
+  next_required_decision_or_artifact:
+```
+
+Lifecycle coverage:
+
+| Stage | Typical Artifact | Minimum Review Evidence | Fail When |
+|---|---|---|---|
+| discovery/decision | interview synthesis, opportunity brief, business case, competitor/market analysis, roadmap decision | sources, facts vs assumptions, target outcome, alternatives, decision threshold, owner | recommendation has no attributable evidence or decision rule |
+| definition | scope, story inventory, role path, PRD, state model | user/business outcome, boundaries, paths, states/guards, domain result, acceptance | feature names exist without executable behavior or acceptance |
+| design | IA, UX flow, design handoff, prototype | role entry/exit, interaction/state coverage, responsive/accessibility constraints, visible outcomes | primary path is ambiguous, dead, or contradicts the requirement |
+| engineering | product-linked architecture, API/schema/data/migration contract, Developer Fast-Lane | trace to stories/states, inputs/outputs, versions, errors, idempotency, security/permission, rollback | implementation contract invents or omits business behavior |
+| verification | test plan/cases, traceability matrix, UAT/acceptance report | requirement-to-test links, positive/negative/permission/state/regression coverage, evidence, defect disposition | pass/fail claims lack reproducible evidence or critical paths are untested |
+| release | pilot/rollout plan, runbook, readiness record, support handoff | scope, environment, migration, observability, rollback, support/on-call, approval | P0 readiness has no owner, mitigation, or tested fallback |
+| operation/learning | metric dashboard spec, experiment/effect report, incident or delivery retrospective | metric lineage, cohort/window, guardrails, evidence strength, root cause, action owner, decision | correlation is presented as causation or learning has no owned action |
+| retirement | deprecation/sunset plan, tenant/provider migration, export/deletion evidence | dependency inventory, customer notice, migration/export, retention/deletion, support end, rollback window | customers/data/dependencies can be stranded or silently deleted |
+
+Review rules:
+
+- Judge internal consistency, traceability to available upstream evidence, and fitness for the named downstream consumer.
+- Mark unavailable adjacent artifacts as package gaps only when a full package was requested.
+- A polished document with no owner, evidence, decision, or downstream acceptance is not PASS.
+- When two supplied artifacts conflict, list the exact fields/behaviors and identify the decision owner; do not silently choose one.
+- Artifact PASS means the artifact is fit for its declared purpose. It does not mean the whole product or release is approved.
 
 ## 1. Interaction Ledger
 
@@ -175,6 +223,28 @@ Package only the current artifact scope. A single-artifact review must not creat
 | Human overrule log | any automated check is overridden |
 | System readiness record | staging/pilot/production/customer demo with real data |
 
+## 7.5 Post-Launch Evidence Review
+
+Apply when reviewing a metric report, experiment/pilot result, operational review, incident postmortem, customer-feedback synthesis, or claimed product effect.
+
+| Area | Required Evidence |
+|---|---|
+| Decision | continue, scale, rollback, iterate, pause, or retire; owner and deadline |
+| Metric integrity | definition, source, lineage, freshness, denominator, cohort/segment, timezone/window |
+| Comparison | baseline, target, comparison group or prior period, material confounders |
+| Guardrails | quality, complaint, safety, compliance, support load, cost/latency where relevant |
+| Qualitative evidence | customer/user feedback source, sampling boundary, severity/frequency |
+| Incident learning | timeline, impact, contributing conditions, containment, root cause, corrective/preventive actions |
+| Follow-through | each action has owner, due date, verification method, and closure state |
+
+Rules:
+
+- Separate observed output, adoption, correlation, controlled evidence, and causal claims.
+- Do not accept vanity metrics without a decision they inform.
+- Do not average away a failing tenant, role, locale, market, or high-risk cohort.
+- For AI effects, also apply `ai-effect-evaluation.md` and its evidence levels.
+- For production incidents, corrective actions must update the relevant requirement, test, runtime, readiness, or runbook contract; a narrative postmortem alone is incomplete.
+
 ## 8. Common Failure Patterns
 
 - A page has the right title but no complete user path.
@@ -185,6 +255,9 @@ Package only the current artifact scope. A single-artifact review must not creat
 - AI/Excel import skips ambiguous-field confirmation.
 - Enterprise and admin paths are mixed without role visibility or data isolation.
 - PRD names a module but omits inputs, outputs, processing logic, and testable transitions.
+- Test/UAT report declares PASS without traceable evidence or unresolved-defect disposition.
+- Post-launch report lists metrics but no baseline, guardrail, decision, or owner.
+- Retirement plan omits customer migration, data export/deletion, dependency, or support-end handling.
 
 ## 8.5 Mobile Acceptance
 
