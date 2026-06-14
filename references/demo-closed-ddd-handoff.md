@@ -17,7 +17,9 @@ Use this reference for a requested prototype, development handoff, customer demo
 
 The prototype is an executable requirement. It must let a PM or pre-sales person demonstrate every core function to a customer without a backend.
 
-The PRD is the domain contract. It must let development and testing implement the same behavior without guessing business rules.
+The PRD contains both the complete product specification and the domain/engineering contract. Development and testing must be able to implement the same behavior without guessing fields, rules, interactions, states, permissions, exceptions, or technical entry points.
+
+The product specification in `templates/prd-standard-template.md` is upstream. The module template below overlays DDD and implementation traceability on that specification; it must not replace or summarize away the detailed module behavior.
 
 ## Full Package Artifacts
 
@@ -50,7 +52,7 @@ Must pass all:
 
 ## PRD Module Template
 
-For each bounded context or feature module, write:
+For each bounded context or feature module, write this engineering overlay after the complete module product specification:
 
 ### Module Name
 
@@ -131,15 +133,18 @@ Test cases:
 
 Add this compact section before development starts. It is the fixed consumption entry for Dev Lead and QA; do not force developers to hunt across a long narrative PRD.
 
-| Module | Command/Query | Aggregate/Entity | State Before -> After | Guard/Permission | Domain Event/Audit | API/Business Contract | Prototype Action/Testid | Test Case |
-|---|---|---|---|---|---|---|---|---|
-| Customer issue ticket | `escalateTicket` command | Ticket / ResponseTask | `待客户确认` -> `已升级` | customer not satisfied; role in service/sales/boss | `TicketEscalated`, response task created | idempotency key + SLA rule | `data-action=escalate-ticket` | TC-TICKET-ESC-001 |
+Every row must reference the detailed module specification and, when attachments were supplied, the source evidence register. Fast-Lane is an index into authoritative behavior, not a replacement for it.
+
+| Module / Spec Ref | Source IDs | Command/Query | Aggregate/Entity | State Before -> After | Guard/Permission | Domain Event/Audit | API/Business Contract | Prototype Action/Testid | Test Case |
+|---|---|---|---|---|---|---|---|---|---|
+| Customer issue ticket / M04-E | SRC-012 | `escalateTicket` command | Ticket / ResponseTask | `待客户确认` -> `已升级` | customer not satisfied; role in service/sales/boss | `TicketEscalated`, response task created | idempotency key + SLA rule | `data-action=escalate-ticket` | TC-TICKET-ESC-001 |
 
 Fast-lane fail conditions:
 - A primary prototype action has no command/query row.
 - A state transition has no guard and no domain event/audit row.
 - A create/submit/escalate/review action has no idempotency or duplicate-submit rule.
 - Dev Lead cannot identify the aggregate and expected domain result for a primary action in under 10 minutes.
+- A Fast-Lane row exists but its fields/rules/states cannot be traced to a complete module specification or authoritative source evidence.
 
 ## Demo Path Contract
 

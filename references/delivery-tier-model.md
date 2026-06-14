@@ -62,6 +62,8 @@ The table below defines a **full package**. For a single-artifact request, only 
 | Demo/path notes | required when interaction/path is claimed | required | required for full package | required for full package |
 | Known gaps/de-scope | required | required | required | required |
 | Light PRD | optional | required | replaced by PRD | replaced by PRD |
+| Complete module product specification | no | conditional for build scope | required for every in-scope build module | required for every in-scope build module |
+| Source evidence register/coverage | only when evidence is supplied | when detailed evidence is supplied | required when detailed evidence is supplied | required when detailed evidence is supplied |
 | User story inventory | optional | required lite | required | required |
 | Role path matrix | optional | required lite | required | required |
 | State-button matrix | only lifecycle objects | lifecycle objects | required | required |
@@ -82,7 +84,7 @@ L1 may skip full DDD if:
 - no cross-role approval or data isolation risk exists;
 - dev handoff is not yet requested.
 
-L2 must not skip Developer Fast-Lane if development starts.
+L2 must not skip the complete module product specification or Developer Fast-Lane if development starts. The master PRD page budget applies to narrative/one bounded module; split large specifications and authoritative annexes instead of omitting atomic requirements.
 
 L3 must not skip AI runtime, harness, observability, rollback, or effect-intent checks.
 
@@ -105,7 +107,7 @@ Classify mixed products per module. Do not automatically escalate an entire prod
 | From | To | Required Work |
 |---|---|---|
 | L0 -> L1 | Add story inventory, role paths, state notes, testids |
-| L1 -> L2 | Add full PRD, state-button matrix, Developer Fast-Lane, acceptance report |
+| L1 -> L2 | Add master PRD, complete in-scope module specifications, source evidence coverage when applicable, state-button matrix, Developer Fast-Lane, acceptance report |
 | L2 -> L3 | Add AI scenario card, harness, runtime, prompt registry, observability, effect evaluation |
 
 ## Tier Mismatch Failures
@@ -116,3 +118,4 @@ Classify mixed products per module. Do not automatically escalate an entire prod
 - Treating a customer/bid package as L1 when it needs acceptance evidence.
 - Forcing a pre-delivery strategy brief, incident review, experiment report, or retirement plan into L0-L3 when no product tier exists.
 - Calling one artifact PASS and implying adjacent lifecycle stages or the full product are approved.
+- Shrinking a complex L2 platform into a 15-page summary by dropping fields, rules, metrics, states, or acceptance details instead of splitting module specifications.

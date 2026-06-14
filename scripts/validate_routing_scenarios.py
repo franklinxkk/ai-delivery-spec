@@ -415,6 +415,14 @@ SCENARIOS = (
         frozenset({"reverse-engineering", "reporting"}),
     ),
     Scenario(
+        "Detailed PRD evidence coverage",
+        "用现有Dashboard指标Excel、AI巡检规则表、SQL字段字典和HTML原型编写完整PRD，交开发和测试",
+        True,
+        "Standard",
+        "L2",
+        frozenset({"reverse-engineering", "reporting"}),
+    ),
+    Scenario(
         "Driver precision training agent",
         "设计货运司机小程序精准培训智能体，基于主动防控数据自动创建学习任务，准备交开发",
         True,
@@ -742,7 +750,7 @@ def main():
             print(f"- {failure}")
         return 1
 
-    real_count = 8
+    real_count = 9
     boundary_count = 8
     global_count = 8
     lifecycle_count = 12

@@ -14,6 +14,7 @@ Use this file when upgrading projects or the skill itself across major versions.
 - v4.0.6 -> v4.0.7 Intent And Scenario Validation
 - v4.0.7 -> v4.0.8 Global AI Readiness
 - v4.0.8 -> v4.1.0 Lifecycle Review Baseline
+- v4.1.0 -> v4.2.0 Product Specification Completeness
 - Gate Mapping
 - Project Upgrade Path
 - Migration Checklist
@@ -127,6 +128,22 @@ Use this file when upgrading projects or the skill itself across major versions.
 | Post-launch evidence review added | Metrics, baselines, comparison, guardrails, qualitative evidence, incident learning, and next action become reviewable contracts |
 | Retirement/exit readiness added | Dependency shutdown, customer migration, data portability/deletion, deprecation, notice, support end, and closure evidence are explicit |
 | Routing regression expanded | 45 scenarios now include 12 lifecycle-stage artifact cases in addition to real, cross-industry, global, and non-trigger coverage |
+
+## v4.1.0 -> v4.2.0 Product Specification Completeness
+
+| Change | Migration Action |
+|---|---|
+| Gate 3 split into Product Specification Completeness and Engineering Traceability Contract | Re-review L2/L3 PRDs used for development; an engineering summary or DDD/Fast-Lane table alone no longer passes |
+| Source Evidence Register added | Inventory supplied Excel/PDF/SQL/prototypes/screenshots/rule catalogs and disposition every atomic source item |
+| Standard PRD template changed from a flat feature table to full module specifications | Convert in-scope build modules to `FULL_SPEC`; keep overview only for deferred/external scope |
+| Reporting/Analytics contract expanded | Re-map dashboard metrics, indicator definitions, Excel report tasks/fill, and AI report generation into detailed page/field/rule/state contracts |
+| Complexity budget clarified | Keep the master narrative concise, but split module specs/authoritative annexes instead of deleting detail |
+
+Compatibility:
+
+- Existing v4.1.0 artifacts remain valid lifecycle records, but do not claim v4.2.0 Gate 3 PASS until source coverage and complete module specifications are checked.
+- No new public reference file is required; v4.2.0 strengthens existing core/template/reporting/gate contracts to limit context growth.
+- Prototype, runtime, prompt, mobile, SaaS, approval, global, and AI gates keep their existing behavior.
 
 ## Gate Mapping
 

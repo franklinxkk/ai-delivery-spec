@@ -9,9 +9,9 @@ description: >-
   with no delivery intent.
 ---
 
-# AI Delivery Spec — AI Native 软件交付协议 (v4.1.0 Lifecycle Review Baseline)
+# AI Delivery Spec — AI Native 软件交付协议 (v4.2.0 Product Specification Completeness)
 
-> 作者：李康（Li Kang） | 版本：v4.1.0 | 原则：全生命周期单产物评审、精准触发、意图证据、范围优先、明确停止、分级交付、确定性路由、场景回归、区域配置、条件 Gate、ToB/ToG 通用模式、AI Native 与 AI 嵌入分流、领域插件化、可审计可开发可验证。
+> 作者：李康（Li Kang） | 版本：v4.2.0 | 原则：完整产品规格与工程契约并存、附件证据零静默遗漏、全生命周期单产物评审、精准触发、范围优先、明确停止、分级交付、条件 Gate、AI Native 与 AI 嵌入分流、领域插件化、可审计可开发可验证。
 
 ## 1. Core Rule
 
@@ -144,17 +144,19 @@ Minimum:
 
 Use: `references/prototype-testability.md`, `references/demo-closed-ddd-handoff.md`.
 
-### Gate 3: Development Contract
+### Gate 3: Product Specification + Development Contract
 
-For L2/L3, the PRD must be a development contract, not only a product narrative.
+For L2/L3, the PRD must contain two independent, mutually traceable layers. Neither layer may replace the other.
 
 Required:
-- inputs, outputs, processing logic, business transformation logic;
+- **Product Specification Completeness**: for every in-scope build module, define users/scenarios, pages/views, fields/dictionaries, actions, business rules/calibers, state-button behavior, permissions/data scope, exceptions/fallbacks, integrations, acceptance, and authoritative evidence;
+- **Engineering Traceability Contract**: inputs, outputs, processing logic, business transformation logic;
 - aggregate/entity/value object/state/event/command/query/policy/invariant where applicable;
 - Developer Fast-Lane table for coding entry;
 - concrete tests with UI result and domain result.
+- when detailed attachments exist, a Source Evidence Register maps every sheet/page/rule/metric/field set to `EMBEDDED`, `AUTHORITATIVE_ANNEX`, `DEFERRED`, `CONFLICT`, or `NOT_APPLICABLE`; silent omission fails the gate.
 
-Use: `references/demo-closed-ddd-handoff.md`.
+Use: `references/delivery-core.md`, `references/templates/prd-standard-template.md`, `references/demo-closed-ddd-handoff.md`.
 
 ### Gate 4: Acceptance Package
 
@@ -194,6 +196,7 @@ Route in three passes. Do not force conditional capabilities into one exclusive 
 | Condition | Add | Load |
 |---|---|---|
 | existing HTML/prototype/legacy version/screenshot | interaction baseline and drift review | `delivery-core.md`, `build-governance.md` |
+| detailed Excel/PDF/SQL/field dictionary/metric caliber/rule catalog | source evidence inventory and zero-omission coverage matrix | `delivery-core.md`, `templates/prd-standard-template.md`; add the matching product/domain plugin |
 | new product/market, major investment, repositioning, commercialization | strategic handoff before Stage 1 | `strategy-discovery-handoff.md` |
 | bid, customer, internal archive, acceptance, release, or retirement package | packaging manifest and package-specific evidence | `artifact-packaging.md` |
 | prompt/model/tool registry, rollback, prompt tests | Prompt Ops Gate | `prompt-registry-integration.md`, `prompt-registry.yaml` |
@@ -239,7 +242,7 @@ Stage 1  Opportunity and scope
 Stage 2  Stakeholder and tier
 Stage 3  Requirement design
 Stage 4  Stories, role paths, states
-Stage 5  PRD, prototype, acceptance package
+Stage 5  complete product specification, engineering contract, prototype, acceptance package
 ```
 
 Optional plugins:
@@ -247,7 +250,7 @@ Optional plugins:
 - Stage 0: interaction ledger, patch-chain drift, build manifest.
 - Stage 3: AI feature injection, AI-native scenario, approval/multitenancy/reporting/workflow domain model.
 - Stage 4: mobile/multi-surface paths, RBAC matrix, approval state machine, indicator lineage, workflow graph, connector contracts, locale/region behavior.
-- Stage 5: DDD handoff, Developer Fast-Lane, prompt registry, effect evaluation, regional readiness, workflow execution acceptance, system readiness, packaging manifest.
+- Stage 5: complete module specifications, source coverage matrix, DDD handoff, Developer Fast-Lane, prompt registry, effect evaluation, regional readiness, workflow execution acceptance, system readiness, packaging manifest.
 - After Stage 5: UAT/acceptance, release readiness, post-launch evidence, incident learning, deprecation/retirement as independently reviewable artifacts.
 
 Lite fast path:
@@ -275,7 +278,8 @@ Counting:
 - action = business action name + guard combination + domain result;
 - same action across surfaces counts once if guard/domain result match;
 - reporting metric actions count by query/calculation/write behavior, not by chart count;
-- over-budget is allowed only with owner, reason, de-scope or split plan.
+- over-budget is allowed only with owner, reason, de-scope or split plan;
+- page budgets apply to the master narrative or one bounded module, not to the total authoritative specification set. Split large products into module specifications/annexes; never compress away atomic fields, rules, metrics, states, or acceptance criteria to make the page count pass.
 
 Use `references/delivery-core.md` for state/action/API/agent counting boundaries and PASS/FAIL examples. Do not claim a PRD page count until it is rendered to a defined page size.
 
@@ -304,6 +308,8 @@ Run only the reviewers needed by tier and triggers.
 - Every multi-surface feature declares what is shared and what differs by surface.
 - Every global/multi-region feature declares target markets, locale behavior, data/model region, transfer boundary, and per-locale evaluation evidence.
 - Strategic market, competitor, and differentiation claims are required only when the Strategic Discovery Handoff Gate triggers; every claim must identify evidence, assumptions, confidence, and validation plan.
+- Every in-scope build module has both a complete product specification and an engineering traceability contract; an overview or DDD table alone is not sufficient.
+- Zero silent omission: every supplied source file, sheet, page, rule catalog, field dictionary, metric definition, screenshot set, and prototype path is registered and dispositioned. No source item may disappear silently between evidence, PRD, prototype, development contract, and tests.
 
 ## 10. Required Scripts
 

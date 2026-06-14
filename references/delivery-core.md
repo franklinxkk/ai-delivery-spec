@@ -39,6 +39,47 @@ Fallback rule: if semantic pattern is absent, downgrade gracefully. Do not force
 7. If iteration input exists, run regression detection and interaction parity detection.
 8. Produce `stage0-output.json`.
 
+### Source Evidence Inventory And Coverage
+
+When the input includes Excel, Word/PDF, SQL, screenshots, rule catalogs, field dictionaries, metric caliber tables, prototypes, or legacy documents, Stage 0 must inventory the evidence before drafting the PRD.
+
+Minimum register:
+
+| Source ID | File / Artifact | Sheet / Page / Section / Path | Evidence Type | Atomic Item Count | Authority | Intended Module | Disposition | PRD / Annex Reference | Conflict / Decision Owner |
+|---|---|---|---|---:|---|---|---|---|---|
+| SRC-001 | | | metric / rule / field / flow / screenshot / schema / policy | | authoritative / supporting / historical | | `EMBEDDED` / `AUTHORITATIVE_ANNEX` / `DEFERRED` / `CONFLICT` / `NOT_APPLICABLE` | | |
+
+Rules:
+
+- Count the source at its atomic level: workbook sheets and rows, document sections/pages, prototype views/actions, SQL tables/columns/dictionaries, screenshots, policy clauses, and decision records.
+- Preserve authoritative detail. A source containing 45 metrics, 45 judgment rules, or 95 configurable fields cannot be represented by three examples unless the remaining items are linked to a versioned authoritative annex.
+- `EMBEDDED` means the complete atomic content appears in the product specification.
+- `AUTHORITATIVE_ANNEX` means the source or normalized annex remains part of the frozen delivery package and the main PRD states its authority, version, owner, and module mapping.
+- `DEFERRED` requires scope reason, owner, target release, and downstream impact.
+- `CONFLICT` records both values/behaviors and the decision owner; do not silently choose.
+- `NOT_APPLICABLE` requires a reason.
+- Zero silent omission: every registered source item must have a disposition before Gate 3 can pass.
+
+Recommended `stage0-output.json` extension:
+
+```json
+{
+  "sourceEvidenceRegister": [
+    {
+      "sourceId": "SRC-001",
+      "artifact": "metrics.xlsx",
+      "locator": "Dashboard!A2:D46",
+      "evidenceType": "metric-caliber",
+      "atomicItemCount": 45,
+      "authority": "authoritative",
+      "targetModule": "M01 Dashboard",
+      "disposition": "AUTHORITATIVE_ANNEX",
+      "traceTo": ["M01", "ANNEX-H", "TC-M01-*" ]
+    }
+  ]
+}
+```
+
 ### stage0-output.json Minimum Shape
 
 ```json
@@ -189,6 +230,39 @@ PRD chapters:
 8. User interactions
 9. Edge cases
 10. Non-functional requirements
+
+For L2/L3, Stage 5 has three coordinated layers:
+
+1. **Master Product Narrative**: problem, users, scope, IA, cross-module processes, shared states, NFR, release boundary.
+2. **Complete Module Product Specifications**: one per in-scope build module, using the detailed structure below.
+3. **Engineering Traceability Contracts**: DDD module contract, Developer Fast-Lane, API/schema/test mappings layered on top of the product specification.
+
+The engineering layer does not replace the product layer. A module is not development-ready when it only states purpose, inputs, outputs, aggregates, and commands while omitting page behavior, fields, dictionaries, actions, rules/calibers, states, permissions, exceptions, and acceptance.
+
+### Complete Module Product Specification
+
+For each in-scope build module, include:
+
+| Section | Minimum Content |
+|---|---|
+| Purpose and boundary | user/business outcome, in-scope and explicitly deferred capabilities |
+| Roles and scenarios | initiating role, collaborating roles, start/exit conditions, role path |
+| Pages and views | list/detail/create/edit/configure/result views, entries, exits, empty/error/loading states |
+| Fields and dictionaries | label, meaning, type, required/default, source, validation, dictionary values, editable roles, display/masking |
+| Actions and interactions | trigger, precondition, confirmation, visible result, domain result, next action |
+| Business rules and calibers | numbered rule, priority, formula/caliber, effective range, evidence source, conflict handling |
+| State-button matrix | object state, visible/forbidden actions, guards, transition/event/audit |
+| Permission and data scope | role, organization/tenant/region scope, row/field/action permissions, override policy |
+| Exceptions and fallback | validation, duplicate, stale/conflict, permission, timeout, partial failure, retry/reopen/rollback |
+| Cross-module and external contract | upstream/downstream dependency, source of truth, sync timing, failure ownership |
+| Data, metrics, AI, audit, NFR | only the applicable contracts, with evidence and acceptance |
+| Acceptance and traceability | story/test IDs, expected UI/domain results, prototype mapping, source evidence IDs |
+
+Depth rule:
+
+- `FULL_SPEC`: mandatory for every module planned for implementation in the selected release.
+- `OVERVIEW_ONLY`: allowed only for out-of-scope/deferred/external modules, with owner and revisit condition.
+- Large atomic tables may live in an authoritative annex, but the module section must state the governing source/version, item count, usage rules, and traceability. An appendix is not a dumping ground for unowned requirements.
 
 Prototype rules:
 - Use design-system tokens and real app screen as first viewport.

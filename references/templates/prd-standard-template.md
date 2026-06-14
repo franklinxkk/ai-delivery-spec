@@ -2,7 +2,7 @@
 
 Use for development handoff, bid/demo package, ToB/ToG modules, SaaS features, report products, approval workflows, and multi-surface delivery.
 
-This template keeps the familiar PRD structure but adds the missing engineering contracts: story path, state machine, prototype acceptance, DDD module handoff, testability, and readiness.
+This template keeps the familiar PRD structure and requires three coordinated layers: complete product specification, engineering traceability contract, and authoritative evidence coverage. The DDD/Fast-Lane layer supplements the product specification; it never replaces it.
 
 ## Contents
 
@@ -14,11 +14,11 @@ This template keeps the familiar PRD structure but adds the missing engineering 
 - 6. Users, Roles, And Permissions
 - 7. Information Architecture
 - 8. User Story And Role Path Matrix
-- 9. Feature Details
+- 9. Complete Module Product Specifications
 - 10. Business Processes
 - 11. State Machine And Button Matrix
 - 12. Prototype And Interaction Contract
-- 13. Development Contract
+- 13. Engineering Traceability Contract
 - 14. Data, Metrics, And Tracking
 - 15. Non-Functional Requirements
 - 16. Acceptance And Readiness
@@ -59,7 +59,29 @@ This template keeps the familiar PRD structure but adds the missing engineering 
 | Flowchart | |
 | Research / competitor notes | |
 | Data report | |
+| Metric / rule / field workbook | |
+| SQL / dictionary / data contract | |
+| Policy / standard | |
 | Strategic Discovery Handoff | required only for new product/market, major investment, repositioning, or commercialization |
+
+### Source Evidence Register
+
+Register every supplied source before writing feature details. Do not silently omit sheets, pages, rules, fields, metrics, screenshots, or prototype paths.
+
+| Source ID | Artifact | Locator | Type | Atomic Count | Authority | Target Module | Disposition | PRD / Annex / Test Trace | Conflict / Owner |
+|---|---|---|---|---:|---|---|---|---|---|
+| SRC-001 | | sheet/page/section/view/range | metric/rule/field/flow/schema/policy | | authoritative/supporting/historical | | `EMBEDDED` / `AUTHORITATIVE_ANNEX` / `DEFERRED` / `CONFLICT` / `NOT_APPLICABLE` | | |
+
+Coverage summary:
+
+| Status | Count | Pass Rule |
+|---|---:|---|
+| Registered atomic items | | equals the source inventory count |
+| Embedded | | complete and traceable |
+| Authoritative annex | | versioned, owned, and included in delivery package |
+| Deferred | | reason, owner, release, and impact stated |
+| Conflict | | decision owner and deadline stated |
+| Silent omission | 0 | mandatory |
 
 ## 4. Background And Opportunity
 
@@ -148,17 +170,98 @@ Out of scope:
 |---|---|---|---|---|---|---|---|
 | US-001 | | As a ..., I want ..., so that ... | | | | | TC-001 |
 
-## 9. Feature Details
+## 9. Complete Module Product Specifications
 
-| Feature ID | Module | Feature | Input | Processing Logic | Output / Visible Result | Domain Result | Edge Cases |
+The summary index is not the specification itself.
+
+| Module ID | Module | Depth | Release Scope | Detailed Section / Annex | Source IDs | Owner |
+|---|---|---|---|---|---|---|
+| M01 | | `FULL_SPEC` / `OVERVIEW_ONLY` | in / deferred / external | | | |
+
+Use `FULL_SPEC` for every module planned for implementation in this release. `OVERVIEW_ONLY` is allowed only for deferred, out-of-scope, or external modules and must state owner and revisit condition.
+
+### Mxx Module Name
+
+#### A. Purpose And Boundary
+
+- User/business outcome:
+- In scope:
+- Explicitly deferred / external:
+- Entry and exit conditions:
+- Authoritative source IDs:
+
+#### B. Roles, Scenarios, And Paths
+
+| Scenario ID | Role | Start | Steps | Exit / Next Action | Visible Result | Domain Result |
+|---|---|---|---|---|---|---|
+| | | | | | | |
+
+#### C. Pages And Views
+
+| Page / View | Entry | Purpose | Main Regions | Empty / Loading / Error | Exit |
+|---|---|---|---|---|---|
+| | | | | | |
+
+#### D. Fields And Dictionaries
+
+| Field ID | Page / Object | Label / Meaning | Type | Required / Default | Source | Validation / Dictionary | Editable By | Display / Masking |
+|---|---|---|---|---|---|---|---|---|
+| | | | | | | | | |
+
+If a source workbook/SQL dictionary contains a large complete field set, keep it as a versioned authoritative annex and map its item count and range here. Do not replace it with examples.
+
+#### E. Actions And Interactions
+
+| Action ID | Page / State | Role | Trigger | Preconditions / Confirmation | Visible Result | Domain Result | Next Action |
 |---|---|---|---|---|---|---|---|
-| F-001 | | | | | | | |
+| | | | | | | | |
 
-Rules:
+#### F. Business Rules, Calculations, And Calibers
 
-- describe what and why;
-- include enough business logic for development and QA;
-- avoid framework choices and database schema unless they are business contracts.
+| Rule ID | Applies To | Rule / Formula / Caliber | Priority | Effective Range | Evidence Source | Conflict / Exception |
+|---|---|---|---|---|---|---|
+| | | | | | | |
+
+#### G. State-Button Matrix
+
+| Object | State | Visible Actions | Forbidden Actions | Guard | Transition / Event / Audit |
+|---|---|---|---|---|---|
+| | | | | | |
+
+#### H. Permissions And Data Scope
+
+| Role | Org / Tenant / Region Scope | Row Scope | Field Scope | Action Scope | Override / Approval |
+|---|---|---|---|---|---|
+| | | | | | |
+
+#### I. Exceptions And Fallback
+
+| Case | Detection | User Feedback | Allowed Recovery | Domain / Audit Result | Owner |
+|---|---|---|---|---|---|
+| validation / duplicate / conflict / stale / permission / timeout / partial failure | | | | | |
+
+#### J. Cross-Module And External Contracts
+
+| Dependency | Direction | Source Of Truth | Sync / Trigger | Failure Behavior | Owner |
+|---|---|---|---|---|---|
+| | | | | | |
+
+#### K. Data, Metrics, AI, Audit, And NFR
+
+Include only applicable contracts, but make each one specific and testable.
+
+#### L. Acceptance And Traceability
+
+| Acceptance ID | Story / Rule | Preconditions | Steps | Expected UI Result | Expected Domain Result | Prototype / Test | Source IDs |
+|---|---|---|---|---|---|---|---|
+| | | | | | | | |
+
+Product-spec rules:
+
+- describe what, why, and complete observable business behavior;
+- include enough fields, rules, states, interactions, exceptions, permissions, and acceptance for development and QA to proceed without guessing;
+- avoid framework choices and physical database design unless they are explicit business contracts;
+- when detail exceeds the master document budget, split by bounded module or authoritative annex. Never summarize away atomic requirements.
 
 ## 10. Business Processes
 
@@ -204,7 +307,9 @@ Demo paths:
 | Permission path | | | |
 | Error / empty path | | | |
 
-## 13. Development Contract
+## 13. Engineering Traceability Contract
+
+Complete this after Section 9. It maps product behavior into implementation entry points; it is not a substitute for the module specification.
 
 | Module | Inputs | Outputs | Processing | Domain Object | Commands / Queries | Test Cases |
 |---|---|---|---|---|---|---|
@@ -255,7 +360,8 @@ Domain events:
 |---|---|---|
 | Gate 1 Story-Path | PASS / FAIL | |
 | Gate 2 Demo-Closed Prototype | PASS / FAIL | |
-| Gate 3 Development Contract | PASS / FAIL | |
+| Gate 3A Product Specification Completeness | PASS / FAIL | source coverage + full module specs |
+| Gate 3B Engineering Traceability Contract | PASS / FAIL | DDD/Fast-Lane/API/test trace |
 | Gate 4 Acceptance Package | PASS / FAIL | |
 | System Readiness | PASS / FAIL / N/A | |
 

@@ -120,6 +120,9 @@ def main():
         "Product Plugins",
         "Higher assurance wins",
         "Global/Regional Readiness Profile",
+        "Product Specification Completeness",
+        "Source Evidence Register",
+        "Zero silent omission",
     ]
     for marker in required_markers:
         if marker not in text:
@@ -165,6 +168,8 @@ def main():
     saas_text = (REFERENCES / "saas-multitenancy.md").read_text(encoding="utf-8")
     mobile_text = (REFERENCES / "mobile-product-delivery.md").read_text(encoding="utf-8")
     effect_text = (REFERENCES / "ai-effect-evaluation.md").read_text(encoding="utf-8")
+    prd_template_text = (REFERENCES / "templates" / "prd-standard-template.md").read_text(encoding="utf-8")
+    reporting_text = (REFERENCES / "reporting-analytics.md").read_text(encoding="utf-8")
 
     if "PRD-only request" not in demo_text:
         fail("demo handoff reference does not protect PRD-only scope", failures)
@@ -172,6 +177,37 @@ def main():
         fail("acceptance package requirements are not scope-conditional", failures)
     if "single-artifact request" not in tier_text:
         fail("tier model does not distinguish single-artifact scope", failures)
+    for marker in (
+        "Complete Module Product Specifications",
+        "Source Evidence Register",
+        "FULL_SPEC",
+        "Engineering Traceability Contract",
+        "Silent omission",
+    ):
+        if marker not in prd_template_text:
+            fail(f"standard PRD template missing completeness marker: {marker}", failures)
+    for marker in (
+        "Dashboard Detailed Specification",
+        "Excel Report Template, Task, And Fill Detailed Specification",
+        "AI Data Report Detailed Specification",
+        "authoritative annex",
+    ):
+        if marker not in reporting_text:
+            fail(f"reporting contract missing detailed-spec marker: {marker}", failures)
+    for marker in (
+        "Source Evidence Inventory And Coverage",
+        "Zero silent omission",
+        "Complete Module Product Specification",
+    ):
+        if marker not in delivery_core_text:
+            fail(f"delivery core missing source/product completeness marker: {marker}", failures)
+    for marker in (
+        "Source Coverage And Product Specification Completeness",
+        "Silent omission",
+        "FULL_SPEC",
+    ):
+        if marker not in acceptance_text:
+            fail(f"acceptance gates missing completeness marker: {marker}", failures)
     if "High-impact but non-binding advice" not in ai_feature_text:
         fail("AI Feature Injection lacks high-impact human-verified boundary", failures)
     for marker in (

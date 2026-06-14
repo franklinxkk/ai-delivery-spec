@@ -6,6 +6,7 @@ Use this reference to review a single product-lifecycle artifact or a final PRD,
 
 - 0. Lifecycle Artifact Review
 - 1. Interaction Ledger
+- 1.5 Source Coverage And Product Specification Completeness
 - 2. State-Button Matrix
 - 3. No Toast-Only Core Actions
 - 4. Role Path Verification
@@ -78,6 +79,42 @@ Required when iterating from an existing prototype or old PRD.
 | Regression Diff | removed/changed behavior, preserve/replace/de-scope decision, owner/reason |
 
 Fail if a critical old behavior disappears without a de-scope note.
+
+## 1.5 Source Coverage And Product Specification Completeness
+
+Required for an L2/L3 PRD or development handoff when detailed source material is supplied.
+
+### Source Coverage
+
+| Check | Pass Rule |
+|---|---|
+| Evidence inventory | every file and relevant sheet/page/section/view/schema/rule catalog is registered |
+| Atomic counts | metrics, rules, fields, prototype actions, dictionary values, and policy clauses have explicit counts or ranges |
+| Disposition | every source item is `EMBEDDED`, `AUTHORITATIVE_ANNEX`, `DEFERRED`, `CONFLICT`, or `NOT_APPLICABLE` |
+| Authority | annex/source version, owner, effective scope, and target module are declared |
+| Traceability | source -> module/rule/field -> engineering contract -> acceptance/test is navigable |
+| Silent omission | zero |
+
+### Product Specification Completeness
+
+Every in-scope implementation module must be `FULL_SPEC` and define:
+
+- roles/scenarios and complete operation paths;
+- pages/views and loading/empty/error/result behavior;
+- fields/dictionaries and validation/editability;
+- actions/interactions and visible/domain results;
+- business rules/calibers and priority/conflict behavior;
+- states, buttons, guards, permissions, data scope, audit;
+- exceptions/fallback, cross-module/external dependencies;
+- module acceptance and source/test/prototype traceability.
+
+Fail when:
+
+- a detailed Excel/PDF/SQL/prototype/rule catalog is reduced to examples or a short summary without a frozen authoritative annex;
+- an in-scope module has only purpose, inputs, outputs, aggregates, or commands but omits product behavior needed by PM/dev/QA;
+- an appendix contains requirements but has no owner, authority, version, target module, or acceptance mapping;
+- page-budget pressure causes atomic fields, rules, metrics, states, or acceptance criteria to disappear;
+- a `DEFERRED` or `CONFLICT` item lacks owner and decision/release target.
 
 ## 2. State-Button Matrix
 
@@ -217,6 +254,8 @@ Package only the current artifact scope. A single-artifact review must not creat
 | Verification report | always, scaled to Lite/Standard/Full mode |
 | State-button matrix | lifecycle-heavy object is in scope |
 | Interaction ledger/regression note | iterating an old prototype/PRD |
+| Source evidence register + coverage matrix | detailed attachment/evidence informed an L2/L3 PRD or development handoff |
+| Complete module specification index | one or more modules are in the implementation scope |
 | Test handoff checklist | development or QA handoff is in scope |
 | Package gap list | the request is narrower than a full L2/L3 package |
 | Unresolved risks | always, even when non-blocking |
