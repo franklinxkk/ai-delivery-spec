@@ -120,9 +120,15 @@ def main():
         "Product Plugins",
         "Higher assurance wins",
         "Global/Regional Readiness Profile",
-        "Product Specification Completeness",
+        "Traditional Product Specification",
+        "Function Inventory Coverage",
+        "Deterministic Functional Detail",
+        "Reader-First Navigation Without Coverage Loss",
         "Source Evidence Register",
         "Zero silent omission",
+        "Source assertion status",
+        "Prototype evidence status",
+        "Function splitting",
     ]
     for marker in required_markers:
         if marker not in text:
@@ -183,6 +189,13 @@ def main():
         "FULL_SPEC",
         "Engineering Traceability Contract",
         "Silent omission",
+        "Function Inventory And Completeness Calculation",
+        "Functional Requirement Record",
+        "Numbered Interaction Flow",
+        "release functions",
+        "Reader Navigation",
+        "Assertion Status",
+        "Backend closure checklist",
     ):
         if marker not in prd_template_text:
             fail(f"standard PRD template missing completeness marker: {marker}", failures)
@@ -197,7 +210,10 @@ def main():
     for marker in (
         "Source Evidence Inventory And Coverage",
         "Zero silent omission",
-        "Complete Module Product Specification",
+        "Complete Module And Function Product Specification",
+        "deterministic functional requirement record",
+        "Assertion status",
+        "Backend Closure Rules",
     ):
         if marker not in delivery_core_text:
             fail(f"delivery core missing source/product completeness marker: {marker}", failures)
@@ -205,6 +221,10 @@ def main():
         "Source Coverage And Product Specification Completeness",
         "Silent omission",
         "FULL_SPEC",
+        "Functional Requirement Record",
+        "Coverage denominator",
+        "Prototype evidence status",
+        "Semantic split",
     ):
         if marker not in acceptance_text:
             fail(f"acceptance gates missing completeness marker: {marker}", failures)
@@ -281,6 +301,20 @@ def main():
     for marker in ("Evolution Governance", "three real projects", "two domains"):
         if marker not in benchmark_text:
             fail(f"skill evolution governance missing marker: {marker}", failures)
+
+    prd_quality_validator = ROOT / "scripts" / "validate_prd_quality.py"
+    if not prd_quality_validator.exists():
+        fail("PRD quality validator is missing", failures)
+    else:
+        validator_text = prd_quality_validator.read_text(encoding="utf-8")
+        for marker in (
+            "wildcard ID",
+            "duplicate boilerplate",
+            "action mapping gaps",
+            "machine-readable manifest",
+        ):
+            if marker not in validator_text:
+                fail(f"PRD quality validator missing marker: {marker}", failures)
 
     if failures:
         print("FAIL")

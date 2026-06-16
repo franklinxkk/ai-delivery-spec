@@ -9,9 +9,9 @@ description: >-
   with no delivery intent.
 ---
 
-# AI Delivery Spec — AI Native 软件交付协议 (v4.2.0 Product Specification Completeness)
+# AI Delivery Spec — AI Native 软件交付协议 (v4.3.0 Reader-First Quality Layer)
 
-> 作者：李康（Li Kang） | 版本：v4.2.0 | 原则：完整产品规格与工程契约并存、附件证据零静默遗漏、全生命周期单产物评审、精准触发、范围优先、明确停止、分级交付、条件 Gate、AI Native 与 AI 嵌入分流、领域插件化、可审计可开发可验证。
+> 作者：李康（Li Kang） | 版本：v4.3.0 | 原则：传统产品规格为主、工程契约为辅、Reader-first 只增强导航与去重、不降低 FRR 覆盖率、逐功能确定性描述、附件证据零静默遗漏、全生命周期单产物评审、精准触发、范围优先、明确停止、分级交付、条件 Gate、AI Native 与 AI 嵌入分流、领域插件化、可审计可开发可验证。
 
 ## 1. Core Rule
 
@@ -149,12 +149,16 @@ Use: `references/prototype-testability.md`, `references/demo-closed-ddd-handoff.
 For L2/L3, the PRD must contain two independent, mutually traceable layers. Neither layer may replace the other.
 
 Required:
-- **Product Specification Completeness**: for every in-scope build module, define users/scenarios, pages/views, fields/dictionaries, actions, business rules/calibers, state-button behavior, permissions/data scope, exceptions/fallbacks, integrations, acceptance, and authoritative evidence;
+- **Traditional Product Specification**: background, goals/scope, users/roles, information architecture, business flows, functional details, business rules/data dictionaries, non-functional requirements, acceptance, planning/risks. This is the primary development artifact, not an executive summary;
+- **Function Inventory Coverage**: every in-scope module lists all release functions and every function has a complete functional requirement record. A module summary, screenshot caption, DDD row, or appendix cannot substitute for this record;
+- **Deterministic Functional Detail**: each release function defines purpose, role/scenario, entry/preconditions, pages/views, fields/dictionaries/validation, numbered user-system steps, actions and visible/domain results, business rules/calibers, states/buttons/guards, permissions/data scope, exceptions/recovery, notifications/audit, dependencies, conditional data/AI/algorithm contract, and acceptance cases;
+- **Reader-First Navigation Without Coverage Loss**: add role reader routes and shared contracts so PM/frontend/backend/algorithm/QA/architect can find their facts quickly. This is semantic de-duplication only; it never reduces the release-function denominator, FRR coverage, source evidence mapping, or engineering traceability;
 - **Engineering Traceability Contract**: inputs, outputs, processing logic, business transformation logic;
 - aggregate/entity/value object/state/event/command/query/policy/invariant where applicable;
 - Developer Fast-Lane table for coding entry;
 - concrete tests with UI result and domain result.
 - when detailed attachments exist, a Source Evidence Register maps every sheet/page/rule/metric/field set to `EMBEDDED`, `AUTHORITATIVE_ANNEX`, `DEFERRED`, `CONFLICT`, or `NOT_APPLICABLE`; silent omission fails the gate.
+- `FULL_SPEC` is a calculated result, not an author declaration: planned release function count must equal complete functional-record count, and every required record section must be present or explicitly `N/A` with reason.
 
 Use: `references/delivery-core.md`, `references/templates/prd-standard-template.md`, `references/demo-closed-ddd-handoff.md`.
 
@@ -310,6 +314,10 @@ Run only the reviewers needed by tier and triggers.
 - Strategic market, competitor, and differentiation claims are required only when the Strategic Discovery Handoff Gate triggers; every claim must identify evidence, assumptions, confidence, and validation plan.
 - Every in-scope build module has both a complete product specification and an engineering traceability contract; an overview or DDD table alone is not sufficient.
 - Zero silent omission: every supplied source file, sheet, page, rule catalog, field dictionary, metric definition, screenshot set, and prototype path is registered and dispositioned. No source item may disappear silently between evidence, PRD, prototype, development contract, and tests.
+- Source assertion status is separate from source disposition. Disposition says where the source goes; assertion status says whether a business statement is VERIFIED, INFERRED, PROPOSED, UNKNOWN, or CONFLICT.
+- Prototype evidence status is separate again: VERIFIED, SPEC_ONLY, GAP, CONFLICT, or UNKNOWN. Stage 0 role-path extraction can pass while Gate 2 or Gate 3 remains blocked.
+- Function splitting follows semantics, not page labels: split when role, permission, trigger, aggregate/data owner, state transition, business result, audit/NFR, or acceptance path differs. Navigation/open/close/filter helpers may map to an owning function only when they have no independent domain result.
+- AI-core or AI report generation requires versioned input/output schemas, claim-level evidence references, prompt/model/retrieval/runtime versions, evaluation dataset and thresholds, failure/fallback states, and prohibited writes. Unsupported numeric thresholds or model parameters must be marked PROPOSED until calibrated.
 
 ## 10. Required Scripts
 
@@ -326,7 +334,10 @@ When modifying this skill, run:
 ```powershell
 python scripts/validate_skill_consistency.py
 python scripts/validate_routing_scenarios.py
+python scripts/validate_prd_quality.py path\to\artifact.md --manifest path\to\manifest.json
 ```
+
+`validate_prd_quality.py` is strict only for deterministic inputs. Use it with a machine-readable manifest when checking broken ID references or action mapping gaps; without a manifest, it checks local text issues such as wildcard IDs and repeated boilerplate.
 
 ## 11. Final Response Rule
 

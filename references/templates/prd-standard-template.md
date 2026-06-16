@@ -2,13 +2,17 @@
 
 Use for development handoff, bid/demo package, ToB/ToG modules, SaaS features, report products, approval workflows, and multi-surface delivery.
 
-This template keeps the familiar PRD structure and requires three coordinated layers: complete product specification, engineering traceability contract, and authoritative evidence coverage. The DDD/Fast-Lane layer supplements the product specification; it never replaces it.
+This is a deterministic traditional PRD template for development handoff. Its primary body is the familiar product requirement specification: background, goals/scope, users/permissions, architecture and flows, functional details, rules/data, non-functional requirements, acceptance/planning/risks. Engineering traceability and authoritative evidence are additional layers. DDD/API/Fast-Lane supplements the functional specification; it never replaces it.
+
+The template is not complete merely because all chapter titles exist. Completeness is calculated from the release function inventory: every in-scope function must have one complete Functional Requirement Record (FRR).
 
 ## Contents
 
 - 1. Version Information
 - 2. Change Log
 - 3. Document Notes
+- 3.5 Reader Navigation
+- 3.6 Source Evidence Register
 - 4. Background And Opportunity
 - 5. Goals, Metrics, And Scope
 - 6. Users, Roles, And Permissions
@@ -64,13 +68,34 @@ This template keeps the familiar PRD structure and requires three coordinated la
 | Policy / standard | |
 | Strategic Discovery Handoff | required only for new product/market, major investment, repositioning, or commercialization |
 
-### Source Evidence Register
+## 3.5 Reader Navigation
+
+This table is navigation only. It must not create separate PRDs or redefine business facts.
+
+| Reader | Required Route Through This PRD |
+|---|---|
+| Product / sponsor | goals -> scope -> role paths -> module specifications -> acceptance -> risks |
+| Frontend | IA -> pages -> prototype contract -> state/button matrix -> function records -> acceptance |
+| Backend | module specifications -> fields/rules -> commands/queries/events -> engineering traceability -> NFR |
+| Algorithm / AI | AI boundary -> input/output schema -> prompt/model/eval/fallback -> function records |
+| QA | role paths -> state/exception/permission matrix -> acceptance cases -> evidence |
+| Architect / ops | system boundary -> data ownership -> dependencies -> readiness -> risk/rollback |
+
+## 3.6 Source Evidence Register
 
 Register every supplied source before writing feature details. Do not silently omit sheets, pages, rules, fields, metrics, screenshots, or prototype paths.
 
-| Source ID | Artifact | Locator | Type | Atomic Count | Authority | Target Module | Disposition | PRD / Annex / Test Trace | Conflict / Owner |
-|---|---|---|---|---:|---|---|---|---|---|
-| SRC-001 | | sheet/page/section/view/range | metric/rule/field/flow/schema/policy | | authoritative/supporting/historical | | `EMBEDDED` / `AUTHORITATIVE_ANNEX` / `DEFERRED` / `CONFLICT` / `NOT_APPLICABLE` | | |
+| Source ID | Artifact | Locator | Type | Atomic Count | Authority | Target Module | Disposition | Assertion Status | PRD / Annex / Test Trace | Conflict / Owner |
+|---|---|---|---|---:|---|---|---|---|---|---|
+| SRC-001 | | sheet/page/section/view/range | metric/rule/field/flow/schema/policy | | authoritative/supporting/historical | | `EMBEDDED` / `AUTHORITATIVE_ANNEX` / `DEFERRED` / `CONFLICT` / `NOT_APPLICABLE` | `VERIFIED` / `INFERRED` / `PROPOSED` / `UNKNOWN` / `CONFLICT` | | |
+
+Assertion status rules:
+
+- `VERIFIED`: directly proven by source, rendered prototype, database/schema, policy, or owner decision record.
+- `INFERRED`: strongly implied but not directly stated; requires evidence and reviewer owner.
+- `PROPOSED`: recommended by PM/AI/domain pattern; cannot be treated as accepted until owner confirms.
+- `UNKNOWN`: missing evidence; blocks PASS when core behavior is affected.
+- `CONFLICT`: sources disagree; blocks PASS until resolved.
 
 Coverage summary:
 
@@ -172,13 +197,168 @@ Out of scope:
 
 ## 9. Complete Module Product Specifications
 
-The summary index is not the specification itself.
+The summary index is not the specification itself. Complete Section 9 before writing the engineering overlay in Section 13.
 
 | Module ID | Module | Depth | Release Scope | Detailed Section / Annex | Source IDs | Owner |
 |---|---|---|---|---|---|---|
 | M01 | | `FULL_SPEC` / `OVERVIEW_ONLY` | in / deferred / external | | | |
 
 Use `FULL_SPEC` for every module planned for implementation in this release. `OVERVIEW_ONLY` is allowed only for deferred, out-of-scope, or external modules and must state owner and revisit condition.
+
+### Mxx-0 Function Inventory And Completeness Calculation
+
+List the complete release function tree first. This table is the denominator of Gate 3A.
+
+| Function ID | Function Name | User Outcome | Trigger / Entry | Surface / Page | Release Scope | FRR Ref | Source IDs | Test IDs |
+|---|---|---|---|---|---|---|---|---|
+| Mxx-F01 | | | | | in / deferred / external | Mxx-F01 | | |
+
+Completeness calculation:
+
+| Check | Count / Result | Pass Rule |
+|---|---:|---|
+| Release functions | | all functions with `Release Scope = in` |
+| Complete FRRs | | equals release functions |
+| Functions with complete field/annex coverage | | equals release functions requiring data |
+| Functions with actions and numbered flows | | equals release functions |
+| Functions with exception/recovery cases | | equals release functions |
+| Functions with acceptance cases | | equals release functions |
+| Silent omissions / summary-only functions | 0 | mandatory |
+
+Do not combine independent functions under “management”, “supports X/Y/Z”, “related operations”, or “complete lifecycle”. Create separate Function IDs when the role, trigger, state change, business result, permission, aggregate/data owner, audit/NFR, or acceptance path differs. Navigation, open/close, filtering, pagination and confirmation helpers may map to an owning function only when they have no independent domain result; the action-to-function mapping must still be explicit.
+
+### Mxx-Fnn Functional Requirement Record
+
+Repeat this complete record for every in-scope function in the inventory.
+
+#### 1. Identity, Purpose, And Boundary
+
+| Field | Requirement |
+|---|---|
+| Function ID / Name | |
+| Module / Priority / Release | |
+| User and business value | |
+| In scope | |
+| Out of scope / deferred | |
+| Authoritative source IDs | |
+
+#### 2. Roles And Scenario
+
+| Item | Requirement |
+|---|---|
+| Initiating role | |
+| Collaborating / receiving role | |
+| Trigger and start condition | |
+| Successful exit and next action | |
+
+#### 3. Entry And Preconditions
+
+| Item | Requirement |
+|---|---|
+| Entry page / route / upstream action | |
+| Role prerequisite | |
+| Data and object-state prerequisite | |
+| Time / organization / tenant prerequisite | |
+| Feature flag / configuration / dependency prerequisite | |
+
+#### 4. Pages, Regions, And Visible States
+
+| Page / Region | Purpose | Entry | Main Content | Loading | Empty | Error / Disabled | Exit |
+|---|---|---|---|---|---|---|---|
+| | | | | | | | |
+
+#### 5. Fields, Dictionaries, And Validation
+
+List every user-entered, displayed, exported, matched, calculated, signed, uploaded, filtered, or state-driving field. A complete authoritative annex may replace the rows only when its source ID, version, owner, range, count, and usage rule are declared here.
+
+| Field ID | Page / Object | Label / Meaning | Input / Display / Derived | Type / Format | Required / Default | Dictionary / Value Range | Validation And Error Copy | Source / Calculation | Editable By / State | Masking / Export |
+|---|---|---|---|---|---|---|---|---|---|---|
+| | | | | | | | | | | |
+
+#### 6. Numbered Interaction Flow
+
+Write one observable user-system exchange per step. Do not use a one-line summary such as “supports add, edit, delete, export”.
+
+| Step | Actor | Preconditions | User Action / System Trigger | System Validation And Processing | Visible Result | Domain Result | Next Action |
+|---:|---|---|---|---|---|---|---|
+| 1 | | | | | | | |
+
+#### 7. Actions And Operation Rules
+
+| Action ID | Page / State | Role | Trigger | Confirmation / Guard | Visible Result | Domain Result | Idempotency / Duplicate Rule | Next Action |
+|---|---|---|---|---|---|---|---|---|
+| | | | | | | | | |
+
+#### 8. Business Rules, Calculations, And Calibers
+
+| Rule ID | Applies To | Deterministic Rule / Formula / Threshold | Priority | Time / Effective Version | Evidence Source | Conflict / Exception Behavior |
+|---|---|---|---|---|---|---|
+| | | | | | | |
+
+#### 9. State, Button, And Lifecycle Behavior
+
+| Object | State | Visible Actions | Forbidden Actions | Guard | Trigger -> Next State | Visible Result | Event / Audit |
+|---|---|---|---|---|---|---|---|
+| | | | | | | | |
+
+#### 10. Permissions And Data Scope
+
+| Role | Tenant / Org / Region / Enterprise Scope | Row Scope | Field Scope | Action Scope | Override / Approval | Unauthorized Behavior |
+|---|---|---|---|---|---|---|
+| | | | | | | |
+
+#### 11. Exceptions, Fallback, And Recovery
+
+| Exception ID | Case | Detection | User Feedback | Data Preservation | Allowed Recovery / Retry | Domain / Audit Result | Owner |
+|---|---|---|---|---|---|---|---|
+| | validation / empty / duplicate / stale / conflict / permission / timeout / dependency / partial failure | | | | | | |
+
+#### 12. Notifications, Audit, And Dependencies
+
+| Type | Trigger | Recipient / Dependency | Channel / Interface | Contents / Contract | Failure Behavior | Audit / Owner |
+|---|---|---|---|---|---|---|
+| notification / audit / upstream / downstream | | | | | | |
+
+#### 13. Data, AI, And Algorithm Contract
+
+Complete when the function includes recognition, recommendation, generation, scoring, semantic retrieval, configurable rules, statistical transformation, or other algorithmic processing. Otherwise write `N/A - deterministic CRUD/query with no algorithmic decision`.
+
+| Item | Requirement |
+|---|---|
+| Input schema and source | |
+| Output schema and downstream consumer | |
+| Deterministic code/rule responsibility | |
+| Model/prompt/retrieval responsibility | |
+| Confidence, threshold, and human confirmation | |
+| Model/prompt/rule/schema version | |
+| Timeout, failure, fallback, and prohibited writes | |
+| Golden/evaluation cases and pass threshold | |
+
+#### 14. Function-Level NFR
+
+| Category | Requirement | Measurement / Acceptance |
+|---|---|---|
+| performance / security / privacy / accessibility / compatibility / operations | | |
+
+#### 15. Acceptance And Traceability
+
+At minimum include happy, validation, permission, state-conflict, dependency-failure, and regression cases when applicable.
+
+| Acceptance ID | Case | Preconditions / Data | Steps | Expected UI Result | Expected Domain Result | Prototype / Test | Source IDs |
+|---|---|---|---|---|---|---|---|
+| | | | | | | | |
+
+FRR completion rules:
+
+- Every numbered section 1-15 must contain concrete content or `N/A + reason`.
+- “见原型”, “见附件”, “按现有逻辑”, “同上”, “支持相关操作”, and a screenshot without behavior mapping are incomplete.
+- Enum/dictionary values must be fully listed or mapped to a frozen authoritative annex range.
+- A source annex may carry atomic fields/rules/metrics, but interaction flow, permissions, exception behavior, and acceptance stay in the FRR.
+- `FULL_SPEC` is allowed only after the completeness calculation passes.
+
+### Mxx Shared Module Contracts
+
+Use the following A-L structure only for contracts genuinely shared by several FRRs. Do not use it to replace FRRs.
 
 ### Mxx Module Name
 
@@ -322,6 +502,12 @@ Invariants:
 Domain events:
 
 - 
+
+Backend closure checklist for each write command:
+
+| Function ID | Aggregate / Owner | Command Input / Output | Expected Version / Concurrency | Idempotency Key | Transaction / Saga Boundary | Persisted Result | Domain Event | Audit Fields | Retry / Reconciliation |
+|---|---|---|---|---|---|---|---|---|---|
+| | | | | | | | | | |
 
 ## 14. Data, Metrics, And Tracking
 

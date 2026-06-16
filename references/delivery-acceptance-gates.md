@@ -91,13 +91,28 @@ Required for an L2/L3 PRD or development handoff when detailed source material i
 | Evidence inventory | every file and relevant sheet/page/section/view/schema/rule catalog is registered |
 | Atomic counts | metrics, rules, fields, prototype actions, dictionary values, and policy clauses have explicit counts or ranges |
 | Disposition | every source item is `EMBEDDED`, `AUTHORITATIVE_ANNEX`, `DEFERRED`, `CONFLICT`, or `NOT_APPLICABLE` |
+| Assertion status | every business statement has `VERIFIED`, `INFERRED`, `PROPOSED`, `UNKNOWN`, or `CONFLICT`; core `UNKNOWN`/`CONFLICT` blocks PASS |
 | Authority | annex/source version, owner, effective scope, and target module are declared |
 | Traceability | source -> module/rule/field -> engineering contract -> acceptance/test is navigable |
 | Silent omission | zero |
 
 ### Product Specification Completeness
 
-Every in-scope implementation module must be `FULL_SPEC` and define:
+Every in-scope implementation module must first declare a complete release function inventory. Every release function must then have a deterministic Functional Requirement Record (FRR). `FULL_SPEC` is calculated from that coverage, not assigned by the author.
+
+Function-level pass checks:
+
+| Check | Pass Rule |
+|---|---|
+| Function inventory | every user-visible command/query/configuration/review/import/export/batch/system action in release scope has a Function ID |
+| Coverage denominator | release function count equals complete FRR count |
+| Semantic split | role, permission, trigger, aggregate/data owner, state transition, business result, audit/NFR, or acceptance-path differences create separate functions |
+| FRR structure | identity/value, role/scenario, entry/preconditions, pages/states, fields/dictionaries, numbered flow, actions/results, rules/calibers, state-buttons, permissions/scope, exceptions/recovery, notifications/audit/dependencies, conditional data/AI/algorithm contract, NFR, acceptance |
+| Determinism | no unresolved “etc.”, “related operations”, “according to existing logic”, or unversioned “see attachment/prototype” shortcut |
+| Field coverage | complete rows or a frozen authoritative annex with version/owner/range/count/usage; examples do not count |
+| Acceptance | each function has positive and applicable validation/permission/state/dependency/regression cases with UI and domain results |
+
+Shared module contracts must define:
 
 - roles/scenarios and complete operation paths;
 - pages/views and loading/empty/error/result behavior;
@@ -115,6 +130,11 @@ Fail when:
 - an appendix contains requirements but has no owner, authority, version, target module, or acceptance mapping;
 - page-budget pressure causes atomic fields, rules, metrics, states, or acceptance criteria to disappear;
 - a `DEFERRED` or `CONFLICT` item lacks owner and decision/release target.
+- a module summary table, screenshot list, purpose/input/output contract, DDD overlay, Fast-Lane row, or appendix is counted as an FRR;
+- a release module is labeled `FULL_SPEC` while one or more functions have no complete FRR;
+- a function says “supports add/edit/delete/export” without separate actions, conditions, results, exceptions, permissions, and acceptance;
+- a Reader-first index, shared contract, DDD overlay, or Fast-Lane row is used to reduce the release function denominator or skip FRR sections;
+- a required FRR section is blank or replaced by “same as above”, “see prototype”, “see attachment”, or “existing logic” without an authoritative frozen mapping.
 
 ## 2. State-Button Matrix
 
@@ -204,6 +224,18 @@ Minimum report:
 | State-button matrix | PASS/FAIL | sampled states and actions |
 | Role paths | PASS/FAIL | paths walked |
 | Entry files | PASS/FAIL | synced files and syntax/tail checks |
+
+Prototype evidence status:
+
+| Status | Meaning |
+|---|---|
+| `VERIFIED` | rendered DOM/browser or deterministic audit proves the behavior and visible/domain result |
+| `SPEC_ONLY` | required by PRD but not implemented in prototype/demo surface |
+| `GAP` | prototype has partial or broken behavior |
+| `CONFLICT` | prototype contradicts PRD/source evidence |
+| `UNKNOWN` | behavior cannot be verified with available evidence |
+
+Stage 0 role-path extraction may pass while Gate 2 or Gate 3 remains blocked. Do not relabel prototype conflicts, duplicate handlers, malformed `data-action`, missing evidence UI, or missing backend contracts as non-blocking full-PRD gaps.
 
 For large HTML prototypes also verify:
 - JavaScript syntax.

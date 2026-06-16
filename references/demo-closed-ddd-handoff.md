@@ -19,7 +19,9 @@ The prototype is an executable requirement. It must let a PM or pre-sales person
 
 The PRD contains both the complete product specification and the domain/engineering contract. Development and testing must be able to implement the same behavior without guessing fields, rules, interactions, states, permissions, exceptions, or technical entry points.
 
-The product specification in `templates/prd-standard-template.md` is upstream. The module template below overlays DDD and implementation traceability on that specification; it must not replace or summarize away the detailed module behavior.
+The traditional product specification and per-function FRRs in `templates/prd-standard-template.md` are upstream. The module template below overlays DDD and implementation traceability on those records; it must not replace, compress, or summarize away functional behavior. Every engineering row must reference one or more Function IDs.
+
+Reader-first indexes, shared contracts, DDD rows, and Developer Fast-Lane rows are navigation and implementation-entry aids only. They do not reduce the release function denominator and cannot count as a completed FRR.
 
 ## Full Package Artifacts
 
@@ -55,6 +57,9 @@ Must pass all:
 For each bounded context or feature module, write this engineering overlay after the complete module product specification:
 
 ### Module Name
+
+Mapped Function IDs:
+- `Mxx-Fnn`
 
 Business purpose:
 - What job does this module complete?
@@ -135,6 +140,8 @@ Add this compact section before development starts. It is the fixed consumption 
 
 Every row must reference the detailed module specification and, when attachments were supplied, the source evidence register. Fast-Lane is an index into authoritative behavior, not a replacement for it.
 
+For state-changing commands, each Fast-Lane row must trace to the backend closure checklist: aggregate/data owner, command input/output, expected version/concurrency, idempotency key, transaction/Saga boundary, persisted result, domain event, audit, retry and reconciliation.
+
 | Module / Spec Ref | Source IDs | Command/Query | Aggregate/Entity | State Before -> After | Guard/Permission | Domain Event/Audit | API/Business Contract | Prototype Action/Testid | Test Case |
 |---|---|---|---|---|---|---|---|---|---|
 | Customer issue ticket / M04-E | SRC-012 | `escalateTicket` command | Ticket / ResponseTask | `待客户确认` -> `已升级` | customer not satisfied; role in service/sales/boss | `TicketEscalated`, response task created | idempotency key + SLA rule | `data-action=escalate-ticket` | TC-TICKET-ESC-001 |
@@ -145,6 +152,7 @@ Fast-lane fail conditions:
 - A create/submit/escalate/review action has no idempotency or duplicate-submit rule.
 - Dev Lead cannot identify the aggregate and expected domain result for a primary action in under 10 minutes.
 - A Fast-Lane row exists but its fields/rules/states cannot be traced to a complete module specification or authoritative source evidence.
+- An in-scope Function ID has no engineering mapping, or an engineering mapping points only to a module summary instead of a complete FRR.
 
 ## Demo Path Contract
 

@@ -15,6 +15,8 @@ Use this file when upgrading projects or the skill itself across major versions.
 - v4.0.7 -> v4.0.8 Global AI Readiness
 - v4.0.8 -> v4.1.0 Lifecycle Review Baseline
 - v4.1.0 -> v4.2.0 Product Specification Completeness
+- v4.2.0 -> v4.2.1 Deterministic Functional Specification
+- v4.2.1 -> v4.3.0 Reader-First Quality Layer
 - Gate Mapping
 - Project Upgrade Path
 - Migration Checklist
@@ -145,6 +147,47 @@ Compatibility:
 - No new public reference file is required; v4.2.0 strengthens existing core/template/reporting/gate contracts to limit context growth.
 - Prototype, runtime, prompt, mobile, SaaS, approval, global, and AI gates keep their existing behavior.
 
+## v4.2.0 -> v4.2.1 Deterministic Functional Specification
+
+v4.2.1 corrects a critical ambiguity found while dogfooding v4.2.0 on the 运智管家 reconstruction PRD: a module-level purpose/input/output/state table could still be mislabeled `FULL_SPEC` even when individual functions had no detailed behavior.
+
+| Change | Migration Action |
+|---|---|
+| Traditional PRD explicitly restored as the primary product truth | Keep background, scope, users, IA, flows, detailed functions, rules/data, NFR, acceptance, planning, and risks in the main product specification |
+| Function inventory becomes the completeness denominator | List all in-scope functions per module before claiming completeness |
+| Functional Requirement Record (FRR) added | Write one 15-part deterministic record for every release function, including conditional data/AI/algorithm contract |
+| `FULL_SPEC` becomes calculated | Require `release functions = complete FRRs`; module summaries and DDD rows no longer count |
+| Attachment shortcut constrained | Annexes may hold atomic fields/rules/metrics, but cannot replace flows, permissions, exceptions, or acceptance |
+| Gate 3A fail conditions hardened | “supports add/edit/delete”, “see prototype”, “existing logic”, blank sections, and summary-only modules fail |
+
+Compatibility:
+
+- v4.2.0 PRDs remain historical records, but any development handoff must be rechecked using the function inventory and FRR denominator.
+- Engineering contracts, DDD, API mappings, and Fast-Lane remain valid only after their referenced FRRs pass.
+- No new public Gate is introduced; this is a correctness fix to Gate 3A.
+
+## v4.2.1 -> v4.3.0 Reader-First Quality Layer
+
+v4.3.0 is a targeted quality layer added after validating the Skill against a data-intelligent report module and a CRM operating-response prototype. It does not replace the v4.2.1 deterministic PRD template.
+
+| Change | Migration Action |
+|---|---|
+| Reader navigation added | Add one in-document route table for Product, Frontend, Backend, Algorithm/AI, QA, and Architect/Ops readers; do not create separate role PRDs |
+| Source assertion status added | Keep existing source disposition values, and add `VERIFIED / INFERRED / PROPOSED / UNKNOWN / CONFLICT` to describe whether each business statement is proven |
+| Prototype evidence status added | Mark prototype/demo behavior as `VERIFIED / SPEC_ONLY / GAP / CONFLICT / UNKNOWN`; Stage 0 extraction can pass while Gate 2/3 remains blocked |
+| Semantic function split hardened | Split functions when role, permission, trigger, aggregate/data owner, state transition, business result, audit/NFR, or acceptance path differs |
+| Reader-first de-duplication bounded | Shared contracts can remove repeated prose, but cannot reduce the release-function denominator or skip FRR sections |
+| Backend closure checklist added | State-changing commands must define owner, schema, concurrency, idempotency, transaction/Saga boundary, persisted result, event, audit, retry, and reconciliation |
+| AI report contract hardened | AI-core/report generation requires versioned schemas, claim-level evidence, prompt/model/retrieval/runtime versions, evaluation dataset, fallback states, and prohibited writes |
+| PRD quality validator added | When a machine-readable manifest exists, validate wildcard IDs, broken references, duplicate boilerplate, source assertion gaps, and action-mapping gaps |
+
+Compatibility:
+
+- Existing v4.2.1 PRDs remain valid historical records. Re-run v4.3.0 only when using them for development, QA, customer acceptance, release readiness, or major refactor.
+- Do not replace existing `EMBEDDED / AUTHORITATIVE_ANNEX / DEFERRED / CONFLICT / NOT_APPLICABLE` disposition values.
+- `PROPOSED` numeric thresholds, model parameters, eval sizes, and AI runtime settings are not accepted release facts until calibrated and approved.
+- A prototype can be valid Stage 0 evidence while still failing Gate 2 or Gate 3.
+
 ## Gate Mapping
 
 | v3.9 Gate | v4.0 Equivalent |
@@ -181,6 +224,8 @@ Compatibility:
 - [ ] Map old gates to new gates.
 - [ ] Identify conditional plugins.
 - [ ] Preserve old interaction ledger or document de-scope.
+- [ ] Inventory every in-scope module function and calculate `release functions = complete FRRs`.
+- [ ] Reject module summaries, screenshots, or engineering rows being counted as complete product specifications.
 - [ ] Add missing Developer Fast-Lane if project enters development.
 - [ ] Add package manifest if delivering externally.
 - [ ] Record what remains intentionally below full L3.

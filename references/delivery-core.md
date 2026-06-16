@@ -45,9 +45,9 @@ When the input includes Excel, Word/PDF, SQL, screenshots, rule catalogs, field 
 
 Minimum register:
 
-| Source ID | File / Artifact | Sheet / Page / Section / Path | Evidence Type | Atomic Item Count | Authority | Intended Module | Disposition | PRD / Annex Reference | Conflict / Decision Owner |
-|---|---|---|---|---:|---|---|---|---|---|
-| SRC-001 | | | metric / rule / field / flow / screenshot / schema / policy | | authoritative / supporting / historical | | `EMBEDDED` / `AUTHORITATIVE_ANNEX` / `DEFERRED` / `CONFLICT` / `NOT_APPLICABLE` | | |
+| Source ID | File / Artifact | Sheet / Page / Section / Path | Evidence Type | Atomic Item Count | Authority | Intended Module | Disposition | Assertion Status | PRD / Annex Reference | Conflict / Decision Owner |
+|---|---|---|---|---:|---|---|---|---|---|---|
+| SRC-001 | | | metric / rule / field / flow / screenshot / schema / policy | | authoritative / supporting / historical | | `EMBEDDED` / `AUTHORITATIVE_ANNEX` / `DEFERRED` / `CONFLICT` / `NOT_APPLICABLE` | `VERIFIED` / `INFERRED` / `PROPOSED` / `UNKNOWN` / `CONFLICT` | | |
 
 Rules:
 
@@ -59,6 +59,8 @@ Rules:
 - `CONFLICT` records both values/behaviors and the decision owner; do not silently choose.
 - `NOT_APPLICABLE` requires a reason.
 - Zero silent omission: every registered source item must have a disposition before Gate 3 can pass.
+- Assertion status is separate from disposition. `VERIFIED` can be used as a requirement. `INFERRED` needs evidence and reviewer owner. `PROPOSED` is a recommendation until accepted by the accountable owner. `UNKNOWN` and `CONFLICT` block PASS when they affect core behavior.
+- Prototype gaps use prototype evidence status, not source disposition. Use `VERIFIED`, `SPEC_ONLY`, `GAP`, `CONFLICT`, or `UNKNOWN` in the interaction ledger or verification report.
 
 Recommended `stage0-output.json` extension:
 
@@ -74,6 +76,7 @@ Recommended `stage0-output.json` extension:
       "authority": "authoritative",
       "targetModule": "M01 Dashboard",
       "disposition": "AUTHORITATIVE_ANNEX",
+      "assertionStatus": "VERIFIED",
       "traceTo": ["M01", "ANNEX-H", "TC-M01-*" ]
     }
   ]
@@ -231,17 +234,56 @@ PRD chapters:
 9. Edge cases
 10. Non-functional requirements
 
-For L2/L3, Stage 5 has three coordinated layers:
+For L2/L3, Stage 5 has three coordinated layers, in this authority order:
 
-1. **Master Product Narrative**: problem, users, scope, IA, cross-module processes, shared states, NFR, release boundary.
-2. **Complete Module Product Specifications**: one per in-scope build module, using the detailed structure below.
+1. **Traditional Product Requirement Specification**: background, goals, scope, users, information architecture, business processes, complete functional details, shared rules/data, NFR, acceptance, planning, and risks. This is the primary product truth consumed by PM, design, development, algorithm, and QA.
+2. **Complete Module And Function Specifications**: one inventory per module and one deterministic functional requirement record per in-scope release function, using the detailed structure below.
 3. **Engineering Traceability Contracts**: DDD module contract, Developer Fast-Lane, API/schema/test mappings layered on top of the product specification.
 
 The engineering layer does not replace the product layer. A module is not development-ready when it only states purpose, inputs, outputs, aggregates, and commands while omitting page behavior, fields, dictionaries, actions, rules/calibers, states, permissions, exceptions, and acceptance.
 
-### Complete Module Product Specification
+### Complete Module And Function Product Specification
 
-For each in-scope build module, include:
+Start each module with a function inventory. The inventory defines the denominator for completeness.
+
+| Function ID | Function Name | User Outcome | Surface / Page | Release Scope | Detailed Record | Source IDs | Test IDs |
+|---|---|---|---|---|---|---|---|
+| M04-F01 | Query enterprises | find enterprises in the authorized scope | PC list | in | M04-F01 | SRC-... | TC-... |
+
+Inventory rules:
+
+- Include every user-visible command, query, configuration, review, import/export, batch operation, scheduled/system action, and material exception path planned for the release.
+- Do not hide multiple independent functions under labels such as “management”, “supports”, “etc.”, “related operations”, or “complete lifecycle”.
+- Split functions when role, permission, trigger, aggregate/data owner, state transition, business result, audit/NFR, or acceptance path differs. Creating a ticket, accepting it, escalating it, closing it, confirming a contract, and registering payment are normally different release functions.
+- Navigation, open/close modal, filter, pagination, tab switch, and confirmation helpers may map to an owning function only when they have no independent domain result. The mapping still must be explicit in the action ledger.
+- `planned release functions = complete functional requirement records` is mandatory. Deferred/external functions remain in the inventory but do not enter the release denominator.
+- A screenshot, prototype, workbook, SQL table, policy, or previous PRD is evidence. It does not become an implementable requirement until its behavior is mapped to a functional record or a frozen authoritative annex.
+
+For each function in the release inventory, write a deterministic functional requirement record:
+
+| Section | Required Content |
+|---|---|
+| Identity and value | function ID/name, module, priority, release, user value, source IDs |
+| Roles and scenario | initiating/collaborating roles, trigger, start condition, successful exit, next action |
+| Entry and preconditions | page/route/entry, role/data prerequisites, upstream state, feature/config flags |
+| Pages and visible states | list/detail/create/edit/config/result, loading/empty/error/success/disabled behavior |
+| Fields and dictionaries | every input/output field or authoritative annex range; meaning, type, required/default, enum, source, validation, editability, masking |
+| Numbered interaction flow | user action and corresponding system response for each step; no one-line “supports create/edit/delete” shorthand |
+| Actions and results | action, confirmation, visible result, domain result, next action, idempotency/duplicate behavior |
+| Business rules and calibers | numbered rules, priority, formulas/thresholds, time boundary, conflict behavior, effective version |
+| State-button behavior | object state, visible/forbidden actions, guards, transitions, audit/event |
+| Permission and data scope | tenant/org/region/enterprise/row/field/action scope and override/approval policy |
+| Exceptions and recovery | validation, empty, duplicate, stale/conflict, permission, timeout, dependency failure, partial success, retry/reopen/rollback |
+| Notifications and audit | recipient, channel, trigger, template/contents, failure behavior, audit fields |
+| Data / AI / algorithm contract | when applicable: input/output schema, deterministic vs model responsibility, confidence/threshold, human confirmation, prompt/model/rule version, fallback, evaluation and prohibited writes; otherwise `N/A + reason` |
+| Dependencies and NFR | source of truth, upstream/downstream timing, performance, security/privacy, compatibility, operations |
+| Acceptance | happy, validation, permission, state conflict, dependency failure, regression; expected UI and domain result |
+
+Any section that truly does not apply must say `N/A` and why. Blank, omitted, “同上”, “见原型”, or “按现有逻辑” does not count as complete.
+
+### Module Shared Contracts
+
+After the per-function records, consolidate only genuinely shared module contracts. Shared contracts are semantic de-duplication and navigation aids; they cannot replace the release function inventory or make an incomplete FRR complete.
 
 | Section | Minimum Content |
 |---|---|
@@ -260,9 +302,10 @@ For each in-scope build module, include:
 
 Depth rule:
 
-- `FULL_SPEC`: mandatory for every module planned for implementation in the selected release.
+- `FULL_SPEC`: mandatory for every module planned for implementation in the selected release, and may be declared only when the inventory denominator equals the number of complete function records and shared contracts are complete.
 - `OVERVIEW_ONLY`: allowed only for out-of-scope/deferred/external modules, with owner and revisit condition.
 - Large atomic tables may live in an authoritative annex, but the module section must state the governing source/version, item count, usage rules, and traceability. An appendix is not a dumping ground for unowned requirements.
+- Module summaries, purpose/input/output tables, engineering overlays, and Fast-Lane rows are indexes only. They never satisfy the functional-detail denominator.
 
 Prototype rules:
 - Use design-system tokens and real app screen as first viewport.
@@ -357,6 +400,21 @@ Reviewer outputs and anti-patterns:
 | Dev Lead | feasibility + undefined contracts/dependencies | “This should be feasible.” | “The approve command lacks idempotency, expected version, and rejection event.” |
 
 Do not let personas share hidden conclusions before their own walkthrough. Merge findings only after each required perspective produces evidence.
+
+### Backend Closure Rules
+
+For each state-changing command, define:
+
+- aggregate or data owner;
+- command input and output schema;
+- expected version or concurrency strategy;
+- idempotency key and scope;
+- transaction/Saga boundary and rollback/compensation rule;
+- persisted result and domain event;
+- audit fields;
+- retry, duplicate, stale write, dependency failure and reconciliation behavior.
+
+For async or cross-module flows, also define event id, producer, payload version, ordering/replay behavior, dead-letter handling, alert owner and recovery path.
 
 ## Developer Prompt Skeleton
 
