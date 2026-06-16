@@ -6,6 +6,7 @@ Use this file when generating, reviewing, or repairing an HTML prototype.
 
 - Five-Layer Test Annotation
 - Command and State Annotations
+- State-Driven UI Iron Law
 - Interaction Completeness Gate
 - Assertion Modes
 - Multi-Step Forms
@@ -15,6 +16,7 @@ Use this file when generating, reviewing, or repairing an HTML prototype.
 - Test State Self-Healing / Shadow-Data Isolation
 - Prototype Helper Contract
 - Visual Design Rules
+- Presentation Mode Specification
 - Prototype Acceptance Checklist
 
 ## Five-Layer Test Annotation
@@ -101,6 +103,61 @@ Role-specific views:
 
 ```html
 <button data-visible-role="supervisor" data-action="approve-task">审批</button>
+```
+
+## State-Driven UI Iron Law
+
+Generated HTML prototypes must follow `UI = f(State)`. DOM attributes and
+selectors are allowed for event routing, automation, and rendering verification,
+but they must never be the source of truth for business lifecycle state.
+
+Required architecture for workflow prototypes:
+
+```javascript
+window.GlobalState = {
+  route: "dashboard",
+  role: "admin",
+  entities: {},
+  ui: {},
+  presentationMode: false
+};
+
+function transition(currentState, action) {
+  // pure business transition: no DOM reads/writes here
+  return nextState;
+}
+
+function render(state) {
+  // one-way rendering from state to DOM
+}
+```
+
+Rules:
+
+- `data-action` is an event command, not business state.
+- `data-testid`, `data-state`, `data-visible-role`, and `data-api` may be
+  rendered from state and scanned by tests, but business logic must not infer
+  lifecycle stage from siblings, CSS classes, element text, or DOM position.
+- `querySelector` is permitted for event delegation, test helpers, focus
+  management, and rendering target selection. It is forbidden as the decision
+  source for guards such as “current step”, “approval state”, “selected tenant”,
+  or “can submit”.
+- All state-changing interactions route through one transition boundary:
+  `transition(currentState, action) -> nextState`, then re-render.
+- If a prototype is too small for a full renderer, it still needs a single
+  state object and explicit action-to-state mapping table.
+
+Anti-patterns:
+
+```javascript
+// FAIL: business state inferred from DOM text
+if (document.querySelector(".badge").textContent === "待审核") approve();
+
+// FAIL: next step inferred from sibling order
+var next = button.parentElement.nextElementSibling;
+
+// PASS: command payload comes from data-action, business state from GlobalState
+dispatch({ type: event.target.dataset.action, id: event.target.dataset.id });
 ```
 
 ## Interaction Completeness Gate
@@ -300,6 +357,38 @@ window._test = {
 - Use familiar controls: icons for tools, segmented controls for modes, checkboxes for binary choices, tabs for views.
 - Avoid one-hue palettes and decorative gradient blobs.
 
+## Presentation Mode Specification
+
+Customer-facing or sponsor-facing prototypes should provide a global
+`Presentation Mode` / `演示模式` switch when the prototype will be used for
+customer demo, boss review, bid presentation, or requirements workshop.
+
+Activation behavior:
+
+| Capability | Required Behavior |
+|---|---|
+| Technical noise control | Hide debug consoles, internal test panels, raw mock-data controls, and developer-only annotations. Keep `data-testid` and `data-action` in DOM for automation; do not visually expose them unless a debug panel is active. |
+| Storyline guidance | Show a side guide for the locked core user journey, including current step, next action, expected business value, and branch options. |
+| One-click main path | Provide a safe “start main journey” action that moves the user to the first step without skipping required visible screens. |
+| Adversarial rehearsal | Include safe simulation controls for invalid generic input, permission denial, stale version, weak network/offline, dependency failure, or guard rejection when those risks are in scope. |
+| Evidence capture | Allow screenshot/demo-note capture or visible scenario summary when practical. |
+
+State contract:
+
+```javascript
+window.GlobalState.presentationMode = true;
+window.GlobalState.demoScenario = "main-journey";
+```
+
+Rules:
+
+- Presentation Mode must not alter domain rules, permission guards, validation,
+  or state transitions. It changes visibility and guidance only.
+- Error-flow simulation buttons must use mock/shadow data and must not call real
+  production writes.
+- If the prototype is L0 or purely internal, Presentation Mode may be marked
+  `N/A` with reason.
+
 ## Prototype Acceptance Checklist
 
 - [ ] All interactive elements have `data-testid`.
@@ -315,3 +404,5 @@ window._test = {
 - [ ] Mobile/responsive variants preserve testid system.
 - [ ] `_test.scan()` finds the critical path elements.
 - [ ] Browser/Playwright can complete the main scenario without brittle selectors.
+- [ ] Workflow prototypes use `GlobalState` and transition-driven state changes.
+- [ ] Customer/sponsor demos include Presentation Mode or an explicit `N/A` reason.

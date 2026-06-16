@@ -199,6 +199,35 @@ Stage 1.5 Research:
 - Run only when evidence, policy, market, domain, or competitor uncertainty affects the decision.
 - Output domain norms, gaps, policy notes, interview questions.
 
+### 1.3 Business Readiness And Requirement Diagnosis Anchors
+
+Before detailed feature design, run these defensive anchors when the artifact
+will guide development, customer demo, QA, compliance, or workflow design. If a
+core answer is missing, record `BLOCKED` or `REVIEW_COMPLETE_WITH_GAPS` instead
+of inventing business rules.
+
+| Anchor | Required Question | Output |
+|---|---|---|
+| Accountability / compliance | Who owns the final administrative or commercial judgment? Are there data overreach, legal, audit, privacy, safety, or industry compliance red lines? | accountable decision role, prohibited system behavior, human override rule |
+| Adversarial semantics | If a user enters evasive, vague, hostile, or low-information data such as “收到”, “再看”, “不知道”, what should the system block, warn, escalate, or record? | invalid-generic-response list, guard, penalty/escalation, audit |
+| Offline / concurrency | If multiple users operate the module under weak network/offline/stale data, what is the final conflict reconciliation strategy? | version lock, merge policy, queue/retry, highlight review, rollback/compensation |
+
+Minimum anchor record:
+
+```yaml
+requirement_diagnosis_anchor:
+  accountability_owner:
+  compliance_red_lines:
+  invalid_generic_inputs:
+  guard_or_escalation:
+  offline_behavior:
+  concurrency_strategy:
+  unresolved_decision_owner:
+```
+
+Do not over-ask for L0 exploration. For L0/Lite, capture only the anchors that
+could change the prototype path or invalidate the idea.
+
 Stage 2 Stakeholder Profile:
 
 | Stakeholder | Required Dimensions |
@@ -314,6 +343,37 @@ Prototype rules:
 - Every backend-backed component has `data-api` + `data-method`.
 - Every role-specific view has `data-visible-role`.
 - If based on an older prototype, preserve the interaction baseline ledger or document approved de-scope.
+
+### 5.4 E2E Cross-Module Canvas
+
+For workflow-heavy PRDs, development handoff must not stop at isolated module
+state machines. Provide a long-running lifecycle matrix that connects upstream
+state changes, domain events, downstream state changes, ownership, and tests.
+
+Required when any is true:
+
+- `WORKFLOW: true` in 0D triage;
+- two or more modules exchange task, event, audit, status, report, payment,
+  notification, import, or approval state;
+- QA must write integration/E2E tests;
+- backend services or bounded contexts need event or Saga coordination.
+
+Canvas format:
+
+| E2E ID | Upstream Module / Object | Source State -> Target State | Domain Event | Downstream Module / Object | Downstream State Flow | Owner / Transaction Boundary | Failure / Compensation | Acceptance |
+|---|---|---|---|---|---|---|---|---|
+| E2E-001 | Lead | 有意向 -> 已转商机 | `LeadConverted` | Opportunity / Customer | 新建商机[初步接触] + 客户[锁定中] | CRM service; event outbox | duplicate event ignored by idempotency key | AC-E2E-LONG-RUNNING-001 |
+
+Rules:
+
+- Do not invent integration events when the product is a single isolated CRUD
+  surface. Use the canvas only when cross-module lifecycle value exists.
+- Each row must have a testable source state, event, downstream state result,
+  transaction/consistency owner, and failure behavior.
+- QA must be able to convert each row into an E2E integration or regression
+  scenario without rereading the whole PRD.
+- Backend must be able to identify event payload version, idempotency key,
+  ordering/replay rule, and dead-letter owner for async rows.
 
 ## Guard Protocol
 

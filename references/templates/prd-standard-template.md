@@ -13,6 +13,7 @@ The template is not complete merely because all chapter titles exist. Completene
 - 3. Document Notes
 - 3.5 Reader Navigation
 - 3.6 Source Evidence Register
+- 3.7 Requirement Diagnosis Anchors
 - 4. Background And Opportunity
 - 5. Goals, Metrics, And Scope
 - 6. Users, Roles, And Permissions
@@ -20,6 +21,7 @@ The template is not complete merely because all chapter titles exist. Completene
 - 8. User Story And Role Path Matrix
 - 9. Complete Module Product Specifications
 - 10. Business Processes
+- 10.5 E2E Cross-Module Canvas
 - 11. State Machine And Button Matrix
 - 12. Prototype And Interaction Contract
 - 13. Engineering Traceability Contract
@@ -107,6 +109,21 @@ Coverage summary:
 | Deferred | | reason, owner, release, and impact stated |
 | Conflict | | decision owner and deadline stated |
 | Silent omission | 0 | mandatory |
+
+## 3.7 Requirement Diagnosis Anchors
+
+Complete these anchors before detailed function records when the PRD guides
+development, QA, customer demo, compliance, or workflow design.
+
+| Anchor | Question | Decision / Rule | Owner | Status |
+|---|---|---|---|---|
+| Accountability / compliance | Who owns final administrative/commercial judgment? What legal, data, audit, privacy, safety, or industry red lines apply? | | | VERIFIED / PROPOSED / UNKNOWN |
+| Adversarial semantics | What happens when the user enters vague, evasive, hostile, or low-information data such as “收到”, “再看”, “不知道”? | | | VERIFIED / PROPOSED / UNKNOWN |
+| Offline / concurrency | What happens when multiple users operate under weak network/offline/stale data? What is the final conflict strategy? | | | VERIFIED / PROPOSED / UNKNOWN |
+
+Anchor rule: unresolved anchors that affect core state, compliance, audit, or
+write behavior block development handoff. L0 exploration may mark non-critical
+anchors `N/A` with reason.
 
 ## 4. Background And Opportunity
 
@@ -452,6 +469,24 @@ trigger -> validation -> processing -> state change -> notification/report/audit
 | Process | Trigger | Guard | Action | Result | Audit / Event |
 |---|---|---|---|---|---|
 | | | | | | |
+
+## 10.5 E2E Cross-Module Canvas
+
+Required when workflow state crosses modules, services, tenants, reports,
+notifications, approvals, imports, payments, or audits. Mark `N/A` only for
+isolated modules without cross-module lifecycle.
+
+| E2E ID | Upstream Module / Object | Source State -> Target State | Domain Event | Downstream Module / Object | Downstream State Flow | Owner / Transaction Boundary | Failure / Compensation | Acceptance |
+|---|---|---|---|---|---|---|---|---|
+| E2E-001 | | | | | | | | AC-E2E-LONG-RUNNING-001 |
+
+Rules:
+
+- Each row must be convertible into an integration or E2E regression case.
+- Event payload version, idempotency key, ordering/replay behavior, and
+  dead-letter owner must be defined for async rows.
+- Do not use this canvas to invent artificial workflow complexity for a simple
+  single-module CRUD feature.
 
 ## 11. State Machine And Button Matrix
 

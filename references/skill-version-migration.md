@@ -17,6 +17,7 @@ Use this file when upgrading projects or the skill itself across major versions.
 - v4.1.0 -> v4.2.0 Product Specification Completeness
 - v4.2.0 -> v4.2.1 Deterministic Functional Specification
 - v4.2.1 -> v4.3.0 Reader-First Quality Layer
+- v4.3.0 -> v4.4.0 Production Elastic Delivery Standard
 - Gate Mapping
 - Project Upgrade Path
 - Migration Checklist
@@ -187,6 +188,32 @@ Compatibility:
 - Do not replace existing `EMBEDDED / AUTHORITATIVE_ANNEX / DEFERRED / CONFLICT / NOT_APPLICABLE` disposition values.
 - `PROPOSED` numeric thresholds, model parameters, eval sizes, and AI runtime settings are not accepted release facts until calibrated and approved.
 - A prototype can be valid Stage 0 evidence while still failing Gate 2 or Gate 3.
+
+## v4.3.0 -> v4.4.0 Production Elastic Delivery Standard
+
+v4.4.0 restructures runtime loading after dogfooding v4.3.0 on CRM, data
+reporting, 运智管家, and knowledge-base style systems. The goal is to reduce
+model overload without weakening FRR completeness, evidence traceability, or
+engineering handoff.
+
+| Change | Migration Action |
+|---|---|
+| Four runtime entrypoints | Start from `SKILL.md`, then load only `delivery-core.md`, `prototype-testability.md`, or `advanced-extensions.md` as triggered. Legacy references remain source assets, not default route files. |
+| 0D triage | Every run declares `[TIER: Heavy/Light] | [AI: true/false] | [WORKFLOW: true/false]` before reference loading. Non-AI and non-workflow gates are pruned early. |
+| Requirement Diagnosis Anchors | Development-facing requirements add accountability/compliance, adversarial semantics, and offline/concurrency anchor records. L0 exploration may mark non-critical anchors `N/A`. |
+| State-driven prototype law | Workflow prototypes use `GlobalState` and `transition(currentState, action) -> nextState`; DOM can route events and support tests, but cannot be business state source. |
+| Presentation Mode | Customer/sponsor demos should include a mode that hides technical noise, guides the storyline, and safely simulates invalid input, weak network, permission, or dependency-failure flows. |
+| E2E Cross-Module Canvas | Workflow-heavy PRDs include upstream state, domain event, downstream state, transaction/failure owner, and `AC-E2E-LONG-RUNNING` style acceptance rows. |
+
+Compatibility:
+
+- v4.3.0 PRDs remain valid if they already contain full FRR coverage,
+  engineering traceability, and source evidence mapping.
+- Upgrade to v4.4.0 when a team complains about skill loading overhead,
+  prototypes relying on DOM-derived business state, customer-demo friction, or
+  cross-module integration gaps.
+- Do not delete domain modules, templates, or prompt registry assets. They are
+  load-on-demand assets behind `advanced-extensions.md`.
 
 ## Gate Mapping
 
