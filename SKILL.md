@@ -8,7 +8,7 @@ description: >-
   syntax/debugging, copy rewriting, or idea exploration with no delivery intent.
 ---
 
-# AI Delivery Spec — Production Elastic Delivery Standard (v4.4.1)
+# AI Delivery Spec — Production Elastic Delivery Standard (v4.5.0)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering,
 algorithm, QA, operations, customers, and sponsors can read, build, verify, and
@@ -65,6 +65,8 @@ explicitly instructs it for the current task.
 
 Keep these decisions separate:
 
+- **Lifecycle stage**: discovery, specification, planning, task breakdown,
+  build/verification, launch/readiness, operation/learning, or retirement.
 - **Artifact scope**: one artifact, one module package, or full delivery package.
 - **Execution mode**: Lite, Standard, or Full.
 - **Delivery tier**: L0-L3 rigor of the in-scope artifact/module.
@@ -89,6 +91,18 @@ Tier guide:
 
 End every task with one completion state: `PASS`,
 `REVIEW_COMPLETE_WITH_GAPS`, or `BLOCKED`.
+
+Lifecycle rule: external PM/discovery frameworks and spec-driven engineering
+tools may provide upstream evidence or naming. Do not import their whole
+process. Map them into this lightweight chain only when the request needs it:
+
+```text
+Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire
+```
+
+`Specify` records what/why/acceptance. `Plan` records engineering approach,
+risks, and dependencies. `Tasks` records vertical slices traceable to functions
+and acceptance. Skip stages that are not needed for the requested artifact.
 
 ## 3. AI Centrality
 
@@ -154,11 +168,14 @@ Choose one primary route, then add triggered extensions.
 | prototype/demo/HTML/mobile interaction | `prototype-testability.md`; add `delivery-core.md` for story/state evidence |
 | test/UAT/acceptance/readiness/post-launch/retirement | `delivery-core.md`; add advanced readiness section if real environment |
 | AI, SaaS, approval, reporting, low-code, global, domain switch | load `advanced-extensions.md` only after 0D trigger |
+| implementation task breakdown / issue slicing | `delivery-core.md`; generate tasks only from approved specification/plan evidence |
 
 ## 6. Non-Negotiable Rules
 
 - Product specification and engineering contract must coexist in one source of
   truth. Do not split them into unsynchronized documents.
+- Task breakdown is downstream of specification and plan. Do not create coding
+  tasks from vague goals, screenshots, or incomplete FRRs.
 - Machine-readable contracts are not enough for human teams. PRDs must restore
   business scenario, boundary, exception, metric, and test intent before
   engineering tables.

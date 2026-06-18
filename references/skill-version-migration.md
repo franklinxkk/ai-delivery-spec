@@ -19,6 +19,7 @@ Use this file when upgrading projects or the skill itself across major versions.
 - v4.2.1 -> v4.3.0 Reader-First Quality Layer
 - v4.3.0 -> v4.4.0 Production Elastic Delivery Standard
 - v4.4.0 -> v4.4.1 Human Readability Layer
+- v4.4.1 -> v4.5.0 Lifecycle Benchmark Bridge
 - Gate Mapping
 - Project Upgrade Path
 - Migration Checklist
@@ -240,6 +241,29 @@ Compatibility:
 - Do not remove FRR, DDD, evidence, or acceptance sections to make documents
   shorter. Improve readability through scenario/context and navigation, not by
   reducing requirement coverage.
+
+## v4.4.1 -> v4.5.0 Lifecycle Benchmark Bridge
+
+v4.5.0 benchmarks public PM and spec-driven engineering projects, then absorbs
+only the transferable lifecycle discipline. It does not import external command
+systems or full PM-methodology catalogs into the runtime path.
+
+| Change | Migration Action |
+|---|---|
+| Lifecycle stage made explicit | Record discovery, specification, planning, task breakdown, build/verification, launch, operation/learning, or retirement in final delivery metadata. |
+| Spec/Plan/Tasks bridge added | Keep product specification as the source of truth; add implementation plan assumptions and vertical slice tasks only when the artifact enters build planning. |
+| Vertical Slice Task Backlog added | For implementation handoff, tasks must trace to Function IDs and Acceptance IDs and produce independently verifiable user/domain results. |
+| External framework boundary clarified | Product-Manager-Skills, engineering skills, and Spec Kit style workflows may be upstream evidence or naming references; do not load or copy their whole process. |
+| README made AI-tool-agnostic | Public explanation now describes the standard as usable with any AI tool that can read Markdown, not as one platform's private skill. |
+
+Compatibility:
+
+- Existing v4.4.1 PRDs remain valid when they already contain complete FRRs,
+  readability layer, DDD/API/data traceability, and acceptance evidence.
+- Upgrade to v4.5.0 when the team needs implementation task breakdown, issue
+  slicing, AI coding handoff, or clearer public onboarding.
+- Do not create task backlogs from incomplete requirements. A task without FRR
+  and Acceptance IDs is either a named prefactoring/migration task or `BLOCKED`.
 
 ## Gate Mapping
 

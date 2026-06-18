@@ -7,7 +7,10 @@ Use this file only when upgrading or auditing the skill itself. Do not load it f
 | Benchmark | Observed Pattern | What This Skill Absorbs |
 |---|---|---|
 | `anthropics/skills` | Skill is a self-contained folder with `SKILL.md`, optional `skills/`, `spec/`, `template/`, and clear frontmatter. | Keep `SKILL.md` as the router and move detailed protocols into references. |
+| `deanpeters/Product-Manager-Skills` | Broad PM lifecycle library: discovery, strategy, validation, PRD, roadmap, prioritization, coaching, and packaging for multiple AI tools. Strength: PM education and coverage. Risk: too broad for one delivery run. | Treat discovery/strategy outputs as upstream evidence. Keep lifecycle naming, but do not import the full PM catalog into runtime. |
 | `mattpocock/skills` | Skills are small, composable, practical, and easy to adapt. | Keep delivery gates modular and tier-aware instead of forcing every task through a heavyweight process. |
+| `mattpocock/to-prd` and `to-issues` | PRD synthesis favors existing context, domain vocabulary, testing seams, and issue breakdown by independently verifiable vertical slices. Strength: pragmatic execution. Risk: PRD template is intentionally lightweight for complex ToB/ToG. | Add a Spec/Plan/Tasks bridge and vertical slice backlog, while retaining complete FRR product specification for enterprise delivery. |
+| `github/spec-kit` | Spec-driven workflow separates constitution, specify, clarify/analyze, plan, tasks, and implement. Strength: strong engineering traceability. Risk: command/tool pipeline can be heavier than PM teams need. | Absorb only the lightweight `Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire` mapping and traceability rule. |
 | Large community skill libraries | Broad category organization, authoring standards, scripts, and validation conventions. | Add structure only when it maps to a real trigger, real artifact, and real validation surface. |
 
 ## 2. Design Rules For This Skill

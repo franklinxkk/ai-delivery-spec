@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate ai-delivery-spec v4.4.x runtime routing and core contracts."""
+"""Validate ai-delivery-spec v4.5.x runtime routing and core contracts."""
 
 from pathlib import Path
 import re
@@ -36,6 +36,11 @@ LEGACY_ASSETS = (
     "strategy-discovery-handoff.md",
     "system-readiness-checklist.md",
     "workflow-automation-lowcode.md",
+)
+
+MAINTENANCE_ASSETS = (
+    "skill-design-benchmark.md",
+    "skill-version-migration.md",
 )
 
 DOMAIN_SECTIONS = [
@@ -140,17 +145,18 @@ def main():
             fail("description retains ambiguous generic HTML exclusion", failures)
 
     if len(text.splitlines()) > 260:
-        fail("SKILL.md exceeds v4.4 runtime-entry budget of 260 lines", failures)
+        fail("SKILL.md exceeds v4.5 runtime-entry budget of 260 lines", failures)
 
     require_markers(
         "SKILL.md",
         text,
         (
-            "v4.4.1",
+            "v4.5.0",
             "[TIER: Heavy|Light] | [AI: true|false] | [WORKFLOW: true|false]",
             "Fast-pass pruning",
             "Runtime File Architecture",
             "advanced-extensions.md",
+            "Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire",
             "E2E Cross-Module Canvas",
             "GlobalState",
             "transition(currentState, action) -> nextState",
@@ -200,13 +206,36 @@ def main():
     advanced = (REFERENCES / "advanced-extensions.md").read_text(encoding="utf-8")
     readability = (REFERENCES / "readability-layer.md").read_text(encoding="utf-8")
     migration = (REFERENCES / "skill-version-migration.md").read_text(encoding="utf-8")
+    benchmark = (REFERENCES / "skill-design-benchmark.md").read_text(encoding="utf-8")
     prd_template = (REFERENCES / "templates" / "prd-standard-template.md").read_text(encoding="utf-8")
+    source_asset_index = "\n".join(
+        (
+            advanced,
+            prd_template,
+            (REFERENCES / "system-readiness-checklist.md").read_text(encoding="utf-8"),
+            (REFERENCES / "workflow-automation-lowcode.md").read_text(encoding="utf-8"),
+        )
+    )
+
+    for asset in LEGACY_ASSETS:
+        if not (REFERENCES / asset).exists():
+            fail(f"retained source asset is missing: {asset}", failures)
+        if asset not in source_asset_index:
+            fail(f"retained source asset is not reachable from runtime source index: {asset}", failures)
+
+    for asset in MAINTENANCE_ASSETS:
+        if not (REFERENCES / asset).exists():
+            fail(f"maintenance asset is missing: {asset}", failures)
+        if asset not in advanced and asset != "skill-version-migration.md":
+            fail(f"maintenance asset is not declared in advanced extensions: {asset}", failures)
 
     require_markers(
         "delivery-core.md",
         delivery_core,
         (
             "Business Readiness And Requirement Diagnosis Anchors",
+            "Lifecycle And Spec-Plan-Tasks Bridge",
+            "Vertical Slice Task Backlog",
             "Accountability / compliance",
             "Adversarial semantics",
             "Offline / concurrency",
@@ -247,6 +276,7 @@ def main():
             "Workflow Automation And Low-Code",
             "Domain Modules, Templates, And Legacy Assets",
             "load-on-demand assets",
+            "External lifecycle and PM frameworks are upstream evidence",
         ),
         failures,
     )
@@ -273,6 +303,8 @@ def main():
             "1.5 Executive Summary",
             "Mxx Business Scenario Canvas",
             "Frontend / Backend / QA Handoff Notes",
+            "13.5 Implementation Plan And Task Backlog",
+            "Vertical Slice Backlog",
             "Event ID",
             "Privacy / Masking",
         ),
@@ -285,13 +317,44 @@ def main():
         (
             "v4.3.0 -> v4.4.0 Production Elastic Delivery Standard",
             "v4.4.0 -> v4.4.1 Human Readability Layer",
+            "v4.4.1 -> v4.5.0 Lifecycle Benchmark Bridge",
             "Four runtime entrypoints",
             "0D triage",
             "State-driven prototype law",
             "E2E Cross-Module Canvas",
+            "Spec/Plan/Tasks bridge added",
         ),
         failures,
     )
+
+    require_markers(
+        "skill-design-benchmark.md",
+        benchmark,
+        (
+            "deanpeters/Product-Manager-Skills",
+            "mattpocock/to-prd",
+            "github/spec-kit",
+            "Do not turn every review comment into a new public protocol",
+        ),
+        failures,
+    )
+
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    require_markers(
+        "README.md",
+        readme,
+        (
+            "AI Delivery Spec / AI 产研交付规格",
+            "tool-agnostic",
+            "ChatGPT, Claude, Gemini",
+            "v4.5.0 Focus",
+            "Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire",
+            "Default runtime has only four entrypoints",
+        ),
+        failures,
+    )
+    if "Codex skill" in readme:
+        fail("README.md still positions the project as a Codex-specific skill", failures)
 
     for filename in ("domain-traffic.md", "domain-crm.md"):
         headings = level_two_headings(REFERENCES / filename)
@@ -320,7 +383,7 @@ def main():
             print(f"- {item}")
         return 1
 
-    print("PASS: ai-delivery-spec v4.4.x runtime routing, readability, and core contracts are consistent")
+    print("PASS: ai-delivery-spec v4.5.x runtime routing, readability, and core contracts are consistent")
     return 0
 
 

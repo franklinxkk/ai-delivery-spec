@@ -20,6 +20,8 @@ FULL_SIGNALS = (
     "生产上线",
     "上线准备",
     "发布就绪",
+    "正式上线",
+    "发布就绪方案",
     "迁移切换",
     "回滚",
     "on-call",
@@ -78,6 +80,9 @@ DELIVERY_ARTIFACTS = (
     "开发契约",
     "验收报告",
     "验收方案",
+    "上线方案",
+    "发布方案",
+    "发布就绪方案",
     "智能体",
     "ai学习助教",
     "ai数字人",
@@ -123,6 +128,11 @@ DELIVERY_ARTIFACTS = (
 
 DELIVERY_INTENT = (
     "做",
+    "写",
+    "编写",
+    "起草",
+    "整理",
+    "输出",
     "实现",
     "设计",
     "生成",
@@ -174,6 +184,11 @@ AI_SUPPORTING = (
     "ai提取",
     "ai推荐",
     "ai草拟",
+    "ai生成",
+    "ai报告",
+    "智能报告",
+    "生成报告",
+    "智能问数",
     "人工确认",
     "律师确认",
     "人工审核",
@@ -218,7 +233,11 @@ def select_route(prompt):
             "runbook",
             "试点方案",
             "上线准备",
+            "正式上线",
+            "上线方案",
+            "发布方案",
             "发布就绪",
+            "发布就绪方案",
             "生产上线",
         ),
     ):
@@ -349,6 +368,8 @@ def classify(prompt):
         plugins.add("global")
     if contains_any(prompt, ("交通", "运输", "司机", "车辆", "运智管家", "主动防控")):
         plugins.add("traffic-domain")
+    if contains_any(prompt, ("crm", "客户管理", "线索", "商机", "客户经营", "经营响应")):
+        plugins.add("crm-domain")
     if contains_any(prompt, FULL_SIGNALS) or route in {"release-readiness", "retirement"}:
         plugins.add("readiness")
     if route == "strategy-discovery" or contains_any(
@@ -397,7 +418,15 @@ SCENARIOS = (
         True,
         "Standard",
         "L2",
-        frozenset({"approval", "saas"}),
+        frozenset({"approval", "saas", "crm-domain"}),
+    ),
+    Scenario(
+        "Simple CRUD PRD draft",
+        "快速写一个ToB客户管理CRUD PRD草稿，先看方向",
+        True,
+        "Lite",
+        "L1",
+        frozenset({"crm-domain"}),
     ),
     Scenario(
         "CRM direction sketch",
@@ -405,6 +434,24 @@ SCENARIOS = (
         True,
         "Lite",
         "L0",
+        frozenset({"crm-domain"}),
+    ),
+    Scenario(
+        "AI data report PRD",
+        "编写数据智能报告PRD，包含AI生成报告、智能问数和指标报表，交开发和QA",
+        True,
+        "Standard",
+        "L2",
+        frozenset({"ai-feature", "reporting"}),
+    ),
+    Scenario(
+        "Overseas SaaS release readiness",
+        "输出海外多语言SaaS正式上线方案，覆盖发布就绪、数据驻留和回滚",
+        True,
+        "Full",
+        "L2",
+        frozenset({"saas", "global", "readiness"}),
+        "release-readiness",
     ),
     Scenario(
         "Data application regression",
@@ -750,7 +797,7 @@ def main():
             print(f"- {failure}")
         return 1
 
-    real_count = 9
+    real_count = 12
     boundary_count = 8
     global_count = 8
     lifecycle_count = 12

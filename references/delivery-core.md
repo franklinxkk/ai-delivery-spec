@@ -6,6 +6,7 @@ Use this file for reverse engineering, PRD generation, state machines, guards, S
 
 - Stage 0 Reverse Engineering
 - Engineering Profile / Anti-Bloating
+- Lifecycle And Spec-Plan-Tasks Bridge
 - Stage 1-5 Product Workflow
 - Human-Readable PRD Layer
 - Guard Protocol
@@ -188,6 +189,54 @@ Downgrade from Profile A to Profile S when:
 
 Rule: prompt and agent architecture must reduce delivery risk. If it mainly increases vocabulary, documents, and maintenance load, use code, configuration, or a single linear AI feature contract.
 
+## Lifecycle And Spec-Plan-Tasks Bridge
+
+Use external product or SDD frameworks as upstream evidence, not as a second
+pipeline. Map them into this lifecycle only when the requested artifact needs
+that stage.
+
+| Lifecycle Stage | Purpose | Minimum Artifact | Do Not Expand Into |
+|---|---|---|---|
+| Discover | decide whether the opportunity is worth shaping | outcome, customer/job, evidence, riskiest assumption, next validation | full PRD when user only needs direction |
+| Specify | define what/why/acceptance | complete product specification, FRRs, source register, role paths | implementation plan or coding tasks |
+| Plan | decide how the team will safely implement | architecture/dependency assumptions, data/API/DDD contracts, risk plan | framework choices inside business-only PRD sections |
+| Tasks | split work for execution | vertical slice backlog tied to FRR/AC IDs | layer-by-layer tickets that cannot demo value |
+| Build/Verify | implement and test | prototype/test evidence, acceptance results, defect/risk log | launch approval without readiness |
+| Launch | release or migrate | readiness checklist, rollout, rollback, notice, owner | new feature scope |
+| Learn/Retire | operate, improve, or sunset | metric review, incident/post-launch learning, retirement plan | unowned backlog dumping |
+
+Spec/Plan/Tasks separation:
+
+- **Spec** is product truth: user story, functional behavior, fields, rules,
+  states, permissions, exceptions, source evidence, and acceptance.
+- **Plan** is implementation alignment: architecture constraints, seams,
+  dependencies, data/API/DDD contracts, release strategy, and risk controls.
+- **Tasks** are execution slices: small enough to assign, broad enough to
+  produce a visible/domain result, and traceable to FRR + acceptance IDs.
+
+Do not force this bridge onto L0 idea exploration. For L2/L3 development
+handoff, however, missing plan/task traceability is a delivery risk.
+
+### Vertical Slice Task Backlog
+
+Generate this only when the user requests build planning, issue breakdown, or
+developer handoff.
+
+| Task ID | Slice / Outcome | Source FRR | Acceptance IDs | Owner Role | Depends On | Files / Modules Likely Touched | Test / Evidence | Done Signal |
+|---|---|---|---|---|---|---|---|---|
+| TASK-001 | | Mxx-Fnn | AC-... | frontend/backend/algorithm/QA | none / TASK-... | optional, keep stable if known | | demoable path or passing test |
+
+Rules:
+
+- Prefer tracer-bullet vertical slices that cut through UI, API, data, and test
+  only as far as needed for one user-visible/domain result.
+- Use domain vocabulary from the PRD. Do not invent issue titles from
+  implementation layers only.
+- Mark dependencies explicitly. A task is not ready if it needs an unresolved
+  business rule, missing field dictionary, or unknown permission decision.
+- Avoid stale implementation detail. File paths are useful when known from an
+  existing codebase, but product tasks must remain understandable without them.
+
 ## Stage 1-5 Product Workflow
 
 Run only the stages needed by the selected artifact scope and execution mode. Skip stages whose inputs are already supplied and validated.
@@ -271,6 +320,12 @@ For L2/L3, Stage 5 has three coordinated layers, in this authority order:
 3. **Engineering Traceability Contracts**: DDD module contract, Developer Fast-Lane, API/schema/test mappings layered on top of the product specification.
 
 The engineering layer does not replace the product layer. A module is not development-ready when it only states purpose, inputs, outputs, aggregates, and commands while omitting page behavior, fields, dictionaries, actions, rules/calibers, states, permissions, exceptions, and acceptance.
+
+When the artifact will guide implementation, add a compact plan/task bridge
+after the product specification is complete: implementation assumptions,
+dependencies, vertical slice backlog, and readiness risks. This borrows the
+useful discipline of spec-driven workflows without creating separate unsynced
+documents. Tasks must point back to Function IDs and Acceptance IDs.
 
 ### Complete Module And Function Product Specification
 

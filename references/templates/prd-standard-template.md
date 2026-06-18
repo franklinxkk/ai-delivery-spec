@@ -26,6 +26,7 @@ The template is not complete merely because all chapter titles exist. Completene
 - 11. State Machine And Button Matrix
 - 12. Prototype And Interaction Contract
 - 13. Engineering Traceability Contract
+- 13.5 Implementation Plan And Task Backlog
 - 14. Data, Metrics, And Tracking
 - 15. Non-Functional Requirements
 - 16. Acceptance And Readiness
@@ -586,6 +587,36 @@ Backend closure checklist for each write command:
 | Function ID | Aggregate / Owner | Command Input / Output | Expected Version / Concurrency | Idempotency Key | Transaction / Saga Boundary | Persisted Result | Domain Event | Audit Fields | Retry / Reconciliation |
 |---|---|---|---|---|---|---|---|---|---|
 | | | | | | | | | | |
+
+## 13.5 Implementation Plan And Task Backlog
+
+Complete this only when the PRD will enter development planning, AI coding, or
+issue assignment. It is a downstream execution map, not a second source of
+requirements.
+
+### Implementation Assumptions
+
+| Area | Assumption / Decision | Evidence / Owner | Risk If Wrong |
+|---|---|---|---|
+| architecture / dependency / data / migration / release | | | |
+
+### Vertical Slice Backlog
+
+Each task must deliver a verifiable user-visible or domain result. Avoid pure
+horizontal tickets such as "build database layer" unless they are explicit
+prefactoring tasks and unblock a vertical slice.
+
+| Task ID | Slice / Outcome | Source FRR | Acceptance IDs | Owner Role | Depends On | Files / Modules Likely Touched | Test / Evidence | Done Signal |
+|---|---|---|---|---|---|---|---|---|
+| TASK-001 | | Mxx-Fnn | AC-... | frontend/backend/algorithm/QA | none / TASK-... | optional if known | | demoable path / passing test |
+
+Task rules:
+
+- No task without `Source FRR` and `Acceptance IDs`, unless it is a named
+  prefactoring, migration, or environment task with a clear blocker reason.
+- Split by independently testable workflow/result, not by organization chart.
+- If a task depends on an unresolved business rule, field dictionary, permission
+  decision, source system, or external integration, mark it `BLOCKED`.
 
 ## 14. Data, Metrics, And Tracking
 
