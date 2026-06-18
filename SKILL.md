@@ -8,7 +8,7 @@ description: >-
   syntax/debugging, copy rewriting, or idea exploration with no delivery intent.
 ---
 
-# AI Delivery Spec — Production Elastic Delivery Standard (v4.4.0)
+# AI Delivery Spec — Production Elastic Delivery Standard (v4.4.1)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering,
 algorithm, QA, operations, customers, and sponsors can read, build, verify, and
@@ -53,7 +53,7 @@ Load only these runtime entrypoints:
 | Entrypoint | Use When | Contains |
 |---|---|---|
 | `SKILL.md` | always | 0D triage, mode/tier rules, top-level gates, routing |
-| `references/delivery-core.md` | PRD, requirement, story, state, Stage 0, DDD/API/data handoff, E2E matrix | main delivery kernel |
+| `references/delivery-core.md` | PRD, requirement, story, state, Stage 0, DDD/API/data handoff, E2E matrix | main delivery kernel; may load readability layer for L1+ PRD/handoff |
 | `references/prototype-testability.md` | HTML prototype, executable demo, mobile/H5/mini-program/app interaction | state-driven prototype and testability kernel |
 | `references/advanced-extensions.md` | only when triggered by 0D or explicit scope | AI, SaaS, approval, reporting, low-code, global/readiness/domain extensions |
 
@@ -123,6 +123,10 @@ Applies to PRD, product-linked architecture/API/data contract, or development
 handoff. Required:
 
 - traditional product specification remains the primary truth;
+- L1+ PRD/handoff documents must apply human readability rules: executive
+  summary, scenario-first module writing, explicit boundary/exception coverage,
+  metrics/event tracking where operationally useful, and frontend/backend/QA
+  handoff notes;
 - every release function has a complete Functional Requirement Record;
 - engineering contract is embedded as an implementation/traceability layer, not
   a replacement for product specification;
@@ -155,6 +159,9 @@ Choose one primary route, then add triggered extensions.
 
 - Product specification and engineering contract must coexist in one source of
   truth. Do not split them into unsynchronized documents.
+- Machine-readable contracts are not enough for human teams. PRDs must restore
+  business scenario, boundary, exception, metric, and test intent before
+  engineering tables.
 - Reader-first navigation may reduce duplication, never reduce function
   coverage, source evidence mapping, acceptance coverage, or traceability.
 - Every supplied source file, sheet, page, rule, screenshot, SQL/dictionary,

@@ -9,6 +9,20 @@ The goal is not to make documents thicker. The goal is to make product
 requirements readable, buildable, testable, and operable for product,
 frontend, backend, algorithm, QA, operations, customers, and sponsors.
 
+## v4.4.1 Focus
+
+v4.4.1 adds a **Human Readability Layer** for PRD and development handoff
+documents. It keeps the v4.4.0 four-entry runtime architecture, but makes
+L1+ PRDs more useful for human RD and QA collaboration:
+
+- executive summary within one screen;
+- scenario-first module writing before API/DDD/data tables;
+- explicit business boundary and exception coverage;
+- metrics and event tracking tables with purpose and privacy notes;
+- frontend/backend/QA handoff notes inside FRRs;
+- concrete examples for thresholds, formulas, time windows, AI confidence
+  rules, and non-obvious state guards.
+
 ## v4.4.0 Focus
 
 v4.4.0 introduces the **Production Elastic Delivery Standard**:
@@ -36,6 +50,7 @@ ai-delivery-spec/
     ├── delivery-core.md
     ├── prototype-testability.md
     ├── advanced-extensions.md
+    ├── readability-layer.md
     ├── templates/
     ├── prompt-registry.yaml
     ├── domain-module-template.md

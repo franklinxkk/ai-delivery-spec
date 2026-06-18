@@ -9,6 +9,7 @@ The template is not complete merely because all chapter titles exist. Completene
 ## Contents
 
 - 1. Version Information
+- 1.5 Executive Summary
 - 2. Change Log
 - 3. Document Notes
 - 3.5 Reader Navigation
@@ -42,6 +43,21 @@ The template is not complete merely because all chapter titles exist. Completene
 | Reviewers | Sponsor / PM / Dev Lead / QA / Ops |
 | Delivery Tier | L2 Standard Product Delivery |
 | Triggered Gates | Story-Path / Demo-Closed / Development Contract / Acceptance / optional gates |
+
+## 1.5 Executive Summary
+
+Keep this within one screen. Write it before detailed sections so reviewers can
+understand the business problem, scope, and acceptance signal without reading
+the whole document.
+
+| Field | Content |
+|---|---|
+| Problem | concrete user/business pain; avoid vague “improve efficiency” wording |
+| Primary roles | |
+| Release scope | 2-4 most important functions in this iteration |
+| Out of scope | 1-3 high-expectation exclusions |
+| Hard constraints | compliance, data, dependency, rollout, or deadline limits |
+| Acceptance signal | measurable success indicator or launch decision signal |
 
 ## 2. Change Log
 
@@ -222,6 +238,22 @@ The summary index is not the specification itself. Complete Section 9 before wri
 
 Use `FULL_SPEC` for every module planned for implementation in this release. `OVERVIEW_ONLY` is allowed only for deferred, out-of-scope, or external modules and must state owner and revisit condition.
 
+### Mxx Business Scenario Canvas
+
+Start each module with scenarios before field, API, DDD, or command tables.
+Each scenario must let RD and QA understand `who / when / why / what / result`.
+
+| Scenario ID | Role | When / Trigger | Goal | Main Action | Success Result | Exception To Watch | FRR IDs |
+|---|---|---|---|---|---|---|---|
+| SC-Mxx-01 | | | | | visible result + domain result | | Mxx-Fnn |
+
+Scenario rules:
+
+- Every release FRR traces to at least one business scenario, unless it is a
+  system/internal function with an explicit reason.
+- A scenario is not a substitute for FRR detail. It explains business context
+  before the deterministic specification.
+
 ### Mxx-0 Function Inventory And Completeness Calculation
 
 List the complete release function tree first. This table is the denominator of Gate 3A.
@@ -357,7 +389,18 @@ Complete when the function includes recognition, recommendation, generation, sco
 |---|---|---|
 | performance / security / privacy / accessibility / compatibility / operations | | |
 
-#### 15. Acceptance And Traceability
+#### 15. Frontend / Backend / QA Handoff Notes
+
+| Role | Required Notes |
+|---|---|
+| Frontend | component states, disabled/hidden/highlight behavior, modal/toast/copy, loading/empty/error, responsive/interaction notes |
+| Backend | source of truth, validation owner, permission/data-scope guard, state transition, idempotency, audit/event, dependency failure behavior |
+| QA | priority happy path, boundary values, permission/overreach cases, state conflict, weak network, regression path |
+
+This table points readers to the detailed FRR, state matrix, prototype contract,
+and acceptance IDs. It does not create a second source of truth.
+
+#### 16. Acceptance And Traceability
 
 At minimum include happy, validation, permission, state-conflict, dependency-failure, and regression cases when applicable.
 
@@ -367,7 +410,7 @@ At minimum include happy, validation, permission, state-conflict, dependency-fai
 
 FRR completion rules:
 
-- Every numbered section 1-15 must contain concrete content or `N/A + reason`.
+- Every numbered section 1-16 must contain concrete content or `N/A + reason`.
 - “见原型”, “见附件”, “按现有逻辑”, “同上”, “支持相关操作”, and a screenshot without behavior mapping are incomplete.
 - Enum/dictionary values must be fully listed or mapped to a frozen authoritative annex range.
 - A source annex may carry atomic fields/rules/metrics, but interaction flow, permissions, exception behavior, and acceptance stay in the FRR.
@@ -554,15 +597,24 @@ Backend closure checklist for each write command:
 
 ### Metrics / Reports
 
-| Metric | Formula / Caliber | Dimension | Refresh | Usage |
-|---|---|---|---|---|
-| | | | | |
+| Metric ID | Metric | Formula / Caliber | Dimension | Baseline | Target | Refresh | Usage / Owner |
+|---|---|---|---|---|---|---|---|
+| MET-001 | | | | | | | |
 
 ### Event Tracking
 
-| Event | Trigger | Params | Purpose |
-|---|---|---|---|
-| | | | |
+| Event ID | Event Name | Trigger Moment | Required Params | Purpose | Privacy / Masking |
+|---|---|---|---|---|---|
+| EVT-001 | | button clicked / state changed / task completed | user_id, role, tenant_id, object_id, status | | |
+
+Tracking rules:
+
+- Add events only when they support operation, conversion, risk monitoring,
+  compliance, or product improvement.
+- For AI features, include prompt/model/rule version, confidence bucket,
+  fallback reason, human confirmation, and final outcome when applicable.
+- Sensitive identifiers must be masked, hashed, or omitted according to privacy
+  requirements.
 
 ## 15. Non-Functional Requirements
 

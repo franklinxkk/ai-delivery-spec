@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate ai-delivery-spec v4.4 runtime routing and core contracts."""
+"""Validate ai-delivery-spec v4.4.x runtime routing and core contracts."""
 
 from pathlib import Path
 import re
@@ -146,7 +146,7 @@ def main():
         "SKILL.md",
         text,
         (
-            "v4.4.0",
+            "v4.4.1",
             "[TIER: Heavy|Light] | [AI: true|false] | [WORKFLOW: true|false]",
             "Fast-pass pruning",
             "Runtime File Architecture",
@@ -155,6 +155,7 @@ def main():
             "GlobalState",
             "transition(currentState, action) -> nextState",
             "Product specification and engineering contract",
+            "human readability rules",
             "PASS",
             "REVIEW_COMPLETE_WITH_GAPS",
             "BLOCKED",
@@ -197,7 +198,9 @@ def main():
     delivery_core = (REFERENCES / "delivery-core.md").read_text(encoding="utf-8")
     prototype = (REFERENCES / "prototype-testability.md").read_text(encoding="utf-8")
     advanced = (REFERENCES / "advanced-extensions.md").read_text(encoding="utf-8")
+    readability = (REFERENCES / "readability-layer.md").read_text(encoding="utf-8")
     migration = (REFERENCES / "skill-version-migration.md").read_text(encoding="utf-8")
+    prd_template = (REFERENCES / "templates" / "prd-standard-template.md").read_text(encoding="utf-8")
 
     require_markers(
         "delivery-core.md",
@@ -209,6 +212,9 @@ def main():
             "Offline / concurrency",
             "E2E Cross-Module Canvas",
             "AC-E2E-LONG-RUNNING",
+            "Human-Readable PRD Layer",
+            "readability-layer.md",
+            "executive summary",
             "Complete Module And Function Product Specification",
             "Backend Closure Rules",
         ),
@@ -246,10 +252,39 @@ def main():
     )
 
     require_markers(
+        "readability-layer.md",
+        readability,
+        (
+            "Executive Summary",
+            "Scenario-First Module Writing",
+            "Boundary And Exception Coverage",
+            "Metrics And Event Tracking",
+            "Frontend Backend QA Handoff Notes",
+            "Business Examples",
+            "Readability Acceptance Checklist",
+        ),
+        failures,
+    )
+
+    require_markers(
+        "prd-standard-template.md",
+        prd_template,
+        (
+            "1.5 Executive Summary",
+            "Mxx Business Scenario Canvas",
+            "Frontend / Backend / QA Handoff Notes",
+            "Event ID",
+            "Privacy / Masking",
+        ),
+        failures,
+    )
+
+    require_markers(
         "skill-version-migration.md",
         migration,
         (
             "v4.3.0 -> v4.4.0 Production Elastic Delivery Standard",
+            "v4.4.0 -> v4.4.1 Human Readability Layer",
             "Four runtime entrypoints",
             "0D triage",
             "State-driven prototype law",
@@ -285,7 +320,7 @@ def main():
             print(f"- {item}")
         return 1
 
-    print("PASS: ai-delivery-spec v4.4 runtime routing and core contracts are consistent")
+    print("PASS: ai-delivery-spec v4.4.x runtime routing, readability, and core contracts are consistent")
     return 0
 
 

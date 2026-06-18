@@ -18,6 +18,7 @@ Use this file when upgrading projects or the skill itself across major versions.
 - v4.2.0 -> v4.2.1 Deterministic Functional Specification
 - v4.2.1 -> v4.3.0 Reader-First Quality Layer
 - v4.3.0 -> v4.4.0 Production Elastic Delivery Standard
+- v4.4.0 -> v4.4.1 Human Readability Layer
 - Gate Mapping
 - Project Upgrade Path
 - Migration Checklist
@@ -214,6 +215,31 @@ Compatibility:
   cross-module integration gaps.
 - Do not delete domain modules, templates, or prompt registry assets. They are
   load-on-demand assets behind `advanced-extensions.md`.
+
+## v4.4.0 -> v4.4.1 Human Readability Layer
+
+v4.4.1 addresses a practical gap found when comparing SDD-style artifacts with
+human RD/QA collaboration needs: machine-readable contracts alone are not
+enough. PRDs also need business scenarios, readable intent, boundary cases,
+metrics, and role-specific handoff notes.
+
+| Change | Migration Action |
+|---|---|
+| Readability layer added | Load `readability-layer.md` for L1+ PRD, product specification, or development handoff documents. Keep four-entry runtime architecture; this layer is reached through `delivery-core.md`. |
+| Executive Summary required | Add one-screen summary after version table: problem, roles, release scope, out of scope, constraints, acceptance signal. |
+| Scenario-first module writing | Add module business scenario canvas before function inventory and engineering tables. |
+| Boundary and exception hardening | Ensure validation, empty/loading/error, permission, state conflict, network/offline, and fallback cases are visible to RD/QA. |
+| Metrics and event tracking strengthened | Add metric ID, event ID, trigger moment, parameters, purpose, privacy/masking, and AI runtime fields when applicable. |
+| Frontend/backend/QA handoff notes | Add compact reader notes inside FRR to clarify component behavior, service/state responsibilities, and test focus. |
+
+Compatibility:
+
+- v4.4.0 PRDs remain valid if they are already readable and complete.
+- Upgrade to v4.4.1 when a PRD feels machine-oriented, hard for RD/QA to
+  review, or starts with APIs/DDD before business scenarios.
+- Do not remove FRR, DDD, evidence, or acceptance sections to make documents
+  shorter. Improve readability through scenario/context and navigation, not by
+  reducing requirement coverage.
 
 ## Gate Mapping
 

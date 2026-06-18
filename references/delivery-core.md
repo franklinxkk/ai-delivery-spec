@@ -7,6 +7,7 @@ Use this file for reverse engineering, PRD generation, state machines, guards, S
 - Stage 0 Reverse Engineering
 - Engineering Profile / Anti-Bloating
 - Stage 1-5 Product Workflow
+- Human-Readable PRD Layer
 - Guard Protocol
 - Complexity Budget Counting
 - SIM Review
@@ -343,6 +344,28 @@ Prototype rules:
 - Every backend-backed component has `data-api` + `data-method`.
 - Every role-specific view has `data-visible-role`.
 - If based on an older prototype, preserve the interaction baseline ledger or document approved de-scope.
+
+## Human-Readable PRD Layer
+
+For L1+ PRD, product specification, or development handoff documents, load
+`readability-layer.md` after the core structure is selected. This is a
+presentation and comprehension layer, not a replacement for FRR completeness.
+
+Mandatory readable PRD behaviors:
+
+| Need | Required Treatment |
+|---|---|
+| fast orientation | executive summary within one screen |
+| business context | module scenarios before field/API/DDD tables |
+| RD/QA clarity | explicit boundary, exception, permission, state conflict, network/offline, and fallback paths |
+| operating feedback | metrics and event tracking where post-launch operation or conversion/risk monitoring matters |
+| multi-role handoff | frontend/backend/QA notes that point to FRR/state/prototype/acceptance IDs |
+| rule clarity | concrete examples for thresholds, formulas, time windows, scores, and AI confidence rules |
+
+Fail the PRD readability layer when a module starts with only API/schema/DDD
+tables, uses phrases such as “supports related operations”, “see prototype”,
+“existing logic”, “intelligent processing”, or lacks business examples for
+non-obvious rules.
 
 ### 5.4 E2E Cross-Module Canvas
 

@@ -1,4 +1,4 @@
 interface:
   display_name: "AI Delivery Spec"
-  short_description: "用0D分仓把PRD、原型与AI交付物变成可开发可验收规格"
-  default_prompt: "使用 $ai-delivery-spec 先做0D分仓，再按最小必要范围审查并完善这份产品交付物。"
+  short_description: "用0D分仓把PRD、原型与AI交付物变成可读可开发可验收规格"
+  default_prompt: "使用 $ai-delivery-spec 先做0D分仓，再按最小必要范围审查并完善这份产品交付物；PRD需兼顾人类RD/QA可读性。"
