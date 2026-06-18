@@ -29,7 +29,7 @@ Extension trigger matrix:
 | visual workflow, low-code, connector, automation node, execution replay | Workflow Automation And Low-Code |
 | app/H5/mini-program/PC+mobile, overseas, localization, app stores | Mobile, Multi-Surface, And Global Delivery |
 | release, migration, rollout, on-call, rollback, retirement | System Readiness, Release, And Retirement |
-| industry/domain switch, traffic safety, CRM, prompt registry, templates | Domain Modules, Templates, And Legacy Assets |
+| industry/domain switch, traffic safety, CRM, higher-education informationization, prompt registry, templates | Domain Modules, Templates, And Legacy Assets |
 
 ## AI Feature / AI Native / Prompt Ops
 
@@ -250,6 +250,7 @@ Domain modules remain load-on-demand assets:
 - new industry/company domain: start from `domain-module-template.md`;
 - traffic safety: `domain-traffic.md` plus `domain-traffic-safety-scenarios.md`;
 - CRM: `domain-crm.md`.
+- higher-education informationization: `domain-education-it.md`.
 
 Templates:
 

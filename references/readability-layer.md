@@ -8,6 +8,7 @@ source evidence, DDD/API/data contracts, or acceptance coverage.
 ## Contents
 
 - Purpose
+- Role-Oriented PRD Completeness
 - Executive Summary
 - Scenario-First Module Writing
 - Boundary And Exception Coverage
@@ -26,6 +27,29 @@ guessing. A development-ready PRD must do both.
 
 Rule: narrative explains why and when; tables define what and how to verify.
 Do not produce a document that is only tables, schemas, and IDs.
+
+## Role-Oriented PRD Completeness
+
+A development-ready PRD must support different readers from one source of
+truth. Do not create separate unsynchronized PRDs for product, design,
+frontend, backend, algorithm, and QA.
+
+| Reader | The PRD Must Answer |
+|---|---|
+| Sponsor / PM | What problem is solved, which users and scenarios matter, what is in/out, how success is measured, and what risks remain |
+| UX / UI | user journey, IA, page regions, page states, interaction copy, empty/error/disabled states, accessibility and responsive constraints |
+| Frontend | component states, interaction triggers, client validation, loading/empty/error, multi-surface differences, `data-testid` / `data-action` mapping |
+| Backend | source of truth, fields/dictionaries, validation owner, permission/data scope, state transition, idempotency, dependencies, audit/event |
+| Algorithm / AI | input/output schema, model/rule/prompt responsibility, confidence threshold, human confirmation, evaluation cases, fallback and prohibited writes |
+| QA | happy path, boundary values, permission overreach, state conflict, weak network, dependency failure, regression path, expected UI/domain result |
+
+Rules:
+
+- Each major module must contain or link to these reader answers.
+- A reader-aid table can point to FRR/state/prototype/acceptance IDs, but it
+  cannot replace the detailed FRR.
+- If one reader cannot identify their implementation or test responsibility
+  from the PRD without asking the PM, Gate 3 is not ready.
 
 ## Executive Summary
 

@@ -151,7 +151,7 @@ def main():
         "SKILL.md",
         text,
         (
-            "v4.5.0",
+            "v4.5.2",
             "[TIER: Heavy|Light] | [AI: true|false] | [WORKFLOW: true|false]",
             "Fast-pass pruning",
             "Runtime File Architecture",
@@ -246,9 +246,13 @@ def main():
             "executive summary",
             "Complete Module And Function Product Specification",
             "Backend Closure Rules",
+            "Function-Level NFR",
+            "Frontend / Backend / QA handoff notes",
         ),
         failures,
     )
+    if "| Dependencies and NFR |" in delivery_core:
+        fail("delivery-core.md still has the obsolete FRR row: Dependencies and NFR", failures)
 
     require_markers(
         "prototype-testability.md",
@@ -276,6 +280,7 @@ def main():
             "Workflow Automation And Low-Code",
             "Domain Modules, Templates, And Legacy Assets",
             "load-on-demand assets",
+            "domain-education-it.md",
             "External lifecycle and PM frameworks are upstream evidence",
         ),
         failures,
@@ -286,6 +291,7 @@ def main():
         readability,
         (
             "Executive Summary",
+            "Role-Oriented PRD Completeness",
             "Scenario-First Module Writing",
             "Boundary And Exception Coverage",
             "Metrics And Event Tracking",
@@ -318,11 +324,14 @@ def main():
             "v4.3.0 -> v4.4.0 Production Elastic Delivery Standard",
             "v4.4.0 -> v4.4.1 Human Readability Layer",
             "v4.4.1 -> v4.5.0 Lifecycle Benchmark Bridge",
+            "v4.5.0 -> v4.5.1 PRD Runtime Consistency",
+            "v4.5.1 -> v4.5.2 Higher-Education Domain Module",
             "Four runtime entrypoints",
             "0D triage",
             "State-driven prototype law",
             "E2E Cross-Module Canvas",
             "Spec/Plan/Tasks bridge added",
+            "FRR summary aligned to 16 sections",
         ),
         failures,
     )
@@ -334,6 +343,9 @@ def main():
             "deanpeters/Product-Manager-Skills",
             "mattpocock/to-prd",
             "github/spec-kit",
+            "Woshipm 6063060 / 5264380",
+            "Atlassian PRD guidance",
+            "Microsoft Well-Architected business-requirement guidance",
             "Do not turn every review comment into a new public protocol",
         ),
         failures,
@@ -347,16 +359,17 @@ def main():
             "AI Delivery Spec / AI 产研交付规格",
             "tool-agnostic",
             "ChatGPT, Claude, Gemini",
-            "v4.5.0 Focus",
+            "v4.5.2 Focus",
             "Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire",
             "Default runtime has only four entrypoints",
+            "Higher-Education Informationization",
         ),
         failures,
     )
     if "Codex skill" in readme:
         fail("README.md still positions the project as a Codex-specific skill", failures)
 
-    for filename in ("domain-traffic.md", "domain-crm.md"):
+    for filename in ("domain-traffic.md", "domain-crm.md", "domain-education-it.md"):
         headings = level_two_headings(REFERENCES / filename)
         positions = []
         for section in DOMAIN_SECTIONS:

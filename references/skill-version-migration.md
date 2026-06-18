@@ -20,6 +20,8 @@ Use this file when upgrading projects or the skill itself across major versions.
 - v4.3.0 -> v4.4.0 Production Elastic Delivery Standard
 - v4.4.0 -> v4.4.1 Human Readability Layer
 - v4.4.1 -> v4.5.0 Lifecycle Benchmark Bridge
+- v4.5.0 -> v4.5.1 PRD Runtime Consistency
+- v4.5.1 -> v4.5.2 Higher-Education Domain Module
 - Gate Mapping
 - Project Upgrade Path
 - Migration Checklist
@@ -264,6 +266,52 @@ Compatibility:
   slicing, AI coding handoff, or clearer public onboarding.
 - Do not create task backlogs from incomplete requirements. A task without FRR
   and Acceptance IDs is either a named prefactoring/migration task or `BLOCKED`.
+
+## v4.5.0 -> v4.5.1 PRD Runtime Consistency
+
+v4.5.1 fixes a runtime/template split found during PRD quality review. The
+standard template already required 16 FRR sections, but the `delivery-core.md`
+runtime summary still described only 15 sections. Since most PRD generation
+loads the core file before the template, the core summary is now authoritative
+and aligned with the template.
+
+| Change | Migration Action |
+|---|---|
+| FRR summary aligned to 16 sections | Recheck development-facing PRDs generated from v4.5.0 if they lack `Frontend / Backend / QA Handoff Notes`. |
+| §14 renamed to `Function-Level NFR` | Keep performance/security/privacy/accessibility/compatibility/operations here with measurable acceptance. |
+| Dependencies moved out of §14 | Put upstream/downstream timing, interfaces, failure behavior, and owners in §12 `Notifications, Audit, And Dependencies`. |
+| Role-oriented completeness strengthened | A PRD must answer Sponsor/PM, UX/UI, Frontend, Backend, Algorithm/AI, and QA questions from one source of truth. |
+
+Compatibility:
+
+- v4.5.0 documents remain usable if they already contain complete 16-section
+  FRRs or equivalent handoff notes.
+- For active development, upgrade the FRR denominator before sprint kickoff:
+  missing §15 is a Gate 3 readiness gap, not a stylistic issue.
+- Do not split role-specific PRDs. Add reader navigation and handoff notes inside
+  the same product specification.
+
+## v4.5.1 -> v4.5.2 Higher-Education Domain Module
+
+v4.5.2 adds a replaceable higher-education informationization domain module
+based on reusable patterns from multi-year digital campus, academic affairs,
+student affairs, teaching quality, data governance, one-stop service, and AI
+assistant materials. It does not change the public runtime protocol.
+
+| Change | Migration Action |
+|---|---|
+| `domain-education-it.md` added | Load only when the scenario is higher-education informationization, digital campus, academic affairs, student affairs, teaching quality, smart classroom, one-stop service, education data governance, or campus AI assistant. |
+| Domain index updated | `advanced-extensions.md` now lists traffic, CRM, and higher-education as load-on-demand domain examples. |
+| README bilingual wording refreshed | Public README remains AI-tool-agnostic and now names the supported replaceable domain modules. |
+
+Compatibility:
+
+- Existing traffic-safety and CRM projects are unaffected.
+- Higher-education scenarios must still use the same 14-section domain module
+  contract and the same Gate 1-4 rules.
+- Do not copy school-specific customer data, quotations, or project names into
+  public PRDs unless the user explicitly provides them as source evidence for
+  that project.
 
 ## Gate Mapping
 

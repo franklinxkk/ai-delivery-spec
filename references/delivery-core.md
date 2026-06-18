@@ -359,12 +359,22 @@ For each function in the release inventory, write a deterministic functional req
 | State-button behavior | object state, visible/forbidden actions, guards, transitions, audit/event |
 | Permission and data scope | tenant/org/region/enterprise/row/field/action scope and override/approval policy |
 | Exceptions and recovery | validation, empty, duplicate, stale/conflict, permission, timeout, dependency failure, partial success, retry/reopen/rollback |
-| Notifications and audit | recipient, channel, trigger, template/contents, failure behavior, audit fields |
+| Notifications, audit, and dependencies | recipient/dependency, channel/interface, trigger, contract, failure behavior, audit/owner |
 | Data / AI / algorithm contract | when applicable: input/output schema, deterministic vs model responsibility, confidence/threshold, human confirmation, prompt/model/rule version, fallback, evaluation and prohibited writes; otherwise `N/A + reason` |
-| Dependencies and NFR | source of truth, upstream/downstream timing, performance, security/privacy, compatibility, operations |
+| Function-Level NFR | performance, security/privacy, accessibility, compatibility, operations; each with measurement/acceptance |
+| Frontend / Backend / QA handoff notes | frontend component behavior, backend validation/state/data ownership, QA focus and regression paths; point to FRR/state/prototype/acceptance IDs |
 | Acceptance | happy, validation, permission, state conflict, dependency failure, regression; expected UI and domain result |
 
-Any section that truly does not apply must say `N/A` and why. Blank, omitted, “同上”, “见原型”, or “按现有逻辑” does not count as complete.
+FRR section order is authoritative and must match the standard template:
+1 Identity, 2 Roles/Scenario, 3 Entry/Preconditions, 4 Pages/Visible States,
+5 Fields/Dictionaries/Validation, 6 Numbered Flow, 7 Actions/Rules,
+8 Business Rules/Calibers, 9 State/Button/Lifecycle, 10 Permissions/Data Scope,
+11 Exceptions/Recovery, 12 Notifications/Audit/Dependencies,
+13 Data/AI/Algorithm, 14 Function-Level NFR,
+15 Frontend/Backend/QA Handoff Notes, 16 Acceptance/Traceability.
+
+Any section that truly does not apply must say `N/A` and why. Blank, omitted,
+“同上”, “见原型”, or “按现有逻辑” does not count as complete.
 
 ### Module Shared Contracts
 

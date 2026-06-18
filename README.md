@@ -28,23 +28,45 @@ procurement, release, migration, AI runtime governance, or acceptance.
 Do not use it for pure code syntax debugging, copy rewriting, or loose
 brainstorming with no delivery intent.
 
-## v4.5.0 Focus
+## v4.5.2 Focus
 
-v4.5.0 keeps the v4.4 production-elastic runtime and adds a lightweight
-Lifecycle / Spec-Plan-Tasks bridge:
+v4.5.2 keeps the v4.5 lifecycle bridge, preserves the v4.5.1 PRD
+runtime/template consistency fix, and adds a new replaceable domain module for
+Higher-Education Informationization:
 
-- external PM/discovery frameworks become upstream evidence, not mandatory
-  pipelines;
-- specification, implementation plan, and task breakdown are separated but
-  traceable in one source of truth;
-- task breakdown uses vertical slices tied to Function IDs and Acceptance IDs;
-- README is now bilingual and AI-tool-agnostic;
-- old detailed reference files are retained only as load-on-demand source
-  assets, not default runtime files.
+- the runtime FRR summary now has the same 16 sections as the standard PRD
+  template;
+- `Function-Level NFR` is separated from dependencies, while upstream/downstream
+  dependencies stay in `Notifications, Audit, And Dependencies`;
+- PRD readability explicitly covers Sponsor/PM, UX/UI, Frontend, Backend,
+  Algorithm/AI, and QA readers from one source of truth;
+- public PRD-writing references are treated as readability guidance, not copied
+  wholesale into the runtime;
+- `references/domain-education-it.md` supports digital campus, academic affairs,
+  student affairs, teaching quality, smart classroom, one-stop service, data
+  governance, and campus AI assistant scenarios.
 
-v4.5.0 保留 0D 分仓、四入口架构和可读 PRD 层，同时吸收主流高星项目中最有用
-的工程节奏：先讲清 `what/why/acceptance`，再讲清 `plan/risk/dependency`，
-最后拆成可独立验证的垂直切片任务。它不会把完整外部流程强行塞进团队日常。
+v4.5.2 在保留 v4.5.1 PRD 运行时一致性修复的基础上，新增高校教育信息化领域模块。
+PRD 仍然是单一权威文档，工程契约嵌入其中，用来让前端、后端、算法和测试都能直接找到
+自己的实现与验收依据。
+
+## Domain Modules / 可替换领域模块
+
+Domain knowledge lives in replaceable modules. The public protocol stays
+domain-neutral.
+
+领域知识放在可替换的 domain 模块里，公共交付协议保持领域无关。
+
+| Domain | File | Typical Scope |
+|---|---|---|
+| Traffic Safety / 交通安全与运管监管 | `references/domain-traffic.md` | regulated enterprise, vehicle, personnel, inspection, hidden danger, training, report |
+| CRM / 客户经营响应 | `references/domain-crm.md` | lead, opportunity, customer 360, ticket, demand, contract/payment, partner response |
+| Higher-Education Informationization / 高校教育信息化 | `references/domain-education-it.md` | academic affairs, student affairs, teaching quality, smart classroom, one-stop service, data governance, campus AI assistant |
+
+When changing company or industry, replace or add a `domain-*.md` module first.
+Only change the public protocol when the delivery behavior itself must change.
+
+换公司或行业时，优先替换或新增 `domain-*.md`。只有交付行为本身需要变化时，才修改公共协议。
 
 ## Runtime Architecture / 运行架构
 

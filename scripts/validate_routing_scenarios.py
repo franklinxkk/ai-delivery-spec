@@ -370,6 +370,29 @@ def classify(prompt):
         plugins.add("traffic-domain")
     if contains_any(prompt, ("crm", "客户管理", "线索", "商机", "客户经营", "经营响应")):
         plugins.add("crm-domain")
+    if contains_any(
+        prompt,
+        (
+            "高校",
+            "教育信息化",
+            "智慧校园",
+            "数字校园",
+            "教务",
+            "学工",
+            "教学质量",
+            "智慧教室",
+            "一网通办",
+            "辅导员",
+            "higher-education",
+            "digital campus",
+            "academic affairs",
+            "student affairs",
+            "teaching quality",
+            "smart classroom",
+            "campus ai assistant",
+        ),
+    ):
+        plugins.add("education-domain")
     if contains_any(prompt, FULL_SIGNALS) or route in {"release-readiness", "retirement"}:
         plugins.add("readiness")
     if route == "strategy-discovery" or contains_any(
@@ -563,6 +586,30 @@ SCENARIOS = (
         "Standard",
         "L2",
         frozenset({"workflow", "saas"}),
+    ),
+    Scenario(
+        "Higher education academic affairs",
+        "编写高校教育信息化教务系统PRD，覆盖培养方案、开课、排课、选课、考试、成绩发布、申诉和数据治理，交开发和QA",
+        True,
+        "Standard",
+        "L2",
+        frozenset({"education-domain"}),
+    ),
+    Scenario(
+        "Higher education student affairs",
+        "评审智慧校园学工系统PRD，覆盖辅导员工作台、请假审批、奖助、心理谈话、学生预警、一网通办、多租户RBAC和审计，交开发和QA",
+        True,
+        "Standard",
+        "L2",
+        frozenset({"approval", "saas", "education-domain"}),
+    ),
+    Scenario(
+        "Higher education teaching quality AI",
+        "设计高校教学质量与智慧教室PRD，包含AI推荐课堂分析结论、人工复核、指标看板、移动端取证和测试验收，交开发和QA",
+        True,
+        "Standard",
+        "L2",
+        frozenset({"ai-feature", "mobile", "reporting", "education-domain"}),
     ),
     Scenario(
         "Board strategy handoff",
