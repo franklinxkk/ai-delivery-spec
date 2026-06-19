@@ -8,6 +8,9 @@ All notable changes to AI Delivery Spec are summarized here.
 - Added a complete L1 PRD sample for traffic-safety hidden-danger remediation.
 - Improved the L1 light PRD core-flow section with a fill-in sentence pattern.
 - Added explicit Learn/Retire scope boundaries and a generic post-launch review template.
+- Expanded the Higher-Education IT domain module with OBE/accreditation,
+  professional construction, smart classroom, student community, and research
+  management lifecycle patterns.
 
 ## v4.5.2 - 2026-06-18
 
