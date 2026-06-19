@@ -3,6 +3,11 @@
 > The world's first **product-side Spec-Driven Development** framework for AI-native teams.
 > 从需求到上线，一套可读、可开发、可测试、可运营的产研交付规格。
 
+**AI Delivery Spec / AI 产研交付规格** is a tool-agnostic delivery standard
+for product managers, AI product leads, engineering teams, and QA teams.
+It works with ChatGPT, Claude, Gemini, Codex, Cursor, Copilot, OpenClaw,
+and any AI tool that can read Markdown.
+
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Version](https://img.shields.io/badge/version-4.5.2-green.svg)]()
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
@@ -37,6 +42,14 @@ but a routing-driven runtime that loads only what each artifact needs.
 > 💡 **Complementary with [github/spec-kit](https://github.com/github/spec-kit)**:
 > spec-kit handles spec→code, ai-delivery-spec handles requirement→spec+prototype.
 
+## v4.5.2 Focus
+
+- Human-readable PRDs for product, frontend, backend, algorithm, and QA teams.
+- Embedded engineering contracts for AI-assisted development.
+- Replaceable domain modules for CRM, traffic safety, and education IT.
+- A single lifecycle bridge:
+  `Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire`.
+
 ## Quick Start / 快速开始
 
 ### Install
@@ -57,6 +70,19 @@ First run 0D triage: [TIER] [AI] [WORKFLOW].
 Load only the relevant entrypoint files.
 Produce the requested artifact and end with gates, verification, gaps, and completion state.
 ```
+
+## Examples / 示例
+
+Start with a real-world scenario:
+
+- [CRM Response Center](examples/crm-response-center/README.md) — lead,
+  opportunity, customer service, product feedback, contract/payment.
+- [Traffic Safety SaaS](examples/traffic-safety-saas/README.md) — regulated
+  ToB/ToG workflows, mobile inspection, notices, hidden-danger remediation.
+- [Higher-Education IT](examples/education-it/README.md) — academic affairs,
+  student affairs, teaching systems, smart classrooms, AI learning assistants.
+
+See [examples/README.md](examples/README.md) for the full example index.
 
 ### Try It Now / 立即试用
 
@@ -89,13 +115,15 @@ Spec an AI feature with runtime governance for [your scenario].
 |--------|------|-------|
 | Traffic Safety / 交通安全 | `references/domain-traffic.md` | Regulated enterprise, vehicle, personnel, training |
 | CRM / 客户经营 | `references/domain-crm.md` | Lead, opportunity, customer 360, ticket, contract |
-| Higher-Education IT / 高校教育信息化 | `references/domain-education-it.md` | Academic affairs, student affairs, smart classroom |
+| Higher-Education Informationization / 高校教育信息化 | `references/domain-education-it.md` | Academic affairs, student affairs, smart classroom |
 
 > Adding a new industry? Copy `references/domain-module-template.md` and customize.
 
 ## Architecture / 运行架构
 
 Only 4 entrypoints, loaded on demand:
+
+Default runtime has only four entrypoints.
 
 ```
 SKILL.md ─────────────────────── triage, routing, gates
@@ -151,6 +179,12 @@ Works with: **Claude Code** • **Claude Desktop** • **ChatGPT** • **Gemini*
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). PRs welcome! 🎉
+
+## Launch / Community
+
+- [Changelog](CHANGELOG.md)
+- [Social launch kit](docs/social-launch-kit.md)
+- [Awesome submission targets](docs/awesome-submission-targets.md)
 
 ## Star History
 
