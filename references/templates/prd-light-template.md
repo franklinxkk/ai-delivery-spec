@@ -2,6 +2,20 @@
 
 Use for internal alignment, simple CRUD/workflow, or feature explanation before full development handoff.
 
+## Contents
+
+- 1. Version
+- 2. Background
+- 3. Goal And Non-Goal
+- 4. Users And Roles
+- 5. Scope
+- 6. User Stories
+- 7. Core Flow
+- 8. State And Actions
+- 9. Prototype / Screen Notes
+- 10. Risks And Open Questions
+- 11. Acceptance
+
 ## 1. Version
 
 | Field | Value |
@@ -59,6 +73,19 @@ Not included in this version:
 ```text
 entry -> action -> visible result -> domain result -> next action
 ```
+
+Fill-in sentence:
+
+```text
+The user enters from [入口/Entry], triggers [动作/Action], the system returns
+[可见结果/Visible Result], and writes or updates [领域对象/Domain Object].
+```
+
+Example:
+
+| Step | Flow Sentence | Notes |
+|---|---|---|
+| 1 | The regulator enters from the hidden-danger list, clicks `Issue Notice`, the system shows a confirmation modal, and creates a `HiddenDangerNotice` in `issued` state. | Every step must include both visible result and domain result. |
 
 ## 8. State And Actions
 

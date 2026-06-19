@@ -257,7 +257,8 @@ Templates:
 - light PRD: `templates/prd-light-template.md`;
 - standard PRD: `templates/prd-standard-template.md`;
 - AI Native PRD: `templates/ai-native-prd-template.md`;
-- readiness checklist: `templates/system-readiness-checklist-template.md`.
+- readiness checklist: `templates/system-readiness-checklist-template.md`;
+- post-launch review: `templates/post-launch-review-template.md`.
 
 External lifecycle and PM frameworks are upstream evidence, not runtime
 dependencies. If a user brings Product-Manager-Skills, Spec Kit, to-prd style

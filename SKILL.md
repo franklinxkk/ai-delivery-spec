@@ -104,6 +104,11 @@ Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire
 risks, and dependencies. `Tasks` records vertical slices traceable to functions
 and acceptance. Skip stages that are not needed for the requested artifact.
 
+Learn/Retire coverage is deliberately minimal: capture metric review,
+post-launch learning, and sunset evidence, but do not claim a full
+experimentation, causal inference, or portfolio-retirement framework. When those
+decisions matter, declare the external framework or unresolved gap.
+
 ## 3. AI Centrality
 
 Classify per module:

@@ -42,6 +42,20 @@ but a routing-driven runtime that loads only what each artifact needs.
 > 💡 **Complementary with [github/spec-kit](https://github.com/github/spec-kit)**:
 > spec-kit handles spec→code, ai-delivery-spec handles requirement→spec+prototype.
 
+## Who Should Use This / 适合谁
+
+| Persona | Start Here | Typical Outcome |
+|---|---|---|
+| Solo PM + AI agent | L0/L1, `references/templates/prd-light-template.md`, `examples/` | turn messy ideas into a readable PRD draft |
+| 2-8 person ToB product team | L1/L2, PRD + prototype + acceptance gates | align PM, frontend, backend, algorithm, and QA before build |
+| Enterprise delivery team | L2/L3, readiness, domain modules, AI/runtime governance | support bid, customer demo, regulated launch, and acceptance |
+
+Use **spec-kit** when you already have an approved spec and need code-task
+decomposition. Use **ai-delivery-spec** when the requirement, prototype, domain
+logic, role path, or acceptance evidence is not yet clear. For AI-assisted
+delivery, use ai-delivery-spec first, then hand the stabilized spec to spec-kit
+or your coding agent.
+
 ## v4.5.2 Focus
 
 - Human-readable PRDs for product, frontend, backend, algorithm, and QA teams.
@@ -51,6 +65,35 @@ but a routing-driven runtime that loads only what each artifact needs.
   `Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire`.
 
 ## Quick Start / 快速开始
+
+You only need an AI tool that can read Markdown and the files in this repo.
+No vendor-specific runtime is required.
+
+### 10-Minute Walkthrough / 10分钟上手
+
+1. **Write a minimum PRD / 写一个最小 PRD**
+
+   ```text
+   Use AI Delivery Spec. Mode=Lite, Tier=L1.
+   Write a light PRD for: [feature + target user + business goal].
+   Use prd-light-template and list missing decisions at the end.
+   ```
+
+2. **Review the PRD / 让 AI 检查它**
+
+   ```text
+   Review this PRD with AI Delivery Spec Gate 1 and Gate 3.
+   Check user story, role path, visible result, domain result, exceptions,
+   and whether developers/QA can implement and test it.
+   ```
+
+3. **Upgrade to L2 when it will guide development / 升级到开发交付版**
+
+   ```text
+   Upgrade this L1 PRD to L2 Standard.
+   Add complete FRRs, state/action matrix, frontend/backend/QA handoff notes,
+   acceptance criteria, and traceability.
+   ```
 
 ### Install
 
@@ -79,6 +122,7 @@ Start with a real-world scenario:
   opportunity, customer service, product feedback, contract/payment.
 - [Traffic Safety SaaS](examples/traffic-safety-saas/README.md) — regulated
   ToB/ToG workflows, mobile inspection, notices, hidden-danger remediation.
+  See the complete [L1 PRD sample](examples/traffic-safety-saas/l1-prd-sample.md).
 - [Higher-Education IT](examples/education-it/README.md) — academic affairs,
   student affairs, teaching systems, smart classrooms, AI learning assistants.
 
@@ -153,6 +197,14 @@ Use only the stages needed by the requested artifact:
 ```
 Discover → Specify → Plan → Tasks → Build/Verify → Launch → Learn/Retire
 ```
+
+Learn/Retire is intentionally lightweight in the current runtime: use it for
+minimum metric review, post-launch learning, and sunset planning. For causal
+experiments, advanced A/B testing, or complex deprecation economics, pair this
+repo with your analytics or experimentation framework and record the boundary
+as an explicit gap. Start from
+[`post-launch-review-template.md`](references/templates/post-launch-review-template.md)
+when you only need a minimum review artifact.
 
 ## Validation / 校验
 

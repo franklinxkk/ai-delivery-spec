@@ -6,6 +6,9 @@ A transportation safety SaaS platform serves local regulators and transport
 enterprises. It manages enterprises, vehicles, drivers, safety training,
 inspection, notices, meetings, hidden danger remediation, and data reports.
 
+For a complete beginner-friendly output sample, see
+[L1 PRD Sample: Hidden Danger Rectification Notice](l1-prd-sample.md).
+
 ## Input Prompt
 
 ```text
