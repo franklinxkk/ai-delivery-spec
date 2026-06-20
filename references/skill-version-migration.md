@@ -22,6 +22,7 @@ Use this file when upgrading projects or the skill itself across major versions.
 - v4.4.1 -> v4.5.0 Lifecycle Benchmark Bridge
 - v4.5.0 -> v4.5.1 PRD Runtime Consistency
 - v4.5.1 -> v4.5.2 Higher-Education Domain Module
+- v4.5.2 -> v4.6.0 Coding Agent Compatibility
 - Gate Mapping
 - Project Upgrade Path
 - Migration Checklist
@@ -312,6 +313,31 @@ Compatibility:
 - Do not copy school-specific customer data, quotations, or project names into
   public PRDs unless the user explicitly provides them as source evidence for
   that project.
+
+## v4.5.2 -> v4.6.0 Coding Agent Compatibility
+
+v4.6.0 adds first-class support for coding-agent handoff. It keeps the
+human-readable PRD and FRR as the source of truth, then adds optional
+machine-readable blocks that Cursor, Claude Code, GitHub Copilot Workspace,
+Codex, and similar implementation agents can parse.
+
+| Change | Migration Action |
+|---|---|
+| `coding-agent-compat.md` added | Load only when the PRD/prototype will be consumed by a coding agent, or when the user asks for `AGENTS.md`, `CLAUDE.md`, Cursor rules, test stubs, or machine-readable acceptance. |
+| FRR section 16 extended | Keep prose acceptance required. Add an optional `ac_structured` YAML block immediately after the prose table for L2/L3 coding-agent handoff. |
+| FRR section 13 extended | Add optional `ai_contract_lite` or full machine-readable `ai_runtime_contract` when AI behavior must be implemented, tested, or monitored. |
+| Agent entrypoints added | Use `agents/claude-code.md` as a starter for `CLAUDE.md`, repo-level `AGENTS.md`, `.cursor/rules/*.mdc`, or legacy `.cursorrules`. |
+
+Compatibility:
+
+- L0/L1 human-only PRDs are unchanged unless the user explicitly asks for a
+  coding-agent handoff.
+- Natural-language acceptance remains mandatory. `ac_structured` is additive,
+  not a replacement.
+- Existing prototype `data-testid` and `data-action` conventions remain valid;
+  v4.6.0 formalizes how they connect to tests and implementation tasks.
+- If an old PRD has prose ACs only, migrate P0/P1 cases first and mark any
+  intentionally manual case with `skip_reason`.
 
 ## Gate Mapping
 

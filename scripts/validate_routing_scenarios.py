@@ -49,6 +49,12 @@ STANDARD_SIGNALS = (
     "多角色",
     "全生命周期",
     "handoff",
+    "generate",
+    "convert",
+    "implementation",
+    "cursor",
+    "claude code",
+    "copilot workspace",
     "董事会",
     "年度规划",
     "重大投资",
@@ -109,6 +115,14 @@ DELIVERY_ARTIFACTS = (
     "测试计划",
     "追溯矩阵",
     "uat",
+    "agents.md",
+    "claude.md",
+    "cursor rules",
+    ".cursor/rules",
+    ".cursorrules",
+    "ac_structured",
+    "test stubs",
+    "coding agent",
     "发布计划",
     "灰度方案",
     "运行手册",
@@ -146,6 +160,10 @@ DELIVERY_INTENT = (
     "测试",
     "演示",
     "上线",
+    "generate",
+    "convert",
+    "implement",
+    "implementation",
 )
 
 NON_DELIVERY = (
@@ -250,6 +268,8 @@ def select_route(prompt):
             "测试用例",
             "追溯矩阵",
             "uat",
+            "test stubs",
+            "ac_structured",
             "验收报告",
             "验收方案",
         ),
@@ -402,6 +422,22 @@ def classify(prompt):
         plugins.add("strategy")
     if contains_any(prompt, ("skill发布", "prompt registry", "prompt注册", "模型注册", "工具注册")):
         plugins.add("prompt-ops")
+    if contains_any(
+        prompt,
+        (
+            "agents.md",
+            "claude.md",
+            "cursor rules",
+            ".cursor/rules",
+            ".cursorrules",
+            "ac_structured",
+            "test stubs",
+            "coding agent",
+            "claude code",
+            "copilot workspace",
+        ),
+    ):
+        plugins.add("coding-agent")
     if contains_any(prompt, ("现有", "已有", "旧版", "截图", "sql", "逆向", "v1.8", "v15")):
         plugins.add("reverse-engineering")
 
@@ -491,6 +527,23 @@ SCENARIOS = (
         "Standard",
         "L2",
         frozenset({"reverse-engineering", "reporting"}),
+    ),
+    Scenario(
+        "Coding agent repo instructions",
+        "Generate AGENTS.md, CLAUDE.md and Cursor rules from this approved PRD and prototype for coding agent implementation",
+        True,
+        "Standard",
+        "L2",
+        frozenset({"coding-agent"}),
+    ),
+    Scenario(
+        "Structured AC test stubs",
+        "Convert FRR section 16 acceptance into ac_structured YAML and generate P0/P1 test stubs for Copilot Workspace",
+        True,
+        "Standard",
+        "L2",
+        frozenset({"coding-agent"}),
+        "verification-acceptance",
     ),
     Scenario(
         "Driver precision training agent",
@@ -844,7 +897,7 @@ def main():
             print(f"- {failure}")
         return 1
 
-    real_count = 12
+    real_count = 14
     boundary_count = 8
     global_count = 8
     lifecycle_count = 12

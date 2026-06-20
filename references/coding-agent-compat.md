@@ -1,0 +1,277 @@
+# Coding Agent Compatibility
+
+Load this file when the output will be consumed by a coding agent such as
+Claude Code, Cursor, GitHub Copilot coding agent / Workspace, Devin, or a
+similar implementation agent. Also load it when the user asks to generate
+`AGENTS.md`, `CLAUDE.md`, `.cursor/rules`, `.cursorrules`, test scaffolding, or
+machine-readable acceptance criteria.
+
+## Contents
+
+- When To Load
+- Structured Acceptance Criteria (AC-YAML)
+- Machine-Readable AI Runtime Contract
+- Prototype Data-Attribute Contract
+- Agent Entrypoint Generation
+- Coding Agent Handoff Prompt
+
+## When To Load
+
+Load this file in addition to `delivery-core.md` when any trigger applies:
+
+| Trigger | Action |
+|---|---|
+| User asks to generate `AGENTS.md`, `CLAUDE.md`, `.cursor/rules`, or `.cursorrules` | Load full file |
+| User asks to convert PRD acceptance criteria into test cases or test stubs | Load AC-YAML section |
+| User asks to generate `ai_runtime_contract` in YAML or JSON | Load Machine-Readable AI Runtime Contract section |
+| PRD will be handed off to a coding agent for implementation | Load Coding Agent Handoff Prompt section |
+| User asks to validate prototype `data-*` attribute coverage | Load Prototype Data-Attribute Contract section |
+
+Do not load this file for human-only PRD review, Stage 0 triage, or L0
+prototype exploration.
+
+## Structured Acceptance Criteria (AC-YAML)
+
+FRR section 16 in `delivery-core.md` remains human-readable prose first. For coding
+agent handoff, add a machine-parseable `ac_structured` block immediately after
+the prose acceptance table. This block is additive and does not replace the
+human acceptance section.
+
+```yaml
+ac_structured:
+  - id: AC-M04-F01-001
+    frr_ref: M04-F01
+    type: happy_path
+    priority: P0
+    given: "The user is logged in as a sales representative and at least one lead is in draft state."
+    when: "The user clicks the Submit For Review button."
+    then:
+      ui: "The button becomes disabled and the page shows a submitted-for-review toast."
+      domain: "The lead state changes from draft to pending_review and an audit_log entry is written."
+      sla: "UI response <= 300ms; server write <= 1s."
+    test_type: integration
+    data_testid: "btn-submit-review"
+    data_action: "lead.submitReview"
+    skip_reason: null
+```
+
+ID convention:
+
+```text
+AC-{ModuleID}-{FunctionID}-{SequenceNumber}
+AC-{ModuleID}-SHARED-{SequenceNumber}
+```
+
+Rules:
+
+- Module and Function IDs must match FRR section 1 function inventory.
+- Sequence numbers are stable after assignment; do not renumber old ACs.
+- `priority: P0` is smoke; `P1` is regression; `P2` is long-tail/adversarial.
+- `test_type` is one of `unit`, `integration`, `e2e`, `contract`, `manual`.
+- If automation is intentionally skipped, set `skip_reason`; do not omit the AC.
+
+Type taxonomy:
+
+| Type | Covers |
+|---|---|
+| `happy_path` | successful completion of the primary scenario |
+| `validation` | field-level or business-rule rejection |
+| `permission` | role, tenant, org, row, field, or action scope |
+| `state` | lifecycle guard or invalid transition |
+| `dependency` | upstream/downstream/API/message failure |
+| `regression` | previously failed scenario that must not recur |
+| `edge` | boundary, concurrency, partial failure, timeout, weak network |
+
+## Machine-Readable AI Runtime Contract
+
+The product-level `ai_runtime_contract` in `advanced-extensions.md` is
+authoritative. For coding agent implementation, extend it with implementation
+fields that can map to config, tests, observability, and feature flags.
+
+```yaml
+ai_runtime_contract:
+  agent_or_model: "model-or-agent-name"
+  write_scope: draft_only          # none | draft_only | workflow_task | business_state
+  input_schema_version: v1
+  output_schema_version: v1
+  tool_scope:
+    allowed: ["read_file", "search_index"]
+    forbidden: ["delete_record", "send_external_notification"]
+  human_gate: required_before_publish
+  fallback_state: manual_review    # local_fallback | manual_review | ai_failed
+  observability:
+    fields: [trace_id, prompt_version, model_version, latency_ms, confidence, failure_reason]
+    sink: "structured_log"
+  rollback:
+    owner: "product-ops"
+    trigger: "P1 alert or user complaint rate > threshold"
+    linked_test_cases: ["AC-M07-F02-001"]
+  impl:
+    prompt_file: "prompts/feature-name-v1.md"
+    prompt_version_env: "PROMPT_VERSION"
+    model_env: "AI_MODEL_ID"
+    timeout_ms: 8000
+    retry_policy:
+      max_attempts: 2
+      backoff: exponential
+      retryable_errors: ["429", "529", "timeout"]
+    output_parser: json_strict
+    output_validation_schema: "schemas/feature-output.schema.json"
+    cache_ttl_s: 0
+    feature_flag: "ff_ai_feature_name"
+  eval:
+    golden_case_file: "evals/feature-golden.jsonl"
+    p0_threshold: 0.95
+    p1_threshold: 0.90
+    eval_runner: "pytest evals/ -m p0"
+```
+
+JSON Schema skeleton:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["agent_or_model", "write_scope", "human_gate", "fallback_state"],
+  "properties": {
+    "agent_or_model": { "type": "string" },
+    "write_scope": {
+      "enum": ["none", "draft_only", "workflow_task", "business_state"]
+    },
+    "human_gate": {
+      "enum": ["required_before_write", "required_before_publish", "not_applicable_with_reason"]
+    },
+    "fallback_state": {
+      "enum": ["local_fallback", "manual_review", "ai_failed"]
+    },
+    "impl": {
+      "type": "object",
+      "properties": {
+        "prompt_file": { "type": "string" },
+        "timeout_ms": { "type": "integer", "minimum": 100 },
+        "feature_flag": { "type": "string" },
+        "output_validation_schema": { "type": "string" }
+      }
+    }
+  }
+}
+```
+
+For AI-supporting features that do not require the full runtime contract, use
+this minimum block inside FRR section 13:
+
+```yaml
+ai_contract_lite:
+  model: "model-or-agent-name"
+  prompt_file: "prompts/feature-name-v1.md"
+  write_scope: none
+  human_gate: required_before_publish
+  fallback: "Hide the AI suggestion area and show the manual input entry."
+  feature_flag: "ff_ai_feature_name"
+```
+
+## Prototype Data-Attribute Contract
+
+Coding agents must link implementation and tests to prototype attributes:
+
+| Attribute | Format | Example |
+|---|---|---|
+| `data-testid` | `{component}-{action-or-context}` | `btn-submit-review` |
+| `data-action` | `{domain}.{verb}` | `lead.submitReview` |
+| `data-state` | `{objectType}:{stateName}` | `lead:pending_review` |
+| `data-api` | `/{resource}/{subresource}` | `/leads/submit` |
+| `data-method` | uppercase HTTP verb | `POST` |
+| `data-visible-role` | comma-separated role IDs | `sales_rep,sales_manager` |
+| `data-field` | `{domain}.{fieldName}` | `lead.contactPhone` |
+| `data-bind` | `{storeKey}.{path}` | `leadStore.detail.status` |
+
+Verification checklist:
+
+- [ ] Every `data-testid` maps to at least one `ac_structured.data_testid`.
+- [ ] Every `data-action` appears in FRR section 6 numbered flow or FRR section 7 actions.
+- [ ] Every `data-state` appears in FRR section 9 state/button/lifecycle matrix.
+- [ ] Every `data-api` + `data-method` is declared in FRR section 13 or API contract.
+- [ ] Every `data-visible-role` is defined in FRR section 10.
+- [ ] No interactive element lacks `data-testid`.
+
+If any check fails, the coding agent must report the gap and stop the affected
+implementation step instead of inventing behavior.
+
+## Agent Entrypoint Generation
+
+Generate project-local instruction files from the PRD, not inside this repo.
+
+### `AGENTS.md`
+
+Use for OpenAI Codex, GitHub Copilot coding agent-style repository context, and
+general multi-agent coding tools that read repo-level instructions.
+
+```markdown
+# AGENTS.md
+
+## Source Of Truth
+- PRD: `{prd_path}`.
+- Prototype: `{prototype_path}`.
+- Acceptance: PRD FRR section 16 `ac_structured` blocks.
+
+## Implementation Rules
+1. Business logic follows PRD FRR section 8 and section 9.
+2. UI behavior follows prototype `data-*` annotations.
+3. Do not invent states, permissions, API contracts, or role paths.
+4. Report missing requirements as `[GAP] {FunctionID} section {Section}: {description}`.
+5. Preserve tenant/org/role/data isolation from FRR section 10.
+
+## Verification
+- P0 smoke: `{test_command_p0}`.
+- P1 regression: `{test_command_p1}`.
+- AI eval when applicable: `{eval_command}`.
+```
+
+### `CLAUDE.md`
+
+Use for Claude Code. It may mirror `AGENTS.md`, but keep Claude-specific
+commands, repo conventions, and gap-reporting rules in `CLAUDE.md` when the
+project already uses one.
+
+### Cursor Rules
+
+Prefer modern Cursor project rules under `.cursor/rules/*.mdc` when the project
+supports them. Generate `.cursorrules` only for legacy projects or when the user
+explicitly asks for that file.
+
+```markdown
+---
+description: Product spec implementation rules
+globs: ["**/*"]
+alwaysApply: true
+---
+
+Implement from `{prd_path}` and `{prototype_path}`.
+Do not invent behavior missing from FRR.
+Map tests to `ac_structured` IDs.
+Report gaps with `[GAP]`.
+```
+
+## Coding Agent Handoff Prompt
+
+```text
+Use ai-delivery-spec coding-agent compatibility mode.
+
+Inputs:
+- PRD: {prd_path}
+- Prototype: {prototype_path}
+- Target repo: {repo_path}
+
+Before coding:
+1. Extract FRR function inventory.
+2. Extract all `ac_structured` blocks.
+3. Map prototype `data-testid`, `data-action`, `data-state`, `data-api`,
+   `data-method`, `data-visible-role`, and `data-field`.
+4. Report any gap before implementation.
+
+Implementation:
+- Generate tests from P0/P1 AC entries first.
+- Implement only behavior covered by FRR/prototype/AC.
+- For AI features, implement fallback as default and AI path behind feature flag.
+- End with changed files, test results, and unresolved gaps.
+```

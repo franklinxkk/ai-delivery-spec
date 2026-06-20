@@ -363,7 +363,7 @@ For each function in the release inventory, write a deterministic functional req
 | Data / AI / algorithm contract | when applicable: input/output schema, deterministic vs model responsibility, confidence/threshold, human confirmation, prompt/model/rule version, fallback, evaluation and prohibited writes; otherwise `N/A + reason` |
 | Function-Level NFR | performance, security/privacy, accessibility, compatibility, operations; each with measurement/acceptance |
 | Frontend / Backend / QA handoff notes | frontend component behavior, backend validation/state/data ownership, QA focus and regression paths; point to FRR/state/prototype/acceptance IDs |
-| Acceptance | happy, validation, permission, state conflict, dependency failure, regression; expected UI and domain result |
+| Acceptance | happy, validation, permission, state conflict, dependency failure, regression; expected UI and domain result. For coding-agent handoff (L2+), add an `ac_structured` YAML block immediately after prose acceptance; see `coding-agent-compat.md`. |
 
 FRR section order is authoritative and must match the standard template:
 1 Identity, 2 Roles/Scenario, 3 Entry/Preconditions, 4 Pages/Visible States,

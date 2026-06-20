@@ -13,6 +13,7 @@ Use this file only after `SKILL.md` 0D triage or explicit user scope triggers an
 - Mobile, Multi-Surface, And Global Delivery
 - System Readiness, Release, And Retirement
 - Domain Modules, Templates, And Legacy Assets
+- Coding Agent Compatibility
 
 ## Extension Loading Rule
 
@@ -30,6 +31,7 @@ Extension trigger matrix:
 | app/H5/mini-program/PC+mobile, overseas, localization, app stores | Mobile, Multi-Surface, And Global Delivery |
 | release, migration, rollout, on-call, rollback, retirement | System Readiness, Release, And Retirement |
 | industry/domain switch, traffic safety, CRM, higher-education informationization, prompt registry, templates | Domain Modules, Templates, And Legacy Assets |
+| coding agent handoff, generate AGENTS.md/CLAUDE.md/.cursor/rules/.cursorrules, convert AC to test stubs, implement from PRD | Coding Agent Compatibility |
 
 ## AI Feature / AI Native / Prompt Ops
 
@@ -77,6 +79,8 @@ Runtime resilience:
 - if network probe > 3000ms or cloud AI returns 5xx, enter `local_fallback` within 100ms;
 - local fallback may display cached data, deterministic rule result, or manual workflow only;
 - AI must not write business state during fallback unless a deterministic local policy explicitly allows it.
+- For coding-agent handoff, extend this YAML with `impl` and `eval` fields or
+  use `ai_contract_lite`; see `coding-agent-compat.md`.
 
 Prompt Ops source assets:
 
@@ -270,6 +274,14 @@ run that external framework.
 Strategy/discovery source asset:
 
 - `strategy-discovery-handoff.md`
+
+## Coding Agent Compatibility
+
+Trigger when the PRD/prototype will be consumed by a coding agent, or the user
+asks to generate `AGENTS.md`, `CLAUDE.md`, `.cursor/rules`, `.cursorrules`, or
+test stubs from acceptance criteria.
+
+Source asset: `coding-agent-compat.md`.
 
 Historical detail assets retained for compatibility and audits:
 

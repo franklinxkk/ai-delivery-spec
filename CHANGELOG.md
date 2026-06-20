@@ -4,6 +4,9 @@ All notable changes to AI Delivery Spec are summarized here.
 
 ## Unreleased
 
+- Added v4.6.0 coding-agent compatibility: structured `ac_structured`
+  acceptance, machine-readable AI runtime extensions, and generated
+  `AGENTS.md` / `CLAUDE.md` / Cursor rules.
 - Added a 10-minute README walkthrough and adopter persona guide.
 - Added a complete L1 PRD sample for traffic-safety hidden-danger remediation.
 - Improved the L1 light PRD core-flow section with a fill-in sentence pattern.

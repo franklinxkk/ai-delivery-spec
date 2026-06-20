@@ -384,6 +384,22 @@ Complete when the function includes recognition, recommendation, generation, sco
 | Timeout, failure, fallback, and prohibited writes | |
 | Golden/evaluation cases and pass threshold | |
 
+For coding-agent handoff, add one of the following machine-readable blocks when
+AI or algorithmic behavior exists. Keep the table above for human reviewers.
+
+```yaml
+ai_contract_lite:
+  model: ""
+  prompt_file: ""
+  write_scope: none
+  human_gate: required_before_publish
+  fallback: ""
+  feature_flag: ""
+```
+
+For AI-core modules, use full `ai_runtime_contract`; see
+`references/coding-agent-compat.md`.
+
 #### 14. Function-Level NFR
 
 | Category | Requirement | Measurement / Acceptance |
@@ -408,6 +424,27 @@ At minimum include happy, validation, permission, state-conflict, dependency-fai
 | Acceptance ID | Case | Preconditions / Data | Steps | Expected UI Result | Expected Domain Result | Prototype / Test | Source IDs |
 |---|---|---|---|---|---|---|---|
 | | | | | | | | |
+
+For coding-agent handoff, add this optional block immediately after the table.
+It is additive and does not replace human-readable acceptance.
+
+```yaml
+ac_structured:
+  - id: AC-Mxx-Fxx-001
+    frr_ref: Mxx-Fxx
+    type: happy_path
+    priority: P0
+    given: ""
+    when: ""
+    then:
+      ui: ""
+      domain: ""
+      sla: ""
+    test_type: integration
+    data_testid: ""
+    data_action: ""
+    skip_reason: null
+```
 
 FRR completion rules:
 

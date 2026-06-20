@@ -8,7 +8,7 @@ description: >-
   syntax/debugging, copy rewriting, or idea exploration with no delivery intent.
 ---
 
-# AI Delivery Spec — Production Elastic Delivery Standard (v4.5.2)
+# AI Delivery Spec — Production Elastic Delivery Standard (v4.6.0)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering,
 algorithm, QA, operations, customers, and sponsors can read, build, verify, and
@@ -56,6 +56,7 @@ Load only these runtime entrypoints:
 | `references/delivery-core.md` | PRD, requirement, story, state, Stage 0, DDD/API/data handoff, E2E matrix | main delivery kernel; may load readability layer for L1+ PRD/handoff |
 | `references/prototype-testability.md` | HTML prototype, executable demo, mobile/H5/mini-program/app interaction | state-driven prototype and testability kernel |
 | `references/advanced-extensions.md` | only when triggered by 0D or explicit scope | AI, SaaS, approval, reporting, low-code, global/readiness/domain extensions |
+| `references/coding-agent-compat.md` | only when output is consumed by coding agents | AC-YAML, machine-readable AI contract, AGENTS.md / CLAUDE.md / Cursor rules |
 
 Legacy reference files, templates, prompt registry, and domain modules are
 source assets. Do not load them directly unless one of the four entrypoints
@@ -173,6 +174,7 @@ Choose one primary route, then add triggered extensions.
 | prototype/demo/HTML/mobile interaction | `prototype-testability.md`; add `delivery-core.md` for story/state evidence |
 | test/UAT/acceptance/readiness/post-launch/retirement | `delivery-core.md`; add advanced readiness section if real environment |
 | AI, SaaS, approval, reporting, low-code, global, domain switch | load `advanced-extensions.md` only after 0D trigger |
+| coding agent handoff, generate AGENTS.md/CLAUDE.md/Cursor rules, convert AC to test stubs | `delivery-core.md` + `coding-agent-compat.md` |
 | implementation task breakdown / issue slicing | `delivery-core.md`; generate tasks only from approved specification/plan evidence |
 
 ## 6. Non-Negotiable Rules
@@ -184,6 +186,9 @@ Choose one primary route, then add triggered extensions.
 - Machine-readable contracts are not enough for human teams. PRDs must restore
   business scenario, boundary, exception, metric, and test intent before
   engineering tables.
+- When a PRD will be consumed by a coding agent, add machine-readable acceptance
+  and runtime blocks as an implementation layer; do not remove human-readable
+  FRR narrative.
 - Reader-first navigation may reduce duplication, never reduce function
   coverage, source evidence mapping, acceptance coverage, or traceability.
 - Every supplied source file, sheet, page, rule, screenshot, SQL/dictionary,

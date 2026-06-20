@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate ai-delivery-spec v4.5.x runtime routing and core contracts."""
+"""Validate ai-delivery-spec runtime routing and core contracts."""
 
 from pathlib import Path
 import re
@@ -41,6 +41,10 @@ LEGACY_ASSETS = (
 MAINTENANCE_ASSETS = (
     "skill-design-benchmark.md",
     "skill-version-migration.md",
+)
+
+CODING_AGENT_ASSETS = (
+    "coding-agent-compat.md",
 )
 
 DOMAIN_SECTIONS = [
@@ -151,7 +155,7 @@ def main():
         "SKILL.md",
         text,
         (
-            "v4.5.2",
+            "v4.6.0",
             "[TIER: Heavy|Light] | [AI: true|false] | [WORKFLOW: true|false]",
             "Fast-pass pruning",
             "Runtime File Architecture",
@@ -162,6 +166,8 @@ def main():
             "transition(currentState, action) -> nextState",
             "Product specification and engineering contract",
             "human readability rules",
+            "coding-agent-compat.md",
+            "machine-readable acceptance",
             "PASS",
             "REVIEW_COMPLETE_WITH_GAPS",
             "BLOCKED",
@@ -207,6 +213,7 @@ def main():
     readability = (REFERENCES / "readability-layer.md").read_text(encoding="utf-8")
     migration = (REFERENCES / "skill-version-migration.md").read_text(encoding="utf-8")
     benchmark = (REFERENCES / "skill-design-benchmark.md").read_text(encoding="utf-8")
+    coding_agent = (REFERENCES / "coding-agent-compat.md").read_text(encoding="utf-8")
     prd_template = (REFERENCES / "templates" / "prd-standard-template.md").read_text(encoding="utf-8")
     source_asset_index = "\n".join(
         (
@@ -229,6 +236,12 @@ def main():
         if asset not in advanced and asset != "skill-version-migration.md":
             fail(f"maintenance asset is not declared in advanced extensions: {asset}", failures)
 
+    for asset in CODING_AGENT_ASSETS:
+        if not (REFERENCES / asset).exists():
+            fail(f"coding-agent asset is missing: {asset}", failures)
+        if asset not in text and asset not in advanced and asset not in prd_template:
+            fail(f"coding-agent asset is not reachable from runtime source index: {asset}", failures)
+
     require_markers(
         "delivery-core.md",
         delivery_core,
@@ -248,6 +261,8 @@ def main():
             "Backend Closure Rules",
             "Function-Level NFR",
             "Frontend / Backend / QA handoff notes",
+            "ac_structured",
+            "coding-agent-compat.md",
         ),
         failures,
     )
@@ -278,8 +293,10 @@ def main():
             "SaaS, RBAC, And Multi-Tenancy",
             "Reporting, Dashboard, And Data Product",
             "Workflow Automation And Low-Code",
+            "Coding Agent Compatibility",
             "Domain Modules, Templates, And Legacy Assets",
             "load-on-demand assets",
+            "coding-agent-compat.md",
             "domain-education-it.md",
             "External lifecycle and PM frameworks are upstream evidence",
         ),
@@ -311,6 +328,9 @@ def main():
             "Frontend / Backend / QA Handoff Notes",
             "13.5 Implementation Plan And Task Backlog",
             "Vertical Slice Backlog",
+            "ac_structured",
+            "ai_contract_lite",
+            "coding-agent-compat.md",
             "Event ID",
             "Privacy / Masking",
         ),
@@ -326,12 +346,35 @@ def main():
             "v4.4.1 -> v4.5.0 Lifecycle Benchmark Bridge",
             "v4.5.0 -> v4.5.1 PRD Runtime Consistency",
             "v4.5.1 -> v4.5.2 Higher-Education Domain Module",
+            "v4.5.2 -> v4.6.0 Coding Agent Compatibility",
             "Four runtime entrypoints",
             "0D triage",
+            "ac_structured",
+            "ai_contract_lite",
             "State-driven prototype law",
             "E2E Cross-Module Canvas",
             "Spec/Plan/Tasks bridge added",
             "FRR summary aligned to 16 sections",
+        ),
+        failures,
+    )
+
+    require_markers(
+        "coding-agent-compat.md",
+        coding_agent,
+        (
+            "Structured Acceptance Criteria (AC-YAML)",
+            "Machine-Readable AI Runtime Contract",
+            "Prototype Data-Attribute Contract",
+            "Agent Entrypoint Generation",
+            "ac_structured",
+            "ai_runtime_contract",
+            "ai_contract_lite",
+            "JSON Schema skeleton",
+            "AGENTS.md",
+            "CLAUDE.md",
+            ".cursor/rules",
+            ".cursorrules",
         ),
         failures,
     )
@@ -359,7 +402,10 @@ def main():
             "AI Delivery Spec / AI 产研交付规格",
             "tool-agnostic",
             "ChatGPT, Claude, Gemini",
-            "v4.5.2 Focus",
+            "Current Focus",
+            "coding-agent compatibility",
+            "Coding Agent Handoff",
+            "coding-agent-compat.md",
             "Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire",
             "Default runtime has only four entrypoints",
             "Higher-Education Informationization",
@@ -386,6 +432,24 @@ def main():
     elif "$ai-delivery-spec" not in agent_file.read_text(encoding="utf-8"):
         fail("agents/openai.yaml default_prompt must mention $ai-delivery-spec", failures)
 
+    claude_agent_file = ROOT / "agents" / "claude-code.md"
+    if not claude_agent_file.exists():
+        fail("agents/claude-code.md is missing", failures)
+    else:
+        require_markers(
+            "agents/claude-code.md",
+            claude_agent_file.read_text(encoding="utf-8"),
+            (
+                "Claude Code Agent Entry",
+                "ac_structured",
+                "ai_runtime_contract",
+                "CLAUDE.md",
+                "AGENTS.md",
+                ".cursor/rules",
+            ),
+            failures,
+        )
+
     for script in ("validate_routing_scenarios.py", "validate_prd_quality.py"):
         if not (ROOT / "scripts" / script).exists():
             fail(f"{script} is missing", failures)
@@ -396,7 +460,7 @@ def main():
             print(f"- {item}")
         return 1
 
-    print("PASS: ai-delivery-spec v4.5.x runtime routing, readability, and core contracts are consistent")
+    print("PASS: ai-delivery-spec runtime routing, readability, coding-agent, and core contracts are consistent")
     return 0
 
 

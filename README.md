@@ -9,7 +9,7 @@ It works with ChatGPT, Claude, Gemini, Codex, Cursor, Copilot, OpenClaw,
 and any AI tool that can read Markdown.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-4.5.2-green.svg)]()
+[![Version](https://img.shields.io/badge/version-4.6.0-green.svg)]()
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-purple.svg)](https://openclaw.ai)
 
@@ -37,7 +37,7 @@ but a routing-driven runtime that loads only what each artifact needs.
 | 0D triage routing (TIER×AI×WORKFLOW) | ✅ | ❌ | ❌ |
 | FRR 16-section delivery record | ✅ | ❌ | ❌ |
 | Product-side spec (PRD + prototype) | ✅ | Partial | ❌ |
-| Dev-side spec (code generation) | ❌ | ❌ | ✅ |
+| Dev-side spec (code generation) | coding-agent handoff | ❌ | ✅ |
 
 > 💡 **Complementary with [github/spec-kit](https://github.com/github/spec-kit)**:
 > spec-kit handles spec→code, ai-delivery-spec handles requirement→spec+prototype.
@@ -56,10 +56,12 @@ logic, role path, or acceptance evidence is not yet clear. For AI-assisted
 delivery, use ai-delivery-spec first, then hand the stabilized spec to spec-kit
 or your coding agent.
 
-## v4.5.2 Focus
+## Current Focus
 
 - Human-readable PRDs for product, frontend, backend, algorithm, and QA teams.
 - Embedded engineering contracts for AI-assisted development.
+- Coding-agent compatibility through `ac_structured`, machine-readable AI
+  runtime contracts, and generated `AGENTS.md` / `CLAUDE.md` / Cursor rules.
 - Replaceable domain modules for CRM, traffic safety, and education IT.
 - A single lifecycle bridge:
   `Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire`.
@@ -112,6 +114,17 @@ Use AI Delivery Spec as the delivery standard.
 First run 0D triage: [TIER] [AI] [WORKFLOW].
 Load only the relevant entrypoint files.
 Produce the requested artifact and end with gates, verification, gaps, and completion state.
+```
+
+### Coding Agent Handoff
+
+Use this when a PRD/prototype will be implemented by Cursor, Claude Code,
+GitHub Copilot Workspace, Codex, or a similar coding agent:
+
+```text
+Use AI Delivery Spec coding-agent compatibility mode.
+Given this PRD and prototype, generate AGENTS.md / CLAUDE.md / Cursor rules,
+convert FRR section 16 acceptance into ac_structured YAML, and identify P0/P1 tests.
 ```
 
 ## Examples / 示例
@@ -178,6 +191,9 @@ references/advanced-extensions.md ── AI, SaaS, approval, reporting, global
 
 Other reference files are detail libraries, loaded by trigger conditions only.
 This keeps context size small — your AI tool reads only what it needs.
+
+Coding-agent compatibility is an optional triggered reference:
+`references/coding-agent-compat.md`.
 
 其他 reference 文件是高级场景的明细库，按触发条件加载，避免大模型一次性吞下过多上下文。
 
