@@ -2,7 +2,7 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
-## Unreleased
+## v4.6.2 - 2026-06-21
 
 - Added the Medical / Hospital IT domain module for HIS/EMR/LIS/PACS/RIS,
   clinical workflow, medical quality, infection control, internet hospital,

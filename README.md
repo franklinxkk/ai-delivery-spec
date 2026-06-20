@@ -107,6 +107,12 @@ git clone https://github.com/franklinxkk/ai-delivery-spec.git
 
 # Option 2: Use with OpenClaw / Claude Code
 # Point your agent to this repo and ask it to follow SKILL.md routing rules
+
+# Option 3: Install via Skills CLI
+npx skills add franklinxkk/ai-delivery-spec
+
+# Option 4: Manual install to Claude Code
+cp -r ai-delivery-spec ~/.claude/skills/ai-delivery-spec
 ```
 
 ### Use in Any AI Tool
@@ -140,6 +146,8 @@ Start with a real-world scenario:
   See the complete [L1 PRD sample](examples/traffic-safety-saas/l1-prd-sample.md).
 - [Higher-Education IT](examples/education-it/README.md) — academic affairs,
   student affairs, teaching systems, smart classrooms, AI learning assistants.
+- [Medical / Hospital IT](examples/medical-hospital-it/README.md) — HIS/EMR,
+  LIS, PACS/RIS, clinical workflow, medical quality, and AI-assisted review.
 
 See [examples/README.md](examples/README.md) for the full example index.
 

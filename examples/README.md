@@ -18,6 +18,7 @@ Each example includes:
 | [CRM Response Center](crm-response-center/README.md) | sales, customer service, product feedback loop | `domain-crm.md` |
 | [Traffic Safety SaaS](traffic-safety-saas/README.md) + [L1 PRD sample](traffic-safety-saas/l1-prd-sample.md) | regulated ToB/ToG SaaS, mobile field work | `domain-traffic.md` |
 | [Higher-Education IT](education-it/README.md) | academic affairs, student affairs, teaching systems | `domain-education-it.md` |
+| [Medical / Hospital IT](medical-hospital-it/README.md) | clinical workflow, medical quality, AI-assisted review | `domain-medical-hospital-it.md` |
 
 ## How To Use
 
