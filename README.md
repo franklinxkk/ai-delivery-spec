@@ -9,7 +9,7 @@ It works with ChatGPT, Claude, Gemini, Codex, Cursor, Copilot, OpenClaw,
 and any AI tool that can read Markdown.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-4.6.1-green.svg)]()
+[![Version](https://img.shields.io/badge/version-4.6.2-green.svg)]()
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-purple.svg)](https://openclaw.ai)
 
@@ -64,7 +64,7 @@ or your coding agent.
   runtime contracts, and generated `AGENTS.md` / `CLAUDE.md` / Cursor rules.
 - Deterministic coding-agent contract validation for PRD/prototype `data-*`
   mappings.
-- Replaceable domain modules for CRM, traffic safety, and education IT.
+- Replaceable domain modules for CRM, traffic safety, education IT, and medical/hospital IT.
 - A single lifecycle bridge:
   `Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire`.
 
@@ -175,6 +175,7 @@ Spec an AI feature with runtime governance for [your scenario].
 | Traffic Safety / 交通安全 | `references/domain-traffic.md` | Regulated enterprise, vehicle, personnel, training |
 | CRM / 客户经营 | `references/domain-crm.md` | Lead, opportunity, customer 360, ticket, contract |
 | Higher-Education Informationization / 高校教育信息化 | `references/domain-education-it.md` | Academic affairs, student affairs, smart classroom |
+| Medical / Hospital IT / 医疗医院信息化 | `references/domain-medical-hospital-it.md` | HIS/EMR/LIS/PACS/RIS, clinical workflow, medical quality, patient service, research data |
 
 > Adding a new industry? Copy `references/domain-module-template.md` and customize.
 

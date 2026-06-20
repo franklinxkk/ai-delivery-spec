@@ -155,7 +155,7 @@ def main():
         "SKILL.md",
         text,
         (
-            "v4.6.1",
+            "v4.6.2",
             "[TIER: Heavy|Light] | [AI: true|false] | [WORKFLOW: true|false]",
             "Fast-pass pruning",
             "Runtime File Architecture",
@@ -299,6 +299,7 @@ def main():
             "load-on-demand assets",
             "coding-agent-compat.md",
             "domain-education-it.md",
+            "domain-medical-hospital-it.md",
             "External lifecycle and PM frameworks are upstream evidence",
         ),
         failures,
@@ -349,6 +350,7 @@ def main():
             "v4.5.1 -> v4.5.2 Higher-Education Domain Module",
             "v4.5.2 -> v4.6.0 Coding Agent Compatibility",
             "v4.6.0 -> v4.6.1 Coding Agent Hardening",
+            "v4.6.1 -> v4.6.2 Medical Hospital IT Domain Module",
             "Four runtime entrypoints",
             "0D triage",
             "ac_structured",
@@ -417,13 +419,19 @@ def main():
             "Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire",
             "Default runtime has only four entrypoints",
             "Higher-Education Informationization",
+            "Medical / Hospital IT",
         ),
         failures,
     )
     if "Codex skill" in readme:
         fail("README.md still positions the project as a Codex-specific skill", failures)
 
-    for filename in ("domain-traffic.md", "domain-crm.md", "domain-education-it.md"):
+    for filename in (
+        "domain-traffic.md",
+        "domain-crm.md",
+        "domain-education-it.md",
+        "domain-medical-hospital-it.md",
+    ):
         headings = level_two_headings(REFERENCES / filename)
         positions = []
         for section in DOMAIN_SECTIONS:

@@ -197,6 +197,10 @@ AI_CORE = (
 )
 
 AI_SUPPORTING = (
+    "ai-assisted",
+    "ai recommendation",
+    "human review",
+    "human-approved",
     "ai分类",
     "ai摘要",
     "ai提取",
@@ -413,6 +417,26 @@ def classify(prompt):
         ),
     ):
         plugins.add("education-domain")
+    if contains_any(
+        prompt,
+        (
+            "hospital",
+            "medical",
+            "healthcare",
+            "clinical",
+            "emr",
+            "his",
+            "lis",
+            "pacs",
+            "ris",
+            "cdss",
+            "internet hospital",
+            "medical ai",
+            "radiologist",
+            "critical value",
+        ),
+    ):
+        plugins.add("medical-domain")
     if contains_any(prompt, FULL_SIGNALS) or route in {"release-readiness", "retirement"}:
         plugins.add("readiness")
     if route == "strategy-discovery" or contains_any(
@@ -576,6 +600,14 @@ SCENARIOS = (
         "L2",
     ),
     # Cross-industry coverage.
+    Scenario(
+        "Hospital imaging AI-assisted PRD",
+        "Generate a hospital imaging AI-assisted PRD for PACS/RIS integration, radiologist human review, EMR report publishing, and developer handoff",
+        True,
+        "Standard",
+        "L2",
+        frozenset({"ai-feature", "medical-domain"}),
+    ),
     Scenario(
         "Healthcare AI triage launch",
         "评审移动端AI分诊智能体稳定上线方案，AI自主选择工具并生成处置任务，包含正式验收和回滚",

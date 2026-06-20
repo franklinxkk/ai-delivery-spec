@@ -24,6 +24,7 @@ Use this file when upgrading projects or the skill itself across major versions.
 - v4.5.1 -> v4.5.2 Higher-Education Domain Module
 - v4.5.2 -> v4.6.0 Coding Agent Compatibility
 - v4.6.0 -> v4.6.1 Coding Agent Hardening
+- v4.6.1 -> v4.6.2 Medical Hospital IT Domain Module
 - Gate Mapping
 - Project Upgrade Path
 - Migration Checklist
@@ -360,6 +361,31 @@ Compatibility:
 - L2 AI-supporting modules may be simplified to `ai_contract_lite` unless an
   upgrade trigger is present.
 - Existing AC IDs must not be renumbered during migration.
+
+## v4.6.1 -> v4.6.2 Medical Hospital IT Domain Module
+
+v4.6.2 adds a replaceable medical / hospital informationization domain module
+without changing the default four-entry runtime. It is intended for hospital
+HIS/EMR/LIS/PACS/RIS integration, clinical workflow, medical quality, infection
+control, internet hospital, research data governance, and AI-assisted medical
+operations.
+
+| Change | Migration Action |
+|---|---|
+| `domain-medical-hospital-it.md` added | Load only when the scenario is medical, hospital IT, clinical workflow, EMR/HIS/LIS/PACS/RIS, internet hospital, medical quality, infection control, research data, or medical AI. |
+| Domain index updated | `advanced-extensions.md` and README now list traffic, CRM, higher-education, and medical/hospital IT as load-on-demand domain modules. |
+| Routing scenario added | The routing harness includes an AI-assisted hospital imaging PRD to verify L2 AI-supporting classification with medical-domain loading. |
+
+Compatibility:
+
+- Existing traffic-safety, CRM, and higher-education projects are unaffected.
+- Medical/hospital projects must still use the same 14-section domain module
+  contract and the same Gate 1-4 rules.
+- Regulatory statements in this module are domain constraints to verify, not
+  substitute medical/legal advice. PRDs must cite the latest official policy,
+  hospital SOP, data standard, and accountable owner before formal handoff.
+- AI-assisted medical outputs remain non-binding drafts unless an accountable
+  clinician or approved governance role completes the required human gate.
 
 ## Gate Mapping
 

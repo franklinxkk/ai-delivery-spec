@@ -4,6 +4,10 @@ All notable changes to AI Delivery Spec are summarized here.
 
 ## Unreleased
 
+- Added the Medical / Hospital IT domain module for HIS/EMR/LIS/PACS/RIS,
+  clinical workflow, medical quality, infection control, internet hospital,
+  research data governance, and AI-assisted medical operations.
+- Added routing and consistency checks for medical-domain loading.
 - Added v4.6.1 hardening for coding-agent adoption: AI contract selection
   ladder, AC ID evolution rules, OpenAI/Codex coding-agent entrypoint, and a
   deterministic PRD/prototype `data-*` mapping validator.
