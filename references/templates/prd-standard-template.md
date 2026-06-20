@@ -386,6 +386,10 @@ Complete when the function includes recognition, recommendation, generation, sco
 
 For coding-agent handoff, add one of the following machine-readable blocks when
 AI or algorithmic behavior exists. Keep the table above for human reviewers.
+Use `ai_contract_lite` by default for L2 AI-supporting features. Upgrade to
+full `ai_runtime_contract` only when AI writes consequential state, calls
+side-effect tools, requires runtime rollback/eval/on-call, or affects
+compliance, safety, money, legal, or customer acceptance.
 
 ```yaml
 ai_contract_lite:
@@ -434,6 +438,8 @@ ac_structured:
     frr_ref: Mxx-Fxx
     type: happy_path
     priority: P0
+    status: active
+    revision: 1
     given: ""
     when: ""
     then:

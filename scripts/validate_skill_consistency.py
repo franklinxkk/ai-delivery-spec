@@ -149,16 +149,17 @@ def main():
             fail("description retains ambiguous generic HTML exclusion", failures)
 
     if len(text.splitlines()) > 260:
-        fail("SKILL.md exceeds v4.5 runtime-entry budget of 260 lines", failures)
+        fail("SKILL.md exceeds runtime-entry budget of 260 lines", failures)
 
     require_markers(
         "SKILL.md",
         text,
         (
-            "v4.6.0",
+            "v4.6.1",
             "[TIER: Heavy|Light] | [AI: true|false] | [WORKFLOW: true|false]",
             "Fast-pass pruning",
             "Runtime File Architecture",
+            "Default runtime has four entrypoints",
             "advanced-extensions.md",
             "Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire",
             "E2E Cross-Module Canvas",
@@ -347,10 +348,13 @@ def main():
             "v4.5.0 -> v4.5.1 PRD Runtime Consistency",
             "v4.5.1 -> v4.5.2 Higher-Education Domain Module",
             "v4.5.2 -> v4.6.0 Coding Agent Compatibility",
+            "v4.6.0 -> v4.6.1 Coding Agent Hardening",
             "Four runtime entrypoints",
             "0D triage",
             "ac_structured",
             "ai_contract_lite",
+            "AI contract selection ladder",
+            "AC ID evolution rules",
             "State-driven prototype law",
             "E2E Cross-Module Canvas",
             "Spec/Plan/Tasks bridge added",
@@ -365,11 +369,14 @@ def main():
         (
             "Structured Acceptance Criteria (AC-YAML)",
             "Machine-Readable AI Runtime Contract",
+            "Contract Selection Ladder",
             "Prototype Data-Attribute Contract",
             "Agent Entrypoint Generation",
+            "AC ID Evolution Rules",
             "ac_structured",
             "ai_runtime_contract",
             "ai_contract_lite",
+            "validate_coding_agent_contract.py",
             "JSON Schema skeleton",
             "AGENTS.md",
             "CLAUDE.md",
@@ -404,6 +411,7 @@ def main():
             "ChatGPT, Claude, Gemini",
             "Current Focus",
             "coding-agent compatibility",
+            "Deterministic coding-agent contract validation",
             "Coding Agent Handoff",
             "coding-agent-compat.md",
             "Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire",
@@ -450,7 +458,25 @@ def main():
             failures,
         )
 
-    for script in ("validate_routing_scenarios.py", "validate_prd_quality.py"):
+    openai_codex_file = ROOT / "agents" / "openai-codex.md"
+    if not openai_codex_file.exists():
+        fail("agents/openai-codex.md is missing", failures)
+    else:
+        require_markers(
+            "agents/openai-codex.md",
+            openai_codex_file.read_text(encoding="utf-8"),
+            (
+                "OpenAI Codex Agent Entry",
+                "Source-Of-Truth Order",
+                "ai_contract_lite",
+                "ai_runtime_contract",
+                "validate_coding_agent_contract.py",
+                "AGENTS.md",
+            ),
+            failures,
+        )
+
+    for script in ("validate_routing_scenarios.py", "validate_prd_quality.py", "validate_coding_agent_contract.py"):
         if not (ROOT / "scripts" / script).exists():
             fail(f"{script} is missing", failures)
 

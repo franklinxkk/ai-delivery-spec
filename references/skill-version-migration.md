@@ -23,6 +23,7 @@ Use this file when upgrading projects or the skill itself across major versions.
 - v4.5.0 -> v4.5.1 PRD Runtime Consistency
 - v4.5.1 -> v4.5.2 Higher-Education Domain Module
 - v4.5.2 -> v4.6.0 Coding Agent Compatibility
+- v4.6.0 -> v4.6.1 Coding Agent Hardening
 - Gate Mapping
 - Project Upgrade Path
 - Migration Checklist
@@ -338,6 +339,27 @@ Compatibility:
   v4.6.0 formalizes how they connect to tests and implementation tasks.
 - If an old PRD has prose ACs only, migrate P0/P1 cases first and mark any
   intentionally manual case with `skip_reason`.
+
+## v4.6.0 -> v4.6.1 Coding Agent Hardening
+
+v4.6.1 tightens the first coding-agent layer without changing the default
+four-entry runtime. It addresses adoption friction found in L2 AI-supporting
+features and implementation handoff.
+
+| Change | Migration Action |
+|---|---|
+| AI contract selection ladder added | Use `ai_contract_lite` by default for L2 AI-supporting features. Upgrade to full `ai_runtime_contract` only for consequential writes, side-effect tools, runtime eval/rollback/on-call, or compliance/safety/money/legal/customer-acceptance risk. |
+| AC ID evolution rules added | Do not version AC IDs with suffixes. Use `revision`, `status`, `supersedes`, and `replaced_by` metadata when functions split, merge, or change expected behavior. |
+| `agents/openai-codex.md` added | Keep `agents/openai.yaml` as UI/harness metadata; use `openai-codex.md` for OpenAI Codex / ChatGPT / GitHub coding-agent execution rules. |
+| `validate_coding_agent_contract.py` added | Run it when both PRD and prototype are available to verify `data-*`, `ac_structured`, role, state, and API mappings before coding-agent implementation. |
+
+Compatibility:
+
+- Existing v4.6.0 PRDs remain valid.
+- Full `ai_runtime_contract` remains valid for AI-core/high-risk modules.
+- L2 AI-supporting modules may be simplified to `ai_contract_lite` unless an
+  upgrade trigger is present.
+- Existing AC IDs must not be renumbered during migration.
 
 ## Gate Mapping
 

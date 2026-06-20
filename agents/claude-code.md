@@ -101,6 +101,12 @@ Prefer:
 - `AGENTS.md` for Codex, GitHub coding-agent-style repo context, and generic
   multi-agent coding tools.
 
+When PRD and prototype artifacts are available, run:
+
+```powershell
+python scripts/validate_coding_agent_contract.py --prd path/to/prd.md --prototype path/to/prototype.html
+```
+
 ## Compatibility
 
 - Claude Code: use `CLAUDE.md` or project memory plus the PRD/prototype.

@@ -9,7 +9,7 @@ It works with ChatGPT, Claude, Gemini, Codex, Cursor, Copilot, OpenClaw,
 and any AI tool that can read Markdown.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-4.6.0-green.svg)]()
+[![Version](https://img.shields.io/badge/version-4.6.1-green.svg)]()
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-purple.svg)](https://openclaw.ai)
 
@@ -62,6 +62,8 @@ or your coding agent.
 - Embedded engineering contracts for AI-assisted development.
 - Coding-agent compatibility through `ac_structured`, machine-readable AI
   runtime contracts, and generated `AGENTS.md` / `CLAUDE.md` / Cursor rules.
+- Deterministic coding-agent contract validation for PRD/prototype `data-*`
+  mappings.
 - Replaceable domain modules for CRM, traffic safety, and education IT.
 - A single lifecycle bridge:
   `Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire`.
@@ -228,6 +230,7 @@ when you only need a minimum review artifact.
 py scripts/validate_skill_consistency.py
 py scripts/validate_routing_scenarios.py
 py scripts/validate_prd_quality.py path\to\prd.docx --manifest path\to\manifest.json
+py scripts/validate_coding_agent_contract.py --prd path\to\prd.md --prototype path\to\prototype.html
 ```
 
 ## Compatibility / 兼容性

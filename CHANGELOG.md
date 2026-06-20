@@ -4,6 +4,9 @@ All notable changes to AI Delivery Spec are summarized here.
 
 ## Unreleased
 
+- Added v4.6.1 hardening for coding-agent adoption: AI contract selection
+  ladder, AC ID evolution rules, OpenAI/Codex coding-agent entrypoint, and a
+  deterministic PRD/prototype `data-*` mapping validator.
 - Added v4.6.0 coding-agent compatibility: structured `ac_structured`
   acceptance, machine-readable AI runtime extensions, and generated
   `AGENTS.md` / `CLAUDE.md` / Cursor rules.

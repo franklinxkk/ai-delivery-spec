@@ -51,6 +51,10 @@ Minimum AI-supporting contract:
 - prohibited writes and refusal behavior;
 - linked test cases and regression examples;
 - effect claim evidence level.
+- use `ai_contract_lite` for L2 AI-supporting features by default; upgrade to
+  full `ai_runtime_contract` only when AI writes consequential state, calls
+  side-effect tools, needs runtime rollback/eval/on-call, or affects
+  compliance, safety, money, legal, or customer acceptance.
 
 AI-core production contract:
 
@@ -79,8 +83,10 @@ Runtime resilience:
 - if network probe > 3000ms or cloud AI returns 5xx, enter `local_fallback` within 100ms;
 - local fallback may display cached data, deterministic rule result, or manual workflow only;
 - AI must not write business state during fallback unless a deterministic local policy explicitly allows it.
-- For coding-agent handoff, extend this YAML with `impl` and `eval` fields or
-  use `ai_contract_lite`; see `coding-agent-compat.md`.
+- For coding-agent handoff, choose contract depth with the selection ladder in
+  `coding-agent-compat.md`. L2 AI-supporting features should normally stay on
+  `ai_contract_lite`; AI-core or high-risk features use full contract with
+  `impl` and `eval`.
 
 Prompt Ops source assets:
 

@@ -8,7 +8,7 @@ description: >-
   syntax/debugging, copy rewriting, or idea exploration with no delivery intent.
 ---
 
-# AI Delivery Spec — Production Elastic Delivery Standard (v4.6.0)
+# AI Delivery Spec — Production Elastic Delivery Standard (v4.6.1)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering,
 algorithm, QA, operations, customers, and sponsors can read, build, verify, and
@@ -48,7 +48,8 @@ state, rule, or acceptance claim must still be testable.
 
 ## 1. Runtime File Architecture
 
-Load only these runtime entrypoints:
+Default runtime has four entrypoints. Load only the required default entrypoint
+plus any explicitly triggered add-on.
 
 | Entrypoint | Use When | Contains |
 |---|---|---|
@@ -56,11 +57,16 @@ Load only these runtime entrypoints:
 | `references/delivery-core.md` | PRD, requirement, story, state, Stage 0, DDD/API/data handoff, E2E matrix | main delivery kernel; may load readability layer for L1+ PRD/handoff |
 | `references/prototype-testability.md` | HTML prototype, executable demo, mobile/H5/mini-program/app interaction | state-driven prototype and testability kernel |
 | `references/advanced-extensions.md` | only when triggered by 0D or explicit scope | AI, SaaS, approval, reporting, low-code, global/readiness/domain extensions |
+
+Triggered add-on:
+
+| Add-on | Use When | Contains |
+|---|---|---|
 | `references/coding-agent-compat.md` | only when output is consumed by coding agents | AC-YAML, machine-readable AI contract, AGENTS.md / CLAUDE.md / Cursor rules |
 
 Legacy reference files, templates, prompt registry, and domain modules are
-source assets. Do not load them directly unless one of the four entrypoints
-explicitly instructs it for the current task.
+source assets. Do not load them directly unless a default entrypoint or
+triggered add-on explicitly instructs it for the current task.
 
 ## 2. Scope, Mode, And Tier
 
@@ -213,6 +219,7 @@ Use scripts when applicable instead of retyping repeatable logic:
 ```powershell
 python scripts/extract_interaction_ledger.py --input path/to/prototype.html --output interaction-ledger.json
 python scripts/validate_prd_quality.py path/to/prd.docx --manifest path/to/manifest.json
+python scripts/validate_coding_agent_contract.py --prd path/to/prd.md --prototype path/to/prototype.html
 python scripts/validate_skill_consistency.py
 python scripts/validate_routing_scenarios.py
 ```

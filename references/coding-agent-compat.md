@@ -43,6 +43,8 @@ ac_structured:
     frr_ref: M04-F01
     type: happy_path
     priority: P0
+    status: active
+    revision: 1
     given: "The user is logged in as a sales representative and at least one lead is in draft state."
     when: "The user clicks the Submit For Review button."
     then:
@@ -66,9 +68,35 @@ Rules:
 
 - Module and Function IDs must match FRR section 1 function inventory.
 - Sequence numbers are stable after assignment; do not renumber old ACs.
+- Do not add version suffixes to AC IDs. Use `revision`, `status`,
+  `supersedes`, and `replaced_by` metadata when behavior changes.
 - `priority: P0` is smoke; `P1` is regression; `P2` is long-tail/adversarial.
 - `test_type` is one of `unit`, `integration`, `e2e`, `contract`, `manual`.
 - If automation is intentionally skipped, set `skip_reason`; do not omit the AC.
+
+### AC ID Evolution Rules
+
+Use these rules when FRRs change after AC IDs have been assigned:
+
+| Change | Rule |
+|---|---|
+| Add a new case to the same function | Append the next sequence number, for example `AC-M04-F01-004`. |
+| Split one function into several functions | Keep unchanged ACs in place only if the original FRR remains valid. For behavior moved to a new function, create new AC IDs under the new Function ID and mark old ACs `status: moved` with `replaced_by`. |
+| Merge several functions | Keep still-valid AC IDs active and update `frr_ref` only when the merged function becomes the authoritative FRR. Mark duplicate or obsolete ACs `status: deprecated` with `replaced_by`. |
+| Clarify wording without changing expected UI/domain result | Keep the same AC ID and increment `revision`. |
+| Change expected UI/domain result, permission, state transition, or SLA | Create a new AC ID, mark the old one `status: superseded`, and link it with `replaced_by` / `supersedes`. |
+| Remove a function from release scope | Keep historical AC IDs in the PRD appendix or manifest as `status: deferred` / `deprecated`; do not recycle the numbers. |
+
+Optional metadata:
+
+```yaml
+status: active        # active | moved | superseded | deprecated | deferred
+revision: 1
+supersedes: []
+replaced_by: []
+owner: "pm-or-qa-owner"
+last_changed: "YYYY-MM-DD"
+```
 
 Type taxonomy:
 
@@ -87,6 +115,39 @@ Type taxonomy:
 The product-level `ai_runtime_contract` in `advanced-extensions.md` is
 authoritative. For coding agent implementation, extend it with implementation
 fields that can map to config, tests, observability, and feature flags.
+
+### Contract Selection Ladder
+
+Do not use the full `ai_runtime_contract` for every L2 AI-supporting feature.
+Choose the smallest contract that preserves implementation safety:
+
+| Scenario | Contract |
+|---|---|
+| AI only summarizes, extracts, drafts, classifies, recommends, or ranks; deterministic/manual path remains valid; AI writes no business state | `ai_contract_lite` |
+| AI output becomes a workflow task, changes object lifecycle, triggers external notification, calls tools with side effects, or affects money/safety/compliance/legal decisions | full `ai_runtime_contract` |
+| AI-core, multi-agent, autonomous tool routing, model-selected action, production rollout with rollback/eval/on-call, or high-risk regulated use | full `ai_runtime_contract` plus AI Native / runtime gates |
+
+Upgrade from lite to full when any condition becomes true:
+
+- `write_scope` must exceed `none` or `draft_only`;
+- the AI path can create, update, dispatch, approve, reject, close, pay, notify,
+  delete, or otherwise alter consequential business state;
+- a tool call has external side effects or non-idempotent writes;
+- the feature needs P0/P1 golden eval thresholds, runtime observability,
+  rollback ownership, prompt/model registry, or on-call support;
+- failure could create compliance, privacy, safety, financial, or customer
+  acceptance risk.
+
+Lite-to-full mapping:
+
+| `ai_contract_lite` field | Full contract destination |
+|---|---|
+| `model` | `agent_or_model` / `impl.model_env` |
+| `prompt_file` | `impl.prompt_file` |
+| `write_scope` | `write_scope` |
+| `human_gate` | `human_gate` |
+| `fallback` | `fallback_state` plus recovery notes |
+| `feature_flag` | `impl.feature_flag` |
 
 ```yaml
 ai_runtime_contract:
@@ -196,6 +257,12 @@ Verification checklist:
 
 If any check fails, the coding agent must report the gap and stop the affected
 implementation step instead of inventing behavior.
+
+Run the deterministic checker when both PRD and prototype are available:
+
+```powershell
+python scripts/validate_coding_agent_contract.py --prd path/to/prd.md --prototype path/to/prototype.html
+```
 
 ## Agent Entrypoint Generation
 
