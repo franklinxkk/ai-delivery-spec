@@ -25,6 +25,7 @@ Use this file when upgrading projects or the skill itself across major versions.
 - v4.5.2 -> v4.6.0 Coding Agent Compatibility
 - v4.6.0 -> v4.6.1 Coding Agent Hardening
 - v4.6.1 -> v4.6.2 Medical Hospital IT Domain Module
+- v4.6.2 -> v4.6.3 Guided Requirement Shaping
 - Gate Mapping
 - Project Upgrade Path
 - Migration Checklist
@@ -386,6 +387,29 @@ Compatibility:
   hospital SOP, data standard, and accountable owner before formal handoff.
 - AI-assisted medical outputs remain non-binding drafts unless an accountable
   clinician or approved governance role completes the required human gate.
+
+## v4.6.2 -> v4.6.3 Guided Requirement Shaping
+
+v4.6.3 improves the entry experience for users who start with only an idea,
+pain point, meeting note, boss message, competitor feature, or incomplete
+feature list. It does not weaken downstream Gate 1-4 requirements; it adds a
+lighter path to reach them.
+
+| Change | Migration Action |
+|---|---|
+| Unstructured Input Protocol added | Before PRD generation, classify raw text as idea, pain, solution, feature list, meeting note, or evidence bundle; extract KNOWN / INFERRED / MISSING / CONFLICT. |
+| Input Clarification Protocol added | Ask 3-5 targeted questions only when the missing answer can change scope, role path, state, data, acceptance, or feasibility. |
+| Opportunity Shaping Protocol added | For vague ideas, pain/data, or proposed solutions, shape target user, painful moment, JTBD, outcome, options, riskiest assumption, and next artifact. |
+| Adversarial PRD Review Protocol added | Actively falsify PRDs across scope, role path, acceptance, boundary, state, permission, dependency, AI claims, operations, and coding-agent ambiguity. |
+| Output selector and more samples added | README now helps users choose idea shaping, light PRD, standard PRD, prototype, AI runtime, or coding-agent handoff; CRM, education, and medical examples include L1 samples. |
+
+Compatibility:
+
+- Existing v4.6.2 PRDs and prototypes remain valid.
+- L0/Lite idea exploration may stop at clarification or opportunity shaping.
+- L2/L3 development handoff still requires full FRR, source evidence,
+  acceptance, and applicable runtime/verification contracts.
+- Clarification should reduce guessing, not become an endless interview.
 
 ## Gate Mapping
 

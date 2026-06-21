@@ -32,6 +32,8 @@ and prepares developer/QA handoff.
 
 ## Required Output Focus
 
+Sample output: [L1 PRD sample](l1-prd-sample.md).
+
 - Business scenario: radiologist reviews AI draft before final report signing.
 - Source evidence: PACS/RIS image/report, EMR encounter, patient identity, AI
   model trace, hospital SOP, and current regulatory/policy references.

@@ -19,6 +19,90 @@ Use this file for reverse engineering, PRD generation, state machines, guards, S
 
 Use Stage 0 when the input is an existing HTML prototype, legacy system, screenshot, Excel template, or competitor product.
 
+### Unstructured Input Protocol
+
+Use this branch when the input is a raw idea, pain statement, meeting note,
+boss message, customer complaint, competitor feature list, or short feature
+request rather than a structured PRD/prototype.
+
+Do not jump directly to a full PRD. First normalize the input:
+
+1. Classify the input type: `idea` / `pain` / `solution` / `feature_list` /
+   `meeting_note` / `evidence_bundle`.
+2. Extract signals into `KNOWN`, `INFERRED`, `MISSING`, and `CONFLICT`.
+3. Identify the smallest clarification set needed before Stage 1.
+
+Minimum output:
+
+```yaml
+unstructured_input_parse:
+  input_type:
+  known:
+    users:
+    pain_or_outcome:
+    proposed_solution:
+    constraints:
+    evidence:
+  inferred:
+    assumptions:
+    likely_domain:
+    likely_workflow:
+  missing:
+    - question:
+      why_it_matters:
+      blocks: story | role_path | state | data | acceptance | feasibility
+  conflicts:
+    - issue:
+      decision_owner:
+  recommended_next_step: clarify | opportunity_shape | light_prd | prototype | standard_prd
+```
+
+Rules:
+
+- Ask only the minimum questions needed for the requested output.
+- If the user wants fast exploration, keep missing items as assumptions and end
+  with upgrade triggers.
+- If the artifact will guide development, QA, customer demo, bid, or coding
+  agent implementation, unresolved P0 missing items block `PASS`.
+
+### 0.5 Input Clarification Protocol
+
+Run this before Stage 1 when the request is ambiguous, idea-only, or missing
+enough context that the product direction could change.
+
+Ask 3-5 targeted questions. Do not ask a questionnaire. Choose questions by
+input type:
+
+| Input Type | Ask First |
+|---|---|
+| raw idea | target user, painful moment, desired outcome, current workaround |
+| pain / complaint | frequency, severity, affected role, current cost, unacceptable failure |
+| proposed solution | underlying problem, success metric, alternative solutions, must-not-do |
+| feature list | primary workflow, release goal, role priority, out-of-scope boundary |
+| old PRD/prototype upgrade | what changed, what must be preserved, what can be removed, acceptance owner |
+| competitor feature | customer job, switching barrier, differentiation hypothesis, proof needed |
+
+Question format:
+
+```yaml
+clarification_question:
+  id: CQ-001
+  question:
+  why_it_matters:
+  answer_type: free_text | choose_one | choose_many | numeric | owner_decision
+  if_unanswered_default:
+  downstream_impact: scope | role | state | data | acceptance | risk
+```
+
+After answers, return a decision:
+
+| Decision | Meaning | Next Step |
+|---|---|---|
+| `READY_FOR_LIGHT_PRD` | enough for L1 alignment | write light PRD and gaps |
+| `READY_FOR_OPPORTUNITY_SHAPING` | problem/opportunity still needs shaping | run Opportunity Shaping Protocol |
+| `READY_FOR_STANDARD_PRD` | enough for development-oriented PRD | enter Stage 1-5 |
+| `BLOCKED_BY_P0_UNKNOWN` | missing item would change scope, owner, legality, data, or feasibility | ask owner or record blocked |
+
 ### Annotation Pattern Detection
 
 | Pattern | Signal | Strategy |
@@ -244,6 +328,48 @@ Run only the stages needed by the selected artifact scope and execution mode. Sk
 Stage 1 Brainstorm:
 - When opportunity framing is in scope, frame the opportunity and write a testable outcome/JTBD.
 - Use ICE or another prioritization method only when comparing options.
+
+### 1.1 Opportunity Shaping Protocol
+
+Use this when the user has a vague idea, pain, customer signal, policy/business
+pressure, or proposed solution but not yet a stable requirement.
+
+Pick the matching path:
+
+| Path | Use When | Questions |
+|---|---|---|
+| A. Idea -> opportunity | the input is "I want to build X" | Who has the painful moment? What job/outcome changes? What is the current workaround? What evidence says this matters now? |
+| B. Pain/data -> options | the input names pain or metrics but no solution | What segment is most affected? What root causes are plausible? What solution options exist? Which assumption is riskiest? |
+| C. Solution -> hypothesis | the input already proposes a feature | What problem would make this feature necessary? What metric proves value? What simpler/manual alternative exists? What must be true for this to work? |
+
+Output:
+
+```yaml
+opportunity_shape:
+  target_user:
+  painful_moment:
+  job_to_be_done:
+  desired_outcome:
+  current_workaround:
+  evidence:
+  solution_options:
+    - option:
+      benefit:
+      risk:
+      validation:
+  riskiest_assumption:
+  next_artifact: one_pager | light_prd | prototype | research_plan | no_go_note
+```
+
+Rules:
+
+- Keep L0/Lite outputs short: one opportunity, 2-3 options, one riskiest
+  assumption, one next artifact.
+- Do not force TAM/SAM/SOM, competitor matrices, or full strategy unless the
+  request is a new market, major investment, board decision, or positioning
+  problem.
+- If the user asks for implementation before the opportunity is shaped, produce
+  `REVIEW_COMPLETE_WITH_GAPS` and list the assumptions that coding would lock in.
 
 Stage 1.5 Research:
 - Run only when evidence, policy, market, domain, or competitor uncertainty affects the decision.

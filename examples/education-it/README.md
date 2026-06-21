@@ -42,6 +42,8 @@ For AI learning assistant, AI course generation, AI Q&A, or adaptive learning:
 
 ## Gate Focus
 
+Sample output: [L1 PRD sample](l1-prd-sample.md).
+
 - Academic calendar and term boundaries.
 - Role and organization hierarchy: university, college, major, class, student.
 - Course, timetable, exam, grade, attendance, and credit state machines.

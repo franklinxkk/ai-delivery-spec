@@ -2,6 +2,18 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.6.3 - 2026-06-21
+
+- Added guided requirement shaping for vague ideas, raw pain points, meeting
+  notes, boss messages, feature lists, and competitor references.
+- Added a 3-5 question Input Clarification Protocol and Opportunity Shaping
+  Protocol before full PRD generation.
+- Added Adversarial PRD Review Protocol for scope, role path, acceptance,
+  boundary, state, permission, dependency, AI overclaim, operations, and
+  coding-agent ambiguity attacks.
+- Added README output selector and L1 PRD samples for CRM, Higher-Education IT,
+  and Medical / Hospital IT examples.
+
 ## v4.6.2 - 2026-06-21
 
 - Added the Medical / Hospital IT domain module for HIS/EMR/LIS/PACS/RIS,

@@ -49,6 +49,8 @@ criteria, and unresolved decisions.
 | QA acceptance matrix | Story, path, selector, state result, domain result |
 | Gap list | Decisions needed before production development |
 
+Sample output: [L1 PRD sample](l1-prd-sample.md).
+
 ## Gate Focus
 
 - Gate 1: every role has a complete operating path.

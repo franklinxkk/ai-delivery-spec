@@ -9,7 +9,7 @@ It works with ChatGPT, Claude, Gemini, Codex, Cursor, Copilot, OpenClaw,
 and any AI tool that can read Markdown.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-4.6.2-green.svg)]()
+[![Version](https://img.shields.io/badge/version-4.6.3-green.svg)]()
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-purple.svg)](https://openclaw.ai)
 
@@ -99,6 +99,17 @@ No vendor-specific runtime is required.
    acceptance criteria, and traceability.
    ```
 
+### Output Selector / 输出形态选择
+
+| Your Situation | Use | Expected Output |
+|---|---|---|
+| only a rough idea or pain | `Mode=Lite`, clarification + opportunity shaping | questions, opportunity shape, assumptions, next artifact |
+| need quick internal alignment | `Tier=L1`, `prd-light-template` | light PRD, gaps, upgrade triggers |
+| will hand to dev/QA | `Tier=L2`, standard PRD | complete FRRs, state/action matrix, acceptance, handoff notes |
+| need customer/demo validation | Gate 2 prototype path | clickable prototype or demo path + verification report |
+| AI-core or high-risk automation | `Tier=L3`, AI runtime/eval gates | AI runtime contract, human gate, eval/rollback/ops |
+| coding agent will implement | coding-agent compatibility | `ac_structured`, AGENTS/CLAUDE/Cursor rules, P0/P1 tests |
+
 ### Install
 
 ```bash
@@ -141,13 +152,16 @@ Start with a real-world scenario:
 
 - [CRM Response Center](examples/crm-response-center/README.md) — lead,
   opportunity, customer service, product feedback, contract/payment.
+  See the [L1 PRD sample](examples/crm-response-center/l1-prd-sample.md).
 - [Traffic Safety SaaS](examples/traffic-safety-saas/README.md) — regulated
   ToB/ToG workflows, mobile inspection, notices, hidden-danger remediation.
   See the complete [L1 PRD sample](examples/traffic-safety-saas/l1-prd-sample.md).
 - [Higher-Education IT](examples/education-it/README.md) — academic affairs,
   student affairs, teaching systems, smart classrooms, AI learning assistants.
+  See the [L1 PRD sample](examples/education-it/l1-prd-sample.md).
 - [Medical / Hospital IT](examples/medical-hospital-it/README.md) — HIS/EMR,
   LIS, PACS/RIS, clinical workflow, medical quality, and AI-assisted review.
+  See the [L1 PRD sample](examples/medical-hospital-it/l1-prd-sample.md).
 
 See [examples/README.md](examples/README.md) for the full example index.
 

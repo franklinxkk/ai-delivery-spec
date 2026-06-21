@@ -165,6 +165,49 @@ Core actions must produce a visible business outcome.
 
 Toast is allowed only as secondary feedback.
 
+### 3.5 Adversarial PRD Review Protocol
+
+Use this before sharing an L1+ PRD, prototype package, development handoff, or
+customer-demo artifact with stakeholders. This is different from persona
+walkthrough: the reviewer actively tries to falsify the PRD.
+
+Run 10 attack checks and report findings by severity:
+
+| Attack Dimension | How To Try To Break The PRD |
+|---|---|
+| Scope creep | Find a feature, role, state, or dependency implied by text but not in scope/out-of-scope |
+| Missing role path | Pick each named role and ask: can this role start, complete, and recover from its main task? |
+| Untestable acceptance | Locate any acceptance statement without Given/When/Then, visible result, and domain result |
+| Boundary condition gap | Test zero data, duplicate data, max length, stale data, permission denial, timeout, and partial success |
+| State-machine dead end | Find states with no allowed next action, no owner, or no closure condition |
+| Data permission hole | Try horizontal/vertical overreach: another tenant, org, department, region, enterprise, patient, student, or customer |
+| External dependency blind spot | Find source systems, APIs, imports, SMS, payment, AI model, or third-party pages without owner/failure behavior |
+| AI overclaim | Check whether AI copy, output, or automation exceeds evidence level, write scope, or human-gate permission |
+| Operational unreleasability | Look for missing migration, rollout, rollback, alert, support owner, or data reconciliation |
+| Coding-agent ambiguity | Ask whether a coding agent can identify files/modules, states, APIs, AC IDs, and forbidden guesses |
+
+Finding format:
+
+```yaml
+adversarial_prd_finding:
+  id: ADV-001
+  severity: P0 | P1 | P2 | P3
+  attack_dimension:
+  evidence:
+  why_it_breaks_delivery:
+  required_fix:
+  owner:
+  blocks: PASS | release | coding_agent | qa | customer_demo | none
+```
+
+Severity:
+
+- `P0`: wrong/unsafe build, compliance/security/privacy/data breach, impossible
+  acceptance, or core workflow cannot close.
+- `P1`: development/QA/customer demo likely blocked or materially ambiguous.
+- `P2`: important improvement, workaround possible.
+- `P3`: wording, navigation, or maintainability issue.
+
 ## 4. Role Path Verification
 
 For each role, provide at least one happy path and one exception/permission path.
