@@ -1,0 +1,7 @@
+interface:
+  display_name: "AI Delivery Spec"
+  short_description: "Routes PRD, prototype, dev contract, acceptance, and coding-agent handoff into testable delivery specs."
+  default_prompt: "Use $ai-delivery-spec: run 0D triage, load only necessary entrypoints, and produce a human-readable, testable delivery artifact; add coding-agent blocks only when implementation handoff requires them."
+
+policy:
+  allow_implicit_invocation: true
