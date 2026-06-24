@@ -1,4 +1,4 @@
----
+﻿---
 name: ai-delivery-spec
 description: >-
   Use to create or review product delivery artifacts with handoff intent: PRD,
@@ -8,7 +8,7 @@ description: >-
   syntax/debugging, copy rewriting, or idea exploration with no delivery intent.
 ---
 
-# AI Delivery Spec — Production Elastic Delivery Standard (v4.6.5)
+# AI Delivery Spec — Production Elastic Delivery Standard (v4.6.6)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering,
 algorithm, QA, operations, customers, and sponsors can read, build, verify, and
@@ -236,3 +236,44 @@ When delivering work, state:
 - created or updated artifacts;
 - verification performed;
 - completion state and unresolved risks.
+
+## 9. Version Control And Release Rules
+
+When the skill files are managed in a Git repository and published to GitHub or
+other remotes, follow these rules to prevent data loss and history corruption.
+
+### Commit Flow
+
+1. **Pull first**: Always `git pull origin main` before making any changes.
+   If conflicts arise, resolve them locally before proceeding.
+2. **Stage selectively**: `git add` only the files that were actually modified.
+   Never use `git add .` or `git add -A` blindly.
+3. **Commit with context**: Write a commit message that lists what changed and
+   why. Format: `vX.Y.Z: <short description>`.
+4. **Push after verification**: Only push after local verification (syntax
+   check, test run, or manual review) passes.
+
+### Prohibited Operations
+
+- `git push --force` to `main` branch.
+- `git add .` followed by a commit without reviewing the staged diff.
+- Overwriting remote files without pulling first (causes non-fast-forward
+  rejection or remote history loss if forced).
+- Deleting files that exist on remote but not locally without explicit
+  de-scope reason in the commit message.
+
+### Release Tagging
+
+When publishing a new version:
+
+1. Update `SKILL.md` version number.
+2. Update `CHANGELOG.md` with the new version entry.
+3. Commit with message `vX.Y.Z release`.
+4. Tag: `git tag -a vX.Y.Z -m "Release vX.Y.Z"`.
+5. Push: `git push origin main --tags`.
+
+### Branch Strategy
+
+- `main`: stable, always deployable.
+- Feature branches: `feature/<topic>` for experimental work; merge via PR.
+- No direct pushes to `main` for experimental or unreviewed changes.

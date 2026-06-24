@@ -15,7 +15,11 @@ source evidence, DDD/API/data contracts, or acceptance coverage.
 - Metrics And Event Tracking
 - Frontend Backend QA Handoff Notes
 - Business Examples
+- Page Layout And Component Constraint
+- Computed Metrics Specification
 - Visual Hierarchy And Language Rules
+- Output Language Rules
+- Module Self-Contained Organization (Optional)
 - Readability Acceptance Checklist
 
 ## Purpose
@@ -312,6 +316,180 @@ Language rewrite rules:
 Keep requirement sentences short. Split multi-condition statements into numbered
 rules.
 
+## Output Language Rules
+
+### Core Rule
+
+Use the prompting user's spoken language for all document content, regardless
+of the AI assistant's default or training language. Technical terminology that
+has no established translation or is universally recognized in its English form
+may remain in English.
+
+### What Must Be In The User's Language
+
+- Chapter and section headers
+- Business scenario descriptions
+- Field names, field descriptions, and field validation rules
+- Interaction flow narratives (what happens when a user clicks X)
+- Business rules, calculations, and caliber descriptions
+- Acceptance criteria narrative text
+- Error messages, empty states, loading states, confirmation dialogs
+- Permission descriptions
+- Non-functional requirement descriptions
+
+### What Stays In English
+
+- Technical keywords that serve as identifiers or tooling hooks:
+  `data-action`, `data-testid`, `FRR`, `AC`, `API`, `RBAC`, `E2E`, `SSE`,
+  `SLA`, `SSO`, `LDAP`, `JSON`, `YAML`, `CSS`, `HTML`
+- Standard architectural terms when no well-known local equivalent exists:
+  `Layout Region Diagram`, `Component Four-Tuple`, `Interaction Density
+  Floor`, `Modal Chain Spec`, `Computed Metrics`, `State Machine`,
+  `idempotency key`
+- Code or command references, identifiers, API paths, field IDs, status codes
+- Tables where column headers are standard technical terms (e.g. `FRR ID`,
+  `data-action`, `component_props`, `compute_expression`)
+- Fenced code blocks (schema, API contract, YAML, SQL, AGENTS.md stubs)
+
+### Chapter Header Translation Table
+
+When generating a PRD from the L2 Standard template, translate these chapter
+headers to the user's language. Below is the Chinese mapping; for other
+languages, apply the equivalent translation.
+
+| English (Template) | Chinese |
+|---|---|
+| Version Information | 版本信息 |
+| Executive Summary | 执行摘要 |
+| Change Log | 变更记录 |
+| Background And Opportunity | 背景与机会 |
+| Goals, Metrics, And Scope | 目标、指标与范围 |
+| Users, Roles, And Permissions | 用户、角色与权限 |
+| Information Architecture | 信息架构 |
+| Complete Module Product Specifications | 完整模块产品规格 |
+| Business Processes | 业务流程 |
+| E2E Cross-Module Canvas | E2E跨模块链路画布 |
+| State Machine And Button Matrix | 状态机与按钮矩阵 |
+| Prototype And Interaction Contract | 原型与交互契约 |
+| Engineering Traceability Contract | 工程追溯契约 |
+| Data, Metrics, And Tracking | 数据、指标与追踪 |
+| Non-Functional Requirements | 非功能需求 |
+| Acceptance And Readiness | 验收与就绪 |
+| Risks, Decisions, And Open Questions | 风险、决策与待解问题 |
+| Appendix | 附录 |
+
+FRR section headers within a module also translate:
+
+| English (FRR section) | Chinese |
+|---|---|
+| Identity, Purpose, And Boundary | 身份、目的与边界 |
+| Entry And Preconditions | 入口与前置条件 |
+| Pages, Regions, And Visible States | 页面、区域与可见状态 |
+| Fields, Dictionaries, And Validation | 字段、字典与校验 |
+| Numbered Interaction Flow | 编号交互流程 |
+| Actions And Operation Rules | 操作与规则 |
+| Business Rules, Calculations, And Calibers | 业务规则、计算与口径 |
+| State, Button, And Lifecycle Behavior | 状态、按钮与生命周期行为 |
+| Permissions And Data Scope | 权限与数据范围 |
+| Business Scenario Canvas | 业务场景画布 |
+| Three-Layer Permission Model | 三层权限模型 |
+
+### Verification
+
+Before marking a PRD as `PASS`, run a language check:
+
+- Count total content lines and lines that are >80% English characters.
+- Accept if the English-heavy ratio is below 20% (explainable by code blocks,
+  table headers, and technical terms).
+- If >30% English-heavy ratio, flag as `LANGUAGE_GAP` and rewrite.
+
+## Module Self-Contained Organization (Optional)
+
+When the PRD has many modules (>=5) and readers complain about jumping between
+sections, use the Module Self-Contained mode. This is an optional layout that
+reorganizes the standard template so each module is a complete vertical slice.
+
+### When To Use
+
+- PRD has >=5 modules with independent development teams
+- Readers (PM, frontend, backend, QA) each focus on specific modules
+- The standard template's cross-cutting H2 sections cause navigation friction
+- User or sponsor explicitly requests module-first organization
+
+### When NOT To Use
+
+- PRD has <=3 modules (overhead exceeds benefit)
+- Modules share heavy cross-cutting contracts (shared state machines,
+  cross-module workflows, shared field dictionaries)
+- The PRD is a bid/demo document where reviewers read linearly
+
+### Structure
+
+Replace the standard cross-cutting H2 layout with this module-first structure:
+
+```markdown
+# PRD Title
+
+## Version Information
+## Executive Summary
+## Background And Opportunity
+## Goals, Metrics, And Scope
+## Users, Roles, And Permissions
+## Information Architecture (global only)
+
+## Module M01: [Module Name]
+### Module Overview
+  (scenario table, in/out scope, module-level metrics)
+### Function Records
+  (FRR §1-§16 per function, self-contained)
+### Module State Machine
+  (state-button matrix for this module only)
+### Module Business Rules
+  (numbered rules, calibers, formulas)
+### Module Acceptance
+  (happy path, boundary, permission, state conflict, regression)
+### Frontend/Backend/QA Handoff
+  (component notes, API ownership, test priorities)
+
+## Module M02: [Module Name]
+  (same structure)
+
+## Cross-Module Canvas
+  (E2E workflows that span modules)
+## Engineering Traceability Contract
+  (global RBAC, shared API contracts, shared data schemas)
+## Non-Functional Requirements
+## Risks, Decisions, And Open Questions
+## Appendix
+```
+
+### Rules
+
+- Each module section must contain ALL FRR records for that module.
+  Do not split a module's functions across different H2 sections.
+- Cross-cutting contracts (global RBAC, shared data schemas, E2E workflows)
+  remain in dedicated sections after all modules.
+- The Information Architecture section covers global navigation and IA only;
+  per-module page layout lives inside the module section.
+- Global metrics (cross-module KPIs) stay in the Goals section; per-module
+  metrics stay in the module's Module Overview.
+- The Executive Summary and Background sections remain global.
+- When using this mode, add `Organization: Module-Self-Contained` to the
+  version information table so reviewers know the layout convention.
+
+### Trade-offs
+
+| Standard Layout | Module Self-Contained |
+|---|---|
+| Cross-cutting sections group all state machines, all rules, all acceptance | Each module is a vertical slice; reader stays in one section |
+| Easier to compare same-type artifacts across modules | Easier to hand a module to a team |
+| Risk: reader jumps between H2 sections | Risk: cross-cutting patterns duplicated or inconsistent |
+| Good for: bid docs, review boards, linear reading | Good for: multi-team delivery, coding agent handoff |
+
+When using Module Self-Contained mode, add a cross-module consistency check to
+the Readability Acceptance Checklist to catch duplicated or inconsistent
+contracts.
+
 ## Readability Acceptance Checklist
 
 Before marking a PRD ready for handoff:
@@ -333,3 +511,7 @@ Before marking a PRD ready for handoff:
 - [ ] Every frontend-computed metric has a compute declaration with expression,
       format rule, source fields, and boundary behavior.
 - [ ] No vague language remains without measurable behavior or owner.
+- [ ] Language check: English-heavy lines ≤ 20% of total content lines.
+- [ ] If Module Self-Contained mode is used, cross-module consistency check
+      passed (no duplicated contracts, consistent state definitions, shared
+      fields traced to a single source).

@@ -23,6 +23,12 @@ UNSUPPORTED_NUMERIC_RE = re.compile(
     r"(?i)\b(?:\d+(?:\.\d+)?%|\d+\s*(?:cases|tokens|ms|s|seconds|minutes)|temperature\s*=\s*\d)"
 )
 
+# Language check: detect English-heavy lines (>= 80% ASCII alpha characters)
+# Used to enforce the Output Language Rules from readability-layer.md
+ASCII_ALPHA_RE = re.compile(r"[A-Za-z]")
+FENCE_RE = re.compile(r"^```")
+TABLE_HEADER_RE = re.compile(r"^\s*\|")
+
 
 def read_text(path: Path) -> str:
     suffix = path.suffix.lower()
@@ -106,6 +112,65 @@ def check_manifest(manifest_path: Path, failures: list[str]) -> None:
             add_failure(failures, f"core source assertion blocks PASS: {source_id}={status}")
 
 
+def check_language_ratio(text: str, failures: list[str]) -> None:
+    """Check that English-heavy lines are <= 20% of total content lines.
+
+    Skips: empty lines, code blocks (between ``` fences), and table header
+    separator lines (|---|---|). Lines inside code blocks are not counted
+    at all, since they are expected to be English/code.
+    """
+    lines = text.splitlines()
+    total = 0
+    english_heavy = 0
+    in_code_block = False
+
+    for line in lines:
+        stripped = line.strip()
+
+        # Track code block state
+        if FENCE_RE.match(line):
+            in_code_block = not in_code_block
+            continue
+
+        if in_code_block:
+            continue
+
+        # Skip empty lines
+        if not stripped:
+            continue
+
+        # Skip table separator lines (|---|---|)
+        if TABLE_HEADER_RE.match(line) and re.match(r"^[\s|\-:]+$", stripped):
+            continue
+
+        total += 1
+
+        # Count ASCII alpha characters
+        ascii_chars = len(ASCII_ALPHA_RE.findall(stripped))
+        alpha_total = sum(1 for ch in stripped if ch.isalpha())
+
+        if alpha_total > 0 and ascii_chars / alpha_total >= 0.8:
+            english_heavy += 1
+
+    if total == 0:
+        return
+
+    ratio = english_heavy / total
+    if ratio > 0.30:
+        add_failure(
+            failures,
+            f"LANGUAGE_GAP: English-heavy lines {english_heavy}/{total} "
+            f"({ratio:.1%}) exceed 30% threshold. Rewrite non-code content "
+            f"in the user's spoken language per Output Language Rules."
+        )
+    elif ratio > 0.20:
+        # Warning, not failure
+        print(
+            f"WARNING: English-heavy lines {english_heavy}/{total} "
+            f"({ratio:.1%}) above 20% recommendation"
+        )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("artifact", type=Path, help="PRD/prototype/spec artifact to inspect")
@@ -120,6 +185,7 @@ def main() -> int:
     if not args.allow_wildcards:
         check_wildcard_ids(text, failures)
     check_duplicate_boilerplate(text, failures)
+    check_language_ratio(text, failures)
     if args.warn_numeric:
         check_unsupported_numeric_claims(text, failures)
     if args.manifest:

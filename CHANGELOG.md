@@ -2,6 +2,39 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.6.6 - 2026-06-24
+
+- P0-1: Added `Output Language Rules` to `readability-layer.md`: core rule
+  (use prompting user's spoken language), what must be translated, what stays
+  in English (technical identifiers, code blocks, standard architectural
+  terms), chapter header translation table (18 chapter headers + 11 FRR
+  section headers), and language verification rule (English-heavy lines ≤ 20%).
+  Added `Language check` item to Readability Acceptance Checklist.
+- P0-2: Added `Modal Chain Coverage Rule` to `delivery-core.md`: mandatory
+  ≥ 90% modal coverage when source includes HTML prototype, with extraction
+  procedure (showModal/Modal.open/dialog/drawer/confirm patterns), coverage
+  computation formula, and `MODAL_COVERAGE_GAP` flag for Gate 3 blocking.
+- P0-3: Added `check_language_ratio()` function to `validate_prd_quality.py`:
+  detects English-heavy lines (≥ 80% ASCII alpha), skips code blocks and table
+  separators, fails at > 30% ratio (`LANGUAGE_GAP`), warns at > 20% ratio.
+  Verified against v5.0 English PRD (75% → FAIL) and v5.1 Chinese PRD
+  (22.5% → PASS with warning).
+- P1-4: Added `Module Self-Contained Organization (Optional)` section to
+  `readability-layer.md`: optional layout mode for PRDs with ≥5 modules where
+  each module is a vertical slice (Overview + FRR + State + Rules + Acceptance +
+  Handoff). Includes when-to-use/when-not-to-use rules, structure template,
+  trade-off comparison table, and cross-module consistency checklist item.
+- P1-5: Added `### Prototype Interaction Ledger` section to `delivery-core.md`
+  Stage 0: mandatory extraction procedure (7 inventories: pages, actions,
+  modals, state enums, roles, fields, workflows), JSON output format, coverage
+  verification table with per-category thresholds (pages 100%, actions 95%,
+  modals 90%, etc.), `COVERAGE_GAP` blocking flag, and regression detection
+  via ledger diff.
+- P1-6: Added `## 9. Version Control And Release Rules` to `SKILL.md`: commit
+  flow (pull → selective stage → commit → push), prohibited operations (force
+  push to main, blind add, overwrite without pull), release tagging procedure,
+  branch strategy (main + feature branches).
+
 ## v4.6.5 - 2026-06-23
 
 - P0-1: Added Page Layout + Component Constraint + Interaction Density to

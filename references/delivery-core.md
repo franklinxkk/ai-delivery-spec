@@ -5,6 +5,7 @@ Use this file for reverse engineering, PRD generation, state machines, guards, S
 ## Contents
 
 - Stage 0 Reverse Engineering
+- Prototype Interaction Ledger
 - Engineering Profile / Anti-Bloating
 - Lifecycle And Spec-Plan-Tasks Bridge
 - Stage 1-5 Product Workflow
@@ -196,6 +197,89 @@ Recommended `stage0-output.json` extension:
 }
 ```
 
+### Prototype Interaction Ledger
+
+When the input includes an HTML prototype, before drafting any PRD content,
+extract a complete interaction ledger. This ledger is the single source of
+truth for cross-validating PRD coverage.
+
+#### Extraction Procedure
+
+1. **Page inventory**: Parse all distinct views/pages. Record as
+   `{ page_id, page_title, route_or_file, role_visibility }`.
+2. **Action inventory**: Parse every interactive element with `data-action`,
+   `onclick`, or equivalent handler. Record as
+   `{ action_id, page_id, element_text, handler_function, action_type }`.
+   Action types: `navigate | create | update | delete | submit | filter |
+   sort | export | import | confirm | cancel | toggle | drag | select | custom`.
+3. **Modal inventory**: Parse all `showModal`, `Modal.open`, `dialog`,
+   `drawer`, `confirm`, and popup-like patterns. Record as
+   `{ modal_id, trigger_action, page_id, fields[], required_fields[] }`.
+4. **State enum inventory**: Parse badge mappings, status colors, lifecycle
+   functions. Record as `{ enum_name, values[], source_function, page_id }`.
+5. **Role inventory**: Parse `data-visible-role`, role-based conditionals,
+   navigation restrictions. Record as `{ role_id, reachable_pages[],
+   reachable_actions[] }`.
+6. **Field inventory**: Parse form fields, table columns, data bindings.
+   Record as `{ field_id, page_id, component_type, data_type, required,
+   enum_source }`.
+7. **Workflow inventory**: Parse multi-step sequences (wizard, stepper,
+   approval flow). Record as `{ workflow_id, steps[], roles[] }`.
+
+#### Output Format
+
+Save as `prototype-interaction-ledger.json` alongside `stage0-output.json`:
+
+```json
+{
+  "artifact": "path-or-url",
+  "extractedAt": "ISO-8601",
+  "pages": [],
+  "actions": [],
+  "modals": [],
+  "stateEnums": [],
+  "roles": [],
+  "fields": [],
+  "workflows": [],
+  "summary": {
+    "pageCount": 0,
+    "actionCount": 0,
+    "modalCount": 0,
+    "stateEnumCount": 0,
+    "roleCount": 0,
+    "fieldCount": 0,
+    "workflowCount": 0
+  }
+}
+```
+
+#### Coverage Verification
+
+After generating the PRD, run a cross-coverage check against the ledger:
+
+| Category | Coverage Rule | Block Gate 3 If Below |
+|---|---|---|
+| Pages | Every page in ledger appears in PRD §4 (Pages/Regions) | 100% |
+| Actions | Every action in ledger appears in at least one FRR §6 interaction step | 95% |
+| Modals | Every modal in ledger appears in at least one FRR §6 `modal_spec` | 90% |
+| State Enums | Every enum value in ledger appears in PRD §9 state matrix | 95% |
+| Roles | Every role in ledger appears in PRD §7 (Users/Roles/Permissions) | 100% |
+| Fields | Every field in ledger appears in FRR §5 field dictionary or authoritative annex | 90% |
+| Workflows | Every workflow in ledger appears in E2E Cross-Module Canvas | 100% |
+
+Missing items below the threshold produce a `COVERAGE_GAP` flag listing each
+missing item with its prototype location. Items above the threshold but below
+100% must have an explicit de-scope reason.
+
+#### Regression Detection
+
+When analyzing vN against vN-1, use the ledger diff:
+- Pages removed without de-scope note → `REGRESSION_BLOCK`
+- Actions removed without de-scope note → `REGRESSION_BLOCK`
+- Modals removed without de-scope note → `REGRESSION_BLOCK`
+- State values removed without de-scope note → `REGRESSION_BLOCK`
+- New items added → verify they appear in the PRD
+
 ### Regression Detection
 
 When analyzing vN, compare against vN-1 change notes or bug list if available.
@@ -250,7 +334,7 @@ Interaction parity checks:
 
 Use the smallest contract that can safely deliver the feature. Do not introduce multi-agent topology, prompt graph, DAG router, or prompt registry complexity when ordinary product logic is cheaper and more reliable.
 
-Do not call these profiles “tiers”; delivery tiers are L0-L3. Classify per module.
+Do not call these profiles "tiers"; delivery tiers are L0-L3. Classify per module.
 
 | Engineering Profile | Use When | Required Contract | Do Not Require |
 |---|---|---|---|
@@ -386,7 +470,7 @@ of inventing business rules.
 | Anchor | Required Question | Output |
 |---|---|---|
 | Accountability / compliance | Who owns the final administrative or commercial judgment? Are there data overreach, legal, audit, privacy, safety, or industry compliance red lines? | accountable decision role, prohibited system behavior, human override rule |
-| Adversarial semantics | If a user enters evasive, vague, hostile, or low-information data such as “收到”, “再看”, “不知道”, what should the system block, warn, escalate, or record? | invalid-generic-response list, guard, penalty/escalation, audit |
+| Adversarial semantics | If a user enters evasive, vague, hostile, or low-information data such as "收到", "再看", "不知道", what should the system block, warn, escalate, or record? | invalid-generic-response list, guard, penalty/escalation, audit |
 | Offline / concurrency | If multiple users operate the module under weak network/offline/stale data, what is the final conflict reconciliation strategy? | version lock, merge policy, queue/retry, highlight review, rollback/compensation |
 
 Minimum anchor record:
@@ -465,7 +549,7 @@ Start each module with a function inventory. The inventory defines the denominat
 Inventory rules:
 
 - Include every user-visible command, query, configuration, review, import/export, batch operation, scheduled/system action, and material exception path planned for the release.
-- Do not hide multiple independent functions under labels such as “management”, “supports”, “etc.”, “related operations”, or “complete lifecycle”.
+- Do not hide multiple independent functions under labels such as "management", "supports", "etc.", "related operations", or "complete lifecycle".
 - Split functions when role, permission, trigger, aggregate/data owner, state transition, business result, audit/NFR, or acceptance path differs. Creating a ticket, accepting it, escalating it, closing it, confirming a contract, and registering payment are normally different release functions.
 - Navigation, open/close modal, filter, pagination, tab switch, and confirmation helpers may map to an owning function only when they have no independent domain result. The mapping still must be explicit in the action ledger.
 - `planned release functions = complete functional requirement records` is mandatory. Deferred/external functions remain in the inventory but do not enter the release denominator.
@@ -480,7 +564,7 @@ For each function in the release inventory, write a deterministic functional req
 | Entry and preconditions | page/route/entry, role/data prerequisites, upstream state, feature/config flags |
 | Pages and visible states | list/detail/create/edit/config/result, loading/empty/error/success/disabled behavior |
 | Fields and dictionaries | every input/output field or authoritative annex range; meaning, type, required/default, enum, source, validation, editability, masking. Must include global entity field dictionary, per-sub-page field lists with Row/Col position, component type binding, tree component spec, and metric status color mapping |
-| Numbered interaction flow | user action and corresponding system response for each step; no one-line “supports create/edit/delete” shorthand. Must include modal chain spec, drag-drop interaction spec, and dynamic form row + form cascade when applicable |
+| Numbered interaction flow | user action and corresponding system response for each step; no one-line "supports create/edit/delete" shorthand. Must include modal chain spec, drag-drop interaction spec, and dynamic form row + form cascade when applicable |
 | Actions and results | action, confirmation, visible result, domain result, next action, idempotency/duplicate behavior |
 | Business rules and calibers | numbered rules, priority, formulas/thresholds, time boundary, conflict behavior, effective version |
 | State-button behavior | object state, visible/forbidden actions, guards, transitions, audit/event |
@@ -501,7 +585,27 @@ FRR section order is authoritative and must match the standard template:
 15 Frontend/Backend/QA Handoff Notes, 16 Acceptance/Traceability.
 
 Any section that truly does not apply must say `N/A` and why. Blank, omitted,
-“同上”, “见原型”, or “按现有逻辑” does not count as complete.
+"同上", "见原型", or "按现有逻辑" does not count as complete.
+
+### Modal Chain Coverage Rule
+
+When the source includes an HTML prototype or interactive mockup, the PRD must
+achieve ≥ 90% modal coverage before marking Gate 3 as PASS.
+
+Procedure:
+1. Extract the complete modal inventory from the prototype: search for all
+   `showModal`, `Modal.open`, `dialog`, `drawer`, `confirm`, and popup-like
+   patterns. Record each as `{ modal_id, trigger_action, page_context }`.
+2. In the PRD FRR §6 (Numbered Interaction Flow), every modal in the inventory
+   must appear in at least one interaction step with its `modal_spec`
+   (title, width/size, field list with required markers).
+3. Compute coverage: `covered_modals / total_modals_in_prototype`.
+4. If coverage < 90%, flag as `MODAL_COVERAGE_GAP` and list missing modals
+   with their prototype location. Do not mark Gate 3 PASS until coverage
+   reaches 90% or each missing modal has an explicit de-scope reason.
+
+Entry-alias modals (same modal triggered from different navigation paths) may
+be counted once if the alias relationships are documented.
 
 ### Module Shared Contracts
 
@@ -555,8 +659,8 @@ Mandatory readable PRD behaviors:
 | rule clarity | concrete examples for thresholds, formulas, time windows, scores, and AI confidence rules |
 
 Fail the PRD readability layer when a module starts with only API/schema/DDD
-tables, uses phrases such as “supports related operations”, “see prototype”,
-“existing logic”, “intelligent processing”, or lacks business examples for
+tables, uses phrases such as "supports related operations", "see prototype",
+"existing logic", "intelligent processing", or lacks business examples for
 non-obvious rules.
 
 ### 5.4 E2E Cross-Module Canvas
@@ -706,10 +810,10 @@ Reviewer outputs and anti-patterns:
 
 | Reviewer | Required Output | Invalid Generic Response | Valid Evidence-Shaped Response |
 |---|---|---|---|
-| Sponsor | PASS/NEEDS_REVISION + outcome, cost, control concerns | “The design looks comprehensive.” | “No owner or SLA exists for overdue high-intent leads; business closure fails.” |
-| End User | task walkthrough + concrete pain points | “The DDD model is reasonable.” | “I clicked Submit, saw only a toast, and could not find the created record.” |
-| Peer PM | scope/state gaps + complexity PASS/FAIL | “The requirements are complete.” | “Returned state has no resubmit path; 2 actions are missing from the count.” |
-| Dev Lead | feasibility + undefined contracts/dependencies | “This should be feasible.” | “The approve command lacks idempotency, expected version, and rejection event.” |
+| Sponsor | PASS/NEEDS_REVISION + outcome, cost, control concerns | "The design looks comprehensive." | "No owner or SLA exists for overdue high-intent leads; business closure fails." |
+| End User | task walkthrough + concrete pain points | "The DDD model is reasonable." | "I clicked Submit, saw only a toast, and could not find the created record." |
+| Peer PM | scope/state gaps + complexity PASS/FAIL | "The requirements are complete." | "Returned state has no resubmit path; 2 actions are missing from the count." |
+| Dev Lead | feasibility + undefined contracts/dependencies | "This should be feasible." | "The approve command lacks idempotency, expected version, and rejection event." |
 
 Do not let personas share hidden conclusions before their own walkthrough. Merge findings only after each required perspective produces evidence.
 
