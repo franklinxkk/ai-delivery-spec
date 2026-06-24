@@ -313,11 +313,37 @@ Repeat this complete record for every in-scope function in the inventory.
 
 #### 4. Pages, Regions, And Visible States
 
+**New flow (when IA Skeleton and locked prototype exist):**
+
+- State the IA Skeleton `view_id` and prototype `data-testid` this function uses.
+- Describe only business-visible differences by role/state. Do not rewrite layout,
+  pixel sizes, or component props.
+
+| IA Skeleton view | Prototype data-testid | Business-visible state differences |
+|---|---|---|
+| Mxx-V01 | page-mxx-list | admin sees batch toolbar; normal user does not |
+| Mxx-V02 | modal-mxx-create | disabled when user lacks `mxx:create` permission |
+
+**Fallback (when no prototype exists):**
+
 | Page / Region | Purpose | Entry | Main Content | Loading | Empty | Error / Disabled | Exit |
 |---|---|---|---|---|---|---|---|
 | | | | | | | | |
 
 #### 5. Fields, Dictionaries, And Validation
+
+**New flow (when global field dictionary and locked prototype exist):**
+
+- Reference the global entity field dictionary for common fields.
+- In this FRR, list only fields whose meaning, validation, enum, masking, or
+  editability is business-critical or differs by role/state in this function.
+
+| Field | Business meaning | Special rule for this function |
+|---|---|---|
+| lead.source | 来源 | 代理商录入时强制为"代理商"并锁定 partnerId |
+| lead.intent | 意向度 | 新建时必填，影响分配优先级 |
+
+**Fallback (when no field dictionary exists):**
 
 List every user-entered, displayed, exported, matched, calculated, signed, uploaded, filtered, or state-driving field. A complete authoritative annex may replace the rows only when its source ID, version, owner, range, count, and usage rule are declared here.
 

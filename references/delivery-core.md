@@ -502,6 +502,79 @@ Stage 3 Requirement Design:
 - Metrics format: `[Metric]: [Current] -> [Target] in [Timeline]`.
 - Epic hypothesis must be falsifiable.
 - Out of Scope lists material exclusions and revisit conditions; do not pad it to an arbitrary count.
+- Output the **information architecture skeleton (IA Skeleton)** before any pixel-level prototype or PRD section 4/5/9 detail is produced. See Stage 3.5 below.
+
+Stage 3.5 IA Skeleton Gate (NEW):
+
+Purpose: lock the structural decisions that currently leak into PRD FRR sections
+4-6 (pages, regions, fields, flow). The IA Skeleton is a PM-facing contract:
+role × module × view × region × primary action. It must be confirmed before
+prototype or PRD detail work begins.
+
+When to run:
+- L1+ PRD or handoff where the scope has ≥2 modules, ≥2 primary roles, or any
+  cross-module flow.
+- When the user input is "I need a system to do X" without a confirmed page map.
+- When the prior PRD grew because "we kept adding views/fields/rules later".
+
+IA Skeleton output format (one module per block):
+
+```yaml
+ia_skeleton:
+  version: 1.0
+  modules:
+    - module_id: M01
+      module_name: 驾驶舱
+      primary_roles: [老板, 销售负责人, 产研, 财务, 客服, 运营]
+      views:
+        - view_id: M01-V01
+          view_name: 老板驾驶舱
+          view_type: dashboard          # dashboard | list | detail | form | config | modal
+          entry_path: /dashboard?role=boss
+          regions:
+            - region_id: R01
+              region_name: 顶部指标卡片区
+              components: [StatCard×8]
+              data_owner: backend_aggregate
+              visible_to: [老板]
+            - region_id: R02
+              region_name: 销售漏斗
+              components: [FunnelChart]
+              data_owner: opportunity_pipeline
+          primary_actions:
+            - action: 点击卡片→跳转对应模块
+              target: 模块详情页
+          modal_or_page: page
+          related_views: [M02-V01, M04-V01]
+```
+
+Rules:
+
+1. **View completeness**: every primary role must have at least one view where
+   they accomplish their core job. A view is a page, drawer, or modal that a
+   role deliberately navigates to.
+2. **Region minimality**: regions are coarse-grained (header, sidebar, main
+   content, footer, drawer body, modal body). Do not specify pixel sizes,
+   colors, or component props.
+3. **Action minimality**: list only the role's primary actions that cross views
+   or change domain state. Do not enumerate every button.
+4. **Cross-view flow**: for every object that moves across modules (lead →
+   opportunity, ticket → requirement, opportunity → contract), document the
+   source view ID and target view ID.
+5. **Confirmation lock**: after presenting the IA Skeleton, ask the PM/Sponsor
+   to confirm or revise. Output:
+   ```
+   [CONFIRM LOCK] IA Skeleton v1.0 — 0 unresolved structural gaps
+   ```
+   Do not proceed to Stage 4 or Stage 5 until the lock is granted, or every gap
+   is explicitly accepted as a `PROPOSED` decision with an owner.
+
+Stage 3.5 Gate failures that must block Stage 5:
+- A module has no view for a primary role that needs it.
+- A cross-module flow has a source view but no target view.
+- A view is described as "same as PC" without stating mobile-specific region
+  differences when mobile is in scope.
+- A rule-heavy module (alerts, SLAs, allocation, saturation) has no config view.
 
 Stage 4 Stories + State Machine:
 - Story format: As a [persona], I want [action], so that [value].
@@ -510,13 +583,39 @@ Stage 4 Stories + State Machine:
 - Every state transition includes Trigger + Guard + Action.
 - A story is not Stage-4 complete if it only states a visible UI result. It must also state the domain object change, domain event, audit record, task creation, notification, or measurable state change.
 
-Stage 5 PRD + Prototype:
+Stage 5 Prototype + PRD:
+
+Authority order for L2/L3:
+
+1. **IA Skeleton** (Stage 3.5): confirmed role × module × view × region × primary action.
+2. **Prototype / Demo-Closed Artifact** (Stage 5a): pixel-level layout, component
+   annotations (`data-testid`, `data-action`, `data-state`), modal chain, and
+   interaction flow. The prototype is the primary truth for pages, fields, and
+   visible behavior.
+3. **PRD** (Stage 5b): business scenario, rules, state machines, permissions,
+   exceptions, acceptance, and traceability. The PRD references the prototype
+   and IA Skeleton; it does not re-invent layout or field lists.
+4. **Engineering Traceability Contracts** (Stage 5c, optional): DDD/API/data
+   contract, coding-agent AC-YAML, layered on top of the product specification.
+
+Stage 5a Prototype First:
+
+- Generate or review the HTML prototype **after** the IA Skeleton is locked.
+- Use `references/prototype-testability.md` for annotation rules and state-driven
+  behavior.
+- Extract the interaction ledger with `scripts/extract_interaction_ledger.py`.
+- Lock the prototype with a `[PROTOTYPE LOCK]` statement: list every page,
+  modal, action, state enum, role flow, and any gap against the IA Skeleton.
+- Do not start Stage 5b PRD detail until the prototype is locked or gaps are
+  explicitly accepted.
+
+Stage 5b PRD from Locked Prototype:
 
 PRD chapters:
 1. Problem statement
 2. Users and personas
 3. Core business concepts
-4. Information architecture
+4. Information architecture (derived from IA Skeleton; do not expand)
 5. Feature modules
 6. Business processes
 7. State transitions
@@ -524,13 +623,31 @@ PRD chapters:
 9. Edge cases
 10. Non-functional requirements
 
-For L2/L3, Stage 5 has three coordinated layers, in this authority order:
+PRD writing rules to prevent bloat:
 
-1. **Traditional Product Requirement Specification**: background, goals, scope, users, information architecture, business processes, complete functional details, shared rules/data, NFR, acceptance, planning, and risks. This is the primary product truth consumed by PM, design, development, algorithm, and QA.
-2. **Complete Module And Function Specifications**: one inventory per module and one deterministic functional requirement record per in-scope release function, using the detailed structure below.
-3. **Engineering Traceability Contracts**: DDD module contract, Developer Fast-Lane, API/schema/test mappings layered on top of the product specification.
+- **§4 Information Architecture** must be a thin mapping from the IA Skeleton:
+  module → views → regions → entry paths. Do not add new views or regions here.
+- **FRR §4 Pages/Visible States** must reference the locked prototype page/region
+  IDs (`data-testid`) and modal chain. Describe only the business-visible
+  differences (e.g., role-dependent region visibility), not the full layout.
+- **FRR §5 Fields/Dictionaries** must reference the global field dictionary and
+  the per-page field matrix from the prototype/annex. In the FRR, list only
+  fields whose meaning, validation, or enum is business-critical or differs by
+  role/state. Common fields are documented once in the global dictionary and
+  referenced by name.
+- **FRR §6 Numbered Interaction Flow** must trace actions through the prototype
+  `data-action` IDs. Each step is: user action (`data-action=...`) → system
+  response → domain state change. Do not rewrite component behavior that is
+  already annotated in the prototype.
+- **FRR §8 Business Rules / §9 State / §10 Permission / §11 Exception / §16
+  Acceptance** remain fully specified in the PRD. These are the primary product
+  decisions that the prototype cannot express.
 
-The engineering layer does not replace the product layer. A module is not development-ready when it only states purpose, inputs, outputs, aggregates, and commands while omitting page behavior, fields, dictionaries, actions, rules/calibers, states, permissions, exceptions, and acceptance.
+The engineering layer does not replace the product layer. A module is not
+development-ready when it only states purpose, inputs, outputs, aggregates, and
+commands while omitting business rules, state transitions, permission rules,
+exceptions, and acceptance. However, page layout and field inventory are owned
+by the locked prototype and IA Skeleton, not by the FRR.
 
 When the artifact will guide implementation, add a compact plan/task bridge
 after the product specification is complete: implementation assumptions,
@@ -555,28 +672,28 @@ Inventory rules:
 - `planned release functions = complete functional requirement records` is mandatory. Deferred/external functions remain in the inventory but do not enter the release denominator.
 - A screenshot, prototype, workbook, SQL table, policy, or previous PRD is evidence. It does not become an implementable requirement until its behavior is mapped to a functional record or a frozen authoritative annex.
 
-For each function in the release inventory, write a deterministic functional requirement record:
+For each function in the release inventory, write a deterministic functional requirement record (FRR). The FRR is a **business-behavior contract**, not a layout or component specification. Layout and field inventory are owned by the locked IA Skeleton and prototype.
 
-| Section | Required Content |
-|---|---|
-| Identity and value | function ID/name, module, priority, release, user value, source IDs |
-| Roles and scenario | initiating/collaborating roles, trigger, start condition, successful exit, next action |
-| Entry and preconditions | page/route/entry, role/data prerequisites, upstream state, feature/config flags |
-| Pages and visible states | list/detail/create/edit/config/result, loading/empty/error/success/disabled behavior |
-| Fields and dictionaries | every input/output field or authoritative annex range; meaning, type, required/default, enum, source, validation, editability, masking. Must include global entity field dictionary, per-sub-page field lists with Row/Col position, component type binding, tree component spec, and metric status color mapping |
-| Numbered interaction flow | user action and corresponding system response for each step; no one-line "supports create/edit/delete" shorthand. Must include modal chain spec, drag-drop interaction spec, and dynamic form row + form cascade when applicable |
-| Actions and results | action, confirmation, visible result, domain result, next action, idempotency/duplicate behavior |
-| Business rules and calibers | numbered rules, priority, formulas/thresholds, time boundary, conflict behavior, effective version |
-| State-button behavior | object state, visible/forbidden actions, guards, transitions, audit/event |
-| Permission and data scope | tenant/org/region/enterprise/row/field/action scope and override/approval policy. Must include three-layer permission model (function/row/field) and role × entity × permission_level matrix when prototype has canViewXxx() or data-visible-role |
-| Exceptions and recovery | validation, empty, duplicate, stale/conflict, permission, timeout, dependency failure, partial success, retry/reopen/rollback |
-| Notifications, audit, and dependencies | recipient/dependency, channel/interface, trigger, contract, failure behavior, audit/owner |
-| Data / AI / algorithm contract | when applicable: input/output schema, deterministic vs model responsibility, confidence/threshold, human confirmation, prompt/model/rule version, fallback, evaluation and prohibited writes; otherwise `N/A + reason` |
-| Function-Level NFR | performance, security/privacy, accessibility, compatibility, operations; each with measurement/acceptance |
-| Frontend / Backend / QA handoff notes | frontend component behavior, backend validation/state/data ownership, QA focus and regression paths; point to FRR/state/prototype/acceptance IDs |
-| Acceptance | happy, validation, permission, state conflict, dependency failure, regression; expected UI and domain result. For coding-agent handoff (L2+), add an `ac_structured` YAML block immediately after prose acceptance; see `coding-agent-compat.md`. |
+| Section | Required Content | Owner / Source |
+|---|---|---|
+| 1. Identity and value | function ID/name, module, priority, release, user value, source IDs | PRD |
+| 2. Roles and scenario | initiating/collaborating roles, trigger, start condition, successful exit, next action | PRD |
+| 3. Entry and preconditions | page/route/entry, role/data prerequisites, upstream state, feature/config flags | PRD; route references IA Skeleton view_id |
+| 4. Pages and visible states | list/detail/create/edit/config/result, loading/empty/error/success/disabled behavior | **Prototype primary, PRD references**. In PRD: state the role-dependent visibility and any business-visible layout rule; point to prototype `data-testid` and modal chain. Do not rewrite component layout. |
+| 5. Fields and dictionaries | every input/output field or authoritative annex range; meaning, type, required/default, enum, source, validation, editability, masking | **Global field dictionary + prototype primary, PRD references**. In PRD: list only fields whose meaning, validation, enum, or masking is business-critical or differs by role/state. Common fields are documented once in the global dictionary. |
+| 6. Numbered interaction flow | user action and corresponding system response for each step | PRD, but each user action references prototype `data-action` ID. System response states domain result. Do not rewrite component behavior already in the prototype. |
+| 7. Actions and results | action, confirmation, visible result, domain result, next action, idempotency/duplicate behavior | PRD |
+| 8. Business rules and calibers | numbered rules, priority, formulas/thresholds, time boundary, conflict behavior, effective version | PRD (primary owner) |
+| 9. State-button behavior | object state, visible/forbidden actions, guards, transitions, audit/event | PRD (primary owner) |
+| 10. Permission and data scope | tenant/org/region/enterprise/row/field/action scope and override/approval policy. Include three-layer permission model when prototype has conditional rendering | PRD; map to prototype `data-visible-role` / `canViewXxx()` |
+| 11. Exceptions and recovery | validation, empty, duplicate, stale/conflict, permission, timeout, dependency failure, partial success, retry/reopen/rollback | PRD |
+| 12. Notifications, audit, and dependencies | recipient/dependency, channel/interface, trigger, contract, failure behavior, audit/owner | PRD |
+| 13. Data / AI / algorithm contract | when applicable: input/output schema, deterministic vs model responsibility, confidence/threshold, human confirmation, prompt/model/rule version, fallback, evaluation and prohibited writes; otherwise `N/A + reason` | PRD / engineering annex |
+| 14. Function-Level NFR | performance, security/privacy, accessibility, compatibility, operations; each with measurement/acceptance | PRD |
+| 15. Frontend / Backend / QA handoff notes | frontend component behavior, backend validation/state/data ownership, QA focus and regression paths; point to FRR/state/prototype/acceptance IDs | PRD; references prototype annotations |
+| 16. Acceptance | happy, validation, permission, state conflict, dependency failure, regression; expected UI and domain result. For coding-agent handoff (L2+), add an `ac_structured` YAML block immediately after prose acceptance; see `coding-agent-compat.md`. | PRD |
 
-FRR section order is authoritative and must match the standard template:
+FRR section order remains authoritative:
 1 Identity, 2 Roles/Scenario, 3 Entry/Preconditions, 4 Pages/Visible States,
 5 Fields/Dictionaries/Validation, 6 Numbered Flow, 7 Actions/Rules,
 8 Business Rules/Calibers, 9 State/Button/Lifecycle, 10 Permissions/Data Scope,
@@ -586,6 +703,11 @@ FRR section order is authoritative and must match the standard template:
 
 Any section that truly does not apply must say `N/A` and why. Blank, omitted,
 "同上", "见原型", or "按现有逻辑" does not count as complete.
+
+**FRR bloat prevention rule**: if a fact is already in the IA Skeleton, the
+locked prototype, or the global field dictionary, the FRR must reference it
+rather than repeat it. Repetition is allowed only when the fact is modified by
+role, state, or business rule in this specific function.
 
 ### Modal Chain Coverage Rule
 

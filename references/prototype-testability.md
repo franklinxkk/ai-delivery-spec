@@ -4,6 +4,7 @@ Use this file when generating, reviewing, or repairing an HTML prototype.
 
 ## Contents
 
+- Prototype From IA Skeleton
 - Five-Layer Test Annotation
 - Command and State Annotations
 - State-Driven UI Iron Law
@@ -18,6 +19,54 @@ Use this file when generating, reviewing, or repairing an HTML prototype.
 - Visual Design Rules
 - Presentation Mode Specification
 - Prototype Acceptance Checklist
+
+## Prototype From IA Skeleton
+
+Before drawing any HTML, load the IA Skeleton produced in `delivery-core.md`
+Stage 3.5. The prototype is a pixel-level realization of the locked skeleton,
+not a new design exploration.
+
+### Translation rules
+
+| IA Skeleton element | Prototype output |
+|---|---|
+| `module_id` + `module_name` | One top-level navigation group or landing section |
+| `views[].view_id` | One HTML page, drawer, or modal root with matching `data-testid="page-{view_id}"` |
+| `views[].view_type` | `page` → full route; `modal` → modal container; `drawer` → side drawer |
+| `views[].entry_path` | Route/URL shown in prototype address bar or navigation link |
+| `regions[].region_id` | Container `div` with `data-testid="region-{region_id}"` |
+| `regions[].components` | Placeholder components with realistic sample data and labels |
+| `regions[].visible_to` | Conditional rendering attribute `data-visible-role="role"` |
+| `primary_actions[]` | Buttons/links with `data-action="{action_id}"` and target view/modal |
+| `related_views` | Navigation links, breadcrumbs, or cross-view action targets |
+
+### Constraints
+
+1. **No new views without IA Skeleton update**: if a missing view is discovered
+   during prototyping, update the IA Skeleton and re-confirm before adding it to
+   the HTML. Do not silently expand scope.
+2. **No new primary roles**: role-specific regions must match the IA Skeleton
+   `primary_roles`. Additional roles require skeleton revision.
+3. **Modal chain from views**: every `view_type: modal` or `drawer` must be
+   reachable from at least one `page` view via a `data-action` annotated
+   element.
+4. **Prototype lock statement**: when the prototype is complete, output
+   ```
+   [PROTOTYPE LOCK] view_count=N, modal_count=M, action_count=A, state_count=S
+   Gaps against IA Skeleton: <list or NONE>
+   ```
+   Do not proceed to PRD detail until locked or gaps accepted.
+
+### From prototype to PRD
+
+After locking the prototype:
+
+1. Run `scripts/extract_interaction_ledger.py` to produce
+   `interaction-ledger.json`.
+2. The PRD's FRR §4 and §5 reference the prototype by `data-testid` and
+   `data-action` IDs. They do not rewrite layout or field lists.
+3. Any business rule, state transition, permission, or exception that is not
+   visible in the prototype must still be fully specified in the PRD.
 
 ## Five-Layer Test Annotation
 

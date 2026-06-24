@@ -1,4 +1,4 @@
-﻿---
+---
 name: ai-delivery-spec
 description: >-
   Use to create or review product delivery artifacts with handoff intent: PRD,
@@ -177,11 +177,11 @@ Choose one primary route, then add triggered extensions.
 | Request | Primary Entrypoint |
 |---|---|
 | strategy/discovery/business case/roadmap | `delivery-core.md`; add advanced strategy/readiness section if needed |
-| PRD/requirement/story/path/state/DDD/API/data contract | `delivery-core.md` |
-| prototype/demo/HTML/mobile interaction | `prototype-testability.md`; add `delivery-core.md` for story/state evidence |
+| PRD/requirement/story/path/state/DDD/API/data contract | `delivery-core.md`; run Stage 3.5 IA Skeleton Gate before Stage 5 |
+| prototype/demo/HTML/mobile interaction | `prototype-testability.md`; require IA Skeleton as input; add `delivery-core.md` for story/state evidence |
 | test/UAT/acceptance/readiness/post-launch/retirement | `delivery-core.md`; add advanced readiness section if real environment |
 | AI, SaaS, approval, reporting, low-code, global, domain switch | load `advanced-extensions.md` only after 0D trigger |
-| coding agent handoff, generate AGENTS.md/CLAUDE.md/Cursor rules, convert AC to test stubs | `delivery-core.md` + `coding-agent-compat.md` |
+| coding agent handoff, generate AGENTS.md/CLAUDE.md/Cursor rules, convert AC to test stubs | `delivery-core.md` + `coding-agent-compat.md`; use locked prototype as source of truth for pages/fields |
 | implementation task breakdown / issue slicing | `delivery-core.md`; generate tasks only from approved specification/plan evidence |
 
 ## 6. Non-Negotiable Rules
@@ -221,6 +221,7 @@ Use scripts when applicable instead of retyping repeatable logic:
 python scripts/extract_interaction_ledger.py --input path/to/prototype.html --output interaction-ledger.json
 python scripts/validate_prd_quality.py path/to/prd.docx --manifest path/to/manifest.json
 python scripts/validate_coding_agent_contract.py --prd path/to/prd.md --prototype path/to/prototype.html
+python scripts/validate_ia_skeleton.py --ia-skeleton path/to/ia-skeleton.yaml --prototype path/to/prototype.html --prd path/to/prd.md
 python scripts/validate_skill_consistency.py
 python scripts/validate_routing_scenarios.py
 ```

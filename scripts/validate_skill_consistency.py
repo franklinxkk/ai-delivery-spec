@@ -489,7 +489,12 @@ def main():
             failures,
         )
 
-    for script in ("validate_routing_scenarios.py", "validate_prd_quality.py", "validate_coding_agent_contract.py"):
+    for script in (
+        "validate_routing_scenarios.py",
+        "validate_prd_quality.py",
+        "validate_coding_agent_contract.py",
+        "validate_ia_skeleton.py",
+    ):
         if not (ROOT / "scripts" / script).exists():
             fail(f"{script} is missing", failures)
 
