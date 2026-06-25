@@ -9,7 +9,7 @@ It works with ChatGPT, Claude, Gemini, Codex, Cursor, Copilot, OpenClaw,
 and any AI tool that can read Markdown.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-4.6.3-green.svg)]()
+[![Version](https://img.shields.io/badge/version-4.7.0-green.svg)]()
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-purple.svg)](https://openclaw.ai)
 

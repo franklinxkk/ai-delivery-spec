@@ -137,6 +137,30 @@ def validate(ia_skeleton_path: Path, prototype_path: Path | None, prd_path: Path
             if expected not in testids:
                 issues.append(f"Prototype missing region data-testid '{expected}'")
 
+        # --- primary_actions → data-action cross-validation ---
+        for mod in modules:
+            mod_id = mod.get("module_id", "?")
+            for view in mod.get("views", []):
+                view_id = view.get("view_id", "?")
+                for action_entry in view.get("primary_actions", []):
+                    action_desc = action_entry.get("action", "") if isinstance(action_entry, dict) else str(action_entry)
+                    keywords = re.findall(r"[\w-]+", action_desc.lower())
+                    matched = False
+                    for kw in keywords:
+                        if len(kw) < 3:
+                            continue
+                        for da in actions:
+                            if kw in da.lower():
+                                matched = True
+                                break
+                        if matched:
+                            break
+                    if not matched and keywords:
+                        issues.append(
+                            f"WARNING: primary_action '{action_desc[:50]}' in {view_id} "
+                            f"has no matching data-action in prototype"
+                        )
+
     # PRD checks
     if prd_path:
         prd = load_text(prd_path)

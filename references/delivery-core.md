@@ -569,6 +569,24 @@ Rules:
    Do not proceed to Stage 4 or Stage 5 until the lock is granted, or every gap
    is explicitly accepted as a `PROPOSED` decision with an owner.
 
+### Global Entity Field Dictionary (Stage 3.5 Output)
+
+The Global Entity Field Dictionary is an附属产出 of Stage 3.5, produced after
+the IA Skeleton lock and before Stage 4. It serves as the input for FRR §5
+field dictionaries.
+
+- **Owner**: PM (with input from engineering for system-filled fields).
+- **Consumer**: FRR generation in Stage 5; coding agent handoff.
+- **Format**: One table per entity, covering every field across all sub-pages
+  (list, create, edit, detail, filter). Use
+  `references/templates/field-dictionary-template.md`.
+- **Gate rule**: FRR §5 must reference the global dictionary by field name. Do
+  not re-declare common fields in each FRR; only list fields whose meaning,
+  validation, or enum is business-critical or differs by role/state.
+- **Verification**: `validate_ia_skeleton.py` checks that every field in the
+  prototype interaction ledger appears in the global dictionary or in an FRR
+  §5 with coverage ≥ 90%.
+
 Stage 3.5 Gate failures that must block Stage 5:
 - A module has no view for a primary role that needs it.
 - A cross-module flow has a source view but no target view.

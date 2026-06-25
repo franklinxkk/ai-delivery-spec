@@ -2,6 +2,32 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.7.0 - 2026-06-25
+
+- Added Stage 3.5 IA Skeleton Gate to `delivery-core.md`: PM-facing structural
+  contract (role × module × view × region × primary action) confirmed before
+  Stage 4/5. Trigger: ≥2 modules OR ≥2 primary roles OR any cross-module flow.
+  Gate failures block Stage 5. IA Skeleton YAML format with view completeness,
+  region minimality, action minimality, cross-view flow, and confirmation lock
+  rules.
+- Added `scripts/validate_ia_skeleton.py`: validates IA Skeleton ↔ Prototype ↔
+  PRD cross-references. Checks view_id format, region_id existence, role view
+  coverage, cross-module flow source/target existence, prototype data-testid
+  matching, PRD view/data-action/data-testid reference consistency.
+- Added `references/templates/field-dictionary-template.md`: reusable global
+  entity field dictionary template with per-entity table format, per-sub-page
+  field list, and component binding rules.
+- Added `references/prototype-testability.md`: state-driven prototype and
+  testability kernel extracted from delivery-core. Covers GlobalState,
+  transition() pattern, data-action/data-testid/data-state annotation rules,
+  demo-closed prototype verification.
+- Enhanced `delivery-core.md`: prototype interaction ledger, coverage
+  verification table with per-category thresholds, regression detection via
+  ledger diff, prototype iteration parity gate.
+- Enhanced `readability-layer.md`: Per-Page Layout Region Diagram, Component
+  Four-Tuple Constraint, Computed Metrics Specification, Visual Ratio
+  Computation with boundary clamping.
+
 ## v4.6.6 - 2026-06-24
 
 - P0-1: Added `Output Language Rules` to `readability-layer.md`: core rule

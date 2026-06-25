@@ -8,7 +8,7 @@ description: >-
   syntax/debugging, copy rewriting, or idea exploration with no delivery intent.
 ---
 
-# AI Delivery Spec — Production Elastic Delivery Standard (v4.6.6)
+# AI Delivery Spec — Production Elastic Delivery Standard (v4.7.0)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering,
 algorithm, QA, operations, customers, and sponsors can read, build, verify, and
@@ -177,7 +177,7 @@ Choose one primary route, then add triggered extensions.
 | Request | Primary Entrypoint |
 |---|---|
 | strategy/discovery/business case/roadmap | `delivery-core.md`; add advanced strategy/readiness section if needed |
-| PRD/requirement/story/path/state/DDD/API/data contract | `delivery-core.md`; run Stage 3.5 IA Skeleton Gate before Stage 5 |
+| PRD/requirement/story/path/state/DDD/API/data contract | `delivery-core.md`; run Stage 3.5 IA Skeleton Gate before Stage 5 **when: ≥2 modules OR ≥2 primary roles OR any cross-module flow** |
 | prototype/demo/HTML/mobile interaction | `prototype-testability.md`; require IA Skeleton as input; add `delivery-core.md` for story/state evidence |
 | test/UAT/acceptance/readiness/post-launch/retirement | `delivery-core.md`; add advanced readiness section if real environment |
 | AI, SaaS, approval, reporting, low-code, global, domain switch | load `advanced-extensions.md` only after 0D trigger |
@@ -278,3 +278,34 @@ When publishing a new version:
 - `main`: stable, always deployable.
 - Feature branches: `feature/<topic>` for experimental work; merge via PR.
 - No direct pushes to `main` for experimental or unreviewed changes.
+
+## 10. Delivery Package Convention
+
+When handing off to a coding agent (Claude Code, Cursor, Copilot, Codex) or a
+human development team, organize the delivery package using this directory
+structure so that automated tools can locate artifacts without ambiguity:
+
+```
+delivery/
+  prd/                        # PRD Markdown files
+  prototype/                   # HTML prototype(s)
+  ia-skeleton.yaml             # IA Skeleton (Stage 3.5 output)
+  acceptance/                  # AC-YAML files (one per FRR)
+  agents/                      # AGENTS.md / CLAUDE.md / .cursor/rules
+  evidence/                    # Verification evidence, test results
+  manifest.json                # Package manifest (artifact list + hashes)
+```
+
+Rules:
+
+- `manifest.json` lists every artifact with its relative path, version, and
+  source status (`EMBEDDED` / `AUTHORITATIVE_ANNEX` / `DEFERRED`).
+- Coding agent compatibility files (`AGENTS.md`, `CLAUDE.md`) must reference
+  `delivery/prd/` and `delivery/prototype/` as the primary truth for pages,
+  fields, and visible behavior.
+- When the IA Skeleton is locked (Stage 3.5), `delivery/ia-skeleton.yaml` is
+  the structural truth for role × module × view × region.
+- Acceptance files in `delivery/acceptance/` use the naming convention
+  `M{module}-F{function}-ac.yaml` (e.g., `M04-F01-ac.yaml`).
+- Do not place non-delivery files (scripts, configs, scratch files) inside
+  `delivery/`. Use a sibling `tools/` or `scratch/` directory instead.

@@ -182,6 +182,11 @@ by pixel.
 
 ### Per-Page Layout Region Diagram
 
+When the IA Skeleton is locked (Stage 3.5), reference `region_id` from the
+skeleton instead of re-specifying regions here. Only describe regions not
+already covered by the skeleton (e.g., modal-only regions, conditional panels
+added after Stage 3.5 lock).
+
 Each primary page must produce a region diagram table:
 
 | Region ID | Region Name | Position | Approximate Size | Primary Component | Data Source | Empty State | Loading State | Error State |

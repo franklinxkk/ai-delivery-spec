@@ -201,6 +201,14 @@ risk.
 
 Trigger for H5, app, mini-program, field staff, weak network, PC+mobile consistency, overseas launch, cross-border data, multi-language, or regional model routing.
 
+IA Skeleton linkage:
+
+When mobile is in scope, mobile views must appear in the IA Skeleton (Stage
+3.5). Mobile view_id format: `Mxx-Vyy-mobile` (e.g., `M01-V02-mobile`). If a
+mobile view reuses a desktop view's business logic but has different layout,
+state `platform: mobile` in the view entry and describe only the differing
+regions. Do not skip Stage 3.5 for mobile-only modules.
+
 Mobile contract:
 
 - role path per surface;
