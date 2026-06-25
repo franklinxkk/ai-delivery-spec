@@ -29,11 +29,13 @@ After activation, load:
 Before coding, resolve behavior in this order:
 
 ```text
-1. PRD FRR: business scenario, rules, states, permissions, acceptance.
-2. Prototype data-* attributes: UI action and component binding.
-3. ac_structured blocks: machine-readable test expectations.
-4. ai_contract_lite / ai_runtime_contract: AI behavior, fallback, eval, flags.
-5. Repository conventions: framework, file layout, style, existing tests.
+1. delivery/manifest.json: artifact paths, versions, hashes, source status.
+2. delivery/ia-skeleton.yaml: module/view/region/action structure.
+3. PRD FRR in delivery/prd/: business scenario, rules, states, permissions, acceptance.
+4. Prototype data-* attributes in delivery/prototype/: UI action and component binding.
+5. AC-YAML in delivery/acceptance/ or ac_structured blocks: test expectations.
+6. ai_contract_lite / ai_runtime_contract: AI behavior, fallback, eval, flags.
+7. Repository conventions: framework, file layout, style, existing tests.
 ```
 
 If a required behavior is missing, do not invent it. Report:
@@ -61,8 +63,9 @@ If a required behavior is missing, do not invent it. Report:
 When artifacts are available, run:
 
 ```powershell
-python scripts/validate_coding_agent_contract.py --prd path/to/prd.md --prototype path/to/prototype.html
-python scripts/validate_prd_quality.py path/to/prd.md --manifest path/to/manifest.json
+python scripts/validate_coding_agent_contract.py --prd delivery/prd/main.md --prototype delivery/prototype/app.html
+python scripts/validate_ia_skeleton.py --ia-skeleton delivery/ia-skeleton.yaml --prototype delivery/prototype/app.html --prd delivery/prd/main.md
+python scripts/validate_prd_quality.py delivery/prd/main.md --manifest delivery/manifest.json
 ```
 
 Then run the repository's own tests. Report command, result, and unresolved
@@ -78,4 +81,4 @@ When asked to generate project-local instructions:
 - Prefer `.cursor/rules/*.mdc` for modern Cursor; use `.cursorrules` only for
   legacy Cursor projects.
 - Include PRD path, prototype path, test commands, gap format, source-of-truth
-  order, and AI contract selection rules.
+  order, delivery package layout, and AI contract selection rules.

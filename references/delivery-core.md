@@ -5,7 +5,6 @@ Use this file for reverse engineering, PRD generation, state machines, guards, S
 ## Contents
 
 - Stage 0 Reverse Engineering
-- Prototype Interaction Ledger
 - Engineering Profile / Anti-Bloating
 - Lifecycle And Spec-Plan-Tasks Bridge
 - Stage 1-5 Product Workflow

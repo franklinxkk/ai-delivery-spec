@@ -7,6 +7,7 @@ Mobile delivery is not a compressed desktop page. The PRD/prototype must define 
 ## Contents
 
 - Mobile Scope
+- Mobile IA Skeleton Linkage
 - Localization / RTL / Distribution
 - Mobile Role Path Matrix
 - Navigation Patterns
@@ -39,6 +40,27 @@ mobile_surface:
 ```
 
 Hard rule: if the usage context can involve driving, operating equipment, medical work, financial confirmation, or safety-critical field work, interruptive prompts and non-essential push messages are forbidden during active work.
+
+## Mobile IA Skeleton Linkage
+
+Mobile, H5, app, and mini-program views must be represented in the Stage 3.5
+IA Skeleton before FRR generation when any mobile path is in delivery scope.
+
+Rules:
+
+- If a mobile view shares the same business state and action semantics as a
+  desktop view, keep the same story/function ID and add `platform: mobile` to
+  the IA Skeleton view entry.
+- If the mobile view has a distinct role path, device permission, offline flow,
+  or page structure, use a mobile-specific `view_id`, e.g. `M01-V02-mobile`.
+- Mobile-only views still need regions, primary actions, visible roles, and
+  cross-module flows in `delivery/ia-skeleton.yaml`.
+- Do not duplicate desktop page layout in the PRD. Reference the locked
+  IA Skeleton `view_id` and `region_id`, then describe only mobile differences:
+  navigation depth, gesture, sticky action, permission gate, weak network,
+  offline draft, notification, and device evidence.
+- `data-testid` remains `page-{view_id}` / `region-{region_id}`. Mobile-only
+  elements also use `data-mobile="true"`.
 
 ## Localization / RTL / Distribution
 

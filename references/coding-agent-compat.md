@@ -12,6 +12,7 @@ machine-readable acceptance criteria.
 - Structured Acceptance Criteria (AC-YAML)
 - Machine-Readable AI Runtime Contract
 - Prototype Data-Attribute Contract
+- Delivery Package Layout
 - Agent Entrypoint Generation
 - Coding Agent Handoff Prompt
 
@@ -264,6 +265,35 @@ Run the deterministic checker when both PRD and prototype are available:
 python scripts/validate_coding_agent_contract.py --prd path/to/prd.md --prototype path/to/prototype.html
 ```
 
+## Delivery Package Layout
+
+When a coding agent receives a delivery package, use this relative layout unless
+the user explicitly provides another manifest:
+
+```text
+delivery/
+  prd/                        # PRD Markdown files
+  prototype/                  # HTML prototype(s)
+  ia-skeleton.yaml            # Stage 3.5 structural truth
+  acceptance/                 # AC-YAML files
+  agents/                     # generated AGENTS.md / CLAUDE.md / Cursor rules
+  evidence/                   # validation logs, screenshots, UAT notes
+  manifest.json               # artifact list, versions, hashes, source status
+```
+
+Coding-agent lookup order:
+
+1. Read `delivery/manifest.json` when present.
+2. Read `delivery/ia-skeleton.yaml` for module/view/region/action structure.
+3. Read PRDs from `delivery/prd/`.
+4. Read prototypes from `delivery/prototype/`.
+5. Read AC-YAML from `delivery/acceptance/`.
+6. Read generated coding-agent instructions from `delivery/agents/`.
+
+If the package does not follow this layout, first produce a source map and ask
+for or infer missing paths before implementation. Do not start coding from
+scattered files when the PRD/prototype/acceptance source of truth is ambiguous.
+
 ## Agent Entrypoint Generation
 
 Generate project-local instruction files from the PRD, not inside this repo.
@@ -277,16 +307,19 @@ general multi-agent coding tools that read repo-level instructions.
 # AGENTS.md
 
 ## Source Of Truth
-- PRD: `{prd_path}`.
-- Prototype: `{prototype_path}`.
-- Acceptance: PRD FRR section 16 `ac_structured` blocks.
+- Manifest: `delivery/manifest.json` when present.
+- IA Skeleton: `delivery/ia-skeleton.yaml`.
+- PRD: `delivery/prd/` or `{prd_path}`.
+- Prototype: `delivery/prototype/` or `{prototype_path}`.
+- Acceptance: `delivery/acceptance/` or PRD FRR section 16 `ac_structured` blocks.
 
 ## Implementation Rules
-1. Business logic follows PRD FRR section 8 and section 9.
-2. UI behavior follows prototype `data-*` annotations.
-3. Do not invent states, permissions, API contracts, or role paths.
-4. Report missing requirements as `[GAP] {FunctionID} section {Section}: {description}`.
-5. Preserve tenant/org/role/data isolation from FRR section 10.
+1. Read manifest and IA Skeleton before coding when present.
+2. Business logic follows PRD FRR section 8 and section 9.
+3. UI behavior follows prototype `data-*` annotations.
+4. Do not invent states, permissions, API contracts, or role paths.
+5. Report missing requirements as `[GAP] {FunctionID} section {Section}: {description}`.
+6. Preserve tenant/org/role/data isolation from FRR section 10.
 
 ## Verification
 - P0 smoke: `{test_command_p0}`.

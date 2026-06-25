@@ -2,6 +2,25 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.7.1 - 2026-06-25
+
+- Release hardening: synchronized `SKILL.md`, `README.md`, `CHANGELOG.md`, and
+  validation scripts around the current public version.
+- Rewrote `README.md` as a concise bilingual public landing page with clear
+  user personas, quick start, delivery package convention, runtime architecture,
+  domain modules, examples, and validation commands.
+- Made Stage 3.5 IA Skeleton trigger visibility explicit in `SKILL.md` routing:
+  run when the scope has two or more modules, two or more primary roles, or any
+  cross-module lifecycle.
+- Strengthened coding-agent handoff with a standard `delivery/` package layout
+  and source-of-truth lookup order.
+- Clarified IA Skeleton deduplication rules for readable PRD layout sections:
+  reference locked `region_id` values instead of rewriting page regions.
+- Linked mobile/multi-surface delivery and CRM domain usage back to Stage 3.5
+  IA Skeleton and FRR anti-bloat rules.
+- Hardened IA validation so `primary_actions` can be checked against prototype
+  `data-action` values.
+
 ## v4.7.0 - 2026-06-25
 
 - Added Stage 3.5 IA Skeleton Gate to `delivery-core.md`: PM-facing structural

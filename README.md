@@ -1,144 +1,104 @@
 # AI Delivery Spec
 
-> The world's first **product-side Spec-Driven Development** framework for AI-native teams.
-> 从需求到上线，一套可读、可开发、可测试、可运营的产研交付规格。
-
-**AI Delivery Spec / AI 产研交付规格** is a tool-agnostic delivery standard
-for product managers, AI product leads, engineering teams, and QA teams.
-It works with ChatGPT, Claude, Gemini, Codex, Cursor, Copilot, OpenClaw,
-and any AI tool that can read Markdown.
+> Product-side Spec-Driven Delivery for teams that need PRDs, prototypes,
+> acceptance criteria, and coding-agent handoff to stay consistent.
+>
+> 面向产品、研发、算法、测试与交付团队的产研交付规格：把需求、原型、验收、工程契约和 AI 编程交接放到同一套可追溯流程里。
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-4.7.0-green.svg)]()
+[![Version](https://img.shields.io/badge/version-4.7.1-green.svg)]()
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-purple.svg)](https://openclaw.ai)
 
----
+AI Delivery Spec is tool-agnostic. It works with ChatGPT, Claude, Gemini,
+Codex, Cursor, GitHub Copilot Workspace, OpenClaw, and any AI tool that can
+read Markdown.
 
-## Why This Exists / 为什么存在
+AI Delivery Spec 不是单纯的 PRD 模板，也不是代码生成框架。它是产品侧交付协议：在进入开发前，把业务场景、角色路径、状态流转、字段、原型交互、验收标准和 AI/coding-agent 契约对齐。
 
-AI coding agents write code fast, but **product delivery is still chaos**:
-PRD missing acceptance criteria, prototypes not testable, dev handoff ambiguous,
-AI features without runtime governance.
+## Why It Exists / 为什么需要它
 
-AI 编程智能体写代码很快，但**产品交付仍然是混乱的**：
-PRD 缺验收标准、原型不可测试、交接模糊、AI 功能无运行时治理。
+AI coding agents can produce code quickly, but ToB/ToG delivery still fails
+when:
 
-**AI Delivery Spec** gives your team a shared delivery protocol — not templates,
-but a routing-driven runtime that loads only what each artifact needs.
+- requirements are readable by AI but not by humans;
+- prototypes are beautiful but not testable;
+- PRDs have functions but no role path, state, field, exception, or acceptance;
+- AI features lack runtime, evaluation, fallback, and human-gate contracts;
+- developers and QA cannot locate the locked PRD, prototype, IA skeleton, or
+  acceptance files.
 
-## What Makes It Different / 核心差异
+AI Delivery Spec solves this by making product artifacts both human-readable
+and machine-actionable.
 
-| Feature | ai-delivery-spec | Other PM Skills | spec-kit |
-|---------|:---:|:---:|:---:|
-| L0-L3 delivery tiers (scale-adaptive) | ✅ | ❌ | ❌ |
-| Replaceable domain modules | ✅ | ❌ | ❌ |
-| Prototype testability rules | ✅ | ❌ | ❌ |
-| 0D triage routing (TIER×AI×WORKFLOW) | ✅ | ❌ | ❌ |
-| FRR 16-section delivery record | ✅ | ❌ | ❌ |
-| Product-side spec (PRD + prototype) | ✅ | Partial | ❌ |
-| Dev-side spec (code generation) | coding-agent handoff | ❌ | ✅ |
+AI 编程能提升速度，但如果需求、原型、验收和工程交接不一致，速度只会放大返工。这个项目的目标是让产品文档既能给人评审，也能给 coding agent 解析。
 
-> 💡 **Complementary with [github/spec-kit](https://github.com/github/spec-kit)**:
-> spec-kit handles spec→code, ai-delivery-spec handles requirement→spec+prototype.
+Lifecycle bridge: `Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire`.
 
 ## Who Should Use This / 适合谁
 
 | Persona | Start Here | Typical Outcome |
 |---|---|---|
-| Solo PM + AI agent | L0/L1, `references/templates/prd-light-template.md`, `examples/` | turn messy ideas into a readable PRD draft |
-| 2-8 person ToB product team | L1/L2, PRD + prototype + acceptance gates | align PM, frontend, backend, algorithm, and QA before build |
-| Enterprise delivery team | L2/L3, readiness, domain modules, AI/runtime governance | support bid, customer demo, regulated launch, and acceptance |
+| Solo PM + AI assistant | L0/L1 + `prd-light-template` | turn an idea or rough note into a usable PRD draft |
+| 2-8 person ToB product team | L1/L2 + PRD + prototype + acceptance | align PM, frontend, backend, algorithm, and QA before build |
+| Enterprise delivery team | L2/L3 + readiness + domain modules | support bids, customer demos, regulated launch, and acceptance |
+| AI-native product team | L3 + AI runtime/eval/ops contracts | define human gates, fallback, evaluation, rollback, and observability |
+| Coding-agent users | coding-agent compatibility mode | generate `AGENTS.md`, `CLAUDE.md`, Cursor rules, and AC-YAML |
 
-Use **spec-kit** when you already have an approved spec and need code-task
-decomposition. Use **ai-delivery-spec** when the requirement, prototype, domain
-logic, role path, or acceptance evidence is not yet clear. For AI-assisted
-delivery, use ai-delivery-spec first, then hand the stabilized spec to spec-kit
-or your coding agent.
+Do not use this framework for pure code syntax questions, unrelated debugging,
+copy rewriting, or casual brainstorming with no delivery intent.
 
-## Current Focus
+不适用于：纯代码语法问题、无关调试、单纯改文案、没有交付意图的随便聊天。
 
-- Human-readable PRDs for product, frontend, backend, algorithm, and QA teams.
-- Embedded engineering contracts for AI-assisted development.
-- Coding-agent compatibility through `ac_structured`, machine-readable AI
-  runtime contracts, and generated `AGENTS.md` / `CLAUDE.md` / Cursor rules.
-- Deterministic coding-agent contract validation for PRD/prototype `data-*`
-  mappings.
-- Replaceable domain modules for CRM, traffic safety, education IT, and medical/hospital IT.
-- A single lifecycle bridge:
-  `Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire`.
+## What Makes It Different / 核心差异
+
+| Capability | AI Delivery Spec | Common PM Skills | spec-kit |
+|---|:---:|:---:|:---:|
+| Product-side PRD + prototype governance | Yes | Partial | No |
+| L0-L3 delivery tiering | Yes | Partial | No |
+| 0D triage to prune unnecessary gates | Yes | No | No |
+| Human-readable FRR + machine-readable contracts | Yes | Partial | Yes, engineering-side |
+| Prototype testability and `data-*` contracts | Yes | No | No |
+| Replaceable domain modules | Yes | Rare | No |
+| AI runtime/evaluation/fallback governance | Yes | Rare | No |
+| Coding-agent handoff package | Yes | Partial | Yes, after spec is approved |
+
+Use **AI Delivery Spec** when the requirement, prototype, domain logic, role
+path, or acceptance evidence is not yet stable.
+
+Use **spec-kit** when the approved specification already exists and you need
+engineering task decomposition. They are complementary: AI Delivery Spec
+stabilizes product-side truth; spec-kit can consume the stabilized truth for
+implementation planning.
 
 ## Quick Start / 快速开始
 
-You only need an AI tool that can read Markdown and the files in this repo.
-No vendor-specific runtime is required.
+### 1. Generate a light PRD / 生成轻量 PRD
 
-### 10-Minute Walkthrough / 10分钟上手
-
-1. **Write a minimum PRD / 写一个最小 PRD**
-
-   ```text
-   Use AI Delivery Spec. Mode=Lite, Tier=L1.
-   Write a light PRD for: [feature + target user + business goal].
-   Use prd-light-template and list missing decisions at the end.
-   ```
-
-2. **Review the PRD / 让 AI 检查它**
-
-   ```text
-   Review this PRD with AI Delivery Spec Gate 1 and Gate 3.
-   Check user story, role path, visible result, domain result, exceptions,
-   and whether developers/QA can implement and test it.
-   ```
-
-3. **Upgrade to L2 when it will guide development / 升级到开发交付版**
-
-   ```text
-   Upgrade this L1 PRD to L2 Standard.
-   Add complete FRRs, state/action matrix, frontend/backend/QA handoff notes,
-   acceptance criteria, and traceability.
-   ```
-
-### Output Selector / 输出形态选择
-
-| Your Situation | Use | Expected Output |
-|---|---|---|
-| only a rough idea or pain | `Mode=Lite`, clarification + opportunity shaping | questions, opportunity shape, assumptions, next artifact |
-| need quick internal alignment | `Tier=L1`, `prd-light-template` | light PRD, gaps, upgrade triggers |
-| will hand to dev/QA | `Tier=L2`, standard PRD | complete FRRs, state/action matrix, acceptance, handoff notes |
-| need customer/demo validation | Gate 2 prototype path | clickable prototype or demo path + verification report |
-| AI-core or high-risk automation | `Tier=L3`, AI runtime/eval gates | AI runtime contract, human gate, eval/rollback/ops |
-| coding agent will implement | coding-agent compatibility | `ac_structured`, AGENTS/CLAUDE/Cursor rules, P0/P1 tests |
-
-### Install
-
-```bash
-# Option 1: Clone
-git clone https://github.com/franklinxkk/ai-delivery-spec.git
-
-# Option 2: Use with OpenClaw / Claude Code
-# Point your agent to this repo and ask it to follow SKILL.md routing rules
-
-# Option 3: Install via Skills CLI
-npx skills add franklinxkk/ai-delivery-spec
-
-# Option 4: Manual install to Claude Code
-cp -r ai-delivery-spec ~/.claude/skills/ai-delivery-spec
+```text
+Use AI Delivery Spec.
+Mode=Lite, Tier=L1.
+Write a light PRD for: [feature + target user + business goal].
+Use prd-light-template and list missing decisions at the end.
 ```
 
-### Use in Any AI Tool
+### 2. Review a PRD / 审核需求文档
 
+```text
+Use AI Delivery Spec Gate 1 and Gate 3 to review this PRD.
+Check user story, role path, visible result, domain result, state transitions,
+exceptions, data permission, and whether developers/QA can implement and test it.
 ```
-Use AI Delivery Spec as the delivery standard.
-First run 0D triage: [TIER] [AI] [WORKFLOW].
-Load only the relevant entrypoint files.
-Produce the requested artifact and end with gates, verification, gaps, and completion state.
+
+### 3. Upgrade to development handoff / 升级到开发交付
+
+```text
+Upgrade this PRD to L2 Standard.
+Add complete FRRs, IA Skeleton, field dictionary, state/action matrix,
+frontend/backend/QA handoff notes, ac_structured YAML, and traceability.
 ```
 
-### Coding Agent Handoff
-
-Use this when a PRD/prototype will be implemented by Cursor, Claude Code,
-GitHub Copilot Workspace, Codex, or a similar coding agent:
+### 4. Coding Agent Handoff / 交给 AI 编程智能体
 
 ```text
 Use AI Delivery Spec coding-agent compatibility mode.
@@ -146,140 +106,115 @@ Given this PRD and prototype, generate AGENTS.md / CLAUDE.md / Cursor rules,
 convert FRR section 16 acceptance into ac_structured YAML, and identify P0/P1 tests.
 ```
 
+## Install / 安装
+
+```bash
+# Clone
+git clone https://github.com/franklinxkk/ai-delivery-spec.git
+
+# Skills CLI
+npx skills add franklinxkk/ai-delivery-spec
+
+# Manual install to Claude Code
+cp -r ai-delivery-spec ~/.claude/skills/ai-delivery-spec
+```
+
+In any AI tool:
+
+```text
+Use AI Delivery Spec as the delivery standard.
+First run 0D triage: [TIER] [AI] [WORKFLOW].
+Load only the relevant entrypoint files.
+Produce the requested artifact and end with gates, verification, gaps, and completion state.
+```
+
+## Delivery Package Convention / 交付包目录约定
+
+When a PRD/prototype will be consumed by a coding agent or development team,
+use this directory structure:
+
+```text
+delivery/
+  prd/                        # PRD Markdown files
+  prototype/                  # HTML prototype(s)
+  ia-skeleton.yaml            # Stage 3.5 structural truth
+  acceptance/                 # AC-YAML files, one per FRR or module
+  agents/                     # AGENTS.md / CLAUDE.md / .cursor/rules
+  evidence/                   # validation logs, screenshots, UAT notes
+  manifest.json               # artifact list, versions, hashes, source status
+```
+
+Coding agents should locate artifacts in this order:
+
+1. `delivery/manifest.json`
+2. `delivery/ia-skeleton.yaml`
+3. `delivery/prd/`
+4. `delivery/prototype/`
+5. `delivery/acceptance/`
+6. `delivery/agents/`
+
+## Runtime Architecture / 运行架构
+
+Default runtime has four entrypoints:
+
+```text
+SKILL.md                              triage, routing, gates
+references/delivery-core.md           PRD, stories, state, DDD/API/data, lifecycle
+references/prototype-testability.md   prototype, mobile, interaction testability
+references/advanced-extensions.md     AI, SaaS, approval, reporting, global/domain extensions
+```
+
+Optional triggered reference:
+
+```text
+references/coding-agent-compat.md     AC-YAML, AI runtime schema, AGENTS/CLAUDE/Cursor rules
+```
+
+Other reference files are load-on-demand source assets. They should not be
+loaded unless an entrypoint instructs the agent to use them.
+
+## Output Selector / 输出形态选择
+
+| Situation | Use | Expected Output |
+|---|---|---|
+| rough idea or pain | `Mode=Lite` + clarification | questions, assumptions, opportunity shape |
+| internal alignment | `Tier=L1` | light PRD and gaps |
+| development/QA handoff | `Tier=L2` | full PRD, FRR, IA Skeleton, acceptance |
+| customer demo | Gate 2 prototype path | clickable prototype and verification |
+| AI-core/high-risk automation | `Tier=L3` | runtime, eval, fallback, ops contracts |
+| coding-agent implementation | coding-agent compatibility | AC-YAML, agent rules, validation checks |
+
+## Domain Modules / 领域模块
+
+| Domain | File |
+|---|---|
+| Traffic Safety / 交通安全 | `references/domain-traffic.md` |
+| CRM / 客户经营 | `references/domain-crm.md` |
+| Higher-Education IT / 高校教育信息化 | `references/domain-education-it.md` |
+| Medical / Hospital IT / 医疗医院信息化 | `references/domain-medical-hospital-it.md` |
+
+Adding a new industry: copy `references/domain-module-template.md`, keep the
+section contract, and replace domain-specific vocabulary, workflows, state
+machines, privacy rules, and test scenarios.
+
 ## Examples / 示例
 
-Start with a real-world scenario:
-
-- [CRM Response Center](examples/crm-response-center/README.md) — lead,
-  opportunity, customer service, product feedback, contract/payment.
-  See the [L1 PRD sample](examples/crm-response-center/l1-prd-sample.md).
-- [Traffic Safety SaaS](examples/traffic-safety-saas/README.md) — regulated
-  ToB/ToG workflows, mobile inspection, notices, hidden-danger remediation.
-  See the complete [L1 PRD sample](examples/traffic-safety-saas/l1-prd-sample.md).
-- [Higher-Education IT](examples/education-it/README.md) — academic affairs,
-  student affairs, teaching systems, smart classrooms, AI learning assistants.
-  See the [L1 PRD sample](examples/education-it/l1-prd-sample.md).
-- [Medical / Hospital IT](examples/medical-hospital-it/README.md) — HIS/EMR,
-  LIS, PACS/RIS, clinical workflow, medical quality, and AI-assisted review.
-  See the [L1 PRD sample](examples/medical-hospital-it/l1-prd-sample.md).
+- [CRM Response Center](examples/crm-response-center/README.md)
+- [Traffic Safety SaaS](examples/traffic-safety-saas/README.md)
+- [Higher-Education IT](examples/education-it/README.md)
+- [Medical / Hospital IT](examples/medical-hospital-it/README.md)
 
 See [examples/README.md](examples/README.md) for the full example index.
-
-### Try It Now / 立即试用
-
-```
-# Lightweight PRD
-Use AI Delivery Spec, TIER=L0, WORKFLOW=prd.
-Write a PRD for [your feature].
-
-# Full delivery with prototype
-Use AI Delivery Spec, TIER=L2, WORKFLOW=prototype.
-Build an interactive HTML prototype for [your product].
-
-# AI Native feature with runtime governance
-Use AI Delivery Spec, TIER=L1, AI=native.
-Spec an AI feature with runtime governance for [your scenario].
-```
-
-## Delivery Tiers / 交付层级
-
-| Tier | Scope | Typical Artifacts | When to Use |
-|------|-------|-------------------|-------------|
-| **L0 Lite** | POC / validation | Simplified PRD + wireframe | Quick concept validation |
-| **L1 Standard** | Standard project | Full PRD + interactive prototype + FRR | Regular feature delivery |
-| **L2 Full** | Complex project | Full PRD + hi-fi prototype + complete FRR + acceptance matrix | Multi-stakeholder delivery |
-| **L3 Enterprise** | Enterprise grade | Full suite + governance + multi-domain modules | Procurement / regulatory |
-
-## Domain Modules / 可替换领域模块
-
-| Domain | File | Scope |
-|--------|------|-------|
-| Traffic Safety / 交通安全 | `references/domain-traffic.md` | Regulated enterprise, vehicle, personnel, training |
-| CRM / 客户经营 | `references/domain-crm.md` | Lead, opportunity, customer 360, ticket, contract |
-| Higher-Education Informationization / 高校教育信息化 | `references/domain-education-it.md` | Academic affairs, student affairs, smart classroom |
-| Medical / Hospital IT / 医疗医院信息化 | `references/domain-medical-hospital-it.md` | HIS/EMR/LIS/PACS/RIS, clinical workflow, medical quality, patient service, research data |
-
-> Adding a new industry? Copy `references/domain-module-template.md` and customize.
-
-## Architecture / 运行架构
-
-Only 4 entrypoints, loaded on demand:
-
-Default runtime has only four entrypoints.
-
-```
-SKILL.md ─────────────────────── triage, routing, gates
-references/delivery-core.md ───── PRD, stories, DDD/API/data, lifecycle
-references/prototype-testability.md ── prototype, mobile, interaction
-references/advanced-extensions.md ── AI, SaaS, approval, reporting, global
-```
-
-Other reference files are detail libraries, loaded by trigger conditions only.
-This keeps context size small — your AI tool reads only what it needs.
-
-Coding-agent compatibility is an optional triggered reference:
-`references/coding-agent-compat.md`.
-
-其他 reference 文件是高级场景的明细库，按触发条件加载，避免大模型一次性吞下过多上下文。
-
-## Core Gates / 核心门闸
-
-| Gate | Purpose |
-|------|---------|
-| Gate 1: Story-Path | user story → role path → visible result → domain result → test |
-| Gate 2: Demo-Closed Prototype | every primary action has visible/domain outcome |
-| Gate 3: PRD + Dev Contract | PRD is primary; engineering contract embedded & traceable |
-| Gate 4: Acceptance Package | deliver only in-scope artifacts with verification |
-
-## Lifecycle Bridge / 生命周期桥接
-
-Use only the stages needed by the requested artifact:
-
-```
-Discover → Specify → Plan → Tasks → Build/Verify → Launch → Learn/Retire
-```
-
-Learn/Retire is intentionally lightweight in the current runtime: use it for
-minimum metric review, post-launch learning, and sunset planning. For causal
-experiments, advanced A/B testing, or complex deprecation economics, pair this
-repo with your analytics or experimentation framework and record the boundary
-as an explicit gap. Start from
-[`post-launch-review-template.md`](references/templates/post-launch-review-template.md)
-when you only need a minimum review artifact.
 
 ## Validation / 校验
 
 ```powershell
-py scripts/validate_skill_consistency.py
-py scripts/validate_routing_scenarios.py
-py scripts/validate_prd_quality.py path\to\prd.docx --manifest path\to\manifest.json
-py scripts/validate_coding_agent_contract.py --prd path\to\prd.md --prototype path\to\prototype.html
+python scripts/validate_skill_consistency.py
+python scripts/validate_routing_scenarios.py
+python scripts/validate_ia_skeleton.py --ia-skeleton delivery/ia-skeleton.yaml --prototype delivery/prototype/app.html --prd delivery/prd/main.md
+python scripts/validate_coding_agent_contract.py --prd delivery/prd/main.md --prototype delivery/prototype/app.html
 ```
 
-## Compatibility / 兼容性
+## License / 许可证
 
-Works with: **Claude Code** • **Claude Desktop** • **ChatGPT** • **Gemini** • **Codex** • **Cursor** • **Copilot** • **OpenClaw** • Any AI tool that can read Markdown
-
-## What It Is Not / 不适用场景
-
-- Pure code syntax debugging
-- Copy rewriting
-- Loose brainstorming with no delivery intent
-
-## License
-
-[Apache-2.0](LICENSE) — use freely in commercial projects.
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md). PRs welcome! 🎉
-
-## Launch / Community
-
-- [Changelog](CHANGELOG.md)
-- [Social launch kit](docs/social-launch-kit.md)
-- [Awesome submission targets](docs/awesome-submission-targets.md)
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=franklinxkk/ai-delivery-spec&type=Date)](https://star-history.com/#franklinxkk/ai-delivery-spec&Date)
+Apache-2.0. See [LICENSE](LICENSE).

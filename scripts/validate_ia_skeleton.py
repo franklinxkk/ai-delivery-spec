@@ -31,19 +31,19 @@ def load_text(path: Path) -> str:
 
 
 def extract_data_testids(html: str) -> set[str]:
-    return set(re.findall(r'data-testid="([^"]+)"', html))
+    return set(re.findall(r"""data-testid=["']([^"']+)["']""", html))
 
 
 def extract_data_actions(html: str) -> set[str]:
-    return set(re.findall(r'data-action="([^"]+)"', html))
+    return set(re.findall(r"""data-action=["']([^"']+)["']""", html))
 
 
 def extract_prd_references(prd: str) -> dict[str, set[str]]:
     """Extract IA Skeleton view references and data-action references from PRD."""
     return {
-        "view_refs": set(re.findall(r"IA Skeleton `(M\d+-V\d+)`", prd)),
-        "data_action_refs": set(re.findall(r"data-action=\"([^\"]+)\"", prd)),
-        "data_testid_refs": set(re.findall(r"data-testid=\"([^\"]+)\"", prd)),
+        "view_refs": set(re.findall(r"IA Skeleton `(M\d+-V\d+(?:-[a-z][a-z0-9_]*)?)`", prd)),
+        "data_action_refs": set(re.findall(r"""data-action=["']([^"']+)["']""", prd)),
+        "data_testid_refs": set(re.findall(r"""data-testid=["']([^"']+)["']""", prd)),
     }
 
 
@@ -83,8 +83,10 @@ def validate(ia_skeleton_path: Path, prototype_path: Path | None, prd_path: Path
                 issues.append(f"{mod_id} has a view without view_id")
                 continue
 
-            if not re.match(r"^M\d+-V\d+$", view_id):
-                issues.append(f"{mod_id}: view_id '{view_id}' does not match MNN-VNN pattern")
+            if not re.match(r"^M\d+-V\d+(?:-[a-z][a-z0-9_]*)?$", view_id):
+                issues.append(
+                    f"{mod_id}: view_id '{view_id}' does not match MNN-VNN or MNN-VNN-surface pattern"
+                )
 
             expected_prefix = f"{mod_id}-V"
             if not view_id.startswith(expected_prefix):
@@ -143,7 +145,25 @@ def validate(ia_skeleton_path: Path, prototype_path: Path | None, prd_path: Path
             for view in mod.get("views", []):
                 view_id = view.get("view_id", "?")
                 for action_entry in view.get("primary_actions", []):
-                    action_desc = action_entry.get("action", "") if isinstance(action_entry, dict) else str(action_entry)
+                    if isinstance(action_entry, dict):
+                        explicit_action = (
+                            action_entry.get("data_action")
+                            or action_entry.get("data-action")
+                            or action_entry.get("action_id")
+                        )
+                        action_desc = action_entry.get("action", explicit_action or "")
+                    else:
+                        explicit_action = None
+                        action_desc = str(action_entry)
+
+                    if explicit_action:
+                        if explicit_action not in actions:
+                            issues.append(
+                                f"primary_action data_action '{explicit_action}' in {view_id} "
+                                f"does not exist in prototype data-action"
+                            )
+                        continue
+
                     keywords = re.findall(r"[\w-]+", action_desc.lower())
                     matched = False
                     for kw in keywords:

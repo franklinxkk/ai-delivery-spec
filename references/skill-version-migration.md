@@ -26,6 +26,8 @@ Use this file when upgrading projects or the skill itself across major versions.
 - v4.6.0 -> v4.6.1 Coding Agent Hardening
 - v4.6.1 -> v4.6.2 Medical Hospital IT Domain Module
 - v4.6.2 -> v4.6.3 Guided Requirement Shaping
+- v4.6.3 -> v4.7.0 IA Skeleton Gate
+- v4.7.0 -> v4.7.1 Release And Handoff Hardening
 - Gate Mapping
 - Project Upgrade Path
 - Migration Checklist
@@ -410,6 +412,47 @@ Compatibility:
 - L2/L3 development handoff still requires full FRR, source evidence,
   acceptance, and applicable runtime/verification contracts.
 - Clarification should reduce guessing, not become an endless interview.
+
+## v4.6.3 -> v4.7.0 IA Skeleton Gate
+
+v4.7.0 adds a Stage 3.5 IA Skeleton Gate for multi-module, multi-role, or
+cross-module delivery work. It locks role x module x view x region x primary
+action before full FRR generation.
+
+| Change | Migration Action |
+|---|---|
+| Stage 3.5 IA Skeleton Gate added | For projects with >=2 modules, >=2 primary roles, or any cross-module lifecycle, create `delivery/ia-skeleton.yaml` before Stage 5 FRR writing. |
+| `validate_ia_skeleton.py` added | Validate view IDs, region IDs, cross-module flows, prototype `data-testid`, PRD references, and primary action mapping. |
+| Global field dictionary template added | Produce the global field dictionary after IA Skeleton lock and before Stage 4/5 detailed FRR writing. |
+| Prototype Interaction Ledger strengthened | Use the ledger as source evidence for pages, actions, modals, fields, states, and regression comparison. |
+
+Compatibility:
+
+- Existing L1 single-module PRDs may skip Stage 3.5 with an explicit rationale.
+- L2/L3 delivery packages should include IA Skeleton when the trigger applies.
+- Mobile views are part of the IA Skeleton, not a separate undocumented path.
+
+## v4.7.0 -> v4.7.1 Release And Handoff Hardening
+
+v4.7.1 is a hotfix release focused on public trust and coding-agent handoff. It
+does not add a new gate.
+
+| Change | Migration Action |
+|---|---|
+| Public README rewritten | Use the README as the community-facing landing page and quickstart. |
+| Version synchronization hardened | Keep `SKILL.md`, `README.md`, `CHANGELOG.md`, release tag, and validation script on the same version. |
+| Delivery package layout standardized | Use `delivery/prd/`, `delivery/prototype/`, `delivery/ia-skeleton.yaml`, `delivery/acceptance/`, `delivery/agents/`, `delivery/evidence/`, and `delivery/manifest.json`. |
+| Coding-agent source lookup order clarified | Generated `AGENTS.md`, `CLAUDE.md`, and Cursor rules should read manifest -> IA Skeleton -> PRD -> prototype -> acceptance. |
+| IA Skeleton deduplication clarified | When IA Skeleton is locked, readable PRD layout sections reference `region_id` instead of rewriting page regions. |
+| CRM and mobile linkage updated | CRM and mobile delivery now explicitly reference Stage 3.5 and FRR anti-bloat rules. |
+
+Compatibility:
+
+- v4.7.0 artifacts remain valid.
+- Projects already using a different directory layout should add a manifest or
+  source map before coding-agent implementation.
+- Do not delete legacy source references unless `advanced-extensions.md` no
+  longer indexes them.
 
 ## Gate Mapping
 

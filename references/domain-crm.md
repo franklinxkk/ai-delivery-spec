@@ -28,6 +28,13 @@ This file validates that the domain module contract can migrate beyond traffic s
 - Sensitive areas: customer contacts, contract amount, payment, customer complaints, partner relationship.
 - AI may optimize: lead classification, ticket routing, customer summary, follow-up suggestion, churn/renewal hint.
 - AI must not decide automatically: contract approval, payment confirmation, customer punishment, final sales commitment.
+- Stage 3.5 IA Skeleton should be used for CRM delivery when the scope covers
+  two or more modules (lead/opportunity/customer/ticket/contract/payment), two
+  or more primary roles, or any cross-module lifecycle.
+- FRR anti-bloat rule: do not repeat page layout and field dictionaries in every
+  CRM function. Lock module/view/region/action in the IA Skeleton, place common
+  fields in the global field dictionary, and keep each FRR focused on scenario,
+  state, rule, permission, exception, and acceptance differences.
 
 ## Vocabulary
 
@@ -135,6 +142,18 @@ ResponseTask: pending -> overdue -> escalated -> closed
 - customer 360: contacts, followups, opportunities, contracts, tickets;
 - mobile sales: customer lookup, followup, ticket submission, weak-network draft;
 - boss path: exception -> object detail -> owner action -> status verification.
+- IA Skeleton examples:
+  - `M01-V01`: boss operating cockpit / exception dashboard;
+  - `M02-V01`: lead pool and lead response queue;
+  - `M03-V01`: opportunity pipeline;
+  - `M04-V01`: customer 360;
+  - `M05-V01`: ticket and demand loop;
+  - `M06-V01`: contract/payment follow-up;
+  - `M02-V01-mobile`: sales mobile lead/customer follow-up when the mobile path
+    has distinct navigation, permission, or offline behavior.
+- Coding-agent handoff should use the standard `delivery/` layout:
+  `delivery/ia-skeleton.yaml`, `delivery/prd/`, `delivery/prototype/`,
+  `delivery/acceptance/`, `delivery/agents/`, and `delivery/manifest.json`.
 
 ## Policy / Privacy Constraints
 
@@ -160,3 +179,9 @@ ResponseTask: pending -> overdue -> escalated -> closed
 - [ ] Customer 360 shows business data, not only metadata.
 - [ ] Role/data isolation is explicit.
 - [ ] AI suggestions remain suggestions unless explicitly human-approved.
+- [ ] If the CRM scope spans multiple modules or roles, IA Skeleton is locked
+      before full FRR generation.
+- [ ] Common CRM fields are maintained in a global field dictionary and FRRs do
+      not duplicate unchanged field definitions.
+- [ ] Coding-agent delivery package paths are explicit when implementation by
+      Claude Code, Cursor, Codex, or Copilot is expected.

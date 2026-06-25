@@ -148,14 +148,24 @@ def main():
         if "generic HTML implementation" in description:
             fail("description retains ambiguous generic HTML exclusion", failures)
 
-    if len(text.splitlines()) > 260:
-        fail("SKILL.md exceeds runtime-entry budget of 260 lines", failures)
+    version_match = re.search(
+        r"Production Elastic Delivery Standard \(v([0-9]+\.[0-9]+\.[0-9]+)\)",
+        text,
+    )
+    if not version_match:
+        fail("SKILL.md version heading is missing", failures)
+        current_version = None
+    else:
+        current_version = version_match.group(1)
+
+    if len(text.splitlines()) > 340:
+        fail("SKILL.md exceeds runtime-entry budget of 340 lines", failures)
 
     require_markers(
         "SKILL.md",
         text,
         (
-            "v4.6.3",
+            "v4.7.1",
             "[TIER: Heavy|Light] | [AI: true|false] | [WORKFLOW: true|false]",
             "Fast-pass pruning",
             "Runtime File Architecture",
@@ -169,12 +179,22 @@ def main():
             "human readability rules",
             "coding-agent-compat.md",
             "machine-readable acceptance",
+            "Delivery Package Convention",
+            "delivery/manifest.json",
             "PASS",
             "REVIEW_COMPLETE_WITH_GAPS",
             "BLOCKED",
         ),
         failures,
     )
+
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    if current_version:
+        if f"version-{current_version}" not in readme:
+            fail(f"README.md badge is not synchronized to v{current_version}", failures)
+        if f"## v{current_version} " not in changelog:
+            fail(f"CHANGELOG.md missing current version entry v{current_version}", failures)
 
     for entrypoint in CORE_ENTRYPOINTS:
         if entrypoint not in text:
@@ -355,6 +375,8 @@ def main():
             "v4.6.0 -> v4.6.1 Coding Agent Hardening",
             "v4.6.1 -> v4.6.2 Medical Hospital IT Domain Module",
             "v4.6.2 -> v4.6.3 Guided Requirement Shaping",
+            "v4.6.3 -> v4.7.0 IA Skeleton Gate",
+            "v4.7.0 -> v4.7.1 Release And Handoff Hardening",
             "Four runtime entrypoints",
             "0D triage",
             "ac_structured",
@@ -383,6 +405,9 @@ def main():
             "ai_runtime_contract",
             "ai_contract_lite",
             "validate_coding_agent_contract.py",
+            "Delivery Package Layout",
+            "delivery/ia-skeleton.yaml",
+            "delivery/manifest.json",
             "JSON Schema skeleton",
             "AGENTS.md",
             "CLAUDE.md",
@@ -412,18 +437,18 @@ def main():
         "README.md",
         readme,
         (
-            "AI Delivery Spec / AI 产研交付规格",
+            "Product-side Spec-Driven Delivery",
             "tool-agnostic",
             "ChatGPT, Claude, Gemini",
-            "Current Focus",
+            "Who Should Use This",
             "coding-agent compatibility",
-            "Deterministic coding-agent contract validation",
+            "Delivery Package Convention",
             "Coding Agent Handoff",
             "coding-agent-compat.md",
             "Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire",
-            "Default runtime has only four entrypoints",
+            "Default runtime has four entrypoints",
             "Output Selector",
-            "Higher-Education Informationization",
+            "Higher-Education IT",
             "Medical / Hospital IT",
         ),
         failures,

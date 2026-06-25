@@ -30,10 +30,12 @@ After activation, load:
 Before writing code, use this priority:
 
 ```text
-1. FRR in the PRD: business logic, states, permissions, acceptance.
-2. Prototype data-* attributes: UI behavior and component binding.
-3. ac_structured blocks in FRR section 16: expected outcomes for tests.
-4. Engineering contract in FRR section 13: API/data/AI schemas and constraints.
+1. delivery/manifest.json: artifact list, versions, hashes, and source status.
+2. delivery/ia-skeleton.yaml: module/view/region/action structure.
+3. FRR in delivery/prd/: business logic, states, permissions, acceptance.
+4. Prototype data-* attributes in delivery/prototype/: UI behavior and component binding.
+5. AC-YAML in delivery/acceptance/ or ac_structured blocks in FRR section 16.
+6. Engineering contract in FRR section 13: API/data/AI schemas and constraints.
 ```
 
 Never invent behavior not present in these sources. If a gap exists, report:
@@ -48,6 +50,8 @@ Then stop the affected implementation step.
 
 For each function:
 
+- [ ] Locate `delivery/manifest.json` when present and verify artifact paths.
+- [ ] Locate `delivery/ia-skeleton.yaml` when present and identify the target module/view.
 - [ ] Locate FRR by Function ID.
 - [ ] Read section 8 business rules and section 9 state-button matrix.
 - [ ] Read section 10 permission and data scope.
@@ -93,6 +97,19 @@ When asked to generate `AGENTS.md`, `CLAUDE.md`, `.cursor/rules`, or
 `.cursorrules`, use `references/coding-agent-compat.md` and write the generated
 file to the target project repo root, not inside `ai-delivery-spec`.
 
+Default package layout for generated instructions:
+
+```text
+delivery/
+  prd/
+  prototype/
+  ia-skeleton.yaml
+  acceptance/
+  agents/
+  evidence/
+  manifest.json
+```
+
 Prefer:
 
 - `CLAUDE.md` for Claude Code.
@@ -104,7 +121,8 @@ Prefer:
 When PRD and prototype artifacts are available, run:
 
 ```powershell
-python scripts/validate_coding_agent_contract.py --prd path/to/prd.md --prototype path/to/prototype.html
+python scripts/validate_coding_agent_contract.py --prd delivery/prd/main.md --prototype delivery/prototype/app.html
+python scripts/validate_ia_skeleton.py --ia-skeleton delivery/ia-skeleton.yaml --prototype delivery/prototype/app.html --prd delivery/prd/main.md
 ```
 
 ## Compatibility

@@ -8,7 +8,7 @@ description: >-
   syntax/debugging, copy rewriting, or idea exploration with no delivery intent.
 ---
 
-# AI Delivery Spec — Production Elastic Delivery Standard (v4.7.0)
+# AI Delivery Spec — Production Elastic Delivery Standard (v4.7.1)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering,
 algorithm, QA, operations, customers, and sponsors can read, build, verify, and
@@ -177,7 +177,7 @@ Choose one primary route, then add triggered extensions.
 | Request | Primary Entrypoint |
 |---|---|
 | strategy/discovery/business case/roadmap | `delivery-core.md`; add advanced strategy/readiness section if needed |
-| PRD/requirement/story/path/state/DDD/API/data contract | `delivery-core.md`; run Stage 3.5 IA Skeleton Gate before Stage 5 **when: ≥2 modules OR ≥2 primary roles OR any cross-module flow** |
+| PRD/requirement/story/path/state/DDD/API/data contract | `delivery-core.md`; run Stage 3.5 IA Skeleton Gate before Stage 5 **when: >=2 modules OR >=2 primary roles OR any cross-module flow** |
 | prototype/demo/HTML/mobile interaction | `prototype-testability.md`; require IA Skeleton as input; add `delivery-core.md` for story/state evidence |
 | test/UAT/acceptance/readiness/post-launch/retirement | `delivery-core.md`; add advanced readiness section if real environment |
 | AI, SaaS, approval, reporting, low-code, global, domain switch | load `advanced-extensions.md` only after 0D trigger |
@@ -298,7 +298,7 @@ delivery/
 
 Rules:
 
-- `manifest.json` lists every artifact with its relative path, version, and
+- `delivery/manifest.json` lists every artifact with its relative path, version, and
   source status (`EMBEDDED` / `AUTHORITATIVE_ANNEX` / `DEFERRED`).
 - Coding agent compatibility files (`AGENTS.md`, `CLAUDE.md`) must reference
   `delivery/prd/` and `delivery/prototype/` as the primary truth for pages,
