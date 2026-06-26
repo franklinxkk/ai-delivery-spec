@@ -1,14 +1,16 @@
 interface:
   display_name: "AI Delivery Spec"
-  version: "4.7.2"
+  version: "4.7.3"
   short_description: "Product-side SDD framework for PRD, prototype, acceptance, and coding-agent handoff."
   default_prompt: >
     Use $ai-delivery-spec / ai-delivery-spec. First run 0D triage
     ([TIER] [AI] [WORKFLOW]).
     Choose one PRD profile when writing requirements: Contract Summary,
     Human-First Full PRD, or AI-Coding Full PRD. Load only necessary
-    entrypoints. Produce a human-readable, testable delivery artifact; add
-    coding-agent blocks only when implementation handoff requires them.
+    entrypoints. Select a work path: Traditional Product Lifecycle, AI Native
+    Product Discovery, or AI Coding Delivery. Produce a human-readable,
+    testable delivery artifact; add coding-agent blocks only when
+    implementation handoff requires them.
 
 inputs:
   artifact_type:

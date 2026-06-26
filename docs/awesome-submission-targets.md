@@ -4,7 +4,7 @@ Prioritize lists where AI Delivery Spec is genuinely useful to the audience:
 product managers, AI product leads, coding-agent users, and enterprise delivery
 teams.
 
-_Last updated: 2026-06-26_
+_Last updated: 2026-06-27_
 
 ## P0: Submit First
 
@@ -58,16 +58,32 @@ _Last updated: 2026-06-26_
 
 ## Recommended GitHub Topics
 
-Use repository topics that reflect both the generic framework and the supported
-domain modules:
+GitHub topics only support lowercase short identifiers, not Chinese tags. Use
+English plus pinyin-style Chinese-community search terms:
 
 ```text
 product-management
 prd
 spec-driven-development
 sdd
-ai-agents
+requirements
+requirements-engineering
+product-requirements
+prd-template
+prototype-design
+competitive-analysis
+chanpinjingli
+xuqiuwendang
+chanpinxuqiu
+yuanxingsheji
+jingpinfenxi
+chanxie
+yanfa
+ceshi
+ai-coding
+ai-programming
 ai-native
+ai-agents
 coding-agent
 claude-code
 cursor
@@ -76,6 +92,10 @@ qa
 prototype
 tob
 tog
+saas
+productops
+dev-handoff
+acceptance-testing
 crm
 traffic-safety
 education-it
@@ -85,11 +105,40 @@ his
 emr
 ```
 
+## Chinese Community Tags
+
+Use these in README copy, article titles, juejin/zhihu/xiaohongshu/Bilibili
+descriptions, and release posts:
+
+```text
+产品经理
+需求文档
+PRD模板
+需求规格说明书
+产品原型
+竞品分析
+产研协同
+AI编程
+AI Coding
+AI Native
+AI产品经理
+智能体产品
+测试验收
+研发交付
+ToB产品
+ToG产品
+SaaS产品
+CRM系统
+交通安全
+高校信息化
+医疗信息化
+```
+
 ## Submission Checklist
 
 - [x] README first screen explains the problem in English.
 - [x] Apache-2.0 license is present.
-- [x] Latest release tag exists (`v4.7.2` after this release is pushed).
+- [x] Latest release tag exists (`v4.7.3` after this release is pushed).
 - [x] Changelog has a dated release section, not only `Unreleased`.
 - [x] Examples exist for CRM, traffic safety, education IT, and medical/hospital IT.
 - [x] Agent install paths are documented for clone, Skills CLI, and Claude Code.

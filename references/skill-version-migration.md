@@ -29,6 +29,7 @@ Use this file when upgrading projects or the skill itself across major versions.
 - v4.6.3 -> v4.7.0 IA Skeleton Gate
 - v4.7.0 -> v4.7.1 Release And Handoff Hardening
 - v4.7.1 -> v4.7.2 PRD Profile And Readability Hardening
+- v4.7.2 -> v4.7.3 Work Paths And Layout IDs
 - Gate Mapping
 - Project Upgrade Path
 - Migration Checklist
@@ -478,6 +479,28 @@ Compatibility:
   module-level readable requirements.
 - If a previous PRD compressed page/field/interaction detail into prototype
   references, expand FRR §4-§6 during the next revision.
+
+## v4.7.2 -> v4.7.3 Work Paths And Layout IDs
+
+v4.7.3 is a small compatibility and adoption release. It clarifies the three
+main use paths and makes page layout anchors stable enough for human teams and
+coding agents.
+
+| Change | Migration Action |
+|---|---|
+| Work Path selector added | Classify work as Traditional Product Lifecycle, AI Native Product Discovery, or AI Coding Delivery before choosing detailed sections. |
+| Profile template assets added | Use `templates/human-first-prd-template.md` for human PM/RD/QA/vendor handoff and `templates/ai-coding-prd-template.md` only when coding-agent implementation is explicit. |
+| Heading hierarchy validation added | Keep exactly one H1, avoid H2 -> H4 jumps, and run `validate_prd_quality.py` before declaring PRD PASS. |
+| Layout ID rules added | Add `LAY-{view_id}-{RNN|MNN|DNN|PNN}` to primary page regions, modals, drawers, and panels when page implementation detail matters. |
+| README search keywords expanded | Use Chinese PM/PRD/AI-coding/prototype keywords in README and community posts; use English/pinyin topics for GitHub. |
+
+Compatibility:
+
+- Existing v4.7.2 PRDs remain valid.
+- Heading hierarchy validation is a new quality gate for revised PRDs. Fix
+  multiple-H1 documents and H2/H3/H4 jumps before handoff.
+- Add Layout IDs when revising a PRD for detailed implementation, AI coding, or
+  vendor handoff. Do not renumber existing `view_id`, `region_id`, or AC IDs.
 
 ## Gate Mapping
 

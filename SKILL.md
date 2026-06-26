@@ -8,7 +8,7 @@ description: >-
   syntax/debugging, copy rewriting, or idea exploration with no delivery intent.
 ---
 
-# AI Delivery Spec — Production Elastic Delivery Standard (v4.7.2)
+# AI Delivery Spec — Production Elastic Delivery Standard (v4.7.3)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering,
 algorithm, QA, operations, customers, and sponsors can read, build, verify, and
@@ -105,15 +105,26 @@ development handoff, choose exactly one profile:
 | Profile | Trigger | Required Shape |
 |---|---|---|
 | Contract Summary | quick review, gap check, local change note, or L0/L1 alignment without implementation handoff | concise scope, gaps, decisions, and upgrade triggers |
-| Human-First Full PRD | default for human PM/RD/QA/vendor delivery, customer review, bid/demo, or any development handoff unless the user explicitly requests all-AI coding | readable product specification first: scenarios, page/region layout, field and interaction detail, rules, exceptions, permissions, NFR, acceptance, and handoff notes |
-| AI-Coding Full PRD | user explicitly says coding agent, full AI coding, Cursor/Claude Code/Copilot/Codex implementation, or asks for machine-readable contracts/tests | Human-First Full PRD plus `ac_structured`, machine-readable AI/runtime contracts when applicable, delivery package manifest, and coding-agent rules |
-
-Rules:
+| Human-First Full PRD | default for human PM/RD/QA/vendor delivery, customer review, bid/demo, or any development handoff unless the user explicitly requests all-AI coding | use `references/templates/human-first-prd-template.md`; readable product specification first: scenarios, page/region layout, field and interaction detail, rules, exceptions, permissions, NFR, acceptance, and handoff notes |
+| AI-Coding Full PRD | user explicitly says coding agent, full AI coding, Cursor/Claude Code/Copilot/Codex implementation, or asks for machine-readable contracts/tests | use `references/templates/ai-coding-prd-template.md`; Human-First Full PRD plus `ac_structured`, machine-readable AI/runtime contracts when applicable, delivery package manifest, and coding-agent rules |
 
 - AI-Coding Full PRD is an extension of Human-First Full PRD, not a replacement.
 - Formal implementation handoff must never degrade to contract-only summaries.
 - If the user's intent is ambiguous but the output may guide developers or QA,
   choose Human-First Full PRD and list what would trigger AI-Coding enrichment.
+
+### Product Work Path Selector
+
+Select the work path before loading detailed references:
+
+| Work Path | Trigger | Required Route |
+|---|---|---|
+| Traditional Product Lifecycle | user wants a full lifecycle PRD similar to enterprise PM standards, Tencent-style product lifecycle, vendor/human development, review/sign-off, launch, or acceptance | Human-First Full PRD + lifecycle annex + readiness/acceptance where needed |
+| AI Native Product Discovery | user wants AI-native product brainstorming, competitor research, agent workflow, AI runtime, prototype, or AI product planning | delivery-core opportunity shaping + advanced AI/native/runtime/eval sections + prototype when requested |
+| AI Coding Delivery | user wants to learn from competitor/prototype and have AI generate the system | AI-Coding Full PRD + locked prototype/source evidence + coding-agent compatibility + delivery package |
+
+If multiple paths apply, keep one source PRD and add path-specific sections.
+Do not create separate unsynchronized PRDs.
 
 End every task with one completion state: `PASS`,
 `REVIEW_COMPLETE_WITH_GAPS`, or `BLOCKED`.
@@ -131,9 +142,7 @@ risks, and dependencies. `Tasks` records vertical slices traceable to functions
 and acceptance. Skip stages that are not needed for the requested artifact.
 
 Learn/Retire coverage is deliberately minimal: capture metric review,
-post-launch learning, and sunset evidence, but do not claim a full
-experimentation, causal inference, or portfolio-retirement framework. When those
-decisions matter, declare the external framework or unresolved gap.
+post-launch learning, sunset evidence, and any external framework gap.
 
 ## 3. AI Centrality
 
@@ -252,15 +261,11 @@ python scripts/validate_routing_scenarios.py
 
 ## 8. Final Response Rule
 
-When delivering work, state:
-
-- 0D triage result;
-- lifecycle stage, artifact type, downstream consumer/decision;
-- artifact scope, mode, tier;
-- triggered gates/extensions;
-- created or updated artifacts;
-- verification performed;
-- completion state and unresolved risks.
+When delivering work, state: 0D triage result; lifecycle stage, artifact type,
+downstream consumer/decision; artifact scope, mode, tier; triggered
+gates/extensions; created or updated artifacts; verification performed; and
+completion state (`PASS`, `REVIEW_COMPLETE_WITH_GAPS`, or `BLOCKED`) with
+unresolved risks.
 
 ## 9. Version Control And Release Rules
 

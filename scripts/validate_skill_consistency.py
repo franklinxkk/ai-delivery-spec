@@ -47,6 +47,11 @@ CODING_AGENT_ASSETS = (
     "coding-agent-compat.md",
 )
 
+PROFILE_TEMPLATE_ASSETS = (
+    "templates/human-first-prd-template.md",
+    "templates/ai-coding-prd-template.md",
+)
+
 DOMAIN_SECTIONS = [
     "Domain Purpose",
     "Vocabulary",
@@ -169,8 +174,12 @@ def main():
             "Fast-pass pruning",
             "Runtime File Architecture",
             "PRD Profile Selector",
+            "Product Work Path Selector",
             "Human-First Full PRD",
             "AI-Coding Full PRD",
+            "Traditional Product Lifecycle",
+            "AI Native Product Discovery",
+            "AI Coding Delivery",
             "Default runtime has four entrypoints",
             "advanced-extensions.md",
             "Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire",
@@ -238,6 +247,8 @@ def main():
     benchmark = (REFERENCES / "skill-design-benchmark.md").read_text(encoding="utf-8")
     coding_agent = (REFERENCES / "coding-agent-compat.md").read_text(encoding="utf-8")
     prd_template = (REFERENCES / "templates" / "prd-standard-template.md").read_text(encoding="utf-8")
+    human_first_template = (REFERENCES / "templates" / "human-first-prd-template.md").read_text(encoding="utf-8")
+    ai_coding_template = (REFERENCES / "templates" / "ai-coding-prd-template.md").read_text(encoding="utf-8")
     source_asset_index = "\n".join(
         (
             advanced,
@@ -265,6 +276,12 @@ def main():
         if asset not in text and asset not in advanced and asset not in prd_template:
             fail(f"coding-agent asset is not reachable from runtime source index: {asset}", failures)
 
+    for asset in PROFILE_TEMPLATE_ASSETS:
+        if not (REFERENCES / asset).exists():
+            fail(f"profile template asset is missing: {asset}", failures)
+        if asset not in text and asset not in delivery_core and asset not in advanced and asset not in prd_template:
+            fail(f"profile template asset is not reachable from runtime source index: {asset}", failures)
+
     require_markers(
         "delivery-core.md",
         delivery_core,
@@ -281,6 +298,7 @@ def main():
             "E2E Cross-Module Canvas",
             "AC-E2E-LONG-RUNNING",
             "Human-Readable PRD Layer",
+            "Product Work Path",
             "readability-layer.md",
             "executive summary",
             "Complete Module And Function Product Specification",
@@ -341,6 +359,8 @@ def main():
             "Metrics And Event Tracking",
             "Frontend Backend QA Handoff Notes",
             "Business Examples",
+            "Document Heading Hierarchy",
+            "Layout ID",
             "Readability Acceptance Checklist",
         ),
         failures,
@@ -350,8 +370,10 @@ def main():
         "prd-standard-template.md",
         prd_template,
         (
+            "Heading hierarchy lock",
             "1.5 Executive Summary",
             "Mxx Business Scenario Canvas",
+            "Layout ID",
             "Frontend / Backend / QA Handoff Notes",
             "13.5 Implementation Plan And Task Backlog",
             "Vertical Slice Backlog",
@@ -360,6 +382,41 @@ def main():
             "coding-agent-compat.md",
             "Event ID",
             "Privacy / Masking",
+        ),
+        failures,
+    )
+
+    require_markers(
+        "human-first-prd-template.md",
+        human_first_template,
+        (
+            "Human-First Full PRD",
+            "Heading Hierarchy Lock",
+            "源证据登记册",
+            "Layout ID",
+            "FRR",
+            "§16 验收标准",
+            "Gate Completion Statement",
+        ),
+        failures,
+    )
+
+    require_markers(
+        "ai-coding-prd-template.md",
+        ai_coding_template,
+        (
+            "AI-Coding Full PRD",
+            "Human-First Full PRD",
+            "Machine-Readable Extension Layer",
+            "Prototype Data-Attribute Contract",
+            "Structured Acceptance Criteria",
+            "ac_structured",
+            "ai_contract_lite",
+            "Delivery Package",
+            "AGENTS.md",
+            "CLAUDE.md",
+            ".cursor/rules",
+            "Heading Hierarchy Lock",
         ),
         failures,
     )
@@ -380,6 +437,7 @@ def main():
             "v4.6.3 -> v4.7.0 IA Skeleton Gate",
             "v4.7.0 -> v4.7.1 Release And Handoff Hardening",
             "v4.7.1 -> v4.7.2 PRD Profile And Readability Hardening",
+            "v4.7.2 -> v4.7.3 Work Paths And Layout IDs",
             "Four runtime entrypoints",
             "0D triage",
             "ac_structured",
@@ -392,6 +450,8 @@ def main():
             "FRR summary aligned to 16 sections",
             "Human-First Full PRD",
             "AI-Coding Full PRD",
+            "Heading hierarchy validation",
+            "Layout ID",
         ),
         failures,
     )

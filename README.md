@@ -6,7 +6,7 @@
 > 面向产品、研发、算法、测试与交付团队的产研交付规格：把需求、原型、验收、工程契约和 AI 编程交接放到同一套可追溯流程里。
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-4.7.2-green.svg)]()
+[![Version](https://img.shields.io/badge/version-4.7.3-green.svg)]()
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-purple.svg)](https://openclaw.ai)
 
@@ -15,6 +15,8 @@ Codex, Cursor, GitHub Copilot Workspace, OpenClaw, and any AI tool that can
 read Markdown.
 
 AI Delivery Spec 不是单纯的 PRD 模板，也不是代码生成框架。它是产品侧交付协议：在进入开发前，把业务场景、角色路径、状态流转、字段、原型交互、验收标准和 AI/coding-agent 契约对齐。
+
+中文关键词：产品经理、需求文档、PRD、原型设计、竞品分析、AI 编程、AI Coding、AI Native、产研协同、测试验收、ToB、ToG、SaaS、CRM、交通安全、高校信息化、医疗信息化。
 
 ## Why It Exists / 为什么需要它
 
@@ -78,8 +80,8 @@ implementation planning.
 | Your intent | Profile | What the AI should output |
 |---|---|---|
 | I only need a quick review or gap list | Contract Summary | concise decisions, gaps, and upgrade triggers |
-| Humans will review, develop, test, or outsource this feature | Human-First Full PRD | readable full PRD with page layout, fields, interactions, rules, exceptions, acceptance, and handoff notes |
-| A coding agent will implement from the PRD/prototype | AI-Coding Full PRD | Human-First Full PRD plus AC-YAML, machine-readable contracts, manifest, and agent rules |
+| Humans will review, develop, test, or outsource this feature | Human-First Full PRD | use `references/templates/human-first-prd-template.md`; readable full PRD with page layout, fields, interactions, rules, exceptions, acceptance, and handoff notes |
+| A coding agent will implement from the PRD/prototype | AI-Coding Full PRD | use `references/templates/ai-coding-prd-template.md`; Human-First Full PRD plus AC-YAML, machine-readable contracts, manifest, and agent rules |
 
 默认原则：只要文档会给前端、后端、算法、测试、外包或客户评审使用，就用
 **Human-First Full PRD**。只有明确要 Cursor / Claude Code / Copilot /
@@ -210,6 +212,22 @@ loaded unless an entrypoint instructs the agent to use them.
 | customer demo | Gate 2 prototype path | clickable prototype and verification |
 | AI-core/high-risk automation | `Tier=L3` | runtime, eval, fallback, ops contracts |
 | coding-agent implementation | AI-Coding Full PRD + coding-agent compatibility | Human-First PRD + AC-YAML, agent rules, validation checks |
+
+## Three Main Work Paths / 三类主路径
+
+| Work Path | Use This When | Main Artifacts |
+|---|---|---|
+| Traditional Product Lifecycle / 古法产品全生命周期 | You need a Tencent-style or enterprise-standard product lifecycle document for human PM/RD/QA review, vendor development, launch, and acceptance | Human-First Full PRD, lifecycle annex, review/sign-off, rollout/readiness, post-launch review |
+| AI Native Product Discovery / AI Native 产品探索 | You need to brainstorm an AI-native product, learn from competitors, define agent workflow, prototype, PRD, runtime/eval/fallback | opportunity shaping, AI centrality, AI feature/native contract, prototype, AI PRD |
+| AI Coding Delivery / AI 编程交付 | You want to turn competitor screenshots, prototypes, or requirements into a detailed AI-friendly specification so a coding agent can generate the system | AI-Coding Full PRD, locked prototype, `ac_structured`, delivery manifest, AGENTS/CLAUDE/Cursor rules |
+
+Template relationship:
+
+```text
+AI-Coding Full PRD
+└─ includes Human-First Full PRD
+   └─ adds AC-YAML, machine-readable contracts, delivery package, and agent handoff prompts
+```
 
 ## Domain Modules / 领域模块
 

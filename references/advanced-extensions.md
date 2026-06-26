@@ -275,6 +275,8 @@ Templates:
 
 - light PRD: `templates/prd-light-template.md`;
 - standard PRD: `templates/prd-standard-template.md`;
+- Human-First Full PRD profile: `templates/human-first-prd-template.md`;
+- AI-Coding Full PRD profile: `templates/ai-coding-prd-template.md`;
 - AI Native PRD: `templates/ai-native-prd-template.md`;
 - global field dictionary: `templates/field-dictionary-template.md`;
 - readiness checklist: `templates/system-readiness-checklist-template.md`;

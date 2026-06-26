@@ -18,6 +18,7 @@ source evidence, DDD/API/data contracts, or acceptance coverage.
 - Page Layout And Component Constraint
 - Computed Metrics Specification
 - Visual Hierarchy And Language Rules
+- Document Heading Hierarchy
 - Output Language Rules
 - Module Self-Contained Organization (Optional)
 - Readability Acceptance Checklist
@@ -191,15 +192,23 @@ accepted addition.
 
 Each primary page must produce a region diagram table:
 
-| Region ID | Region Name | Position | Approximate Size | Primary Component | Data Source | Empty State | Loading State | Error State |
-|---|---|---|---|---|---|---|---|---|
-| R1 | Header | top | full-width, 60px | PageHeader | N/A | N/A | skeleton | "页面加载失败" + retry button |
-| R2 | Filter Bar | below header | full-width, auto | Form + Select + DatePicker | filter store | "请选择筛选条件" | skeleton row | inline error toast |
-| R3 | Table | main | full-width, flex-1 | ProTable | `/api/entities` list | "暂无数据" illustration | skeleton rows | error illustration + retry |
-| R4 | Pagination | bottom | full-width, 48px | Pagination | table store | hidden when 0 rows | disabled | disabled |
+| Layout ID | Region ID | Region Name | Position | Approximate Size | Primary Component | Data Source | Empty State | Loading State | Error State |
+|---|---|---|---|---|---|---|---|---|---|
+| LAY-M01-V01-R01 | R1 | Header | top | full-width, 60px | PageHeader | N/A | N/A | skeleton | "页面加载失败" + retry button |
+| LAY-M01-V01-R02 | R2 | Filter Bar | below header | full-width, auto | Form + Select + DatePicker | filter store | "请选择筛选条件" | skeleton row | inline error toast |
+| LAY-M01-V01-R03 | R3 | Table | main | full-width, flex-1 | ProTable | `/api/entities` list | "暂无数据" illustration | skeleton rows | error illustration + retry |
+| LAY-M01-V01-R04 | R4 | Pagination | bottom | full-width, 48px | Pagination | table store | hidden when 0 rows | disabled | disabled |
 
 Rules:
 
+- Every row must have a stable `Layout ID` in the format
+  `LAY-{view_id}-{RNN|MNN|DNN|PNN}`. Use `R` for page region, `M` for modal,
+  `D` for drawer, and `P` for popover/panel.
+- Layout IDs are PRD-level anchors. They should be referenced by FRR §4,
+  component constraints, prototype `data-testid`, screenshots, and acceptance
+  cases when page rendering matters.
+- Do not renumber Layout IDs after assignment. Mark removed layouts as
+  `deprecated` in the change log or source evidence register.
 - Every user-visible region must appear, including modals, drawers, and
   floating panels that belong to the page.
 - Empty, loading, and error states are mandatory for data-driven regions.
@@ -322,6 +331,44 @@ Language rewrite rules:
 
 Keep requirement sentences short. Split multi-condition statements into numbered
 rules.
+
+## Document Heading Hierarchy
+
+PRD heading hierarchy must be stable so humans, document generators, and coding
+agents can navigate the same structure.
+
+Rules:
+
+- Use exactly one H1 (`#`) for the document title.
+- Use H2 (`##`) for global lifecycle chapters or top-level module sections.
+- Use H3 (`###`) for module subsections or function records.
+- Use H4 (`####`) for FRR numbered sections inside one function.
+- Do not jump heading levels, for example from H2 directly to H4.
+- Do not use bold text, table rows, or numbered list items as fake headings.
+- Do not restart numbering independently in different sections unless the
+  parent heading makes the scope clear.
+
+Recommended module-first shape:
+
+```markdown
+# {Product Name} PRD
+
+## 版本信息
+## 执行摘要
+## 全局信息架构
+
+## 模块 M01：{Module Name}
+### M01-0 功能清单
+### M01-F01 {Function Name}
+#### 1. 身份、目的与边界
+#### 2. 角色与场景
+...
+#### 16. 验收标准
+```
+
+Before marking a PRD `PASS`, run a heading check or manually verify:
+one H1, no heading-level jumps, and all FRR §1-§16 sections nested under a
+specific function record.
 
 ## Output Language Rules
 

@@ -363,6 +363,21 @@ Use external product or SDD frameworks as upstream evidence, not as a second
 pipeline. Map them into this lifecycle only when the requested artifact needs
 that stage.
 
+### Product Work Path
+
+Choose one primary work path and keep all outputs synchronized in one source
+PRD:
+
+| Work Path | Use When | Output Emphasis |
+|---|---|---|
+| Traditional Product Lifecycle | full lifecycle product work, enterprise PM review, human/vendor development, launch and acceptance | Human-First Full PRD, lifecycle annex, sign-off, rollout, readiness, and post-launch review |
+| AI Native Product Discovery | AI-native idea shaping, agent workflow, AI runtime, AI effect, competitor learning, AI prototype | opportunity shaping, AI centrality, AI feature/native contracts, eval/fallback/ops, prototype |
+| AI Coding Delivery | competitor/prototype/source evidence is converted into implementation-ready spec for coding agents | AI-Coding Full PRD, locked prototype evidence, `ac_structured`, agent instructions, delivery package |
+
+Do not fork separate PRDs per path. Add path-specific sections to the same
+document and keep Function IDs, Layout IDs, Acceptance IDs, and source evidence
+stable.
+
 | Lifecycle Stage | Purpose | Minimum Artifact | Do Not Expand Into |
 |---|---|---|---|
 | Discover | decide whether the opportunity is worth shaping | outcome, customer/job, evidence, riskiest assumption, next validation | full PRD when user only needs direction |
@@ -636,8 +651,8 @@ PRD Profile:
 | Profile | Use When | Required Output |
 |---|---|---|
 | Contract Summary | local review, gap report, or L0/L1 alignment without implementation handoff | concise decisions, gaps, acceptance, and upgrade trigger |
-| Human-First Full PRD | default for human PM/RD/QA/vendor delivery, customer review, bid/demo, or any implementation handoff unless all-AI coding is explicit | full readable product specification with scenarios, page layout, field/validation detail, interaction flow, business rules, exceptions, state, permission, NFR, acceptance, and frontend/backend/QA handoff |
-| AI-Coding Full PRD | explicit coding-agent or full-AI implementation path | Human-First Full PRD plus `ac_structured`, machine-readable contracts, package manifest, and coding-agent rules |
+| Human-First Full PRD | default for human PM/RD/QA/vendor delivery, customer review, bid/demo, or any implementation handoff unless all-AI coding is explicit | use `references/templates/human-first-prd-template.md`; full readable product specification with scenarios, page layout, field/validation detail, interaction flow, business rules, exceptions, state, permission, NFR, acceptance, and frontend/backend/QA handoff |
+| AI-Coding Full PRD | explicit coding-agent or full-AI implementation path | use `references/templates/ai-coding-prd-template.md`; Human-First Full PRD plus `ac_structured`, machine-readable contracts, package manifest, and coding-agent rules |
 
 AI-Coding Full PRD is additive. It cannot delete or compress the Human-First
 Full PRD layer. Contract Summary is not acceptable for formal development
@@ -645,9 +660,16 @@ handoff unless the user explicitly limits scope to review only.
 
 PRD chaptering:
 
-- For Human-First Full PRD and AI-Coding Full PRD, use
-  `references/templates/prd-standard-template.md` as the authoritative
-  structure. Its module FRR sections are mandatory for every in-scope function.
+- For Human-First Full PRD, use
+  `references/templates/human-first-prd-template.md` as the profile-specific
+  structure.
+- For AI-Coding Full PRD, use
+  `references/templates/ai-coding-prd-template.md`; it embeds the Human-First
+  layer and adds coding-agent extensions.
+- `references/templates/prd-standard-template.md` remains the shared base and
+  compatibility template. Its module FRR sections are mandatory for every
+  in-scope function unless the profile-specific template provides a stricter
+  version.
 - For Contract Summary or L0/L1 review-only output, a compact 10-part summary
   may be used: problem, users, concepts, IA, features, process, state,
   interactions, edge cases, NFR. This summary is not a development-ready PRD.
@@ -713,7 +735,7 @@ For each function in the release inventory, write a deterministic functional req
 | 1. Identity and value | function ID/name, module, priority, release, user value, source IDs | PRD |
 | 2. Roles and scenario | initiating/collaborating roles, trigger, start condition, successful exit, next action | PRD |
 | 3. Entry and preconditions | page/route/entry, role/data prerequisites, upstream state, feature/config flags | PRD; route references IA Skeleton view_id |
-| 4. Pages and visible states | list/detail/create/edit/config/result, region layout, major components, table/list columns, modal/drawer chain, loading/empty/error/success/disabled behavior | PRD normalizes prototype/IA evidence into implementable page behavior; references `view_id`, `region_id`, `data-testid`, and modal chain |
+| 4. Pages and visible states | list/detail/create/edit/config/result, stable Layout ID, region layout, major components, table/list columns, modal/drawer chain, loading/empty/error/success/disabled behavior | PRD normalizes prototype/IA evidence into implementable page behavior; references `view_id`, `region_id`, `Layout ID`, `data-testid`, and modal chain |
 | 5. Fields and dictionaries | every input/output/display/filter/export/calculated field or authoritative annex range; meaning, type, required/default, enum, source, validation, editability, masking | global dictionary + function-specific page/field matrix; shared fields may reference dictionary but must state per-page behavior |
 | 6. Numbered interaction flow | user action and corresponding validation, visible response, persistence/state/event/audit/notification result, failure path, next step | PRD; each user action references prototype `data-action` ID and domain result |
 | 7. Actions and results | action, confirmation, visible result, domain result, next action, idempotency/duplicate behavior | PRD |

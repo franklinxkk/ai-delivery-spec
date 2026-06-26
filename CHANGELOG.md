@@ -2,6 +2,26 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.7.3 - 2026-06-27
+
+- Added three explicit product work paths: Traditional Product Lifecycle,
+  AI Native Product Discovery, and AI Coding Delivery.
+- Added profile-specific templates:
+  `references/templates/human-first-prd-template.md` and
+  `references/templates/ai-coding-prd-template.md`.
+- Added heading hierarchy lock rules to the PRD templates and deterministic
+  heading validation in `scripts/validate_prd_quality.py` so generated PRDs
+  cannot pass with multiple H1 headings or skipped heading levels.
+- Added stable `Layout ID` rules for PRD page/region/modal/drawer/panel
+  specifications so layout detail can be traced across PRD, prototype,
+  screenshots, acceptance, and coding-agent handoff.
+- Strengthened PRD layout tables with `LAY-{view_id}-{RNN|MNN|DNN|PNN}`
+  identifiers.
+- Updated README with Chinese search keywords and work-path guidance for
+  community adoption.
+- Expanded recommended GitHub topics and Chinese community tags for PM,
+  AI coding, PRD, prototype, ToB/ToG, and domain discovery.
+
 ## v4.7.2 - 2026-06-26
 
 - Added explicit PRD Profile selection: `Contract Summary`,

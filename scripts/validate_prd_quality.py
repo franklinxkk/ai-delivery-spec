@@ -28,6 +28,7 @@ UNSUPPORTED_NUMERIC_RE = re.compile(
 ASCII_ALPHA_RE = re.compile(r"[A-Za-z]")
 FENCE_RE = re.compile(r"^```")
 TABLE_HEADER_RE = re.compile(r"^\s*\|")
+HEADING_RE = re.compile(r"^(#{1,6})\s+\S")
 LAZY_REFERENCE_RE = re.compile(
     r"(见原型|见附件|按现有逻辑|同上|参考原型|see prototype|same as above|existing logic|see attachment)",
     re.IGNORECASE,
@@ -203,6 +204,42 @@ def check_lazy_references(text: str, failures: list[str]) -> None:
         )
 
 
+def check_heading_hierarchy(text: str, failures: list[str]) -> None:
+    """Fail heading structures that break PRD/document navigation."""
+
+    headings: list[tuple[int, str]] = []
+    in_code_block = False
+    for line in text.splitlines():
+        if FENCE_RE.match(line):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block:
+            continue
+        match = HEADING_RE.match(line)
+        if match:
+            headings.append((len(match.group(1)), line.strip()))
+
+    if not headings:
+        return
+
+    h1_count = sum(1 for level, _ in headings if level == 1)
+    if h1_count != 1:
+        add_failure(failures, f"HEADING_GAP: expected exactly one H1, found {h1_count}")
+
+    previous_level = headings[0][0]
+    if previous_level != 1:
+        add_failure(failures, f"HEADING_GAP: first heading must be H1, found {headings[0][1]}")
+
+    for level, heading in headings[1:]:
+        if level > previous_level + 1:
+            add_failure(
+                failures,
+                f"HEADING_GAP: heading jumps from H{previous_level} to H{level}: {heading}",
+            )
+            break
+        previous_level = level
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("artifact", type=Path, help="PRD/prototype/spec artifact to inspect")
@@ -223,6 +260,7 @@ def main() -> int:
     if not args.allow_wildcards:
         check_wildcard_ids(text, failures)
     check_duplicate_boilerplate(text, failures)
+    check_heading_hierarchy(text, failures)
     check_lazy_references(text, failures)
     check_language_ratio(text, failures, args.target_language)
     if args.warn_numeric:

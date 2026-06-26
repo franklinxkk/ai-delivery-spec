@@ -6,6 +6,16 @@ This is a deterministic traditional PRD template for development handoff. Its pr
 
 The template is not complete merely because all chapter titles exist. Completeness is calculated from the release function inventory: every in-scope function must have one complete Functional Requirement Record (FRR).
 
+Heading hierarchy lock:
+
+- Use exactly one H1 for the document title.
+- Use H2 for global chapters or top-level modules.
+- Use H3 for module subsections and function records.
+- Use H4 for FRR §1-§16 sections inside one function.
+- Do not jump from H2 directly to H4; do not create fake headings with bold text.
+- When using Module Self-Contained mode, each function record must sit under
+  its module heading and all FRR sections must stay nested under that function.
+
 ## Contents
 
 - 1. Version Information
@@ -354,10 +364,19 @@ Repeat this complete record for every in-scope function in the inventory.
   states clear enough for frontend, backend, and QA. Do not copy pixel trivia
   or invent new components.
 
-| IA Skeleton view | Prototype data-testid / region_id | Page / Region Layout | Main Components / Fields | Visible States | Role / State Differences |
-|---|---|---|---|---|---|
-| Mxx-V01 | page-mxx-list / region-filter | top filter + KPI row + data table + right drawer | filters: status/date/owner; table columns: name/status/owner/updatedAt/actions | loading / empty / normal / error / disabled | boss sees all metrics; sales sees own data |
-| Mxx-V02 | modal-mxx-create | centered modal, two-column form, footer actions | required fields, default values, validation hints | create / validating / submit_failed / submit_success | disabled when user lacks `mxx:create` |
+| Layout ID | IA Skeleton view | Prototype data-testid / region_id | Page / Region Layout | Main Components / Fields | Visible States | Role / State Differences |
+|---|---|---|---|---|---|---|
+| LAY-Mxx-V01-R01 | Mxx-V01 | page-mxx-list / region-filter | top filter + KPI row + data table + right drawer | filters: status/date/owner; table columns: name/status/owner/updatedAt/actions | loading / empty / normal / error / disabled | boss sees all metrics; sales sees own data |
+| LAY-Mxx-V02-M01 | Mxx-V02 | modal-mxx-create | centered modal, two-column form, footer actions | required fields, default values, validation hints | create / validating / submit_failed / submit_success | disabled when user lacks `mxx:create` |
+
+Layout ID rules:
+
+- Use `LAY-{view_id}-{RNN|MNN|DNN|PNN}` where `R` = page region, `M` = modal,
+  `D` = drawer, and `P` = popover/panel.
+- Keep Layout IDs stable after assignment. If a region is removed, mark it
+  deprecated in the change log; do not recycle the ID.
+- FRR §4, prototype `data-testid`, component constraints, and acceptance cases
+  should reference the same Layout ID when page rendering matters.
 
 **Fallback (when no prototype exists):**
 
