@@ -63,8 +63,10 @@ After locking the prototype:
 
 1. Run `scripts/extract_interaction_ledger.py` to produce
    `interaction-ledger.json`.
-2. The PRD's FRR §4 and §5 reference the prototype by `data-testid` and
-   `data-action` IDs. They do not rewrite layout or field lists.
+2. The PRD's FRR §4-§6 reference the prototype by `view_id`, `region_id`,
+   `data-testid`, `data-action`, and modal/drawer IDs, then normalize the page
+   layout, visible states, field behavior, and action-to-domain flow into a
+   human-readable implementation specification. "See prototype" is not enough.
 3. Any business rule, state transition, permission, or exception that is not
    visible in the prototype must still be fully specified in the PRD.
 
@@ -137,6 +139,26 @@ Stateful containers:
 </section>
 ```
 
+State enum contract:
+
+```javascript
+window.STATE_ENUMS = {
+  lead: ["pending_review", "approved", "rejected"],
+  ticket: ["open", "processing", "resolved", "closed"]
+};
+```
+
+Rules:
+
+- Runtime attributes must not contain unresolved template placeholders such as
+  `data-state="${state}"`. If a renderer uses templates, the rendered DOM must
+  contain concrete values and the full enum space must be exported in
+  `window.STATE_ENUMS`.
+- `data-state` values use concrete business states, not CSS classes or display
+  text. PRD FRR §9 must use the same enum values.
+- When state is composite, use a stable namespace such as
+  `objectType:stateName` or expose the object type in `data-state-owner`.
+
 API-backed components:
 
 ```html
@@ -153,6 +175,59 @@ Role-specific views:
 ```html
 <button data-visible-role="supervisor" data-action="approve-task">审批</button>
 ```
+
+If role visibility is computed at runtime instead of rendered as static
+`data-visible-role` attributes, export the role contract explicitly:
+
+```javascript
+window.PROTOTYPE_ROLE_CONTRACT = {
+  "approve-task": ["supervisor", "admin"],
+  "view-finance-region": ["finance", "boss"]
+};
+```
+
+Modal / drawer identity:
+
+```html
+<section
+  data-testid="modal-create-lead"
+  data-modal-id="create-lead"
+  data-modal-title="新建线索"
+  data-modal-mode="create"
+>
+</section>
+```
+
+Rules:
+
+- Every modal, drawer, popover workflow, or confirmation dialog that changes
+  domain state must have a stable `data-testid="modal-{modal_id}"` or
+  `data-testid="drawer-{drawer_id}"`.
+- Helper APIs such as `showModal(title, body, ...)` must either render a stable
+  modal testid from an explicit id or maintain a `window.MODAL_CONTRACT` map
+  from triggering `data-action` to modal id, title, fields, and result action.
+- A title-only modal is not enough for PRD or automated test traceability.
+
+Write action API contract:
+
+```javascript
+window.ACTION_API_CONTRACT = {
+  "save-lead": {
+    method: "POST",
+    api: "/api/leads",
+    domain_result: "LeadCreated",
+    rollback: "none"
+  }
+};
+```
+
+Rules:
+
+- Write actions should expose `data-api` and `data-method` on the triggering
+  element when practical.
+- If the API is intentionally abstract in prototype mode, export
+  `window.ACTION_API_CONTRACT` so the PRD/coding-agent handoff can still map
+  actions to backend commands, state changes, events, and failure behavior.
 
 ## State-Driven UI Iron Law
 
@@ -445,7 +520,14 @@ Rules:
 - [ ] Backend-writing automated scenarios have shadow-data isolation or are explicitly disabled.
 - [ ] All `data-action` commands have implemented handlers and visible outcomes.
 - [ ] No placeholder attributes remain, such as `${action}`.
-- [ ] All stateful containers have `data-state`.
+- [ ] All stateful containers have concrete `data-state`; renderer templates
+      export `window.STATE_ENUMS` and no runtime `data-state="${...}"` remains.
+- [ ] Runtime role visibility is either represented by `data-visible-role` or
+      exported through `window.PROTOTYPE_ROLE_CONTRACT`.
+- [ ] Domain-state modals/drawers have stable `modal-*` / `drawer-*` testids or
+      are listed in `window.MODAL_CONTRACT`.
+- [ ] Write actions expose `data-api`/`data-method` or are mapped in
+      `window.ACTION_API_CONTRACT`.
 - [ ] Async sections have `data-loads-after`.
 - [ ] Modals, toasts, charts, tables, row items have stable testids.
 - [ ] Multi-step and batch operations use the required naming.

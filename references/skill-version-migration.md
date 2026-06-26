@@ -28,6 +28,7 @@ Use this file when upgrading projects or the skill itself across major versions.
 - v4.6.2 -> v4.6.3 Guided Requirement Shaping
 - v4.6.3 -> v4.7.0 IA Skeleton Gate
 - v4.7.0 -> v4.7.1 Release And Handoff Hardening
+- v4.7.1 -> v4.7.2 PRD Profile And Readability Hardening
 - Gate Mapping
 - Project Upgrade Path
 - Migration Checklist
@@ -453,6 +454,30 @@ Compatibility:
   source map before coding-agent implementation.
 - Do not delete legacy source references unless `advanced-extensions.md` no
   longer indexes them.
+
+## v4.7.1 -> v4.7.2 PRD Profile And Readability Hardening
+
+v4.7.2 resolves the gap between machine-readable contracts and human-readable
+development PRDs. It makes full product specification the default for formal
+handoff and treats AI-coding contracts as an additive layer.
+
+| Change | Migration Action |
+|---|---|
+| PRD Profile selector added | Classify each PRD as Contract Summary, Human-First Full PRD, or AI-Coding Full PRD before writing sections. |
+| Human-First Full PRD made default | For PM/RD/QA/vendor delivery, preserve scenario, page layout, field behavior, interaction flow, business rule, exception, permission, NFR, acceptance, and handoff detail. |
+| AI-Coding Full PRD clarified | Keep all Human-First detail and add `ac_structured`, machine-readable runtime/API contracts, package manifest, and coding-agent rules. |
+| Prototype-to-PRD rule corrected | Locked prototypes are evidence. FRR §4-§6 must normalize page/region/field/action/modal behavior instead of saying only "see prototype". |
+| Prototype contract strengthened | Add `STATE_ENUMS`, modal/drawer identity, role contract, and action/API contract guidance for prototype-to-PRD traceability. |
+| Validation scripts hardened | `validate_prd_quality.py` flags lazy references; `validate_coding_agent_contract.py` checks unresolved AC placeholders, template states, modal identity, and action/API contracts. |
+
+Compatibility:
+
+- v4.7.1 PRDs remain valid, but development-ready PRDs should be reviewed
+  against the Human-First Full PRD profile before handoff.
+- Existing coding-agent contracts remain valid; they must not be used to remove
+  module-level readable requirements.
+- If a previous PRD compressed page/field/interaction detail into prototype
+  references, expand FRR §4-§6 during the next revision.
 
 ## Gate Mapping
 

@@ -183,9 +183,11 @@ by pixel.
 ### Per-Page Layout Region Diagram
 
 When the IA Skeleton is locked (Stage 3.5), reference `region_id` from the
-skeleton instead of re-specifying regions here. Only describe regions not
-already covered by the skeleton (e.g., modal-only regions, conditional panels
-added after Stage 3.5 lock).
+skeleton and do not create parallel region IDs. Still add the layout,
+component, data-source, empty/loading/error, and conditional-visibility
+constraints needed by frontend and QA. Only create new region rows when the
+locked skeleton lacks a modal-only region, conditional panel, or post-lock
+accepted addition.
 
 Each primary page must produce a region diagram table:
 

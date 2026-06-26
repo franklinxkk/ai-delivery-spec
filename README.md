@@ -6,7 +6,7 @@
 > 面向产品、研发、算法、测试与交付团队的产研交付规格：把需求、原型、验收、工程契约和 AI 编程交接放到同一套可追溯流程里。
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-4.7.1-green.svg)]()
+[![Version](https://img.shields.io/badge/version-4.7.2-green.svg)]()
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-purple.svg)](https://openclaw.ai)
 
@@ -71,7 +71,19 @@ engineering task decomposition. They are complementary: AI Delivery Spec
 stabilizes product-side truth; spec-kit can consume the stabilized truth for
 implementation planning.
 
-## Quick Start / 快速开始
+## 10-Minute Quick Start / 10 分钟快速开始
+
+### Step 0. Choose the PRD profile / 先选 PRD Profile
+
+| Your intent | Profile | What the AI should output |
+|---|---|---|
+| I only need a quick review or gap list | Contract Summary | concise decisions, gaps, and upgrade triggers |
+| Humans will review, develop, test, or outsource this feature | Human-First Full PRD | readable full PRD with page layout, fields, interactions, rules, exceptions, acceptance, and handoff notes |
+| A coding agent will implement from the PRD/prototype | AI-Coding Full PRD | Human-First Full PRD plus AC-YAML, machine-readable contracts, manifest, and agent rules |
+
+默认原则：只要文档会给前端、后端、算法、测试、外包或客户评审使用，就用
+**Human-First Full PRD**。只有明确要 Cursor / Claude Code / Copilot /
+Codex 等 coding agent 直接实现时，才升级为 **AI-Coding Full PRD**。
 
 ### 1. Generate a light PRD / 生成轻量 PRD
 
@@ -94,17 +106,32 @@ exceptions, data permission, and whether developers/QA can implement and test it
 
 ```text
 Upgrade this PRD to L2 Standard.
-Add complete FRRs, IA Skeleton, field dictionary, state/action matrix,
-frontend/backend/QA handoff notes, ac_structured YAML, and traceability.
+Use Human-First Full PRD unless I explicitly ask for all-AI coding.
+Add complete FRRs, IA Skeleton, page/region layout, field dictionary,
+state/action matrix, frontend/backend/QA handoff notes, acceptance, and
+traceability.
 ```
 
 ### 4. Coding Agent Handoff / 交给 AI 编程智能体
 
 ```text
 Use AI Delivery Spec coding-agent compatibility mode.
+Use AI-Coding Full PRD.
 Given this PRD and prototype, generate AGENTS.md / CLAUDE.md / Cursor rules,
 convert FRR section 16 acceptance into ac_structured YAML, and identify P0/P1 tests.
 ```
+
+### 5. Review before handoff / 交付前自查
+
+```powershell
+python scripts/validate_skill_consistency.py
+python scripts/validate_prd_quality.py delivery/prd/main.md
+python scripts/validate_coding_agent_contract.py --prd delivery/prd/main.md --prototype delivery/prototype/app.html
+```
+
+If the PRD contains phrases like “see prototype / 见原型 / 按现有逻辑”, it must
+also provide traceable `view_id`, `region_id`, `data-testid`, `data-action`,
+field behavior, and expected domain result.
 
 ## Install / 安装
 
@@ -179,10 +206,10 @@ loaded unless an entrypoint instructs the agent to use them.
 |---|---|---|
 | rough idea or pain | `Mode=Lite` + clarification | questions, assumptions, opportunity shape |
 | internal alignment | `Tier=L1` | light PRD and gaps |
-| development/QA handoff | `Tier=L2` | full PRD, FRR, IA Skeleton, acceptance |
+| development/QA handoff | `Tier=L2` + Human-First Full PRD | full PRD, FRR, IA Skeleton, page/field/action detail, acceptance |
 | customer demo | Gate 2 prototype path | clickable prototype and verification |
 | AI-core/high-risk automation | `Tier=L3` | runtime, eval, fallback, ops contracts |
-| coding-agent implementation | coding-agent compatibility | AC-YAML, agent rules, validation checks |
+| coding-agent implementation | AI-Coding Full PRD + coding-agent compatibility | Human-First PRD + AC-YAML, agent rules, validation checks |
 
 ## Domain Modules / 领域模块
 

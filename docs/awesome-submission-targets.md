@@ -4,7 +4,7 @@ Prioritize lists where AI Delivery Spec is genuinely useful to the audience:
 product managers, AI product leads, coding-agent users, and enterprise delivery
 teams.
 
-_Last updated: 2026-06-21_
+_Last updated: 2026-06-26_
 
 ## P0: Submit First
 
@@ -89,7 +89,7 @@ emr
 
 - [x] README first screen explains the problem in English.
 - [x] Apache-2.0 license is present.
-- [x] Latest release tag exists (`v4.6.2`).
+- [x] Latest release tag exists (`v4.7.2` after this release is pushed).
 - [x] Changelog has a dated release section, not only `Unreleased`.
 - [x] Examples exist for CRM, traffic safety, education IT, and medical/hospital IT.
 - [x] Agent install paths are documented for clone, Skills CLI, and Claude Code.

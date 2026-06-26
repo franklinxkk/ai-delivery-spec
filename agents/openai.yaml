@@ -1,7 +1,34 @@
 interface:
   display_name: "AI Delivery Spec"
-  short_description: "Routes PRD, prototype, dev contract, acceptance, and coding-agent handoff into testable delivery specs."
-  default_prompt: "Use $ai-delivery-spec: run 0D triage, load only necessary entrypoints, and produce a human-readable, testable delivery artifact; add coding-agent blocks only when implementation handoff requires them."
+  version: "4.7.2"
+  short_description: "Product-side SDD framework for PRD, prototype, acceptance, and coding-agent handoff."
+  default_prompt: >
+    Use $ai-delivery-spec / ai-delivery-spec. First run 0D triage
+    ([TIER] [AI] [WORKFLOW]).
+    Choose one PRD profile when writing requirements: Contract Summary,
+    Human-First Full PRD, or AI-Coding Full PRD. Load only necessary
+    entrypoints. Produce a human-readable, testable delivery artifact; add
+    coding-agent blocks only when implementation handoff requires them.
+
+inputs:
+  artifact_type:
+    enum: ["idea", "prd", "prototype", "acceptance", "coding_agent_handoff", "review"]
+  prd_profile:
+    enum: ["contract_summary", "human_first_full_prd", "ai_coding_full_prd"]
+    default: "human_first_full_prd"
+  delivery_tier:
+    enum: ["L0", "L1", "L2", "L3"]
+
+outputs:
+  required_final_fields:
+    - triage
+    - lifecycle_stage
+    - artifact_scope
+    - mode_and_tier
+    - triggered_gates
+    - updated_artifacts
+    - verification
+    - completion_state
 
 policy:
   allow_implicit_invocation: true

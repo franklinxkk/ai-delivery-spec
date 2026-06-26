@@ -28,6 +28,14 @@ UNSUPPORTED_NUMERIC_RE = re.compile(
 ASCII_ALPHA_RE = re.compile(r"[A-Za-z]")
 FENCE_RE = re.compile(r"^```")
 TABLE_HEADER_RE = re.compile(r"^\s*\|")
+LAZY_REFERENCE_RE = re.compile(
+    r"(见原型|见附件|按现有逻辑|同上|参考原型|see prototype|same as above|existing logic|see attachment)",
+    re.IGNORECASE,
+)
+REFERENCE_ANCHOR_RE = re.compile(
+    r"(data-testid|data-action|FRR|AC-|SRC-|Source ID|view_id|region_id|modal-|drawer-|prototype lock|prototype path)",
+    re.IGNORECASE,
+)
 
 
 def read_text(path: Path) -> str:
@@ -112,13 +120,16 @@ def check_manifest(manifest_path: Path, failures: list[str]) -> None:
             add_failure(failures, f"core source assertion blocks PASS: {source_id}={status}")
 
 
-def check_language_ratio(text: str, failures: list[str]) -> None:
-    """Check that English-heavy lines are <= 20% of total content lines.
+def check_language_ratio(text: str, failures: list[str], target_language: str) -> None:
+    """Check language only when a target output language is declared.
 
-    Skips: empty lines, code blocks (between ``` fences), and table header
-    separator lines (|---|---|). Lines inside code blocks are not counted
-    at all, since they are expected to be English/code.
+    `zh` enforces that non-code narrative is not English-heavy. This supports
+    Chinese delivery teams. English/global open-source examples should run with
+    the default `none` and are not penalized for English content.
     """
+    if target_language in {"none", "en"}:
+        return
+
     lines = text.splitlines()
     total = 0
     english_heavy = 0
@@ -171,12 +182,39 @@ def check_language_ratio(text: str, failures: list[str]) -> None:
         )
 
 
+def check_lazy_references(text: str, failures: list[str]) -> None:
+    """Fail bare references that replace implementation detail.
+
+    Phrases such as "see prototype" are allowed only when the same paragraph
+    gives a traceable locator (FRR/source/testid/action/view/region). Otherwise
+    human developers and coding agents cannot reconstruct page behavior.
+    """
+
+    paragraphs = re.split(r"\n\s*\n", text)
+    bad: list[str] = []
+    for para in paragraphs:
+        if LAZY_REFERENCE_RE.search(para) and not REFERENCE_ANCHOR_RE.search(para):
+            bad.append(re.sub(r"\s+", " ", para.strip())[:180])
+    if bad:
+        add_failure(
+            failures,
+            "lazy implementation references without locator/detail: "
+            + " | ".join(bad[:10]),
+        )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("artifact", type=Path, help="PRD/prototype/spec artifact to inspect")
     parser.add_argument("--manifest", type=Path, help="Optional machine-readable manifest for strict graph checks")
     parser.add_argument("--allow-wildcards", action="store_true", help="Allow wildcard IDs in templates/examples")
     parser.add_argument("--warn-numeric", action="store_true", help="Check unsupported numeric-claim candidates")
+    parser.add_argument(
+        "--target-language",
+        choices=("none", "zh", "en"),
+        default="none",
+        help="Optional narrative language enforcement. Use zh for Chinese delivery docs.",
+    )
     args = parser.parse_args()
 
     failures: list[str] = []
@@ -185,7 +223,8 @@ def main() -> int:
     if not args.allow_wildcards:
         check_wildcard_ids(text, failures)
     check_duplicate_boilerplate(text, failures)
-    check_language_ratio(text, failures)
+    check_lazy_references(text, failures)
+    check_language_ratio(text, failures, args.target_language)
     if args.warn_numeric:
         check_unsupported_numeric_claims(text, failures)
     if args.manifest:

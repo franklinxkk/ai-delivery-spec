@@ -2,6 +2,28 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.7.2 - 2026-06-26
+
+- Added explicit PRD Profile selection: `Contract Summary`,
+  `Human-First Full PRD`, and `AI-Coding Full PRD`.
+- Made Human-First Full PRD the default for formal PM/RD/QA/vendor handoff:
+  complete scenarios, page/region layout, field behavior, interaction flow,
+  business rules, exceptions, permissions, NFR, acceptance, and handoff notes.
+- Clarified that AI-Coding Full PRD is additive: it keeps human-readable
+  product specifications and adds `ac_structured`, machine-readable contracts,
+  package manifest, and coding-agent rules.
+- Corrected prototype-to-PRD rules: locked prototypes are authoritative
+  evidence, but FRR §4-§6 must normalize layout/field/action/modal behavior
+  into implementable PRD text instead of saying only "see prototype".
+- Strengthened prototype contracts with `STATE_ENUMS`, modal/drawer identity,
+  runtime role contract, and action/API contract guidance.
+- Hardened validation scripts:
+  `validate_prd_quality.py` now flags lazy references such as "见原型" without
+  traceable detail; `validate_coding_agent_contract.py` now checks unresolved
+  AC placeholders, template states, modal identity, and action/API contracts.
+- Updated migration guidance for v4.7.2 and aligned the standard PRD template
+  with lifecycle-style human review plus AI-coding enrichment.
+
 ## v4.7.1 - 2026-06-25
 
 - Release hardening: synchronized `SKILL.md`, `README.md`, `CHANGELOG.md`, and

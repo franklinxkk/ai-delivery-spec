@@ -15,6 +15,7 @@ The template is not complete merely because all chapter titles exist. Completene
 - 3.5 Reader Navigation
 - 3.6 Source Evidence Register
 - 3.7 Requirement Diagnosis Anchors
+- 3.8 PRD Profile And Prototype Lock Declaration
 - 4. Background And Opportunity
 - 5. Goals, Metrics, And Scope
 - 6. Users, Roles, And Permissions
@@ -31,7 +32,8 @@ The template is not complete merely because all chapter titles exist. Completene
 - 15. Non-Functional Requirements
 - 16. Acceptance And Readiness
 - 17. Risks, Decisions, And Open Questions
-- 18. Appendix
+- 18. Product Lifecycle Management Annex
+- 19. Appendix
 
 ## 1. Version Information
 
@@ -43,6 +45,7 @@ The template is not complete merely because all chapter titles exist. Completene
 | Created At | |
 | Reviewers | Sponsor / PM / Dev Lead / QA / Ops |
 | Delivery Tier | L2 Standard Product Delivery |
+| PRD Profile | Contract Summary / Human-First Full PRD / AI-Coding Full PRD |
 | Triggered Gates | Story-Path / Demo-Closed / Development Contract / Acceptance / optional gates |
 
 ## 1.5 Executive Summary
@@ -141,6 +144,36 @@ development, QA, customer demo, compliance, or workflow design.
 Anchor rule: unresolved anchors that affect core state, compliance, audit, or
 write behavior block development handoff. L0 exploration may mark non-critical
 anchors `N/A` with reason.
+
+## 3.8 PRD Profile And Prototype Lock Declaration
+
+Choose one profile before writing detailed sections.
+
+| Profile | Apply When | Required Completeness |
+|---|---|---|
+| Contract Summary | review-only, gap check, or L0/L1 alignment without implementation handoff | scope, decisions, gaps, acceptance, and upgrade trigger |
+| Human-First Full PRD | default for human PM/RD/QA/vendor delivery, customer review, bid/demo, or implementation handoff | full business-readable specification: scenario, page layout, field behavior, interaction flow, rules, exception, permission, NFR, acceptance, handoff notes |
+| AI-Coding Full PRD | explicit all-AI/coding-agent implementation | Human-First Full PRD plus `ac_structured`, machine-readable runtime/API contracts, package manifest, and coding-agent rules |
+
+Prototype lock:
+
+| Item | Value |
+|---|---|
+| IA Skeleton version / path | |
+| Locked prototype path / version | |
+| Locked pages / views count | |
+| Locked modal / drawer count | |
+| Locked action count | |
+| Known prototype gaps accepted for this PRD | NONE / list |
+
+Rules:
+
+- If a locked prototype exists, FRR §4-§6 must normalize its page regions,
+  fields, visible states, modal/drawer behavior, and action-to-domain flow into
+  implementable PRD text. Do not write only "see prototype".
+- AI-Coding Full PRD is additive. It does not remove Human-First details.
+- Contract Summary is not valid for formal development unless explicitly
+  de-scoped by the requester.
 
 ## 4. Background And Opportunity
 
@@ -316,13 +349,15 @@ Repeat this complete record for every in-scope function in the inventory.
 **New flow (when IA Skeleton and locked prototype exist):**
 
 - State the IA Skeleton `view_id` and prototype `data-testid` this function uses.
-- Describe only business-visible differences by role/state. Do not rewrite layout,
-  pixel sizes, or component props.
+- Normalize the locked prototype into an implementable page specification. Keep
+  layout, major components, table/list columns, forms, modals, and visible
+  states clear enough for frontend, backend, and QA. Do not copy pixel trivia
+  or invent new components.
 
-| IA Skeleton view | Prototype data-testid | Business-visible state differences |
-|---|---|---|
-| Mxx-V01 | page-mxx-list | admin sees batch toolbar; normal user does not |
-| Mxx-V02 | modal-mxx-create | disabled when user lacks `mxx:create` permission |
+| IA Skeleton view | Prototype data-testid / region_id | Page / Region Layout | Main Components / Fields | Visible States | Role / State Differences |
+|---|---|---|---|---|---|
+| Mxx-V01 | page-mxx-list / region-filter | top filter + KPI row + data table + right drawer | filters: status/date/owner; table columns: name/status/owner/updatedAt/actions | loading / empty / normal / error / disabled | boss sees all metrics; sales sees own data |
+| Mxx-V02 | modal-mxx-create | centered modal, two-column form, footer actions | required fields, default values, validation hints | create / validating / submit_failed / submit_success | disabled when user lacks `mxx:create` |
 
 **Fallback (when no prototype exists):**
 
@@ -335,13 +370,16 @@ Repeat this complete record for every in-scope function in the inventory.
 **New flow (when global field dictionary and locked prototype exist):**
 
 - Reference the global entity field dictionary for common fields.
-- In this FRR, list only fields whose meaning, validation, enum, masking, or
-  editability is business-critical or differs by role/state in this function.
+- In this FRR, list every field that must be implemented or tested in this
+  function: displayed fields, input fields, filters, exports, calculated values,
+  hidden system fields that drive state, and role/state-specific editability.
+  Common definitions may reference the global dictionary, but per-page behavior
+  still belongs here.
 
-| Field | Business meaning | Special rule for this function |
-|---|---|---|
-| lead.source | 来源 | 代理商录入时强制为"代理商"并锁定 partnerId |
-| lead.intent | 意向度 | 新建时必填，影响分配优先级 |
+| Field | Page / Region | Component | Dictionary Ref | Display / Input / Filter / Export | Required | Validation / Enum | Editability / Masking / Source |
+|---|---|---|---|---|---|---|---|
+| lead.source | create modal | Select | lead.source | input + display | yes | enum: 广告/介绍/主动咨询/展会/其他 | agent-created leads lock partnerId |
+| lead.intent | list + create modal | Select/Badge | lead.intent | input + display + filter | yes | enum: 高/中/低 | drives assignment priority |
 
 **Fallback (when no field dictionary exists):**
 
@@ -475,9 +513,19 @@ Rules:
 
 Write one observable user-system exchange per step. Do not use a one-line summary such as “supports add, edit, delete, export”.
 
-| Step | Actor | Preconditions | User Action / System Trigger | System Validation And Processing | Visible Result | Domain Result | Next Action |
-|---:|---|---|---|---|---|---|---|
-| 1 | | | | | | | |
+| Step | Actor | Preconditions | User Action / System Trigger | Prototype `data-action` | Frontend Visible Result | Backend Validation / Processing | Domain Result / Event / Audit | Failure / Idempotency | Next Action |
+|---:|---|---|---|---|---|---|---|---|---|
+| 1 | | | | `save-lead` | modal shows submitting, then closes and table refreshes | validate required fields, duplicate check, permission scope | LeadCreated + audit log | duplicate returns conflict modal; repeated submit is idempotent by requestId | |
+
+Write-action minimum:
+
+- Validation owner: frontend-only / backend-authoritative / both.
+- Persistence: create/update/delete/transition target object and field changes.
+- Event / audit: emitted domain event and audit record.
+- Notification / task: downstream message, todo, SMS, email, or none.
+- Failure path: validation error, permission denial, stale data, dependency
+  failure, timeout, retry, rollback, and visible copy.
+- Idempotency: duplicate click, repeated request, refresh/retry behavior.
 
 #### 6.1 Modal Chain Specification
 
@@ -659,14 +707,41 @@ For AI-core modules, use full `ai_runtime_contract`; see
 
 #### 15. Frontend / Backend / QA Handoff Notes
 
-| Role | Required Notes |
-|---|---|
-| Frontend | component states, disabled/hidden/highlight behavior, modal/toast/copy, loading/empty/error, responsive/interaction notes |
-| Backend | source of truth, validation owner, permission/data-scope guard, state transition, idempotency, audit/event, dependency failure behavior |
-| QA | priority happy path, boundary values, permission/overreach cases, state conflict, weak network, regression path |
+This section is a reader-friendly work package index. It points to FRR,
+prototype, state matrix, and acceptance IDs; it does not create a second source
+of truth.
 
-This table points readers to the detailed FRR, state matrix, prototype contract,
-and acceptance IDs. It does not create a second source of truth.
+##### 15.1 Frontend Work Package
+
+| Area | Requirement | Evidence / Ref |
+|---|---|---|
+| Page layout | regions, table/list columns, form layout, drawer/modal chain to implement | FRR §4 / prototype testids |
+| Component states | loading, empty, error, disabled, success, selected, pending | FRR §4 / §9 |
+| Interaction behavior | click, submit, cascade, batch, drag/drop, pagination, filters, exports | FRR §6 / §7 |
+| Copy and feedback | modal title, toast copy, inline error, guard message | FRR §6 / §11 |
+| Responsive / multi-surface | desktop/mobile/miniprogram differences and shared state | mobile or multi-surface contract |
+
+##### 15.2 Backend Work Package
+
+| Area | Requirement | Evidence / Ref |
+|---|---|---|
+| Source of truth | owning aggregate/table/service and authoritative source | FRR §5 / §13 |
+| Validation owner | backend validation, uniqueness, enum, amount/date, file constraints | FRR §5 / §8 |
+| Permission guard | tenant/org/role/row/field/action scope, overreach behavior | FRR §10 |
+| State transition | allowed transition, guard, event, audit, rollback | FRR §9 / §12 |
+| API / dependency | command/query, upstream/downstream interface, timeout/failure | FRR §12 / §13 |
+| Idempotency | duplicate submit, retry, scheduled job, partial success | FRR §6 / §11 |
+
+##### 15.3 QA Work Package
+
+| Area | Requirement | Evidence / Ref |
+|---|---|---|
+| P0 path | business happy path and minimum release acceptance | FRR §16 |
+| Boundary values | empty, zero, max length, enum invalid, date boundary, amount precision | FRR §5 / §11 |
+| Permission / data isolation | vertical and horizontal overreach, cross-tenant/department checks | FRR §10 |
+| State conflict | stale data, repeated submit, illegal transition, reopen/rollback | FRR §9 / §11 |
+| Integration / E2E | cross-module event and downstream state chain | E2E Cross-Module Canvas |
+| Regression | previous prototype/PRD behavior that must be preserved | source evidence / ledger |
 
 #### 16. Acceptance And Traceability
 
@@ -967,7 +1042,49 @@ Tracking rules:
 | Decision | | | | |
 | Question | | | | |
 
-## 18. Appendix
+## 18. Product Lifecycle Management Annex
+
+Use this annex for Human-First Full PRD and AI-Coding Full PRD when the
+artifact enters formal review, development planning, customer delivery, or
+release. Keep it concise for small L1/L2 features.
+
+### 18.1 Review And Sign-Off
+
+| Review Stage | Participants | Required Evidence | Decision |
+|---|---|---|---|
+| Requirement review | sponsor / PM / RD / QA / ops | scope, role paths, FRR inventory, unresolved questions | PASS / REVISE / BLOCKED |
+| Technical review | architect / dev lead / backend / frontend / algorithm | API/data/state/dependency/NFR | PASS / REVISE / BLOCKED |
+| Test review | QA / PM / dev lead | acceptance, edge cases, regression, data setup | PASS / REVISE / BLOCKED |
+| Launch review | sponsor / ops / support / PM / dev lead | readiness, rollout, rollback, support plan | PASS / REVISE / BLOCKED |
+
+### 18.2 Milestones And Delivery Plan
+
+| Milestone | Target Date | Scope | Owner | Entry Condition | Exit Condition |
+|---|---|---|---|---|---|
+| Prototype lock | | | | | |
+| PRD lock | | | | | |
+| Development start | | | | | |
+| Test start | | | | | |
+| Pilot / UAT | | | | | |
+| Production release | | | | | |
+
+### 18.3 Rollout, Training, And Support
+
+| Item | Requirement |
+|---|---|
+| Rollout scope | pilot org / region / tenant / user group |
+| Migration / data initialization | data source, owner, validation, fallback |
+| User training | audience, material, owner, completion signal |
+| Support channel | support owner, SLA, escalation path |
+| Rollback / human overrule | trigger, approver, recovery action |
+
+### 18.4 Post-Launch Review
+
+| Metric / Signal | Baseline | Target | Actual | Decision |
+|---|---:|---:|---:|---|
+| | | | | continue / adjust / rollback / retire |
+
+## 19. Appendix
 
 - Research report:
 - Competitor analysis:

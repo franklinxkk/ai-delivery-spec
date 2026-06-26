@@ -8,7 +8,7 @@ description: >-
   syntax/debugging, copy rewriting, or idea exploration with no delivery intent.
 ---
 
-# AI Delivery Spec — Production Elastic Delivery Standard (v4.7.1)
+# AI Delivery Spec — Production Elastic Delivery Standard (v4.7.2)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering,
 algorithm, QA, operations, customers, and sponsors can read, build, verify, and
@@ -97,6 +97,24 @@ Tier guide:
 | L2 | ToB/ToG standard delivery, development handoff, bid/demo package | AI Native unless triggered |
 | L3 | AI-core, high-risk automation, compliance/money/safety impact, multi-agent | none for affected module unless de-scoped |
 
+### PRD Profile Selector
+
+When the user asks for a PRD, requirement document, product specification, or
+development handoff, choose exactly one profile:
+
+| Profile | Trigger | Required Shape |
+|---|---|---|
+| Contract Summary | quick review, gap check, local change note, or L0/L1 alignment without implementation handoff | concise scope, gaps, decisions, and upgrade triggers |
+| Human-First Full PRD | default for human PM/RD/QA/vendor delivery, customer review, bid/demo, or any development handoff unless the user explicitly requests all-AI coding | readable product specification first: scenarios, page/region layout, field and interaction detail, rules, exceptions, permissions, NFR, acceptance, and handoff notes |
+| AI-Coding Full PRD | user explicitly says coding agent, full AI coding, Cursor/Claude Code/Copilot/Codex implementation, or asks for machine-readable contracts/tests | Human-First Full PRD plus `ac_structured`, machine-readable AI/runtime contracts when applicable, delivery package manifest, and coding-agent rules |
+
+Rules:
+
+- AI-Coding Full PRD is an extension of Human-First Full PRD, not a replacement.
+- Formal implementation handoff must never degrade to contract-only summaries.
+- If the user's intent is ambiguous but the output may guide developers or QA,
+  choose Human-First Full PRD and list what would trigger AI-Coding enrichment.
+
 End every task with one completion state: `PASS`,
 `REVIEW_COMPLETE_WITH_GAPS`, or `BLOCKED`.
 
@@ -154,9 +172,15 @@ handoff. Required:
   summary, scenario-first module writing, explicit boundary/exception coverage,
   metrics/event tracking where operationally useful, and frontend/backend/QA
   handoff notes;
+- formal PRDs must declare one PRD Profile: Contract Summary, Human-First Full
+  PRD, or AI-Coding Full PRD;
 - every release function has a complete Functional Requirement Record;
 - engineering contract is embedded as an implementation/traceability layer, not
   a replacement for product specification;
+- when a locked prototype exists, FRR pages/fields/actions must extract and
+  normalize the business-relevant page layout, regions, visible states, fields,
+  modal/drawer behavior, and action-to-domain flow. A bare "see prototype" is
+  not a complete specification;
 - source evidence register has zero silent omission;
 - DDD/API/data handoff includes commands, queries, events, invariants, state,
   policy, permission, and tests where applicable;
@@ -177,11 +201,11 @@ Choose one primary route, then add triggered extensions.
 | Request | Primary Entrypoint |
 |---|---|
 | strategy/discovery/business case/roadmap | `delivery-core.md`; add advanced strategy/readiness section if needed |
-| PRD/requirement/story/path/state/DDD/API/data contract | `delivery-core.md`; run Stage 3.5 IA Skeleton Gate before Stage 5 **when: >=2 modules OR >=2 primary roles OR any cross-module flow** |
+| PRD/requirement/story/path/state/DDD/API/data contract | `delivery-core.md`; choose PRD Profile first; run Stage 3.5 IA Skeleton Gate before Stage 5 **when: >=2 modules OR >=2 primary roles OR any cross-module flow** |
 | prototype/demo/HTML/mobile interaction | `prototype-testability.md`; require IA Skeleton as input; add `delivery-core.md` for story/state evidence |
 | test/UAT/acceptance/readiness/post-launch/retirement | `delivery-core.md`; add advanced readiness section if real environment |
 | AI, SaaS, approval, reporting, low-code, global, domain switch | load `advanced-extensions.md` only after 0D trigger |
-| coding agent handoff, generate AGENTS.md/CLAUDE.md/Cursor rules, convert AC to test stubs | `delivery-core.md` + `coding-agent-compat.md`; use locked prototype as source of truth for pages/fields |
+| coding agent handoff, generate AGENTS.md/CLAUDE.md/Cursor rules, convert AC to test stubs | `delivery-core.md` + `coding-agent-compat.md`; use AI-Coding Full PRD and locked prototype as source evidence for pages/fields/actions |
 | implementation task breakdown / issue slicing | `delivery-core.md`; generate tasks only from approved specification/plan evidence |
 
 ## 6. Non-Negotiable Rules

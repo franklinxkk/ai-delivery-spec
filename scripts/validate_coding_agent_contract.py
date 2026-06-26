@@ -11,6 +11,9 @@ coding agents need before turning a PRD/prototype into implementation tasks:
 - prototype data-api + data-method -> PRD API/contract prose
 - prototype data-visible-role -> PRD role/permission prose
 - interactive prototype controls have data-testid
+- runtime data-state values are concrete, not template placeholders
+- domain-state modals/drawers have stable identifiers or a modal contract
+- ac_structured does not leave data_testid/data_action as MISSING placeholders
 """
 
 from __future__ import annotations
@@ -54,6 +57,10 @@ def collect_attrs(html: str) -> dict[str, set[str]]:
     for name, _quote, value in ATTR_RE.findall(html):
         values.setdefault(name, set()).add(value.strip())
     return values
+
+
+def has_window_contract(html: str, name: str) -> bool:
+    return bool(re.search(rf"\bwindow\.{re.escape(name)}\b|\b{re.escape(name)}\s*=", html))
 
 
 def interactive_missing_testid(html: str) -> list[str]:
@@ -111,6 +118,16 @@ def main() -> int:
     ac_testids = yaml_values(prd_text, "data_testid")
     ac_actions = yaml_values(prd_text, "data_action")
 
+    missing_ac_placeholders = sorted(
+        value for value in (ac_testids | ac_actions)
+        if value.upper() in {"MISSING", "TBD", "TODO", "UNKNOWN", "N/A"}
+    )
+    if missing_ac_placeholders:
+        failures.append(
+            "ac_structured contains unresolved data_testid/data_action placeholders: "
+            + ", ".join(missing_ac_placeholders)
+        )
+
     prototype_testids = attrs.get("data-testid", set())
     unmapped_testids = sorted(t for t in prototype_testids if t not in ac_testids)
     if unmapped_testids:
@@ -126,6 +143,19 @@ def main() -> int:
         failures.append("data-action values missing from PRD FRR flow/actions or AC: " + ", ".join(missing_actions[:50]))
 
     states = attrs.get("data-state", set())
+    templated_states = sorted(s for s in states if "${" in s or "{{" in s or "}}" in s)
+    if templated_states:
+        if has_window_contract(html, "STATE_ENUMS"):
+            warnings.append(
+                "template-like data-state values detected; verify rendered DOM replaces them: "
+                + ", ".join(templated_states[:20])
+            )
+        else:
+            failures.append(
+                "TEMPLATE_STATE_DETECTED: data-state values contain template placeholders "
+                "and window.STATE_ENUMS is missing: "
+                + ", ".join(templated_states[:20])
+            )
     missing_states = sorted(s for s in states if not contains_loose(prd_text, s))
     if missing_states:
         failures.append("data-state values missing from PRD state matrix/prose: " + ", ".join(missing_states[:50]))
@@ -145,6 +175,36 @@ def main() -> int:
     missing_roles = sorted(role for role in roles if role not in prd_text)
     if missing_roles:
         failures.append("data-visible-role values missing from PRD permissions: " + ", ".join(missing_roles[:50]))
+
+    if not role_values and re.search(r"\bcanView[A-Z]|\bcan[A-Z][A-Za-z0-9_]*\(", html):
+        if not has_window_contract(html, "PROTOTYPE_ROLE_CONTRACT"):
+            warnings.append(
+                "runtime role/permission helpers detected but no data-visible-role or "
+                "window.PROTOTYPE_ROLE_CONTRACT was found"
+            )
+
+    has_modal_testid = bool(
+        re.search(r"""data-testid=["'](?:modal|drawer)-[^"']+["']""", html)
+    )
+    has_modal_helper = bool(re.search(r"\b(showModal|openModal|showDrawer|openDrawer)\s*\(", html))
+    if has_modal_helper and not has_modal_testid and not has_window_contract(html, "MODAL_CONTRACT"):
+        failures.append(
+            "MODAL_TESTID_GAP: modal/drawer helper detected but no stable modal-* / "
+            "drawer-* data-testid or window.MODAL_CONTRACT was found"
+        )
+
+    write_action_re = re.compile(
+        r"^(save|create|update|delete|remove|submit|approve|reject|assign|convert|"
+        r"close|resolve|escalate|confirm|register|adjust|recover|publish|send|"
+        r"import|export|do)-",
+        re.IGNORECASE,
+    )
+    write_actions = sorted(a for a in actions if write_action_re.search(a))
+    if write_actions and not apis and not has_window_contract(html, "ACTION_API_CONTRACT"):
+        warnings.append(
+            "write-like data-action values found without data-api/data-method or "
+            "window.ACTION_API_CONTRACT: " + ", ".join(write_actions[:30])
+        )
 
     missing_controls = interactive_missing_testid(html)
     if missing_controls:

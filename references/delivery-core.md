@@ -609,9 +609,12 @@ Authority order for L2/L3:
    annotations (`data-testid`, `data-action`, `data-state`), modal chain, and
    interaction flow. The prototype is the primary truth for pages, fields, and
    visible behavior.
-3. **PRD** (Stage 5b): business scenario, rules, state machines, permissions,
-   exceptions, acceptance, and traceability. The PRD references the prototype
-   and IA Skeleton; it does not re-invent layout or field lists.
+3. **PRD** (Stage 5b): readable product specification plus traceable
+   engineering contract. It extracts and normalizes the business-relevant
+   layout, fields, visible states, interactions, rules, permissions,
+   exceptions, acceptance, and handoff notes from the locked prototype, IA
+   Skeleton, and source evidence. It must not invent details, but it also must
+   not replace implementable requirements with "see prototype".
 4. **Engineering Traceability Contracts** (Stage 5c, optional): DDD/API/data
    contract, coding-agent AC-YAML, layered on top of the product specification.
 
@@ -628,34 +631,47 @@ Stage 5a Prototype First:
 
 Stage 5b PRD from Locked Prototype:
 
-PRD chapters:
-1. Problem statement
-2. Users and personas
-3. Core business concepts
-4. Information architecture (derived from IA Skeleton; do not expand)
-5. Feature modules
-6. Business processes
-7. State transitions
-8. User interactions
-9. Edge cases
-10. Non-functional requirements
+PRD Profile:
+
+| Profile | Use When | Required Output |
+|---|---|---|
+| Contract Summary | local review, gap report, or L0/L1 alignment without implementation handoff | concise decisions, gaps, acceptance, and upgrade trigger |
+| Human-First Full PRD | default for human PM/RD/QA/vendor delivery, customer review, bid/demo, or any implementation handoff unless all-AI coding is explicit | full readable product specification with scenarios, page layout, field/validation detail, interaction flow, business rules, exceptions, state, permission, NFR, acceptance, and frontend/backend/QA handoff |
+| AI-Coding Full PRD | explicit coding-agent or full-AI implementation path | Human-First Full PRD plus `ac_structured`, machine-readable contracts, package manifest, and coding-agent rules |
+
+AI-Coding Full PRD is additive. It cannot delete or compress the Human-First
+Full PRD layer. Contract Summary is not acceptable for formal development
+handoff unless the user explicitly limits scope to review only.
+
+PRD chaptering:
+
+- For Human-First Full PRD and AI-Coding Full PRD, use
+  `references/templates/prd-standard-template.md` as the authoritative
+  structure. Its module FRR sections are mandatory for every in-scope function.
+- For Contract Summary or L0/L1 review-only output, a compact 10-part summary
+  may be used: problem, users, concepts, IA, features, process, state,
+  interactions, edge cases, NFR. This summary is not a development-ready PRD.
 
 PRD writing rules to prevent bloat:
 
 - **§4 Information Architecture** must be a thin mapping from the IA Skeleton:
   module → views → regions → entry paths. Do not add new views or regions here.
-- **FRR §4 Pages/Visible States** must reference the locked prototype page/region
-  IDs (`data-testid`) and modal chain. Describe only the business-visible
-  differences (e.g., role-dependent region visibility), not the full layout.
+- **FRR §4 Pages/Visible States** must reference locked prototype page/region
+  IDs (`data-testid`) and modal/drawer chain, then normalize the page layout
+  into an implementable description: regions, major components, table/list
+  columns, empty/loading/error/disabled states, and role/state conditional
+  visibility. Do not copy pixel trivia or invent new components.
 - **FRR §5 Fields/Dictionaries** must reference the global field dictionary and
-  the per-page field matrix from the prototype/annex. In the FRR, list only
-  fields whose meaning, validation, or enum is business-critical or differs by
-  role/state. Common fields are documented once in the global dictionary and
-  referenced by name.
-- **FRR §6 Numbered Interaction Flow** must trace actions through the prototype
-  `data-action` IDs. Each step is: user action (`data-action=...`) → system
-  response → domain state change. Do not rewrite component behavior that is
-  already annotated in the prototype.
+  per-page field matrix, then spell out all fields that RD/QA must implement or
+  test in this function: displayed fields, input fields, filters, exports,
+  calculated values, validation, enums, editability, masking, and source of
+  truth. Shared common fields may be referenced, but the function must still
+  state where they appear and how they behave.
+- **FRR §6 Numbered Interaction Flow** must trace each meaningful prototype
+  `data-action` ID into a user-visible result and a domain result. For write
+  actions, include validation, persistence/state change, event/audit,
+  notification/task side effect, failure handling, and idempotency. Component
+  labels alone do not count.
 - **FRR §8 Business Rules / §9 State / §10 Permission / §11 Exception / §16
   Acceptance** remain fully specified in the PRD. These are the primary product
   decisions that the prototype cannot express.
@@ -663,8 +679,9 @@ PRD writing rules to prevent bloat:
 The engineering layer does not replace the product layer. A module is not
 development-ready when it only states purpose, inputs, outputs, aggregates, and
 commands while omitting business rules, state transitions, permission rules,
-exceptions, and acceptance. However, page layout and field inventory are owned
-by the locked prototype and IA Skeleton, not by the FRR.
+exceptions, page/field/action behavior, and acceptance. The locked prototype and
+IA Skeleton are authoritative evidence; the FRR must turn that evidence into a
+stable human-readable implementation specification.
 
 When the artifact will guide implementation, add a compact plan/task bridge
 after the product specification is complete: implementation assumptions,
@@ -689,16 +706,16 @@ Inventory rules:
 - `planned release functions = complete functional requirement records` is mandatory. Deferred/external functions remain in the inventory but do not enter the release denominator.
 - A screenshot, prototype, workbook, SQL table, policy, or previous PRD is evidence. It does not become an implementable requirement until its behavior is mapped to a functional record or a frozen authoritative annex.
 
-For each function in the release inventory, write a deterministic functional requirement record (FRR). The FRR is a **business-behavior contract**, not a layout or component specification. Layout and field inventory are owned by the locked IA Skeleton and prototype.
+For each function in the release inventory, write a deterministic functional requirement record (FRR). The FRR is a **human-readable product specification plus traceability contract**. It must include the layout, field, and interaction details needed by frontend, backend, algorithm, and QA teams, while using the locked IA Skeleton/prototype as evidence instead of inventing a parallel design.
 
 | Section | Required Content | Owner / Source |
 |---|---|---|
 | 1. Identity and value | function ID/name, module, priority, release, user value, source IDs | PRD |
 | 2. Roles and scenario | initiating/collaborating roles, trigger, start condition, successful exit, next action | PRD |
 | 3. Entry and preconditions | page/route/entry, role/data prerequisites, upstream state, feature/config flags | PRD; route references IA Skeleton view_id |
-| 4. Pages and visible states | list/detail/create/edit/config/result, loading/empty/error/success/disabled behavior | **Prototype primary, PRD references**. In PRD: state the role-dependent visibility and any business-visible layout rule; point to prototype `data-testid` and modal chain. Do not rewrite component layout. |
-| 5. Fields and dictionaries | every input/output field or authoritative annex range; meaning, type, required/default, enum, source, validation, editability, masking | **Global field dictionary + prototype primary, PRD references**. In PRD: list only fields whose meaning, validation, enum, or masking is business-critical or differs by role/state. Common fields are documented once in the global dictionary. |
-| 6. Numbered interaction flow | user action and corresponding system response for each step | PRD, but each user action references prototype `data-action` ID. System response states domain result. Do not rewrite component behavior already in the prototype. |
+| 4. Pages and visible states | list/detail/create/edit/config/result, region layout, major components, table/list columns, modal/drawer chain, loading/empty/error/success/disabled behavior | PRD normalizes prototype/IA evidence into implementable page behavior; references `view_id`, `region_id`, `data-testid`, and modal chain |
+| 5. Fields and dictionaries | every input/output/display/filter/export/calculated field or authoritative annex range; meaning, type, required/default, enum, source, validation, editability, masking | global dictionary + function-specific page/field matrix; shared fields may reference dictionary but must state per-page behavior |
+| 6. Numbered interaction flow | user action and corresponding validation, visible response, persistence/state/event/audit/notification result, failure path, next step | PRD; each user action references prototype `data-action` ID and domain result |
 | 7. Actions and results | action, confirmation, visible result, domain result, next action, idempotency/duplicate behavior | PRD |
 | 8. Business rules and calibers | numbered rules, priority, formulas/thresholds, time boundary, conflict behavior, effective version | PRD (primary owner) |
 | 9. State-button behavior | object state, visible/forbidden actions, guards, transitions, audit/event | PRD (primary owner) |
@@ -721,10 +738,13 @@ FRR section order remains authoritative:
 Any section that truly does not apply must say `N/A` and why. Blank, omitted,
 "同上", "见原型", or "按现有逻辑" does not count as complete.
 
-**FRR bloat prevention rule**: if a fact is already in the IA Skeleton, the
-locked prototype, or the global field dictionary, the FRR must reference it
-rather than repeat it. Repetition is allowed only when the fact is modified by
-role, state, or business rule in this specific function.
+**FRR bloat prevention rule**: do not duplicate raw skeleton/prototype content
+verbatim, and do not repeat unchanged global dictionary definitions in every
+FRR. Instead, normalize the evidence into the function-level specification a
+human developer/tester needs: which page/region, which fields, which visible
+states, which actions, which business rules, and what result. A reference such
+as "see prototype", "see appendix", or "same as existing logic" without this
+normalization is incomplete.
 
 ### Modal Chain Coverage Rule
 
