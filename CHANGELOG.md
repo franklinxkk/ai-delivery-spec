@@ -2,6 +2,13 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.9.5 - 2026-06-27
+
+- Changed `SKILL.md` frontmatter `description` from folded YAML block syntax
+  to a standard single-line string for agentskill.sh parser compatibility.
+- Preserved the trigger exclusions for code-only syntax/debugging, copy
+  rewriting, and idea exploration with no delivery intent.
+
 ## v4.9.4 - 2026-06-27
 
 - Reworked `README.md` for community discovery and first-screen conversion:

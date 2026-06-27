@@ -1,14 +1,9 @@
 ---
 name: ai-delivery-spec
-description: >-
-  Use to create or review product delivery artifacts with handoff intent: PRD,
-  prototype, role path, DDD/API/data contract, test/UAT evidence, readiness,
-  post-launch review, retirement, AI runtime/evaluation, or cross-border spec.
-  First run 0D triage to prune AI/workflow gates. Do not use for code-only
-  syntax/debugging, copy rewriting, or idea exploration with no delivery intent.
+description: Create or review product delivery artifacts with handoff intent: PRD, prototype, role path, DDD/API/data contract, test/UAT evidence, readiness, AI runtime, and coding-agent handoff. First run 0D triage. Do not use for code-only syntax/debugging, copy rewriting, or idea exploration with no delivery intent.
 ---
 
-# AI Delivery Spec — Production Elastic Delivery Standard (v4.9.4)
+# AI Delivery Spec — Production Elastic Delivery Standard (v4.9.5)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering,
 algorithm, QA, operations, customers, and sponsors can read, build, verify, and

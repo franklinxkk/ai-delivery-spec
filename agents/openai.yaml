@@ -1,6 +1,6 @@
 interface:
   display_name: "AI Delivery Spec"
-  version: "4.9.4"
+  version: "4.9.5"
   short_description: "Product-side SDD framework for PRD, prototype, acceptance, and coding-agent handoff."
   default_prompt: >
     Use $ai-delivery-spec / ai-delivery-spec. First run 0D triage
