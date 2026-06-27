@@ -1,6 +1,6 @@
 ---
 name: ai-delivery-spec
-description: Spec-driven delivery framework for product teams. Generates PRD, prototype, FRR, AC-YAML, WBS, and risk register. Supports Traditional, AI Native, and AI Coding work paths.
+description: Spec-driven delivery framework for product teams. Generates PRD, prototype, FRR, AC-YAML, WBS, and risk register. Supports Traditional, AI Native, and AI Coding work paths. Not for code-only syntax/debugging, copy rewriting, or idea exploration with no delivery intent.
 ---
 
 # AI Delivery Spec — Production Elastic Delivery Standard (v4.9.6)
