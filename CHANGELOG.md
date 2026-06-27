@@ -2,6 +2,25 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.9.2 - 2026-06-27
+
+- Tightened Human-First PRD field guidance: when a locked prototype exists,
+  FRR section 5 must list only prototype-invisible field rules instead of
+  repeating every visible field already shown in the prototype.
+- Clarified that Work Path is selected before PRD Profile: work path controls
+  lifecycle scope, while PRD profile controls document format and consumer.
+- Relaxed AI-Coding batch guidance from fixed module/FRR limits to context-size
+  batching and added web/chat mode handling.
+- Added an explicit AI-Coding heading rule preventing generated `AGENTS.md` or
+  `CLAUDE.md` content from becoming a second H1 in the same PRD.
+- Added Stage 4 `TRK` development follow-up and `BUG` defect register outputs
+  to `delivery-core.md`.
+- Rebuilt routing validation with clean bilingual English/Chinese scenarios.
+- Reduced Chinese PRD language-ratio false positives by down-weighting common
+  technical identifiers such as `data-testid`, `FRR`, `AC-YAML`, and `Mxx-Fxx`.
+- Rewrote `CONTRIBUTING.md` without encoding corruption and added domain-module
+  14-section and `advanced-extensions.md` sync checklist items.
+
 ## v4.9.1 - 2026-06-27
 
 - Cleaned the reference architecture for community distribution. Removed legacy

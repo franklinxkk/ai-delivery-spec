@@ -6,7 +6,7 @@
 > 面向产品、研发、算法、测试和交付团队的产品侧 SDD 规范：让需求、原型、验收和 AI 编程交接保持一致。
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-4.9.1-green.svg)]()
+[![Version](https://img.shields.io/badge/version-4.9.2-green.svg)]()
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-purple.svg)](https://openclaw.ai)
 

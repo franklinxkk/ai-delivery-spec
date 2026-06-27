@@ -1,4 +1,4 @@
-# AI-Coding Full PRD Template (v4.9.1 Profile)
+# AI-Coding Full PRD Template (v4.9.2 Profile)
 
 Use this profile only when the user explicitly wants a coding agent, full AI
 implementation, machine-readable contracts, test stubs, or an implementation
@@ -25,6 +25,9 @@ not a replacement.
 - Do not jump from H2 directly to H4.
 - Do not use bold text, table rows, or numbered list items as fake headings.
 - In Chinese PRDs, translate headings but keep the hierarchy unchanged.
+- If generated `AGENTS.md`, `CLAUDE.md`, or Cursor rules are included inline in
+  the same Markdown file, put them under H2/H3 annex headings or fenced code
+  blocks. Do not start them with a second H1 such as `# AGENTS.md`.
 
 ## 0D Triage And PRD Profile
 
@@ -90,9 +93,10 @@ Batch generation strategy:
 
 | Trigger | Required Behavior |
 |---|---|
-| modules >= 5 or total FRR >= 20 | generate Part 1 Stage 3 in batches |
-| one batch | maximum 4 modules or 12 FRRs |
-| after each batch | write the batch to the output file and verify FRR IDs |
+| context estimate for remaining FRRs exceeds 6000 tokens | generate Part 1 Stage 3 in batches |
+| one batch | keep the batch under roughly 6000 output tokens; choose module/function boundaries that preserve coherence |
+| file-system agent mode | write each batch to the target output file and verify FRR IDs before continuing |
+| web/chat mode without file system | write batches as consecutive conversation sections; do not require file writes |
 | after all batches | run the FRR Completion Gate |
 
 ## Part 2 Machine-Readable Extension Layer

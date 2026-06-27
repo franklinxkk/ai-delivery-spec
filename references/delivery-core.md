@@ -773,12 +773,14 @@ Stage 4 Stories + State Machine:
 - Every story includes happy, error, and boundary paths.
 - Every state transition includes Trigger + Guard + Action.
 - A story is not Stage-4 complete if it only states a visible UI result. It must also state the domain object change, domain event, audit record, task creation, notification, or measurable state change.
+- Stage 4 outputs include the `TRK` development follow-up log and `BUG`
+  defect register when build/verify is in scope.
 
 Stage 5 Prototype + PRD:
 
 Authority order for L2/L3:
 
-1. **IA Skeleton** (Stage 3.5): confirmed role × module × view × region × primary action.
+1. **IA Skeleton** (Stage 3.5): confirmed role -> module -> view -> region -> primary action.
 2. **Prototype / Demo-Closed Artifact** (Stage 5a): pixel-level layout, component
    annotations (`data-testid`, `data-action`, `data-state`), modal chain, and
    interaction flow. The prototype is the primary truth for pages, fields, and

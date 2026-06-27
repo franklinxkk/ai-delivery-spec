@@ -26,11 +26,23 @@ UNSUPPORTED_NUMERIC_RE = re.compile(
 # Language check: detect English-heavy lines (>= 80% ASCII alpha characters)
 # Used to enforce the Output Language Rules from readability-layer.md
 ASCII_ALPHA_RE = re.compile(r"[A-Za-z]")
+TECH_IDENTIFIER_RE = re.compile(
+    r"(?i)\b("
+    r"data-[a-z0-9_-]+|data-testid|data-action|data-field|"
+    r"FRR|AC-YAML|ac_structured|Given|When|Then|API|REST|JSON|YAML|"
+    r"AC-[A-Z0-9-]+|SRC-[A-Z0-9-]+|LAY-[A-Z0-9-]+|"
+    r"M\d{2}(?:-F\d{2}|-V\d{2})?|BR-M\d{2}-F\d{2}-\d{2}"
+    r")\b"
+)
 FENCE_RE = re.compile(r"^```")
 TABLE_HEADER_RE = re.compile(r"^\s*\|")
 HEADING_RE = re.compile(r"^(#{1,6})\s+\S")
 LAZY_REFERENCE_RE = re.compile(
-    r"(见原型|参见原型|参考原型|见附件|按现有逻辑|同上|see prototype|same as above|existing logic|see attachment)",
+    "("
+    "\u89c1\u539f\u578b|\u53c2\u89c1\u539f\u578b|\u53c2\u8003\u539f\u578b|"
+    "\u89c1\u9644\u4ef6|\u6309\u73b0\u6709\u903b\u8f91|\u540c\u4e0a|"
+    "see prototype|same as above|existing logic|see attachment"
+    ")",
     re.IGNORECASE,
 )
 REFERENCE_ANCHOR_RE = re.compile(
@@ -170,8 +182,8 @@ def check_language_ratio(text: str, failures: list[str], target_language: str) -
         return
 
     lines = text.splitlines()
-    total = 0
-    english_heavy = 0
+    total_weight = 0.0
+    english_heavy_weight = 0.0
     in_code_block = False
 
     for line in lines:
@@ -193,30 +205,33 @@ def check_language_ratio(text: str, failures: list[str], target_language: str) -
         if TABLE_HEADER_RE.match(line) and re.match(r"^[\s|\-:]+$", stripped):
             continue
 
-        total += 1
+        weight = 0.3 if TECH_IDENTIFIER_RE.search(stripped) else 1.0
+        total_weight += weight
 
         # Count ASCII alpha characters
         ascii_chars = len(ASCII_ALPHA_RE.findall(stripped))
         alpha_total = sum(1 for ch in stripped if ch.isalpha())
 
         if alpha_total > 0 and ascii_chars / alpha_total >= 0.8:
-            english_heavy += 1
+            english_heavy_weight += weight
 
-    if total == 0:
+    if total_weight == 0:
         return
 
-    ratio = english_heavy / total
+    ratio = english_heavy_weight / total_weight
     if ratio > 0.30:
         add_failure(
             failures,
-            f"LANGUAGE_GAP: English-heavy lines {english_heavy}/{total} "
+            f"LANGUAGE_GAP: English-heavy weighted lines "
+            f"{english_heavy_weight:.1f}/{total_weight:.1f} "
             f"({ratio:.1%}) exceed 30% threshold. Rewrite non-code content "
             f"in the user's spoken language per Output Language Rules."
         )
     elif ratio > 0.20:
         # Warning, not failure
         print(
-            f"WARNING: English-heavy lines {english_heavy}/{total} "
+            f"WARNING: English-heavy weighted lines "
+            f"{english_heavy_weight:.1f}/{total_weight:.1f} "
             f"({ratio:.1%}) above 20% recommendation"
         )
 
