@@ -1,9 +1,9 @@
 ---
 name: ai-delivery-spec
-description: Create or review product delivery artifacts with handoff intent: PRD, prototype, role path, DDD/API/data contract, test/UAT evidence, readiness, AI runtime, and coding-agent handoff. First run 0D triage. Do not use for code-only syntax/debugging, copy rewriting, or idea exploration with no delivery intent.
+description: Spec-driven delivery framework for product teams. Generates PRD, prototype, FRR, AC-YAML, WBS, and risk register. Supports Traditional, AI Native, and AI Coding work paths.
 ---
 
-# AI Delivery Spec — Production Elastic Delivery Standard (v4.9.5)
+# AI Delivery Spec — Production Elastic Delivery Standard (v4.9.6)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering,
 algorithm, QA, operations, customers, and sponsors can read, build, verify, and
