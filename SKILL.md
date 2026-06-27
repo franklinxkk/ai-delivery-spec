@@ -3,7 +3,7 @@ name: ai-delivery-spec
 description: Create PRDs, prototypes, tests, AI runtime specs, and coding agent handoffs for product delivery. Excludes code debugging and copy rewriting.
 ---
 
-# AI Delivery Spec — Production Elastic Delivery Standard (v4.9.6)
+# AI Delivery Spec - Production Elastic Delivery Standard (v4.9.7)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering,
 algorithm, QA, operations, customers, and sponsors can read, build, verify, and
@@ -328,7 +328,7 @@ Rules:
   `delivery/prd/` and `delivery/prototype/` as the primary truth for pages,
   fields, and visible behavior.
 - When the IA Skeleton is locked (Stage 3.5), `delivery/ia-skeleton.yaml` is
-  the structural truth for role × module × view × region.
+  the structural truth for role x module x view x region.
 - Acceptance files in `delivery/acceptance/` use the naming convention
   `M{module}-F{function}-ac.yaml` (e.g., `M04-F01-ac.yaml`).
 - Do not place non-delivery files (scripts, configs, scratch files) inside

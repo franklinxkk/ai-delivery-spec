@@ -2,6 +2,12 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.9.7 - 2026-06-27
+
+- Made root `SKILL.md` ASCII-only for agentskill.sh compatibility by replacing
+  the remaining em dash and multiplication-sign characters in the runtime file.
+- Kept frontmatter in the simplest `name` and single-line `description` form.
+
 ## v4.9.6 - 2026-06-27
 
 - Further simplified `SKILL.md` frontmatter `description` for agentskill.sh:
