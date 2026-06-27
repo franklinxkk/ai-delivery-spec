@@ -2,6 +2,15 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.9.4 - 2026-06-27
+
+- Reworked `README.md` for community discovery and first-screen conversion:
+  clearer pain statement, production outputs, install path, quick-start prompts,
+  work-path selector, PRD profile selector, and toolchain positioning.
+- Kept the README tool-agnostic and bilingual so product managers, developers,
+  QA, AI-native teams, and coding-agent users can quickly identify the workflow
+  that fits their job.
+
 ## v4.9.3 - 2026-06-27
 
 - Added the `skills.sh` badge and a dedicated `npx skills add
