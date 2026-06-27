@@ -39,9 +39,7 @@ classify the affected modules separately as AI-supporting or AI-core.
 - `references/prototype-testability.md`
 - `references/advanced-extensions.md`
 - `references/domain-traffic.md`
-- `references/domain-traffic-safety-scenarios.md`
-- `references/mobile-product-delivery.md`
-- `references/multi-surface-consistency.md`
+- mobile and multi-surface rules are now inside `references/advanced-extensions.md`
 
 ## Gate Focus
 

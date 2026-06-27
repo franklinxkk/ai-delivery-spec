@@ -825,10 +825,9 @@ PRD chaptering:
 - For AI-Coding Full PRD, use
   `references/templates/ai-coding-prd-template.md`; it embeds the Human-First
   layer and adds coding-agent extensions.
-- `references/templates/prd-standard-template.md` remains the shared base and
-  compatibility template. Its module FRR sections are mandatory for every
-  in-scope function unless the profile-specific template provides a stricter
-  version.
+- The profile template is authoritative. `human-first-prd-template.md` is the
+  default human/vendor/development PRD; `ai-coding-prd-template.md` extends it
+  for coding-agent implementation.
 - For Contract Summary or L0/L1 review-only output, a compact 10-part summary
   may be used: problem, users, concepts, IA, features, process, state,
   interactions, edge cases, NFR. This summary is not a development-ready PRD.

@@ -36,7 +36,7 @@ criteria, and unresolved decisions.
 - `references/advanced-extensions.md` for SaaS/RBAC/workflow triggers
 - `references/domain-crm.md`
 - `references/readability-layer.md`
-- `references/templates/prd-standard-template.md`
+- `references/templates/human-first-prd-template.md`
 
 ## Required Artifacts
 

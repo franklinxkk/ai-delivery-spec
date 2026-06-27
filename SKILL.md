@@ -8,7 +8,7 @@ description: >-
   syntax/debugging, copy rewriting, or idea exploration with no delivery intent.
 ---
 
-# AI Delivery Spec — Production Elastic Delivery Standard (v4.9.0)
+# AI Delivery Spec — Production Elastic Delivery Standard (v4.9.1)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering,
 algorithm, QA, operations, customers, and sponsors can read, build, verify, and
@@ -65,9 +65,9 @@ Triggered add-on:
 | `references/coding-agent-compat.md` | only when output is consumed by coding agents | AC-YAML, machine-readable AI contract, AGENTS.md / CLAUDE.md / Cursor rules |
 | `references/realtime-contract.md` | when the product includes SSE/WebSocket, countdown timers, real-time alerts, polling, or push notifications | real-time event types, SLA countdown, alert rule engine, reconnection and polling strategy |
 
-Legacy reference files, templates, prompt registry, and domain modules are
-source assets. Do not load them directly unless a default entrypoint or
-triggered add-on explicitly instructs it for the current task.
+Templates and domain modules are load-on-demand source assets. Do not load them
+directly unless a default entrypoint or triggered add-on explicitly instructs it
+for the current task.
 
 ## 2. Scope, Mode, And Tier
 

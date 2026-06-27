@@ -2,6 +2,22 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.9.1 - 2026-06-27
+
+- Cleaned the reference architecture for community distribution. Removed legacy
+  split-protocol references that had already been consolidated into
+  `delivery-core.md`, `advanced-extensions.md`, current PRD templates, or
+  coding-agent compatibility.
+- Reduced `references/` from 42 files to 17 focused files: runtime entrypoints,
+  current templates, domain modules, coding-agent compatibility, realtime
+  contract, and readability layer.
+- Rewrote README with a clean bilingual structure and removed corrupted legacy
+  Chinese text.
+- Updated `advanced-extensions.md` so it is the authoritative compact extension
+  pack instead of an index pointing to many old reference files.
+- Rebuilt `validate_skill_consistency.py` to enforce the compact architecture
+  and fail when deleted legacy references are reintroduced.
+
 ## v4.9.0 - 2026-06-27
 
 - Added lifecycle-strengthening rules for traditional PM delivery: discovery

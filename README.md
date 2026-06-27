@@ -3,10 +3,10 @@
 > Product-side Spec-Driven Delivery for teams that need PRDs, prototypes,
 > acceptance criteria, and coding-agent handoff to stay consistent.
 >
-> 面向产品、研发、算法、测试与交付团队的产研交付规格：把需求、原型、验收、工程契约和 AI 编程交接放到同一套可追溯流程里。
+> 面向产品、研发、算法、测试和交付团队的产品侧 SDD 规范：让需求、原型、验收和 AI 编程交接保持一致。
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-4.9.0-green.svg)]()
+[![Version](https://img.shields.io/badge/version-4.9.1-green.svg)]()
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-purple.svg)](https://openclaw.ai)
 
@@ -14,44 +14,47 @@ AI Delivery Spec is tool-agnostic. It works with ChatGPT, Claude, Gemini,
 Codex, Cursor, GitHub Copilot Workspace, OpenClaw, and any AI tool that can
 read Markdown.
 
-AI Delivery Spec 不是单纯的 PRD 模板，也不是代码生成框架。它是产品侧交付协议：在进入开发前，把业务场景、角色路径、状态流转、字段、原型交互、验收标准和 AI/coding-agent 契约对齐。
+AI Delivery Spec is not just a PRD template and not a code generator. It is a
+delivery standard that aligns product truth before build: scenarios, roles,
+state, fields, prototype behavior, acceptance, engineering contract, and AI /
+coding-agent handoff.
 
-中文关键词：产品经理、需求文档、PRD、原型设计、竞品分析、AI 编程、AI Coding、AI Native、产研协同、测试验收、ToB、ToG、SaaS、CRM、交通安全、高校信息化、医疗信息化。
+中文关键词：产品经理、PRD、需求文档、原型、竞品分析、AI Coding、AI Native、产研协同、测试验收、ToB、ToG、SaaS、CRM、交通安全、高校信息化、医疗信息化。
 
-## Why It Exists / 为什么需要它
+## Why It Exists / 为什么需要
 
-AI coding agents can produce code quickly, but enterprise/public-sector delivery
-often still fails
-when:
+AI coding agents can produce code quickly, but enterprise and public-sector
+delivery still fails when:
 
 - requirements are readable by AI but not by humans;
 - prototypes are beautiful but not testable;
-- PRDs have functions but no role path, state, field, exception, or acceptance;
+- PRDs list features but miss role paths, states, fields, exceptions, and
+  acceptance criteria;
 - AI features lack runtime, evaluation, fallback, and human-gate contracts;
 - developers and QA cannot locate the locked PRD, prototype, IA skeleton, or
   acceptance files.
 
-AI Delivery Spec solves this by making product artifacts both human-readable
-and machine-actionable.
+AI Delivery Spec makes product artifacts both human-readable and
+machine-actionable.
 
-AI 编程能提升速度，但如果需求、原型、验收和工程交接不一致，速度只会放大返工。这个项目的目标是让产品文档既能给人评审，也能给 coding agent 解析。
+Lifecycle bridge:
 
-Lifecycle bridge: `Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire`.
+```text
+Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire
+```
 
 ## Who Should Use This / 适合谁
 
 | Persona | Start Here | Typical Outcome |
 |---|---|---|
-| Solo PM + AI assistant | L0/L1 + `prd-light-template` | turn an idea or rough note into a usable PRD draft |
-| 2-8 person enterprise product team | L1/L2 + PRD + prototype + acceptance | align PM, frontend, backend, algorithm, and QA before build |
+| Solo PM + AI assistant | L0/L1 + light PRD | turn an idea or rough note into a usable PRD draft |
+| 2-8 person product team | L1/L2 + PRD + prototype + acceptance | align PM, frontend, backend, algorithm, and QA before build |
 | Enterprise/public-sector delivery team | L2/L3 + readiness + domain modules | support bids, customer demos, regulated launch, and acceptance |
 | AI-native product team | L3 + AI runtime/eval/ops contracts | define human gates, fallback, evaluation, rollback, and observability |
-| Coding-agent users | coding-agent compatibility mode | generate `AGENTS.md`, `CLAUDE.md`, Cursor rules, and AC-YAML |
+| Coding-agent users | coding-agent compatibility mode | generate `AGENTS.md`, `CLAUDE.md`, Cursor rules, AC-YAML, and manifest |
 
 Do not use this framework for pure code syntax questions, unrelated debugging,
 copy rewriting, or casual brainstorming with no delivery intent.
-
-不适用于：纯代码语法问题、无关调试、单纯改文案、没有交付意图的随便聊天。
 
 ## What Makes It Different / 核心差异
 
@@ -74,21 +77,22 @@ engineering task decomposition. They are complementary: AI Delivery Spec
 stabilizes product-side truth; spec-kit can consume the stabilized truth for
 implementation planning.
 
-## 10-Minute Quick Start / 10 分钟快速开始
+## 10-Minute Quick Start / 10 分钟开始
 
-### Step 0. Choose the PRD profile / 先选 PRD Profile
+### 1. Choose a PRD Profile / 选择 PRD 类型
 
-| Your intent | Profile | What the AI should output |
+| Intent | Profile | Output |
 |---|---|---|
-| I only need a quick review or gap list | Contract Summary | concise decisions, gaps, and upgrade triggers |
-| Humans will review, develop, test, or outsource this feature | Human-First Full PRD | use `references/templates/human-first-prd-template.md`; readable full PRD with page layout, fields, interactions, rules, exceptions, acceptance, and handoff notes |
-| A coding agent will implement from the PRD/prototype | AI-Coding Full PRD | use `references/templates/ai-coding-prd-template.md`; Human-First Full PRD plus AC-YAML, machine-readable contracts, manifest, and agent rules |
+| quick review or gap list | Contract Summary | concise decisions, gaps, and upgrade triggers |
+| humans will review/develop/test/outsource | Human-First Full PRD | readable full PRD with page layout, fields, interactions, rules, exceptions, acceptance, and handoff notes |
+| coding agent will implement | AI-Coding Full PRD | Human-First PRD plus AC-YAML, machine-readable contracts, manifest, and agent rules |
 
-默认原则：只要文档会给前端、后端、算法、测试、外包或客户评审使用，就用
-**Human-First Full PRD**。只有明确要 Cursor / Claude Code / Copilot /
-Codex 等 coding agent 直接实现时，才升级为 **AI-Coding Full PRD**。
+Default rule: if frontend, backend, algorithm, QA, vendor, customer, or sponsor
+will use the document, choose **Human-First Full PRD**. Upgrade to
+**AI-Coding Full PRD** only when implementation by Cursor, Claude Code, Copilot,
+Codex, or another coding agent is explicit.
 
-### 1. Generate a light PRD / 生成轻量 PRD
+### 2. Generate a Light PRD / 生成轻量 PRD
 
 ```text
 Use AI Delivery Spec.
@@ -97,7 +101,7 @@ Write a light PRD for: [feature + target user + business goal].
 Use prd-light-template and list missing decisions at the end.
 ```
 
-### 2. Review a PRD / 审核需求文档
+### 3. Review a PRD / 审核需求文档
 
 ```text
 Use AI Delivery Spec Gate 1 and Gate 3 to review this PRD.
@@ -105,17 +109,16 @@ Check user story, role path, visible result, domain result, state transitions,
 exceptions, data permission, and whether developers/QA can implement and test it.
 ```
 
-### 3. Upgrade to development handoff / 升级到开发交付
+### 4. Upgrade to Development Handoff / 升级到开发交付
 
 ```text
 Upgrade this PRD to L2 Standard.
 Use Human-First Full PRD unless I explicitly ask for all-AI coding.
 Add complete FRRs, IA Skeleton, page/region layout, field dictionary,
-state/action matrix, frontend/backend/QA handoff notes, acceptance, and
-traceability.
+state/action matrix, frontend/backend/QA handoff notes, acceptance, and traceability.
 ```
 
-### 4. Coding Agent Handoff / 交给 AI 编程智能体
+### 5. Coding Agent Handoff / 交给 AI 编程智能体
 
 ```text
 Use AI Delivery Spec coding-agent compatibility mode.
@@ -123,18 +126,6 @@ Use AI-Coding Full PRD.
 Given this PRD and prototype, generate AGENTS.md / CLAUDE.md / Cursor rules,
 convert FRR section 16 acceptance into ac_structured YAML, and identify P0/P1 tests.
 ```
-
-### 5. Review before handoff / 交付前自查
-
-```powershell
-python scripts/validate_skill_consistency.py
-python scripts/validate_prd_quality.py delivery/prd/main.md
-python scripts/validate_coding_agent_contract.py --prd delivery/prd/main.md --prototype delivery/prototype/app.html
-```
-
-If the PRD contains phrases like “see prototype / 见原型 / 按现有逻辑”, it must
-also provide traceable `view_id`, `region_id`, `data-testid`, `data-action`,
-field behavior, and expected domain result.
 
 ## Install / 安装
 
@@ -153,24 +144,15 @@ cp -r ai-delivery-spec ~/.claude/skills/ai-delivery-spec
 |---|---|
 | Claude Code Skills CLI | `npx skills add franklinxkk/ai-delivery-spec` |
 | Claude Code manual | copy repo folder to `~/.claude/skills/ai-delivery-spec` |
-| Codex / ChatGPT / Gemini | clone the repo, attach or reference `SKILL.md`, and use `agents/openai-codex.md` as the coding-agent execution note when implementation is required |
+| Codex / ChatGPT / Gemini | clone the repo, attach or reference `SKILL.md`, and use `agents/openai-codex.md` when implementation is required |
 | OpenAI / skill UI metadata | `agents/openai.yaml` provides display metadata; it is not the full execution protocol |
 | Cursor | place generated `.cursor/rules` from `delivery/agents/` in the implementation repo |
 | Copilot Workspace / other coding agents | give it `delivery/manifest.json`, PRD, prototype, AC-YAML, and agent rules |
 
-In any AI tool:
-
-```text
-Use AI Delivery Spec as the delivery standard.
-First run 0D triage: [TIER] [AI] [WORKFLOW].
-Load only the relevant entrypoint files.
-Produce the requested artifact and end with gates, verification, gaps, and completion state.
-```
-
-## Delivery Package Convention / 交付包目录约定
+## Delivery Package Convention / 交付包约定
 
 When a PRD/prototype will be consumed by a coding agent or development team,
-use this directory structure:
+use this structure:
 
 ```text
 delivery/
@@ -203,14 +185,15 @@ references/prototype-testability.md   prototype, mobile, interaction testability
 references/advanced-extensions.md     AI, SaaS, approval, reporting, global/domain extensions
 ```
 
-Optional triggered reference:
+Optional triggered references:
 
 ```text
 references/coding-agent-compat.md     AC-YAML, AI runtime schema, AGENTS/CLAUDE/Cursor rules
+references/realtime-contract.md       SSE/WebSocket/polling/push/countdown contracts
 ```
 
-Other reference files are load-on-demand source assets. They should not be
-loaded unless an entrypoint instructs the agent to use them.
+Templates and domain modules are load-on-demand source assets. They should not
+be loaded unless an entrypoint instructs the agent to use them.
 
 ## Toolchain Integration / 工具链集成
 
@@ -240,28 +223,9 @@ same source PRD and export only the slices each tool needs:
 
 | Work Path | Use This When | Main Artifacts |
 |---|---|---|
-| Traditional / Enterprise Product Lifecycle / 传统企业级产品全生命周期 | You need an enterprise-standard lifecycle document for human PM/RD/QA review, vendor development, launch, and acceptance | Human-First Full PRD, lifecycle annex, review/sign-off, rollout/readiness, post-launch review |
-| AI Native Product Discovery / AI Native 产品探索 | You need to brainstorm an AI-native product, learn from competitors, define agent workflow, prototype, PRD, runtime/eval/fallback | opportunity shaping, AI centrality, AI feature/native contract, prototype, AI PRD |
-| AI Coding Delivery / AI 编程交付 | You want to turn competitor screenshots, prototypes, or requirements into a detailed AI-friendly specification so a coding agent can generate the system | AI-Coding Full PRD, locked prototype, `ac_structured`, delivery manifest, AGENTS/CLAUDE/Cursor rules |
-
-Lifecycle coverage:
-
-| Stage | What This Spec Adds |
-|---|---|
-| Discover | input clarification, opportunity shaping, competitor/alternative learning, value assessment, priority decision |
-| Specify | Human-First PRD, EARS statements, FRR, IA Skeleton, source evidence, role paths |
-| Plan | implementation assumptions, vertical slice backlog, risk/blocker tracking |
-| Build/Verify | bug triage, acceptance traceability, prototype/test evidence |
-| Launch | readiness, rollout, training, support, rollback |
-| Learn/Retire | post-launch review, metric decision, retirement checklist |
-
-Template relationship:
-
-```text
-AI-Coding Full PRD
-└─ includes Human-First Full PRD
-   └─ adds AC-YAML, machine-readable contracts, delivery package, and agent handoff prompts
-```
+| Traditional / Enterprise Product Lifecycle | human PM/RD/QA review, vendor development, launch, acceptance | Human-First Full PRD, lifecycle annex, review/sign-off, rollout/readiness, post-launch review |
+| AI Native Product Discovery | AI-native product brainstorming, competitor research, agent workflow, runtime/eval/fallback | opportunity shaping, AI centrality, AI feature/native contract, prototype, AI PRD |
+| AI Coding Delivery | competitor screenshots, prototypes, or requirements must become a detailed AI-friendly implementation spec | AI-Coding Full PRD, locked prototype, `ac_structured`, manifest, AGENTS/CLAUDE/Cursor rules |
 
 ## Domain Modules / 领域模块
 
@@ -275,6 +239,20 @@ AI-Coding Full PRD
 Adding a new industry: copy `references/domain-module-template.md`, keep the
 section contract, and replace domain-specific vocabulary, workflows, state
 machines, privacy rules, and test scenarios.
+
+## Reference File Policy / reference 文件策略
+
+The repository intentionally keeps references compact:
+
+- runtime entrypoints;
+- current PRD templates;
+- domain modules;
+- coding-agent and realtime add-ons;
+- validators and examples.
+
+Historical split protocols have been consolidated into `advanced-extensions.md`
+or `delivery-core.md`. Do not re-add one-off reference files unless they are
+needed by at least three real projects, two domains, and one validator change.
 
 ## Examples / 示例
 

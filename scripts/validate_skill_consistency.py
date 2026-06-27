@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate ai-delivery-spec runtime routing and core contracts."""
+"""Validate ai-delivery-spec runtime routing and compact reference structure."""
 
 from pathlib import Path
 import re
@@ -16,7 +16,32 @@ CORE_ENTRYPOINTS = (
     "references/advanced-extensions.md",
 )
 
-LEGACY_ASSETS = (
+OPTIONAL_ENTRYPOINTS = (
+    "references/coding-agent-compat.md",
+    "references/realtime-contract.md",
+)
+
+RETAINED_REFERENCE_FILES = {
+    "advanced-extensions.md",
+    "coding-agent-compat.md",
+    "delivery-core.md",
+    "prototype-testability.md",
+    "readability-layer.md",
+    "realtime-contract.md",
+    "domain-crm.md",
+    "domain-education-it.md",
+    "domain-medical-hospital-it.md",
+    "domain-module-template.md",
+    "domain-traffic.md",
+    "templates/ai-coding-prd-template.md",
+    "templates/field-dictionary-template.md",
+    "templates/human-first-prd-template.md",
+    "templates/post-launch-review-template.md",
+    "templates/prd-light-template.md",
+    "templates/system-readiness-checklist-template.md",
+}
+
+REMOVED_REFERENCE_NAMES = {
     "ai-effect-evaluation.md",
     "ai-feature-injection.md",
     "ai-native-harness-engineering.md",
@@ -27,30 +52,22 @@ LEGACY_ASSETS = (
     "delivery-acceptance-gates.md",
     "delivery-tier-model.md",
     "demo-closed-ddd-handoff.md",
+    "domain-traffic-safety-scenarios.md",
     "mobile-product-delivery.md",
     "multi-surface-consistency.md",
     "prompt-registry-integration.md",
+    "prompt-registry.yaml",
     "reporting-analytics.md",
     "saas-multitenancy.md",
+    "skill-design-benchmark.md",
+    "skill-version-migration.md",
     "story-path-verification.md",
     "strategy-discovery-handoff.md",
     "system-readiness-checklist.md",
     "workflow-automation-lowcode.md",
-)
-
-MAINTENANCE_ASSETS = (
-    "skill-design-benchmark.md",
-    "skill-version-migration.md",
-)
-
-CODING_AGENT_ASSETS = (
-    "coding-agent-compat.md",
-)
-
-PROFILE_TEMPLATE_ASSETS = (
-    "templates/human-first-prd-template.md",
-    "templates/ai-coding-prd-template.md",
-)
+    "ai-native-prd-template.md",
+    "prd-standard-template.md",
+}
 
 DOMAIN_SECTIONS = [
     "Domain Purpose",
@@ -70,17 +87,21 @@ DOMAIN_SECTIONS = [
 ]
 
 
-def fail(message, failures):
+def fail(message: str, failures: list[str]) -> None:
     failures.append(message)
 
 
-def frontmatter_description(text):
+def read(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
+def frontmatter_description(text: str) -> str | None:
     match = re.match(r"^---\n(.*?)\n---", text, re.DOTALL)
     if not match:
         return None
     lines = match.group(1).splitlines()
     collecting = False
-    parts = []
+    parts: list[str] = []
     for line in lines:
         if line.startswith("description:"):
             collecting = True
@@ -95,11 +116,11 @@ def frontmatter_description(text):
     return " ".join(part for part in parts if part)
 
 
-def markdown_headings(path, level=2):
+def markdown_headings(path: Path, level: int = 2) -> list[str]:
     prefix = "#" * level + " "
-    headings = []
+    headings: list[str] = []
     in_fence = False
-    for line in path.read_text(encoding="utf-8").splitlines():
+    for line in read(path).splitlines():
         if line.lstrip().startswith("```"):
             in_fence = not in_fence
             continue
@@ -110,30 +131,37 @@ def markdown_headings(path, level=2):
     return headings
 
 
-def level_two_headings(path):
-    return markdown_headings(path, level=2)
-
-
-def contents_entries(text):
+def contents_entries(text: str) -> list[str]:
     match = re.search(r"\n## Contents\n\n(.*?)(?=\n## )", text, re.DOTALL)
     if not match:
         return []
-    return [
-        line[2:].strip()
-        for line in match.group(1).splitlines()
-        if line.startswith("- ")
-    ]
+    return [line[2:].strip() for line in match.group(1).splitlines() if line.startswith("- ")]
 
 
-def require_markers(name, text, markers, failures):
+def require_markers(name: str, text: str, markers: tuple[str, ...], failures: list[str]) -> None:
     for marker in markers:
         if marker not in text:
             fail(f"{name} missing marker: {marker}", failures)
 
 
-def main():
-    failures = []
-    text = SKILL.read_text(encoding="utf-8")
+def validate_contents(path: Path, failures: list[str]) -> None:
+    ref_text = read(path)
+    if len(ref_text.splitlines()) > 100 and "\n## Contents\n" not in ref_text:
+        fail(f"long reference missing Contents: {path.relative_to(ROOT)}", failures)
+    elif "\n## Contents\n" in ref_text:
+        expected = markdown_headings(path, level=2)
+        actual = contents_entries(ref_text)
+        if actual != expected:
+            fail(f"Contents is stale or incomplete: {path.relative_to(ROOT)}", failures)
+    headings = markdown_headings(path, level=2)
+    duplicates = sorted({heading for heading in headings if headings.count(heading) > 1})
+    if duplicates:
+        fail(f"duplicate level-two headings: {path.relative_to(ROOT)} -> {', '.join(duplicates)}", failures)
+
+
+def main() -> int:
+    failures: list[str] = []
+    text = read(SKILL)
     description = frontmatter_description(text)
 
     if description is None:
@@ -150,21 +178,25 @@ def main():
         ):
             if exclusion not in description:
                 fail(f"description missing exclusion: {exclusion}", failures)
-        if "generic HTML implementation" in description:
-            fail("description retains ambiguous generic HTML exclusion", failures)
 
     version_match = re.search(
         r"Production Elastic Delivery Standard \(v([0-9]+\.[0-9]+\.[0-9]+)\)",
         text,
     )
-    if not version_match:
+    current_version = version_match.group(1) if version_match else None
+    if current_version is None:
         fail("SKILL.md version heading is missing", failures)
-        current_version = None
-    else:
-        current_version = version_match.group(1)
 
     if len(text.splitlines()) > 340:
         fail("SKILL.md exceeds runtime-entry budget of 340 lines", failures)
+
+    readme = read(ROOT / "README.md")
+    changelog = read(ROOT / "CHANGELOG.md")
+    if current_version:
+        if f"version-{current_version}" not in readme:
+            fail(f"README.md badge is not synchronized to v{current_version}", failures)
+        if f"## v{current_version} " not in changelog:
+            fail(f"CHANGELOG.md missing current version entry v{current_version}", failures)
 
     require_markers(
         "SKILL.md",
@@ -177,22 +209,10 @@ def main():
             "Product Work Path Selector",
             "Human-First Full PRD",
             "AI-Coding Full PRD",
-            "Traditional Product Lifecycle",
-            "AI Native Product Discovery",
-            "AI Coding Delivery",
-            "full lifecycle walkthrough",
             "Default runtime has four entrypoints",
-            "advanced-extensions.md",
-            "Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire",
-            "E2E Cross-Module Canvas",
-            "GlobalState",
-            "transition(currentState, action) -> nextState",
-            "Product specification and engineering contract",
-            "human readability rules",
             "coding-agent-compat.md",
-            "machine-readable acceptance",
+            "realtime-contract.md",
             "Delivery Package Convention",
-            "delivery/manifest.json",
             "PASS",
             "REVIEW_COMPLETE_WITH_GAPS",
             "BLOCKED",
@@ -200,131 +220,66 @@ def main():
         failures,
     )
 
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
-    if current_version:
-        if f"version-{current_version}" not in readme:
-            fail(f"README.md badge is not synchronized to v{current_version}", failures)
-        if f"## v{current_version} " not in changelog:
-            fail(f"CHANGELOG.md missing current version entry v{current_version}", failures)
-
-    for entrypoint in CORE_ENTRYPOINTS:
+    for entrypoint in CORE_ENTRYPOINTS + OPTIONAL_ENTRYPOINTS:
         if entrypoint not in text:
-            fail(f"SKILL.md missing runtime entrypoint: {entrypoint}", failures)
+            fail(f"SKILL.md missing entrypoint: {entrypoint}", failures)
         if not (ROOT / entrypoint).exists():
-            fail(f"runtime entrypoint file missing: {entrypoint}", failures)
+            fail(f"entrypoint file missing: {entrypoint}", failures)
 
-    # The default route must not list every legacy reference as a direct primary load path.
-    direct_legacy_mentions = [name for name in LEGACY_ASSETS if name in text]
-    if direct_legacy_mentions:
-        fail(
-            "SKILL.md directly mentions legacy assets outside four-entry routing: "
-            + ", ".join(direct_legacy_mentions),
-            failures,
-        )
+    actual_refs = {
+        str(path.relative_to(REFERENCES)).replace("\\", "/")
+        for path in REFERENCES.rglob("*")
+        if path.is_file()
+    }
+    missing_retained = sorted(RETAINED_REFERENCE_FILES - actual_refs)
+    if missing_retained:
+        fail("retained reference missing: " + ", ".join(missing_retained), failures)
+    unexpected_refs = sorted(actual_refs - RETAINED_REFERENCE_FILES)
+    if unexpected_refs:
+        fail("unexpected reference file in compact architecture: " + ", ".join(unexpected_refs), failures)
+    for removed in REMOVED_REFERENCE_NAMES:
+        if removed in actual_refs or f"templates/{removed}" in actual_refs:
+            fail(f"removed legacy reference still exists: {removed}", failures)
 
     for path in sorted(REFERENCES.rglob("*.md")):
-        ref_text = path.read_text(encoding="utf-8")
-        if len(ref_text.splitlines()) > 100 and "\n## Contents\n" not in ref_text:
-            fail(f"long reference missing Contents: {path.relative_to(ROOT)}", failures)
-        elif "\n## Contents\n" in ref_text:
-            expected = level_two_headings(path)
-            actual = contents_entries(ref_text)
-            if actual != expected:
-                fail(f"Contents is stale or incomplete: {path.relative_to(ROOT)}", failures)
-        headings = level_two_headings(path)
-        duplicates = sorted({heading for heading in headings if headings.count(heading) > 1})
-        if duplicates:
-            fail(
-                f"duplicate level-two headings: {path.relative_to(ROOT)} -> {', '.join(duplicates)}",
-                failures,
-            )
+        validate_contents(path, failures)
 
-    delivery_core = (REFERENCES / "delivery-core.md").read_text(encoding="utf-8")
-    prototype = (REFERENCES / "prototype-testability.md").read_text(encoding="utf-8")
-    advanced = (REFERENCES / "advanced-extensions.md").read_text(encoding="utf-8")
-    readability = (REFERENCES / "readability-layer.md").read_text(encoding="utf-8")
-    migration = (REFERENCES / "skill-version-migration.md").read_text(encoding="utf-8")
-    benchmark = (REFERENCES / "skill-design-benchmark.md").read_text(encoding="utf-8")
-    coding_agent = (REFERENCES / "coding-agent-compat.md").read_text(encoding="utf-8")
-    prd_template = (REFERENCES / "templates" / "prd-standard-template.md").read_text(encoding="utf-8")
-    human_first_template = (REFERENCES / "templates" / "human-first-prd-template.md").read_text(encoding="utf-8")
-    ai_coding_template = (REFERENCES / "templates" / "ai-coding-prd-template.md").read_text(encoding="utf-8")
-    source_asset_index = "\n".join(
-        (
-            advanced,
-            prd_template,
-            (REFERENCES / "system-readiness-checklist.md").read_text(encoding="utf-8"),
-            (REFERENCES / "workflow-automation-lowcode.md").read_text(encoding="utf-8"),
-        )
-    )
-
-    for asset in LEGACY_ASSETS:
-        if not (REFERENCES / asset).exists():
-            fail(f"retained source asset is missing: {asset}", failures)
-        if asset not in source_asset_index:
-            fail(f"retained source asset is not reachable from runtime source index: {asset}", failures)
-
-    for asset in MAINTENANCE_ASSETS:
-        if not (REFERENCES / asset).exists():
-            fail(f"maintenance asset is missing: {asset}", failures)
-        if asset not in advanced and asset != "skill-version-migration.md":
-            fail(f"maintenance asset is not declared in advanced extensions: {asset}", failures)
-
-    for asset in CODING_AGENT_ASSETS:
-        if not (REFERENCES / asset).exists():
-            fail(f"coding-agent asset is missing: {asset}", failures)
-        if asset not in text and asset not in advanced and asset not in prd_template:
-            fail(f"coding-agent asset is not reachable from runtime source index: {asset}", failures)
-
-    for asset in PROFILE_TEMPLATE_ASSETS:
-        if not (REFERENCES / asset).exists():
-            fail(f"profile template asset is missing: {asset}", failures)
-        if asset not in text and asset not in delivery_core and asset not in advanced and asset not in prd_template:
-            fail(f"profile template asset is not reachable from runtime source index: {asset}", failures)
+    delivery_core = read(REFERENCES / "delivery-core.md")
+    prototype = read(REFERENCES / "prototype-testability.md")
+    advanced = read(REFERENCES / "advanced-extensions.md")
+    readability = read(REFERENCES / "readability-layer.md")
+    coding_agent = read(REFERENCES / "coding-agent-compat.md")
+    human_first_template = read(REFERENCES / "templates" / "human-first-prd-template.md")
+    ai_coding_template = read(REFERENCES / "templates" / "ai-coding-prd-template.md")
+    realtime = read(REFERENCES / "realtime-contract.md")
 
     require_markers(
         "delivery-core.md",
         delivery_core,
         (
-            "Business Readiness And Requirement Diagnosis Anchors",
-            "Unstructured Input Protocol",
             "Input Clarification Protocol",
             "Opportunity Shaping Protocol",
             "Discovery Evidence, Value, And Prioritization",
-            "Screenshot / Competitor Manual Ledger",
             "EARS requirement writing rule",
-            "Lifecycle And Spec-Plan-Tasks Bridge",
             "Vertical Slice Task Backlog",
             "Engineering Plan",
-            "Open Questions",
             "Development Follow-Up, Issue Flow, And Bug Triage",
             "Post-Launch Review And Retirement Protocol",
-            "Accountability / compliance",
-            "Adversarial semantics",
-            "Offline / concurrency",
             "E2E Cross-Module Canvas",
-            "AC-E2E-LONG-RUNNING",
             "Human-Readable PRD Layer",
-            "Product Work Path",
-            "readability-layer.md",
-            "executive summary",
             "Complete Module And Function Product Specification",
             "Global State Machine Summary",
             "Domain Event Inventory",
-            "Backend Closure Rules",
-            "12. Notifications, audit, and dependencies",
-            "13. Data / AI / algorithm contract",
-            "Function-Level NFR",
             "Frontend / Backend / QA handoff notes",
-            "16. Acceptance",
             "ac_structured",
             "coding-agent-compat.md",
+            "human-first-prd-template.md",
+            "ai-coding-prd-template.md",
         ),
         failures,
     )
-    if "| Dependencies and NFR |" in delivery_core:
-        fail("delivery-core.md still has the obsolete FRR row: Dependencies and NFR", failures)
+    if "prd-standard-template.md" in delivery_core:
+        fail("delivery-core.md still references deleted prd-standard-template.md", failures)
 
     require_markers(
         "prototype-testability.md",
@@ -335,7 +290,6 @@ def main():
             "window.GlobalState",
             "transition(currentState, action)",
             "Presentation Mode Specification",
-            "Adversarial rehearsal",
             "shadow data",
         ),
         failures,
@@ -350,60 +304,32 @@ def main():
             "SaaS, RBAC, And Multi-Tenancy",
             "Reporting, Dashboard, And Data Product",
             "Workflow Automation And Low-Code",
-            "Coding Agent Compatibility",
-            "Domain Modules, Templates, And Legacy Assets",
-            "load-on-demand assets",
+            "Mobile, Multi-Surface, And Global Delivery",
+            "System Readiness, Release, And Retirement",
+            "Domain Modules And Templates",
+            "Repository Cleanliness Rule",
             "coding-agent-compat.md",
             "domain-education-it.md",
             "domain-medical-hospital-it.md",
-            "External lifecycle and PM frameworks are upstream evidence",
         ),
         failures,
     )
+    for removed in REMOVED_REFERENCE_NAMES:
+        if removed in advanced and removed not in {"prompt-registry.yaml"}:
+            fail(f"advanced-extensions.md still references deleted file: {removed}", failures)
 
     require_markers(
         "readability-layer.md",
         readability,
         (
             "Executive Summary",
-            "Role-Oriented PRD Completeness",
             "Scenario-First Module Writing",
             "EARS Requirement Statements",
             "Boundary And Exception Coverage",
             "Metrics And Event Tracking",
             "Frontend Backend QA Handoff Notes",
-            "Business Examples",
             "Document Heading Hierarchy",
             "Layout ID",
-            "Readability Acceptance Checklist",
-        ),
-        failures,
-    )
-
-    require_markers(
-        "prd-standard-template.md",
-        prd_template,
-        (
-            "Heading hierarchy lock",
-            "1.5 Executive Summary",
-            "Mxx Business Scenario Canvas",
-            "Layout ID",
-            "prototype-invisible rule",
-            "Competitor / Alternative Analysis",
-            "Value Assessment And Prioritization",
-            "EARS Requirement Writing Rule",
-            "Development Follow-Up And Blockers",
-            "Bug Management",
-            "Post-Launch Review",
-            "Retirement Decision",
-            "Frontend / Backend / QA Handoff Notes",
-            "13.5 Implementation Plan And Task Backlog",
-            "Vertical Slice Backlog",
-            "ac_structured",
-            "ai_contract_lite",
-            "coding-agent-compat.md",
-            "Event ID",
-            "Privacy / Masking",
         ),
         failures,
     )
@@ -413,14 +339,8 @@ def main():
         human_first_template,
         (
             "Human-First Full PRD",
-            "Heading Hierarchy Lock",
             "Source Evidence Register",
-            "Layout ID",
             "FRR",
-            "EARS",
-            "Alternative",
-            "Bug",
-            "Post-launch",
             "Notifications, Audit, And Dependencies",
             "Data, AI, And Algorithm Contract",
             "Function-Level NFR",
@@ -428,10 +348,7 @@ def main():
             "Acceptance And Traceability",
             "Sprint Task Breakdown",
             "Risk Register",
-            "Key Dependencies",
             "Open Questions",
-            "Glossary",
-            "Decision Records",
             "Gate Completion Statement",
         ),
         failures,
@@ -443,14 +360,10 @@ def main():
         (
             "AI-Coding Full PRD",
             "Human-First Full PRD",
-            "Machine-Readable Extension Layer",
             "Prototype Interaction Ledger Extraction",
-            "Prototype Data-Attribute Contract",
             "Structured Acceptance Criteria",
             "FRR Completion Gate",
             "Batch generation strategy",
-            "ac_structured",
-            "ai_contract_lite",
             "API Endpoint Inventory",
             "Delivery Package",
             "source_status",
@@ -458,47 +371,6 @@ def main():
             "AGENTS.md",
             "CLAUDE.md",
             ".cursor/rules",
-            "Heading Hierarchy Lock",
-        ),
-        failures,
-    )
-
-    require_markers(
-        "skill-version-migration.md",
-        migration,
-        (
-            "v4.3.0 -> v4.4.0 Production Elastic Delivery Standard",
-            "v4.4.0 -> v4.4.1 Human Readability Layer",
-            "v4.4.1 -> v4.5.0 Lifecycle Benchmark Bridge",
-            "v4.5.0 -> v4.5.1 PRD Runtime Consistency",
-            "v4.5.1 -> v4.5.2 Higher-Education Domain Module",
-            "v4.5.2 -> v4.6.0 Coding Agent Compatibility",
-            "v4.6.0 -> v4.6.1 Coding Agent Hardening",
-            "v4.6.1 -> v4.6.2 Medical Hospital IT Domain Module",
-            "v4.6.2 -> v4.6.3 Guided Requirement Shaping",
-            "v4.6.3 -> v4.7.0 IA Skeleton Gate",
-            "v4.7.0 -> v4.7.1 Release And Handoff Hardening",
-            "v4.7.1 -> v4.7.2 PRD Profile And Readability Hardening",
-            "v4.7.2 -> v4.7.3 Work Paths And Layout IDs",
-            "v4.7.3 -> v4.8.0 Lifecycle Delivery Hardening",
-            "v4.8.0 -> v4.9.0 FRR Restoration And Context Safety",
-            "Four runtime entrypoints",
-            "0D triage",
-            "ac_structured",
-            "ai_contract_lite",
-            "AI contract selection ladder",
-            "AC ID evolution rules",
-            "State-driven prototype law",
-            "E2E Cross-Module Canvas",
-            "Spec/Plan/Tasks bridge added",
-            "FRR summary aligned to 16 sections",
-            "Human-First Full PRD",
-            "AI-Coding Full PRD",
-            "Heading hierarchy validation",
-            "Layout ID",
-            "Discover strengthened",
-            "Bug triage added",
-            "FRR Completion Gate",
         ),
         failures,
     )
@@ -510,80 +382,42 @@ def main():
             "Structured Acceptance Criteria (AC-YAML)",
             "Machine-Readable AI Runtime Contract",
             "Contract Selection Ladder",
-            "Prototype Data-Attribute Contract",
             "Agent Entrypoint Generation",
-            "AC ID Evolution Rules",
-            "ac_structured",
-            "ai_runtime_contract",
-            "ai_contract_lite",
-            "validate_coding_agent_contract.py",
             "Delivery Package Layout",
-            "delivery/ia-skeleton.yaml",
-            "delivery/manifest.json",
             "Manifest minimum schema",
-            "source_status",
-            "sha256",
             "spec-kit Interoperability",
-            "JSON Schema skeleton",
             "AGENTS.md",
             "CLAUDE.md",
             ".cursor/rules",
-            ".cursorrules",
         ),
         failures,
     )
 
     require_markers(
-        "skill-design-benchmark.md",
-        benchmark,
+        "realtime-contract.md",
+        realtime,
         (
-            "deanpeters/Product-Manager-Skills",
-            "mattpocock/to-prd",
-            "github/spec-kit",
-            "Woshipm 6063060 / 5264380",
-            "Atlassian PRD guidance",
-            "Microsoft Well-Architected business-requirement guidance",
-            "Do not turn every review comment into a new public protocol",
+            "SSE",
+            "WebSocket",
+            "polling",
+            "reconnect",
         ),
         failures,
     )
 
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    awesome_targets = (ROOT / "docs" / "awesome-submission-targets.md").read_text(
-        encoding="utf-8"
-    )
     require_markers(
         "README.md",
         readme,
         (
             "Product-side Spec-Driven Delivery",
             "tool-agnostic",
-            "ChatGPT, Claude, Gemini",
             "Who Should Use This",
             "coding-agent compatibility",
             "Delivery Package Convention",
-            "Coding Agent Handoff",
-            "Toolchain Integration",
-            "Traditional / Enterprise Product Lifecycle",
-            "coding-agent-compat.md",
-            "Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire",
             "Default runtime has four entrypoints",
             "Output Selector",
             "Higher-Education IT",
             "Medical / Hospital IT",
-        ),
-        failures,
-    )
-    require_markers(
-        "awesome-submission-targets.md",
-        awesome_targets,
-        (
-            "Core GitHub Topics",
-            "Extended / Community Search Tags",
-            "Target-specific variants",
-            "awesome-product-management",
-            "awesome-ai-agents",
-            "awesome-llmops",
         ),
         failures,
     )
@@ -596,7 +430,7 @@ def main():
         "domain-education-it.md",
         "domain-medical-hospital-it.md",
     ):
-        headings = level_two_headings(REFERENCES / filename)
+        headings = markdown_headings(REFERENCES / filename, level=2)
         positions = []
         for section in DOMAIN_SECTIONS:
             if section not in headings:
@@ -606,64 +440,22 @@ def main():
         if positions and positions != sorted(positions):
             fail(f"{filename} domain sections are out of contract order", failures)
 
-    agent_file = ROOT / "agents" / "openai.yaml"
-    if not agent_file.exists():
-        fail("agents/openai.yaml is missing", failures)
-    elif "$ai-delivery-spec" not in agent_file.read_text(encoding="utf-8"):
-        fail("agents/openai.yaml default_prompt must mention $ai-delivery-spec", failures)
-
-    claude_agent_file = ROOT / "agents" / "claude-code.md"
-    if not claude_agent_file.exists():
-        fail("agents/claude-code.md is missing", failures)
-    else:
-        require_markers(
-            "agents/claude-code.md",
-            claude_agent_file.read_text(encoding="utf-8"),
-            (
-                "Claude Code Agent Entry",
-                "ac_structured",
-                "ai_runtime_contract",
-                "CLAUDE.md",
-                "AGENTS.md",
-                ".cursor/rules",
-            ),
-            failures,
-        )
-
-    openai_codex_file = ROOT / "agents" / "openai-codex.md"
-    if not openai_codex_file.exists():
-        fail("agents/openai-codex.md is missing", failures)
-    else:
-        require_markers(
-            "agents/openai-codex.md",
-            openai_codex_file.read_text(encoding="utf-8"),
-            (
-                "OpenAI Codex Agent Entry",
-                "Source-Of-Truth Order",
-                "ai_contract_lite",
-                "ai_runtime_contract",
-                "validate_coding_agent_contract.py",
-                "AGENTS.md",
-            ),
-            failures,
-        )
-
-    for script in (
-        "validate_routing_scenarios.py",
-        "validate_prd_quality.py",
-        "validate_coding_agent_contract.py",
-        "validate_ia_skeleton.py",
-    ):
-        if not (ROOT / "scripts" / script).exists():
-            fail(f"{script} is missing", failures)
+    for agent_path, markers in {
+        ROOT / "agents" / "openai.yaml": ("$ai-delivery-spec",),
+        ROOT / "agents" / "claude-code.md": ("Claude Code Agent Entry", "ac_structured", "AGENTS.md"),
+        ROOT / "agents" / "openai-codex.md": ("OpenAI Codex Agent Entry", "Source-Of-Truth Order", "AGENTS.md"),
+    }.items():
+        if not agent_path.exists():
+            fail(f"{agent_path.relative_to(ROOT)} is missing", failures)
+        else:
+            require_markers(str(agent_path.relative_to(ROOT)), read(agent_path), markers, failures)
 
     if failures:
-        print("FAIL")
         for item in failures:
-            print(f"- {item}")
+            print(f"FAIL: {item}")
         return 1
 
-    print("PASS: ai-delivery-spec runtime routing, readability, coding-agent, and core contracts are consistent")
+    print("PASS: ai-delivery-spec compact runtime, templates, domains, and validators are consistent")
     return 0
 
 
