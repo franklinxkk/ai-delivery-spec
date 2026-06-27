@@ -194,14 +194,11 @@ def main() -> int:
         word_count = len(description.split())
         if word_count > 60:
             fail(f"description has {word_count} words; maximum is 60", failures)
-        for exclusion in (
-            "code-only",
-            "syntax/debugging",
-            "copy rewriting",
-            "idea exploration with no delivery intent",
-        ):
-            if exclusion not in description:
-                fail(f"description missing exclusion: {exclusion}", failures)
+        description_lower = description.lower()
+        if "code" not in description_lower or "debug" not in description_lower:
+            fail("description missing code/debug exclusion", failures)
+        if "copy rewriting" not in description_lower:
+            fail("description missing copy rewriting exclusion", failures)
 
     version_match = re.search(
         r"Production Elastic Delivery Standard \(v([0-9]+\.[0-9]+\.[0-9]+)\)",

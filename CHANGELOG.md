@@ -4,10 +4,10 @@ All notable changes to AI Delivery Spec are summarized here.
 
 ## v4.9.6 - 2026-06-27
 
-- Shortened `SKILL.md` YAML frontmatter `description` for agentskill.sh
-  directory compatibility while keeping trigger exclusions (no code-only
-  debugging, copy rewriting, or idea exploration with no delivery intent).
-- Updated README badge to v4.9.6.
+- Further simplified `SKILL.md` frontmatter `description` for agentskill.sh:
+  single-line, short, no folded YAML, no colon-space sequence, and no slash-heavy
+  parser edge cases.
+- Updated README badge and release metadata to v4.9.6.
 
 ## v4.9.5 - 2026-06-27
 

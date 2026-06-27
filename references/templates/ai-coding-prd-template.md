@@ -1,4 +1,4 @@
-# AI-Coding Full PRD Template (v4.9.5 Profile)
+# AI-Coding Full PRD Template (v4.9.6 Profile)
 
 Use this profile only when the user explicitly wants a coding agent, full AI
 implementation, machine-readable contracts, test stubs, or an implementation
