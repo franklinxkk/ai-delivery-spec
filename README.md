@@ -1,9 +1,11 @@
-# AI Delivery Spec
+# AI Delivery Spec（产品侧 SDD 规范框架）
 
+**中文关键词**：产品经理 | PRD | 需求文档 | 原型 | FRR | AC-YAML | AI Coding | Spec-Driven | 产研协同 | 交付规范 | ToB | ToG | SaaS
+
+> 面向产品经理、产研团队和 AI 编程团队的产品侧 SDD 规范：把想法、竞品、原型、PRD、验收、上线和 AI Coding 交接统一成可读、可测、可实现的一套交付标准。
+>
 > Product-side Spec-Driven Delivery for PMs and product teams who need PRDs,
 > prototypes, acceptance criteria, and coding-agent handoff to stay consistent.
->
-> 面向产品经理、产研团队和 AI 编程团队的产品侧 SDD 规范：把想法、竞品、原型、PRD、验收、上线和 AI Coding 交接统一成可读、可测、可实现的一套交付标准。
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Version](https://img.shields.io/badge/version-4.9.7-green.svg)]()
@@ -20,7 +22,7 @@ OpenClaw, and any AI tool that can read Markdown.
 
 中文关键词：产品经理、PRD、需求文档、产品需求文档、需求规格说明书、原型、竞品分析、AI Coding、AI Native、Spec-Driven Development、SDD、产研协同、测试验收、ToB、ToG、SaaS、CRM、交通安全、高校信息化、医疗信息化。
 
-## The Pain / 解决什么问题
+## 解决什么问题 / The Pain
 
 AI coding is fast. Enterprise product delivery is still slow because the
 handoff breaks:
@@ -33,7 +35,7 @@ handoff breaks:
 | AI features ship without runtime safety | write scope, human gate, fallback, eval, rollback, observability, prompt/version governance |
 | PM, frontend, backend, algorithm, and QA read different truths | one source PRD with human-readable spec plus machine-readable contracts |
 
-## What You Can Produce / 你能产出什么
+## 你能产出什么 / What You Can Produce
 
 - **Light PRD**: turn a rough idea, meeting note, boss message, or customer pain
   into a structured requirement draft.
@@ -49,7 +51,7 @@ handoff breaks:
 - **Domain-Aware Specs**: traffic safety, CRM, higher-education IT, and
   medical/hospital IT domain modules.
 
-## Install / 安装
+## 安装 / Install
 
 ### Install With skills.sh / Skills CLI
 
@@ -69,7 +71,7 @@ git clone https://github.com/franklinxkk/ai-delivery-spec.git
 cp -r ai-delivery-spec ~/.claude/skills/ai-delivery-spec
 ```
 
-## 10-Minute Quick Start / 10 分钟开始
+## 10 分钟快速上手 / Quick Start
 
 ### 1. From Rough Idea To PRD / 从想法到需求
 
@@ -117,7 +119,7 @@ business flows, gaps, and source evidence from this prototype/screenshot.
 Then help me shape a differentiated PRD and prototype plan.
 ```
 
-## Choose Your Work Path / 选择工作路径
+## 选择工作路径 / Work Paths
 
 | Work Path | Use When | Main Output |
 |---|---|---|
@@ -125,7 +127,7 @@ Then help me shape a differentiated PRD and prototype plan.
 | AI Native Product Discovery | AI-native product brainstorming, agent workflow, model/tool/runtime design, AI governance | opportunity shaping, AI centrality, AI feature/native contract, prototype, runtime/eval/fallback |
 | AI Coding Delivery | competitor/prototype/requirements must become a coding-agent-ready implementation spec | AI-Coding Full PRD, `ac_structured`, API/event/data contract, manifest, AGENTS/CLAUDE/Cursor rules |
 
-## PRD Profile Selector / PRD 类型选择
+## PRD 类型选择 / Profile Selector
 
 | Intent | Profile | Output |
 |---|---|---|
@@ -138,7 +140,7 @@ will use the document, choose **Human-First Full PRD**. Upgrade to
 **AI-Coding Full PRD** only when implementation by Cursor, Claude Code, Copilot,
 Codex, Devin, or another coding agent is explicit.
 
-## Who Should Use This / 适合谁
+## 适合谁 / Who Should Use This
 
 | Persona | Start Here | Typical Outcome |
 |---|---|---|
@@ -151,7 +153,7 @@ Codex, Devin, or another coding agent is explicit.
 Do not use this framework for pure code syntax questions, unrelated debugging,
 copy rewriting, or casual brainstorming with no delivery intent.
 
-## What Makes It Different / 核心差异
+## 核心差异 / What Makes It Different
 
 | Capability | AI Delivery Spec | Common PM Skills | spec-kit |
 |---|:---:|:---:|:---:|
@@ -172,7 +174,7 @@ engineering task decomposition. They are complementary: AI Delivery Spec
 stabilizes product-side truth; spec-kit can consume the stabilized truth for
 implementation planning.
 
-## Delivery Package Convention / 交付包约定
+## 交付包约定 / Delivery Convention
 
 When a PRD/prototype will be consumed by a coding agent or development team,
 use this structure:
@@ -197,7 +199,7 @@ Coding agents should locate artifacts in this order:
 5. `delivery/acceptance/`
 6. `delivery/agents/`
 
-## Runtime Architecture / 运行架构
+## 运行架构 / Runtime Architecture
 
 Default runtime has four entrypoints:
 
@@ -218,7 +220,7 @@ references/realtime-contract.md       SSE/WebSocket/polling/push/countdown contr
 Templates and domain modules are load-on-demand source assets. They should not
 be loaded unless an entrypoint instructs the agent to use them.
 
-## Toolchain Integration / 工具链集成
+## 工具链集成 / Toolchain Integration
 
 AI Delivery Spec does not require a specific tracker or coding agent. Use the
 same source PRD and export only the slices each tool needs:
@@ -231,7 +233,7 @@ same source PRD and export only the slices each tool needs:
 | Playwright / Browser Use | `data-testid`, `data-action`, demo paths, AC-YAML | automated verification | `delivery/evidence/` |
 | Notion / Confluence / Feishu | Human-First Full PRD and lifecycle annex | stakeholder-readable source of truth | team knowledge base |
 
-## Output Selector / 输出形态选择
+## 输出形态选择 / Output Selector
 
 | Situation | Use | Expected Output |
 |---|---|---|
@@ -242,7 +244,7 @@ same source PRD and export only the slices each tool needs:
 | AI-core/high-risk automation | `Tier=L3` | runtime, eval, fallback, ops contracts |
 | coding-agent implementation | AI-Coding Full PRD + coding-agent compatibility | Human-First PRD + AC-YAML, agent rules, validation checks |
 
-## Domain Modules / 领域模块
+## 领域模块 / Domain Modules
 
 | Domain | File |
 |---|---|
@@ -255,7 +257,7 @@ Adding a new industry: copy `references/domain-module-template.md`, keep the
 section contract, and replace domain-specific vocabulary, workflows, state
 machines, privacy rules, and test scenarios.
 
-## Examples / 示例
+## 示例 / Examples
 
 - [CRM Response Center](examples/crm-response-center/README.md)
 - [Traffic Safety SaaS](examples/traffic-safety-saas/README.md)
@@ -264,7 +266,7 @@ machines, privacy rules, and test scenarios.
 
 See [examples/README.md](examples/README.md) for the full example index.
 
-## Reference File Policy / reference 文件策略
+## Reference 文件策略 / File Policy
 
 The repository intentionally keeps references compact:
 
@@ -278,7 +280,7 @@ Historical split protocols have been consolidated into `advanced-extensions.md`
 or `delivery-core.md`. Do not re-add one-off reference files unless they are
 needed by at least three real projects, two domains, and one validator change.
 
-## Validation / 校验
+## 校验 / Validation
 
 ```powershell
 python scripts/validate_skill_consistency.py
@@ -288,6 +290,6 @@ python scripts/validate_ia_skeleton.py --ia-skeleton delivery/ia-skeleton.yaml -
 python scripts/validate_coding_agent_contract.py --prd delivery/prd/main.md --prototype delivery/prototype/app.html
 ```
 
-## License / 许可证
+## 许可证 / License
 
 Apache-2.0. See [LICENSE](LICENSE).
