@@ -11,6 +11,7 @@ source evidence, DDD/API/data contracts, or acceptance coverage.
 - Role-Oriented PRD Completeness
 - Executive Summary
 - Scenario-First Module Writing
+- EARS Requirement Statements
 - Boundary And Exception Coverage
 - Metrics And Event Tracking
 - Frontend Backend QA Handoff Notes
@@ -96,6 +97,26 @@ Rules:
   one scenario or state why it is system/internal.
 - If a module has no scenario, it is likely a technical appendix, not a product
   module.
+
+## EARS Requirement Statements
+
+Use EARS to make behavior testable without turning the PRD into pseudo-code.
+Apply it to P0/P1 behavior, exceptions, state guards, and permission branches.
+
+| Pattern | Sentence Shape | Use When |
+|---|---|---|
+| Event-driven | When {event}, the system shall {response}. | trigger starts behavior |
+| State-driven | While {state}, the system shall {response}. | object/user/session state changes behavior |
+| Unwanted behavior | If {unwanted condition}, the system shall {mitigation}. | invalid input, abuse, overreach, exception |
+| Optional feature | Where {feature/config/permission}, the system shall {response}. | feature flag, tenant config, permission branch |
+| Ubiquitous | The system shall {invariant}. | always-on business invariant |
+
+Rules:
+
+- Write the human scenario first, then use EARS for precise behavior.
+- Do not force every sentence into EARS. Use it where ambiguity would affect
+  frontend, backend, QA, or coding-agent implementation.
+- EARS statements must trace to FRR, state matrix, acceptance, or source evidence.
 
 ## Boundary And Exception Coverage
 

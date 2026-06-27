@@ -273,6 +273,7 @@ the user explicitly provides another manifest:
 ```text
 delivery/
   prd/                        # PRD Markdown files
+    contracts/                 # optional API/data/event contracts referenced by PRD
   prototype/                  # HTML prototype(s)
   ia-skeleton.yaml            # Stage 3.5 structural truth
   acceptance/                 # AC-YAML files
@@ -289,6 +290,49 @@ Coding-agent lookup order:
 4. Read prototypes from `delivery/prototype/`.
 5. Read AC-YAML from `delivery/acceptance/`.
 6. Read generated coding-agent instructions from `delivery/agents/`.
+
+Manifest minimum schema:
+
+```json
+{
+  "version": "1.0.0",
+  "artifacts": [
+    {
+      "path": "delivery/prd/main.md",
+      "role": "prd",
+      "version": "1.0.0",
+      "source_status": "EMBEDDED",
+      "sha256": "{hash}"
+    }
+  ]
+}
+```
+
+Every artifact entry must include `path`, `role`, `version`, `source_status`,
+and `sha256`. Allowed `source_status` values are `EMBEDDED`,
+`AUTHORITATIVE_ANNEX`, `DEFERRED`, `CONFLICT`, and `NOT_APPLICABLE`.
+Use `delivery/prd/contracts/` for contract files when the project needs a
+separate field dictionary, API contract, or event contract.
+
+### spec-kit Interoperability
+
+When the same repository also uses spec-kit or another engineering-side SDD
+tool, keep AI Delivery Spec as the product-side source of truth and map files
+without overwriting either tool's native files:
+
+| ai-delivery-spec | spec-kit-style artifact | Mapping Rule |
+|---|---|---|
+| `delivery/prd/main.md` | `spec.md` | FRR -> user stories, functional requirements, success criteria |
+| `delivery/plan.md` | `plan.md` | engineering plan, dependencies, risks, implementation order |
+| `delivery/tasks.md` | `tasks.md` | WBS / vertical slices sorted by dependency |
+| `delivery/acceptance/ac-structured.yaml` | success criteria / tests | AC-YAML -> success criteria and test cases |
+| `delivery/agents/AGENTS.md` | `AGENTS.md` | direct coding-agent instruction file |
+| `delivery/ia-skeleton.yaml` | no direct equivalent | keep as product IA / view / action truth |
+| `delivery/prototype/` | no direct equivalent | keep as interactive evidence |
+
+Do not let engineering-side task files become the source of product truth. If
+the code implementation diverges from the PRD, produce a gap report before
+accepting the build.
 
 If the package does not follow this layout, first produce a source map and ask
 for or infer missing paths before implementation. Do not start coding from

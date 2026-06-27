@@ -8,7 +8,7 @@ description: >-
   syntax/debugging, copy rewriting, or idea exploration with no delivery intent.
 ---
 
-# AI Delivery Spec — Production Elastic Delivery Standard (v4.7.3)
+# AI Delivery Spec — Production Elastic Delivery Standard (v4.9.0)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering,
 algorithm, QA, operations, customers, and sponsors can read, build, verify, and
@@ -119,7 +119,7 @@ Select the work path before loading detailed references:
 
 | Work Path | Trigger | Required Route |
 |---|---|---|
-| Traditional Product Lifecycle | user wants a full lifecycle PRD similar to enterprise PM standards, Tencent-style product lifecycle, vendor/human development, review/sign-off, launch, or acceptance | Human-First Full PRD + lifecycle annex + readiness/acceptance where needed |
+| Traditional Product Lifecycle | user wants a full lifecycle PRD similar to enterprise PM standards, vendor/human development, review/sign-off, launch, or acceptance | Human-First Full PRD + Stage 4-6 lifecycle annex + readiness/acceptance where needed |
 | AI Native Product Discovery | user wants AI-native product brainstorming, competitor research, agent workflow, AI runtime, prototype, or AI product planning | delivery-core opportunity shaping + advanced AI/native/runtime/eval sections + prototype when requested |
 | AI Coding Delivery | user wants to learn from competitor/prototype and have AI generate the system | AI-Coding Full PRD + locked prototype/source evidence + coding-agent compatibility + delivery package |
 
@@ -210,7 +210,7 @@ Choose one primary route, then add triggered extensions.
 | Request | Primary Entrypoint |
 |---|---|
 | strategy/discovery/business case/roadmap | `delivery-core.md`; add advanced strategy/readiness section if needed |
-| PRD/requirement/story/path/state/DDD/API/data contract | `delivery-core.md`; choose PRD Profile first; run Stage 3.5 IA Skeleton Gate before Stage 5 **when: >=2 modules OR >=2 primary roles OR any cross-module flow** |
+| PRD/requirement/story/path/state/DDD/API/data contract/full lifecycle walkthrough | `delivery-core.md`; choose PRD Profile first; run Stage 3.5 IA Skeleton Gate before Stage 5 **when: >=2 modules OR >=2 primary roles OR any cross-module flow**; for "from idea to launch/review" simulate Stage 4-6 unless real readiness evidence is supplied |
 | prototype/demo/HTML/mobile interaction | `prototype-testability.md`; require IA Skeleton as input; add `delivery-core.md` for story/state evidence |
 | test/UAT/acceptance/readiness/post-launch/retirement | `delivery-core.md`; add advanced readiness section if real environment |
 | AI, SaaS, approval, reporting, low-code, global, domain switch | load `advanced-extensions.md` only after 0D trigger |

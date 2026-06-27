@@ -2,6 +2,38 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.9.0 - 2026-06-27
+
+- Added lifecycle-strengthening rules for traditional PM delivery: discovery
+  evidence, competitor/alternative analysis, value assessment, prioritization,
+  EARS requirement writing, development follow-up, issue flow, bug triage, and
+  post-launch review.
+- Restored Human-First Full PRD template FRR scaffolding to the authoritative
+  16-section structure, including notifications/audit/dependencies, data/AI/
+  algorithm contract, function-level NFR, frontend/backend/QA handoff notes,
+  and acceptance/traceability.
+- Hardened AI-Coding Full PRD: Part 1 must inline the complete Human-First
+  specification and pass the FRR Completion Gate before AC-YAML, API stubs,
+  runtime contracts, or agent handoff sections are written.
+- Added large-prototype context safety: prototypes over 100KB should first be
+  converted into an interaction ledger via `extract_interaction_ledger.py`.
+- Added batch generation guidance for large PRDs, plus WBS, risk register, key
+  dependencies, open questions, global state summary, domain event inventory,
+  and API endpoint inventory templates.
+- Aligned coding-agent delivery package and manifest rules across templates,
+  core routing, and `coding-agent-compat.md`.
+- Strengthened manifest validation in `validate_prd_quality.py` when a package
+  manifest is supplied.
+- Reduced PRD bloat in FRR section 5.2: when a locked prototype exists, sub-page
+  field lists must not repeat all positional fields. They should list only
+  prototype-invisible rules such as permission differences, state-conditional
+  editability, enum values not visible in the prototype, and cross-field
+  linkage.
+- Hardened `validate_prd_quality.py` lazy-reference detection so legal prototype
+  anchors such as `[page-xxx]`, `[modal-xxx]`, `[region-xxx]`, and `[btn-xxx]`
+  do not fail only because the paragraph omits the literal word
+  `data-testid`.
+
 ## v4.7.3 - 2026-06-27
 
 - Added three explicit product work paths: Traditional Product Lifecycle,

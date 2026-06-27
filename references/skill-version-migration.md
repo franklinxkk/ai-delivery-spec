@@ -30,6 +30,8 @@ Use this file when upgrading projects or the skill itself across major versions.
 - v4.7.0 -> v4.7.1 Release And Handoff Hardening
 - v4.7.1 -> v4.7.2 PRD Profile And Readability Hardening
 - v4.7.2 -> v4.7.3 Work Paths And Layout IDs
+- v4.7.3 -> v4.8.0 Lifecycle Delivery Hardening
+- v4.8.0 -> v4.9.0 FRR Restoration And Context Safety
 - Gate Mapping
 - Project Upgrade Path
 - Migration Checklist
@@ -501,6 +503,55 @@ Compatibility:
   multiple-H1 documents and H2/H3/H4 jumps before handoff.
 - Add Layout IDs when revising a PRD for detailed implementation, AI coding, or
   vendor handoff. Do not renumber existing `view_id`, `region_id`, or AC IDs.
+
+## v4.7.3 -> v4.8.0 Lifecycle Delivery Hardening
+
+v4.8.0 strengthens the full product lifecycle path while keeping AI-coding
+contracts additive. It improves Discover, Plan, Build/Verify, and Learn/Retire
+without adding a heavy always-on project-management process.
+
+| Change | Migration Action |
+|---|---|
+| Discover strengthened | Add competitor/alternative learning, value assessment, prioritization, and EARS statements when scope, roadmap, investment, or delivery order is still being decided. |
+| Plan -> Build follow-up added | Track progress, risks, blockers, decisions, reminders, and vertical slice status from FRR/AC IDs instead of free-form status notes. |
+| Bug triage added | Classify defects as S0/S1/S2/S3, tie them to AC/view evidence, and record regression evidence. |
+| Post-launch review upgraded | Review outcome, feedback, operations, metric decision, owner, and retirement readiness after launch. |
+| FRR §5.2 prototype-locked rule added | When a locked prototype exists, do not fill full positional sub-page field tables. Write only fields whose behavior is invisible in the prototype: permission differences, state-conditional editability, enum/rule values not shown, and cross-field linkage. |
+| Lazy-reference anchor recognition expanded | Prototype references such as `[page-xxx]`, `[modal-xxx]`, `[region-xxx]`, `[drawer-xxx]`, `[btn-xxx]`, `[action-xxx]`, and `[field-xxx]` count as traceable anchors. |
+
+Compatibility:
+
+- Existing full field tables remain valid, but future PRDs should prefer the
+  reduced §5.2 pattern when the prototype is locked.
+- A paragraph that says only "see prototype" still fails unless it includes a
+  concrete page/modal/region/action/field/FRR/source anchor.
+- Existing v4.7.3 PRDs remain valid. Add lifecycle sections only when the work
+  enters formal product lifecycle, development planning, release, or review.
+
+## v4.8.0 -> v4.9.0 FRR Restoration And Context Safety
+
+v4.9.0 fixes the main dogfooding failure found when comparing generated
+AI-Coding PRDs with developer-approved CRM implementation specs: machine-readable
+sections could start before the human-readable FRR layer was complete.
+
+| Change | Migration Action |
+|---|---|
+| Human-First FRR scaffold restored to 16 sections | Recheck v4.8 PRDs that have only 11 compact sections; add §12 notifications/audit/dependencies, §13 data/AI/algorithm, §14 function-level NFR, §15 frontend/backend/QA handoff, and §16 acceptance/traceability. |
+| AI-Coding Part 1 made inline and mandatory | Do not reference the Human-First template as a shortcut. Inline complete FRRs before writing AC-YAML, API stubs, runtime contracts, or agent instructions. |
+| FRR Completion Gate added | Verify `release functions = complete FRRs` and every FRR has §1-§16 before Part 2 starts. |
+| Large prototype ledger rule added | For HTML prototypes over 100KB, extract `prototype-interaction-ledger.json` first and use it as the main context, while keeping the full prototype as authoritative annex. |
+| Batch generation strategy added | For >=5 modules or >=20 FRRs, generate Stage 3 in batches of up to 4 modules or 12 FRRs and verify IDs after each batch. |
+| Cross-module summaries added | Add global state machine summary, domain event inventory, and E2E canvas for workflow-heavy systems. |
+| Planning artifacts strengthened | Add WBS, risk register, key dependencies, open questions, and engineering plan when the work enters implementation. |
+| Coding-agent package manifest hardened | `delivery/manifest.json` now requires artifact path, role, version, source status, and hash when used for validation. |
+
+Compatibility:
+
+- Existing v4.8 PRDs remain useful as drafts, but do not claim AI-Coding Full
+  PRD PASS until Part 1 contains complete FRRs.
+- Old AC-YAML remains valid only when each `frr_ref` points to an existing FRR.
+- Do not delete old reference files during this migration. They remain
+  load-on-demand assets until a separate slimming release validates removal.
 
 ## Gate Mapping
 

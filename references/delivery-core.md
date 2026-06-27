@@ -202,6 +202,13 @@ When the input includes an HTML prototype, before drafting any PRD content,
 extract a complete interaction ledger. This ledger is the single source of
 truth for cross-validating PRD coverage.
 
+If the HTML prototype is larger than 100KB, run
+`scripts/extract_interaction_ledger.py` first and use the generated lightweight
+JSON as the main context. Do not load a very large prototype into the main
+context when the ledger provides the needed pages/actions/modals/states/fields.
+The full prototype remains an authoritative annex referenced by path and
+stable `data-*` IDs.
+
 #### Extraction Procedure
 
 1. **Page inventory**: Parse all distinct views/pages. Record as
@@ -278,6 +285,35 @@ When analyzing vN against vN-1, use the ledger diff:
 - Modals removed without de-scope note → `REGRESSION_BLOCK`
 - State values removed without de-scope note → `REGRESSION_BLOCK`
 - New items added → verify they appear in the PRD
+
+### Screenshot / Competitor Manual Ledger
+
+Use this when the input is only screenshots, competitor images, screen
+recordings, or rough sketches rather than an executable prototype. This is a
+manual evidence ledger; do not pretend screenshot observations are verified
+runtime behavior.
+
+| Item | Required Content |
+|---|---|
+| screen_id | stable ID such as `SHOT-M01-V01` |
+| source | file/page/timecode/link |
+| observed_layout | visible regions, components, hierarchy |
+| observed_fields | labels, values, filters, table columns, forms |
+| inferred_actions | buttons/links/gestures and expected result |
+| inferred_states | status badges, disabled/empty/error/loading hints |
+| confidence | high / medium / low |
+| cannot_copy | brand assets, protected copy, proprietary workflow, legal/ethical boundary |
+| differentiation_hypothesis | what to learn, what to improve, what to avoid |
+| follow_up_needed | missing evidence or validation question |
+
+Rules:
+
+- Use screenshots as `supporting` evidence unless the user owns the product or
+  confirms the behavior.
+- Never copy protected branding, exact copy, proprietary data, or unique visual
+  assets into the target product.
+- Convert screenshot observations into IA Skeleton and FRR assumptions with
+  `INFERRED` status until validated by the owner or a working prototype.
 
 ### Regression Detection
 
@@ -420,13 +456,94 @@ Rules:
 - Avoid stale implementation detail. File paths are useful when known from an
   existing codebase, but product tasks must remain understandable without them.
 
+### Engineering Plan
+
+Generate this only after the product specification is complete and before
+tasking a coding agent or development team. It is the bridge from product truth
+to implementation approach; it does not replace the PRD.
+
+| Section | Required Content |
+|---|---|
+| Technical approach | architecture style, framework constraints, integration pattern, key design decisions |
+| Data model | core entities and relationships summarized from FRR §5 and shared contracts |
+| API design | endpoint inventory, auth, idempotency, state guards, error model from FRR §13 |
+| State machine summary | global state summary derived from FRR §9 |
+| Dependency analysis | third-party systems, data imports, upstream/downstream ownership, timing |
+| Risk and mitigation | technical and delivery risks linked to owner and decision deadline |
+| Implementation order | critical path, parallel work, migration/setup tasks, acceptance checkpoints |
+
+### Open Questions
+
+| Q ID | Question | Impact Scope | Suggested Approach | Decision Owner | Due Date |
+|---|---|---|---|---|---|
+| Q-001 | | Mxx-Fxx / AC-... | | | |
+
+### Development Follow-Up, Issue Flow, And Bug Triage
+
+Use this only when the artifact enters Plan, Tasks, Build/Verify, or formal
+project tracking. It is a bridge to Jira, TAPD, Linear, GitHub Issues, Teambition,
+or a local tracker; it is not a replacement for those tools.
+
+Progress / risk / blocker table:
+
+| Item ID | Type | Source FRR / AC | Owner | Status | Risk / Blocker | Next Action | Due / Reminder | Decision Owner |
+|---|---|---|---|---|---|---|---|---|
+| TRK-001 | task / risk / blocker / change / decision | Mxx-Fxx / AC-... | PM/RD/QA/Design/Ops | open/in_progress/blocked/done | | | | |
+
+Issue state flow:
+
+```text
+new -> clarified -> planned -> in_progress -> ready_for_test -> testing -> accepted -> closed
+                         \-> blocked -> decision_needed -> planned
+                         \-> rejected / deferred
+```
+
+Bug triage rule:
+
+| Severity | Meaning | Required Action |
+|---|---|---|
+| S0 | data loss, security breach, payment/compliance/safety blocker, production down | stop release or hotfix; owner and rollback required |
+| S1 | core workflow blocked or major role cannot complete lifecycle | fix before launch unless human overrule records risk |
+| S2 | important branch, non-core workflow, or visible quality issue | schedule before or immediately after launch |
+| S3 | copy, style, minor usability issue | backlog with owner |
+
+Bug record minimum:
+
+| Bug ID | Severity | Source AC / View | Reproduction | Expected | Actual | Owner | Fix Version | Regression Evidence |
+|---|---|---|---|---|---|---|---|---|
+| BUG-001 | S1 | AC-... / Mxx-Vxx | | | | | | |
+
+Reminder rule: add reminders only for business deadlines, compliance, unresolved
+decisions, blocked tasks, overdue defects, launch readiness, or post-launch
+metric review. Do not turn reminders into product requirements unless the
+software itself must send them.
+
+### Post-Launch Review And Retirement Protocol
+
+Use this for Launch, Learn, or Retire scope. Keep it small for ordinary L1/L2
+features and expand only for strategic, regulated, AI-core, or paid products.
+
+| Review Item | Required Content |
+|---|---|
+| Outcome review | original business goal, actual metric, adoption, failure/incident signal |
+| User feedback | target role, evidence, frequency, severity, representative quote |
+| Operations review | support tickets, on-call events, rollback/override, data quality |
+| Decision | continue, iterate, rollback, retire, or observe |
+| Owner / date | accountable owner and next review date |
+
+Retirement rule: a feature can be marked for retirement only when usage,
+business value, operational cost, customer dependency, migration path, and data
+retention are reviewed. Record the final owner decision; do not silently delete
+legacy behavior.
+
 ## Stage 1-5 Product Workflow
 
 Run only the stages needed by the selected artifact scope and execution mode. Skip stages whose inputs are already supplied and validated.
 
 Stage 1 Brainstorm:
 - When opportunity framing is in scope, frame the opportunity and write a testable outcome/JTBD.
-- Use ICE or another prioritization method only when comparing options.
+- Use competitor/alternative evidence, value assessment, and prioritization
+  only when the decision affects scope, roadmap, investment, or delivery order.
 
 ### 1.1 Opportunity Shaping Protocol
 
@@ -470,9 +587,51 @@ Rules:
 - If the user asks for implementation before the opportunity is shaped, produce
   `REVIEW_COMPLETE_WITH_GAPS` and list the assumptions that coding would lock in.
 
+### 1.2 Discovery Evidence, Value, And Prioritization
+
+Use this when Discover is in scope, when the user brings only an idea, or when
+scope/priority is not yet stable. Keep it concise unless the user asks for
+strategy or market work.
+
+Competitor / alternative table:
+
+| Alternative | User Job Covered | Strength | Weakness / Gap | What To Learn | What Not To Copy |
+|---|---|---|---|---|---|
+| competitor / manual workaround / spreadsheet / status quo | | | | | |
+
+Value assessment table:
+
+| Option | Target Role | User Value | Business Value | Feasibility | Risk | Evidence | Recommendation |
+|---|---|---:|---:|---:|---|---|---|
+| | | H/M/L | H/M/L | H/M/L | | | do / defer / test / reject |
+
+Prioritization table:
+
+| Candidate | Method | Score / Level | Why Now | Dependency | Release Decision |
+|---|---|---|---|---|---|
+| | ICE / RICE / MoSCoW / owner decision | | | | in / out / later |
+
+EARS requirement writing rule:
+
+| Pattern | Use When | Sentence Shape |
+|---|---|---|
+| Event-driven | behavior starts from a trigger | When {event}, the system shall {response}. |
+| State-driven | behavior depends on object state | While {state}, the system shall {response}. |
+| Unwanted behavior | guard, exception, abuse, invalid input | If {unwanted condition}, the system shall {mitigation}. |
+| Optional feature | behavior depends on configuration/permission | Where {feature/config/permission}, the system shall {response}. |
+| Ubiquitous | always-on invariant | The system shall {invariant}. |
+
+Rules:
+
+- Each P0/P1 function should have at least one EARS-style statement before
+  detailed UI/API tables.
+- Use EARS to clarify behavior, not to make prose verbose. The concrete user
+  scenario still comes first.
+
 Stage 1.5 Research:
 - Run only when evidence, policy, market, domain, or competitor uncertainty affects the decision.
-- Output domain norms, gaps, policy notes, interview questions.
+- Output domain norms, competitor/alternative notes, value gaps, policy notes,
+  interview questions, and priority impact.
 
 ### 1.3 Business Readiness And Requirement Diagnosis Anchors
 
@@ -843,6 +1002,24 @@ Fail the PRD readability layer when a module starts with only API/schema/DDD
 tables, uses phrases such as "supports related operations", "see prototype",
 "existing logic", "intelligent processing", or lacks business examples for
 non-obvious rules.
+
+### Global State Machine Summary
+
+After all FRRs are written, summarize every entity with lifecycle state in one
+table. This is a cross-module implementation and QA aid; it does not replace
+FRR §9.
+
+| Entity | States | Key Transitions | Key Events | Source FRR |
+|---|---|---|---|---|
+| Lead | pending -> assigned -> following -> converted / invalid | assign; first response; convert; close | LeadCreated / LeadAssigned / LeadConverted | Mxx-Fxx |
+
+### Domain Event Inventory
+
+Summarize all events declared in FRR §12, FRR §13, and E2E flows.
+
+| Event Name | Trigger / Producer | Consumers | Payload | Timing / Idempotency | Source FRR |
+|---|---|---|---|---|---|
+| LeadCreated | M04 lead creation | dashboard, response task, audit | leadId, source, owner | sync/outbox + idempotency key | M04-F01 |
 
 ### 5.4 E2E Cross-Module Canvas
 

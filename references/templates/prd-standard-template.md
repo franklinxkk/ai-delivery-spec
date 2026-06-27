@@ -215,6 +215,26 @@ Current data and system constraints:
 |---|---|---|
 | | | |
 
+### Competitor / Alternative Analysis
+
+Use this for Discover-stage work, roadmap decisions, AI-native product
+planning, or when a feature is copied from a competitor/prototype. For simple
+implementation-only changes, keep it brief or mark `N/A with reason`.
+
+| Alternative | User Job Covered | Strength | Weakness / Gap | What To Learn | What Not To Copy |
+|---|---|---|---|---|---|
+| competitor / status quo / manual workaround | | | | | |
+
+### Value Assessment And Prioritization
+
+| Option | Target Role | User Value | Business Value | Feasibility | Risk | Evidence | Recommendation |
+|---|---|---:|---:|---:|---|---|---|
+| | | H/M/L | H/M/L | H/M/L | | | do / defer / test / reject |
+
+| Candidate | Method | Score / Level | Why Now | Dependency | Release Decision |
+|---|---|---|---|---|---|
+| | ICE / RICE / MoSCoW / owner decision | | | | in / out / later |
+
 ### Business Problem
 
 Problem:
@@ -240,6 +260,18 @@ In scope:
 Out of scope:
 
 - 
+
+### EARS Requirement Writing Rule
+
+Use EARS statements for P0/P1 behavior before detailed UI/API tables.
+
+| Pattern | Sentence Shape | Applies To |
+|---|---|---|
+| Event-driven | When {event}, the system shall {response}. | trigger-based behavior |
+| State-driven | While {state}, the system shall {response}. | state-dependent buttons/rules |
+| Unwanted behavior | If {unwanted condition}, the system shall {mitigation}. | invalid input, overreach, exception |
+| Optional feature | Where {feature/config/permission}, the system shall {response}. | configuration or permission branch |
+| Ubiquitous | The system shall {invariant}. | always-on rule |
 - 
 - 
 - 
@@ -419,6 +451,22 @@ One table per entity, covering every field across all sub-pages (list, create, e
 
 Each sub-page (list view, create modal, edit modal, detail drawer, filter bar)
 has its own field list with positional information.
+
+**When a locked prototype exists:** do not fill the positional tables below.
+Instead, for each sub-page write one row per field that has a
+prototype-invisible rule: permission difference, state-conditional editability,
+enum value not shown in the prototype, cross-field linkage, backend-only field,
+audit field, masking rule, or calculation rule. All other visual fields are
+inferred from the locked prototype by `view_id`, `Layout ID`, `region_id`,
+`data-testid`, and `data-field`.
+
+| Sub-page / Anchor | Field | Prototype-Invisible Rule | Owner | Acceptance Trace |
+|---|---|---|---|---|
+| `[modal-lead-create]` | lead.partnerId | locked to current partner for agent-created leads; hidden from direct sales | backend | AC-Mxx-Fxx-001 |
+| `[drawer-lead-detail]` | lead.contactPhone | masked unless user has `lead:contact:read` | backend + frontend | AC-Mxx-Fxx-002 |
+
+**When no locked prototype exists:** use the positional tables below to make the
+page buildable without screenshots or HTML evidence.
 
 **List View Fields:**
 
@@ -1002,6 +1050,39 @@ Task rules:
 - If a task depends on an unresolved business rule, field dictionary, permission
   decision, source system, or external integration, mark it `BLOCKED`.
 
+### Development Follow-Up And Blockers
+
+Use this table during Plan -> Build. It may be copied into Jira, TAPD, Linear,
+GitHub Issues, Teambition, or another tracker.
+
+| Item ID | Type | Source FRR / AC | Owner | Status | Risk / Blocker | Next Action | Due / Reminder | Decision Owner |
+|---|---|---|---|---|---|---|---|---|
+| TRK-001 | task / risk / blocker / change / decision | Mxx-Fxx / AC-... | PM/RD/QA/Design/Ops | open/in_progress/blocked/done | | | | |
+
+Issue state flow:
+
+```text
+new -> clarified -> planned -> in_progress -> ready_for_test -> testing -> accepted -> closed
+                         \-> blocked -> decision_needed -> planned
+                         \-> rejected / deferred
+```
+
+### Bug Management
+
+| Bug ID | Severity | Source AC / View | Reproduction | Expected | Actual | Owner | Fix Version | Regression Evidence |
+|---|---|---|---|---|---|---|---|---|
+| BUG-001 | S0/S1/S2/S3 | AC-... / Mxx-Vxx | | | | | | |
+
+Severity rule:
+
+- `S0`: data loss, security breach, payment/compliance/safety blocker, or
+  production down. Stop release or hotfix.
+- `S1`: core workflow blocked or major role cannot complete lifecycle. Fix
+  before launch unless human overrule records risk.
+- `S2`: important branch or visible quality issue. Schedule before or
+  immediately after launch.
+- `S3`: copy, style, or minor usability issue. Backlog with owner.
+
 ## 14. Data, Metrics, And Tracking
 
 ### Business Data
@@ -1102,6 +1183,25 @@ release. Keep it concise for small L1/L2 features.
 | Metric / Signal | Baseline | Target | Actual | Decision |
 |---|---:|---:|---:|---|
 | | | | | continue / adjust / rollback / retire |
+
+| Review Item | Required Content |
+|---|---|
+| Outcome review | original business goal, actual metric, adoption, failure/incident signal |
+| User feedback | target role, evidence, frequency, severity, representative quote |
+| Operations review | support tickets, on-call events, rollback/override, data quality |
+| Decision | continue, iterate, rollback, retire, or observe |
+| Owner / next review | accountable owner and next review date |
+
+### 18.5 Retirement Decision
+
+| Check | Required Answer |
+|---|---|
+| Usage | who still uses it and how often |
+| Business value | what value remains and whether it has alternatives |
+| Operational cost | maintenance, support, data, compliance, and training cost |
+| Customer dependency | affected customers, contracts, or migration commitments |
+| Migration path | replacement feature, data migration, notice, rollback |
+| Final decision | continue / migrate / freeze / retire; owner and date |
 
 ## 19. Appendix
 

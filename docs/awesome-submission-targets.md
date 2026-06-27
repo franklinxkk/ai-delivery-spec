@@ -56,22 +56,53 @@ _Last updated: 2026-06-27_
 | JackyST0/awesome-agent-skills | Low | 📋 TODO | |
 | killer-skills.com | Low | 📋 TODO | |
 
-## Recommended GitHub Topics
+## Core GitHub Topics
 
-GitHub topics only support lowercase short identifiers, not Chinese tags. Use
-English plus pinyin-style Chinese-community search terms:
+GitHub topics only support lowercase short identifiers. Keep repository topics
+to 20 or fewer high-signal terms:
 
 ```text
 product-management
 prd
 spec-driven-development
-sdd
-requirements
 requirements-engineering
 product-requirements
 prd-template
 prototype-design
 competitive-analysis
+ai-coding
+ai-native
+ai-agents
+coding-agent
+claude-code
+cursor
+acceptance-testing
+dev-handoff
+saas
+productops
+requirements
+```
+
+## Extended / Community Search Tags
+
+Use these in README copy, release posts, articles, and directory submissions
+when the platform allows more tags:
+
+```text
+sdd
+ai-programming
+copilot
+qa
+prototype
+tob
+tog
+crm
+traffic-safety
+education-it
+medical-hospital-it
+healthcare-it
+his
+emr
 chanpinjingli
 xuqiuwendang
 chanpinxuqiu
@@ -80,29 +111,6 @@ jingpinfenxi
 chanxie
 yanfa
 ceshi
-ai-coding
-ai-programming
-ai-native
-ai-agents
-coding-agent
-claude-code
-cursor
-copilot
-qa
-prototype
-tob
-tog
-saas
-productops
-dev-handoff
-acceptance-testing
-crm
-traffic-safety
-education-it
-medical-hospital-it
-healthcare-it
-his
-emr
 ```
 
 ## Chinese Community Tags
@@ -138,7 +146,7 @@ CRM系统
 
 - [x] README first screen explains the problem in English.
 - [x] Apache-2.0 license is present.
-- [x] Latest release tag exists (`v4.7.3` after this release is pushed).
+- [x] Latest release tag exists (`v4.9.0` after this release is pushed).
 - [x] Changelog has a dated release section, not only `Unreleased`.
 - [x] Examples exist for CRM, traffic safety, education IT, and medical/hospital IT.
 - [x] Agent install paths are documented for clone, Skills CLI, and Claude Code.
@@ -166,3 +174,45 @@ CRM系统
 | 小红书 | Image + emoji text | 📝 Ready |
 | V2EX | Technical text post | 📝 Ready |
 | 即刻 | Short-form text | 📝 Ready |
+
+## Reusable Awesome List Entry
+
+Use the shortest acceptable description for awesome lists:
+
+```markdown
+- [AI Delivery Spec](https://github.com/franklinxkk/ai-delivery-spec) - Product-side spec-driven delivery framework for PRDs, prototypes, acceptance criteria, lifecycle governance, and coding-agent handoff.
+```
+
+Chinese-community variant:
+
+```markdown
+- [AI Delivery Spec](https://github.com/franklinxkk/ai-delivery-spec) - 面向产品经理、研发、测试和 AI coding 的产品侧 SDD 交付规范，覆盖 PRD、原型、验收、生命周期治理和 coding-agent 交接。
+```
+
+Target-specific variants:
+
+```markdown
+<!-- product-management / productops lists -->
+- [AI Delivery Spec](https://github.com/franklinxkk/ai-delivery-spec) - Product-side delivery framework for PRDs, prototypes, acceptance criteria, lifecycle reviews, and engineering handoff.
+
+<!-- AI agents / coding-agent lists -->
+- [AI Delivery Spec](https://github.com/franklinxkk/ai-delivery-spec) - Spec-driven product handoff for AI coding agents, including AC-YAML, agent rules, prototype evidence, and delivery manifests.
+
+<!-- LLMOps / AI governance lists -->
+- [AI Delivery Spec](https://github.com/franklinxkk/ai-delivery-spec) - Product-facing AI runtime and evaluation contract framework with human gates, fallback, observability, and rollback evidence.
+```
+
+## Skill / Agent Directory Submission List
+
+| Directory / Community | Suggested Category | Entry Status |
+|---|---|---|
+| skills.sh | Product / Project Management | auto-indexed after GitHub release |
+| ComposioHQ/awesome-claude-skills | Product / Project Management | submitted / keep updated |
+| heilcheng/awesome-agent-skills | Productivity / Collaboration | submitted / keep updated |
+| laolaoshiren/claude-code-skills-zh | 产品 / 需求 / 研发协同 | submitted / keep updated |
+| hesreallyhim/awesome-claude-code | Skills / Project Management | submit when repo TOC stabilizes |
+| VoltAgent/awesome-agent-skills | Agent Skills | submit after star threshold |
+| awesome-product-management | PRD / Product Ops | submit after v4.9.0 release |
+| awesome-ai-agents | Agent Governance / SDD | submit after v4.9.0 release |
+| awesome-llmops | AI Runtime / Evaluation / Governance | submit only if AI runtime audience fits |
+| Product Hunt | Developer Tools / Productivity | launch after demo video and screenshots |

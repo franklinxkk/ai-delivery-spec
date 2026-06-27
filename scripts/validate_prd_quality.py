@@ -30,11 +30,12 @@ FENCE_RE = re.compile(r"^```")
 TABLE_HEADER_RE = re.compile(r"^\s*\|")
 HEADING_RE = re.compile(r"^(#{1,6})\s+\S")
 LAZY_REFERENCE_RE = re.compile(
-    r"(见原型|见附件|按现有逻辑|同上|参考原型|see prototype|same as above|existing logic|see attachment)",
+    r"(见原型|参见原型|参考原型|见附件|按现有逻辑|同上|see prototype|same as above|existing logic|see attachment)",
     re.IGNORECASE,
 )
 REFERENCE_ANCHOR_RE = re.compile(
-    r"(data-testid|data-action|FRR|AC-|SRC-|Source ID|view_id|region_id|modal-|drawer-|prototype lock|prototype path)",
+    r"(data-testid|data-action|FRR|AC-|SRC-|Source ID|view_id|region_id|"
+    r"prototype lock|prototype path|\[(?:page|modal|drawer|region|btn|action|field)-)",
     re.IGNORECASE,
 )
 
@@ -94,7 +95,44 @@ def check_unsupported_numeric_claims(text: str, failures: list[str]) -> None:
 
 
 def check_manifest(manifest_path: Path, failures: list[str]) -> None:
-    data = json.loads(manifest_path.read_text(encoding="utf-8"))
+    data = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
+
+    artifacts = data.get("artifacts")
+    if artifacts is None:
+        add_failure(failures, "manifest missing artifacts[] package inventory")
+    elif not isinstance(artifacts, list) or not artifacts:
+        add_failure(failures, "manifest artifacts[] must be a non-empty list")
+    else:
+        allowed_status = {
+            "EMBEDDED",
+            "AUTHORITATIVE_ANNEX",
+            "DEFERRED",
+            "CONFLICT",
+            "NOT_APPLICABLE",
+        }
+        manifest_base = manifest_path.parent
+        repo_base = manifest_base.parent if manifest_base.name == "delivery" else manifest_base
+        for index, item in enumerate(artifacts, start=1):
+            if not isinstance(item, dict):
+                add_failure(failures, f"manifest artifact #{index} must be an object")
+                continue
+            for key in ("path", "role", "version", "source_status", "sha256"):
+                if not item.get(key):
+                    add_failure(failures, f"manifest artifact #{index} missing {key}")
+            status = str(item.get("source_status", "")).upper()
+            if status and status not in allowed_status:
+                add_failure(
+                    failures,
+                    f"manifest artifact #{index} has invalid source_status: {status}",
+                )
+            rel_path = str(item.get("path", ""))
+            if rel_path and not (
+                (repo_base / rel_path).exists() or (manifest_base / rel_path).exists()
+            ):
+                add_failure(
+                    failures,
+                    f"manifest artifact path does not exist: {rel_path}",
+                )
 
     defined = set(data.get("defined_ids", []))
     referenced = set(data.get("referenced_ids", []))

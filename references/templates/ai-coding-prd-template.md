@@ -1,4 +1,4 @@
-# AI-Coding Full PRD Template (v4.7.3 Profile)
+# AI-Coding Full PRD Template (v4.9.0 Profile)
 
 Use this profile only when the user explicitly wants a coding agent, full AI
 implementation, machine-readable contracts, test stubs, or an implementation
@@ -7,25 +7,26 @@ not a replacement.
 
 ## Contents
 
-- Heading Hierarchy Lock / 标题层级锁
-- 0D Triage And PRD Profile / 0D 分流与 PRD Profile
-- Part 1 Human-First Foundation Layer / 第一部分 人类可读基础层
-- Part 2 Machine-Readable Extension Layer / 第二部分 机器可读扩展层
-- Part 3 Coding Agent Delivery Package / 第三部分 编程智能体交付包
-- Part 4 Validation And Review / 第四部分 验证与评审
-- Gate Completion Statement / Gate 完成声明
+- Heading Hierarchy Lock
+- 0D Triage And PRD Profile
+- Prototype Interaction Ledger Extraction
+- Part 1 Human-First Foundation Layer
+- Part 2 Machine-Readable Extension Layer
+- Part 3 Coding Agent Delivery Package
+- Part 4 Validation And Review
+- Gate Completion Statement
 
-## Heading Hierarchy Lock / 标题层级锁
+## Heading Hierarchy Lock
 
 - Use exactly one H1 (`#`) for the document title.
-- Use H2 (`##`) for global lifecycle stages or top-level modules.
-- Use H3 (`###`) for module subsections and function records.
+- Use H2 (`##`) for global lifecycle stages or top-level parts.
+- Use H3 (`###`) for module subsections, machine-readable blocks, and package sections.
 - Use H4 (`####`) for FRR numbered sections inside one function.
 - Do not jump from H2 directly to H4.
 - Do not use bold text, table rows, or numbered list items as fake headings.
 - In Chinese PRDs, translate headings but keep the hierarchy unchanged.
 
-## 0D Triage And PRD Profile / 0D 分流与 PRD Profile
+## 0D Triage And PRD Profile
 
 ```text
 [TIER: Heavy|Light] | [AI: true|false] | [WORKFLOW: true|false]
@@ -39,27 +40,68 @@ PRD Profile: AI-Coding Full PRD
 | User asks for `AGENTS.md`, `CLAUDE.md`, `.cursor/rules`, AC-YAML, or test stubs | Use AI-Coding Full PRD |
 | User only asks for human review, vendor development, or QA handoff | Use Human-First Full PRD first; list upgrade conditions |
 
-## Part 1 Human-First Foundation Layer / 第一部分 人类可读基础层
+## Prototype Interaction Ledger Extraction
 
-Before adding any machine-readable blocks, write the full business-readable
-specification using `references/templates/human-first-prd-template.md`.
+If the source prototype HTML is larger than 100KB, first run:
 
-Required foundation:
+```bash
+python scripts/extract_interaction_ledger.py --input {prototype.html} --output prototype-interaction-ledger.json
+```
+
+Use the lightweight ledger as the primary context for pages, actions, modals,
+states, roles, fields, and workflows. Do not load a very large prototype into
+the main context when the ledger can provide the required implementation
+evidence. The full prototype remains an authoritative source file and should be
+referenced through path, `view_id`, `data-testid`, and `data-action`.
+
+## Part 1 Human-First Foundation Layer
+
+Before adding any machine-readable blocks, inline the full Human-First Full PRD
+in this document. Do not write "see human-first-prd-template.md" as a substitute
+for content. Part 1 must include all modules and every complete FRR.
+
+Required foundation, all inline:
 
 - source evidence register;
-- roles, scope, user journeys, and business scenarios;
-- IA Skeleton, prototype lock, `Layout ID`, page layout, and region behavior;
-- one complete FRR per function;
-- field validation, dictionaries, interaction/state flow, business rules,
-  exceptions, permission, metrics, NFR, and acceptance;
-- frontend / backend / QA handoff notes.
+- Stage 1: background, roles, user journeys, competitor/alternative learning,
+  EARS statements, scope, priority, and out-of-scope;
+- Stage 2: IA Skeleton, prototype lock, `Layout ID`, page layout, and region
+  behavior;
+- Stage 3: one complete 16-section FRR per in-scope function;
+- Stage 4-6: review plan, WBS, risk, dependency, QA acceptance, launch, and
+  post-launch review when the requested scope includes lifecycle delivery.
 
-Do not compress this layer into schemas. Coding agents need scenario context to
-avoid implementing technically valid but business-wrong behavior.
+FRR Completion Gate before Part 2:
 
-## Part 2 Machine-Readable Extension Layer / 第二部分 机器可读扩展层
+| Check | Pass Standard |
+|---|---|
+| FRR count | every `Mxx-Fxx` in the release function inventory has one FRR |
+| FRR completeness | every FRR contains sections 1-16 |
+| Module coverage | every in-scope module has at least one FRR or a clear deferred reason |
+| State machine | every FRR section 9 has state/button/lifecycle behavior or `N/A + reason` |
+| Permission | every FRR section 10 has role/data/action permission or `N/A + reason` |
+| Acceptance | every FRR section 16 has prose acceptance before AC-YAML |
 
-### 2.1 Prototype Data-Attribute Contract / 原型数据属性契约
+If any check fails, return to Part 1 and complete the missing FRR before writing
+Part 2. Coding agents need scenario context to avoid implementing technically
+valid but business-wrong behavior.
+
+Batch generation strategy:
+
+| Trigger | Required Behavior |
+|---|---|
+| modules >= 5 or total FRR >= 20 | generate Part 1 Stage 3 in batches |
+| one batch | maximum 4 modules or 12 FRRs |
+| after each batch | write the batch to the output file and verify FRR IDs |
+| after all batches | run the FRR Completion Gate |
+
+## Part 2 Machine-Readable Extension Layer
+
+Prerequisite: Part 1 FRR Completion Gate has passed. Every `frr_ref` in
+AC-YAML, API stubs, runtime contracts, and agent tasks must point to an existing
+FRR in Part 1.
+
+### 2.1 Prototype Data-Attribute Contract
 
 | View ID | Layout ID | data-testid | data-action | data-field | Expected Handler / Result |
 |---|---|---|---|---|---|
@@ -69,8 +111,7 @@ Rules:
 
 - Every `primary_action` in IA Skeleton must map to a prototype `data-action`.
 - Every critical page/region/modal/drawer must have stable `data-testid`.
-- Every form field needed for implementation or testing must map to
-  `data-field`.
+- Every form field needed for implementation or testing must map to `data-field`.
 
 ### 2.2 Structured Acceptance Criteria (AC-YAML)
 
@@ -79,17 +120,18 @@ standalone file, `ac-structured.yaml` may keep the top-level `acceptance` key.
 
 ```yaml
 ac_structured:
-  source_file: delivery/ac-structured.yaml
-acceptance:
   - id: AC-M01-F01-001
-    given: "用户具备新增权限且必填字段合法"
-    when: "提交新增表单"
-    then: "系统创建记录、返回编号、列表展示新记录并写入审计日志"
+    frr_ref: M01-F01
+    given: "The user has create permission and all required fields are valid"
+    when: "The user submits the create form"
+    then: "The system creates the record, returns an ID, updates the list, and writes an audit log"
     test_type: integration
     priority: P0
     source_ids: ["SRC-001"]
     view_ids: ["M01-V01"]
     actions: ["create-record"]
+    data_testid: "btn-create-record"
+    data_action: "create-record"
 ```
 
 AC ID evolution rules:
@@ -97,8 +139,8 @@ AC ID evolution rules:
 - Do not renumber existing AC IDs after assignment.
 - Split functions by adding suffixes or new function IDs; keep deprecated IDs
   with `status: deprecated`.
-- When behavior changes materially, add `version: v2` or a new AC ID and map the
-  old one to migration notes.
+- When behavior changes materially, add `revision`, `supersedes`, or a new AC ID
+  and map the old one to migration notes.
 
 ### 2.3 Machine-Readable Runtime / AI Contract
 
@@ -123,6 +165,15 @@ For full AI runtime, reference `references/coding-agent-compat.md` and include
 
 ### 2.4 API / Event / Data Contract Stub
 
+#### 2.4.1 API Endpoint Inventory
+
+| Method | Path | Auth Required | Description | Idempotency | Source FRR |
+|---|---|---|---|---|---|
+| GET | /api/{module}/{resource} | yes | list/query | yes | Mxx-Fxx |
+| POST | /api/{module}/{resource} | yes | create | required | Mxx-Fxx |
+| PUT | /api/{module}/{resource}/{id} | yes | update | yes | Mxx-Fxx |
+| DELETE | /api/{module}/{resource}/{id} | yes | delete/logical delete | yes | Mxx-Fxx |
+
 ```yaml
 commands:
   - id: CMD-M01-F01-create
@@ -138,45 +189,64 @@ events:
     payload_schema: schemas/M01-F01.created.event.json
 ```
 
-## Part 3 Coding Agent Delivery Package / 第三部分 编程智能体交付包
+## Part 3 Coding Agent Delivery Package
 
 Use this directory convention when handing work to a coding agent:
 
 ```text
 delivery/
   manifest.json
-  prd.md
-  prototype.html
   ia-skeleton.yaml
-  ac-structured.yaml
-  field-dictionary.md
-  api-contract.yaml
-  events.yaml
-  AGENTS.md
-  CLAUDE.md
-  .cursor/rules
+  prd/
+    main.md
+    contracts/
+      field-dictionary.md
+      api-contract.yaml
+      events.yaml
+  prototype/
+    app.html
+  acceptance/
+    ac-structured.yaml
+  agents/
+    AGENTS.md
+    CLAUDE.md
+    .cursor/rules/
+  evidence/
 ```
 
-`delivery/manifest.json` must list every authoritative file and its role:
+`delivery/manifest.json` must list every authoritative file with relative path,
+role, version, source status, and hash:
 
 ```json
 {
-  "prd": "delivery/prd.md",
-  "prototype": "delivery/prototype.html",
-  "ia_skeleton": "delivery/ia-skeleton.yaml",
-  "acceptance": "delivery/ac-structured.yaml",
-  "agent_rules": ["delivery/AGENTS.md", "delivery/CLAUDE.md", "delivery/.cursor/rules"]
+  "version": "1.0.0",
+  "artifacts": [
+    {
+      "path": "delivery/prd/main.md",
+      "role": "prd",
+      "version": "1.0.0",
+      "source_status": "EMBEDDED",
+      "sha256": "{hash}"
+    },
+    {
+      "path": "delivery/prototype/app.html",
+      "role": "prototype",
+      "version": "locked",
+      "source_status": "AUTHORITATIVE_ANNEX",
+      "sha256": "{hash}"
+    }
+  ]
 }
 ```
 
-## Part 4 Validation And Review / 第四部分 验证与评审
+## Part 4 Validation And Review
 
 Run deterministic checks before declaring PASS:
 
 ```bash
-python scripts/validate_prd_quality.py delivery/prd.md --target-language zh
-python scripts/validate_coding_agent_contract.py delivery
-python scripts/validate_ia_skeleton.py delivery/ia-skeleton.yaml --prototype delivery/prototype.html --prd delivery/prd.md
+python scripts/validate_prd_quality.py delivery/prd/main.md --target-language zh
+python scripts/validate_coding_agent_contract.py --prd delivery/prd/main.md --prototype delivery/prototype/app.html
+python scripts/validate_ia_skeleton.py --ia-skeleton delivery/ia-skeleton.yaml --prototype delivery/prototype/app.html --prd delivery/prd/main.md
 ```
 
 Review checklist:
@@ -189,7 +259,7 @@ Review checklist:
 | QA | AC-YAML can become automated or manual test cases |
 | Coding Agent | package paths, schemas, and source-of-truth order are unambiguous |
 
-## Gate Completion Statement / Gate 完成声明
+## Gate Completion Statement
 
 ```text
 Scope: {artifact scope}

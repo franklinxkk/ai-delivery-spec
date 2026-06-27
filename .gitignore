@@ -1,3 +1,5 @@
 media/promo-video/frames/
 *.tmp
 *.log
+__pycache__/
+*.pyc

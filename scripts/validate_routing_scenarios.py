@@ -53,6 +53,18 @@ STANDARD_SIGNALS = (
     "cursor",
     "claude code",
     "copilot workspace",
+    "ai-coding full prd",
+    "coding agent implementation",
+    "full lifecycle",
+    "end-to-end lifecycle",
+    "complete prd",
+    "完整走一遍",
+    "想法引导",
+    "研发跟进",
+    "测试验收",
+    "上线复盘",
+    "完整prd",
+    "完整 prd",
     "董事会",
     "年度规划",
     "重大投资",
@@ -121,6 +133,12 @@ DELIVERY_ARTIFACTS = (
     "ac_structured",
     "test stubs",
     "coding agent",
+    "ai-coding full prd",
+    "完整prd",
+    "完整 prd",
+    "全生命周期",
+    "研发跟进",
+    "上线复盘",
     "发布计划",
     "灰度方案",
     "运行手册",
@@ -165,6 +183,11 @@ DELIVERY_INTENT = (
     "convert",
     "implement",
     "implementation",
+    "brainstorm",
+    "simulate",
+    "walkthrough",
+    "引导",
+    "走一遍",
 )
 
 NON_DELIVERY = (
@@ -220,6 +243,50 @@ AI_SUPPORTING = (
 
 def select_route(prompt):
     """Select one primary artifact route before composing optional plugins."""
+    if contains_any(
+        prompt,
+        (
+            "ai-coding full prd",
+            "全ai生成",
+            "ai coding",
+            "coding agent implementation",
+        ),
+    ) or (
+        contains_any(prompt, ("cursor", "claude code", "codex", "coding agent"))
+        and contains_any(
+            prompt,
+            (
+                "prd",
+                "原型",
+                "prototype",
+                "竞品",
+                "screenshot",
+                "截图",
+                "自动实现",
+                "生成系统",
+                "实现系统",
+            ),
+        )
+    ):
+        return "coding-agent-delivery"
+    if contains_any(
+        prompt,
+        (
+            "完整走一遍",
+            "全生命周期",
+            "从想法",
+            "想法引导",
+            "研发跟进",
+            "测试验收",
+            "上线复盘",
+            "完整prd",
+            "完整 prd",
+            "full lifecycle",
+            "end-to-end lifecycle",
+            "complete prd",
+        ),
+    ):
+        return "product-lifecycle"
     if contains_any(
         prompt,
         (
@@ -338,6 +405,11 @@ def classify(prompt):
         tier = "N/A"
     elif contains_any(prompt, AI_CORE):
         tier = "L3"
+    elif route in {"product-lifecycle", "coding-agent-delivery"} and mode in {
+        "Standard",
+        "Full",
+    }:
+        tier = "L2"
     elif mode in {"Standard", "Full"}:
         tier = "L2"
     elif contains_any(prompt, ("prd", "需求文档", "用户故事", "状态机")):
@@ -463,6 +535,22 @@ def classify(prompt):
         ),
     ):
         plugins.add("coding-agent")
+    if route == "coding-agent-delivery":
+        plugins.add("coding-agent")
+    if route == "product-lifecycle" and contains_any(
+        prompt,
+        (
+            "上线",
+            "发布",
+            "验收",
+            "复盘",
+            "launch",
+            "release",
+            "acceptance",
+            "post-launch",
+        ),
+    ):
+        plugins.add("readiness")
     if contains_any(prompt, ("现有", "已有", "旧版", "截图", "sql", "逆向", "v1.8", "v15")):
         plugins.add("reverse-engineering")
 
@@ -527,6 +615,24 @@ SCENARIOS = (
         "Lite",
         "L1",
         frozenset({"crm-domain"}),
+    ),
+    Scenario(
+        "Traditional full lifecycle guided CRM",
+        "我只有一个简单CRM想法，请引导我发散和完善需求，完整走一遍产品生命周期，输出完整PRD，覆盖研发跟进、测试验收和上线复盘。",
+        True,
+        "Standard",
+        "L2",
+        frozenset({"crm-domain", "readiness"}),
+        "product-lifecycle",
+    ),
+    Scenario(
+        "Competitor prototype to AI Coding PRD",
+        "参考竞品截图和现有HTML原型，生成 AI-Coding Full PRD，让 Cursor/Claude Code 按交付包自动实现系统。",
+        True,
+        "Standard",
+        "L2",
+        frozenset({"coding-agent", "reverse-engineering"}),
+        "coding-agent-delivery",
     ),
     Scenario(
         "AI data report PRD",
