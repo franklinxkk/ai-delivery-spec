@@ -146,7 +146,7 @@ CRM系统
 
 - [x] README first screen explains the problem in English.
 - [x] Apache-2.0 license is present.
-- [x] Latest release tag exists (`v4.9.2` after this release is pushed).
+- [x] Latest release tag exists (`v4.9.3` after this release is pushed).
 - [x] Changelog has a dated release section, not only `Unreleased`.
 - [x] Examples exist for CRM, traffic safety, education IT, and medical/hospital IT.
 - [x] Agent install paths are documented for clone, Skills CLI, and Claude Code.
@@ -212,7 +212,7 @@ Target-specific variants:
 | laolaoshiren/claude-code-skills-zh | 产品 / 需求 / 研发协同 | submitted / keep updated |
 | hesreallyhim/awesome-claude-code | Skills / Project Management | submit when repo TOC stabilizes |
 | VoltAgent/awesome-agent-skills | Agent Skills | submit after star threshold |
-| awesome-product-management | PRD / Product Ops | submit after v4.9.2 release |
-| awesome-ai-agents | Agent Governance / SDD | submit after v4.9.2 release |
+| awesome-product-management | PRD / Product Ops | submit after v4.9.3 release |
+| awesome-ai-agents | Agent Governance / SDD | submit after v4.9.3 release |
 | awesome-llmops | AI Runtime / Evaluation / Governance | submit only if AI runtime audience fits |
 | Product Hunt | Developer Tools / Productivity | launch after demo video and screenshots |

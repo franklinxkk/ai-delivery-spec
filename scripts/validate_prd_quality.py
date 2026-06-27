@@ -50,6 +50,19 @@ REFERENCE_ANCHOR_RE = re.compile(
     r"prototype lock|prototype path|\[(?:page|modal|drawer|region|btn|action|field)-)",
     re.IGNORECASE,
 )
+FRR_OPERATION_TABLE_RE = re.compile(
+    r"\|(?=[^\n]*(?:\u64cd\u4f5c|Action))"
+    r"(?=[^\n]*(?:\u5141\u8bb8\u89d2\u8272|Allowed Roles?|Allowed Role))"
+    r"(?=[^\n]*(?:\u5141\u8bb8\u72b6\u6001|Allowed States?|Allowed State|"
+    r"\u786e\u8ba4|\u5e42\u7b49|\u53ef\u89c1\u7ed3\u679c|\u9886\u57df\u7ed3\u679c|"
+    r"Confirmation|Idempotent|Visible Result|Domain Result))[^\n]*\|",
+    re.IGNORECASE,
+)
+LAYOUT_REGION_TABLE_RE = re.compile(
+    r"\|(?=[^\n]*Layout ID)(?=[^\n]*(?:Region|\u533a\u57df))"
+    r"(?=[^\n]*(?:\u4f4d\u7f6e|Position|\u4e3b\u8981\u7ec4\u4ef6|Component))[^\n]*\|",
+    re.IGNORECASE,
+)
 
 
 def read_text(path: Path) -> str:
@@ -171,7 +184,12 @@ def check_manifest(manifest_path: Path, failures: list[str]) -> None:
             add_failure(failures, f"core source assertion blocks PASS: {source_id}={status}")
 
 
-def check_language_ratio(text: str, failures: list[str], target_language: str) -> None:
+def check_language_ratio(
+    text: str,
+    failures: list[str],
+    target_language: str,
+    fail_ratio: float = 0.30,
+) -> None:
     """Check language only when a target output language is declared.
 
     `zh` enforces that non-code narrative is not English-heavy. This supports
@@ -219,21 +237,37 @@ def check_language_ratio(text: str, failures: list[str], target_language: str) -
         return
 
     ratio = english_heavy_weight / total_weight
-    if ratio > 0.30:
+    warn_ratio = min(0.20, max(0.01, fail_ratio * 0.67))
+    if ratio > fail_ratio:
         add_failure(
             failures,
             f"LANGUAGE_GAP: English-heavy weighted lines "
             f"{english_heavy_weight:.1f}/{total_weight:.1f} "
-            f"({ratio:.1%}) exceed 30% threshold. Rewrite non-code content "
+            f"({ratio:.1%}) exceed {fail_ratio:.0%} threshold. Rewrite non-code content "
             f"in the user's spoken language per Output Language Rules."
         )
-    elif ratio > 0.20:
+    elif ratio > warn_ratio:
         # Warning, not failure
         print(
             f"WARNING: English-heavy weighted lines "
             f"{english_heavy_weight:.1f}/{total_weight:.1f} "
-            f"({ratio:.1%}) above 20% recommendation"
+            f"({ratio:.1%}) above {warn_ratio:.0%} recommendation"
         )
+
+
+def is_structured_repetition_table(paragraph: str) -> bool:
+    """Return true for structured tables where repeated cells are intentional.
+
+    Operation matrices often use "same as above" or "同上" inside table cells to
+    avoid repeating role/status text. That is not a lazy implementation
+    reference because the table header itself supplies the missing dimension.
+    Layout region tables use the same shorthand for visible roles or data source.
+    """
+
+    for line in paragraph.splitlines()[:5]:
+        if FRR_OPERATION_TABLE_RE.search(line) or LAYOUT_REGION_TABLE_RE.search(line):
+            return True
+    return False
 
 
 def check_lazy_references(text: str, failures: list[str]) -> None:
@@ -247,6 +281,8 @@ def check_lazy_references(text: str, failures: list[str]) -> None:
     paragraphs = re.split(r"\n\s*\n", text)
     bad: list[str] = []
     for para in paragraphs:
+        if is_structured_repetition_table(para):
+            continue
         if LAZY_REFERENCE_RE.search(para) and not REFERENCE_ANCHOR_RE.search(para):
             bad.append(re.sub(r"\s+", " ", para.strip())[:180])
     if bad:
@@ -305,17 +341,55 @@ def main() -> int:
         default="none",
         help="Optional narrative language enforcement. Use zh for Chinese delivery docs.",
     )
+    parser.add_argument(
+        "--language-threshold",
+        dest="legacy_language_threshold",
+        help=(
+            "Deprecated compatibility alias. Accepts zh/en/none as an alias for "
+            "--target-language, or a numeric fail ratio such as 0.30."
+        ),
+    )
+    parser.add_argument(
+        "--language-fail-ratio",
+        type=float,
+        default=0.30,
+        help="Fail threshold for English-heavy weighted lines when --target-language=zh.",
+    )
     args = parser.parse_args()
 
     failures: list[str] = []
     text = read_text(args.artifact)
+    target_language = args.target_language
+    language_fail_ratio = args.language_fail_ratio
+
+    if args.legacy_language_threshold:
+        legacy = args.legacy_language_threshold.strip().lower()
+        aliases = {
+            "zh": "zh",
+            "cn": "zh",
+            "chinese": "zh",
+            "en": "en",
+            "english": "en",
+            "none": "none",
+            "off": "none",
+            "false": "none",
+        }
+        if legacy in aliases:
+            target_language = aliases[legacy]
+        else:
+            try:
+                language_fail_ratio = float(legacy)
+            except ValueError:
+                parser.error("--language-threshold expects zh/en/none or a numeric ratio")
+    if not 0 < language_fail_ratio <= 1:
+        parser.error("--language-fail-ratio must be between 0 and 1")
 
     if not args.allow_wildcards:
         check_wildcard_ids(text, failures)
     check_duplicate_boilerplate(text, failures)
     check_heading_hierarchy(text, failures)
     check_lazy_references(text, failures)
-    check_language_ratio(text, failures, args.target_language)
+    check_language_ratio(text, failures, target_language, language_fail_ratio)
     if args.warn_numeric:
         check_unsupported_numeric_claims(text, failures)
     if args.manifest:

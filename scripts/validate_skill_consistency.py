@@ -86,6 +86,18 @@ DOMAIN_SECTIONS = [
     "Acceptance Checklist",
 ]
 
+MOJIBAKE_MARKERS = (
+    "\ufffd",
+    "\u9205",
+    "\u8133",
+    "\u9983",
+    "\u95c8\u3220",
+    "\u6d93\u8f70",
+    "\u9358\u62bd",
+    "\u702f\u5921",
+    "\u93cd\uffe0",
+)
+
 
 def fail(message: str, failures: list[str]) -> None:
     failures.append(message)
@@ -144,6 +156,18 @@ def require_markers(name: str, text: str, markers: tuple[str, ...], failures: li
             fail(f"{name} missing marker: {marker}", failures)
 
 
+def cjk_count(text: str) -> int:
+    return sum("\u4e00" <= ch <= "\u9fff" for ch in text)
+
+
+def require_clean_chinese_support(name: str, text: str, min_cjk: int, failures: list[str]) -> None:
+    if cjk_count(text) < min_cjk:
+        fail(f"{name} has insufficient Chinese coverage for bilingual/community use", failures)
+    for marker in MOJIBAKE_MARKERS:
+        if marker in text:
+            fail(f"{name} contains likely mojibake marker: {marker!r}", failures)
+
+
 def validate_contents(path: Path, failures: list[str]) -> None:
     ref_text = read(path)
     if len(ref_text.splitlines()) > 100 and "\n## Contents\n" not in ref_text:
@@ -192,6 +216,13 @@ def main() -> int:
 
     readme = read(ROOT / "README.md")
     changelog = read(ROOT / "CHANGELOG.md")
+    require_clean_chinese_support("README.md", readme, 80, failures)
+    require_clean_chinese_support(
+        "scripts/validate_routing_scenarios.py",
+        read(ROOT / "scripts" / "validate_routing_scenarios.py"),
+        80,
+        failures,
+    )
     if current_version:
         if f"version-{current_version}" not in readme:
             fail(f"README.md badge is not synchronized to v{current_version}", failures)
@@ -411,6 +442,8 @@ def main() -> int:
         (
             "Product-side Spec-Driven Delivery",
             "tool-agnostic",
+            "skills.sh",
+            "npx skills add franklinxkk/ai-delivery-spec",
             "Who Should Use This",
             "coding-agent compatibility",
             "Delivery Package Convention",
@@ -424,12 +457,34 @@ def main() -> int:
     if "Codex skill" in readme:
         fail("README.md still positions the project as a Codex-specific skill", failures)
 
-    for filename in (
-        "domain-traffic.md",
-        "domain-crm.md",
-        "domain-education-it.md",
-        "domain-medical-hospital-it.md",
-    ):
+    domain_template = read(REFERENCES / "domain-module-template.md")
+    contributing = read(ROOT / "CONTRIBUTING.md")
+    require_markers(
+        "CONTRIBUTING.md",
+        contributing,
+        (
+            "14-section domain contract",
+            "references/domain-module-template.md",
+            "references/advanced-extensions.md",
+        ),
+        failures,
+    )
+    for section in DOMAIN_SECTIONS:
+        if section not in domain_template:
+            fail(f"domain-module-template.md missing section contract item: {section}", failures)
+        if section not in contributing:
+            fail(f"CONTRIBUTING.md missing domain section checklist item: {section}", failures)
+
+    domain_files = sorted(
+        path.name
+        for path in REFERENCES.glob("domain-*.md")
+        if path.name != "domain-module-template.md"
+    )
+    for filename in domain_files:
+        if filename not in advanced:
+            fail(f"advanced-extensions.md missing domain module: {filename}", failures)
+        if f"references/{filename}" not in readme:
+            fail(f"README.md missing domain module: references/{filename}", failures)
         headings = markdown_headings(REFERENCES / filename, level=2)
         positions = []
         for section in DOMAIN_SECTIONS:

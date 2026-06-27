@@ -6,9 +6,10 @@
 > 面向产品、研发、算法、测试和交付团队的产品侧 SDD 规范：让需求、原型、验收和 AI 编程交接保持一致。
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-4.9.2-green.svg)]()
+[![Version](https://img.shields.io/badge/version-4.9.3-green.svg)]()
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-purple.svg)](https://openclaw.ai)
+![skills.sh](https://skills.sh/b/franklinxkk/ai-delivery-spec)
 
 AI Delivery Spec is tool-agnostic. It works with ChatGPT, Claude, Gemini,
 Codex, Cursor, GitHub Copilot Workspace, OpenClaw, and any AI tool that can
@@ -129,12 +130,17 @@ convert FRR section 16 acceptance into ac_structured YAML, and identify P0/P1 te
 
 ## Install / 安装
 
+### Install With skills.sh / Skills CLI
+
+```bash
+npx skills add franklinxkk/ai-delivery-spec
+```
+
+### Manual Or Repository Install
+
 ```bash
 # Clone
 git clone https://github.com/franklinxkk/ai-delivery-spec.git
-
-# Skills CLI
-npx skills add franklinxkk/ai-delivery-spec
 
 # Manual install to Claude Code
 cp -r ai-delivery-spec ~/.claude/skills/ai-delivery-spec
@@ -268,6 +274,7 @@ See [examples/README.md](examples/README.md) for the full example index.
 ```powershell
 python scripts/validate_skill_consistency.py
 python scripts/validate_routing_scenarios.py
+python scripts/validate_release_readiness.py
 python scripts/validate_ia_skeleton.py --ia-skeleton delivery/ia-skeleton.yaml --prototype delivery/prototype/app.html --prd delivery/prd/main.md
 python scripts/validate_coding_agent_contract.py --prd delivery/prd/main.md --prototype delivery/prototype/app.html
 ```

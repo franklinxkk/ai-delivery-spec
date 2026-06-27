@@ -2,6 +2,26 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.9.3 - 2026-06-27
+
+- Added the `skills.sh` badge and a dedicated `npx skills add
+  franklinxkk/ai-delivery-spec` install path in `README.md`.
+- Added backward-compatible `--language-threshold` handling in
+  `validate_prd_quality.py`, mapping `zh/en/none` to `--target-language` and
+  preserving numeric ratio support.
+- Reduced lazy-reference false positives for FRR operation matrices that use
+  repeated role/status cells such as "same as above" or "同上".
+- Added bilingual/community health checks to `validate_skill_consistency.py`
+  so README and routing scenarios keep valid Chinese content and avoid mojibake.
+- Added automated domain-module sync checks across domain files,
+  `domain-module-template.md`, `CONTRIBUTING.md`, `README.md`, and
+  `advanced-extensions.md`.
+- Added `validate_release_readiness.py` to simulate traditional PRD,
+  AI-native, AI-coding, PRD review, competitor/prototype, lifecycle, mobile,
+  and launch/retirement paths before release.
+- Synchronized release metadata across `SKILL.md`, README badge, OpenAI
+  metadata, templates, and community submission docs.
+
 ## v4.9.2 - 2026-06-27
 
 - Tightened Human-First PRD field guidance: when a locked prototype exists,
