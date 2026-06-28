@@ -26,6 +26,7 @@ UNSUPPORTED_NUMERIC_RE = re.compile(
 # Language check: detect English-heavy lines (>= 80% ASCII alpha characters)
 # Used to enforce the Output Language Rules from readability-layer.md
 ASCII_ALPHA_RE = re.compile(r"[A-Za-z]")
+CJK_RE = re.compile(r"[\u4e00-\u9fff]")
 TECH_IDENTIFIER_RE = re.compile(
     r"(?i)\b("
     r"data-[a-z0-9_-]+|data-testid|data-action|data-field|"
@@ -37,6 +38,16 @@ TECH_IDENTIFIER_RE = re.compile(
 FENCE_RE = re.compile(r"^```")
 TABLE_HEADER_RE = re.compile(r"^\s*\|")
 HEADING_RE = re.compile(r"^(#{1,6})\s+\S")
+HEADING_DETAIL_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
+FRR_HEADING_RE = re.compile(r"^(#{3,4})\s+(M\d{2}-F\d{2})\b")
+FRR_ID_RE = re.compile(r"\bM\d{2}-F\d{2}\b")
+FRR_SECTION_RE = re.compile(r"^#{4,6}\s*(?:§\s*)?(\d{1,2})\b")
+PART1_RE = re.compile(r"^##\s+.*(?:Part 1|第一部分).*$", re.MULTILINE | re.IGNORECASE)
+PART2_RE = re.compile(r"^##\s+.*(?:Part 2|第二部分).*$", re.MULTILINE | re.IGNORECASE)
+FRR_INDEX_SUBSTITUTE_RE = re.compile(
+    r"(FRR\s*Index|FRR\s*Map|索引表|索引地图|详见|参见|see\s+(?:the\s+)?(?:prd|template|appendix|annex|file))",
+    re.IGNORECASE,
+)
 LAZY_REFERENCE_RE = re.compile(
     "("
     "\u89c1\u539f\u578b|\u53c2\u89c1\u539f\u578b|\u53c2\u8003\u539f\u578b|"
@@ -68,7 +79,7 @@ LAYOUT_REGION_TABLE_RE = re.compile(
 def read_text(path: Path) -> str:
     suffix = path.suffix.lower()
     if suffix in {".md", ".txt", ".html", ".json", ".yaml", ".yml"}:
-        return path.read_text(encoding="utf-8", errors="ignore")
+        return path.read_text(encoding="utf-8-sig", errors="ignore")
     if suffix == ".docx":
         with zipfile.ZipFile(path) as zf:
             xml = zf.read("word/document.xml")
@@ -76,7 +87,7 @@ def read_text(path: Path) -> str:
         ns = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
         texts = [node.text or "" for node in root.findall(".//w:t", ns)]
         return "\n".join(texts)
-    return path.read_text(encoding="utf-8", errors="ignore")
+    return path.read_text(encoding="utf-8-sig", errors="ignore")
 
 
 def add_failure(failures: list[str], message: str) -> None:
@@ -255,6 +266,130 @@ def check_language_ratio(
         )
 
 
+def check_heading_language(text: str, failures: list[str], target_language: str) -> None:
+    """For Chinese delivery docs, require navigational headings to be Chinese."""
+    if target_language != "zh":
+        return
+
+    bad: list[str] = []
+    in_code_block = False
+    for line in text.splitlines():
+        if FENCE_RE.match(line):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block:
+            continue
+        match = HEADING_DETAIL_RE.match(line)
+        if not match:
+            continue
+        level = len(match.group(1))
+        heading = match.group(2).strip()
+        if level in {2, 3, 4} and len(CJK_RE.findall(heading)) < 2:
+            bad.append(line.strip())
+
+    if bad:
+        add_failure(
+            failures,
+            "HEADING_LANGUAGE_GAP: H2/H3/H4 headings must be in Chinese when "
+            "--target-language=zh. Offending headings: " + " | ".join(bad[:10]),
+        )
+
+
+def iter_markdown_lines_without_code(text: str) -> list[str]:
+    lines: list[str] = []
+    in_code_block = False
+    for line in text.splitlines():
+        if FENCE_RE.match(line):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block:
+            continue
+        lines.append(line)
+    return lines
+
+
+def check_frr_section_completeness(text: str, failures: list[str]) -> None:
+    """Require every explicit FRR heading to contain sections 1-16."""
+    lines = iter_markdown_lines_without_code(text)
+    frrs: list[tuple[str, int, set[int]]] = []
+    current_id: str | None = None
+    current_level = 0
+    current_sections: set[int] = set()
+
+    for line in lines:
+        heading_match = HEADING_DETAIL_RE.match(line)
+        if not heading_match:
+            continue
+        level = len(heading_match.group(1))
+        frr_match = FRR_HEADING_RE.match(line)
+        if frr_match:
+            if current_id:
+                frrs.append((current_id, current_level, current_sections))
+            current_id = frr_match.group(2)
+            current_level = len(frr_match.group(1))
+            current_sections = set()
+            continue
+        if current_id and level <= current_level:
+            frrs.append((current_id, current_level, current_sections))
+            current_id = None
+            current_level = 0
+            current_sections = set()
+            continue
+        if current_id:
+            section_match = FRR_SECTION_RE.match(line)
+            if section_match:
+                number = int(section_match.group(1))
+                if 1 <= number <= 16:
+                    current_sections.add(number)
+
+    if current_id:
+        frrs.append((current_id, current_level, current_sections))
+
+    missing_messages = []
+    required = set(range(1, 17))
+    for frr_id, _, sections in frrs:
+        missing = sorted(required - sections)
+        if missing:
+            missing_messages.append(f"{frr_id} missing sections: {', '.join('§' + str(i) for i in missing)}")
+
+    if missing_messages:
+        add_failure(
+            failures,
+            "FRR_COMPLETENESS_GAP: every FRR must inline sections §1-§16. "
+            + " | ".join(missing_messages[:20]),
+        )
+
+
+def check_ai_coding_part1_inline(text: str, failures: list[str]) -> None:
+    """Fail AI-Coding PRDs whose Part 1 is only an index or external pointer."""
+    part1_match = PART1_RE.search(text)
+    part2_match = PART2_RE.search(text)
+    if not part1_match or not part2_match or part2_match.start() <= part1_match.end():
+        return
+
+    part1 = text[part1_match.end():part2_match.start()]
+    function_ids = set(FRR_ID_RE.findall(part1))
+    frr_heading_ids = set(
+        match.group(2)
+        for match in (FRR_HEADING_RE.match(line) for line in iter_markdown_lines_without_code(part1))
+        if match
+    )
+
+    if function_ids and len(frr_heading_ids) < len(function_ids):
+        add_failure(
+            failures,
+            "FRR_INLINE_GAP: AI-Coding Part 1 references function IDs that are "
+            "not present as inline FRR headings: "
+            + ", ".join(sorted(function_ids - frr_heading_ids)[:20]),
+        )
+    if function_ids and FRR_INDEX_SUBSTITUTE_RE.search(part1) and len(frr_heading_ids) < len(function_ids):
+        add_failure(
+            failures,
+            "FRR_INLINE_GAP: AI-Coding Part 1 appears to use an index/reference "
+            "instead of inline FRR bodies.",
+        )
+
+
 def is_structured_repetition_table(paragraph: str) -> bool:
     """Return true for structured tables where repeated cells are intentional.
 
@@ -390,6 +525,9 @@ def main() -> int:
     check_heading_hierarchy(text, failures)
     check_lazy_references(text, failures)
     check_language_ratio(text, failures, target_language, language_fail_ratio)
+    check_heading_language(text, failures, target_language)
+    check_frr_section_completeness(text, failures)
+    check_ai_coding_part1_inline(text, failures)
     if args.warn_numeric:
         check_unsupported_numeric_claims(text, failures)
     if args.manifest:

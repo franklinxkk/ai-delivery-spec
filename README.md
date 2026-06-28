@@ -8,7 +8,7 @@
 > prototypes, acceptance criteria, and coding-agent handoff to stay consistent.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-4.9.7-green.svg)]()
+[![Version](https://img.shields.io/badge/version-4.9.8-green.svg)]()
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-purple.svg)](https://openclaw.ai)
 ![skills.sh](https://skills.sh/b/franklinxkk/ai-delivery-spec)
@@ -48,8 +48,9 @@ handoff breaks:
   mode.
 - **Review Report**: PRD/prototype gap review across product, engineering,
   QA, architecture, AI, and operations perspectives.
-- **Domain-Aware Specs**: traffic safety, CRM, higher-education IT, and
-  medical/hospital IT domain modules.
+- **Domain-Aware Specs**: traffic safety, CRM, AI+Data / data mart / BI /
+  reporting / fill-in, higher-education IT, and medical/hospital IT domain
+  modules.
 
 ## 安装 / Install
 
@@ -174,7 +175,7 @@ engineering task decomposition. They are complementary: AI Delivery Spec
 stabilizes product-side truth; spec-kit can consume the stabilized truth for
 implementation planning.
 
-## 交付包约定 / Delivery Convention
+## 交付包约定 / Delivery Package Convention
 
 When a PRD/prototype will be consumed by a coding agent or development team,
 use this structure:
@@ -250,6 +251,7 @@ same source PRD and export only the slices each tool needs:
 |---|---|
 | Traffic Safety / 交通安全 | `references/domain-traffic.md` |
 | CRM / 客户经营 | `references/domain-crm.md` |
+| AI+Data / Data Mart / BI / Reporting / 数据智能、数据集市、报表与填报 | `references/domain-data-mart.md` |
 | Higher-Education IT / 高校教育信息化 | `references/domain-education-it.md` |
 | Medical / Hospital IT / 医疗医院信息化 | `references/domain-medical-hospital-it.md` |
 
@@ -286,6 +288,7 @@ needed by at least three real projects, two domains, and one validator change.
 python scripts/validate_skill_consistency.py
 python scripts/validate_routing_scenarios.py
 python scripts/validate_release_readiness.py
+python scripts/validate_ai_data_product_scenarios.py
 python scripts/validate_ia_skeleton.py --ia-skeleton delivery/ia-skeleton.yaml --prototype delivery/prototype/app.html --prd delivery/prd/main.md
 python scripts/validate_coding_agent_contract.py --prd delivery/prd/main.md --prototype delivery/prototype/app.html
 ```

@@ -9,6 +9,7 @@ human product review. It verifies that the current runtime can support:
 - AI-coding handoff with machine-readable contracts;
 - PRD review and competitor/prototype reverse-engineering routes;
 - reader roles needed by PM, UX, frontend, backend, algorithm, QA, and coding agents.
+- AI+Data product lifecycle, ontology/semantic modeling, ChatBI, and Data Agent paths.
 """
 
 from __future__ import annotations
@@ -60,6 +61,7 @@ def validate_static_contracts(failures: list[str]) -> None:
     prototype = read(REFERENCES / "prototype-testability.md")
     human_template = read(REFERENCES / "templates" / "human-first-prd-template.md")
     ai_template = read(REFERENCES / "templates" / "ai-coding-prd-template.md")
+    data_domain = read(REFERENCES / "domain-data-mart.md")
 
     require(
         "SKILL.md work/profile routing",
@@ -155,8 +157,8 @@ def validate_static_contracts(failures: list[str]) -> None:
             "Source Evidence Register",
             "Page Layout And Region Map",
             "Repeat one complete FRR for every in-scope function",
-            "#### §15 Frontend / Backend / QA Handoff Notes",
-            "#### §16 Acceptance And Traceability",
+            "Frontend / Backend / QA Handoff Notes",
+            "Acceptance And Traceability",
             "Sprint Task Breakdown",
             "Bug Management And Acceptance Defects",
             "Post-launch Review",
@@ -181,6 +183,25 @@ def validate_static_contracts(failures: list[str]) -> None:
             "CLAUDE.md",
             ".cursor/rules",
             "Review checklist",
+        ],
+        failures,
+    )
+    require(
+        "AI+Data domain",
+        data_domain,
+        [
+            "multi-source data",
+            "Source and ingestion",
+            "Processing and quality",
+            "Governance and catalog",
+            "Storage and retrieval",
+            "Semantic and ontology",
+            "Data Agent",
+            "ChatBI",
+            "Ontology And Semantic Contract",
+            "data_agent_contract",
+            "insight-to-action loop",
+            "Acceptance Checklist",
         ],
         failures,
     )
@@ -214,6 +235,7 @@ def validate_scenario_matrix(failures: list[str]) -> None:
             REFERENCES / "prototype-testability.md",
             REFERENCES / "coding-agent-compat.md",
             REFERENCES / "readability-layer.md",
+            REFERENCES / "domain-data-mart.md",
             REFERENCES / "templates" / "human-first-prd-template.md",
             REFERENCES / "templates" / "ai-coding-prd-template.md",
         ]
@@ -275,6 +297,25 @@ def validate_scenario_matrix(failures: list[str]) -> None:
             "Learn/Retire",
             "Post-Launch Review And Retirement Protocol",
             "System Readiness",
+        ],
+        "UC9 AI+Data lifecycle -> source to agent": [
+            "multi-source data",
+            "Source and ingestion",
+            "Processing and quality",
+            "Governance and catalog",
+            "Storage and retrieval",
+            "Semantic and ontology",
+            "Data Agent",
+            "ChatBI",
+            "data_agent_contract",
+        ],
+        "UC10 ontology and data system product": [
+            "Ontology And Semantic Contract",
+            "Object type",
+            "Link type",
+            "Action type",
+            "AgentWritebackBlocked",
+            "insight-to-action loop",
         ],
     }
     for name, markers in scenarios.items():

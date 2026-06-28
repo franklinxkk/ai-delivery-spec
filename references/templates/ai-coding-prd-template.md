@@ -1,4 +1,4 @@
-# AI-Coding Full PRD Template (v4.9.7 Profile)
+# AI-Coding Full PRD Template (v4.9.8 Profile)
 
 Use this profile only when the user explicitly wants a coding agent, full AI
 implementation, machine-readable contracts, test stubs, or an implementation
@@ -8,13 +8,13 @@ not a replacement.
 ## Contents
 
 - Heading Hierarchy Lock
-- 0D Triage And PRD Profile
-- Prototype Interaction Ledger Extraction
-- Part 1 Human-First Foundation Layer
-- Part 2 Machine-Readable Extension Layer
-- Part 3 Coding Agent Delivery Package
-- Part 4 Validation And Review
-- Gate Completion Statement
+- 0D 分流与 PRD 类型 / 0D Triage And PRD Profile
+- 原型交互清单提取 / Prototype Interaction Ledger Extraction
+- 第一部分 人类可读基础层 / Part 1 Human-First Foundation Layer
+- 第二部分 机器可读扩展层 / Part 2 Machine-Readable Extension Layer
+- 第三部分 Coding Agent 交付包 / Part 3 Coding Agent Delivery Package
+- 第四部分 验证与评审 / Part 4 Validation And Review
+- 完成门禁声明 / Gate Completion Statement
 
 ## Heading Hierarchy Lock
 
@@ -24,15 +24,17 @@ not a replacement.
 - Use H4 (`####`) for FRR numbered sections inside one function.
 - Do not jump from H2 directly to H4.
 - Do not use bold text, table rows, or numbered list items as fake headings.
-- In Chinese PRDs, translate headings but keep the hierarchy unchanged.
+- Final output language follows the user's spoken language. For Chinese PRDs,
+  use Chinese headings only unless the user explicitly asks for bilingual
+  headings. Do not copy English template headings into Chinese deliverables.
 - If generated `AGENTS.md`, `CLAUDE.md`, or Cursor rules are included inline in
   the same Markdown file, put them under H2/H3 annex headings or fenced code
   blocks. Do not start them with a second H1 such as `# AGENTS.md`.
 
-## 0D Triage And PRD Profile
+## 0D 分流与 PRD 类型 / 0D Triage And PRD Profile
 
 ```text
-[TIER: Heavy|Light] | [AI: true|false] | [WORKFLOW: true|false]
+[TIER: Heavy|Light] | [AI: true|false] | [WORKFLOW: true|false] | [INFO: complete|partial|missing]
 Mode: Standard | Full
 PRD Profile: AI-Coding Full PRD
 ```
@@ -43,7 +45,7 @@ PRD Profile: AI-Coding Full PRD
 | User asks for `AGENTS.md`, `CLAUDE.md`, `.cursor/rules`, AC-YAML, or test stubs | Use AI-Coding Full PRD |
 | User only asks for human review, vendor development, or QA handoff | Use Human-First Full PRD first; list upgrade conditions |
 
-## Prototype Interaction Ledger Extraction
+## 原型交互清单提取 / Prototype Interaction Ledger Extraction
 
 If the source prototype HTML is larger than 100KB, first run:
 
@@ -57,11 +59,21 @@ the main context when the ledger can provide the required implementation
 evidence. The full prototype remains an authoritative source file and should be
 referenced through path, `view_id`, `data-testid`, and `data-action`.
 
-## Part 1 Human-First Foundation Layer
+## 第一部分 人类可读基础层 / Part 1 Human-First Foundation Layer
 
 Before adding any machine-readable blocks, inline the full Human-First Full PRD
 in this document. Do not write "see human-first-prd-template.md" as a substitute
 for content. Part 1 must include all modules and every complete FRR.
+
+Forbidden substitutes:
+
+- FRR Index Map without the full FRR body;
+- "see / refer to / 详见 / 参见" another file or appendix instead of writing the
+  FRR content inline;
+- placeholder sections that only contain `TBD`, `same as above`, `见原型`,
+  `按现有逻辑`, or an external source link;
+- AC-YAML, API stubs, or task lists that reference FRRs not already present in
+  Part 1.
 
 Required foundation, all inline:
 
@@ -80,7 +92,9 @@ FRR Completion Gate before Part 2:
 |---|---|
 | FRR count | every `Mxx-Fxx` in the release function inventory has one FRR |
 | FRR completeness | every FRR contains sections 1-16 |
+| FRR inline body | every FRR section 1-16 is written directly in Part 1, not replaced by an index, appendix link, or external reference |
 | Module coverage | every in-scope module has at least one FRR or a clear deferred reason |
+| Key information | every FRR section 1 states who/when/why/what/result and contains no unresolved P0 `TBD` |
 | State machine | every FRR section 9 has state/button/lifecycle behavior or `N/A + reason` |
 | Permission | every FRR section 10 has role/data/action permission or `N/A + reason` |
 | Acceptance | every FRR section 16 has prose acceptance before AC-YAML |
@@ -99,13 +113,13 @@ Batch generation strategy:
 | web/chat mode without file system | write batches as consecutive conversation sections; do not require file writes |
 | after all batches | run the FRR Completion Gate |
 
-## Part 2 Machine-Readable Extension Layer
+## 第二部分 机器可读扩展层 / Part 2 Machine-Readable Extension Layer
 
 Prerequisite: Part 1 FRR Completion Gate has passed. Every `frr_ref` in
 AC-YAML, API stubs, runtime contracts, and agent tasks must point to an existing
 FRR in Part 1.
 
-### 2.1 Prototype Data-Attribute Contract
+### 2.1 原型数据属性契约 / Prototype Data-Attribute Contract
 
 | View ID | Layout ID | data-testid | data-action | data-field | Expected Handler / Result |
 |---|---|---|---|---|---|
@@ -117,7 +131,7 @@ Rules:
 - Every critical page/region/modal/drawer must have stable `data-testid`.
 - Every form field needed for implementation or testing must map to `data-field`.
 
-### 2.2 Structured Acceptance Criteria (AC-YAML)
+### 2.2 结构化验收标准 / Structured Acceptance Criteria (AC-YAML)
 
 When embedded in a PRD, use the `ac_structured` key. When exported as a
 standalone file, `ac-structured.yaml` may keep the top-level `acceptance` key.
@@ -146,7 +160,7 @@ AC ID evolution rules:
 - When behavior changes materially, add `revision`, `supersedes`, or a new AC ID
   and map the old one to migration notes.
 
-### 2.3 Machine-Readable Runtime / AI Contract
+### 2.3 机器可读运行时 / AI 契约 / Machine-Readable Runtime / AI Contract
 
 Use `ai_contract_lite` for AI-supporting features. Use full
 `ai_runtime_contract` only for AI-core or production AI actions with tool use,
@@ -167,9 +181,9 @@ For full AI runtime, reference `references/coding-agent-compat.md` and include
 `write_scope`, `tool_scope`, `human_gate`, `fallback`, `observability`,
 `rollback`, `prompt_file`, and `golden_case_file`.
 
-### 2.4 API / Event / Data Contract Stub
+### 2.4 API / 事件 / 数据契约桩 / API / Event / Data Contract Stub
 
-#### 2.4.1 API Endpoint Inventory
+#### 2.4.1 API 端点清单 / API Endpoint Inventory
 
 | Method | Path | Auth Required | Description | Idempotency | Source FRR |
 |---|---|---|---|---|---|
@@ -193,7 +207,7 @@ events:
     payload_schema: schemas/M01-F01.created.event.json
 ```
 
-## Part 3 Coding Agent Delivery Package
+## 第三部分 Coding Agent 交付包 / Part 3 Coding Agent Delivery Package
 
 Use this directory convention when handing work to a coding agent:
 
@@ -243,7 +257,7 @@ role, version, source status, and hash:
 }
 ```
 
-## Part 4 Validation And Review
+## 第四部分 验证与评审 / Part 4 Validation And Review
 
 Run deterministic checks before declaring PASS:
 
@@ -263,7 +277,7 @@ Review checklist:
 | QA | AC-YAML can become automated or manual test cases |
 | Coding Agent | package paths, schemas, and source-of-truth order are unambiguous |
 
-## Gate Completion Statement
+## 完成门禁声明 / Gate Completion Statement
 
 ```text
 Scope: {artifact scope}

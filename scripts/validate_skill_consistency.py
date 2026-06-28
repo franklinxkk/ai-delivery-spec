@@ -29,6 +29,7 @@ RETAINED_REFERENCE_FILES = {
     "readability-layer.md",
     "realtime-contract.md",
     "domain-crm.md",
+    "domain-data-mart.md",
     "domain-education-it.md",
     "domain-medical-hospital-it.md",
     "domain-module-template.md",
@@ -339,6 +340,7 @@ def main() -> int:
             "coding-agent-compat.md",
             "domain-education-it.md",
             "domain-medical-hospital-it.md",
+            "domain-data-mart.md",
         ),
         failures,
     )
@@ -448,6 +450,7 @@ def main() -> int:
             "Output Selector",
             "Higher-Education IT",
             "Medical / Hospital IT",
+            "Data Mart",
         ),
         failures,
     )

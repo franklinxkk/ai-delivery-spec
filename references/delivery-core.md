@@ -69,7 +69,9 @@ Rules:
 ### 0.5 Input Clarification Protocol
 
 Run this before Stage 1 when the request is ambiguous, idea-only, or missing
-enough context that the product direction could change.
+enough context that the product direction could change. Also run it whenever
+0D triage returns `INFO: missing` or `INFO: partial` for a development,
+customer-demo, QA, acceptance, or coding-agent artifact.
 
 Ask 3-5 targeted questions. Do not ask a questionnaire. Choose questions by
 input type:
@@ -82,6 +84,24 @@ input type:
 | feature list | primary workflow, release goal, role priority, out-of-scope boundary |
 | old PRD/prototype upgrade | what changed, what must be preserved, what can be removed, acceptance owner |
 | competitor feature | customer job, switching barrier, differentiation hypothesis, proof needed |
+| AI+Data / data product / BI / report | source acquisition, cleaning/quality, governance/lineage, storage/retrieval, semantic/ontology, analysis/agent, metric source, dimension dictionary, statistical period, sys/ext split, caliber-change propagation |
+
+Data-product mandatory questions when missing:
+
+| Question | Why It Matters | Missing Impact |
+|---|---|---|
+| 数据从哪些源进入系统：数据库、文件、API、CDC、流、SaaS、人工填报？ | determines acquisition architecture, credentials, sync, and ownership | downstream PRD cannot define freshness, backfill, or failure recovery |
+| 接入后是否需要清洗、标准化、去重、实体对齐或异常队列？ | determines processing and quality workflow | wrong or duplicate data enters trusted metrics silently |
+| 谁拥有数据资产、元数据、血缘、分级、授权和审计？ | determines governance, security, and acceptance owner | data product cannot be trusted or launched in regulated teams |
+| 数据如何存储和检索：ODS/DWD/DWS/ADS、lakehouse、warehouse、OLAP、搜索、向量？ | determines latency, freshness, cost, retrieval, and implementation plan | ChatBI/BI may be slow, stale, or impossible to scope |
+| 是否需要语义层或本体：对象、关系、动作、指标、维度、业务术语？ | determines whether users/agents query business concepts or raw tables | AI answers and self-service analysis become inconsistent |
+| Data Agent/ChatBI 允许读哪些数据、用哪些工具、是否能写回任务或业务状态？ | determines AI runtime, permission, eval, and human gate | agent may leak data or perform unsafe actions |
+| 指标来自哪里：Excel、业务口述、已有系统、数仓表，还是政策口径？ | determines authority and source register | metric caliber becomes unverifiable |
+| 维度有哪些，是否支持下钻或权限范围过滤？ | drives filters, grouping, drill path, and row-level scope | reports cannot answer "by whom/where/when" |
+| 统计周期是什么：日、周、月、季度、累计、自定义？边界时间是什么？ | controls refresh, comparison, and acceptance | numbers are correct technically but wrong in business use |
+| 哪些字段系统自动取数，哪些字段人工填报？ | separates `sys` locked fields from `ext` editable fields | fill-in workflow, validation, and ownership are wrong |
+| 数据来源表/API和刷新频率是什么？ | defines SQL/API, freshness, quality, and dependency owner | implementation cannot guarantee data availability |
+| 指标口径或维度值变更后如何通知和影响历史报表？ | protects trust, lineage, and audit | old and new numbers mix silently |
 
 Question format:
 

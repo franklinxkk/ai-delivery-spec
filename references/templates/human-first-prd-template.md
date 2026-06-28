@@ -1,4 +1,4 @@
-# Human-First Full PRD Template (v4.9.7 Profile)
+# Human-First Full PRD Template (v4.9.8 Profile)
 
 Use this profile when the PRD will be reviewed, developed, tested, outsourced,
 accepted, or archived by human teams. The document must be readable before it
@@ -8,15 +8,15 @@ they do not replace it.
 ## Contents
 
 - Heading Hierarchy Lock
-- 0D Triage And Scope
-- Stage 1 Requirement Planning
-- Stage 2 IA And Prototype Lock
-- Stage 3 Complete Functional Requirement Records
-- Stage 4 Review And Delivery Plan
-- Stage 5 Test And Acceptance
-- Stage 6 Launch And Review
-- Appendix
-- Gate Completion Statement
+- 0D 分流与范围 / 0D Triage And Scope
+- 阶段一 需求规划 / Stage 1 Requirement Planning
+- 阶段二 IA 与原型锁定 / Stage 2 IA And Prototype Lock
+- 阶段三 完整功能需求记录 / Stage 3 Complete Functional Requirement Records
+- 阶段四 评审与交付计划 / Stage 4 Review And Delivery Plan
+- 阶段五 测试与验收 / Stage 5 Test And Acceptance
+- 阶段六 上线与复盘 / Stage 6 Launch And Review
+- 附录 / Appendix
+- 完成门禁声明 / Gate Completion Statement
 
 ## Heading Hierarchy Lock
 
@@ -26,12 +26,14 @@ they do not replace it.
 - Use H4 (`####`) for FRR numbered sections inside one function.
 - Do not jump from H2 directly to H4.
 - Do not use bold text, table rows, or numbered list items as fake headings.
-- In Chinese PRDs, translate headings but keep the hierarchy unchanged.
+- Final output language follows the user's spoken language. For Chinese PRDs,
+  use Chinese headings only unless the user explicitly asks for bilingual
+  headings. Do not copy English template headings into Chinese deliverables.
 
-## 0D Triage And Scope
+## 0D 分流与范围 / 0D Triage And Scope
 
 ```text
-[TIER: Heavy|Light] | [AI: true|false] | [WORKFLOW: true|false]
+[TIER: Heavy|Light] | [AI: true|false] | [WORKFLOW: true|false] | [INFO: complete|partial|missing]
 Mode: Lite | Standard | Full
 PRD Profile: Human-First Full PRD
 Lifecycle Stage: Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire
@@ -50,9 +52,9 @@ Rules:
 - Do not write "see prototype" without `view_id`, `region_id`, `data-testid`,
   `data-action`, screenshot page, or module/function ID.
 
-## Stage 1 Requirement Planning
+## 阶段一 需求规划 / Stage 1 Requirement Planning
 
-### 1.1 Project Background And Business Goals
+### 1.1 项目背景与业务目标 / Project Background And Business Goals
 
 Write 1-2 short paragraphs explaining the business scene, pain, and expected
 outcome. Avoid abstract phrases such as "improve efficiency" unless the
@@ -62,19 +64,19 @@ behavior and measurement are stated.
 |---|---|---|---|
 | BO-01 | {business outcome} | {metric or review signal} | P0/P1/P2 |
 
-### 1.2 Roles, Responsibilities, And Use Scenes
+### 1.2 角色、职责与使用场景 / Roles, Responsibilities, And Use Scenes
 
 | Role ID | Role | Responsibility | System Goal | Typical Scenario | Pain Point |
 |---|---|---|---|---|---|
 | ROLE-001 | {name} | {responsibility} | {goal} | {when/where} | {pain} |
 
-### 1.3 Core User Journey And Business Scenario
+### 1.3 核心用户旅程与业务场景 / Core User Journey And Business Scenario
 
 | Scenario ID | Role | When / Trigger | Goal | Main Action | Success Result | Exception To Watch |
 |---|---|---|---|---|---|---|
 | SC-M01-01 | {role} | {trigger} | {goal} | {action} | visible result + domain result | {exception} |
 
-### 1.4 Competitor / Alternative Analysis, Value, And Priority
+### 1.4 竞品/替代方案、价值与优先级 / Competitor / Alternative Analysis, Value, And Priority
 
 Use this section when the requirement is not fully shaped, when multiple
 solutions compete, or when roadmap priority must be justified.
@@ -91,7 +93,7 @@ solutions compete, or when roadmap priority must be justified.
 |---|---|---|---|---|---|
 | {feature} | ICE/RICE/MoSCoW/owner decision | {score} | {reason} | {dependency} | in/out/later |
 
-### 1.5 EARS Requirement Writing Rule
+### 1.5 EARS 需求表述规则 / EARS Requirement Writing Rule
 
 For P0/P1 behavior, include at least one EARS-style statement before detailed
 tables.
@@ -104,21 +106,21 @@ tables.
 | Optional feature | Where {feature/config/permission}, the system shall {response}. | configuration or permission branch |
 | Ubiquitous | The system shall {invariant}. | always-on rule |
 
-### 1.6 Scope, Priority, And Out-Of-Scope
+### 1.6 范围、优先级与不做事项 / Scope, Priority, And Out-Of-Scope
 
 | Module ID | Module | In Scope | Out Of Scope | Priority | Release |
 |---|---|---|---|---|---|
 | M01 | {module} | {functions} | {exclusions} | P0/P1/P2 | v{version} |
 
-## Stage 2 IA And Prototype Lock
+## 阶段二 IA 与原型锁定 / Stage 2 IA And Prototype Lock
 
-### 2.1 IA Skeleton
+### 2.1 IA 骨架 / IA Skeleton
 
 | Module ID | View ID | View Name | Platform | Primary Roles | Regions | Primary Actions |
 |---|---|---|---|---|---|---|
 | M01 | M01-V01 | {view} | web/mobile/miniapp | {roles} | {region_ids} | {action_ids} |
 
-### 2.2 Page Layout And Region Map
+### 2.2 页面布局与区域地图 / Page Layout And Region Map
 
 | Layout ID | View ID | Region ID | Region Name | Position | Main Components | Visible States | Notes |
 |---|---|---|---|---|---|---|---|
@@ -132,16 +134,37 @@ Rules:
 - If an IA Skeleton is locked, reference its `region_id` instead of rewriting
   the same region definitions in multiple places.
 
-### 2.3 Prototype Lock Record
+### 2.3 原型锁定记录 / Prototype Lock Record
 
 | Artifact | Path / URL | Lock Status | Evidence Scope | Owner |
 |---|---|---|---|---|
 | Prototype | {path} | locked / draft | views/actions/modals/states/mock data | {owner} |
 
-## Stage 3 Complete Functional Requirement Records
+### 2.4 AI+Data 产品系统契约 / AI + Data Product System Contract
+
+Use this section for data source, data platform, data mart, BI, reporting,
+dashboard, indicator library, semantic/ontology, Data Agent, ChatBI, or fill-in
+products. For Chinese PRDs, write this section in Chinese.
+
+| Layer | Required Content |
+|---|---|
+| 多源数据接入 | 数据源清单、连接方式、凭证负责人、schema、同步频率、补数、幂等、失败隔离 |
+| 清洗处理 | 转换规则、标准化、去重/实体对齐、异常队列、原始值保留、质量门禁 |
+| 治理目录 | 资产目录、元数据、血缘、数据分级、质量分、审批、审计、生命周期 |
+| 存储检索 | lake/warehouse/mart/OLAP/search/vector/cache、刷新、延迟、留存、成本、权限 |
+| 语义/本体 | 业务术语、指标、维度、对象类型、关系、动作类型、示例、版本与回滚 |
+| 分析应用 | 看板、自助分析、报表、填报、筛选、下钻、导出、空/错/无权限状态 |
+| Data Agent / ChatBI | 允许数据源与工具、继承用户权限、引用证据、刷新状态、拒答规则、评测集、人工门禁 |
+| 洞察到行动 | 洞察解释、任务/流程/本体动作、写入范围、最终责任人、回滚与复盘指标 |
+
+## 阶段三 完整功能需求记录 / Stage 3 Complete Functional Requirement Records
 
 Repeat one complete FRR for every in-scope function. A module is not complete
 until all its functions have complete records.
+
+Use plain text or bold text for module grouping. Do not add `### Mxx Module`
+between the Stage 3 heading and FRR records, because that causes H3 -> H5
+heading jumps in generated PRDs.
 
 ### Mxx-Fxx {Function Name}
 
@@ -149,18 +172,18 @@ Every in-scope function must contain all 16 FRR sections. If a section does not
 apply, write `N/A + reason`; do not leave it blank or write only "see prototype",
 "same as above", or "existing logic".
 
-#### §1 Business Scenario
+#### §1 业务场景 / Business Scenario
 
 Use `who / when / why / what / result` to describe the concrete scene. State
 the visible user result and the domain/business result.
 
-#### §2 Roles And Scenario
+#### §2 角色与场景 / Roles And Scenario
 
 | Role | Responsibility In This Function | Start Condition | Success Exit | Next Action |
 |---|---|---|---|---|
 | {role} | {responsibility} | {trigger/state} | {visible + domain result} | {next step} |
 
-#### §3 Entry And Preconditions
+#### §3 入口与前置条件 / Entry And Preconditions
 
 | Item | Requirement |
 |---|---|
@@ -169,14 +192,14 @@ the visible user result and the domain/business result.
 | Blocked Entry Handling | {disabled/hidden/error/redirect/audit} |
 | Upstream Dependency | {source module/event/data} |
 
-#### §4 Pages, Regions, And Visible States
+#### §4 页面、区域与可见状态 / Pages, Regions, And Visible States
 
 Reference `Layout ID`, `view_id`, `region_id`, `data-testid`, table columns,
 form fields, modal/drawer chain, responsive differences, and empty/loading/error
 /success/disabled states. State how the page looks and behaves, not only which
 data exists.
 
-#### §5 Fields, Dictionaries, And Validation
+#### §5 字段、字典与校验 / Fields, Dictionaries, And Validation
 
 When a locked prototype exists: list only prototype-invisible rules such as
 permission differences, state-conditional editability, enum values not visible
@@ -188,37 +211,50 @@ visible field position that the locked prototype already shows.
 |---|---|---|---|---|---|---|---|
 | FLD-Mxx-Fxx-001 | {field} | string/date/number/enum/file | Y/N | {dict} | {rule} | {value} | {role} |
 
-#### §6 Numbered Interaction Flow
+For data mart, BI, reporting, dashboard, indicator library, or fill-in
+products, add these optional columns when relevant:
+
+| Field ID | Field Name | Type | Required | Dictionary / Enum | Validation | Default | Editable By | Dimension / Caliber | sys/ext | Statistical Period |
+|---|---|---|---|---|---|---|---|---|---|---|
+| FLD-Mxx-Fxx-001 | {field} | number/string/date/enum | Y/N | {dict} | {rule} | {value} | system/role | IND-001 / DIM-AREA | sys/ext | month/custom |
+
+#### §6 编号交互流程 / Numbered Interaction Flow
 
 | Step | Actor | Action / data-action | Frontend Feedback | Backend Rule | Domain Result | Failure Branch |
 |---|---|---|---|---|---|---|
 | 1 | {role} | {data-action} | toast/modal/loading/disabled | {validation/transaction} | {state/event/audit} | {error/retry} |
 
-#### §7 Actions And Operation Rules
+#### §7 操作与规则 / Actions And Operation Rules
 
 | Action | Allowed Role | Allowed State | Confirmation | Idempotency | Visible Result | Domain Result |
 |---|---|---|---|---|---|---|
 | {action} | {role} | {state} | none/modal/second-confirm | yes/no/key | {ui result} | {data/state/event} |
 
-#### §8 Business Rules, Calculations, And Calibers
+#### §8 业务规则、计算与口径 / Business Rules, Calculations, And Calibers
 
 Describe source of truth, create/update/delete rules, synchronization,
 calculation, threshold/caliber, conflict handling, audit logging, and
 upstream/downstream impact. Number every rule as `BR-Mxx-Fxx-NN`.
 
-#### §9 State, Button, And Lifecycle Behavior
+#### §9 状态、按钮与生命周期行为 / State, Button, And Lifecycle Behavior
 
 | Current State | Visible Actions | Forbidden Actions | Guard | Next State | Event / Audit |
 |---|---|---|---|---|---|
 | {state} | {actions} | {actions} | {role/data/time/config} | {state} | {event/audit} |
 
-#### §10 Permissions And Data Scope
+Example:
+
+| Current State | Visible Actions | Forbidden Actions | Guard | Next State | Event / Audit |
+|---|---|---|---|---|---|
+| draft | submit, save | approve, export | owner role + required fields valid | submitted | SubmissionSubmitted / audit |
+
+#### §10 权限与数据范围 / Permissions And Data Scope
 
 | Role | Function Permission | Data Scope | Field / Action Restriction | Overreach Handling |
 |---|---|---|---|---|
 | {role} | view/create/update/delete/approve/export | self/department/specified/all/custom | {restriction} | block/mask/escalate/audit |
 
-#### §11 Exceptions, Fallback, And Recovery
+#### §11 异常、降级与恢复 / Exceptions, Fallback, And Recovery
 
 | Category | Required Behavior |
 |---|---|
@@ -228,21 +264,44 @@ upstream/downstream impact. Number every rule as `BR-Mxx-Fxx-NN`.
 | State conflict | {repeat submit/stale data/deleted/locked} |
 | Network / dependency | {timeout/offline/partial success/retry} |
 
-#### §12 Notifications, Audit, And Dependencies
+#### §12 通知、审计与依赖 / Notifications, Audit, And Dependencies
 
 | Trigger | Recipient / Dependency | Channel / Interface | Payload / Content | Failure Handling | Audit Owner |
 |---|---|---|---|---|---|
 | {trigger} | {role/system} | in-app/SMS/API/event/file | {payload} | retry/fallback/manual | {owner} |
 
-#### §13 Data, AI, And Algorithm Contract
+#### §13 数据、AI 与算法契约 / Data, AI, And Algorithm Contract
+
+Choose the applicable sub-template by product type.
+
+Data product:
+
+| Contract Type | Required Content |
+|---|---|
+| Source and ingestion | source inventory, connector/API/file/stream/manual mode, auth, schema, cadence, backfill, retry, idempotency |
+| Processing and quality | transform/clean rules, dedupe, entity resolution, quality gates, exception handling, raw-data preservation |
+| Governance and catalog | owner, classification, metadata, lineage, certification, access policy, audit, lifecycle |
+| Storage and retrieval | lake/warehouse/mart/OLAP/search/vector/cache, freshness, latency, retention, cost, permissions |
+| Semantic and ontology | glossary, metric/dimension model, object/link/action types, relation rules, examples, model version |
+| Analytics/reporting/fill-in | dashboard/report/fill workflow, filters, drill, export, sys/ext split, submit/review state |
+| Data Agent / ChatBI | allowed sources/tools, inherited permission, citations, freshness, refusal rules, eval sets, human gate |
+| Action loop | insight-to-task/action, write scope, final accountable owner, rollback, monitoring |
+
+AI product:
+
+| Contract Type | Required Content |
+|---|---|
+| AI / Algorithm | deterministic vs model responsibility, input/output schema, confidence, human gate, fallback, evaluation |
+| Prohibited Write | fields/states/actions AI or automation must not modify |
+
+CRUD / business product:
 
 | Contract Type | Required Content |
 |---|---|
 | Data | source of truth, schema/dictionary, import/export, sync timing, consistency owner |
-| AI / Algorithm | deterministic vs model responsibility, input/output schema, confidence, human gate, fallback, evaluation |
-| Prohibited Write | fields/states/actions AI or automation must not modify |
+| API / event | endpoint, request/response, state guard, event payload, idempotency |
 
-#### §14 Function-Level NFR
+#### §14 功能级非功能需求 / Function-Level NFR
 
 | Category | Requirement | Measurement |
 |---|---|---|
@@ -251,7 +310,7 @@ upstream/downstream impact. Number every rule as `BR-Mxx-Fxx-NN`.
 | Compatibility | {browser/device/surface} | {scope} |
 | Operations | {monitoring/retry/rollback/support} | {evidence} |
 
-#### §15 Frontend / Backend / QA Handoff Notes
+#### §15 前端 / 后端 / QA 交接说明 / Frontend / Backend / QA Handoff Notes
 
 | Reader | Must Know |
 |---|---|
@@ -260,33 +319,40 @@ upstream/downstream impact. Number every rule as `BR-Mxx-Fxx-NN`.
 | Algorithm / AI | data source, schema, prompt/rule/model responsibility, eval/fallback |
 | QA | happy path, boundary, permission, state conflict, weak network, regression |
 
-#### §16 Acceptance And Traceability
+#### §16 验收与追溯 / Acceptance And Traceability
 
 | AC ID | Given | When | Then | Test Type | Priority | Source / Prototype |
 |---|---|---|---|---|---|---|
 | AC-Mxx-Fxx-001 | {precondition} | {action} | {observable result + domain result} | unit/integration/e2e/manual | P0/P1/P2 | SRC-... / data-action |
 
-## Stage 4 Review And Delivery Plan
+After all FRRs, add these shared summaries when lifecycle, workflow, or
+cross-module delivery is in scope: Global State Machine Summary, Domain Event
+Inventory, and E2E Cross-Module Canvas.
 
-### 4.1 Sprint Task Breakdown / WBS
+## 阶段四 评审与交付计划 / Stage 4 Review And Delivery Plan
+
+### 4.1 Sprint 任务拆解 / Sprint Task Breakdown / WBS
 
 | Task ID | Slice | Source FRR | Owner Role | Dependency | Done Criteria |
 |---|---|---|---|---|---|
 | TASK-Mxx-001 | {vertical slice} | Mxx-Fxx | FE/BE/QA/AI | {dependency} | {test/evidence} |
+| TASK-M01-001 | complete create-report happy path | M01-F01 | FE+BE+QA | indicator dictionary ready | AC-M01-F01-001 pass |
 
-### 4.2 Risk Register
+### 4.2 风险登记册 / Risk Register
 
 | Risk ID | Risk | Impact | Probability | Mitigation | Owner | Trigger |
 |---|---|---|---|---|---|---|
 | RISK-001 | {risk} | H/M/L | H/M/L | {mitigation} | {owner} | {trigger} |
+| RISK-002 | metric source table not delivered | H | M | freeze mock source and mark report as draft | data owner | DWD delivery delayed |
 
-### 4.3 Key Dependencies
+### 4.3 关键依赖项 / Key Dependencies
 
 | Dependency ID | Upstream / Owner | Needed By | Required Date | Fallback | Status |
 |---|---|---|---|---|---|
 | DEP-001 | {system/person} | {module/function} | {date} | {fallback} | open/confirmed/blocked |
+| DEP-002 | DWD source table / data owner | M01-F01, M03-F01 | Sprint 1 Week 2 | use verified CSV annex | open |
 
-### 4.4 Development Follow-Up, Risk, And Blockers
+### 4.4 研发跟进、风险与阻塞 / Development Follow-Up, Risk, And Blockers
 
 Use this when build/verify is in scope.
 
@@ -294,19 +360,19 @@ Use this when build/verify is in scope.
 |---|---|---|---|---|---|---|---|
 | TRK-001 | {date} | Mxx-Fxx | {owner} | not-started/in-progress/done | {blocker} | {decision} | {date} |
 
-### 4.5 Bug Management And Acceptance Defects
+### 4.5 Bug 管理与验收缺陷 / Bug Management And Acceptance Defects
 
 | BUG ID | Source AC | Severity | Steps To Reproduce | Expected | Actual | Owner | Status |
 |---|---|---|---|---|---|---|---|
 | BUG-001 | AC-Mxx-Fxx-001 | P0/P1/P2 | {steps} | {expected} | {actual} | {owner} | open/fixed/verified |
 
-### 4.6 Open Questions
+### 4.6 待确认问题 / Open Questions
 
 | Question ID | Module / FRR | Question | Owner | Blocks Delivery? | Due Date | Decision |
 |---|---|---|---|---|---|---|
 | Q-001 | Mxx-Fxx | {question} | {owner} | Y/N | {date} | open/decided |
 
-## Stage 5 Test And Acceptance
+## 阶段五 测试与验收 / Stage 5 Test And Acceptance
 
 | Test ID | Source AC | Test Type | Preconditions | Steps | Expected Result | Evidence |
 |---|---|---|---|---|---|---|
@@ -321,54 +387,74 @@ Acceptance package:
 - unresolved risks and de-scoped items;
 - sign-off owner and date.
 
-## Stage 6 Launch And Review
+## 阶段六 上线与复盘 / Stage 6 Launch And Review
 
-### 6.1 Launch Checklist
+### 6.1 上线检查清单 / Launch Checklist
 
 | Area | Check | Owner | Evidence | Result |
 |---|---|---|---|---|
 | data | migration/import/reconciliation ready | {owner} | {evidence} | pass/fail |
 | operation | on-call, rollback, support ready | {owner} | {evidence} | pass/fail |
+| security | permission, masking, audit, test-data isolation verified | {owner} | {evidence} | pass/fail |
+| rollback | feature flag, data backup, and rollback owner ready | {owner} | {evidence} | pass/fail |
 
-### 6.2 Post-launch Review
+### 6.2 数据观察清单 / Post-Launch Metrics Watch
+
+| Metric / Signal | Baseline | Target | Actual | Watch Window | Alert Threshold |
+|---|---|---|---|---|---|
+| {metric} | {baseline} | {target} | {actual} | T+1/T+7/T+30 | {threshold} |
+
+### 6.3 复盘报告 / Post-launch Review
 
 | Metric / Signal | Baseline | Target | Actual | Decision | Follow-Up |
 |---|---|---|---|---|---|
 | {metric} | {baseline} | {target} | {actual} | continue/iterate/rollback/retire | {action} |
 
-## Appendix
+### 6.4 5 Whys 根因分析 / 5 Whys
 
-### Appendix A Glossary
+| Problem | Why 1 | Why 2 | Why 3 | Why 4 | Why 5 | Root Cause | Action |
+|---|---|---|---|---|---|---|---|
+| {problem} | | | | | | {root cause} | {owner/date} |
+
+### 6.5 后续行动项 / Action Items
+
+| Iteration | Topic | Action | Priority | Owner | Due Date |
+|---|---|---|---|---|---|
+| vNext | {topic} | {action} | P0/P1/P2 | {owner} | {date} |
+
+## 附录 / Appendix
+
+### 附录 A 术语表 / Appendix A Glossary
 
 | Term | Definition | Notes |
 |---|---|---|
 | {term} | {definition} | {notes} |
 
-### Appendix B Role Permission Matrix
+### 附录 B 角色权限矩阵 / Appendix B Role Permission Matrix
 
 | Role | Menu | Action | Data Scope | Field Scope |
 |---|---|---|---|---|
 | {role} | {menu} | {action} | {scope} | {fields} |
 
-### Appendix C API Endpoint Inventory
+### 附录 C API 端点清单 / Appendix C API Endpoint Inventory
 
 | Method | Path | Source FRR | Auth | Idempotency | Notes |
 |---|---|---|---|---|---|
 | GET | /api/{module}/{resource} | Mxx-Fxx | yes | yes | {notes} |
 
-### Appendix D E2E Cross-Module Canvas
+### 附录 D E2E 跨模块链路画布 / Appendix D E2E Cross-Module Canvas
 
 | Upstream State Change | Domain Event | Downstream State Change | Test Case |
 |---|---|---|---|
 | {source state} | {event} | {target state} | AC-E2E-001 |
 
-### Appendix E Decision Records
+### 附录 E 决策记录 / Appendix E Decision Records
 
 | Decision ID | Date | Decision | Options Considered | Owner | Impact |
 |---|---|---|---|---|---|
 | ADR-001 | {date} | {decision} | {options} | {owner} | {impact} |
 
-## Gate Completion Statement
+## 完成门禁声明 / Gate Completion Statement
 
 ```text
 Completion State: PASS | REVIEW_COMPLETE_WITH_GAPS | BLOCKED

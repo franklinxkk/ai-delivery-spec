@@ -182,6 +182,49 @@ REALTIME_SIGNALS = (
     "轮询",
 )
 
+DATA_PRODUCT_SIGNALS = (
+    "data source",
+    "ingestion",
+    "etl",
+    "elt",
+    "cdc",
+    "stream",
+    "lakehouse",
+    "warehouse",
+    "catalog",
+    "lineage",
+    "governance",
+    "ontology",
+    "data mart",
+    "bi",
+    "dashboard",
+    "report",
+    "indicator",
+    "metric",
+    "semantic layer",
+    "data agent",
+    "chatbi",
+    "nl2sql",
+    "fill-in",
+    "数据源",
+    "数据采集",
+    "清洗",
+    "治理",
+    "存储",
+    "检索",
+    "血缘",
+    "本体",
+    "智能体",
+    "智能问数",
+    "数据集市",
+    "报表",
+    "指标",
+    "口径",
+    "维度",
+    "填报",
+    "取数范围",
+)
+
 
 @dataclass(frozen=True)
 class Route:
@@ -233,7 +276,11 @@ def route(prompt: str) -> Route:
 
     if contains_any(text, PROTOTYPE_SIGNALS):
         entrypoints.append("prototype-testability.md")
-    if (contains_any(text, AI_PRODUCT_SIGNALS) and not ai_coding) or contains_any(text, WORKFLOW_SIGNALS):
+    if (
+        (contains_any(text, AI_PRODUCT_SIGNALS) and not ai_coding)
+        or contains_any(text, WORKFLOW_SIGNALS)
+        or contains_any(text, DATA_PRODUCT_SIGNALS)
+    ):
         entrypoints.append("advanced-extensions.md")
     if ai_coding:
         entrypoints.append("coding-agent-compat.md")
@@ -288,6 +335,16 @@ SCENARIOS = (
         "Chinese workflow",
         "设计一个带审批、状态流转和审计的工单需求文档。",
         Route(True, "Standard", "Traditional Product Lifecycle", "Human-First Full PRD", ("delivery-core.md", "advanced-extensions.md")),
+    ),
+    Scenario(
+        "Chinese data mart PRD",
+        "帮我写一个运管数据集市报表和企业填报的完整需求文档，包含指标、口径、维度和取数范围。",
+        Route(True, "Standard", "Traditional Product Lifecycle", "Human-First Full PRD", ("delivery-core.md", "advanced-extensions.md")),
+    ),
+    Scenario(
+        "Chinese AI data platform lifecycle",
+        "帮我设计一个AI+Data平台，覆盖多源数据采集、清洗治理、湖仓存储、语义本体、ChatBI和Data Agent全生命周期PRD。",
+        Route(True, "Standard", "AI Native Product Discovery", "Human-First Full PRD", ("delivery-core.md", "advanced-extensions.md")),
     ),
     Scenario(
         "Code-only exclusion",

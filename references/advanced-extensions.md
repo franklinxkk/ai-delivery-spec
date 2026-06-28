@@ -27,7 +27,7 @@ Extension trigger matrix:
 | product AI exists or AI claims/effects are in scope | AI Feature / AI Native / Prompt Ops |
 | tenant, org tree, data scope, RBAC, license, seat, region isolation | SaaS, RBAC, And Multi-Tenancy |
 | approval, escalation, countersign, dispatch, audit, return/reject | Approval And Audit Workflow |
-| indicator, BI, dashboard, report template/task/fill, data mart | Reporting, Dashboard, And Data Product |
+| data source, ingestion, ETL, ELT, CDC, stream, lakehouse, warehouse, catalog, lineage, governance, ontology, semantic layer, data agent, ChatBI, NL2SQL, indicator, BI, dashboard, report template/task/fill, data mart, metric, 数据源, 数据采集, 清洗, 治理, 存储, 检索, 本体, 语义层, 数据智能体, 智能问数, 数据集市, 报表配置, 填报系统, 指标管理, 口径管理, 维度管理, 取数范围 | Reporting, Dashboard, And Data Product |
 | visual workflow, low-code, connector, automation node, execution replay | Workflow Automation And Low-Code |
 | app/H5/mini-program/PC+mobile, overseas, localization, app stores | Mobile, Multi-Surface, And Global Delivery |
 | release, migration, rollout, on-call, rollback, retirement | System Readiness, Release, And Retirement |
@@ -136,9 +136,27 @@ approval reference file is required.
 
 ## Reporting, Dashboard, And Data Product
 
-Trigger when scope includes indicator library, dashboard, BI, report template/task, Excel fill-in, data mart, data source, or AI data report.
+Trigger when scope includes data source ingestion, ETL/ELT, CDC, stream, data
+cleaning, data quality, governance, catalog, lineage, storage, retrieval,
+lakehouse/warehouse/mart, semantic layer, ontology, indicator library, metric
+platform, dashboard, BI, report template/task, Excel fill-in, data scope
+filter, Data Agent, ChatBI, NL2SQL/NL2Metrics, insight generation, or AI data
+report. For deep data-product work, also load `domain-data-mart.md`.
 
 Minimum contracts:
+
+AI+Data capability stack:
+
+| Layer | Required Contract |
+|---|---|
+| Source and acquisition | source inventory, connector/API/file/stream/manual mode, credential owner, schema, sync cadence, backfill, idempotency, retry |
+| Processing and cleaning | transform rules, standardization, dedupe/entity resolution, exception queue, raw preservation, quality gates |
+| Governance and catalog | asset owner, classification, metadata, lineage, certification, access approval, audit, lifecycle |
+| Storage and retrieval | lake/warehouse/mart/OLAP/search/vector/cache path, freshness, latency, retention, cost, permission, index/materialization |
+| Semantic and ontology | business glossary, metrics, dimensions, object/link/action types, relations, examples, model version, rollback |
+| Analytics and reporting | dashboard/report/fill/self-service analysis, filters, drill paths, exports, empty/error/permission states |
+| Data Agent and ChatBI | allowed sources/tools, user-scope inheritance, citations, freshness handling, refusal rules, eval sets, human gate |
+| Action loop and operations | insight-to-action owner, write scope, workflow task/ontology action, monitoring, rollback, incident, cost/adoption metrics |
 
 Indicator:
 
@@ -146,14 +164,31 @@ Indicator:
 indicator:
   id: IND-001
   name:
-  subject: enterprise | vehicle | person | org | time_period
-  formula:
+  layer: atomic | derived | composite
+  subject: enterprise | vehicle | person | org | time_period | custom
+  business_definition:
+  technical_expression: sql | mql | formula | rule
   source_tables_or_api:
   refresh_frequency:
+  statistical_period:
+  unit:
+  dimension_refs:
   permissions:
   quality_rule:
-  owner:
+  business_owner:
+  technical_owner:
 ```
+
+Indicator governance:
+
+| Contract | Required |
+|---|---|
+| Layered indicators | atomic / derived / composite layer, dependency graph, recalculation rule |
+| Caliber dual track | business definition plus SQL/MQL/formula, source, period, owner, version |
+| Dimension dictionary | dimension ID, value source, hierarchy/drill path, related indicators |
+| Exception rule table | related metric, effective condition, adjustment logic, business basis, expiry |
+| Change propagation | affected templates/reports/dashboards/exports/AI answers, owner notification |
+| Lineage | source system -> table/API -> indicator -> template -> report/dashboard/export |
 
 Dashboard/report:
 
@@ -161,17 +196,43 @@ Dashboard/report:
 - filter dimensions, drill path, export behavior;
 - empty/error/loading/permission states;
 - source freshness and refresh time;
+- row-level and column-level permission behavior before aggregation and export;
 - generated report sections, prompt fragments, inserted indicators, knowledge references, and evidence citations.
 
 Excel/report task:
 
 - template snapshot at publish time;
-- auto-fill fields vs enterprise fill-in fields;
+- auto-fill fields vs enterprise fill-in fields, with explicit `sys` / `ext` column split;
 - auto extraction rate and fill completion rate;
-- submit, return, complete, lock, export, and audit states.
+- submit, return, complete, lock, export, and audit states;
+- deadline, reminder, overdue, return/rework, and idempotent batch operations.
+
+Data scope and statistical period:
+
+| Area | Required |
+|---|---|
+| Scope filter | subject, selectable dimensions, default value, row-scope permission, export behavior |
+| Statistical period | day/week/month/quarter/custom/cumulative parameters and boundary time |
+| Refresh | source freshness, schedule, manual refresh rule, stale-data handling |
+| Quality | null/range/duplicate/freshness/referential rules and issue owner |
+| Fill mode | system extract, manual fill, Excel upload, review, return/rework |
+
+Semantic-layer and AI-data rules:
+
+- Prefer approved metric/dimension semantics over free-form SQL generation.
+- Prefer ontology object/link/action semantics when the product must connect
+  data to operational decisions or writeback actions.
+- AI data answers must cite indicator IDs, object/asset IDs, period, scope,
+  source freshness, and caliber/model version.
+- AI must not bypass permission, row/column masks, source freshness warnings,
+  lineage gaps, sensitivity labels, or caliber/model version constraints.
+- Data agents must declare tool scope, write scope, human gate, evaluation
+  cases, trace fields, fallback, and rollback before production use.
 
 This section is the authoritative reporting/data-product contract. No extra
-reporting reference file is required.
+reporting reference file is required, except the load-on-demand
+`domain-data-mart.md` domain module for data mart, BI, reporting, and fill-in
+products.
 
 ## Workflow Automation And Low-Code
 
@@ -260,6 +321,7 @@ Domain modules remain load-on-demand assets:
 - CRM: `domain-crm.md`.
 - higher-education informationization: `domain-education-it.md`.
 - medical / hospital IT: `domain-medical-hospital-it.md`.
+- data mart / BI / reporting / fill-in: `domain-data-mart.md`.
 
 Templates:
 

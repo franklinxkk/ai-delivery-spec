@@ -2,6 +2,31 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.9.8 - 2026-06-28
+
+- Added `INFO: complete|partial|missing` to 0D triage and made missing P0
+  context trigger clarification before full PRD generation.
+- Hardened output-language rules: generated PRDs must follow the user's spoken
+  language, and Chinese PRDs must not keep English-only chapter or FRR headers.
+- Upgraded `references/domain-data-mart.md` from a narrow data-mart/reporting
+  module to an AI+Data product system module covering source acquisition,
+  ingestion, cleaning, governance/catalog/lineage, storage/retrieval, semantic
+  and ontology modeling, BI/analysis/report/fill-in, ChatBI, Data Agent,
+  insight-to-action loops, operations, evaluation, and retirement.
+- Expanded advanced data-product routing and contracts for ETL/ELT, CDC,
+  streams, lakehouse/warehouse/mart, search/vector retrieval, ontology action
+  types, data-agent tool scope, ChatBI citations, freshness, permission
+  inheritance, refusal rules, eval sets, and human gates.
+- Upgraded Human-First and AI-Coding PRD templates to v4.9.8 with Chinese-first
+  lifecycle/FRR headings, AI+Data Stage 2.4 contracts, product-type-specific
+  FRR section 13 templates, richer WBS/risk/dependency examples, and deeper
+  launch/review tables.
+- Strengthened AI-Coding Part 1 rules so FRR Index Maps, appendix links, and
+  external references cannot replace inline FRR §1-§16 bodies.
+- Enhanced validators to check Chinese heading language, FRR §1-§16
+  completeness, AI-Coding Part 1 inline FRR coverage, data-product routing, and
+  AI+Data simulation paths.
+
 ## v4.9.7 - 2026-06-27
 
 - Made root `SKILL.md` ASCII-only for agentskill.sh compatibility by replacing

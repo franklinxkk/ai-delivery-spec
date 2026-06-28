@@ -396,9 +396,11 @@ specific function record.
 ### Core Rule
 
 Use the prompting user's spoken language for all document content, regardless
-of the AI assistant's default or training language. Technical terminology that
-has no established translation or is universally recognized in its English form
-may remain in English.
+of the AI assistant's default or training language. This is a MUST, not a style
+preference. If the user writes in Chinese, generated PRDs must use Chinese
+chapter headers, FRR section headers, narrative, field descriptions, rules, and
+acceptance text. Keep English only for technical identifiers, code, API paths,
+schema keys, and terms the user explicitly asks to keep bilingual.
 
 ### What Must Be In The User's Language
 
@@ -428,9 +430,12 @@ may remain in English.
 
 ### Chapter Header Translation Table
 
-When generating a PRD from the L2 Standard template, translate these chapter
-headers to the user's language. Below is the Chinese mapping; for other
-languages, apply the equivalent translation.
+When generating a PRD from the L2 Standard template, MUST translate these
+chapter headers to the user's spoken language. English-only headers are a
+`LANGUAGE_GAP` failure. For Chinese output, use the Chinese header; do not keep
+slash-bilingual headings unless the user explicitly requests bilingual output.
+Below is the Chinese mapping; for other languages, apply the equivalent
+translation.
 
 | English (Template) | Chinese |
 |---|---|

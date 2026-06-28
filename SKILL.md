@@ -3,7 +3,7 @@ name: ai-delivery-spec
 description: Create PRDs, prototypes, tests, AI runtime specs, and coding agent handoffs for product delivery. Excludes code debugging and copy rewriting.
 ---
 
-# AI Delivery Spec - Production Elastic Delivery Standard (v4.9.7)
+# AI Delivery Spec - Production Elastic Delivery Standard (v4.9.8)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering,
 algorithm, QA, operations, customers, and sponsors can read, build, verify, and
@@ -14,7 +14,7 @@ operate without losing lifecycle state, evidence, or handoff accountability.
 Before loading any reference, classify the request and state the result:
 
 ```text
-[TIER: Heavy|Light] | [AI: true|false] | [WORKFLOW: true|false]
+[TIER: Heavy|Light] | [AI: true|false] | [WORKFLOW: true|false] | [INFO: complete|partial|missing]
 ```
 
 Classification rules:
@@ -28,6 +28,9 @@ Classification rules:
 - **WORKFLOW: true** when the scope contains approval, escalation, cross-module
   state, low-code workflow, task routing, audit lifecycle, or long-running
   business process.
+- **INFO: missing/partial** when P0 users, outcome, data source, metric
+  caliber, permission boundary, workflow state, or acceptance evidence is
+  absent enough to change the PRD.
 
 Fast-pass pruning:
 
@@ -39,7 +42,9 @@ Fast-pass pruning:
   Do not expand into full PRD, DDD, readiness, or acceptance package.
 
 Do not treat pruning as quality relaxation: any in-scope interaction, field,
-state, rule, or acceptance claim must still be testable.
+state, rule, or acceptance claim must still be testable. If `INFO: missing`,
+run the clarification protocol before generating; if the user says to proceed
+anyway, mark assumptions and finish as `REVIEW_COMPLETE_WITH_GAPS`.
 
 ## 1. Runtime File Architecture
 
