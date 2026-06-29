@@ -1,4 +1,4 @@
-# Human-First Full PRD Template (v4.9.8 Profile)
+# Human-First Full PRD Template (v4.9.9 Profile)
 
 Use this profile when the PRD will be reviewed, developed, tested, outsourced,
 accepted, or archived by human teams. The document must be readable before it
@@ -161,6 +161,28 @@ products. For Chinese PRDs, write this section in Chinese.
 
 Repeat one complete FRR for every in-scope function. A module is not complete
 until all its functions have complete records.
+
+Long-form PRD continuation contract:
+
+- Build a Release Function Inventory before writing FRRs. The inventory is the
+  denominator for completion and must list `module_id`, `function_id`, role,
+  state/permission difference, source evidence, and priority.
+- Write FRRs by bounded module/function batches when the document is large. Do
+  not make later modules thinner to fit one response.
+- Keep a PRD Completion Ledger after every batch:
+
+| Module | Planned FRRs | Completed FRRs | Missing Sections | Blocking Gaps | Next Batch |
+|---|---:|---:|---|---|---|
+| M01 | 3 | 2 | M01-F03 §8/§11 | metric owner unknown | continue M01-F03 |
+
+- If the remaining inventory cannot fit in the current response, stop at a
+  stable boundary and output `CONTINUATION_REQUIRED` with the next batch plan.
+  Final completion state remains `BLOCKED` or `REVIEW_COMPLETE_WITH_GAPS`
+  until every planned FRR is complete.
+- Before handing over the PRD as final, run a self-repair loop: verify FRR
+  count, 16-section completeness, source coverage, page/action/state coverage,
+  permission, exception, acceptance, and unresolved P0 gaps; then revise the
+  weak modules instead of merely reporting them.
 
 Use plain text or bold text for module grouping. Do not add `### Mxx Module`
 between the Stage 3 heading and FRR records, because that causes H3 -> H5

@@ -334,6 +334,22 @@ Do not let engineering-side task files become the source of product truth. If
 the code implementation diverges from the PRD, produce a gap report before
 accepting the build.
 
+Recommended sequence:
+
+```text
+1. AI Delivery Spec: shape the opportunity and produce Human-First or AI-Coding PRD.
+2. AI Delivery Spec: lock IA Skeleton, prototype evidence, and AC-YAML.
+3. spec-kit: run constitution/specify using the approved PRD as source input.
+4. spec-kit: run plan/tasks/implement for engineering decomposition.
+5. AI Delivery Spec or coding-agent validators: compare build behavior back to
+   PRD FRRs, prototype data-* contracts, and AC-YAML.
+```
+
+For spec-kit skills mode, keep its generated skills/commands beside this skill;
+do not merge the instructions. AI Delivery Spec answers what/why/acceptance and
+artifact truth. spec-kit answers engineering plan/tasks/implementation after
+that truth is stable.
+
 If the package does not follow this layout, first produce a source map and ask
 for or infer missing paths before implementation. Do not start coding from
 scattered files when the PRD/prototype/acceptance source of truth is ambiguous.

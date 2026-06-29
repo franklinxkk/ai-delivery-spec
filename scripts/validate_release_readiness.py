@@ -10,6 +10,8 @@ human product review. It verifies that the current runtime can support:
 - PRD review and competitor/prototype reverse-engineering routes;
 - reader roles needed by PM, UX, frontend, backend, algorithm, QA, and coding agents.
 - AI+Data product lifecycle, ontology/semantic modeling, ChatBI, and Data Agent paths.
+- AI-native product / agentic system domain contracts and long-form PRD continuation.
+- Multi-agent lifecycle verification across built-in domains before final release.
 """
 
 from __future__ import annotations
@@ -62,6 +64,7 @@ def validate_static_contracts(failures: list[str]) -> None:
     human_template = read(REFERENCES / "templates" / "human-first-prd-template.md")
     ai_template = read(REFERENCES / "templates" / "ai-coding-prd-template.md")
     data_domain = read(REFERENCES / "domain-data-mart.md")
+    ai_domain = read(REFERENCES / "domain-ai-native.md")
 
     require(
         "SKILL.md work/profile routing",
@@ -96,6 +99,8 @@ def validate_static_contracts(failures: list[str]) -> None:
             "Stage 3.5 IA Skeleton Gate",
             "Global Entity Field Dictionary",
             "Complete Module And Function Product Specification",
+            "Long-Form PRD Continuation Contract",
+            "Multi-Agent Lifecycle Verification",
             "FRR section order remains authoritative",
             "Frontend / Backend / QA handoff notes",
             "E2E Cross-Module Canvas",
@@ -157,6 +162,7 @@ def validate_static_contracts(failures: list[str]) -> None:
             "Source Evidence Register",
             "Page Layout And Region Map",
             "Repeat one complete FRR for every in-scope function",
+            "Long-form PRD continuation contract",
             "Frontend / Backend / QA Handoff Notes",
             "Acceptance And Traceability",
             "Sprint Task Breakdown",
@@ -176,6 +182,7 @@ def validate_static_contracts(failures: list[str]) -> None:
             "Part 3 Coding Agent Delivery Package",
             "Part 4 Validation And Review",
             "FRR Completion Gate",
+            "Self-driven repair rule",
             "ac_structured",
             "API Endpoint Inventory",
             "manifest.json",
@@ -183,6 +190,26 @@ def validate_static_contracts(failures: list[str]) -> None:
             "CLAUDE.md",
             ".cursor/rules",
             "Review checklist",
+        ],
+        failures,
+    )
+    require(
+        "AI Native domain",
+        ai_domain,
+        [
+            "AI Native Product And Agentic Systems",
+            "AgentDefinition",
+            "ToolDefinition",
+            "PromptVersion",
+            "ContextAsset",
+            "EvalSet",
+            "RunTrace",
+            "HumanReview",
+            "AIWritebackBlocked",
+            "EvalRegressionDetected",
+            "Human Gate",
+            "fallback",
+            "Acceptance Checklist",
         ],
         failures,
     )
@@ -235,6 +262,7 @@ def validate_scenario_matrix(failures: list[str]) -> None:
             REFERENCES / "prototype-testability.md",
             REFERENCES / "coding-agent-compat.md",
             REFERENCES / "readability-layer.md",
+            REFERENCES / "domain-ai-native.md",
             REFERENCES / "domain-data-mart.md",
             REFERENCES / "templates" / "human-first-prd-template.md",
             REFERENCES / "templates" / "ai-coding-prd-template.md",
@@ -316,6 +344,29 @@ def validate_scenario_matrix(failures: list[str]) -> None:
             "Action type",
             "AgentWritebackBlocked",
             "insight-to-action loop",
+        ],
+        "UC11 AI-native agent domain": [
+            "AI Native Product And Agentic Systems",
+            "AgentDefinition",
+            "ToolDefinition",
+            "EvalSet",
+            "RunTrace",
+            "HumanReview",
+            "AIWritebackBlocked",
+        ],
+        "UC12 long-form PRD continuation": [
+            "Long-Form PRD Continuation Contract",
+            "PRD Completion Ledger",
+            "CONTINUATION_REQUIRED",
+            "Self-driven repair rule",
+        ],
+        "UC13 multi-agent lifecycle validation": [
+            "Multi-Agent Lifecycle Verification",
+            "PM Agent",
+            "Domain Expert Agent",
+            "Architecture / Data / AI Agent",
+            "QA Agent",
+            "Coding Agent",
         ],
     }
     for name, markers in scenarios.items():
@@ -411,7 +462,7 @@ def validate_generated_minimal_samples(failures: list[str]) -> None:
         No AI. POST /api/leads is idempotent by request_id.
 
         ##### §14 Function-Level NFR
-        Server write <= 1s.
+        Server write latency, validation failure, duplicate submit handling, and audit logging are observable with proposed threshold <= 1s.
 
         ##### §15 Frontend / Backend / QA Handoff Notes
         Frontend uses btn-submit-lead disabled/loading states. Backend validates owner. QA tests duplicate submit.

@@ -108,6 +108,18 @@ The product helps analysts use governed data sources, semantic models, ChatBI, a
 
 The release includes source onboarding, catalog governance, semantic modeling, ontology actions, ChatBI, and the data agent console.
 
+## Release Function Inventory
+
+| Function ID | Function Name | Release Scope |
+|---|---|---|
+| M01-F01 | Connect Data Source | in |
+
+## PRD Completion Ledger
+
+| Function ID | Planned | Completed | Status |
+|---|---:|---:|---|
+| M01-F01 | 1 | 1 | complete |
+
 ## Stage 3 Complete Functional Requirement Records
 
 ### M01-F01 Connect Data Source
@@ -205,6 +217,78 @@ ac_structured:
 """
 
 
+ZH_AI_CODING = """
+# AI+Data 平台 AI-Coding PRD 样例
+
+Profile: AI-Coding Full PRD
+
+## 发布功能清单 / Release Function Inventory
+
+| Function ID | Function Name | Release Scope |
+|---|---|---|
+| M01-F01 | 建立数据源接入 | in |
+
+## PRD 完成台账 / PRD Completion Ledger
+
+| Function ID | Planned | Completed | Status |
+|---|---:|---:|---|
+| M01-F01 | 1 | 1 | complete |
+
+## 第一部分 人类可读基础层
+
+### M01-F01 建立数据源接入
+
+#### 1 业务场景
+数据工程师接入多源业务系统，系统生成可治理、可检索、可供 ChatBI 和 Data Agent 使用的数据资产。
+#### 2 角色与场景
+数据工程师提交接入，治理负责人审核分级分类，分析师只能消费已认证资产，数据负责人确认业务用途。
+#### 3 入口与前置条件
+入口为数据源管理页；前置条件是具备接入权限、凭证负责人、业务用途、敏感级别和失败隔离策略。
+#### 4 页面、区域与可见状态
+页面包含连接器列表、凭证抽屉、schema 预览区、同步历史区和异常队列，状态覆盖草稿、连接中、失败、已接入。
+#### 5 字段、字典与校验
+字段包括 source_id、schema_version、sync_mode、sensitivity、owner、retention_policy、quarantine_policy 和 freshness_level。
+#### 6 编号交互流程
+1. 用户触发 data-action connect-source，系统测试连接、预览 schema、登记目录资产并写入审计轨迹。
+#### 7 操作与规则
+保存草稿、测试连接、提交审核、发布同步、禁用数据源都必须幂等、可审计，并返回可见成功或失败状态。
+#### 8 业务规则、计算与口径
+BR-M01-F01-01：未完成分级分类、血缘登记、权限绑定和新鲜度策略的数据源不得进入智能问数范围。
+#### 9 状态、按钮与生命周期行为
+draft -> connected -> syncing -> active -> degraded；失败可重试、隔离或退回治理负责人补充元数据。
+#### 10 权限与数据范围
+权限继承组织、数据源 owner、行列级授权和敏感字段脱敏规则；Data Agent 工具调用必须复用同一范围，越权时拒答并写审计。
+#### 11 异常、降级与恢复
+连接超时保留草稿；schema 漂移触发影响分析；同步失败标记下游新鲜度风险并暂停高风险自动写回。
+#### 12 通知、审计与依赖
+发布 DataSourceConnected、SchemaChanged、IngestionFailed 事件，通知治理负责人并记录操作者、时间、输入和结果。
+#### 13 数据、AI 与算法契约
+契约定义接入、清洗、治理、存储、检索、语义本体、ChatBI、Data Agent 工具范围、人审门禁和写回阻断。
+#### 14 功能级非功能需求
+连接测试、schema 预览、权限校验、审计写入、失败重试和智能问数拒答都必须可观测并可追溯到 source_id。
+#### 15 前端、后端与 QA 交接说明
+前端实现状态展示和 data-testid；后端实现凭证、幂等、权限和审计；QA 覆盖成功、失败、越权、降级和恢复。
+#### 16 验收与追溯
+AC-M01-F01-001：给定用户具备数据源接入权限，当提交有效凭证和业务用途时，则系统生成同步任务、目录资产和审计记录。
+
+## 第二部分 机器可读扩展层
+
+### 结构化验收标准
+
+```yaml
+ac_structured:
+  - id: AC-M01-F01-001
+    frr_ref: M01-F01
+    given: "用户具备数据源接入权限"
+    when: "用户触发 connect-source"
+    then: "系统创建同步任务、目录资产和审计记录"
+    test_type: integration
+    priority: P0
+    data_action: connect-source
+```
+"""
+
+
 BAD_ZH_HEADING = """
 # 坏样例
 
@@ -233,6 +317,25 @@ FRR Index Map:
 ## 第二部分 机器可读扩展层
 
 ### 2.1 结构化验收标准
+"""
+
+
+BAD_AI_CODING = """
+# 坏的 AI-Coding PRD
+
+## 第一部分 Part 1 人类可读基础层
+
+FRR Index Map:
+
+| FRR ID | Name |
+|---|---|
+| M01-F01 | 数据源接入 |
+
+详见 human-first-prd-template.md。
+
+## 第二部分 Part 2 机器可读扩展层
+
+### 结构化验收标准
 """
 
 

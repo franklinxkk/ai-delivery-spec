@@ -1,4 +1,4 @@
-# AI-Coding Full PRD Template (v4.9.8 Profile)
+# AI-Coding Full PRD Template (v4.9.9 Profile)
 
 Use this profile only when the user explicitly wants a coding agent, full AI
 implementation, machine-readable contracts, test stubs, or an implementation
@@ -78,6 +78,7 @@ Forbidden substitutes:
 Required foundation, all inline:
 
 - source evidence register;
+- Release Function Inventory and PRD Completion Ledger;
 - Stage 1: background, roles, user journeys, competitor/alternative learning,
   EARS statements, scope, priority, and out-of-scope;
 - Stage 2: IA Skeleton, prototype lock, `Layout ID`, page layout, and region
@@ -103,6 +104,16 @@ If any check fails, return to Part 1 and complete the missing FRR before writing
 Part 2. Coding agents need scenario context to avoid implementing technically
 valid but business-wrong behavior.
 
+Self-driven repair rule:
+
+- Do not emit Part 2/Part 3 as a workaround for incomplete Part 1.
+- If `validate_prd_quality.py` or the FRR Completion Gate finds gaps, revise
+  Part 1 first, then regenerate affected AC-YAML/API/event/task references.
+- If the context window is near exhaustion, output only the Completion Ledger,
+  next-batch function list, and `CONTINUATION_REQUIRED` continuation
+  instruction. Do not summarize the remaining modules as "same as previous" or
+  "see appendix".
+
 Batch generation strategy:
 
 | Trigger | Required Behavior |
@@ -111,7 +122,8 @@ Batch generation strategy:
 | one batch | keep the batch under roughly 6000 output tokens; choose module/function boundaries that preserve coherence |
 | file-system agent mode | write each batch to the target output file and verify FRR IDs before continuing |
 | web/chat mode without file system | write batches as consecutive conversation sections; do not require file writes |
-| after all batches | run the FRR Completion Gate |
+| after every batch | update the PRD Completion Ledger and list the exact next FRR |
+| after all batches | run the FRR Completion Gate and repair any failed FRR before Part 2 |
 
 ## 第二部分 机器可读扩展层 / Part 2 Machine-Readable Extension Layer
 

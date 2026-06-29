@@ -133,9 +133,13 @@ AI_CODING_SIGNALS = (
     "agents.md",
     "claude.md",
     ".cursor/rules",
+    "spec-kit",
+    "speckit",
     "ac-yaml",
     "ac_structured",
     "test stubs",
+    "/speckit.plan",
+    "/speckit.tasks",
     "自动生成系统",
     "ai编程",
     "ai coding",
@@ -225,6 +229,24 @@ DATA_PRODUCT_SIGNALS = (
     "取数范围",
 )
 
+DESIGN_SYSTEM_SIGNALS = (
+    "visual style",
+    "design system",
+    "frontend-design",
+    "uiux",
+    "antd",
+    "ant design",
+    "material design",
+    "arco",
+    "arcodesign",
+    "glass",
+    "视觉风格",
+    "设计系统",
+    "苹果玻璃",
+    "谷歌扁平",
+    "字节",
+)
+
 
 @dataclass(frozen=True)
 class Route:
@@ -280,6 +302,7 @@ def route(prompt: str) -> Route:
         (contains_any(text, AI_PRODUCT_SIGNALS) and not ai_coding)
         or contains_any(text, WORKFLOW_SIGNALS)
         or contains_any(text, DATA_PRODUCT_SIGNALS)
+        or contains_any(text, DESIGN_SYSTEM_SIGNALS)
     ):
         entrypoints.append("advanced-extensions.md")
     if ai_coding:
@@ -345,6 +368,16 @@ SCENARIOS = (
         "Chinese AI data platform lifecycle",
         "帮我设计一个AI+Data平台，覆盖多源数据采集、清洗治理、湖仓存储、语义本体、ChatBI和Data Agent全生命周期PRD。",
         Route(True, "Standard", "AI Native Product Discovery", "Human-First Full PRD", ("delivery-core.md", "advanced-extensions.md")),
+    ),
+    Scenario(
+        "Spec-kit interop",
+        "把这个AI-Coding PRD整理成可以继续交给spec-kit /speckit.plan和/speckit.tasks使用的交付包。",
+        Route(True, "Standard", "AI Coding Delivery", "AI-Coding Full PRD", ("delivery-core.md", "coding-agent-compat.md")),
+    ),
+    Scenario(
+        "Chinese prototype visual style",
+        "帮我画一个管理后台原型，没确定是Ant Design还是ArcoDesign风格。",
+        Route(True, "Standard", "Traditional Product Lifecycle", "Human-First Full PRD", ("delivery-core.md", "prototype-testability.md", "advanced-extensions.md")),
     ),
     Scenario(
         "Code-only exclusion",

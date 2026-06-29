@@ -564,6 +564,13 @@ Stage 1 Brainstorm:
 - When opportunity framing is in scope, frame the opportunity and write a testable outcome/JTBD.
 - Use competitor/alternative evidence, value assessment, and prioritization
   only when the decision affects scope, roadmap, investment, or delivery order.
+- Use AI Delivery Spec's Opportunity Shaping Protocol when the brainstorming
+  must become a PRD, prototype, acceptance package, roadmap decision, or coding
+  handoff. Use an external `brainstorming` skill only for broad divergent
+  ideation before product delivery shape is selected; then register its output
+  as source evidence and normalize it back into this workflow.
+- Do not run two brainstorming processes in parallel. Pick one divergent pass,
+  then converge into opportunity, scope, assumptions, and next artifact.
 
 ### 1.1 Opportunity Shaping Protocol
 
@@ -908,6 +915,32 @@ Inventory rules:
 - `planned release functions = complete functional requirement records` is mandatory. Deferred/external functions remain in the inventory but do not enter the release denominator.
 - A screenshot, prototype, workbook, SQL table, policy, or previous PRD is evidence. It does not become an implementable requirement until its behavior is mapped to a functional record or a frozen authoritative annex.
 
+### Long-Form PRD Continuation Contract
+
+Large systems must not degrade as the context window fills. Before writing the
+first FRR, create a completion ledger from the release inventory:
+
+| Function ID | Planned | Complete Sections | Source Coverage | Prototype / IA Coverage | AC Coverage | Status |
+|---|---:|---|---|---|---|---|
+| M04-F01 | yes | §1-§16 | SRC-001,SRC-002 | view/action/modal covered | AC-M04-F01-* | complete |
+
+Rules:
+
+- Write large PRDs in module/function batches. Each batch must end at an FRR
+  boundary and update the ledger before continuing.
+- Do not compress tail modules into summaries, indexes, shared tables, or
+  "same as above" text to fit one response.
+- If the output surface cannot hold the remaining FRRs, stop with
+  `CONTINUATION_REQUIRED`, the current ledger, and the exact next function to
+  continue. The completion state cannot be `PASS` until the inventory
+  denominator equals complete FRRs.
+- In file-system agent mode, write to the target PRD file incrementally and run
+  validators after each batch when practical.
+- The self-repair loop is mandatory before final handoff: check FRR count,
+  sections §1-§16, source evidence disposition, IA/prototype page/action/modal
+  coverage, permissions, exceptions, acceptance, and machine-readable references
+  where applicable. Repair weak or missing modules before presenting results.
+
 For each function in the release inventory, write a deterministic functional requirement record (FRR). The FRR is a **human-readable product specification plus traceability contract**. It must include the layout, field, and interaction details needed by frontend, backend, algorithm, and QA teams, while using the locked IA Skeleton/prototype as evidence instead of inventing a parallel design.
 
 | Section | Required Content | Owner / Source |
@@ -1169,6 +1202,41 @@ If a tier budget is exceeded, do not relabel items to make the count pass. Recor
 SIM 1 after Stage 3: review solution before prototype.
 
 SIM 2 after Stage 5: review PRD + prototype together.
+
+### Multi-Agent Lifecycle Verification
+
+Before final release, publication, GitHub submission, or customer handoff, run
+multi-agent lifecycle verification for each in-scope domain. This can be
+performed by real subagents, independent reviewers, or the deterministic
+simulation script, but the result must be recorded as evidence.
+
+Lifecycle stages:
+
+```text
+Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire
+```
+
+Reviewer agents:
+
+| Agent | Focus | Blocking Question |
+|---|---|---|
+| PM Agent | outcome, scope, priority, lifecycle, stakeholder readability | Can a product owner approve what/why/acceptance without hidden assumptions? |
+| Domain Expert Agent | standards, vocabulary, scenarios, role paths, policy | Are domain facts, standards, and operating constraints represented correctly? |
+| Architecture / Data / AI Agent | state, data, integration, AI/runtime, ontology, security | Can implementation preserve invariants, permissions, traceability, and rollback? |
+| QA Agent | acceptance, edge cases, regression, E2E lifecycle | Can tests be written without rereading or inventing requirements? |
+| Coding Agent | source-of-truth order, FRR completeness, AC-YAML, prototype attributes | Can an implementation agent build without guessing behavior? |
+
+Domain coverage rule:
+
+- For each active `domain-*.md`, validate at least one happy path, one exception
+  path, one permission/privacy path, one lifecycle transition, and one
+  acceptance/test path.
+- For AI+Data and AI Native domains, also validate context freshness,
+  ontology/semantic contracts, eval/fallback, human gate, and write scope.
+- A domain/lifecycle cell that is out of scope must say why. Blank cells do not
+  count.
+- If any P0 agent returns `FAIL`, the final completion state cannot be `PASS`;
+  repair the artifact or record an explicit owner-approved de-scope.
 
 ### Persona Walkthrough Script
 

@@ -8,7 +8,7 @@
 > prototypes, acceptance criteria, and coding-agent handoff to stay consistent.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-4.9.8-green.svg)]()
+[![Version](https://img.shields.io/badge/version-4.9.9-green.svg)]()
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-purple.svg)](https://openclaw.ai)
 ![skills.sh](https://skills.sh/b/franklinxkk/ai-delivery-spec)
@@ -20,7 +20,7 @@ specs and machine-readable implementation contracts.
 It works with ChatGPT, Claude, Gemini, Codex, Cursor, GitHub Copilot Workspace,
 OpenClaw, and any AI tool that can read Markdown.
 
-中文关键词：产品经理、PRD、需求文档、产品需求文档、需求规格说明书、原型、竞品分析、AI Coding、AI Native、Spec-Driven Development、SDD、产研协同、测试验收、ToB、ToG、SaaS、CRM、交通安全、高校信息化、医疗信息化。
+中文关键词：产品经理、PRD、需求文档、产品需求文档、需求规格说明书、原型、竞品分析、AI Coding、AI Native、Spec-Driven Development、SDD、spec-kit、skills.sh、产研协同、测试验收、ToB、ToG、SaaS、CRM、交通安全、数据产品、ChatBI、Data Agent、高校信息化、医疗信息化。
 
 ## 解决什么问题 / The Pain
 
@@ -49,8 +49,8 @@ handoff breaks:
 - **Review Report**: PRD/prototype gap review across product, engineering,
   QA, architecture, AI, and operations perspectives.
 - **Domain-Aware Specs**: traffic safety, CRM, AI+Data / data mart / BI /
-  reporting / fill-in, higher-education IT, and medical/hospital IT domain
-  modules.
+  reporting / fill-in, AI Native / agentic systems, higher-education IT, and
+  medical/hospital IT domain modules.
 
 ## 安装 / Install
 
@@ -59,6 +59,26 @@ handoff breaks:
 ```bash
 npx skills add franklinxkk/ai-delivery-spec
 ```
+
+Useful skills.sh commands:
+
+```bash
+# list skills discovered from this repo
+npx skills add franklinxkk/ai-delivery-spec --list
+
+# install to specific agents
+npx skills add franklinxkk/ai-delivery-spec -a codex -a claude-code -a cursor
+
+# use without installing
+npx skills use franklinxkk/ai-delivery-spec --agent codex
+
+# update installed copy
+npx skills update ai-delivery-spec
+```
+
+This repository keeps `SKILL.md` at the root, so Skills CLI / skills.sh can
+discover it directly. Root `SKILL.md` plus valid YAML frontmatter is the
+cross-agent compatibility baseline.
 
 ### Clone
 
@@ -73,6 +93,14 @@ cp -r ai-delivery-spec ~/.claude/skills/ai-delivery-spec
 ```
 
 ## 10 分钟快速上手 / Quick Start
+
+### 产品经理 5 步上手 / PM Quickstart
+
+1. 粗想法先用 Light PRD：说清目标用户、痛点、期望结果，让 AI Delivery Spec 先问最少必要问题。
+2. 要给研发、测试、客户或外包团队看时，升级为 Human-First Full PRD。
+3. 要交给 Cursor、Claude Code、Codex、Copilot 等自动实现时，再升级为 AI-Coding Full PRD。
+4. 有原型、截图、Excel、旧系统或竞品时，先跑 Stage 0，把页面、字段、动作、状态、证据和缺口抽出来。
+5. 最终交付前必须看 Completion State：只有 `PASS` 才代表当前范围已闭合。
 
 ### 1. From Rough Idea To PRD / 从想法到需求
 
@@ -119,6 +147,33 @@ Extract views, roles, data actions, states, fields, modals, entities,
 business flows, gaps, and source evidence from this prototype/screenshot.
 Then help me shape a differentiated PRD and prototype plan.
 ```
+
+### 6. Brainstorm Product Direction / 产品脑暴
+
+```text
+Use AI Delivery Spec opportunity shaping.
+I want to explore [problem / market / user group].
+First help me separate outcome, customer problem, options, assumptions,
+validation path, and next artifact. Do not jump directly to a full PRD.
+```
+
+If you already use a generic `brainstorming` skill, run it for divergent ideas
+first, then feed the selected direction into AI Delivery Spec for PRD, prototype,
+acceptance, and handoff.
+
+### 7. Prototype Visual Style / 原型视觉风格
+
+```text
+Use AI Delivery Spec prototype path.
+Create a clickable prototype for [domain].
+Ask me to choose visual style only if it affects brand/demo/acceptance.
+If unspecified, use a restrained enterprise UI and keep data-testid/data-action
+coverage complete.
+```
+
+When a dedicated frontend-design/UIUX/design-system skill is available, use it
+for visual language and component choices. AI Delivery Spec owns IA, state,
+actions, business rules, and testability.
 
 ## 选择工作路径 / Work Paths
 
@@ -175,6 +230,29 @@ engineering task decomposition. They are complementary: AI Delivery Spec
 stabilizes product-side truth; spec-kit can consume the stabilized truth for
 implementation planning.
 
+### spec-kit 配合方式 / spec-kit Interop
+
+Use this sequence when both tools are present:
+
+```text
+AI Delivery Spec: Discover -> Human-First / AI-Coding PRD -> prototype/IA/AC
+spec-kit: /speckit.constitution -> /speckit.specify -> /speckit.plan -> /speckit.tasks -> /speckit.implement
+```
+
+Mapping:
+
+| AI Delivery Spec | spec-kit |
+|---|---|
+| `delivery/prd/main.md` | feature `spec.md` input / source evidence |
+| `delivery/ia-skeleton.yaml` | product IA annex, no direct replacement |
+| `delivery/prototype/` | interactive evidence, no direct replacement |
+| `delivery/acceptance/ac-structured.yaml` | success criteria and tests |
+| `delivery/agents/AGENTS.md` | coding-agent operating rules |
+
+Rule: spec-kit can decompose and implement after product truth is stable. It
+must not replace the Human-First PRD, AI-Coding PRD, IA Skeleton, or prototype
+evidence.
+
 ## 交付包约定 / Delivery Package Convention
 
 When a PRD/prototype will be consumed by a coding agent or development team,
@@ -229,10 +307,35 @@ same source PRD and export only the slices each tool needs:
 | Tool / Surface | Input Artifact | Output / Use | Put It Here |
 |---|---|---|---|
 | Cursor / Claude Code / Codex / Copilot Workspace | AI-Coding Full PRD, `ac_structured`, prototype | implementation rules and testable build plan | `delivery/agents/` |
+| skills.sh / Skills CLI | root `SKILL.md` GitHub repo | install/use/update skill across Codex, Claude Code, Cursor, Copilot, Gemini CLI, and more | agent skill directories |
+| spec-kit | approved PRD + AC + agent rules | engineering plan, tasks, and implementation convergence | `.specify/` and `specs/` |
+| frontend-design / UIUX skills | IA Skeleton, prototype goal, brand/design system choice | visual language and component-system decisions | prototype/design artifacts |
 | Jira / TAPD / Linear / GitHub Issues | vertical slice backlog, blocker table, bug records | tasks, risks, defects | project tracker |
 | Figma / design review | IA Skeleton, Layout IDs, page regions, component states | design alignment and visual gaps | design file or design review note |
 | Playwright / Browser Use | `data-testid`, `data-action`, demo paths, AC-YAML | automated verification | `delivery/evidence/` |
 | Notion / Confluence / Feishu | Human-First Full PRD and lifecycle annex | stakeholder-readable source of truth | team knowledge base |
+
+## 轻量 CLI / Helper CLI
+
+The repository includes a small helper CLI for teams that want a repeatable
+package layout without adopting another platform:
+
+```powershell
+# create delivery/ with prd, prototype, acceptance, agents, evidence, manifest
+python scripts/ai_delivery_spec_cli.py init-delivery --output delivery
+
+# run repository-level validators
+python scripts/ai_delivery_spec_cli.py check
+
+# run PRD/prototype checks when artifacts exist
+python scripts/ai_delivery_spec_cli.py check --prd delivery/prd/main.md --prototype delivery/prototype/app.html --ia-skeleton delivery/ia-skeleton.yaml --target-language zh
+```
+
+On Windows, use `py -3` instead of `python` if the `python` launcher is not
+registered in PATH.
+
+This CLI is intentionally thin. It initializes the convention and calls the
+same validators documented below; it is not a separate runtime or framework.
 
 ## 输出形态选择 / Output Selector
 
@@ -245,12 +348,42 @@ same source PRD and export only the slices each tool needs:
 | AI-core/high-risk automation | `Tier=L3` | runtime, eval, fallback, ops contracts |
 | coding-agent implementation | AI-Coding Full PRD + coding-agent compatibility | Human-First PRD + AC-YAML, agent rules, validation checks |
 
+## 多智能体生命周期验证 / Multi-Agent Lifecycle Validation
+
+Before final publication, customer handoff, or GitHub release, validate the
+selected domains across the full product lifecycle:
+
+```text
+Discover -> Specify -> Plan -> Tasks -> Build/Verify -> Launch -> Learn/Retire
+```
+
+Reviewer agents:
+
+| Agent | Checks |
+|---|---|
+| PM Agent | outcome, scope, priority, stakeholder-readable PRD |
+| Domain Expert Agent | standards, vocabulary, scenarios, policy constraints |
+| Architecture / Data / AI Agent | state, data, integration, ontology, AI/runtime, security |
+| QA Agent | acceptance, exception, permission, E2E, regression |
+| Coding Agent | FRR completeness, AC-YAML, prototype data-* mapping, source-of-truth order |
+
+Run:
+
+```powershell
+python scripts/validate_multi_agent_lifecycle_scenarios.py
+```
+
+The built-in simulation covers Traffic, CRM, AI+Data, AI Native / Agentic
+Systems, Higher-Education IT, and Medical / Hospital IT across all lifecycle
+stages and reviewer agents.
+
 ## 领域模块 / Domain Modules
 
 | Domain | File |
 |---|---|
 | Traffic Safety / 交通安全 | `references/domain-traffic.md` |
 | CRM / 客户经营 | `references/domain-crm.md` |
+| AI Native / Agentic Systems / AI 原生与智能体系统 | `references/domain-ai-native.md` |
 | AI+Data / Data Mart / BI / Reporting / 数据智能、数据集市、报表与填报 | `references/domain-data-mart.md` |
 | Higher-Education IT / 高校教育信息化 | `references/domain-education-it.md` |
 | Medical / Hospital IT / 医疗医院信息化 | `references/domain-medical-hospital-it.md` |
@@ -289,6 +422,9 @@ python scripts/validate_skill_consistency.py
 python scripts/validate_routing_scenarios.py
 python scripts/validate_release_readiness.py
 python scripts/validate_ai_data_product_scenarios.py
+python scripts/validate_v4_9_9_contracts.py
+python scripts/validate_multi_agent_lifecycle_scenarios.py
+python scripts/ai_delivery_spec_cli.py check
 python scripts/validate_ia_skeleton.py --ia-skeleton delivery/ia-skeleton.yaml --prototype delivery/prototype/app.html --prd delivery/prd/main.md
 python scripts/validate_coding_agent_contract.py --prd delivery/prd/main.md --prototype delivery/prototype/app.html
 ```

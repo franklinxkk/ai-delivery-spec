@@ -481,6 +481,25 @@ window._test = {
 - Use familiar controls: icons for tools, segmented controls for modes, checkboxes for binary choices, tabs for views.
 - Avoid one-hue palettes and decorative gradient blobs.
 
+### Visual Style Clarification And External UI Skills
+
+Ask a short visual-style clarification when style affects acceptance, brand,
+customer demo, procurement review, or design-system compatibility. Useful
+choices include Ant Design-style enterprise UI, Apple glass-style consumer UI,
+Google Material-style flat UI, ArcoDesign / ByteDance-style enterprise UI, or
+an existing company design system.
+
+If the user does not specify a style and the request is an operational ToB/ToG
+prototype, default to a restrained enterprise style: dense information,
+moderate contrast, predictable tables/forms, 4-8px radii, stable layout, and no
+decorative hero sections.
+
+If a dedicated `frontend-design`, `web-design-guidelines`, `uiux`, Figma, or
+brand-system skill is installed and the task includes visual design quality,
+use it for visual language and component-system decisions. AI Delivery Spec
+remains responsible for IA, data-testid/data-action, state, role path, business
+rules, and acceptance traceability.
+
 ## Presentation Mode Specification
 
 Customer-facing or sponsor-facing prototypes should provide a global

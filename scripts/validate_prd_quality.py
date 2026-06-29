@@ -41,9 +41,101 @@ HEADING_RE = re.compile(r"^(#{1,6})\s+\S")
 HEADING_DETAIL_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
 FRR_HEADING_RE = re.compile(r"^(#{3,4})\s+(M\d{2}-F\d{2})\b")
 FRR_ID_RE = re.compile(r"\bM\d{2}-F\d{2}\b")
+r"""
+FRR_SECTION_RE = re.compile(r"^#{4,6}\s*(?:[§搂]\s*)?(\d{1,2})\b")
 FRR_SECTION_RE = re.compile(r"^#{4,6}\s*(?:§\s*)?(\d{1,2})\b")
+FRR_SECTION_RE = re.compile(r"^#{4,6}\s*(?:[§搂]\s*)?(\d{1,2})\b")
+"""
+FRR_SECTION_RE = re.compile(r"^#{4,6}\s*(?:(?:\u00a7|\u6402)\s*)?(\d{1,2})\b")
+FRR_COVERAGE_TRIGGER_RE = re.compile(
+    r"(Release Function Inventory|Function Inventory|Complete Functional Requirement|"
+    r"Stage 3|阶段三|完整功能需求|ac_structured)",
+    re.IGNORECASE,
+)
+FULL_PRD_TRIGGER_RE = re.compile(
+    r"(Human-First Full PRD|AI-Coding Full PRD|PRD Profile|Stage 3 Complete Functional Requirement|"
+    r"阶段三\s*完整功能需求|development handoff|研发|测试|交付)",
+    re.IGNORECASE,
+)
+RELEASE_INVENTORY_RE = re.compile(r"(Release Function Inventory|Function Inventory|功能清单|发布功能清单)", re.IGNORECASE)
+COMPLETION_LEDGER_RE = re.compile(r"(PRD Completion Ledger|Completion Ledger|完成度台账|完成台账)", re.IGNORECASE)
+PLACEHOLDER_RE = re.compile(
+    r"(?i)^(?:todo|tbd|n/a|na|none|null|same as above|see prototype|existing logic|"
+    r"\u5f85\u8865\u5145|\u5f85\u5b9a|\u540c\u4e0a|\u89c1\u539f\u578b|\u6309\u73b0\u6709\u903b\u8f91|[-_/\\.]*)$"
+)
+RFI_TABLE_HEADER_RE = re.compile(
+    r"\|(?=[^\n]*(?:Function ID|功能 ID|功能ID))(?=[^\n]*(?:Release Scope|发布范围|Scope|范围))[^\n]*\|",
+    re.IGNORECASE,
+)
+_DISABLED_LEDGER_TABLE_HEADER_RE = r"""
+    r"\|(?=[^\n]*(?:Function ID|Module|模块|功能))(?=[^\n]*(?:Planned|Completed|Status|计划|完成|状态))[^\n]*\|",
+    re.IGNORECASE,
+)
 PART1_RE = re.compile(r"^##\s+.*(?:Part 1|第一部分).*$", re.MULTILINE | re.IGNORECASE)
 PART2_RE = re.compile(r"^##\s+.*(?:Part 2|第二部分).*$", re.MULTILINE | re.IGNORECASE)
+"""
+r"""
+LEDGER_TABLE_HEADER_RE = re.compile(
+    r"\|(?=[^\n]*(?:Function ID|Module|模块|功能))"
+    r"(?=[^\n]*(?:Planned|Completed|Complete Sections|Status|计划|完成|状态))[^\n]*\|",
+    re.IGNORECASE,
+)
+PART1_RE = re.compile(r"^##\s+.*(?:Part 1|第一部分).*$", re.MULTILINE | re.IGNORECASE)
+PART2_RE = re.compile(r"^##\s+.*(?:Part 2|第二部分).*$", re.MULTILINE | re.IGNORECASE)
+FULL_PRD_TRIGGER_RE = re.compile(
+    r"(Human-First Full PRD|AI-Coding Full PRD|PRD Profile|"
+    r"Stage 3 Complete Functional Requirement|Complete Functional Requirement Records|"
+    r"Development Handoff|development handoff|PRD Completion Ledger|研发|测试|交付)",
+    re.IGNORECASE,
+)
+RELEASE_INVENTORY_RE = re.compile(
+    r"(Release Function Inventory|Function Inventory|功能清单|发布功能清单)",
+    re.IGNORECASE,
+)
+COMPLETION_LEDGER_RE = re.compile(
+    r"(PRD Completion Ledger|Completion Ledger|完成度台账|完成台账)",
+    re.IGNORECASE,
+)
+CONTINUATION_REQUIRED_RE = re.compile(
+    r"(CONTINUATION_REQUIRED|REVIEW_COMPLETE_WITH_GAPS|Completion State:\s*BLOCKED|Completion state:\s*BLOCKED)",
+    re.IGNORECASE,
+)
+FINAL_PASS_RE = re.compile(r"(?im)^\s*Completion state\s*:\s*PASS\s*$")
+RFI_TABLE_HEADER_RE = re.compile(
+    r"\|(?=[^\n]*(?:Function ID|功能 ID|功能ID))(?=[^\n]*(?:Release Scope|Scope|发布范围|范围))[^\n]*\|",
+    re.IGNORECASE,
+)
+"""
+LEDGER_TABLE_HEADER_RE = re.compile(
+    r"\|(?=[^\n]*(?:Function ID|Module|Function))"
+    r"(?=[^\n]*(?:Planned|Completed|Complete Sections|Status))[^\n]*\|",
+    re.IGNORECASE,
+)
+PART1_RE = re.compile(r"^##\s+.*(?:Part 1|Part One).*$", re.MULTILINE | re.IGNORECASE)
+PART2_RE = re.compile(r"^##\s+.*(?:Part 2|Part Two).*$", re.MULTILINE | re.IGNORECASE)
+FULL_PRD_TRIGGER_RE = re.compile(
+    r"(Human-First Full PRD|AI-Coding Full PRD|PRD Profile|"
+    r"Stage 3 Complete Functional Requirement|Complete Functional Requirement Records|"
+    r"Development Handoff|development handoff|PRD Completion Ledger)",
+    re.IGNORECASE,
+)
+RELEASE_INVENTORY_RE = re.compile(
+    r"(Release Function Inventory|Function Inventory)",
+    re.IGNORECASE,
+)
+COMPLETION_LEDGER_RE = re.compile(
+    r"(PRD Completion Ledger|Completion Ledger)",
+    re.IGNORECASE,
+)
+CONTINUATION_REQUIRED_RE = re.compile(
+    r"(CONTINUATION_REQUIRED|REVIEW_COMPLETE_WITH_GAPS|Completion State:\s*BLOCKED|Completion state:\s*BLOCKED)",
+    re.IGNORECASE,
+)
+FINAL_PASS_RE = re.compile(r"(?im)^\s*Completion state\s*:\s*PASS\s*$")
+RFI_TABLE_HEADER_RE = re.compile(
+    r"\|(?=[^\n]*(?:Function ID))(?=[^\n]*(?:Release Scope|Scope))[^\n]*\|",
+    re.IGNORECASE,
+)
 FRR_INDEX_SUBSTITUTE_RE = re.compile(
     r"(FRR\s*Index|FRR\s*Map|索引表|索引地图|详见|参见|see\s+(?:the\s+)?(?:prd|template|appendix|annex|file))",
     re.IGNORECASE,
@@ -308,55 +400,321 @@ def iter_markdown_lines_without_code(text: str) -> list[str]:
     return lines
 
 
-def check_frr_section_completeness(text: str, failures: list[str]) -> None:
-    """Require every explicit FRR heading to contain sections 1-16."""
+def split_markdown_table_row(line: str) -> list[str]:
+    stripped = line.strip()
+    if not stripped.startswith("|") or not stripped.endswith("|"):
+        return []
+    return [cell.strip() for cell in stripped.strip("|").split("|")]
+
+
+def is_table_separator(line: str) -> bool:
+    return bool(re.match(r"^\s*\|[\s|\-:]+\|\s*$", line))
+
+
+def parse_tables(lines: list[str]) -> list[list[list[str]]]:
+    tables: list[list[list[str]]] = []
+    current: list[list[str]] = []
+    for line in lines + [""]:
+        row = split_markdown_table_row(line)
+        if row:
+            if not is_table_separator(line):
+                current.append(row)
+            continue
+        if current:
+            tables.append(current)
+            current = []
+    return tables
+
+
+def col_index(headers: list[str], names: tuple[str, ...]) -> int | None:
+    lowered = [header.lower() for header in headers]
+    for idx, header in enumerate(lowered):
+        if any(name.lower() in header for name in names):
+            return idx
+    return None
+
+
+def extract_release_inventory_ids(text: str) -> set[str]:
+    ids: set[str] = set()
     lines = iter_markdown_lines_without_code(text)
-    frrs: list[tuple[str, int, set[int]]] = []
-    current_id: str | None = None
-    current_level = 0
-    current_sections: set[int] = set()
+    for table in parse_tables(lines):
+        if not table:
+            continue
+        headers = table[0]
+        header_line = "|" + "|".join(headers) + "|"
+        if not RFI_TABLE_HEADER_RE.search(header_line):
+            continue
+        id_col = col_index(headers, ("Function ID", "功能 ID", "功能ID"))
+        scope_col = col_index(headers, ("Release Scope", "发布范围", "Scope", "范围"))
+        if id_col is None:
+            continue
+        for row in table[1:]:
+            if id_col >= len(row):
+                continue
+            frr_id_match = FRR_ID_RE.search(row[id_col])
+            if not frr_id_match:
+                continue
+            scope = row[scope_col].lower() if scope_col is not None and scope_col < len(row) else "in"
+            if any(term in scope for term in ("out", "defer", "later", "external", "not_applicable", "不做", "延期", "外部")):
+                continue
+            ids.add(frr_id_match.group(0))
+    return ids
+
+
+def section_content_too_thin(content: str) -> bool:
+    stripped = re.sub(r"\s+", " ", content.strip())
+    if not stripped:
+        return True
+    if PLACEHOLDER_RE.match(stripped):
+        return True
+    # Remove common table punctuation and technical IDs before measuring signal.
+    signal = re.sub(r"[|:\-`#*_{}\[\]()/\\.,;，。；、\s]", "", stripped)
+    if len(signal) < 18 and not REFERENCE_ANCHOR_RE.search(stripped):
+        return True
+    return False
+
+
+def extract_frrs(text: str) -> list[dict[str, object]]:
+    lines = iter_markdown_lines_without_code(text)
+    frrs: list[dict[str, object]] = []
+    current: dict[str, object] | None = None
+    section_no: int | None = None
+    section_lines: list[str] = []
+
+    def flush_section() -> None:
+        nonlocal section_no, section_lines
+        if current is not None and section_no is not None:
+            sections = current.setdefault("sections", {})
+            assert isinstance(sections, dict)
+            sections[section_no] = "\n".join(section_lines).strip()
+        section_no = None
+        section_lines = []
+
+    def flush_frr() -> None:
+        nonlocal current
+        if current is not None:
+            flush_section()
+            frrs.append(current)
+        current = None
 
     for line in lines:
         heading_match = HEADING_DETAIL_RE.match(line)
-        if not heading_match:
-            continue
-        level = len(heading_match.group(1))
-        frr_match = FRR_HEADING_RE.match(line)
-        if frr_match:
-            if current_id:
-                frrs.append((current_id, current_level, current_sections))
-            current_id = frr_match.group(2)
-            current_level = len(frr_match.group(1))
-            current_sections = set()
-            continue
-        if current_id and level <= current_level:
-            frrs.append((current_id, current_level, current_sections))
-            current_id = None
-            current_level = 0
-            current_sections = set()
-            continue
-        if current_id:
-            section_match = FRR_SECTION_RE.match(line)
-            if section_match:
-                number = int(section_match.group(1))
-                if 1 <= number <= 16:
-                    current_sections.add(number)
+        if heading_match:
+            level = len(heading_match.group(1))
+            frr_match = FRR_HEADING_RE.match(line)
+            if frr_match:
+                flush_frr()
+                current = {"id": frr_match.group(2), "level": len(frr_match.group(1)), "sections": {}}
+                continue
+            if current is not None and level <= int(current["level"]):
+                flush_frr()
+                continue
+            if current is not None:
+                section_match = FRR_SECTION_RE.match(line)
+                if section_match:
+                    flush_section()
+                    number = int(section_match.group(1))
+                    if 1 <= number <= 16:
+                        section_no = number
+                        section_lines = []
+                    continue
+        if current is not None and section_no is not None:
+            section_lines.append(line)
 
-    if current_id:
-        frrs.append((current_id, current_level, current_sections))
+    flush_frr()
+    return frrs
 
+
+def check_frr_section_completeness(text: str, failures: list[str]) -> None:
+    """Require every explicit FRR heading to contain sections 1-16."""
+    frrs = extract_frrs(text)
     missing_messages = []
     required = set(range(1, 17))
-    for frr_id, _, sections in frrs:
-        missing = sorted(required - sections)
+    for frr in frrs:
+        sections = frr["sections"]
+        assert isinstance(sections, dict)
+        missing = sorted(required - set(sections))
         if missing:
-            missing_messages.append(f"{frr_id} missing sections: {', '.join('§' + str(i) for i in missing)}")
+            missing_messages.append(f"{frr['id']} missing sections: {', '.join('§' + str(i) for i in missing)}")
 
     if missing_messages:
         add_failure(
             failures,
             "FRR_COMPLETENESS_GAP: every FRR must inline sections §1-§16. "
             + " | ".join(missing_messages[:20]),
+        )
+
+
+def check_frr_section_body_quality(text: str, failures: list[str]) -> None:
+    """Reject FRRs whose required sections are present but placeholder-thin."""
+    frrs = extract_frrs(text)
+    bad: list[str] = []
+    for frr in frrs:
+        sections = frr["sections"]
+        assert isinstance(sections, dict)
+        for number in range(1, 17):
+            content = str(sections.get(number, ""))
+            if section_content_too_thin(content):
+                bad.append(f"{frr['id']} §{number}")
+    if bad:
+        add_failure(
+            failures,
+            "FRR_SECTION_BODY_GAP: FRR sections must contain non-placeholder, "
+            "implementation-useful content. Thin sections: " + ", ".join(bad[:50]),
+        )
+
+
+def check_frr_reference_coverage(text: str, failures: list[str]) -> None:
+    """Require referenced release function IDs to exist as inline FRR headings."""
+    if not FRR_COVERAGE_TRIGGER_RE.search(text):
+        return
+
+    lines = iter_markdown_lines_without_code(text)
+    referenced_ids = set(FRR_ID_RE.findall("\n".join(lines)))
+    if not referenced_ids:
+        return
+
+    heading_ids = {
+        match.group(2)
+        for match in (FRR_HEADING_RE.match(line) for line in lines)
+        if match
+    }
+    missing = sorted(referenced_ids - heading_ids)
+    if missing:
+        add_failure(
+            failures,
+            "FRR_INVENTORY_COVERAGE_GAP: every referenced release function ID "
+            "must have an inline FRR heading: " + ", ".join(missing[:30]),
+        )
+
+
+def requires_full_prd_contract(text: str) -> bool:
+    """Return true when the artifact claims full PRD / full FRR delivery."""
+    return bool(FRR_ID_RE.search(text) and FULL_PRD_TRIGGER_RE.search(text))
+
+
+def extract_inline_frr_heading_ids(text: str) -> set[str]:
+    lines = iter_markdown_lines_without_code(text)
+    return {
+        match.group(2)
+        for match in (FRR_HEADING_RE.match(line) for line in lines)
+        if match
+    }
+
+
+def parse_int_cell(value: str) -> int | None:
+    match = re.search(r"\d+", value)
+    return int(match.group(0)) if match else None
+
+
+def extract_completion_ledger_rows(text: str) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    lines = iter_markdown_lines_without_code(text)
+    for table in parse_tables(lines):
+        if not table:
+            continue
+        headers = table[0]
+        header_line = "|" + "|".join(headers) + "|"
+        if not LEDGER_TABLE_HEADER_RE.search(header_line):
+            continue
+        for raw_row in table[1:]:
+            row: dict[str, str] = {}
+            for index, header in enumerate(headers):
+                row[header.strip()] = raw_row[index].strip() if index < len(raw_row) else ""
+            rows.append(row)
+    return rows
+
+
+def check_rfi_and_ledger_presence(text: str, failures: list[str]) -> None:
+    if not requires_full_prd_contract(text):
+        return
+
+    inventory_ids = extract_release_inventory_ids(text)
+    ledger_rows = extract_completion_ledger_rows(text)
+    missing: list[str] = []
+    if not RELEASE_INVENTORY_RE.search(text) or not inventory_ids:
+        missing.append("parseable Release Function Inventory table")
+    if not COMPLETION_LEDGER_RE.search(text) or not ledger_rows:
+        missing.append("parseable PRD Completion Ledger table")
+    if missing:
+        add_failure(
+            failures,
+            "RFI_LEDGER_GAP: full PRD delivery must include "
+            + " and ".join(missing)
+            + " before final handoff.",
+        )
+
+
+def check_rfi_denominator(text: str, failures: list[str]) -> None:
+    inventory_ids = extract_release_inventory_ids(text)
+    if not inventory_ids:
+        return
+    heading_ids = extract_inline_frr_heading_ids(text)
+    missing = sorted(inventory_ids - heading_ids)
+    if missing:
+        add_failure(
+            failures,
+            "FRR_INVENTORY_COVERAGE_GAP: every in-scope Release Function "
+            "Inventory item must have an inline FRR heading: "
+            + ", ".join(missing[:30]),
+        )
+
+
+def ledger_row_identifier(row: dict[str, str]) -> str:
+    for key, value in row.items():
+        lowered = key.lower()
+        if any(marker in lowered for marker in ("function id", "module", "function")) and value:
+            return value
+    return "<unknown>"
+
+
+def row_value(row: dict[str, str], markers: tuple[str, ...]) -> str:
+    for key, value in row.items():
+        lowered = key.lower()
+        if any(marker.lower() in lowered for marker in markers):
+            return value
+    return ""
+
+
+def ledger_row_incomplete(row: dict[str, str]) -> bool:
+    planned_text = row_value(row, ("Planned FRRs", "Planned"))
+    completed_text = row_value(row, ("Completed FRRs", "Completed", "Complete Sections"))
+    status_text = row_value(row, ("Status",))
+    missing_text = row_value(row, ("Missing", "Blocking"))
+
+    planned = parse_int_cell(planned_text)
+    completed = parse_int_cell(completed_text)
+    if planned is not None and completed is not None and planned > completed:
+        return True
+
+    combined = " ".join([completed_text, status_text, missing_text]).lower()
+    if "§1-§16" in completed_text or "搂1-搂16" in completed_text:
+        return False
+    if status_text and not re.search(r"(?i)\b(complete|completed|pass|done)\b", status_text):
+        return True
+    if missing_text and not re.search(r"(?i)\b(none|n/a|na|0|-)\b", missing_text):
+        return True
+    if any(marker in combined for marker in ("missing", "blocked", "gap", "todo", "tbd")):
+        return True
+    return False
+
+
+def check_completion_ledger_state(text: str, failures: list[str]) -> None:
+    rows = extract_completion_ledger_rows(text)
+    if not rows:
+        return
+
+    incomplete = [ledger_row_identifier(row) for row in rows if ledger_row_incomplete(row)]
+    if not incomplete:
+        return
+
+    if FINAL_PASS_RE.search(text) or not CONTINUATION_REQUIRED_RE.search(text):
+        add_failure(
+            failures,
+            "PRD_COMPLETION_LEDGER_GAP: ledger has incomplete planned work but "
+            "the artifact does not stop with CONTINUATION_REQUIRED, BLOCKED, or "
+            "REVIEW_COMPLETE_WITH_GAPS. Incomplete rows: "
+            + ", ".join(incomplete[:30]),
         )
 
 
@@ -526,7 +884,12 @@ def main() -> int:
     check_lazy_references(text, failures)
     check_language_ratio(text, failures, target_language, language_fail_ratio)
     check_heading_language(text, failures, target_language)
+    check_rfi_and_ledger_presence(text, failures)
+    check_frr_reference_coverage(text, failures)
+    check_rfi_denominator(text, failures)
     check_frr_section_completeness(text, failures)
+    check_frr_section_body_quality(text, failures)
+    check_completion_ledger_state(text, failures)
     check_ai_coding_part1_inline(text, failures)
     if args.warn_numeric:
         check_unsupported_numeric_claims(text, failures)

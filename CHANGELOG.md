@@ -2,6 +2,32 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.9.9 - 2026-06-29
+
+- Added `references/domain-ai-native.md` as a first-class AI-native / agentic
+  systems domain module covering agents, tools, prompts, context assets, eval
+  sets, run traces, human review, fallback, rollback, and AI writeback policy.
+- Expanded traffic and transport supervision domain coverage with a standards
+  corpus register for national law/policy, GB/GB-T, JT/JT-T/JTG, GA/cross-agency
+  interfaces, provincial/local DB or DBxx/T rules, group standards, and
+  customer-specific operating rules.
+- Expanded CRM domain coverage beyond lead/ticket flow into campaign,
+  opportunity, Customer 360, quote/CPQ, contract/payment, renewal/customer
+  success, partner/channel, and product-demand feedback loops.
+- Hardened long-form Human-First and AI-Coding PRD generation with a Release
+  Function Inventory, PRD Completion Ledger, continuation-required behavior,
+  and self-driven repair before final handoff.
+- Documented skills.sh / Skills CLI installation/use/update flows, spec-kit
+  interoperability, PM quickstart, brainstorming composition, and prototype
+  visual-style clarification in README.
+- Added `scripts/validate_v4_9_9_contracts.py` and extended release/routing
+  validators for AI-native domains, spec-kit interop, external UI design skill
+  composition, and tail-thin PRD rejection.
+- Added multi-agent lifecycle validation across Traffic, CRM, AI+Data,
+  AI Native, Higher-Education IT, and Medical/Hospital IT domains, covering
+  Discover, Specify, Plan, Tasks, Build/Verify, Launch, and Learn/Retire with
+  PM, domain expert, architecture/data/AI, QA, and coding-agent reviewers.
+
 ## v4.9.8 - 2026-06-28
 
 - Added `INFO: complete|partial|missing` to 0D triage and made missing P0

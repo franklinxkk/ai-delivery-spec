@@ -31,7 +31,7 @@ Extension trigger matrix:
 | visual workflow, low-code, connector, automation node, execution replay | Workflow Automation And Low-Code |
 | app/H5/mini-program/PC+mobile, overseas, localization, app stores | Mobile, Multi-Surface, And Global Delivery |
 | release, migration, rollout, on-call, rollback, retirement | System Readiness, Release, And Retirement |
-| industry/domain switch, traffic safety, CRM, higher-education informationization, medical/hospital IT, templates | Domain Modules And Templates |
+| industry/domain switch, traffic safety, transport supervision, CRM, AI-native product, agentic system, higher-education informationization, medical/hospital IT, templates | Domain Modules And Templates |
 | coding agent handoff, generate AGENTS.md/CLAUDE.md/.cursor/rules/.cursorrules, convert AC to test stubs, implement from PRD | Coding Agent Compatibility |
 
 ## AI Feature / AI Native / Prompt Ops
@@ -319,9 +319,24 @@ Domain modules remain load-on-demand assets:
 - new industry/company domain: start from `domain-module-template.md`;
 - traffic safety: `domain-traffic.md`;
 - CRM: `domain-crm.md`.
+- AI-native product / agentic system: `domain-ai-native.md`.
 - higher-education informationization: `domain-education-it.md`.
 - medical / hospital IT: `domain-medical-hospital-it.md`.
 - data mart / BI / reporting / fill-in: `domain-data-mart.md`.
+
+Traffic/transport domain note: when traffic safety, transport supervision, or
+government transportation data products are in scope, the domain module must
+include a standards corpus register covering applicable national law/policy,
+GB/GB-T national standards, JT/JT-T and JTG transport industry standards,
+GA/public-safety interfaces where relevant, provincial/local DB or DBxx/T
+standards, group standards (`T/...`), and customer/enterprise rules. Do not
+hardcode a standard as active without issuer, region, effective date, version,
+and applicability.
+
+CRM domain note: when CRM scope spans marketing, sales, service, customer
+success, partner/channel, contract/payment, or product-feedback loops, use the
+CRM domain module to lock lifecycle states, SLA/response tasks, Customer 360,
+permission layers, and AI suggestions as supporting behavior.
 
 Templates:
 
@@ -338,6 +353,18 @@ PRDs, market sizing, opportunity trees, roadmaps, or issue lists, register them
 as source artifacts and map them into `delivery-core.md` lifecycle stages. Do
 not load or reproduce their complete process unless the user explicitly asks to
 run that external framework.
+
+Composition with external skills:
+
+- Use AI Delivery Spec for product-side truth: PRD, IA, prototype testability,
+  acceptance, lifecycle gates, and coding-agent handoff.
+- Use external brainstorming skills only for divergent ideation before product
+  shape exists; then convert the result into Opportunity Shaping evidence.
+- Use external frontend-design/UIUX/design-system skills for visual language
+  when prototype style, brand, or component-system quality is in scope.
+- Use spec-kit after the product specification is stable, mainly for
+  engineering plan/tasks/implementation convergence. Do not let spec-kit task
+  files replace the Human-First or AI-Coding PRD.
 
 Strategy/discovery guidance lives in `delivery-core.md`. This file only adds
 advanced triggers and contracts.

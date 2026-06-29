@@ -19,6 +19,7 @@ This file validates that the domain module contract can migrate beyond traffic s
 - UI / Mobile Patterns
 - Policy / Privacy Constraints
 - Domain Test Scenarios
+- Multi-Agent Lifecycle Verification Matrix
 - Acceptance Checklist
 
 ## Domain Purpose
@@ -28,6 +29,9 @@ This file validates that the domain module contract can migrate beyond traffic s
 - Sensitive areas: customer contacts, contract amount, payment, customer complaints, partner relationship.
 - AI may optimize: lead classification, ticket routing, customer summary, follow-up suggestion, churn/renewal hint.
 - AI must not decide automatically: contract approval, payment confirmation, customer punishment, final sales commitment.
+- Capability scope may include marketing lead acquisition, SFA pipeline,
+  Customer 360, CPQ/quotation, contract/payment, service tickets, customer
+  success/renewal, partner/channel operations, and product-feedback loops.
 - Stage 3.5 IA Skeleton should be used for CRM delivery when the scope covers
   two or more modules (lead/opportunity/customer/ticket/contract/payment), two
   or more primary roles, or any cross-module lifecycle.
@@ -46,6 +50,10 @@ This file validates that the domain module contract can migrate beyond traffic s
 | Ticket | customer issue or request requiring handling | service module |
 | ResponseTask | SLA-driven reminder/escalation task | workflow module |
 | Partner | channel/agent who introduces or serves customers | partner module |
+| Campaign | marketing activity, channel, audience, and conversion source | marketing module |
+| Quote / CPQ | product/package/discount proposal before contract | quotation module |
+| Renewal / Churn Risk | customer success lifecycle signal | customer success module |
+| Demand | product request created from service or sales feedback | product/R&D module |
 
 ## Aggregates and Entities
 
@@ -57,6 +65,10 @@ This file validates that the domain module contract can migrate beyond traffic s
 | Contract | amount, payment plan, invoices | draft / signed / partially_paid / paid / overdue |
 | Ticket | type, owner, SLA, result | new / assigned / processing / pending_customer / escalated / closed |
 | ResponseTask | object ref, SLA, owner, priority | pending / responded / overdue / escalated / closed |
+| Campaign | audience, channel, cost, leads, conversion | draft / active / completed / archived |
+| Quote | product package, price, discount, approval | draft / submitted / approved / rejected / expired |
+| RenewalPlan | account, renewal date, risk, owner, actions | planned / at_risk / negotiating / renewed / churned |
+| Demand | source ticket/customer, value, review, roadmap link | new / reviewed / scheduled / released / rejected |
 
 ## Domain Events
 
@@ -74,6 +86,12 @@ events:
     payload: { ticket_id, reason, owner_role, response_task_id }
   PaymentRegistered:
     payload: { contract_id, payment_id, amount, operator_id }
+  RenewalRiskDetected:
+    payload: { customer_id, risk_level, evidence_refs, owner_id }
+  DemandCreatedFromTicket:
+    payload: { demand_id, ticket_id, customer_id, creator_id }
+  QuoteApproved:
+    payload: { quote_id, opportunity_id, approver_id, approved_at }
 ```
 
 ## State Machines
@@ -85,6 +103,9 @@ Ticket: new -> assigned -> processing -> pending_customer -> closed
 Ticket: processing | pending_customer -> escalated -> processing
 ResponseTask: pending -> responded -> closed
 ResponseTask: pending -> overdue -> escalated -> closed
+Quote: draft -> submitted -> approved | rejected | expired
+RenewalPlan: planned -> at_risk -> negotiating -> renewed | churned
+Demand: new -> reviewed -> scheduled -> released | rejected
 ```
 
 ## Metric / Indicator Governance
@@ -95,6 +116,11 @@ ResponseTask: pending -> overdue -> escalated -> closed
 | overdue_ticket_count | tickets beyond SLA | Ticket | service manager |
 | stalled_opportunity_count | opportunities with no update beyond threshold | Opportunity | sales manager |
 | partner_feedback_delay | partner leads without feedback | Partner + Lead | channel manager |
+| campaign_conversion_rate | qualified leads / campaign leads by channel and period | Campaign + Lead | marketing ops |
+| win_rate_by_stage | won opportunities / stage-entered opportunities | Opportunity | sales ops |
+| payment_overdue_amount | unpaid amount past payment-plan date | Contract + Payment | finance |
+| renewal_risk_count | active customers with renewal risk above threshold | Customer + RenewalPlan | customer success |
+| ticket_to_demand_rate | product-related tickets converted to demands | Ticket + Demand | product ops |
 
 ## AI Context Sources
 
@@ -104,6 +130,9 @@ ResponseTask: pending -> overdue -> escalated -> closed
 | customer interactions | followup/ticket records | real-time | customer owner + authorized roles |
 | contract/payment | finance module | real-time | masked by role |
 | product issue history | ticket/demand module | daily/real-time | service/product roles |
+| marketing and channel source | campaign/partner platform | daily/real-time | marketing/channel roles |
+| quote/discount history | quotation/contract module | real-time | sales manager/finance/legal scope |
+| renewal and usage signals | customer success/product telemetry | daily | customer owner + CS role |
 
 ## Content / Knowledge Assets
 
@@ -114,6 +143,9 @@ ResponseTask: pending -> overdue -> escalated -> closed
 | product FAQ/solution | product/version, audience, effective date | product review before publishing |
 | contract/payment policy | contract type, approval role, financial boundary | finance/legal authority |
 | service templates | ticket type, response text, attachment requirements | service owner and revision history |
+| sales stage playbook | stage, exit criteria, required evidence, next action | sales leadership review |
+| quote/discount policy | product package, discount boundary, approval role | finance/legal authority |
+| renewal/churn playbook | risk signal, intervention action, owner, cadence | customer success owner |
 
 ## Core Workflows
 
@@ -124,6 +156,9 @@ ResponseTask: pending -> overdue -> escalated -> closed
 | customer issue handling | customer feedback | ticket closed or demand created |
 | product feedback loop | repeated tickets | demand evaluated/scheduled |
 | partner service | partner introduces lead | feedback sent to partner |
+| marketing-to-sales handoff | campaign lead qualified | lead assigned and SLA tracked |
+| quote-to-contract | opportunity price proposal approved | contract draft or signed |
+| renewal/churn intervention | renewal risk signal appears | renewal plan closed as renewed/churned |
 
 ## Role Path Patterns
 
@@ -134,12 +169,18 @@ ResponseTask: pending -> overdue -> escalated -> closed
 | customer service | service queue | create ticket, assign, follow, close | confirm payment | ticket closure |
 | product/R&D | ticket/demand queue | accept, resolve, adopt demand | change contract/payment | demand roadmap |
 | finance | contract/payment | register payment, view overdue | edit customer issue | payment updated |
+| marketing ops | campaign dashboard | import leads, inspect conversion | change opportunity stage | leads handed off |
+| customer success | customer success workspace | inspect health, plan renewal, create task | approve discount/payment | renewal outcome |
+| channel manager | partner workspace | manage partner leads, feedback, settlement evidence | see unrelated partner data | partner SLA closed |
 
 ## UI / Mobile Patterns
 
 - dashboard: exception metrics with drilldown;
 - response center: SLA task queue;
 - customer 360: contacts, followups, opportunities, contracts, tickets;
+- customer success workspace: health, usage, renewal, churn risk, intervention tasks;
+- campaign and channel views: lead source, conversion funnel, attribution, partner feedback;
+- quote/contract/payment flow: quote approval, contract state, payment plan, overdue follow-up;
 - mobile sales: customer lookup, followup, ticket submission, weak-network draft;
 - boss path: exception -> object detail -> owner action -> status verification.
 - IA Skeleton examples:
@@ -162,6 +203,8 @@ ResponseTask: pending -> overdue -> escalated -> closed
 - cross-tenant/customer access requires explicit authorization;
 - AI suggestions must show source and confidence;
 - AI cannot confirm payment, approve contract, or close customer issue without human confirmation.
+- AI cannot approve quote discounts, decide churn status, modify payment amount,
+  or publish product roadmap commitments without accountable human approval.
 
 ## Domain Test Scenarios
 
@@ -171,10 +214,55 @@ ResponseTask: pending -> overdue -> escalated -> closed
 | customer rejects ticket result | customer service | ticket pending_customer | escalate | TicketEscalated, urgent ResponseTask created |
 | sales mobile weak network followup | sales | customer visible | write followup offline | draft preserved, no data loss |
 | partner lead feedback | channel manager | partner lead converted | send feedback | PartnerFeedbackRecorded |
+| quote approval boundary | sales manager/finance | quote exceeds discount threshold | submit -> review -> approve/reject | QuoteApproved or rejection audit |
+| renewal risk intervention | customer success | customer is at_risk | create plan -> follow up -> close | RenewalPlan ends renewed/churned |
+| ticket to demand loop | service/product | repeated product issue | convert ticket to demand | DemandCreatedFromTicket traceable |
+
+## Multi-Agent Lifecycle Verification Matrix
+
+| domain_id | stage | reviewer_agent | path_type | scenario_ref | evidence_ref | blocking_question | expected_result | test_marker | verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| crm | Discover | PM Agent | happy_path | lead response | Domain Purpose / Core Workflows | Is the business outcome lead response or wider customer operating response? | outcome and release boundary are explicit | crm_discover_pm_happy_path | PASS |
+| crm | Discover | Domain Expert Agent | exception_path | customer rejects ticket result | Domain Test Scenarios | Are sales/service/customer success exceptions discovered? | ticket rejection and escalation are in scope or de-scoped | crm_discover_domain_exception_path | PASS |
+| crm | Discover | Architecture / Data / AI Agent | permission_privacy_path | Customer 360 | Policy / Privacy Constraints | Are contact/payment/complaint data scopes identified? | customer360_masking and role scope are required | customer360_masking | PASS |
+| crm | Discover | QA Agent | lifecycle_transition | lead to opportunity | State Machines | Can QA see the first lifecycle chain? | Lead -> Opportunity path is testable | crm_discover_qa_lifecycle_transition | PASS |
+| crm | Discover | Coding Agent | acceptance_test_path | coding package | UI / Mobile Patterns | Can implementation sources be found? | ac_structured, data-testid, data-action, data-state, data-api, data-method, manifest.json, source_of_truth_order required | ac_structured;data-testid;data-action;data-state;data-api;data-method;manifest.json;source_of_truth_order | PASS |
+| crm | Specify | PM Agent | happy_path | opportunity conversion | Core Workflows | Does the PRD specify visible and revenue result? | lead_to_cash_trace starts from qualified lead | lead_to_cash_trace | PASS |
+| crm | Specify | Domain Expert Agent | exception_path | quote approval boundary | Domain Test Scenarios | Are discount and approval boundaries explicit? | QuoteApproved or rejection audit is specified | crm_specify_domain_exception_path | PASS |
+| crm | Specify | Architecture / Data / AI Agent | permission_privacy_path | contract/payment | AI Context Sources / Policy | Are finance fields masked and human-owned? | AI cannot confirm payment or approve contract | crm_specify_arch_permission_privacy_path | PASS |
+| crm | Specify | QA Agent | lifecycle_transition | ResponseTask SLA | State Machines | Can SLA state and escalation be tested? | pending -> overdue -> escalated -> closed is explicit | sla_response_task | PASS |
+| crm | Specify | Coding Agent | acceptance_test_path | FRR package | Acceptance Checklist | Can coding agent implement without guessing? | function, state, permission, and AC are traceable | crm_specify_coding_acceptance_test_path | PASS |
+| crm | Plan | PM Agent | happy_path | campaign to sales handoff | Core Workflows | Are marketing and sales owners aligned? | campaign leads hand off with SLA | crm_plan_pm_happy_path | PASS |
+| crm | Plan | Domain Expert Agent | exception_path | partner feedback delay | Metric / Indicator Governance | Are partner/channel SLA metrics planned? | partner_feedback_delay has owner and source | crm_plan_domain_exception_path | PASS |
+| crm | Plan | Architecture / Data / AI Agent | permission_privacy_path | row/field scope | Policy / Privacy Constraints | Are tenant/customer/partner scopes planned? | cross-tenant and cross-partner access blocked | crm_plan_arch_permission_privacy_path | PASS |
+| crm | Plan | QA Agent | lifecycle_transition | renewal plan | State Machines | Can QA plan customer success lifecycle tests? | RenewalPlan planned -> renewed/churned is explicit | crm_plan_qa_lifecycle_transition | PASS |
+| crm | Plan | Coding Agent | acceptance_test_path | AGENTS handoff | UI / Mobile Patterns | Are delivery paths and source order defined? | delivery/manifest and source_of_truth_order are required | source_of_truth_order;manifest.json | PASS |
+| crm | Tasks | PM Agent | happy_path | customer issue handling | Core Workflows | Are slices tied to customer closure? | ticket closed or demand created | ticket_to_demand_trace | PASS |
+| crm | Tasks | Domain Expert Agent | exception_path | quote rejected | State Machines | Are rejected/expired quote tasks split? | Quote states are not hidden under management | crm_tasks_domain_exception_path | PASS |
+| crm | Tasks | Architecture / Data / AI Agent | permission_privacy_path | Customer 360 masking | UI / Mobile Patterns / Policy | Do tasks preserve field-level masking? | customer360_masking is acceptance relevant | customer360_masking | PASS |
+| crm | Tasks | QA Agent | lifecycle_transition | ticket escalation | Domain Test Scenarios | Are escalation and urgent response tasks planned? | TicketEscalated and ResponseTask created | sla_response_task | PASS |
+| crm | Tasks | Coding Agent | acceptance_test_path | data-* mapping | UI / Mobile Patterns | Can coding tasks map views/actions? | data-testid/data-action/data-state/data-api/data-method are required | data-testid;data-action;data-state;data-api;data-method | PASS |
+| crm | Build/Verify | PM Agent | happy_path | boss exception cockpit | Role Path Patterns | Does build close operating exceptions? | owner action and verification visible | crm_build_pm_happy_path | PASS |
+| crm | Build/Verify | Domain Expert Agent | exception_path | ticket to demand loop | Domain Test Scenarios | Is product feedback traceable? | DemandCreatedFromTicket links service to roadmap | ticket_to_demand_trace | PASS |
+| crm | Build/Verify | Architecture / Data / AI Agent | permission_privacy_path | AI suggestion | Policy / Privacy Constraints | Does AI remain supporting behavior? | no payment/contract/ticket closure without human approval | crm_build_arch_permission_privacy_path | PASS |
+| crm | Build/Verify | QA Agent | lifecycle_transition | mobile weak network | Domain Test Scenarios | Are offline drafts and duplicate prevention tested? | draft preserved and no data loss | crm_build_qa_lifecycle_transition | PASS |
+| crm | Build/Verify | Coding Agent | acceptance_test_path | AC validation | Acceptance Checklist | Can tests bind to FRR and prototype? | ac_structured and data-* coverage required | ac_structured;data-testid;data-action | PASS |
+| crm | Launch | PM Agent | happy_path | lead-to-cash launch | Aggregates and Entities / Events | Are revenue-critical events ready? | lead_to_cash_trace covers LeadAssigned -> PaymentRegistered | lead_to_cash_trace | PASS |
+| crm | Launch | Domain Expert Agent | exception_path | churn risk intervention | Domain Test Scenarios | Are renewal risk launch controls explicit? | RenewalPlan closes renewed/churned with evidence | crm_launch_domain_exception_path | PASS |
+| crm | Launch | Architecture / Data / AI Agent | permission_privacy_path | export and finance | Policy / Privacy Constraints | Are export and sensitive fields audited? | export requires audit and role masking | crm_launch_arch_permission_privacy_path | PASS |
+| crm | Launch | QA Agent | lifecycle_transition | contract/payment | Aggregates and Entities | Can smoke tests cover payment overdue path? | Contract partially_paid/paid/overdue is testable | crm_launch_qa_lifecycle_transition | PASS |
+| crm | Launch | Coding Agent | acceptance_test_path | release package | Acceptance Checklist | Can coding agent identify launch blockers? | package paths and acceptance evidence are explicit | crm_launch_coding_acceptance_test_path | PASS |
+| crm | Learn/Retire | PM Agent | happy_path | funnel learning | Metric / Indicator Governance | Can post-launch learning improve conversion/SLA? | metrics have owners and sources | crm_learn_pm_happy_path | PASS |
+| crm | Learn/Retire | Domain Expert Agent | exception_path | deprecated playbook | Content / Knowledge Assets | Can outdated policies/playbooks retire safely? | playbook versions and governance exist | crm_learn_domain_exception_path | PASS |
+| crm | Learn/Retire | Architecture / Data / AI Agent | permission_privacy_path | retained customer data | Policy / Privacy Constraints | Are retention/export/privacy risks visible? | customer sensitive data remains scoped/audited | crm_learn_arch_permission_privacy_path | PASS |
+| crm | Learn/Retire | QA Agent | lifecycle_transition | response task regression | State Machines | Can regression preserve SLA lifecycle? | pending/overdue/escalated/closed remains covered | sla_response_task | PASS |
+| crm | Learn/Retire | Coding Agent | acceptance_test_path | historical AC | Acceptance Checklist | Can old AC IDs remain stable after iteration? | acceptance_test_path and source_of_truth_order preserved | crm_learn_coding_acceptance_test_path | PASS |
 
 ## Acceptance Checklist
 
 - [ ] Lead, opportunity, customer, ticket, contract/payment, response task states are defined.
+- [ ] Marketing/campaign, quote/CPQ, renewal/customer success, partner/channel,
+      and product-demand loops are included or explicitly out of scope.
 - [ ] Every SLA exception has owner, action, and closure rule.
 - [ ] Customer 360 shows business data, not only metadata.
 - [ ] Role/data isolation is explicit.
