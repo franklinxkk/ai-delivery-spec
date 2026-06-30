@@ -1,6 +1,15 @@
-# AI Delivery Spec（产品侧 SDD 规范框架）
+# AI Delivery Spec（产品侧 SDD / AI Coding 交付规范）
 
-**中文关键词**：产品经理 | PRD | 需求文档 | 原型 | FRR | AC-YAML | AI Coding | Spec-Driven | 产研协同 | 交付规范 | ToB | ToG | SaaS
+**Search keywords**: product management | PRD | product requirements document |
+requirements engineering | spec-driven development | SDD | AI coding |
+coding-agent handoff | acceptance criteria | prototype testability | product ops |
+enterprise software | SaaS | CRM | BI | ChatBI | Data Agent | AI Native |
+agentic workflow | spec-kit | skills.sh
+
+**中文关键词**：产品经理 | 产品需求文档 | 需求规格说明书 | PRD | 原型 |
+验收标准 | AI 编程 | AI Coding | 编码智能体 | 产品侧 SDD | 产研协同 |
+测试验收 | 自动化测试 | ToB | ToG | SaaS | CRM | 数据产品 | ChatBI |
+Data Agent | AI 原生 | 智能体工作流 | spec-kit | skills.sh
 
 > 面向产品经理、产研团队和 AI 编程团队的产品侧 SDD 规范：把想法、竞品、原型、PRD、验收、上线和 AI Coding 交接统一成可读、可测、可实现的一套交付标准。
 >
@@ -8,7 +17,7 @@
 > prototypes, acceptance criteria, and coding-agent handoff to stay consistent.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-4.9.9-green.svg)]()
+[![Version](https://img.shields.io/badge/version-4.9.10-green.svg)]()
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-purple.svg)](https://openclaw.ai)
 ![skills.sh](https://skills.sh/b/franklinxkk/ai-delivery-spec)
@@ -20,7 +29,17 @@ specs and machine-readable implementation contracts.
 It works with ChatGPT, Claude, Gemini, Codex, Cursor, GitHub Copilot Workspace,
 OpenClaw, and any AI tool that can read Markdown.
 
-中文关键词：产品经理、PRD、需求文档、产品需求文档、需求规格说明书、原型、竞品分析、AI Coding、AI Native、Spec-Driven Development、SDD、spec-kit、skills.sh、产研协同、测试验收、ToB、ToG、SaaS、CRM、交通安全、数据产品、ChatBI、Data Agent、高校信息化、医疗信息化。
+Recommended GitHub topics:
+
+```text
+product-management, prd, requirements-engineering, spec-driven-development,
+ai-coding, coding-agent, ai-agents, ai-native, agent-skills, skills-sh,
+spec-kit, acceptance-criteria, prototype, software-delivery,
+enterprise-software, saas, crm, business-intelligence, chatbi, data-agent
+```
+
+Use it when a team needs one shared source of truth for PMs, developers,
+architects, QA, vendors, customers, and coding agents.
 
 ## 解决什么问题 / The Pain
 
@@ -32,6 +51,7 @@ handoff breaks:
 | PRD is readable by AI but not by developers, QA, or stakeholders | scenario-first, human-readable PRD with role paths, page layout, fields, rules, exceptions, NFR, and acceptance |
 | Prototype looks good but cannot be tested or implemented | `data-testid`, `data-action`, IA Skeleton, page/region layout, interaction ledger, and demo-closed checks |
 | Coding agent gets vague requirements and invents behavior | AI-Coding PRD with `ac_structured`, API/data/event contracts, `AGENTS.md`, `CLAUDE.md`, Cursor rules, and manifest |
+| Large PRD starts detailed but later modules become thin | Stage 3.5 cross-module flow contract, FRR completion gates, batch continuation, and post-generation checklist |
 | AI features ship without runtime safety | write scope, human gate, fallback, eval, rollback, observability, prompt/version governance |
 | PM, frontend, backend, algorithm, and QA read different truths | one source PRD with human-readable spec plus machine-readable contracts |
 
@@ -43,6 +63,8 @@ handoff breaks:
   frontend, backend, algorithm, QA, vendor, sponsor, and customer review.
 - **AI-Coding Full PRD**: Human-First PRD plus AC-YAML, machine-readable
   contracts, API/event/data stubs, delivery manifest, and coding-agent rules.
+- **Multi-Module PRD Pack**: master contract plus module PRDs, cross-module
+  flow contract, field mapping, event/notification inventory, and E2E canvas.
 - **Prototype Delivery Pack**: clickable prototype requirements with stable
   test IDs, actions, state rules, role paths, shadow-test isolation, and demo
   mode.
@@ -101,6 +123,17 @@ cp -r ai-delivery-spec ~/.claude/skills/ai-delivery-spec
 3. 要交给 Cursor、Claude Code、Codex、Copilot 等自动实现时，再升级为 AI-Coding Full PRD。
 4. 有原型、截图、Excel、旧系统或竞品时，先跑 Stage 0，把页面、字段、动作、状态、证据和缺口抽出来。
 5. 最终交付前必须看 Completion State：只有 `PASS` 才代表当前范围已闭合。
+
+### 按角色/痛点选择入口 / Role-Based Entry
+
+| Role / Pain | Start With | Ask For |
+|---|---|---|
+| 初级产品经理 / new PM | Light PRD + clarification | turn rough input into goals, users, scenarios, open questions, and next checks |
+| 中级产品经理 / feature owner | Human-First Full PRD | complete module specs, role paths, field dictionaries, rules, exceptions, and acceptance |
+| 高级产品经理 / complex owner | Stage 0 + Stage 3.5 + gates | prototype reverse engineering, IA Skeleton, cross-module flow contract, E2E canvas, and launch readiness |
+| 产品总监 / product lead | opportunity shaping + lifecycle review | outcome, priority, roadmap assumptions, resource tradeoffs, launch risks, and learn/retire signals |
+| 开发/架构 / engineering lead | AI-Coding Full PRD | API/data/event contracts, source-of-truth order, manifest, AGENTS/CLAUDE/Cursor rules |
+| 测试/RPA / QA automation | coding-agent contract checks | AC-YAML, data-testid/action/state/API mapping, positive/negative cases, regression paths |
 
 ### 1. From Rough Idea To PRD / 从想法到需求
 
@@ -390,7 +423,9 @@ stages and reviewer agents.
 
 Adding a new industry: copy `references/domain-module-template.md`, keep the
 section contract, and replace domain-specific vocabulary, workflows, state
-machines, privacy rules, and test scenarios.
+machines, privacy rules, and test scenarios. Keep the First-Principles Domain Lens compact:
+value object, role job, lifecycle state, source authority, high-risk boundary,
+and test evidence.
 
 ## 示例 / Examples
 
@@ -422,7 +457,6 @@ python scripts/validate_skill_consistency.py
 python scripts/validate_routing_scenarios.py
 python scripts/validate_release_readiness.py
 python scripts/validate_ai_data_product_scenarios.py
-python scripts/validate_v4_9_9_contracts.py
 python scripts/validate_multi_agent_lifecycle_scenarios.py
 python scripts/ai_delivery_spec_cli.py check
 python scripts/validate_ia_skeleton.py --ia-skeleton delivery/ia-skeleton.yaml --prototype delivery/prototype/app.html --prd delivery/prd/main.md

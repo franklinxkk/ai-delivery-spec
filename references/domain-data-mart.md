@@ -7,6 +7,7 @@ This module is intentionally broader than a data mart checklist. It treats data 
 ## Contents
 
 - Domain Purpose
+- First-Principles Domain Lens
 - Vocabulary
 - Aggregates and Entities
 - Domain Events
@@ -41,6 +42,19 @@ Use this module when any of these capabilities are in scope:
 - semantic model, metric layer, dimension dictionary, business glossary, ontology object/link/action types, or data product API;
 - dashboard, self-service analysis, report template, filling task, export, embedded analytics, or operational cockpit;
 - Data Agent, ChatBI, NL2SQL, NL2Metrics, insight generation, anomaly attribution, report writing, or action agent.
+
+## First-Principles Domain Lens
+
+AI+Data product judgment starts from trusted decision flow, not from a report,
+warehouse, or chatbot label.
+
+| Lens | Data Product Question | Acceptance Signal |
+|---|---|---|
+| Data supply chain | Which source becomes trusted data, at what freshness and quality? | source, sync, quality, lineage, and owner are explicit |
+| Semantic truth | Which metrics, dimensions, entities, and ontology actions users rely on? | semantic/ontology version and permission scope are governed |
+| Decision loop | What analysis, fill-in, alert, or action changes after insight? | BI/ChatBI/Data Agent output links to workflow or accountable decision |
+| Reversibility | Which data or ontology writes can be corrected safely? | human gate, audit, rollback, and recalculation scope are defined |
+| Evidence | Can every answer, metric, and generated report cite source/caliber? | citations, query trace, and quality status are visible |
 
 ## Vocabulary
 

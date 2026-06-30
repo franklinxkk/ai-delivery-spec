@@ -324,6 +324,11 @@ Domain modules remain load-on-demand assets:
 - medical / hospital IT: `domain-medical-hospital-it.md`.
 - data mart / BI / reporting / fill-in: `domain-data-mart.md`.
 
+Each domain module must keep a compact First-Principles Domain Lens. Use it to
+judge value object, role job, lifecycle state, source authority, high-risk
+boundaries, and test evidence before writing module PRDs. Do not copy long
+industry standards into the public protocol; register sources and applicability.
+
 Traffic/transport domain note: when traffic safety, transport supervision, or
 government transportation data products are in scope, the domain module must
 include a standards corpus register covering applicable national law/policy,

@@ -22,15 +22,15 @@ Thanks for helping improve AI Delivery Spec.
 Domain modules make AI Delivery Spec useful in new industries.
 
 1. Copy `references/domain-module-template.md`.
-2. Keep the 14-section domain contract exactly:
+2. Keep the 15-section domain contract exactly:
    `Domain Purpose`, `Vocabulary`, `Aggregates and Entities`,
    `Domain Events`, `State Machines`, `Metric / Indicator Governance`,
    `AI Context Sources`, `Content / Knowledge Assets`, `Core Workflows`,
    `Role Path Patterns`, `UI / Mobile Patterns`,
    `Policy / Privacy Constraints`, `Domain Test Scenarios`,
-   `Acceptance Checklist`.
+   `Multi-Agent Lifecycle Verification Matrix`, `Acceptance Checklist`.
 3. Fill in domain entities, roles, workflows, policies, terminology, privacy
-   rules, and test scenarios.
+   rules, test scenarios, and a compact First-Principles Domain Lens.
 4. Name it `references/domain-{your-domain}.md`.
 5. Update `references/advanced-extensions.md` trigger matrix and domain list.
 6. Add or update at least one example if the domain is meant for public use.
@@ -58,7 +58,9 @@ Domain modules make AI Delivery Spec useful in new industries.
       least three real projects, two domains, and one validator change.
 - [ ] Domain-specific content stays in `references/domain-*.md`, not in core
       runtime files.
-- [ ] New domain modules keep the 14-section domain contract.
+- [ ] New domain modules keep the 15-section domain contract.
+- [ ] New domain modules include a First-Principles Domain Lens without turning
+      the file into an industry encyclopedia.
 - [ ] New domain modules update `advanced-extensions.md` trigger matrix and
       domain list.
 - [ ] Validation scripts pass where applicable.

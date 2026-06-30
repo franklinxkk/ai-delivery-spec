@@ -2,6 +2,25 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.9.10 - 2026-06-30
+
+- Added a Stage 3.5 Cross-Module Flow Contract for any scope with multiple
+  modules or cross-module lifecycle state, including source/target module
+  responsibilities, field mapping, event/notification references, E2E
+  acceptance, and `bidirectional_status`.
+- Added a Post-Generation Multi-Module Checklist to block `PASS` when module
+  PRDs lose flow closure, FRR completeness, state/event mapping, prototype
+  test anchors, or domain quality gates after splitting a large PRD.
+- Added a Domain Knowledge Quality Gate and First-Principles Domain Lens across
+  existing domain modules, keeping domain reasoning focused on value object,
+  role job, lifecycle state, source authority, high-risk boundary, and test
+  evidence rather than long industry encyclopedias.
+- Added CRM-specific multi-module gates for cross-module handoff, R01-R12 style
+  response/alert rule back-references, ER/field/event/notification integrity,
+  and prototype `data-testid` / `data-action` testability.
+- Kept the compact skill structure: no new reference files were added; existing
+  runtime, domain, README, contributing, and validator files were updated.
+
 ## v4.9.9 - 2026-06-29
 
 - Added `references/domain-ai-native.md` as a first-class AI-native / agentic

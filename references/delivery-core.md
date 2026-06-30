@@ -794,6 +794,41 @@ Stage 3.5 Gate failures that must block Stage 5:
   differences when mobile is in scope.
 - A rule-heavy module (alerts, SLAs, allocation, saturation) has no config view.
 
+### Cross-Module Flow Contract (Stage 3.5 Output)
+
+Produce this contract whenever the scope has two or more modules or any object,
+event, task, payment, approval, audit, notification, or status crossing module
+boundaries. It bridges the IA Skeleton, module PRDs, and E2E tests.
+
+```yaml
+cross_module_flow_contract:
+  version: 1.0
+  flows:
+    - flow_id: E2E-001
+      source_module: Mxx
+      source_view: Mxx-Vxx
+      trigger_action: data-action-or-business-action
+      source_state: current -> target
+      target_module: Myy
+      target_view: Myy-Vyy
+      target_initial_state: state_after_receiving
+      field_mapping_ref: master_field_mapping_id
+      event_ref: DomainEventName
+      notification_ref: optional_notification_id
+      acceptance_ref: AC-E2E-001
+      bidirectional_status: complete   # complete | gap | not_applicable
+```
+
+Gate rules:
+- The source module FRR must state trigger, guard, target module, emitted
+  event/audit, and failure behavior.
+- The target module FRR must state received data, initial state, visible entry,
+  duplicate/idempotency behavior, and correction owner.
+- The master/shared contract must contain field mapping, entity relation,
+  event/notification reference, and E2E acceptance row.
+- No multi-module PRD can be marked `PASS` while any in-scope flow has
+  `bidirectional_status: gap`; use `REVIEW_COMPLETE_WITH_GAPS` instead.
+
 Stage 4 Stories + State Machine:
 - Story format: As a [persona], I want [action], so that [value].
 - AC format: Given / When / Then + Expected UI Result + Expected Domain Result.
@@ -884,6 +919,15 @@ PRD writing rules to prevent bloat:
 - **FRR §8 Business Rules / §9 State / §10 Permission / §11 Exception / §16
   Acceptance** remain fully specified in the PRD. These are the primary product
   decisions that the prototype cannot express.
+- **For multi-module PRDs**, every FRR that produces or consumes a
+  cross-module change must reference the Cross-Module Flow Contract row and
+  state both sides of the handoff. A module-local story is incomplete when its
+  downstream object appears without source trigger, field mapping, initial
+  state, owner, and acceptance.
+- **Prototype `data-testid` enforcement**: when a locked prototype exists, FRR
+  sections 4, 6, 7, and 16 must reference stable `data-testid` / `data-action`
+  anchors for primary paths, forms, modals, tables, and assertions. Human-first
+  wording may be primary, but AI/RPA/test execution needs these anchors.
 
 The engineering layer does not replace the product layer. A module is not
 development-ready when it only states purpose, inputs, outputs, aggregates, and
@@ -1105,6 +1149,50 @@ Rules:
   scenario without rereading the whole PRD.
 - Backend must be able to identify event payload version, idempotency key,
   ordering/replay rule, and dead-letter owner for async rows.
+
+### Domain Knowledge Quality Gate
+
+When a domain module is loaded, use it as a reusable product judgment lens, not
+as an encyclopedia. The domain pass must show:
+
+- first-principles value logic: core object, role job, state change, and
+  measurable outcome;
+- source breadth: public/global, China/national, regional/local, industry,
+  group, and customer-specific rules are registered when relevant;
+- source freshness and authority status: official/primary source preferred,
+  with outdated or unverified rules marked as assumptions;
+- workflow closure: each domain workflow has owner, trigger, state change,
+  exception path, and acceptance evidence;
+- high-risk actions: irreversible, regulated, money, safety, privacy, or AI
+  writeback actions have human gate, audit, and rollback/fallback.
+
+If a domain lacks enough evidence to make those calls, keep the PRD usable but
+mark the affected assertions `INFERRED` or `UNKNOWN`, and do not mark the
+package `PASS`.
+
+### Post-Generation Multi-Module Checklist
+
+Run this after generating or splitting any multi-module PRD package. If any
+required item fails, the completion state is `REVIEW_COMPLETE_WITH_GAPS`.
+
+1. One source-of-truth order exists: master contract, IA Skeleton, prototype,
+   module PRDs, acceptance, and annexes.
+2. Every module has a release function inventory and every in-scope function
+   has a complete FRR.
+3. Every cross-module flow is present in the Cross-Module Flow Contract and E2E
+   Cross-Module Canvas.
+4. Source and target module PRDs both describe their side of each flow.
+5. Field mappings, entity relations, domain events, notifications, audit, and
+   failure/compensation are complete for each flow.
+6. Every lifecycle entity has a state/button/guard matrix and a global state
+   summary row.
+7. Every user story or operation path maps to at least one acceptance/test ID.
+8. Happy, validation, permission, state-conflict, duplicate, timeout, and
+   dependency-failure paths are covered for P0/P1 flows.
+9. Locked prototype primary actions have `data-testid` / `data-action` anchors
+   referenced by PRD sections and tests.
+10. The loaded domain module's quality gate and lifecycle verification matrix
+    have been applied; unresolved domain gaps block `PASS`.
 
 ## Guard Protocol
 

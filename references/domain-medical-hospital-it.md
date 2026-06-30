@@ -16,6 +16,7 @@ before PRD signoff.
 ## Contents
 
 - Domain Purpose
+- First-Principles Domain Lens
 - Vocabulary
 - Aggregates and Entities
 - Domain Events
@@ -54,6 +55,19 @@ before PRD signoff.
 - Out of scope unless explicitly requested: medical device hardware design,
   pharmaceutical manufacturing, insurance claim adjudication independent of
   hospital workflow, and public-health command systems outside hospital IT.
+
+## First-Principles Domain Lens
+
+Medical/hospital IT product judgment starts from patient safety, accountable
+clinical workflow, and legally traceable evidence.
+
+| Lens | Hospital Question | Acceptance Signal |
+|---|---|---|
+| Clinical object | Which patient, encounter, order, record, report, prescription, quality issue, or research dataset changes? | source system, encounter scope, and responsible role are explicit |
+| Safety state | What transition proves care, review, execution, acknowledgement, or closure happened safely? | state guard, signer/reviewer, timestamp, and audit are traceable |
+| Authority boundary | Which hospital policy, national/local regulation, clinical guideline, consent, insurance, or research rule applies? | accountable owner and verified source status are recorded |
+| Human gate | Which diagnosis, prescription, discharge, signature, settlement, or data-release decision cannot be automated? | AI output remains draft/evidence until authorized human confirmation |
+| Failure recovery | What happens on critical value, contraindication, identity mismatch, downtime, or AI disagreement? | escalation, fallback, rollback/amendment, and patient-safety evidence exist |
 
 ## Vocabulary
 

@@ -7,6 +7,7 @@ This module is distilled from multi-year higher-education informationization mat
 ## Contents
 
 - Domain Purpose
+- First-Principles Domain Lens
 - Vocabulary
 - Aggregates and Entities
 - Domain Events
@@ -30,6 +31,19 @@ This module is distilled from multi-year higher-education informationization mat
 - AI may optimize: policy Q&A, one-stop service guidance, learning/career suggestions, counselor work assistance, data Q&A, classroom quality analysis, teaching report drafting, form/process filling, and risk hints.
 - AI must not decide automatically: student disciplinary action, scholarship/aid final result, psychological crisis classification, final grades, graduation eligibility, teacher performance conclusion, official evaluation result, or any legally/accountably binding school decision.
 - Representative system families to abstract from: academic affairs suites such as training-plan, course, scheduling, selection, exam, score, graduation-audit, and textbook management; learning/teaching platforms with course resources, classroom interaction, homework, analytics, and AI classroom signals; student-affairs platforms covering one-stop community, counselor workbench, aid/award/sanction/dorm/safety/employment; research management platforms covering project, fund, contract, output, IP, ethics/integrity, and achievement transformation; university data platforms covering standards, master data, indicators, reports, and dashboards.
+
+## First-Principles Domain Lens
+
+Education IT product judgment starts from accountable learning, teaching,
+student growth, service, research, and governance outcomes.
+
+| Lens | Education Question | Acceptance Signal |
+|---|---|---|
+| Educational object | Which student, teacher, course, class, program, service case, research project, or indicator changes? | source system, owner, term/version, and role scope are explicit |
+| Accountability | Which office, teacher, counselor, reviewer, or student owns the next action? | workflow task, deadline, evidence, and appeal/review path exist |
+| Outcome evidence | What proves learning, teaching quality, service completion, research progress, or improvement? | assessment, portfolio, diagnosis, output, or service result is traceable |
+| Policy boundary | Which school, provincial, national, accreditation, privacy, or customer rule applies? | rule source, version, applicability, and conflict handling are registered |
+| AI boundary | Which recommendations stay non-binding and require human confirmation? | final grades, graduation, aid, discipline, mental-health, and evaluations keep human gates |
 
 ## Vocabulary
 

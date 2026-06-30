@@ -85,6 +85,7 @@ DOMAIN_SECTIONS = [
     "UI / Mobile Patterns",
     "Policy / Privacy Constraints",
     "Domain Test Scenarios",
+    "Multi-Agent Lifecycle Verification Matrix",
     "Acceptance Checklist",
 ]
 
@@ -296,6 +297,9 @@ def main() -> int:
             "Development Follow-Up, Issue Flow, And Bug Triage",
             "Post-Launch Review And Retirement Protocol",
             "E2E Cross-Module Canvas",
+            "Cross-Module Flow Contract",
+            "Post-Generation Multi-Module Checklist",
+            "Domain Knowledge Quality Gate",
             "Human-Readable PRD Layer",
             "Complete Module And Function Product Specification",
             "Multi-Agent Lifecycle Verification",
@@ -447,6 +451,9 @@ def main() -> int:
             "skills.sh",
             "npx skills add franklinxkk/ai-delivery-spec",
             "PM Quickstart",
+            "Recommended GitHub topics",
+            "Role-Based Entry",
+            "Multi-Module PRD Pack",
             "spec-kit Interop",
             "frontend-design",
             "Helper CLI",
@@ -473,7 +480,7 @@ def main() -> int:
         "CONTRIBUTING.md",
         contributing,
         (
-            "14-section domain contract",
+            "15-section domain contract",
             "references/domain-module-template.md",
             "references/advanced-extensions.md",
         ),
@@ -484,6 +491,8 @@ def main() -> int:
             fail(f"domain-module-template.md missing section contract item: {section}", failures)
         if section not in contributing:
             fail(f"CONTRIBUTING.md missing domain section checklist item: {section}", failures)
+    if "First-Principles Domain Lens" not in domain_template:
+        fail("domain-module-template.md missing First-Principles Domain Lens", failures)
 
     domain_files = sorted(
         path.name
@@ -496,6 +505,8 @@ def main() -> int:
         if f"references/{filename}" not in readme:
             fail(f"README.md missing domain module: references/{filename}", failures)
         headings = markdown_headings(REFERENCES / filename, level=2)
+        if "First-Principles Domain Lens" not in headings:
+            fail(f"{filename} missing First-Principles Domain Lens", failures)
         positions = []
         for section in DOMAIN_SECTIONS:
             if section not in headings:
@@ -513,7 +524,16 @@ def main() -> int:
         if not agent_path.exists():
             fail(f"{agent_path.relative_to(ROOT)} is missing", failures)
         else:
-            require_markers(str(agent_path.relative_to(ROOT)), read(agent_path), markers, failures)
+            agent_text = read(agent_path)
+            require_markers(str(agent_path.relative_to(ROOT)), agent_text, markers, failures)
+            if current_version and agent_path.suffix in {".yaml", ".yml"}:
+                version_match = re.search(r'^\s*version:\s*["\']?([^"\'\n]+)', agent_text, re.MULTILINE)
+                if version_match and version_match.group(1).strip() != current_version:
+                    fail(
+                        f"{agent_path.relative_to(ROOT)} version {version_match.group(1).strip()} "
+                        f"is not synchronized to v{current_version}",
+                        failures,
+                    )
 
     if failures:
         for item in failures:

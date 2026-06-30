@@ -10,6 +10,7 @@ The public protocol stays domain-neutral. Domain knowledge must live in a replac
 - Domain Module Skeleton
 - Mapping From Old Domain to New Domain
 - Domain Quality Gate
+- First-Principles Domain Lens
 - Domain Switch Verification Checklist
 - Example: Knowledge Learning Domain Outline
 
@@ -31,6 +32,7 @@ role paths
 UI/mobile patterns
 policy/privacy constraints
 test scenarios
+multi-agent lifecycle verification matrix
 acceptance checklist
 ```
 
@@ -52,6 +54,17 @@ This is a replaceable domain module. Public protocol files must stay domain-neut
 - Regulated or sensitive areas:
 - What AI may optimize:
 - What AI must not decide automatically:
+
+## First-Principles Domain Lens
+
+| Lens | Required Answer |
+|---|---|
+| Value object | What domain object, decision, artifact, or state becomes better? |
+| Role job | Which role's repeated job or accountability is changed? |
+| State physics | What lifecycle state transition proves work really happened? |
+| Source authority | Which public/global, China/national, regional/local, industry, group, or customer-specific rules apply? |
+| High-risk boundary | Which actions need human gate, audit, fallback, or rollback? |
+| Test evidence | Which scenarios prove the domain logic is usable, not just plausible? |
 
 ## Vocabulary
 
@@ -135,6 +148,14 @@ metric:
 | Scenario | Role | Preconditions | Steps | Expected Domain Result |
 |---|---|---|---|---|
 
+## Multi-Agent Lifecycle Verification Matrix
+
+| domain_id | stage | reviewer_agent | path_type | scenario_ref | evidence_ref | blocking_question | expected_result | test_marker | verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| {domain_id} | Discover | PM Agent | happy_path | primary value object | Domain Purpose | Is the business outcome explicit? | value object and user result are testable | {domain_id}_discover_pm_happy_path | PASS |
+| {domain_id} | Specify | QA Agent | lifecycle_transition | primary lifecycle | State Machines | Can QA convert state changes into test cases? | allowed/blocked transitions are explicit | {domain_id}_specify_qa_lifecycle_transition | PASS |
+| {domain_id} | Build/Verify | Coding Agent | acceptance_test_path | implementation handoff | Acceptance Checklist | Can a coding agent trace source truth to tests? | FRR, AC, data-testid/action/state/API, and manifest are traceable | ac_structured;data-testid;data-action | PASS |
+
 ## Acceptance Checklist
 
 - [ ] Domain entities and source of truth are explicit.
@@ -144,6 +165,7 @@ metric:
 - [ ] High-risk actions have human gate.
 - [ ] Domain workflows have role paths and test scenarios.
 - [ ] UI/mobile patterns include required testids.
+- [ ] Multi-agent lifecycle matrix covers PM, domain, architecture/data/AI, QA, and coding perspectives across the stages in scope.
 ```
 
 ## Mapping From Old Domain to New Domain
@@ -169,6 +191,20 @@ Fail the domain module if:
 - it lacks domain-specific test scenarios;
 - it leaks domain-specific rules into public protocol files;
 - it does not define what AI is forbidden to do.
+
+## First-Principles Domain Lens
+
+When a domain is created or updated, keep the domain file compact but make the
+product logic defensible:
+
+- Start from the value object, role job, lifecycle state, and measurable result.
+- Register public/global, China/national, regional/local, industry, group, and
+  customer-specific rules when they materially affect scope or acceptance.
+- Prefer source registers and applicability notes over copying long standards.
+- Mark unverified or time-sensitive rules as assumptions until checked against
+  official or accountable sources.
+- Define high-risk boundaries: irreversible actions, regulated decisions, money,
+  safety, privacy, and AI writeback.
 
 ## Domain Switch Verification Checklist
 

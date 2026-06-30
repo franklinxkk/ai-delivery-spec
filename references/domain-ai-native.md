@@ -9,6 +9,7 @@ same 14 section headings used here and in `domain-module-template.md`.
 ## Contents
 
 - Domain Purpose
+- First-Principles Domain Lens
 - Vocabulary
 - Aggregates and Entities
 - Domain Events
@@ -39,9 +40,9 @@ same 14 section headings used here and in `domain-module-template.md`.
   safety, enforcement, account closure, payment, or irreversible business
   actions without explicit authorized human accountability.
 
-### First-Principles Product Logic
+## First-Principles Domain Lens
 
-AI-native product judgment must start from work physics, not tool hype. Claude,
+First-Principles Product Logic: AI-native product judgment must start from work physics, not tool hype. Claude,
 Codex, Trae, OpenClaw/Lobster-class tools, WorkBuddy-class internal assistants,
 and new agent platforms are delivery surfaces. They are not the product logic.
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate v4.9.9 domain, continuation, platform, and composition contracts."""
+"""Validate current release domain, continuation, platform, and gate contracts."""
 
 from __future__ import annotations
 
@@ -51,12 +51,12 @@ def validate_markers(failures: list[str]) -> None:
     human_template = read(REFERENCES / "templates" / "human-first-prd-template.md")
     ai_template = read(REFERENCES / "templates" / "ai-coding-prd-template.md")
 
-    require("SKILL.md", skill, ["v4.9.9"], failures)
+    require("SKILL.md", skill, ["v4.9.10"], failures)
     require(
         "README.md",
         readme,
         [
-            "version-4.9.9",
+            "version-4.9.10",
             "PM Quickstart",
             "skills.sh",
             "npx skills use franklinxkk/ai-delivery-spec",
@@ -69,7 +69,7 @@ def validate_markers(failures: list[str]) -> None:
             "Multi-Agent Lifecycle Validation",
             "validate_multi_agent_lifecycle_scenarios.py",
             "references/domain-ai-native.md",
-            "validate_v4_9_9_contracts.py",
+            "First-Principles Domain Lens",
         ],
         failures,
     )
@@ -78,6 +78,9 @@ def validate_markers(failures: list[str]) -> None:
         delivery,
         [
             "Long-Form PRD Continuation Contract",
+            "Cross-Module Flow Contract",
+            "Post-Generation Multi-Module Checklist",
+            "Domain Knowledge Quality Gate",
             "CONTINUATION_REQUIRED",
             "self-repair loop",
             "external `brainstorming` skill",
@@ -168,6 +171,9 @@ def validate_markers(failures: list[str]) -> None:
             "Customer 360",
             "quote/CPQ",
             "renewal/customer success",
+            "First-Principles CRM Product Logic",
+            "Multi-Module PRD Quality Gate",
+            "CRM-G1 Cross-module handoff",
         ],
         failures,
     )
@@ -420,7 +426,7 @@ def main() -> int:
             print(f"FAIL: {item}")
         return 1
 
-    print("PASS: v4.9.9 domain, continuation, platform, and composition contracts passed")
+    print("PASS: current release domain, continuation, platform, and gate contracts passed")
     return 0
 
 

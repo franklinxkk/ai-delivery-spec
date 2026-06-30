@@ -3,7 +3,7 @@ name: ai-delivery-spec
 description: Create PRDs, prototypes, tests, AI runtime specs, and coding agent handoffs for product delivery. Excludes code debugging and copy rewriting.
 ---
 
-# AI Delivery Spec - Production Elastic Delivery Standard (v4.9.9)
+# AI Delivery Spec - Production Elastic Delivery Standard (v4.9.10)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering,
 algorithm, QA, operations, customers, and sponsors can read, build, verify, and
@@ -210,7 +210,7 @@ Choose one primary route, then add triggered extensions.
 | Request | Primary Entrypoint |
 |---|---|
 | strategy/discovery/business case/roadmap | `delivery-core.md`; add advanced strategy/readiness section if needed |
-| PRD/requirement/story/path/state/DDD/API/data contract/full lifecycle walkthrough | `delivery-core.md`; choose Work Path, then PRD Profile; run Stage 3.5 IA Skeleton Gate before Stage 5 **when: >=2 modules OR >=2 primary roles OR any cross-module flow**; for "from idea to launch/review" simulate Stage 4-6 unless real readiness evidence is supplied |
+| PRD/requirement/story/path/state/DDD/API/data contract/full lifecycle walkthrough | `delivery-core.md`; choose Work Path, then PRD Profile; run Stage 3.5 IA Skeleton Gate before Stage 5 **when: >=2 modules OR >=2 primary roles OR any cross-module flow**; for multi-module delivery, run domain/multi-module post-generation gates before `PASS` |
 | prototype/demo/HTML/mobile interaction | `prototype-testability.md`; require IA Skeleton as input; add `delivery-core.md` for story/state evidence |
 | test/UAT/acceptance/readiness/post-launch/retirement | `delivery-core.md`; add advanced readiness section if real environment |
 | AI, SaaS, approval, reporting, low-code, global, domain switch | load `advanced-extensions.md` only after 0D trigger |
