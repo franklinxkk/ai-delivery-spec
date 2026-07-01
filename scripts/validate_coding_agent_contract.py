@@ -7,9 +7,11 @@ coding agents need before turning a PRD/prototype into implementation tasks:
 
 - prototype data-testid -> ac_structured.data_testid
 - prototype data-action -> FRR prose or ac_structured.data_action
+- prototype data-field/data-bind -> FRR field dictionary, AC, or data contract
 - prototype data-state -> PRD state matrix/prose
 - prototype data-api + data-method -> PRD API/contract prose
 - prototype data-visible-role -> PRD role/permission prose
+- write-like data-action -> data-api/data-method or ACTION_API_CONTRACT entry
 - interactive prototype controls have data-testid
 - runtime data-state values are concrete, not template placeholders
 - domain-state modals/drawers have stable identifiers or a modal contract
@@ -48,7 +50,7 @@ def read_text(path: Path) -> str:
 
 
 def yaml_values(text: str, key: str) -> set[str]:
-    pattern = re.compile(rf"^\s*{re.escape(key)}:\s*['\"]?([^'\"\n#]+)", re.MULTILINE)
+    pattern = re.compile(rf"^\s*(?:-\s*)?{re.escape(key)}:\s*['\"]?([^'\"\n#]+)", re.MULTILINE)
     return {match.group(1).strip() for match in pattern.finditer(text) if match.group(1).strip()}
 
 
@@ -106,6 +108,16 @@ def main() -> int:
         action="store_true",
         help="Warn instead of fail when non-AC data-testid values exist in the prototype",
     )
+    parser.add_argument(
+        "--allow-unmapped-field",
+        action="store_true",
+        help="Warn instead of fail when data-field/data-bind values are not present in the PRD",
+    )
+    parser.add_argument(
+        "--allow-missing-action-api",
+        action="store_true",
+        help="Warn instead of fail when write-like data-actions have no API or ACTION_API_CONTRACT mapping",
+    )
     args = parser.parse_args()
 
     prd_text = read_text(args.prd)
@@ -141,6 +153,16 @@ def main() -> int:
     missing_actions = sorted(a for a in actions if a not in prd_text and a not in ac_actions)
     if missing_actions:
         failures.append("data-action values missing from PRD FRR flow/actions or AC: " + ", ".join(missing_actions[:50]))
+
+    field_values = attrs.get("data-field", set()) | attrs.get("data-bind", set())
+    ac_fields = yaml_values(prd_text, "data_field") | yaml_values(prd_text, "data_bind")
+    missing_fields = sorted(f for f in field_values if f not in prd_text and f not in ac_fields)
+    if missing_fields:
+        message = "data-field/data-bind values missing from PRD field dictionary or AC: " + ", ".join(missing_fields[:50])
+        if args.allow_unmapped_field:
+            warnings.append(message)
+        else:
+            failures.append(message)
 
     states = attrs.get("data-state", set())
     templated_states = sorted(s for s in states if "${" in s or "{{" in s or "}}" in s)
@@ -201,10 +223,14 @@ def main() -> int:
     )
     write_actions = sorted(a for a in actions if write_action_re.search(a))
     if write_actions and not apis and not has_window_contract(html, "ACTION_API_CONTRACT"):
-        warnings.append(
+        message = (
             "write-like data-action values found without data-api/data-method or "
             "window.ACTION_API_CONTRACT: " + ", ".join(write_actions[:30])
         )
+        if args.allow_missing_action_api:
+            warnings.append(message)
+        else:
+            failures.append(message)
 
     missing_controls = interactive_missing_testid(html)
     if missing_controls:

@@ -1025,6 +1025,66 @@ states, which actions, which business rules, and what result. A reference such
 as "see prototype", "see appendix", or "same as existing logic" without this
 normalization is incomplete.
 
+### Page-Level Detailed Design Gate
+
+For L1+ implementation handoff, every page, drawer, modal, and repeated card
+surface referenced by an FRR must include a readable detailed-design block.
+This block is mandatory even when a locked prototype exists; the prototype is
+evidence, not the implementable explanation.
+
+Minimum block:
+
+| Item | Required Detail |
+|---|---|
+| Layout | top/middle/bottom/left/right/modal/drawer regions; list/table/card/timeline/chart placement; responsive differences |
+| Field mapping | visible label, `data-field`/source field, meaning, type, enum, default, empty state, editability, masking |
+| Interaction | button/link/tab/filter action, visible result, domain result, modal/drawer opened, failure branch |
+| Repeated content | sort order, grouping, pagination/load more, empty/one/many record behavior |
+| Role/state variants | which regions/actions appear by role and object state; disabled/hidden/error wording |
+
+Gate rule: if a developer cannot implement the page from PRD text plus the
+prototype without guessing field meaning, list density, timeline ordering, card
+data source, or modal behavior, Gate 3 cannot pass.
+
+### CRUD And Lifecycle Semantics Gate
+
+Every lifecycle-bearing business entity must declare its CRUD/lifecycle policy
+before implementation tasks are generated. Do not assume `delete` means
+physical deletion.
+
+| Entity | Create | Edit | Delete / Close / Void / Archive | Allowed States | Forbidden States | Audit / Event |
+|---|---|---|---|---|---|---|
+| {entity} | {action/API} | {action/API} | physical delete / soft delete / close / void / archive / not supported | {states} | {states} | {audit/event} |
+
+Rules:
+
+- If the UI contains edit/delete buttons, FRR §6/§7/§9/§10 must define the
+  role, state guard, visible feedback, persistence result, and audit log.
+- For workflow/financial/customer/history entities, default to close, void,
+  archive, or soft delete unless the PRD explicitly authorizes physical delete.
+- If deletion is blocked, specify the user-facing reason and alternative path
+  (for example close ticket, lose opportunity, void contract, archive customer).
+
+### Complex Form And Calculation Gate
+
+Forms with repeated rows, conditional fields, discounts, totals, payment terms,
+tax, quota, score, SLA, or any calculated value must include a calculation
+contract.
+
+| Field / Row | Trigger | Formula / Rule | Manual Override | Backend Validation | Error / Empty Behavior |
+|---|---|---|---|---|---|
+| {field} | on change / submit / recalc | {formula} | allowed/forbidden + flag | {server rule} | {message/state} |
+
+Required details:
+
+- input fields, conditional visibility, row add/remove behavior, and minimum
+  row count;
+- calculation formula, rounding, lower/upper bounds, currency/unit, and
+  recalculation trigger;
+- whether manual edit freezes a calculated value and how "recalculate" resets
+  it;
+- server-side revalidation and conflict handling when frontend values differ.
+
 ### Modal Chain Coverage Rule
 
 When the source includes an HTML prototype or interactive mockup, the PRD must

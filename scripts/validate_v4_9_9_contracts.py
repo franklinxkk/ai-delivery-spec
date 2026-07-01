@@ -51,12 +51,12 @@ def validate_markers(failures: list[str]) -> None:
     human_template = read(REFERENCES / "templates" / "human-first-prd-template.md")
     ai_template = read(REFERENCES / "templates" / "ai-coding-prd-template.md")
 
-    require("SKILL.md", skill, ["v4.9.10"], failures)
+    require("SKILL.md", skill, ["v4.9.11"], failures)
     require(
         "README.md",
         readme,
         [
-            "version-4.9.10",
+            "version-4.9.11",
             "PM Quickstart",
             "skills.sh",
             "npx skills use franklinxkk/ai-delivery-spec",

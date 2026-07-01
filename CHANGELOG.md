@@ -2,6 +2,31 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.9.11 - 2026-07-01
+
+- Added a mandatory Page-Level Detailed Design Gate so implementation handoff
+  PRDs must specify layout regions, field mappings, interactions, repeated
+  record behavior, empty/error states, and role/state variants instead of
+  relying on visual prototypes alone.
+- Added CRUD and lifecycle semantics gates to force every business entity to
+  define create/edit/delete/close/void/archive behavior, allowed states,
+  forbidden states, audit/event output, and user-facing guard messages.
+- Added a Complex Form and Calculation Gate for repeated-row forms, discounts,
+  totals, manual overrides, recalculation triggers, and backend revalidation.
+- Added a Dynamic Surface Scan Gate for role/tab/modal/drawer/state variants
+  so hidden or lazy-rendered prototype actions and fields are not missed by
+  initial DOM scans.
+- Expanded coding-agent compatibility with a Prototype Annotation x PRD
+  Contract cross-check matrix covering `data-action`, `data-testid`,
+  `data-field`, `data-state`, `data-api`, `data-method`, `data-visible-role`,
+  and modal/drawer contracts.
+- Enhanced `extract_interaction_ledger.py` to collect `data-field` and
+  `data-bind`; enhanced `validate_coding_agent_contract.py` to validate
+  field mappings and fail missing action-to-API mappings by default.
+- Synchronized Human-First and AI-Coding PRD templates to v4.9.11 with page
+  detailed-design, CRUD lifecycle, complex-form calculation, cross-check, and
+  Action-to-API matrix sections.
+
 ## v4.9.10 - 2026-06-30
 
 - Added a Stage 3.5 Cross-Module Flow Contract for any scope with multiple

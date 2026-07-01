@@ -17,7 +17,7 @@ Data Agent | AI 原生 | 智能体工作流 | spec-kit | skills.sh
 > prototypes, acceptance criteria, and coding-agent handoff to stay consistent.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-4.9.10-green.svg)]()
+[![Version](https://img.shields.io/badge/version-4.9.11-green.svg)]()
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-purple.svg)](https://openclaw.ai)
 ![skills.sh](https://skills.sh/b/franklinxkk/ai-delivery-spec)

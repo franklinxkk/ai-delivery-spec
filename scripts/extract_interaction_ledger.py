@@ -2,8 +2,8 @@
 """Extract a first-pass interaction ledger from a local HTML prototype.
 
 This helper is intentionally conservative. It reads static HTML/JS and reports
-views, data-actions, onclick handlers, testids, modal-like nodes, and function
-names. Dynamic behavior still requires browser verification.
+views, data-actions, onclick handlers, testids, data-fields, modal-like nodes,
+and function names. Dynamic behavior still requires browser verification.
 """
 
 from __future__ import annotations
@@ -67,6 +67,8 @@ def main():
             "data-visible-role",
             "data-api",
             "data-method",
+            "data-field",
+            "data-bind",
             "onclick",
         ],
     )
@@ -74,6 +76,8 @@ def main():
     onclicks = attr_values(html, "onclick")
     data_actions = attr_values(html, "data-action")
     data_testids = attr_values(html, "data-testid")
+    data_fields = attr_values(html, "data-field")
+    data_binds = attr_values(html, "data-bind")
     ids = attr_values(html, "id")
 
     functions = re.findall(r"\bfunction\s+([A-Za-z_$][\w$]*)\s*\(", html)
@@ -102,6 +106,9 @@ def main():
             "dataActions": len(data_actions),
             "uniqueDataActions": len(set(data_actions)),
             "dataTestids": len(data_testids),
+            "dataFields": len(data_fields),
+            "uniqueDataFields": len(set(data_fields)),
+            "dataBinds": len(data_binds),
             "onclicks": len(onclicks),
             "ids": len(ids),
             "functions": len(set(functions + arrow_assignments)),
@@ -112,6 +119,8 @@ def main():
             + [{"type": "onclick", "name": o} for o in onclicks]
         ),
         "testids": sorted(set(data_testids)),
+        "fields": sorted(set(data_fields)),
+        "binds": sorted(set(data_binds)),
         "modalsOrDrawers": unique(modal_candidates),
         "functions": sorted(set(functions + arrow_assignments)),
         "notes": [

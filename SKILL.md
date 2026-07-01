@@ -3,11 +3,9 @@ name: ai-delivery-spec
 description: Create PRDs, prototypes, tests, AI runtime specs, and coding agent handoffs for product delivery. Excludes code debugging and copy rewriting.
 ---
 
-# AI Delivery Spec - Production Elastic Delivery Standard (v4.9.10)
+# AI Delivery Spec - Production Elastic Delivery Standard (v4.9.11)
 
-Author: Li Kang. Purpose: produce delivery artifacts that product, engineering,
-algorithm, QA, operations, customers, and sponsors can read, build, verify, and
-operate without losing lifecycle state, evidence, or handoff accountability.
+Author: Li Kang. Purpose: produce delivery artifacts that product, engineering, algorithm, QA, operations, customers, and sponsors can read, build, verify, and operate without losing lifecycle state, evidence, or handoff accountability.
 
 ## 0. Initialization And Triage
 
@@ -190,6 +188,7 @@ handoff. Required:
   normalize the business-relevant page layout, regions, visible states, fields,
   modal/drawer behavior, and action-to-domain flow. A bare "see prototype" is
   not a complete specification;
+- implementation handoff requires page-level detailed design, CRUD/lifecycle semantics, complex form formulas, and prototype-to-PRD cross-checks;
 - source evidence register has zero silent omission;
 - DDD/API/data handoff includes commands, queries, events, invariants, state,
   policy, permission, and tests where applicable;

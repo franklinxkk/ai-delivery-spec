@@ -251,6 +251,8 @@ Verification checklist:
 
 - [ ] Every `data-testid` maps to at least one `ac_structured.data_testid`.
 - [ ] Every `data-action` appears in FRR section 6 numbered flow or FRR section 7 actions.
+- [ ] Every `data-field` appears in an FRR field table, global field dictionary,
+      or AC/data contract.
 - [ ] Every `data-state` appears in FRR section 9 state/button/lifecycle matrix.
 - [ ] Every `data-api` + `data-method` is declared in FRR section 13 or API contract.
 - [ ] Every `data-visible-role` is defined in FRR section 10.
@@ -258,6 +260,22 @@ Verification checklist:
 
 If any check fails, the coding agent must report the gap and stop the affected
 implementation step instead of inventing behavior.
+
+Cross-check matrix:
+
+| Prototype Annotation | PRD Contract Location | Required Mapping |
+|---|---|---|
+| `data-action` | FRR §6 flow, §7 action table, §9 state/button matrix | action meaning, role, guard, visible result, domain result |
+| `data-testid` | FRR §4/§16 and `ac_structured.data_testid` | automation anchor and acceptance path |
+| `data-field` / `data-bind` | FRR §5 or global field dictionary | label, source field, type, enum, default, empty state, editability |
+| `data-state` | FRR §9 state machine | enum value, allowed/forbidden actions, transition/event/audit |
+| `data-api` + `data-method` | FRR §13 API/command contract or action-to-API matrix | method, path, request/response, idempotency, permission |
+| `data-visible-role` | FRR §10 RBAC/data scope matrix | role visibility and backend enforcement |
+| modal/drawer action | FRR §4/§6 modal spec | title, fields, required markers, result action, failure branch |
+
+Block `PASS` when a coding agent would need to infer an API path, field source,
+enum, state transition, RBAC rule, modal content, repeated-card/timeline order,
+or CRUD/delete semantics from visual layout alone.
 
 Run the deterministic checker when both PRD and prototype are available:
 

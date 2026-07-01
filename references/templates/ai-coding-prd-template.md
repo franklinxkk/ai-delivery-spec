@@ -1,4 +1,4 @@
-# AI-Coding Full PRD Template (v4.9.10 Profile)
+# AI-Coding Full PRD Template (v4.9.11 Profile)
 
 Use this profile only when the user explicitly wants a coding agent, full AI
 implementation, machine-readable contracts, test stubs, or an implementation
@@ -142,6 +142,21 @@ Rules:
 - Every `primary_action` in IA Skeleton must map to a prototype `data-action`.
 - Every critical page/region/modal/drawer must have stable `data-testid`.
 - Every form field needed for implementation or testing must map to `data-field`.
+- Every dynamic role/tab/modal/state surface must be scanned after rendering,
+  not only from the initial HTML DOM.
+
+### 2.1.1 原型标注 x PRD 契约交叉校验矩阵
+
+| Prototype Annotation | PRD Contract Location | Coverage Status | Gap / Decision |
+|---|---|---|---|
+| `data-action` | FRR §6/§7/§9 | COVERED / GAP / SPEC_ONLY | {note} |
+| `data-testid` | FRR §4/§16 + AC-YAML | COVERED / GAP / SPEC_ONLY | {note} |
+| `data-field` / `data-bind` | FRR §5 / field dictionary | COVERED / GAP / SPEC_ONLY | {note} |
+| `data-state` | FRR §9 state machine | COVERED / GAP / SPEC_ONLY | {note} |
+| `data-api` + `data-method` | FRR §13 / action-to-API matrix | COVERED / GAP / SPEC_ONLY | {note} |
+| `data-visible-role` | FRR §10 RBAC matrix | COVERED / GAP / SPEC_ONLY | {note} |
+
+Block coding tasks for any `GAP` that affects implementation behavior.
 
 ### 2.2 结构化验收标准 / Structured Acceptance Criteria (AC-YAML)
 
@@ -218,6 +233,12 @@ events:
     topic: m01.record.created
     payload_schema: schemas/M01-F01.created.event.json
 ```
+
+#### 2.4.2 Action-to-API Routing Matrix
+
+| data-action | Method | Path | Command / Query | Request Source Fields | Permission | State Guard | Source FRR |
+|---|---|---|---|---|---|---|---|
+| {action-id} | POST | /api/{resource} | CMD-Mxx-Fxx | {data-field list} | {permission} | {state guard} | Mxx-Fxx |
 
 ## 第三部分 Coding Agent 交付包 / Part 3 Coding Agent Delivery Package
 

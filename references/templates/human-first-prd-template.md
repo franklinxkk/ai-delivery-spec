@@ -1,4 +1,4 @@
-# Human-First Full PRD Template (v4.9.10 Profile)
+# Human-First Full PRD Template (v4.9.11 Profile)
 
 Use this profile when the PRD will be reviewed, developed, tested, outsourced,
 accepted, or archived by human teams. The document must be readable before it
@@ -221,13 +221,19 @@ form fields, modal/drawer chain, responsive differences, and empty/loading/error
 /success/disabled states. State how the page looks and behaves, not only which
 data exists.
 
+For each page, card, timeline, table, modal, or drawer in this function, add a
+page-level detailed-design table:
+
+| Surface | Position / Region | Fields Shown | Repeated Record Rule | Empty / Loading / Error | Role / State Variant |
+|---|---|---|---|---|---|
+| {page/card/modal} | top/middle/bottom/left/right/modal | {labels + data-field} | sort/group/page size/many-record behavior | {states} | {role/state differences} |
+
 #### §5 字段、字典与校验 / Fields, Dictionaries, And Validation
 
-When a locked prototype exists: list only prototype-invisible rules such as
-permission differences, state-conditional editability, enum values not visible
-in the prototype, masking, backend-only fields, and cross-field linkage.
-Reference the global field dictionary for all other fields. Do not repeat every
-visible field position that the locked prototype already shows.
+When a locked prototype exists: every implementation-relevant `data-field`,
+display field, input field, calculated field, table column, card label, timeline
+item, and filter must map to a field definition here or in the global field
+dictionary. Do not rely on visual labels alone.
 
 | Field ID | Field Name | Type | Required | Dictionary / Enum | Validation | Default | Editable By |
 |---|---|---|---|---|---|---|---|
@@ -252,11 +258,23 @@ products, add these optional columns when relevant:
 |---|---|---|---|---|---|---|
 | {action} | {role} | {state} | none/modal/second-confirm | yes/no/key | {ui result} | {data/state/event} |
 
+For each lifecycle entity touched by the function, declare CRUD/delete semantics:
+
+| Entity | Create | Edit | Delete / Close / Void / Archive | Allowed States | Forbidden States | Audit / Event |
+|---|---|---|---|---|---|---|
+| {entity} | {action/API} | {action/API} | physical delete / soft delete / close / void / archive / not supported | {states} | {states} | {audit/event} |
+
 #### §8 业务规则、计算与口径 / Business Rules, Calculations, And Calibers
 
 Describe source of truth, create/update/delete rules, synchronization,
 calculation, threshold/caliber, conflict handling, audit logging, and
 upstream/downstream impact. Number every rule as `BR-Mxx-Fxx-NN`.
+
+For complex forms or calculated values, add a calculation contract:
+
+| Field / Row | Trigger | Formula / Rule | Manual Override | Backend Validation | Error / Empty Behavior |
+|---|---|---|---|---|---|
+| {field} | on change / submit / recalc | {formula} | allowed/forbidden + flag | {server rule} | {message/state} |
 
 #### §9 状态、按钮与生命周期行为 / State, Button, And Lifecycle Behavior
 

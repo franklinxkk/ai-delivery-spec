@@ -9,6 +9,7 @@ Use this file when generating, reviewing, or repairing an HTML prototype.
 - Command and State Annotations
 - State-Driven UI Iron Law
 - Interaction Completeness Gate
+- Dynamic Surface Scan Gate
 - Assertion Modes
 - Multi-Step Forms
 - Batch Operations
@@ -312,6 +313,32 @@ Acceptance:
 - Handler coverage is 100% for non-disabled commands.
 - Main user journeys pass in browser walkthrough, not only DOM scan.
 
+## Dynamic Surface Scan Gate
+
+Static HTML scans are insufficient for role-based apps, tabbed pages, drawers,
+modals, lazy-rendered lists, or stateful prototypes. Before marking a prototype
+ready for PRD/coding-agent handoff, scan the rendered DOM after exercising the
+state surface.
+
+Required scan dimensions:
+
+| Dimension | Minimum Coverage |
+|---|---|
+| Role | each primary role or role group that changes navigation, visibility, or permissions |
+| View/tab | each navigable page and each tab/segment/filter that renders unique actions or fields |
+| Modal/drawer | each create/edit/detail/confirm modal or drawer opened by its trigger action |
+| State | at least one record for each meaningful lifecycle state and guard branch |
+| Repeated content | empty, one-record, and multi-record rendering for tables, cards, timelines, and child rows |
+
+Record the scan as a dynamic interaction ledger with rendered `data-testid`,
+`data-action`, `data-field`, `data-state`, `data-api`, `data-method`, and
+`data-visible-role` values per surface. If a value appears only after changing
+tab/role/state, it still must be mapped in the PRD contract and acceptance
+coverage.
+
+Fail the gate when a primary action exists only in a hidden/dynamic surface and
+has no PRD action definition, handler, modal spec, API mapping, or AC coverage.
+
 ## Assertion Modes
 
 | Mode | Use |
@@ -536,6 +563,8 @@ Rules:
 
 - [ ] All interactive elements have `data-testid`.
 - [ ] All commands have `data-action`.
+- [ ] All implementation-relevant displayed/input/calculated fields have
+      `data-field` or a documented field dictionary mapping.
 - [ ] Backend-writing automated scenarios have shadow-data isolation or are explicitly disabled.
 - [ ] All `data-action` commands have implemented handlers and visible outcomes.
 - [ ] No placeholder attributes remain, such as `${action}`.
@@ -554,5 +583,7 @@ Rules:
 - [ ] Mobile/responsive variants preserve testid system.
 - [ ] `_test.scan()` finds the critical path elements.
 - [ ] Browser/Playwright can complete the main scenario without brittle selectors.
+- [ ] Dynamic role/tab/modal/state scan has been performed; hidden/dynamic
+      actions and fields are included in the PRD/prototype cross-check.
 - [ ] Workflow prototypes use `GlobalState` and transition-driven state changes.
 - [ ] Customer/sponsor demos include Presentation Mode or an explicit `N/A` reason.
