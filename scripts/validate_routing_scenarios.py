@@ -325,6 +325,11 @@ SCENARIOS = (
         Route(True, "Standard", "Traditional Product Lifecycle", "Human-First Full PRD", ("delivery-core.md",)),
     ),
     Scenario(
+        "English OA workflow PRD",
+        "Write a complete PRD for an OA collaborative office system with workflow approval, unified todo, official document and meeting resolution tracking.",
+        Route(True, "Standard", "Traditional Product Lifecycle", "Human-First Full PRD", ("delivery-core.md", "advanced-extensions.md")),
+    ),
+    Scenario(
         "English AI coding PRD",
         "Use this prototype to produce an AI Coding PRD with AGENTS.md, AC-YAML and API stubs for Cursor.",
         Route(True, "Standard", "AI Coding Delivery", "AI-Coding Full PRD", ("delivery-core.md", "prototype-testability.md", "coding-agent-compat.md")),

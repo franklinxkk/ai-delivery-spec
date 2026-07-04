@@ -31,7 +31,7 @@ Extension trigger matrix:
 | visual workflow, low-code, connector, automation node, execution replay | Workflow Automation And Low-Code |
 | app/H5/mini-program/PC+mobile, overseas, localization, app stores | Mobile, Multi-Surface, And Global Delivery |
 | release, migration, rollout, on-call, rollback, retirement | System Readiness, Release, And Retirement |
-| industry/domain switch, traffic safety, transport supervision, CRM, AI-native product, agentic system, higher-education informationization, medical/hospital IT, templates | Domain Modules And Templates |
+| industry/domain switch, traffic safety, transport supervision, OA, collaborative office, workflow approval, official document, CRM, AI-native product, agentic system, higher-education informationization, medical/hospital IT, templates | Domain Modules And Templates |
 | coding agent handoff, generate AGENTS.md/CLAUDE.md/.cursor/rules/.cursorrules, convert AC to test stubs, implement from PRD | Coding Agent Compatibility |
 
 ## AI Feature / AI Native / Prompt Ops
@@ -74,6 +74,8 @@ ai_runtime_contract:
 
 Evaluation contract:
 
+- anchor cases calibrate the eval baseline before normal evaluation after any
+  model, prompt, retrieval, tool, schema, or context-source change;
 - golden cases are tiered: P0 smoke, P1 regression, P2 long-tail/adversarial;
 - each claim has evidence reference, baseline, threshold, reviewer, and sample size;
 - product copy must not overclaim beyond evidence level;
@@ -318,11 +320,35 @@ Domain modules remain load-on-demand assets:
 
 - new industry/company domain: start from `domain-module-template.md`;
 - traffic safety: `domain-traffic.md`;
+- OA / collaborative office: `domain-oa.md`.
 - CRM: `domain-crm.md`.
 - AI-native product / agentic system: `domain-ai-native.md`.
 - higher-education informationization: `domain-education-it.md`.
 - medical / hospital IT: `domain-medical-hospital-it.md`.
 - data mart / BI / reporting / fill-in: `domain-data-mart.md`.
+
+Multi-domain composition rule:
+
+- If one request explicitly spans multiple domains, load only the matched
+  domain modules and create a short `Domain Composition Map` before writing
+  PRD/IA/acceptance.
+- The map must state each domain's value object, source-of-truth module,
+  lifecycle state, high-risk boundary, and which domain owns each shared
+  object/event/metric.
+- Shared capabilities such as approval, workflow, AI, reporting, mobile, SaaS,
+  and realtime are handled by this `advanced-extensions.md` contract first;
+  domain files then add industry vocabulary, state physics, policy constraints,
+  and test scenarios.
+- Do not let a generic workflow term automatically switch to OA. Use
+  `domain-oa.md` only when the product is actually OA / collaborative office /
+  employee workspace / official document / unified todo / meeting /
+  supervision / e-signature / office AI assistant.
+- Do not let a generic AI term automatically switch to AI Native. Use
+  `domain-ai-native.md` only when AI is the product's core work system,
+  agentic runtime, or high-risk automation surface.
+- If domain rules conflict, record `CONFLICT` in source evidence and stop as
+  `REVIEW_COMPLETE_WITH_GAPS` unless an accountable owner chooses the source of
+  truth.
 
 Each domain module must keep a compact First-Principles Domain Lens. Use it to
 judge value object, role job, lifecycle state, source authority, high-risk
@@ -342,6 +368,13 @@ CRM domain note: when CRM scope spans marketing, sales, service, customer
 success, partner/channel, contract/payment, or product-feedback loops, use the
 CRM domain module to lock lifecycle states, SLA/response tasks, Customer 360,
 permission layers, and AI suggestions as supporting behavior.
+
+OA domain note: when OA, collaborative office, workflow approval, official
+document, meeting, supervision, unified todo, knowledge, e-signature, mobile
+office, service desk, low-code workflow, or AI office assistant is in scope,
+use the OA domain module to lock work-object lifecycle, workflow_human_gate,
+document_authority, todo_sla_close_guard, org_permission_scope, and AI office
+assistant boundaries.
 
 Templates:
 

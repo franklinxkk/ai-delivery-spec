@@ -17,6 +17,7 @@ Use this file when generating, reviewing, or repairing an HTML prototype.
 - Verification Loop
 - Test State Self-Healing / Shadow-Data Isolation
 - Prototype Helper Contract
+- Prototype Design Process
 - Visual Design Rules
 - Presentation Mode Specification
 - Prototype Acceptance Checklist
@@ -497,6 +498,28 @@ window._test = {
   }
 };
 ```
+
+## Prototype Design Process
+
+Use a compact design process before writing HTML. Do not import external
+`design.md` files wholesale; extract only reusable process rules.
+
+1. **Scenario first**: identify the role, task, decision, and success result.
+2. **Structure before style**: lock IA Skeleton views, regions, and navigation
+   before selecting colors or component flavor.
+3. **Content density**: decide whether the screen is operational, analytical,
+   mobile task, customer-facing demo, or consumer experience.
+4. **Component state**: define empty, loading, error, disabled, selected,
+   hover/focus, permission-denied, and offline states for primary controls.
+5. **Visual system**: choose a design-system style only when it affects brand,
+   acceptance, customer demo, or implementation reuse.
+6. **Responsive pass**: verify desktop and mobile layout constraints for tables,
+   forms, cards, dialogs, and long text.
+7. **Screenshot pass**: inspect at least one desktop and one mobile viewport
+   before declaring the prototype visually acceptable.
+
+This process can improve prototype quality, but it must not override IA,
+state, role path, business rules, or testability contracts.
 
 ## Visual Design Rules
 

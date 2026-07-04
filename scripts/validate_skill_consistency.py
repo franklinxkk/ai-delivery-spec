@@ -34,6 +34,7 @@ RETAINED_REFERENCE_FILES = {
     "domain-education-it.md",
     "domain-medical-hospital-it.md",
     "domain-module-template.md",
+    "domain-oa.md",
     "domain-traffic.md",
     "templates/ai-coding-prd-template.md",
     "templates/field-dictionary-template.md",
@@ -211,8 +212,8 @@ def main() -> int:
     if current_version is None:
         fail("SKILL.md version heading is missing", failures)
 
-    if len(text.splitlines()) > 340:
-        fail("SKILL.md exceeds runtime-entry budget of 340 lines", failures)
+    if len(text.splitlines()) > 380:
+        fail("SKILL.md exceeds runtime-entry budget of 380 lines", failures)
 
     readme = read(ROOT / "README.md")
     changelog = read(ROOT / "CHANGELOG.md")
@@ -243,6 +244,7 @@ def main() -> int:
             "Default runtime has four entrypoints",
             "coding-agent-compat.md",
             "realtime-contract.md",
+            "Final Self-Check",
             "Delivery Package Convention",
             "PASS",
             "REVIEW_COMPLETE_WITH_GAPS",
@@ -283,6 +285,7 @@ def main() -> int:
     human_first_template = read(REFERENCES / "templates" / "human-first-prd-template.md")
     ai_coding_template = read(REFERENCES / "templates" / "ai-coding-prd-template.md")
     realtime = read(REFERENCES / "realtime-contract.md")
+    interaction_ledger_script = read(ROOT / "scripts" / "extract_interaction_ledger.py")
 
     require_markers(
         "delivery-core.md",
@@ -336,16 +339,19 @@ def main() -> int:
         (
             "Extension Loading Rule",
             "AI Feature / AI Native / Prompt Ops",
+            "anchor cases",
             "SaaS, RBAC, And Multi-Tenancy",
             "Reporting, Dashboard, And Data Product",
             "Workflow Automation And Low-Code",
             "Mobile, Multi-Surface, And Global Delivery",
             "System Readiness, Release, And Retirement",
             "Domain Modules And Templates",
+            "Multi-domain composition rule",
             "Repository Cleanliness Rule",
             "coding-agent-compat.md",
             "domain-education-it.md",
             "domain-medical-hospital-it.md",
+            "domain-oa.md",
             "domain-ai-native.md",
             "domain-data-mart.md",
         ),
@@ -399,6 +405,8 @@ def main() -> int:
             "Human-First Full PRD",
             "Prototype Interaction Ledger Extraction",
             "Structured Acceptance Criteria",
+            "frozen_apis",
+            "immutability_rules",
             "FRR Completion Gate",
             "Batch generation strategy",
             "API Endpoint Inventory",
@@ -417,8 +425,11 @@ def main() -> int:
         coding_agent,
         (
             "Structured Acceptance Criteria (AC-YAML)",
+            "frozen_apis",
+            "immutability_rules",
             "Machine-Readable AI Runtime Contract",
             "Contract Selection Ladder",
+            "anchor_case_file",
             "Agent Entrypoint Generation",
             "Delivery Package Layout",
             "Manifest minimum schema",
@@ -441,6 +452,16 @@ def main() -> int:
         ),
         failures,
     )
+    require_markers(
+        "extract_interaction_ledger.py",
+        interaction_ledger_script,
+        (
+            "stateSnapshot",
+            "stateChecksum",
+            "schemaVersion",
+        ),
+        failures,
+    )
 
     require_markers(
         "README.md",
@@ -460,6 +481,8 @@ def main() -> int:
             "ai_delivery_spec_cli.py",
             "Multi-Agent Lifecycle Validation",
             "validate_multi_agent_lifecycle_scenarios.py",
+            "validate_domain_isolation.py",
+            "validate_current_release_contracts.py",
             "Who Should Use This",
             "coding-agent compatibility",
             "Delivery Package Convention",
@@ -467,6 +490,7 @@ def main() -> int:
             "Output Selector",
             "Higher-Education IT",
             "Medical / Hospital IT",
+            "OA / Collaborative Office",
             "Data Mart",
         ),
         failures,

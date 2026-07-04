@@ -1,4 +1,4 @@
-# AI-Coding Full PRD Template (v4.9.11 Profile)
+# AI-Coding Full PRD Template (v4.9.13 Profile)
 
 Use this profile only when the user explicitly wants a coding agent, full AI
 implementation, machine-readable contracts, test stubs, or an implementation
@@ -113,6 +113,10 @@ Self-driven repair rule:
   next-batch function list, and `CONTINUATION_REQUIRED` continuation
   instruction. Do not summarize the remaining modules as "same as previous" or
   "see appendix".
+- If the output token budget is insufficient for all remaining FRRs, stop at
+  the last fully completed FRR. Emit `CONTINUATION_REQUIRED`, the exact next
+  `Mxx-Fxx`, remaining function count, and source evidence still needed. Never
+  compress unfinished FRRs into summary prose.
 
 Batch generation strategy:
 
@@ -177,6 +181,14 @@ ac_structured:
     actions: ["create-record"]
     data_testid: "btn-create-record"
     data_action: "create-record"
+    frozen_apis:
+      - method: POST
+        path: /api/{module}/{resource}
+        request_schema: schemas/Mxx-Fxx.create.request.json
+        response_schema: schemas/Mxx-Fxx.create.response.json
+    immutability_rules:
+      - "Do not rename request/response fields to satisfy generated tests."
+      - "Do not change state enum values without updating FRR section 9."
 ```
 
 AC ID evolution rules:
@@ -186,6 +198,9 @@ AC ID evolution rules:
   with `status: deprecated`.
 - When behavior changes materially, add `revision`, `supersedes`, or a new AC ID
   and map the old one to migration notes.
+- Use `frozen_apis` and `immutability_rules` for AC entries that coding agents
+  will turn into tests. These fields prevent agents from changing interfaces,
+  enums, permission guards, or lifecycle states merely to make tests pass.
 
 ### 2.3 机器可读运行时 / AI 契约 / Machine-Readable Runtime / AI Contract
 
@@ -206,7 +221,8 @@ ai_contract_lite:
 
 For full AI runtime, reference `references/coding-agent-compat.md` and include
 `write_scope`, `tool_scope`, `human_gate`, `fallback`, `observability`,
-`rollback`, `prompt_file`, and `golden_case_file`.
+`rollback`, `prompt_file`, `golden_case_file`, and `anchor_case_file` for
+model/prompt drift calibration.
 
 ### 2.4 API / 事件 / 数据契约桩 / API / Event / Data Contract Stub
 

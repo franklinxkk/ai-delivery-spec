@@ -55,6 +55,14 @@ ac_structured:
     test_type: integration
     data_testid: "btn-submit-review"
     data_action: "lead.submitReview"
+    frozen_apis:
+      - method: POST
+        path: /api/leads/{id}/submit-review
+        request_schema: schemas/lead-submit-review.request.json
+        response_schema: schemas/lead-submit-review.response.json
+    immutability_rules:
+      - "Do not rename request/response fields to make tests pass."
+      - "Do not change lifecycle states unless the FRR state matrix changes."
     skip_reason: null
 ```
 
@@ -73,6 +81,11 @@ Rules:
   `supersedes`, and `replaced_by` metadata when behavior changes.
 - `priority: P0` is smoke; `P1` is regression; `P2` is long-tail/adversarial.
 - `test_type` is one of `unit`, `integration`, `e2e`, `contract`, `manual`.
+- `frozen_apis` locks interface shape for coding agents. If implementation
+  needs to change method/path/schema/field names, report `[GAP]` and update the
+  PRD/contract first.
+- `immutability_rules` states what coding agents must not mutate to force tests
+  to pass, such as enum values, state names, permission guards, or API fields.
 - If automation is intentionally skipped, set `skip_reason`; do not omit the AC.
 
 ### AC ID Evolution Rules
@@ -183,8 +196,12 @@ ai_runtime_contract:
     feature_flag: "ff_ai_feature_name"
   eval:
     golden_case_file: "evals/feature-golden.jsonl"
+    anchor_case_file: "evals/feature-anchor.jsonl"
+    baseline_model_version: "model@YYYY-MM-DD"
     p0_threshold: 0.95
     p1_threshold: 0.90
+    anchor_p0_threshold: 1.00
+    drift_calibration: "Run anchor cases before golden/adversarial eval after any model, prompt, retrieval, or tool change."
     eval_runner: "pytest evals/ -m p0"
 ```
 
@@ -396,8 +413,10 @@ general multi-agent coding tools that read repo-level instructions.
 2. Business logic follows PRD FRR section 8 and section 9.
 3. UI behavior follows prototype `data-*` annotations.
 4. Do not invent states, permissions, API contracts, or role paths.
-5. Report missing requirements as `[GAP] {FunctionID} section {Section}: {description}`.
-6. Preserve tenant/org/role/data isolation from FRR section 10.
+5. Do not modify `frozen_apis`, lifecycle enums, permission guards, or
+   `immutability_rules` to make tests pass.
+6. Report missing requirements as `[GAP] {FunctionID} section {Section}: {description}`.
+7. Preserve tenant/org/role/data isolation from FRR section 10.
 
 ## Verification
 - P0 smoke: `{test_command_p0}`.

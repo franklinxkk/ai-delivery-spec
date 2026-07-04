@@ -7,6 +7,11 @@ Usage:
         --prototype path/to/prototype.html \
         --prd path/to/prd.md
 
+    python scripts/validate_ia_skeleton.py \
+        --extract-from-prd \
+        --prd path/to/prd.md \
+        --prototype path/to/prototype.html
+
 Exit code 0 if no issues, 1 otherwise.
 """
 
@@ -30,6 +35,19 @@ def load_text(path: Path) -> str:
         return f.read()
 
 
+def extract_yaml_from_prd(prd_path: Path) -> dict:
+    """Extract the first fenced YAML block containing an ia_skeleton root."""
+    text = load_text(prd_path)
+    for match in re.finditer(r"```(?:yaml|yml)\s*\n(.*?)\n```", text, re.DOTALL | re.IGNORECASE):
+        candidate = match.group(1)
+        if "ia_skeleton" not in candidate:
+            continue
+        parsed = yaml.safe_load(candidate)
+        if isinstance(parsed, dict) and parsed.get("ia_skeleton"):
+            return parsed
+    raise ValueError(f"No fenced YAML ia_skeleton block found in PRD: {prd_path}")
+
+
 def extract_data_testids(html: str) -> set[str]:
     return set(re.findall(r"""data-testid=["']([^"']+)["']""", html))
 
@@ -47,10 +65,9 @@ def extract_prd_references(prd: str) -> dict[str, set[str]]:
     }
 
 
-def validate(ia_skeleton_path: Path, prototype_path: Path | None, prd_path: Path | None) -> list[str]:
+def validate_skeleton(skeleton: dict, prototype_path: Path | None, prd_path: Path | None) -> list[str]:
     issues: list[str] = []
 
-    skeleton = load_yaml(ia_skeleton_path)
     modules = skeleton.get("ia_skeleton", {}).get("modules", [])
     if not modules:
         issues.append("IA Skeleton has no modules")
@@ -202,6 +219,10 @@ def validate(ia_skeleton_path: Path, prototype_path: Path | None, prd_path: Path
     return issues
 
 
+def validate(ia_skeleton_path: Path, prototype_path: Path | None, prd_path: Path | None) -> list[str]:
+    return validate_skeleton(load_yaml(ia_skeleton_path), prototype_path, prd_path)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Validate IA Skeleton <-> Prototype <-> PRD consistency"
@@ -209,8 +230,13 @@ def main() -> int:
     parser.add_argument(
         "--ia-skeleton",
         type=Path,
-        required=True,
+        default=None,
         help="Path to ia-skeleton.yaml",
+    )
+    parser.add_argument(
+        "--extract-from-prd",
+        action="store_true",
+        help="Extract the ia_skeleton YAML fenced block from --prd and validate it.",
     )
     parser.add_argument(
         "--prototype",
@@ -226,11 +252,31 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    if not args.ia_skeleton.exists():
-        print(f"ERROR: IA Skeleton not found: {args.ia_skeleton}", file=sys.stderr)
+    if args.prototype and not args.prototype.exists():
+        print(f"ERROR: Prototype not found: {args.prototype}", file=sys.stderr)
+        return 1
+    if args.prd and not args.prd.exists():
+        print(f"ERROR: PRD not found: {args.prd}", file=sys.stderr)
         return 1
 
-    issues = validate(args.ia_skeleton, args.prototype, args.prd)
+    if args.extract_from_prd:
+        if not args.prd:
+            print("ERROR: --extract-from-prd requires --prd", file=sys.stderr)
+            return 1
+        try:
+            skeleton = extract_yaml_from_prd(args.prd)
+        except Exception as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+        issues = validate_skeleton(skeleton, args.prototype, args.prd)
+    else:
+        if not args.ia_skeleton:
+            print("ERROR: provide --ia-skeleton or use --extract-from-prd --prd path/to/prd.md", file=sys.stderr)
+            return 1
+        if not args.ia_skeleton.exists():
+            print(f"ERROR: IA Skeleton not found: {args.ia_skeleton}", file=sys.stderr)
+            return 1
+        issues = validate(args.ia_skeleton, args.prototype, args.prd)
 
     if issues:
         print(f"Found {len(issues)} issue(s):")

@@ -96,6 +96,16 @@ DOMAINS = {
             "customer360_masking",
         ],
     },
+    "oa": {
+        "file": "domain-oa.md",
+        "markers": [
+            "workflow_human_gate",
+            "document_authority",
+            "todo_sla_close_guard",
+            "org_permission_scope",
+            "ai_office_assistant_boundary",
+        ],
+    },
     "ai_data": {
         "file": "domain-data-mart.md",
         "markers": [

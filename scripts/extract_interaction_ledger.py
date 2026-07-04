@@ -9,6 +9,7 @@ and function names. Dynamic behavior still requires browser verification.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -76,6 +77,7 @@ def main():
     onclicks = attr_values(html, "onclick")
     data_actions = attr_values(html, "data-action")
     data_testids = attr_values(html, "data-testid")
+    data_states = attr_values(html, "data-state")
     data_fields = attr_values(html, "data-field")
     data_binds = attr_values(html, "data-bind")
     ids = attr_values(html, "id")
@@ -95,8 +97,18 @@ def main():
         if "modal" in text or "drawer" in text or "dialog" in text or "sheet" in text:
             modal_candidates.append(row)
 
+    state_snapshot = {
+        "dataStates": sorted(set(data_states)),
+        "dataActions": sorted(set(data_actions)),
+        "dataTestids": sorted(set(data_testids)),
+    }
+    state_snapshot["stateChecksum"] = hashlib.sha256(
+        json.dumps(state_snapshot, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    ).hexdigest()
+
     ledger = {
         "artifact": str(html_path),
+        "schemaVersion": "interaction-ledger/v1",
         "annotationPattern": {
             "hasDataActions": bool(data_actions),
             "hasDataTestids": bool(data_testids),
@@ -106,6 +118,8 @@ def main():
             "dataActions": len(data_actions),
             "uniqueDataActions": len(set(data_actions)),
             "dataTestids": len(data_testids),
+            "dataStates": len(data_states),
+            "uniqueDataStates": len(set(data_states)),
             "dataFields": len(data_fields),
             "uniqueDataFields": len(set(data_fields)),
             "dataBinds": len(data_binds),
@@ -119,12 +133,15 @@ def main():
             + [{"type": "onclick", "name": o} for o in onclicks]
         ),
         "testids": sorted(set(data_testids)),
+        "states": sorted(set(data_states)),
+        "stateSnapshot": state_snapshot,
         "fields": sorted(set(data_fields)),
         "binds": sorted(set(data_binds)),
         "modalsOrDrawers": unique(modal_candidates),
         "functions": sorted(set(functions + arrow_assignments)),
         "notes": [
             "Static ledger only; verify dynamic routes and handlers in browser.",
+            "stateSnapshot.stateChecksum protects high-value state/action/testid boundaries from lossy summarization.",
             "Inline onclick prototypes should be upgraded with data-action/data-testid before L2 handoff.",
         ],
     }

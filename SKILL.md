@@ -3,7 +3,7 @@ name: ai-delivery-spec
 description: Create PRDs, prototypes, tests, AI runtime specs, and coding agent handoffs for product delivery. Excludes code debugging and copy rewriting.
 ---
 
-# AI Delivery Spec - Production Elastic Delivery Standard (v4.9.11)
+# AI Delivery Spec - Production Elastic Delivery Standard (v4.9.13)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering, algorithm, QA, operations, customers, and sponsors can read, build, verify, and operate without losing lifecycle state, evidence, or handoff accountability.
 
@@ -66,6 +66,9 @@ Triggered add-on:
 Templates and domain modules are load-on-demand source assets. Do not load them
 directly unless a default entrypoint or triggered add-on explicitly instructs it
 for the current task.
+For domain modules, load only matched domains. Do not load all domains "for
+safety"; use a Domain Composition Map when multiple domains are explicitly in
+scope.
 
 ## 2. Scope, Mode, And Tier
 
@@ -254,11 +257,28 @@ python scripts/extract_interaction_ledger.py --input path/to/prototype.html --ou
 python scripts/validate_prd_quality.py path/to/prd.docx --manifest path/to/manifest.json
 python scripts/validate_coding_agent_contract.py --prd path/to/prd.md --prototype path/to/prototype.html
 python scripts/validate_ia_skeleton.py --ia-skeleton path/to/ia-skeleton.yaml --prototype path/to/prototype.html --prd path/to/prd.md
+python scripts/validate_ia_skeleton.py --extract-from-prd --prd path/to/prd.md --prototype path/to/prototype.html
 python scripts/validate_skill_consistency.py
 python scripts/validate_routing_scenarios.py
 ```
 
-## 8. Final Response Rule
+On Windows, use `py -3` instead of `python` when the Microsoft Store Python
+stub or PATH setup causes launcher failures.
+
+## 8. Final Self-Check
+
+Before declaring a completion state, confirm:
+
+- 0D triage was declared and pruning was respected.
+- IA Skeleton is locked or explicitly not required for this scope.
+- Every in-scope FRR is complete, or the output uses `CONTINUATION_REQUIRED`
+  / `REVIEW_COMPLETE_WITH_GAPS` with the exact next function list.
+- Source evidence has no silent `DEFERRED`, `UNKNOWN`, or `CONFLICT`.
+- Prototype/action/field/state anchors are traceable when prototype evidence
+  exists.
+- Final state, unresolved risks, and verification results are consistent.
+
+## 9. Final Response Rule
 
 When delivering work, state: 0D triage result; lifecycle stage, artifact type,
 downstream consumer/decision; artifact scope, mode, tier; triggered
@@ -266,7 +286,7 @@ gates/extensions; created or updated artifacts; verification performed; and
 completion state (`PASS`, `REVIEW_COMPLETE_WITH_GAPS`, or `BLOCKED`) with
 unresolved risks.
 
-## 9. Version Control And Release Rules
+## 10. Version Control And Release Rules
 
 When the skill files are managed in a Git repository and published to GitHub or
 other remotes, follow these rules to prevent data loss and history corruption.
@@ -307,7 +327,7 @@ When publishing a new version:
 - Feature branches: `feature/<topic>` for experimental work; merge via PR.
 - No direct pushes to `main` for experimental or unreviewed changes.
 
-## 10. Delivery Package Convention
+## 11. Delivery Package Convention
 
 When handing off to a coding agent (Claude Code, Cursor, Copilot, Codex) or a
 human development team, organize the delivery package using this directory

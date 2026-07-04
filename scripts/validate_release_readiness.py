@@ -592,7 +592,9 @@ def validate_generated_minimal_samples(failures: list[str]) -> None:
 
 def validate_local_crm_samples(crm_dir: Path | None, failures: list[str], warnings: list[str]) -> None:
     if not crm_dir or not crm_dir.exists():
-        warnings.append("local CRM sample directory not provided; skipped pressure-sample checks")
+        # The built-in minimal Human-First and AI-Coding samples above are the
+        # default release smoke pressure. Local CRM artifacts are optional
+        # extended checks and should not create a warning for fresh clones.
         return
 
     human = next(crm_dir.glob("*HumanFirst*.md"), None)

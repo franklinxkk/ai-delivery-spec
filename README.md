@@ -3,12 +3,12 @@
 **Search keywords**: product management | PRD | product requirements document |
 requirements engineering | spec-driven development | SDD | AI coding |
 coding-agent handoff | acceptance criteria | prototype testability | product ops |
-enterprise software | SaaS | CRM | BI | ChatBI | Data Agent | AI Native |
+enterprise software | SaaS | OA | workflow | CRM | BI | ChatBI | Data Agent | AI Native |
 agentic workflow | spec-kit | skills.sh
 
 **中文关键词**：产品经理 | 产品需求文档 | 需求规格说明书 | PRD | 原型 |
 验收标准 | AI 编程 | AI Coding | 编码智能体 | 产品侧 SDD | 产研协同 |
-测试验收 | 自动化测试 | ToB | ToG | SaaS | CRM | 数据产品 | ChatBI |
+测试验收 | 自动化测试 | ToB | ToG | SaaS | OA | 协同办公 | 流程审批 | CRM | 数据产品 | ChatBI |
 Data Agent | AI 原生 | 智能体工作流 | spec-kit | skills.sh
 
 > 面向产品经理、产研团队和 AI 编程团队的产品侧 SDD 规范：把想法、竞品、原型、PRD、验收、上线和 AI Coding 交接统一成可读、可测、可实现的一套交付标准。
@@ -17,7 +17,7 @@ Data Agent | AI 原生 | 智能体工作流 | spec-kit | skills.sh
 > prototypes, acceptance criteria, and coding-agent handoff to stay consistent.
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-4.9.11-green.svg)]()
+[![Version](https://img.shields.io/badge/version-4.9.13-green.svg)]()
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-compatible-purple.svg)](https://openclaw.ai)
 ![skills.sh](https://skills.sh/b/franklinxkk/ai-delivery-spec)
@@ -35,11 +35,21 @@ Recommended GitHub topics:
 product-management, prd, requirements-engineering, spec-driven-development,
 ai-coding, coding-agent, ai-agents, ai-native, agent-skills, skills-sh,
 spec-kit, acceptance-criteria, prototype, software-delivery,
-enterprise-software, saas, crm, business-intelligence, chatbi, data-agent
+enterprise-software, saas, workflow-automation, crm, business-intelligence, data-agent
 ```
 
 Use it when a team needs one shared source of truth for PMs, developers,
 architects, QA, vendors, customers, and coding agents.
+
+## 30-Second Fit Check
+
+| You Need | Use This Repo For |
+|---|---|
+| A PM has only a rough idea, boss note, meeting record, or competitor screenshot | guided clarification, opportunity shaping, and a Light PRD |
+| A team needs a readable PRD for frontend, backend, algorithm, QA, vendor, or customer review | Human-First Full PRD with scenarios, page layout, fields, interactions, rules, exceptions, and acceptance |
+| A coding agent will implement the system | AI-Coding Full PRD with `ac_structured`, API/data/event contracts, `AGENTS.md`, `CLAUDE.md`, Cursor rules, and manifest |
+| A prototype must be demoed and later tested | IA Skeleton, `data-testid`, `data-action`, state-driven interaction, screenshot/browser verification, and presentation mode |
+| The product includes AI, data, workflow, SaaS, OA, CRM, education, healthcare, or traffic safety domain logic | load only the matched domain modules and produce traceable contracts |
 
 ## 解决什么问题 / The Pain
 
@@ -70,9 +80,9 @@ handoff breaks:
   mode.
 - **Review Report**: PRD/prototype gap review across product, engineering,
   QA, architecture, AI, and operations perspectives.
-- **Domain-Aware Specs**: traffic safety, CRM, AI+Data / data mart / BI /
-  reporting / fill-in, AI Native / agentic systems, higher-education IT, and
-  medical/hospital IT domain modules.
+- **Domain-Aware Specs**: traffic safety, OA / collaborative office, CRM,
+  AI+Data / data mart / BI / reporting / fill-in, AI Native / agentic systems,
+  higher-education IT, and medical/hospital IT domain modules.
 
 ## 安装 / Install
 
@@ -106,6 +116,8 @@ cross-agent compatibility baseline.
 
 ```bash
 git clone https://github.com/franklinxkk/ai-delivery-spec.git
+cd ai-delivery-spec
+python -m pip install -r requirements.txt
 ```
 
 ### Manual Install To Claude Code
@@ -347,6 +359,7 @@ same source PRD and export only the slices each tool needs:
 | Figma / design review | IA Skeleton, Layout IDs, page regions, component states | design alignment and visual gaps | design file or design review note |
 | Playwright / Browser Use | `data-testid`, `data-action`, demo paths, AC-YAML | automated verification | `delivery/evidence/` |
 | Notion / Confluence / Feishu | Human-First Full PRD and lifecycle annex | stakeholder-readable source of truth | team knowledge base |
+| Reviewer agent | generated PRD/prototype/package | gate report before handoff | `agents/reviewer-agent.md` |
 
 ## 轻量 CLI / Helper CLI
 
@@ -366,6 +379,8 @@ python scripts/ai_delivery_spec_cli.py check --prd delivery/prd/main.md --protot
 
 On Windows, use `py -3` instead of `python` if the `python` launcher is not
 registered in PATH.
+If `python` opens the Microsoft Store stub or exits with code 49, run the same
+commands as `py -3 scripts/...`.
 
 This CLI is intentionally thin. It initializes the convention and calls the
 same validators documented below; it is not a separate runtime or framework.
@@ -406,15 +421,16 @@ Run:
 python scripts/validate_multi_agent_lifecycle_scenarios.py
 ```
 
-The built-in simulation covers Traffic, CRM, AI+Data, AI Native / Agentic
-Systems, Higher-Education IT, and Medical / Hospital IT across all lifecycle
-stages and reviewer agents.
+The built-in simulation covers Traffic, OA / Collaborative Office, CRM,
+AI+Data, AI Native / Agentic Systems, Higher-Education IT, and Medical /
+Hospital IT across all lifecycle stages and reviewer agents.
 
 ## 领域模块 / Domain Modules
 
 | Domain | File |
 |---|---|
 | Traffic Safety / 交通安全 | `references/domain-traffic.md` |
+| OA / Collaborative Office / 协同办公与流程审批 | `references/domain-oa.md` |
 | CRM / 客户经营 | `references/domain-crm.md` |
 | AI Native / Agentic Systems / AI 原生与智能体系统 | `references/domain-ai-native.md` |
 | AI+Data / Data Mart / BI / Reporting / 数据智能、数据集市、报表与填报 | `references/domain-data-mart.md` |
@@ -427,9 +443,19 @@ machines, privacy rules, and test scenarios. Keep the First-Principles Domain Le
 value object, role job, lifecycle state, source authority, high-risk boundary,
 and test evidence.
 
+Multi-domain requests are supported. When a product spans domains such as
+`CRM + OA + Data Mart`, load only the matched domain modules and produce a
+`Domain Composition Map`: domain, value object, source of truth, lifecycle
+state, high-risk boundary, shared object/event/metric owner, and conflicts.
+Generic approval/workflow terms do not automatically switch to OA; generic AI
+terms do not automatically switch to AI Native.
+See [Multi-Domain Package](examples/multi-domain-package/README.md) for a
+minimal `CRM x OA x Data Mart` composition sample.
+
 ## 示例 / Examples
 
 - [CRM Response Center](examples/crm-response-center/README.md)
+- [OA Collaborative Office](examples/oa-collaborative-office/README.md)
 - [Traffic Safety SaaS](examples/traffic-safety-saas/README.md)
 - [Higher-Education IT](examples/education-it/README.md)
 - [Medical / Hospital IT](examples/medical-hospital-it/README.md)
@@ -457,11 +483,18 @@ python scripts/validate_skill_consistency.py
 python scripts/validate_routing_scenarios.py
 python scripts/validate_release_readiness.py
 python scripts/validate_ai_data_product_scenarios.py
+python scripts/validate_current_release_contracts.py
 python scripts/validate_multi_agent_lifecycle_scenarios.py
+python scripts/validate_domain_isolation.py
 python scripts/ai_delivery_spec_cli.py check
+python scripts/validate_prd_quality.py path/to/prd.md --incremental
+python scripts/validate_prd_quality.py path/to/template.md --allow-wildcards
 python scripts/validate_ia_skeleton.py --ia-skeleton delivery/ia-skeleton.yaml --prototype delivery/prototype/app.html --prd delivery/prd/main.md
+python scripts/validate_ia_skeleton.py --extract-from-prd --prd delivery/prd/main.md --prototype delivery/prototype/app.html
 python scripts/validate_coding_agent_contract.py --prd delivery/prd/main.md --prototype delivery/prototype/app.html
 ```
+
+For Windows, replace `python` with `py -3` if needed.
 
 ## 许可证 / License
 

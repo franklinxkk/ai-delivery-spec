@@ -2,6 +2,39 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.9.13 - 2026-07-04
+
+- Added incremental PRD validation mode to `validate_prd_quality.py` so
+  in-progress PRD excerpts can validate expanded FRRs without requiring every
+  Release Function Inventory item to be fully written.
+- Added `--extract-from-prd` support to `validate_ia_skeleton.py` for PRDs
+  that embed `ia_skeleton` YAML directly in Markdown.
+- Hardened PRD quality checks against false positives from rule examples,
+  blockquotes, evaluation/gate headings, and template wildcard IDs.
+- Added a mandatory final self-check section in `SKILL.md` and clarified
+  Windows `py -3` usage.
+- Added `requirements.txt`, GitHub Actions validation, and a multi-domain
+  `CRM x OA x Data Mart` example package with manifest and IA Skeleton.
+- Added a lightweight `agents/reviewer-agent.md` entry for PRD/prototype gate
+  review using the deterministic validators.
+- Strengthened AI-Coding template continuation fallback for large PRDs that
+  exceed context/output budget.
+
+## v4.9.12 - 2026-07-04
+
+- Added `references/domain-oa.md` for OA / collaborative office, workflow
+  approval, official document, meeting, supervision, knowledge, e-signature,
+  mobile office, low-code workflow, and AI office assistant scenarios.
+- Linked the OA domain module from `advanced-extensions.md`, README domain
+  tables, examples, and validation scripts.
+- Added OA lifecycle validation coverage across PM, domain, architecture/data/AI,
+  QA, and coding-agent perspectives.
+- Added `scripts/validate_domain_isolation.py` to verify that built-in domain
+  modules route independently and do not leak domain-specific markers into each
+  other.
+- Renamed the legacy version-specific release validator to
+  `validate_current_release_contracts.py` and removed hard-coded version checks.
+
 ## v4.9.11 - 2026-07-01
 
 - Added a mandatory Page-Level Detailed Design Gate so implementation handoff
@@ -64,7 +97,7 @@ All notable changes to AI Delivery Spec are summarized here.
 - Documented skills.sh / Skills CLI installation/use/update flows, spec-kit
   interoperability, PM quickstart, brainstorming composition, and prototype
   visual-style clarification in README.
-- Added `scripts/validate_v4_9_9_contracts.py` and extended release/routing
+- Added the release contract validator and extended release/routing
   validators for AI-native domains, spec-kit interop, external UI design skill
   composition, and tail-thin PRD rejection.
 - Added multi-agent lifecycle validation across Traffic, CRM, AI+Data,

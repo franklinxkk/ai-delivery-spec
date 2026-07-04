@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate current release domain, continuation, platform, and gate contracts."""
+"""Validate current-release domain, continuation, platform, and gate contracts."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import textwrap
+import re
 from pathlib import Path
 
 
@@ -26,6 +27,11 @@ def require(name: str, text: str, markers: list[str], failures: list[str]) -> No
     for marker in markers:
         if marker not in text:
             fail(failures, f"{name} missing marker: {marker}")
+
+
+def current_version(skill_text: str) -> str:
+    match = re.search(r"Production Elastic Delivery Standard \(v([0-9]+\.[0-9]+\.[0-9]+)\)", skill_text)
+    return match.group(1) if match else "unknown"
 
 
 def complete_frr(function_id: str, title: str = "Complete Function") -> str:
@@ -50,13 +56,14 @@ def validate_markers(failures: list[str]) -> None:
     ai_native = read(REFERENCES / "domain-ai-native.md")
     human_template = read(REFERENCES / "templates" / "human-first-prd-template.md")
     ai_template = read(REFERENCES / "templates" / "ai-coding-prd-template.md")
+    version = current_version(skill)
 
-    require("SKILL.md", skill, ["v4.9.11"], failures)
+    require("SKILL.md", skill, [f"v{version}"], failures)
     require(
         "README.md",
         readme,
         [
-            "version-4.9.11",
+            f"version-{version}",
             "PM Quickstart",
             "skills.sh",
             "npx skills use franklinxkk/ai-delivery-spec",
@@ -69,6 +76,7 @@ def validate_markers(failures: list[str]) -> None:
             "Multi-Agent Lifecycle Validation",
             "validate_multi_agent_lifecycle_scenarios.py",
             "references/domain-ai-native.md",
+            "references/domain-oa.md",
             "First-Principles Domain Lens",
         ],
         failures,

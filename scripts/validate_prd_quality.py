@@ -39,6 +39,13 @@ FENCE_RE = re.compile(r"^```")
 TABLE_HEADER_RE = re.compile(r"^\s*\|")
 HEADING_RE = re.compile(r"^(#{1,6})\s+\S")
 HEADING_DETAIL_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
+META_HEADING_EXEMPT_RE = re.compile(
+    r"(?i)\b("
+    r"evaluation|gate|self[- ]?check|validation|review|acceptance|traceability|"
+    r"completion state|frr|ac-yaml|ac_structured|api|nfr|ai-coding|human-first|"
+    r"评审|验收|自检|门禁|追溯|完成状态"
+    r")\b"
+)
 FRR_HEADING_RE = re.compile(r"^(#{3,4})\s+(M\d{2}-F\d{2})\b")
 FRR_ID_RE = re.compile(r"\bM\d{2}-F\d{2}\b")
 r"""
@@ -147,6 +154,10 @@ LAZY_REFERENCE_RE = re.compile(
     "see prototype|same as above|existing logic|see attachment"
     ")",
     re.IGNORECASE,
+)
+RULE_INSTRUCTION_RE = re.compile(
+    r"(?i)(do not|don't|never|forbid|forbidden|not allowed|must not|"
+    r"不要|不得|禁止|严禁|不允许)"
 )
 REFERENCE_ANCHOR_RE = re.compile(
     r"(data-testid|data-action|FRR|AC-|SRC-|Source ID|view_id|region_id|"
@@ -376,6 +387,8 @@ def check_heading_language(text: str, failures: list[str], target_language: str)
             continue
         level = len(match.group(1))
         heading = match.group(2).strip()
+        if META_HEADING_EXEMPT_RE.search(heading):
+            continue
         if level in {2, 3, 4} and len(CJK_RE.findall(heading)) < 2:
             bad.append(line.strip())
 
@@ -395,6 +408,22 @@ def iter_markdown_lines_without_code(text: str) -> list[str]:
             in_code_block = not in_code_block
             continue
         if in_code_block:
+            continue
+        lines.append(line)
+    return lines
+
+
+def iter_markdown_lines_without_code_or_quotes(text: str) -> list[str]:
+    """Return Markdown lines excluding fenced code and blockquote examples."""
+    lines: list[str] = []
+    in_code_block = False
+    for line in text.splitlines():
+        if FENCE_RE.match(line):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block:
+            continue
+        if line.lstrip().startswith(">"):
             continue
         lines.append(line)
     return lines
@@ -771,10 +800,12 @@ def check_lazy_references(text: str, failures: list[str]) -> None:
     human developers and coding agents cannot reconstruct page behavior.
     """
 
-    paragraphs = re.split(r"\n\s*\n", text)
+    paragraphs = re.split(r"\n\s*\n", "\n".join(iter_markdown_lines_without_code_or_quotes(text)))
     bad: list[str] = []
     for para in paragraphs:
         if is_structured_repetition_table(para):
+            continue
+        if LAZY_REFERENCE_RE.search(para) and RULE_INSTRUCTION_RE.search(para):
             continue
         if LAZY_REFERENCE_RE.search(para) and not REFERENCE_ANCHOR_RE.search(para):
             bad.append(re.sub(r"\s+", " ", para.strip())[:180])
@@ -827,6 +858,21 @@ def main() -> int:
     parser.add_argument("artifact", type=Path, help="PRD/prototype/spec artifact to inspect")
     parser.add_argument("--manifest", type=Path, help="Optional machine-readable manifest for strict graph checks")
     parser.add_argument("--allow-wildcards", action="store_true", help="Allow wildcard IDs in templates/examples")
+    parser.add_argument(
+        "--incremental",
+        action="store_true",
+        help=(
+            "Validate an in-progress PRD excerpt. Checks explicit inline FRRs "
+            "but does not require Release Function Inventory coverage to equal "
+            "all FRR headings."
+        ),
+    )
+    parser.add_argument(
+        "--stage",
+        choices=("full", "incremental", "draft", "review"),
+        default="full",
+        help="Validation strictness. Non-full stages behave like --incremental for inventory coverage.",
+    )
     parser.add_argument("--warn-numeric", action="store_true", help="Check unsupported numeric-claim candidates")
     parser.add_argument(
         "--target-language",
@@ -879,17 +925,20 @@ def main() -> int:
 
     if not args.allow_wildcards:
         check_wildcard_ids(text, failures)
+    incremental_mode = args.incremental or args.stage != "full"
     check_duplicate_boilerplate(text, failures)
     check_heading_hierarchy(text, failures)
     check_lazy_references(text, failures)
     check_language_ratio(text, failures, target_language, language_fail_ratio)
     check_heading_language(text, failures, target_language)
-    check_rfi_and_ledger_presence(text, failures)
-    check_frr_reference_coverage(text, failures)
-    check_rfi_denominator(text, failures)
+    if not incremental_mode:
+        check_rfi_and_ledger_presence(text, failures)
+        check_frr_reference_coverage(text, failures)
+        check_rfi_denominator(text, failures)
     check_frr_section_completeness(text, failures)
     check_frr_section_body_quality(text, failures)
-    check_completion_ledger_state(text, failures)
+    if not incremental_mode:
+        check_completion_ledger_state(text, failures)
     check_ai_coding_part1_inline(text, failures)
     if args.warn_numeric:
         check_unsupported_numeric_claims(text, failures)

@@ -83,6 +83,7 @@ Durable AI-native trend map:
 | RAG Context | retrieved document, record, vector result, or knowledge snippet | retrieval/index service |
 | Human Gate | required review/approval before publish, send, write, or close | workflow policy |
 | Golden Case | versioned evaluation example with expected behavior | eval set |
+| Anchor Case | stable calibration case used to detect model/prompt/tool drift before normal eval | eval set |
 | Refusal | safe response when request is unsupported, unsafe, or unauthorized | policy/rule set |
 
 ## Aggregates and Entities
@@ -94,7 +95,7 @@ Durable AI-native trend map:
 | ToolDefinition | schema, auth owner, side effects, rate limits, rollback | blocks unsafe tool mixing |
 | PromptVersion | template, variables, examples, owner, status | draft -> tested -> active |
 | ContextAsset | document/table/API/vector index, freshness, classification | permission inherited by user |
-| EvalSet | golden cases, adversarial cases, thresholds, reviewer | required for AI-core release |
+| EvalSet | anchor cases, golden cases, adversarial cases, thresholds, reviewer | required for AI-core release |
 | RunTrace | input hash, context refs, model, tools, output, feedback | observability and audit |
 | HumanReview | reviewer, decision, reason, edited output, audit | closes accountability loop |
 
@@ -149,12 +150,16 @@ State consistency:
 | tool_call_error_rate | failed or blocked tool calls / total tool calls | engineering |
 | grounded_answer_rate | answers with valid context citations / answer runs | AI engineer |
 | eval_p0_pass_rate | P0 golden cases passed / P0 cases | release owner |
+| anchor_case_pass_rate | anchor cases passed before normal eval / anchor cases | AI engineer + QA |
 | rollback_time | time from regression alert to safe fallback | operations |
 
 Rules:
 
 - Every launch claim needs an eval set, baseline, threshold, sample size, and
   owner.
+- Any model, prompt, retrieval, tool, or schema change must run Anchor-Cases
+  before normal golden/adversarial evaluation. Anchor failure means the eval
+  baseline is not comparable and must stop release as `REVIEW_COMPLETE_WITH_GAPS`.
 - AI-core modules require P0 smoke, P1 regression, and adversarial cases.
 - Production monitoring must connect run traces to user feedback and incidents.
 - Metrics must segment by model/prompt/tool/context version.
@@ -177,7 +182,7 @@ Rules:
 | prompt library | owner, variables, examples, version, risk class | review before active |
 | tool registry | schema, auth owner, write scope, rollback, rate limit | security review |
 | knowledge base | owner, source, effective date, classification, freshness | lifecycle review |
-| eval set | case type, expected behavior, threshold, reviewer, version | release gate |
+| eval set | anchor/golden/adversarial case type, expected behavior, threshold, reviewer, version | release gate |
 | refusal policy | forbidden request class, response boundary, escalation | risk/compliance owner |
 | fallback playbook | trigger, user message, manual path, owner, recovery | operations owner |
 
@@ -191,8 +196,8 @@ Rules:
    model/tool execution -> citation/refusal -> human gate when needed -> output.
 4. Tool writeback: proposed action -> policy check -> reviewer approval ->
    idempotent tool call -> audit/event -> rollback path.
-5. Evaluation loop: golden/adversarial run -> threshold check -> regression
-   triage -> prompt/model/tool update -> release decision.
+5. Evaluation loop: anchor calibration -> golden/adversarial run -> threshold
+   check -> regression triage -> prompt/model/tool update -> release decision.
 6. Operations loop: trace/feedback/incident -> classify failure -> fallback or
    rollback -> fix -> post-launch review.
 
@@ -243,6 +248,7 @@ Rules:
 | tool write requires approval | expert reviewer | writeback waits for approval and logs decision |
 | stale knowledge base | end user | answer warns stale source or routes to manual path |
 | eval regression before launch | AI engineer | release blocked and failed cases listed |
+| anchor case drift after model upgrade | AI engineer | normal eval is paused until baseline is recalibrated |
 | fallback on model outage | operations owner | deterministic/manual fallback within SLA |
 | prompt rollback | operations owner | active prompt returns to last passing version |
 | adversarial prompt injection | risk reviewer | tool call blocked and event logged |
@@ -294,6 +300,8 @@ Rules:
 - [ ] Agent/tool/write scopes and human gates are explicit.
 - [ ] Context sources have freshness, permission, citation, and reliability rules.
 - [ ] Eval sets, thresholds, baselines, and owners exist before AI-core launch.
+- [ ] Anchor-Cases run before golden/adversarial eval after model, prompt,
+      retrieval, tool, schema, or context changes.
 - [ ] Refusal, fallback, rollback, incident, and post-launch review paths are defined.
 - [ ] High-impact decisions keep authorized human accountability.
 - [ ] Coding-agent handoff includes `ai_contract_lite` or `ai_runtime_contract`

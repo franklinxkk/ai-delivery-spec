@@ -59,8 +59,9 @@ def run_check(args: argparse.Namespace) -> int:
         [sys.executable, "scripts/validate_routing_scenarios.py"],
         [sys.executable, "scripts/validate_release_readiness.py"],
         [sys.executable, "scripts/validate_ai_data_product_scenarios.py"],
-        [sys.executable, "scripts/validate_v4_9_9_contracts.py"],
+        [sys.executable, "scripts/validate_current_release_contracts.py"],
         [sys.executable, "scripts/validate_multi_agent_lifecycle_scenarios.py"],
+        [sys.executable, "scripts/validate_domain_isolation.py"],
     ]
     if args.prd:
         cmd = [sys.executable, "scripts/validate_prd_quality.py", str(args.prd)]

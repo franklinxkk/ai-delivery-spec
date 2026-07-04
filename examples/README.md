@@ -16,6 +16,8 @@ Each example includes:
 | Example | Best For | Domain Module |
 |---|---|---|
 | [CRM Response Center](crm-response-center/README.md) + [L1 PRD sample](crm-response-center/l1-prd-sample.md) | sales, customer service, product feedback loop | `domain-crm.md` |
+| [OA Collaborative Office](oa-collaborative-office/README.md) + [L1 PRD sample](oa-collaborative-office/l1-prd-sample.md) | workflow approval, official document, meeting, todo, AI office assistant | `domain-oa.md` |
+| [Multi-Domain Package](multi-domain-package/README.md) | CRM x OA x Data Mart composition, cross-module flow, E2E canvas | `domain-crm.md` + `domain-oa.md` + `domain-data-mart.md` |
 | [Traffic Safety SaaS](traffic-safety-saas/README.md) + [L1 PRD sample](traffic-safety-saas/l1-prd-sample.md) | regulated ToB/ToG SaaS, mobile field work | `domain-traffic.md` |
 | [Higher-Education IT](education-it/README.md) + [L1 PRD sample](education-it/l1-prd-sample.md) | academic affairs, student affairs, teaching systems | `domain-education-it.md` |
 | [Medical / Hospital IT](medical-hospital-it/README.md) + [L1 PRD sample](medical-hospital-it/l1-prd-sample.md) | clinical workflow, medical quality, AI-assisted review | `domain-medical-hospital-it.md` |

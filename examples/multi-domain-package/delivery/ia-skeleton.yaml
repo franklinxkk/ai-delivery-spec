@@ -1,0 +1,50 @@
+ia_skeleton:
+  modules:
+    - module_id: M01
+      module_name: CRM Ticket And Demand
+      primary_roles: [service, product_manager]
+      views:
+        - view_id: M01-V01
+          view_type: page
+          visible_to: [service, product_manager]
+          regions:
+            - region_id: M01-R01
+              purpose: ticket list and demand conversion entry
+          primary_actions:
+            - action_id: ticket.convert_to_demand
+              action: convert confirmed ticket to product demand
+    - module_id: M02
+      module_name: OA Unified Todo
+      primary_roles: [approver, process_owner]
+      views:
+        - view_id: M02-V01
+          view_type: page
+          visible_to: [approver, process_owner]
+          regions:
+            - region_id: M02-R01
+              purpose: todo processing and audit trail
+          primary_actions:
+            - action_id: todo.close
+              action: close todo with result
+    - module_id: M03
+      module_name: Data Mart Report
+      primary_roles: [data_owner, manager]
+      views:
+        - view_id: M03-V01
+          view_type: page
+          visible_to: [data_owner, manager]
+          regions:
+            - region_id: M03-R01
+              purpose: SLA and conversion indicator dashboard
+          primary_actions:
+            - action_id: indicator.refresh
+              action: refresh metric after todo closure
+  cross_module_flows:
+    - flow: ticket to demand to todo to indicator
+      source_view: M01-V01
+      target_view: M02-V01
+      event: DemandTodoCreated
+    - flow: todo closure to data mart metric
+      source_view: M02-V01
+      target_view: M03-V01
+      event: TodoClosedForDemand
