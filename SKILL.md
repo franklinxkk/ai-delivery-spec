@@ -3,7 +3,7 @@ name: ai-delivery-spec
 description: Create PRDs, prototypes, tests, AI runtime specs, and coding agent handoffs for product delivery. Excludes code debugging and copy rewriting.
 ---
 
-# AI Delivery Spec - Production Elastic Delivery Standard (v4.9.13)
+# AI Delivery Spec - Production Elastic Delivery Standard (v4.9.14)
 
 Author: Li Kang. Purpose: produce delivery artifacts that product, engineering, algorithm, QA, operations, customers, and sponsors can read, build, verify, and operate without losing lifecycle state, evidence, or handoff accountability.
 

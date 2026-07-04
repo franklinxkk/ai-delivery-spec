@@ -1,4 +1,4 @@
-# Human-First Full PRD Template (v4.9.13 Profile)
+# Human-First Full PRD Template (v4.9.14 Profile)
 
 Use this profile when the PRD will be reviewed, developed, tested, outsourced,
 accepted, or archived by human teams. The document must be readable before it

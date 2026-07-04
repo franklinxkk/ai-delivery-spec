@@ -2,6 +2,13 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.9.14 - 2026-07-04
+
+- Removed `media/promo-video/` generated promotional video assets from the
+  repository and installed skill package. The repo now keeps promotion planning
+  outside the runtime skill payload so community installs stay smaller and
+  cleaner.
+
 ## v4.9.13 - 2026-07-04
 
 - Added incremental PRD validation mode to `validate_prd_quality.py` so
