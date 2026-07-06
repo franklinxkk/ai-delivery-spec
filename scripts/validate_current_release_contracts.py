@@ -420,6 +420,87 @@ Completion state: PASS
             fail(failures, "incomplete ledger with PASS failed without PRD_COMPLETION_LEDGER_GAP signal")
 
 
+def validate_over_specified_simple_scope_rejected(failures: list[str]) -> None:
+    bad_prd = textwrap.dedent(
+        """
+        # Over-Specified Simple Scope
+
+        ## Stage 1 Requirement Planning
+
+        The release is a simple CRUD list/detail feature for manual review, but
+        the implementation plan sets Tier: L3 and requires a multi-agent DAG,
+        prompt graph, prompt registry, and autonomous tool planning.
+        """
+    ).strip()
+    with tempfile.TemporaryDirectory(prefix="ads-499-antibloat-") as tmp:
+        path = Path(tmp) / "over-specified-simple-scope.md"
+        path.write_text(bad_prd, encoding="utf-8")
+        result = subprocess.run(
+            [sys.executable, "scripts/validate_prd_quality.py", str(path), "--stage", "draft"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+        )
+        output = result.stdout + result.stderr
+        if result.returncode == 0:
+            fail(failures, "over-specified simple scope unexpectedly passed validate_prd_quality.py")
+        if "ANTI_BLOATING_GAP" not in output:
+            fail(failures, "over-specified simple scope failed without ANTI_BLOATING_GAP signal")
+
+
+def validate_crm_end_to_end_example(failures: list[str]) -> None:
+    base = ROOT / "examples" / "crm-end-to-end-package" / "delivery"
+    prd = base / "prd" / "main.md"
+    manifest = base / "manifest.json"
+    ia = base / "ia-skeleton.yaml"
+    prototype = base / "prototype" / "app.html"
+    required = [prd, manifest, ia, prototype, base / "acceptance" / "ac-structured.yaml"]
+    missing = [str(path.relative_to(ROOT)) for path in required if not path.exists()]
+    if missing:
+        fail(failures, "CRM end-to-end example missing files: " + ", ".join(missing))
+        return
+
+    commands = [
+        [
+            sys.executable,
+            "scripts/validate_prd_quality.py",
+            str(prd),
+            "--manifest",
+            str(manifest),
+        ],
+        [
+            sys.executable,
+            "scripts/validate_ia_skeleton.py",
+            "--ia-skeleton",
+            str(ia),
+            "--prototype",
+            str(prototype),
+            "--prd",
+            str(prd),
+        ],
+        [
+            sys.executable,
+            "scripts/validate_coding_agent_contract.py",
+            "--prd",
+            str(prd),
+            "--prototype",
+            str(prototype),
+        ],
+    ]
+    for cmd in commands:
+        result = subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True)
+        if result.returncode != 0:
+            output = (result.stdout + result.stderr).strip()
+            first_line = output.splitlines()[0] if output else "<no output>"
+            fail(
+                failures,
+                "CRM end-to-end example validation failed: "
+                + " ".join(cmd)
+                + "\n"
+                + first_line,
+            )
+
+
 def main() -> int:
     failures: list[str] = []
     validate_markers(failures)
@@ -428,6 +509,8 @@ def main() -> int:
     validate_full_prd_missing_rfi_ledger_rejected(failures)
     validate_placeholder_sections_rejected(failures)
     validate_incomplete_ledger_pass_rejected(failures)
+    validate_over_specified_simple_scope_rejected(failures)
+    validate_crm_end_to_end_example(failures)
 
     if failures:
         for item in failures:

@@ -1,6 +1,6 @@
 # AI + Data Product System Domain Module
 
-Use this replaceable domain module for AI+Data platforms, data marts, data warehouses, lakehouse products, BI, ChatBI, Data Agent, semantic/ontology products, metric platforms, dashboards, reporting, fill-in systems, data governance, data catalog, lineage, retrieval/search, and data analysis products. A replacement `domain-*.md` must preserve the same 14 section headings used here and in `domain-module-template.md`.
+Use this replaceable domain module for AI+Data platforms, data marts, data warehouses, lakehouse products, BI, ChatBI, Data Agent, semantic/ontology products, metric platforms, dashboards, reporting, fill-in systems, data governance, data catalog, lineage, retrieval/search, and data analysis products. A replacement `domain-*.md` must preserve the same 15 section headings used here and in `domain-module-template.md`.
 
 This module is intentionally broader than a data mart checklist. It treats data products as an end-to-end system: source acquisition -> processing -> governance -> storage/retrieval -> semantic/ontology layer -> analytics/BI -> AI agents -> action/decision loop -> operations/evaluation.
 

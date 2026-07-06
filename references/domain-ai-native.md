@@ -4,7 +4,7 @@ Use this replaceable domain module for AI-native products, agent workflows,
 LLM-powered applications, multi-agent systems, copilots, AI assistants, RAG
 products, tool-using agents, evaluation platforms, prompt/model operations, and
 human-in-the-loop automation. A replacement `domain-*.md` must preserve the
-same 14 section headings used here and in `domain-module-template.md`.
+same 15 section headings used here and in `domain-module-template.md`.
 
 ## Contents
 
@@ -295,7 +295,7 @@ Rules:
 
 ## Acceptance Checklist
 
-- [ ] All 14 domain module sections are present.
+- [ ] All 15 domain module sections are present.
 - [ ] AI centrality is classified per module: AI-incidental, AI-supporting, or AI-core.
 - [ ] Agent/tool/write scopes and human gates are explicit.
 - [ ] Context sources have freshness, permission, citation, and reliability rules.

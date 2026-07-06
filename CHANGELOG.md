@@ -2,6 +2,21 @@
 
 All notable changes to AI Delivery Spec are summarized here.
 
+## v4.9.15 - 2026-07-06
+
+- Expanded the traffic domain module for road-transport enterprise SaaS,
+  scenic/tourism passenger transport overlays, onboarding/training/check
+  workflows, migration baselines, and current standards corpus boundaries.
+- Synchronized runtime, README, templates, and agent metadata to v4.9.15 so
+  main-branch installs do not drift from tagged releases.
+- Fixed the helper CLI so PRD + prototype checks run the coding-agent contract
+  validator even when an IA Skeleton is not supplied.
+- Hardened consistency validation against domain contract count drift and
+  stale 14-section wording after the First-Principles Domain Lens became part
+  of the required 15-section domain contract.
+- Added release-facing checks and examples for complexity-budget anti-bloating
+  and CRM end-to-end delivery package coverage.
+
 ## v4.9.14 - 2026-07-04
 
 - Removed `media/promo-video/` generated promotional video assets from the

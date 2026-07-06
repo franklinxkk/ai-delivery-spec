@@ -517,6 +517,9 @@ def main() -> int:
             fail(f"CONTRIBUTING.md missing domain section checklist item: {section}", failures)
     if "First-Principles Domain Lens" not in domain_template:
         fail("domain-module-template.md missing First-Principles Domain Lens", failures)
+    for stale_marker in ("same 14 section", "All 14 domain module sections"):
+        if stale_marker in "\n".join(read(path) for path in REFERENCES.glob("domain-*.md")):
+            fail(f"domain modules contain stale 14-section contract wording: {stale_marker}", failures)
 
     domain_files = sorted(
         path.name
