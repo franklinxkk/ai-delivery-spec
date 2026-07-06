@@ -391,7 +391,7 @@ Common categories:
 
 ## Acceptance Checklist
 
-- [ ] All 14 domain module sections are present.
+- [ ] All 15 domain module sections are present.
 - [ ] Academic affairs, student affairs, research management, teaching quality, professional construction, one-stop service, data governance, and AI assistant boundaries are explicit when relevant.
 - [ ] Student, teacher, course, teaching class, score, service case, classroom evaluation, OBE achievement, research project/fund/output, data resource, and indicator lifecycles are defined.
 - [ ] Authoritative source, owner department, freshness, and conflict-resolution rule are named for cross-system data.

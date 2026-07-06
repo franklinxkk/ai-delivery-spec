@@ -177,6 +177,14 @@ LAYOUT_REGION_TABLE_RE = re.compile(
     r"(?=[^\n]*(?:\u4f4d\u7f6e|Position|\u4e3b\u8981\u7ec4\u4ef6|Component))[^\n]*\|",
     re.IGNORECASE,
 )
+LOW_COMPLEXITY_RE = re.compile(
+    r"(?i)\b(simple\s+CRUD|linear\s+workflow|list/detail|create/edit|"
+    r"filtering|export|manual\s+review|ordinary\s+product\s+logic)\b"
+)
+OVER_ENGINEERED_RE = re.compile(
+    r"(?i)\b(multi-agent\s+(?:DAG|topology|graph)|prompt\s+(?:graph|topology|registry)|"
+    r"DAG\s+router|autonomous\s+tool\s+planning|AI\s+Native\s+Harness|Tier\s*[:=]\s*L3)\b"
+)
 
 
 def read_text(path: Path) -> str:
@@ -853,6 +861,25 @@ def check_heading_hierarchy(text: str, failures: list[str]) -> None:
         previous_level = level
 
 
+def check_complexity_budget(text: str, failures: list[str]) -> None:
+    """Fail obvious over-specification against the anti-bloating rule."""
+
+    paragraphs = re.split(r"\n\s*\n", "\n".join(iter_markdown_lines_without_code_or_quotes(text)))
+    bad: list[str] = []
+    for para in paragraphs:
+        if RULE_INSTRUCTION_RE.search(para):
+            continue
+        if LOW_COMPLEXITY_RE.search(para) and OVER_ENGINEERED_RE.search(para):
+            bad.append(re.sub(r"\s+", " ", para.strip())[:200])
+    if bad:
+        add_failure(
+            failures,
+            "ANTI_BLOATING_GAP: low-complexity scope is over-modeled with "
+            "agentic/L3 architecture: "
+            + " | ".join(bad[:5]),
+        )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("artifact", type=Path, help="PRD/prototype/spec artifact to inspect")
@@ -929,6 +956,7 @@ def main() -> int:
     check_duplicate_boilerplate(text, failures)
     check_heading_hierarchy(text, failures)
     check_lazy_references(text, failures)
+    check_complexity_budget(text, failures)
     check_language_ratio(text, failures, target_language, language_fail_ratio)
     check_heading_language(text, failures, target_language)
     if not incremental_mode:

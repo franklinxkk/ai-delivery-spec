@@ -1,0 +1,61 @@
+acceptance:
+  - id: AC-CRM-F01-001
+    frr_ref: M01-F01
+    data_testid: page-M01-V01
+    data_action: create-lead
+    data_field: Lead.customerName
+    given: authorized cs_agent is on the CRM response workspace
+    when: the user submits a valid lead
+    then: Lead is created in assigned state and ResponseTask is created
+    test_type: integration
+  - id: AC-CRM-F01-002
+    frr_ref: M01-F01
+    data_testid: region-lead-intake
+    data_action: create-lead
+    data_field: Lead.source
+    given: required lead source is present
+    when: create-lead is submitted
+    then: audit log records creator, source, and assigned owner
+    test_type: integration
+  - id: AC-CRM-F01-003
+    frr_ref: M01-F01
+    data_testid: field-lead-customer-name
+    data_action: create-lead
+    data_field: Lead.customerName
+    given: customer name is empty
+    when: create-lead is attempted
+    then: validation blocks persistence and keeps draft state
+    test_type: negative
+  - id: AC-CRM-F01-004
+    frr_ref: M01-F01
+    data_testid: field-lead-source
+    data_action: create-lead
+    data_field: Lead.source
+    given: lead source is selected
+    when: create-lead succeeds
+    then: source is stored on Lead and visible to sales_manager
+    test_type: integration
+  - id: AC-CRM-F01-005
+    frr_ref: M01-F01
+    data_testid: btn-create-lead
+    data_action: create-lead
+    given: user has lead create permission
+    when: the button is clicked
+    then: POST /api/crm/leads is called with idempotency guard
+    test_type: integration
+  - id: AC-CRM-F02-001
+    frr_ref: M01-F02
+    data_testid: region-response-task
+    data_action: convert-opportunity
+    given: Lead is assigned and response task exists
+    when: sales_manager converts the qualified lead
+    then: Opportunity is created and Lead state becomes converted
+    test_type: integration
+  - id: AC-CRM-F02-002
+    frr_ref: M01-F02
+    data_testid: btn-convert-opportunity
+    data_action: convert-opportunity
+    given: user has conversion permission
+    when: convert-opportunity is clicked
+    then: POST /api/crm/opportunities is called and LeadConverted event is recorded
+    test_type: integration

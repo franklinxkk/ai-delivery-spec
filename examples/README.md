@@ -15,6 +15,7 @@ Each example includes:
 
 | Example | Best For | Domain Module |
 |---|---|---|
+| [CRM End-to-End Delivery Package](crm-end-to-end-package/README.md) | full path from Stage 0 to IA, prototype, PRD, AC-YAML, manifest, and validation | `domain-crm.md` |
 | [CRM Response Center](crm-response-center/README.md) + [L1 PRD sample](crm-response-center/l1-prd-sample.md) | sales, customer service, product feedback loop | `domain-crm.md` |
 | [OA Collaborative Office](oa-collaborative-office/README.md) + [L1 PRD sample](oa-collaborative-office/l1-prd-sample.md) | workflow approval, official document, meeting, todo, AI office assistant | `domain-oa.md` |
 | [Multi-Domain Package](multi-domain-package/README.md) | CRM x OA x Data Mart composition, cross-module flow, E2E canvas | `domain-crm.md` + `domain-oa.md` + `domain-data-mart.md` |

@@ -1,0 +1,5 @@
+Expected validation commands:
+
+py -3 scripts/validate_prd_quality.py examples/crm-end-to-end-package/delivery/prd/main.md --manifest examples/crm-end-to-end-package/delivery/manifest.json
+py -3 scripts/validate_ia_skeleton.py --ia-skeleton examples/crm-end-to-end-package/delivery/ia-skeleton.yaml --prototype examples/crm-end-to-end-package/delivery/prototype/app.html --prd examples/crm-end-to-end-package/delivery/prd/main.md
+py -3 scripts/validate_coding_agent_contract.py --prd examples/crm-end-to-end-package/delivery/prd/main.md --prototype examples/crm-end-to-end-package/delivery/prototype/app.html

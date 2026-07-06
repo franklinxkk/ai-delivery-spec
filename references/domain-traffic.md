@@ -1,6 +1,6 @@
 # Domain: Traffic Safety And Road Transport SaaS
 
-Use this replaceable domain module for 运管、交通监管、道路运输企业安全生产、交通安全 SaaS、两客一危、普货、站场、维修、驾培、租赁、数据集市和指标库产品. A replacement `domain-*.md` must preserve the same 14 section headings used here and in `domain-module-template.md`.
+Use this replaceable domain module for 运管、交通监管、道路运输企业安全生产、交通安全 SaaS、两客一危、普货、站场、维修、驾培、租赁、数据集市和指标库产品. A replacement `domain-*.md` must preserve the same 15 section headings used here and in `domain-module-template.md`.
 
 ## Contents
 
@@ -462,7 +462,7 @@ Scenic/tourism passenger transport should normally stay inside this traffic doma
 
 ## Acceptance Checklist
 
-- [ ] All 14 domain module sections are present.
+- [ ] All 15 domain module sections are present.
 - [ ] Regulator-facing and enterprise-facing product modes are separated where relevant.
 - [ ] Road transport nine-industry scope is explicit, with common platform, configurable template, and independent module boundaries.
 - [ ] Scenic/tourism transport overlays identify source checks, passenger-flow/dispatch context, route/weather risk, maintenance prevention, role training, printable ledgers, AI human-review boundaries, and benchmark output without hardcoding one customer.

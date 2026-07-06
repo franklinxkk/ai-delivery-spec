@@ -81,6 +81,7 @@ def run_check(args: argparse.Namespace) -> int:
                 str(args.prd),
             ]
         )
+    if args.prototype and args.prd:
         commands.append(
             [
                 sys.executable,
