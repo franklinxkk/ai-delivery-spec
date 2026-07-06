@@ -276,19 +276,59 @@ Standards corpus layers:
 | Group / association standards | `T/...` | mark as optional/customer-adopted unless contract says otherwise |
 | Enterprise / customer rules | internal safety system, operation handbook, acceptance checklist | mark as customer-specific and not general regulation |
 
+Effective-source registry rules, web-verified on 2026-07-06:
+
+- Prefer official sources: National People's Congress / State Council / Ministry of Transport / Ministry of Emergency Management / State Administration for Market Regulation standard platforms / official local government releases.
+- Treat legal portals, industry media, training slides, and vendor documents as discovery leads only. Do not activate product rules from them without official source confirmation.
+- Record `source_url`, `issuer`, `document_no`, `publish_date`, `effective_date`, `status`, `scope`, `industry`, `rule_owner`, and `last_verified_at` for every law, regulation, standard, checklist, or customer rule.
+- Distinguish `law/regulation`, `department rule`, `normative file`, `mandatory national standard`, `recommended standard`, `industry standard`, `local rule`, and `enterprise rule`.
+- Before generating compliance conclusions, verify whether a standard is current, superseded, partially replaced, or only recommended. Deprecated vehicle or repair standards must not drive active hard-stop rules.
+- When source documents conflict, choose the stricter/applicable rule only after recording the conflict, scope, and human decision owner.
+
+Current regulatory baseline to check before product specification:
+
+| Source Family | Key Current Sources | Product Mapping |
+|---|---|---|
+| Safety production baseline | `安全生产法`; road transport / urban passenger major accident hidden-danger criteria; transport safety risk and hidden-danger governance files | dual prevention, hidden danger, accountability, audit evidence, major-risk human approval |
+| Administrative inspection baseline | `交通运输涉企行政检查标准` and local implementation checklists | inspection templates, item evidence, self-check, regulator/enterprise checklist alignment |
+| Enterprise/person/vehicle baseline | `道路运输条例`; `道路运输从业人员管理规定` (2026 revision); `道路运输车辆技术管理规定`; `道路运输车辆动态监督管理办法`; two-type personnel safety assessment measures | enterprise files, two-type personnel, driver/escort qualification, vehicle technical files, dynamic monitoring |
+| Passenger and station baseline | `道路旅客运输及客运站管理规定` (2023 revision); `汽车客运站安全生产规范` (2024); passenger/station safety inspection standards | passenger transport, charter/tourism passenger, source station check, station release, station ledger |
+| Urban bus and taxi baseline | `城市公共交通条例`; `城市公共汽车和电车客运管理规定`; `巡游出租汽车经营服务管理规定`; `网络预约出租汽车经营服务管理暂行办法`; taxi driver qualification rules | city bus, cruise taxi, ride-hailing, driver scale, platform data gaps, dispatch and service safety |
+| Freight and network freight baseline | `道路货物运输及站场管理规定` (2026 revision); network freight / network cargo platform operation rules and service guidance | ordinary freight, freight station, network freight carrier/platform data, waybill/operation relation |
+| Dangerous goods baseline | `道路危险货物运输管理规定` (2026 revision); `危险货物道路运输安全管理办法`; `危险货物道路运输企业安全管理规范` (2025); dangerous-goods standard families | driver/escort/vehicle/tank/cargo/e-waybill/checklist/risk task and human release decision |
+| Radioactive goods baseline | `放射性物品道路运输管理规定` (2026 revision) | radioactive transport qualification, package/vehicle/personnel evidence, stricter approval and audit |
+| International road transport baseline | `国际道路运输管理规定` (2023 revision) | cross-border permits, routes, vehicle/personnel qualification, document validity |
+| Maintenance baseline | `机动车维修管理规定` (2023 revision); repair business condition standards; vehicle electronic health archive policies | repair enterprise, maintenance order, technical file, parts/service evidence, vehicle safety closure |
+| Driver training baseline | `机动车驾驶员培训管理规定` (2026 revision); `GB/T 30340-2025`; `GB/T 30341-2025` | driving school, trainee/coach/class-hour/exam/training-field lifecycle |
+| Vehicle rental baseline | `小微型客车租赁经营服务管理办法`; auto-rental service standards where current | rental enterprise, rental contract, vehicle status, driver/customer relation |
+| Scenic/tourism overlay | passenger transport + station/source check + vehicle technical + training + maintenance + peak/holiday operation + local scenic/customer safety rules | scenic shuttle/sightseeing/transfer transport, printable ledgers, safety daily reports, route/weather/passenger-flow risk |
+
+Standard families to map into data fields and rule tables:
+
+| Standard Family | Examples | Product Mapping |
+|---|---|---|
+| Safety inspection | `JT/T 1482-2023 道路运输安全监督检查规范`; official涉企检查标准 | inspection item library, evidence requirements, issue classification |
+| Dangerous goods | `JT/T 617` series dangerous-goods road transport rules; dangerous goods names/classification/vehicle marking standards | cargo classification, package/vehicle/marking/waybill rule matching |
+| Vehicle safety and inspection | `GB 7258`; `GB 38900`; vehicle technical management and dynamic monitoring standards | vehicle files, technical status, inspection/maintenance evidence, active-defense/GPS source state |
+| Dynamic monitoring and interfaces | `JT/T 794`, `JT/T 796`, `JT/T 808`, `JT/T 809`, active-safety/video alarm standard families where current | GPS/809/active-defense integration, alert source, outage/staleness status |
+| Maintenance and repair | current `GB/T 16739` repair business condition series and repair service/technical-file standards | repair enterprise qualification, repair order, service evidence, maintenance closure |
+| Driving school | `GB/T 30340-2025`; `GB/T 30341-2025`; training record/exam rules | institution qualification, training field, coach/trainee/class-hour data |
+| Passenger station and operation | passenger/station ministerial rules, station safety production norm, station classification/building standards where current | station entry/exit, source release, boarding/security evidence, station risk |
+| Service and rental | taxi/ride-hailing/rental service standards where current | service qualification, order/contract evidence, passenger/driver complaint and safety linkage |
+
 Nine-industry adaptation map:
 
-| Industry | Common Platform Fit | Must Watch |
-|---|---|---|
-| Urban public bus | enterprise/person/vehicle/training/check/risk common base | line/shift/dispatch and public-service operation depth |
-| Taxi / ride-hailing | enterprise/person/vehicle/license/training common base | platform settlement, driver scale, third-party platform data gap |
-| Road passenger transport | common base + passenger operation template | bus line, charter/tourism, station linkage, driver duty checks |
-| International road passenger/freight | common base + certificate/waybill/route template | cross-border permits, route/cargo/passenger data quality |
-| Road freight including dangerous goods and network freight | common base + freight/dangerous-goods template | escort, tank/trailer, e-waybill, cargo attributes, dangerous-goods checklists |
-| Road transport station | independent module plus shared enterprise/person/risk base | station flow, entry/exit, boarding/security evidence |
-| Motor vehicle maintenance | independent module plus shared enterprise/person/risk base | repair order, parts/service evidence, technical management |
-| Driver training | independent module plus shared enterprise/person/training base | trainee/coach/class-hour/exam lifecycle |
-| Small passenger car rental | common base + rental/vehicle template | rental contract, vehicle status, customer/driver relation |
+| Industry | Common Platform Fit | Must Watch | Primary Regulatory Mapping |
+|---|---|---|---|
+| Urban public bus | enterprise/person/vehicle/training/check/risk common base | line/shift/dispatch and public-service operation depth | urban public transport regulation + city bus/electric bus rules + vehicle/dynamic-monitoring standards |
+| Taxi / ride-hailing | enterprise/person/vehicle/license/training common base | platform settlement, driver scale, third-party platform data gap | cruise taxi, ride-hailing, taxi-driver qualification, platform data and service rules |
+| Road passenger transport | common base + passenger operation template | bus line, charter/tourism, station linkage, driver duty checks | passenger/station rules, station safety norm, vehicle technical and driver qualification rules |
+| International road passenger/freight | common base + certificate/waybill/route template | cross-border permits, route/cargo/passenger data quality | international road transport rules + passenger/freight baseline |
+| Road freight including dangerous goods and network freight | common base + freight/dangerous-goods template | escort, tank/trailer, e-waybill, cargo attributes, dangerous-goods checklists | freight/station rules, network freight platform rules, dangerous-goods and radioactive goods rules where applicable |
+| Road transport station | independent module plus shared enterprise/person/risk base | station flow, entry/exit, boarding/security evidence | passenger/station rules, station safety norm, inspection/checklist standards |
+| Motor vehicle maintenance | independent module plus shared enterprise/person/risk base | repair order, parts/service evidence, technical management | maintenance rules, repair business condition standards, vehicle technical-file policies |
+| Driver training | independent module plus shared enterprise/person/training base | trainee/coach/class-hour/exam lifecycle | driver training rules, training institution/field standards |
+| Small passenger car rental | common base + rental/vehicle template | rental contract, vehicle status, customer/driver relation | small passenger car rental rules and current rental service standards |
 
 Do not promise full nine-industry depth in one P1 release. Use P1 to validate three to four high-value scenarios, then scale templates after rule, workflow, and data contracts are stable.
 Scenic/tourism passenger transport should normally stay inside this traffic domain as a cross-template overlay across road passenger transport, station operation, maintenance, training, and operation data. Split it into a separate domain file only if it becomes a standalone product line with its own lifecycle, acceptance package, and routing rules.
@@ -354,6 +394,8 @@ Scenic/tourism passenger transport should normally stay inside this traffic doma
 - Standards used by rules, AI answers, templates, inspections, and reports must cite issuer, region, effective date, version/status, and applicability.
 - When national, industry, local, group, and enterprise rules conflict, record the conflict and decision owner instead of silently choosing one.
 - Usage/adoption analytics may guide product and commercial decisions but must not be presented as legal compliance evidence without domain verification.
+- AI may cite and summarize current regulatory sources, but every compliance conclusion, release-to-duty decision, stop-operation suggestion, penalty-facing conclusion, or major-hidden-danger classification must expose source, confidence, missing context, and human confirmation owner.
+- Industry templates must separate nationally common requirements from provincial/local implementation details and customer-specific safety systems.
 
 ## Domain Test Scenarios
 
@@ -428,7 +470,9 @@ Scenic/tourism passenger transport should normally stay inside this traffic doma
 - [ ] Driver/personnel mobile paths are low-friction and testable for older/low-literacy users.
 - [ ] Organization, jurisdiction, enterprise, tenant, and role data isolation is enforced across UI, API, export, analytics, AI, and embedded systems.
 - [ ] Regulations, templates, indicators, rules, and AI outputs are versioned and traceable.
+- [ ] Laws, regulations, standards, inspection items, and AI rule tables record official source URL, issuer, document number, effective date, status, scope, last verification date, and human owner.
 - [ ] National, industry, provincial/local, group, and customer-specific standards are registered with issuer, region, effective date, status, applicability, and product-rule mapping when used.
+- [ ] Nine-industry templates map to the current regulatory baseline before PRD, prototype, rule-engine, checklist, or AI answer generation.
 - [ ] Every binding regulated or safety-responsibility action has human accountability and audit evidence.
 - [ ] AI behavior is classified as extraction, rule matching, recommendation, drafting, or decision support; binding decisions remain human-owned.
 - [ ] Batch, multi-step, mobile weak-network, custom workflow, and exception paths are testable.
