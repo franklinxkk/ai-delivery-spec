@@ -1,5 +1,8 @@
 # Domain: OA / Collaborative Office
 
+Source authority and freshness metadata: `references/domain-sources.yaml`.
+Coverage and maturity: `references/domain-coverage.yaml`.
+
 Use this file for OA, collaborative office, employee workspace, workflow
 automation, official document, meeting, task, portal, knowledge, e-signature,
 and enterprise intelligent office scenarios.
@@ -23,7 +26,7 @@ domain-neutral.
 - UI / Mobile Patterns
 - Policy / Privacy Constraints
 - Domain Test Scenarios
-- Multi-Agent Lifecycle Verification Matrix
+- Evaluation Profile
 - Multi-Module PRD Quality Gate
 - Acceptance Checklist
 
@@ -52,14 +55,11 @@ domain-neutral.
   official document, meeting, calendar, task/supervision, knowledge, cloud docs,
   low-code forms, data/reporting, helpdesk, HR/expense/legal integrations,
   mobile office, e-signature, and AI office assistant.
-- Stage 3.5 IA Skeleton should be used when the OA scope covers two or more
-  modules, two or more primary roles, PC+mobile surfaces, or any cross-module
-  lifecycle such as todo -> workflow -> document -> archive.
-- FRR anti-bloat rule: do not repeat common page layout, org fields, user
-  fields, workflow-node fields, and document metadata in every OA function.
-  Lock module/view/region/action in the IA Skeleton, place common fields in
-  the global field dictionary, and keep each FRR focused on scenario, state,
-  rule, permission, exception, and acceptance differences.
+- Product Truth must lock module/view/region/action ownership when OA spans
+  multiple modules, roles, PC/mobile surfaces, or todo -> workflow -> document
+  -> archive lifecycles.
+- Keep organization, user, workflow-node, document, and archive fields canonical
+  as `FLD-*`; projections add only relevant differences.
 
 ## First-Principles Domain Lens
 
@@ -305,7 +305,7 @@ Stable test identifiers for OA prototypes:
 | low-code workflow | `page-lowcode-app`, `canvas-workflow`, `btn-publish-workflow-version` |
 | mobile approval | `page-mobile-todo`, `btn-mobile-approve`, `banner-offline-draft` |
 
-IA Skeleton examples:
+Product Truth view examples:
 
 - `M01-V01`: portal and unified todo cockpit.
 - `M02-V01`: workflow approval center.
@@ -361,76 +361,23 @@ Mobile rules:
 | OA-009 | E-signature certificate is expired | signing is blocked and routed to certificate renewal/manual handling |
 | OA-010 | Browser test submits a real approval path | request uses shadow/test mode; no production workflow/seal/payment side effect remains |
 
-## Multi-Agent Lifecycle Verification Matrix
+## Evaluation Profile
 
-| domain_id | stage | reviewer_agent | path_type | scenario_ref | evidence_ref | blocking_question | expected_result | test_marker | verdict |
-|---|---|---|---|---|---|---|---|---|---|
-| oa | Discover | PM Agent | happy_path | unified todo and workflow closure | Domain Purpose / Core Workflows | Is the product outcome accountable work closure rather than feature list? | work object, owner, SLA, and close evidence are explicit | todo_sla_close_guard | PASS |
-| oa | Discover | Domain Expert Agent | exception_path | official document correction | Domain Test Scenarios | Are issued/sealed/archived document changes handled by versioned correction? | document_authority and correction path are mandatory | document_authority | PASS |
-| oa | Discover | Architecture / Data / AI Agent | permission_privacy_path | org and document permission | Policy / Privacy Constraints | Are org, document-level, field, export, API, and AI scopes identified? | org_permission_scope is required before PRD handoff | org_permission_scope | PASS |
-| oa | Discover | QA Agent | lifecycle_transition | workflow instance lifecycle | State Machines | Can QA see submit, approve, return, reject, terminate, and complete paths? | workflow state machine is testable | oa_discover_qa_lifecycle_transition | PASS |
-| oa | Discover | Coding Agent | acceptance_test_path | coding package | UI / Mobile Patterns | Can implementation trace views/actions/states and package files? | ac_structured, data-testid, data-action, data-state, data-api, data-method, manifest.json, source_of_truth_order required | ac_structured;data-testid;data-action;data-state;data-api;data-method;manifest.json;source_of_truth_order | PASS |
-| oa | Specify | PM Agent | happy_path | approval handling | Core Workflows | Does each approval path state visible result and accountable decision? | workflow_human_gate and audit are explicit | workflow_human_gate | PASS |
-| oa | Specify | Domain Expert Agent | exception_path | stale todo duplicate action | Domain Test Scenarios | Are stale-state and duplicate-processing guards specified? | duplicate action is blocked and state refreshes | oa_specify_domain_exception_path | PASS |
-| oa | Specify | Architecture / Data / AI Agent | permission_privacy_path | AI document summary | AI Context Sources / Policy | Does AI cite permitted sources and refuse out-of-scope documents? | ai_office_assistant_boundary is testable | ai_office_assistant_boundary | PASS |
-| oa | Specify | QA Agent | lifecycle_transition | official document lifecycle | State Machines | Can QA test draft, review, issue, distribute, archive, and withdraw? | document lifecycle is explicit | document_authority | PASS |
-| oa | Specify | Coding Agent | acceptance_test_path | FRR/AC contract | Acceptance Checklist | Can coding agent implement without inventing workflow buttons? | buttons derive from state, role, node, and permission | oa_specify_coding_acceptance_test_path | PASS |
-| oa | Plan | PM Agent | happy_path | meeting resolutions | Core Workflows | Are minutes and resolution tasks linked to accountable owners? | meeting resolutions create traceable tasks | oa_plan_pm_happy_path | PASS |
-| oa | Plan | Domain Expert Agent | exception_path | workflow template version change | State Machines | Are running instances protected from definition drift? | snapshot version behavior is explicit | oa_plan_domain_exception_path | PASS |
-| oa | Plan | Architecture / Data / AI Agent | permission_privacy_path | export and watermark | Policy / Privacy Constraints | Are export reason, watermark, retention, and audit planned? | sensitive export is governed | org_permission_scope | PASS |
-| oa | Plan | QA Agent | lifecycle_transition | helpdesk ticket lifecycle | State Machines | Can QA plan service request open, assign, resolve, close, and pending-user paths? | helpdesk lifecycle is testable | oa_plan_qa_lifecycle_transition | PASS |
-| oa | Plan | Coding Agent | acceptance_test_path | AGENTS handoff | UI / Mobile Patterns | Are delivery paths and source order defined? | delivery/manifest and source_of_truth_order are required | source_of_truth_order;manifest.json | PASS |
-| oa | Tasks | PM Agent | happy_path | mobile approval | UI / Mobile Patterns | Are tasks sliced by user-visible approval completion? | mobile path preserves state, evidence, and fallback | oa_tasks_pm_happy_path | PASS |
-| oa | Tasks | Domain Expert Agent | exception_path | expired e-signature certificate | Domain Test Scenarios | Is signature blocked with renewal/manual path? | e-signature failure is not silent | oa_tasks_domain_exception_path | PASS |
-| oa | Tasks | Architecture / Data / AI Agent | permission_privacy_path | HR/finance/legal fields | Policy / Privacy Constraints | Do implementation tasks preserve field-level masks? | sensitive fields remain scoped and audited | org_permission_scope | PASS |
-| oa | Tasks | QA Agent | lifecycle_transition | supervision overdue path | State Machines | Are overdue, escalation, completion, and closure testable? | todo_sla_close_guard has tests | todo_sla_close_guard | PASS |
-| oa | Tasks | Coding Agent | acceptance_test_path | data-* mapping | UI / Mobile Patterns | Can tasks map primary controls to actions and APIs? | data-testid/data-action/data-state/data-api/data-method are required | data-testid;data-action;data-state;data-api;data-method | PASS |
-| oa | Build/Verify | PM Agent | happy_path | portal exception cockpit | Role Path Patterns | Does build show owner action and closure evidence for exceptions? | manager can verify reduced overdue work | oa_build_pm_happy_path | PASS |
-| oa | Build/Verify | Domain Expert Agent | exception_path | document withdrawal | Domain Test Scenarios | Does withdrawal preserve original issued evidence? | version/audit trail remains intact | document_authority | PASS |
-| oa | Build/Verify | Architecture / Data / AI Agent | permission_privacy_path | unauthorized cross-org todo | Policy / Privacy Constraints | Can one org see or process another org's work item? | access is refused without leakage | org_permission_scope | PASS |
-| oa | Build/Verify | QA Agent | lifecycle_transition | weak-network mobile approval | Domain Test Scenarios | Does weak network avoid duplicate approval and data loss? | server validation and draft preservation are testable | oa_build_qa_lifecycle_transition | PASS |
-| oa | Build/Verify | Coding Agent | acceptance_test_path | automated test isolation | Domain Test Scenarios | Can tests run without real approval/seal/payment effects? | shadow/test mode is required | ac_structured;data-testid;data-action | PASS |
-| oa | Launch | PM Agent | happy_path | workflow go-live | Metric / Indicator Governance | Are adoption, SLA, return/reject, and timeout metrics launch-ready? | launch dashboard has calibrated metrics | oa_launch_pm_happy_path | PASS |
-| oa | Launch | Domain Expert Agent | exception_path | document/seal compliance | Policy / Privacy Constraints | Are seal, archive, retention, and correction policies verified? | document_authority and human gate are launch blockers | document_authority;workflow_human_gate | PASS |
-| oa | Launch | Architecture / Data / AI Agent | permission_privacy_path | production AI assistant | AI Context Sources | Are source permission, citation, fallback, and forbidden writes enforced? | ai_office_assistant_boundary is production-ready | ai_office_assistant_boundary | PASS |
-| oa | Launch | QA Agent | lifecycle_transition | smoke tests | State Machines | Can smoke tests cover submit, approve, return, reject, and complete? | workflow state smoke tests pass | oa_launch_qa_lifecycle_transition | PASS |
-| oa | Launch | Coding Agent | acceptance_test_path | release package | Acceptance Checklist | Can coding agent identify release blockers? | package paths and acceptance evidence are explicit | oa_launch_coding_acceptance_test_path | PASS |
-| oa | Learn/Retire | PM Agent | happy_path | process efficiency review | Metric / Indicator Governance | Can post-launch data decide optimize, expand, or retire workflow? | metrics have owner, source, and decision rule | oa_learn_pm_happy_path | PASS |
-| oa | Learn/Retire | Domain Expert Agent | exception_path | stale policy knowledge | Content / Knowledge Assets | Can deprecated SOP stop affecting AI answers and workflows? | stale knowledge is deprecated and reindexed | ai_office_assistant_boundary | PASS |
-| oa | Learn/Retire | Architecture / Data / AI Agent | permission_privacy_path | retained audit/export data | Policy / Privacy Constraints | Are retention, deletion/export proof, and audit immutability preserved? | retention scope remains enforceable | org_permission_scope | PASS |
-| oa | Learn/Retire | QA Agent | lifecycle_transition | workflow retirement | State Machines | Can old workflow stop new submits while old instances finish? | deprecated workflow migration is testable | oa_learn_qa_lifecycle_transition | PASS |
-| oa | Learn/Retire | Coding Agent | acceptance_test_path | historical AC continuity | Acceptance Checklist | Do old AC IDs and source truth remain stable after iteration? | source_of_truth_order and ac_structured remain traceable | source_of_truth_order;ac_structured | PASS |
+Domain knowledge is not execution evidence. Register coverage and maturity in
+`references/domain-coverage.yaml`; keep behavioral scenarios and run evidence
+outside this knowledge file.
 
-## Multi-Module PRD Quality Gate
+Before raising maturity, independently evaluate:
 
-Apply this gate after generating all OA module PRDs or after splitting a large
-OA PRD into a master contract plus module PRDs. Any failed required item means
-`REVIEW_COMPLETE_WITH_GAPS`.
+- one primary happy path;
+- one validation or exception path;
+- one permission/privacy path;
+- one lifecycle transition;
+- one coding-agent no-guess handoff path;
+- applicable migration, integration-failure, AI, and high-risk human-gate paths.
 
-| Gate | Required Condition | Blocks |
-|---|---|---|
-| OA-G1 Work object traceability | Every todo/task/workflow/document item has source module, owner, state, event, audit, and close guard. | orphan todos or notifications without business closure |
-| OA-G2 State/button matrix | Primary buttons are derived from state, role, node, document level, delegation, timeout, and permission. | UI actions that backend cannot validate |
-| OA-G3 Cross-module handoff | Workflow -> todo -> document -> archive and meeting -> resolution -> supervision paths include source event, target state, duplicate rule, and failure path. | cross-module gaps during integration |
-| OA-G4 Permission and export | Org, role, field, document level, export, API, mobile, and AI context scopes are explicit. | data leakage and AI overreach |
-| OA-G5 AI assistant boundary | Every AI feature states source citation, confidence/quality boundary, human gate, forbidden write, fallback, and eval cases. | AI output becoming unaccountable action |
-| OA-G6 Document/e-sign integrity | Issued, archived, sealed, or signed documents have version, hash/signature, correction/withdrawal, and audit rule. | legally or operationally invalid documents |
-| OA-G7 Mobile and weak network | PC/mobile state consistency, offline draft, duplicate prevention, and server validation are specified. | mobile approval divergence |
-
-Post-generation OA checklist:
-
-1. Master contract states module IDs, source-of-truth order, org/data scope,
-   entity relations, event/notification catalog, field mapping, and audit rule.
-2. Each module PRD has release functions, role paths, state/button matrix,
-   business rules, exceptions, and test/acceptance rows.
-3. Unified todo, workflow approval, official document, meeting/resolution,
-   supervision, knowledge/AI, helpdesk, e-signature, and mobile approval are
-   included or explicitly de-scoped.
-4. Every high-impact action keeps human accountability and audit evidence.
-5. Every alert/reminder/supervision item has source rule, owner, SLA, close
-   guard, and target business action.
-6. If prototype evidence exists, action/testid coverage gaps are listed before
-   any `PASS` claim.
+Record executor, input, environment, timestamp, result, and evidence location.
+Mocked matrices and simulated reviewers cannot satisfy expert review or audit.
 
 ## Acceptance Checklist
 
@@ -450,9 +397,9 @@ Post-generation OA checklist:
       gate, forbidden write scope, fallback, and linked tests.
 - [ ] PC+mobile state consistency and weak-network behavior are defined when
       mobile is in scope.
-- [ ] Common OA fields are maintained in a global field dictionary and FRRs do
-      not duplicate unchanged field definitions.
-- [ ] Stage 3.5 IA Skeleton is locked before full FRR generation when the scope
-      spans multiple modules, roles, or surfaces.
+- [ ] Common OA fields use canonical `FLD-*` definitions; projections do not
+      duplicate unchanged definitions.
+- [ ] Product Truth is locked before projections when scope spans multiple
+      modules, roles, or surfaces.
 - [ ] Coding-agent delivery package paths are explicit when implementation by
       Claude Code, Cursor, Codex, or Copilot is expected.

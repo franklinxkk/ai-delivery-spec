@@ -1,0 +1,197 @@
+schema_version: 5.0.0
+truth_id: TRUTH-PRODUCT-001
+
+product:
+  name: "{product name}"
+  outcome: "{measurable customer and business outcome}"
+  scope: ["{in-scope outcome}"]
+  out_of_scope: ["{material exclusion and revisit condition}"]
+  success_metrics:
+    - id: METRIC-OUTCOME-001
+      name: "{metric}"
+      caliber: "{formula, population, period, exclusions}"
+      source_refs: [SRC-PROJECT-001]
+      owner: "{business owner}"
+      target: "{target and timeline}"
+
+delivery_context:
+  lifecycle_stage: specify
+  delivery_mode: standard
+  tier: L2
+  project_shape: greenfield
+  customer_profile: [tob]
+  governance_profiles: []
+  capability_packs: []
+  domain_packs: []
+  consumers: [product, engineering, qa]
+
+sources:
+  - id: SRC-PROJECT-001
+    kind: user_input
+    title: "{source title}"
+    location: "{path, URL, meeting, or owner}"
+    authority: accountable
+    status: active
+    disposition: embedded
+    owner: "{source owner}"
+
+assertions:
+  - id: AST-SCOPE-001
+    statement: "{material product assertion}"
+    status: verified
+    source_refs: [SRC-PROJECT-001]
+    affected_refs: [MOD-CORE-001]
+    owner: "{decision owner}"
+
+unknowns: []
+decisions: []
+conflicts: []
+
+roles:
+  - id: ROLE-USER-001
+    name: "{role}"
+    job: "{job/outcome}"
+    data_scope: "{tenant/org/department/owner/record scope}"
+    forbidden_actions: []
+
+features:
+  - id: FEAT-CORE-001
+    title: "{approved in-scope capability}"
+    scope_status: in_scope
+    priority: P0
+    source_refs: [SRC-PROJECT-001]
+    behavior_refs: [MOD-CORE-001, FLOW-CORE-001, VIEW-CORE-001, ACT-CORE-SUBMIT]
+    acceptance_refs: [AC-CORE-001]
+    owner: "{product owner}"
+    version: "1.0"
+
+modules:
+  - id: MOD-CORE-001
+    name: "{module name}"
+    outcome: "{visible and domain result}"
+    role_refs: [ROLE-USER-001]
+    entity_refs: [ENT-CORE-001]
+    flow_refs: [FLOW-CORE-001]
+    view_refs: [VIEW-CORE-001]
+    acceptance_refs: [AC-CORE-001]
+
+entities:
+  - id: ENT-CORE-001
+    name: "{business entity}"
+    owner: "{aggregate/system owner}"
+    field_refs: [FLD-CORE-NAME]
+    state_machine_ref: STM-CORE-001
+    source_refs: [SRC-PROJECT-001]
+
+fields:
+  - id: FLD-CORE-NAME
+    name: "{field name}"
+    type: string
+    source: "{user/system/derived/API source}"
+    required: true
+    validation: "{validation and error}"
+    editable_by: [ROLE-USER-001]
+    sensitivity: internal
+
+flows:
+  - id: FLOW-CORE-001
+    name: "{end-to-end flow}"
+    actor_refs: [ROLE-USER-001]
+    module_refs: [MOD-CORE-001]
+    start: "{trigger and precondition}"
+    steps:
+      - order: 1
+        actor_ref: ROLE-USER-001
+        view_ref: VIEW-CORE-001
+        action_ref: ACT-CORE-SUBMIT
+        visible_result: "{what the user sees}"
+        domain_result: "{persisted/state/event result}"
+        failure: "{validation/permission/dependency behavior}"
+    result: "{success exit and next action}"
+    compensation: "{rollback/retry/manual recovery}"
+    acceptance_refs: [AC-CORE-001]
+
+views:
+  - id: VIEW-CORE-001
+    name: "{view name}"
+    module_ref: MOD-CORE-001
+    surface: web
+    role_refs: [ROLE-USER-001]
+    regions:
+      - id: REG-CORE-MAIN
+        name: "{region name}"
+        content: "{layout, components, data presentation}"
+        field_refs: [FLD-CORE-NAME]
+        action_refs: [ACT-CORE-SUBMIT]
+    query_source: "{query/API/data source}"
+    states: [default, empty, loading, error, no_permission, success]
+    responsive_rule: "{desktop/mobile/print behavior or N/A}"
+
+actions:
+  - id: ACT-CORE-SUBMIT
+    name: "{action name}"
+    trigger: "{click/submit/event/API}"
+    role_refs: [ROLE-USER-001]
+    allowed_states: [draft]
+    guard_refs: [RULE-CORE-001]
+    confirmation: "{confirmation or none}"
+    visible_result: "{page/modal/list/state change}"
+    command: "{command or endpoint when known}"
+    domain_result: "{persisted change}"
+    event_refs: [EVT-CORE-SUBMITTED]
+    failure_result: "{visible and recoverable failure}"
+    idempotency: "{key and duplicate behavior}"
+    audit: "{actor, before/after, time, reason}"
+    acceptance_refs: [AC-CORE-001]
+
+states:
+  - id: STM-CORE-001
+    owner_ref: ENT-CORE-001
+    states: [draft, submitted]
+    transitions:
+      - from: draft
+        action_ref: ACT-CORE-SUBMIT
+        guard_refs: [RULE-CORE-001]
+        to: submitted
+        event_ref: EVT-CORE-SUBMITTED
+
+rules:
+  - id: RULE-CORE-001
+    statement: "{business invariant}"
+    owner: "{business owner}"
+    source_refs: [SRC-PROJECT-001]
+    enforcement: backend_guard
+    failure_behavior: "{block/warn/escalate/audit}"
+
+events:
+  - id: EVT-CORE-SUBMITTED
+    name: "{event name}"
+    producer: "{module/service}"
+    consumers: ["{consumer}"]
+    payload: [entity_id, occurred_at, actor_id]
+    version: "1.0"
+    ordering: "{ordering key or none}"
+    replay: "{replay/idempotency behavior}"
+    dead_letter_owner: "{owner or N/A}"
+
+integrations: []
+
+acceptance:
+  - id: AC-CORE-001
+    title: "{acceptance scenario}"
+    priority: P0
+    type: happy
+    preconditions: ["{role, data, state}"]
+    steps: ["{action sequence}"]
+    expected_visible: "{observable result}"
+    expected_domain: "{persisted/state/event/audit result}"
+    test_anchors: ["data-testid=page-core", "data-action=ACT-CORE-SUBMIT"]
+    evidence_required: [automated_test, screenshot, audit_record]
+
+evidence: []
+
+projections:
+  - kind: human_first
+    path: projections/human-first-prd.md
+    generated_from: product_truth
+    generated_at: "{ISO-8601 timestamp}"

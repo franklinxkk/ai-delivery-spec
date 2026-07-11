@@ -1,0 +1,38 @@
+schema_version: 5.0.0
+run_id: RUN-SALEOR-DESIGN-V5-20260711
+case_id: GH-SALEOR-CHANNEL-ID
+stage: design
+system:
+  skill_version: 5.0.0-dev
+  model: codex-session-model
+  model_settings: not-externally-recorded
+  repository_ref: 697b9ec6ffb93199f62f783e7bf6c550cd3bcf7e
+input_fingerprint: issue-12945+pinned-repository-ref
+repetitions: 1
+trial_evidence_refs: [evals/artifacts/saleor-channel-id-design.md]
+observations:
+  - obligation_id: OBL-SAL-DES-PRECEDENCE
+    result: satisfied
+    evidence_refs: [evals/artifacts/saleor-channel-id-design.md]
+  - obligation_id: OBL-SAL-DES-SCOPE
+    result: satisfied
+    evidence_refs: [evals/artifacts/saleor-channel-id-design.md]
+inventions:
+  unsupported_business_behaviors: 0
+  delivered_business_behaviors: 0
+  p0_unsupported: 0
+delivery:
+  impacted_acceptance: 0
+  failed_impacted_acceptance: 0
+  delivered_slices: 0
+  reopened_for_spec_mismatch: 0
+  accepted_acceptance: 0
+context:
+  input_tokens: null
+  output_tokens: null
+  cross_artifact_switches: 2
+  human_navigation_seconds: null
+evidence_refs:
+  - evals/artifacts/saleor-channel-id-design.md
+  - https://github.com/saleor/saleor/issues/12945
+status: completed

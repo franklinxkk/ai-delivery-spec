@@ -1,6 +1,7 @@
 # Domain Module Template
 
-Use this file when creating or replacing a domain module such as `domain-traffic.md`, `domain-education.md`, `domain-sales.md`, `domain-customer-service.md`, or any company-specific domain file.
+Use this file when creating or replacing a reusable domain pack. Customer-only
+knowledge should remain in a Project Domain Capsule.
 
 The public protocol stays domain-neutral. Domain knowledge must live in a replaceable domain module.
 
@@ -32,11 +33,13 @@ role paths
 UI/mobile patterns
 policy/privacy constraints
 test scenarios
-multi-agent lifecycle verification matrix
+evaluation profile
 acceptance checklist
 ```
 
-If a new company or industry is used, replace only the domain module unless public protocol behavior truly changes.
+Also add metadata to `references/domain-coverage.yaml`, source records to
+`references/domain-sources.yaml`, and scenarios to `evals/eval-catalog.yaml`.
+New packs start as `experimental`.
 
 ## Domain Module Skeleton
 
@@ -46,6 +49,17 @@ If a new company or industry is used, replace only the domain module unless publ
 Use this file for {industry/company/product scope}.
 
 This is a replaceable domain module. Public protocol files must stay domain-neutral.
+
+Source authority and freshness metadata: `references/domain-sources.yaml`.
+Coverage and maturity: `references/domain-coverage.yaml`.
+
+Applies when:
+
+- {domain object/lifecycle trigger}
+
+Does not apply when:
+
+- {generic or adjacent scenario that should use another pack/capsule}
 
 ## Domain Purpose
 
@@ -148,13 +162,30 @@ metric:
 | Scenario | Role | Preconditions | Steps | Expected Domain Result |
 |---|---|---|---|---|
 
-## Multi-Agent Lifecycle Verification Matrix
+## Evaluation Profile
 
-| domain_id | stage | reviewer_agent | path_type | scenario_ref | evidence_ref | blocking_question | expected_result | test_marker | verdict |
-|---|---|---|---|---|---|---|---|---|---|
-| {domain_id} | Discover | PM Agent | happy_path | primary value object | Domain Purpose | Is the business outcome explicit? | value object and user result are testable | {domain_id}_discover_pm_happy_path | PASS |
-| {domain_id} | Specify | QA Agent | lifecycle_transition | primary lifecycle | State Machines | Can QA convert state changes into test cases? | allowed/blocked transitions are explicit | {domain_id}_specify_qa_lifecycle_transition | PASS |
-| {domain_id} | Build/Verify | Coding Agent | acceptance_test_path | implementation handoff | Acceptance Checklist | Can a coding agent trace source truth to tests? | FRR, AC, data-testid/action/state/API, and manifest are traceable | ac_structured;data-testid;data-action | PASS |
+Register coverage and maturity in `references/domain-coverage.yaml`. Keep
+behavioral scenarios and execution evidence outside this knowledge file.
+
+Minimum independent evaluation:
+
+- primary happy path;
+- validation/exception path;
+- permission/privacy path;
+- lifecycle transition;
+- coding-agent no-guess handoff;
+- applicable migration, integration failure, AI, and high-risk human gate.
+
+Record executor, input, environment, timestamp, result, and evidence location.
+Do not prefill `PASS`. Mocked scenarios and simulated reviewers do not count as
+expert review, project validation, or audit.
+
+- `experimental`: may guide questions and candidate design; production claims prohibited.
+- `validated`: sourced knowledge, project-sampled scenarios, passed behavioral evaluation, and accountable review evidence.
+- `audited`: validated evidence plus passed independent audit in the declared scope.
+
+Automation may verify that these evidence records exist, are current, and match
+scope. Project keywords or complexity must never assign maturity.
 
 ## Acceptance Checklist
 
@@ -165,7 +196,7 @@ metric:
 - [ ] High-risk actions have human gate.
 - [ ] Domain workflows have role paths and test scenarios.
 - [ ] UI/mobile patterns include required testids.
-- [ ] Multi-agent lifecycle matrix covers PM, domain, architecture/data/AI, QA, and coding perspectives across the stages in scope.
+- [ ] Independent evaluation covers PM, domain, architecture/data/AI, QA, and coding perspectives required by the scoped stages.
 ```
 
 ## Mapping From Old Domain to New Domain

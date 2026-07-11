@@ -1,0 +1,427 @@
+schema_version: 5.0.0
+last_catalog_review: 2026-07-11
+policy:
+  primary_sources_only_for_binding_claims: true
+  model_memory_is_authority: false
+  copy_full_protected_standard: false
+  draft_can_create_hard_stop_rule: false
+  refresh_high_risk_days: 90
+  refresh_normal_days: 180
+
+sources:
+  - id: KS-COMMON-REQ-29148
+    domains: [common]
+    title: ISO/IEC/IEEE 29148:2018 Requirements engineering
+    issuer: ISO/IEC/IEEE
+    authority_type: international_standard
+    url: https://www.iso.org/standard/72089.html
+    status: confirmed_current
+    jurisdiction: global
+    applicability: requirements processes and requirement information items
+    product_mapping: requirement quality, traceability, verification, lifecycle
+    last_verified_at: 2026-07-11
+    refresh_days: 180
+  - id: KS-COMMON-QUALITY-25010
+    domains: [common]
+    title: ISO/IEC 25010:2023 Product quality model
+    issuer: ISO/IEC
+    authority_type: international_standard
+    url: https://www.iso.org/standard/78176.html
+    status: current
+    jurisdiction: global
+    applicability: ICT and software product quality requirements and evaluation
+    product_mapping: risk-adaptive NFR and acceptance profiles
+    last_verified_at: 2026-07-11
+    refresh_days: 180
+  - id: KS-COMMON-WCAG-22
+    domains: [common]
+    title: Web Content Accessibility Guidelines 2.2
+    issuer: W3C
+    authority_type: recommendation
+    url: https://www.w3.org/TR/WCAG22/
+    status: current
+    jurisdiction: global
+    applicability: web and web-based product accessibility
+    product_mapping: perceivable, operable, understandable, robust acceptance
+    last_verified_at: 2026-07-11
+    refresh_days: 180
+  - id: KS-COMMON-PIPL
+    domains: [common, crm, education-it, medical-hospital-it, oa, data-product, ai-native]
+    title: 中华人民共和国个人信息保护法
+    issuer: 全国人民代表大会常务委员会
+    authority_type: law
+    url: https://www.samr.gov.cn/wljys/gzzd/art/2023/art_3ef1e889c1e644d4b65b5f5c7f432386.html
+    status: active
+    jurisdiction: China
+    applicability: personal information processing
+    product_mapping: purpose, minimum necessary, consent/legal basis, rights, security, cross-border
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+  - id: KS-COMMON-DSL
+    domains: [common, medical-hospital-it, education-it, data-product, ai-native]
+    title: 中华人民共和国数据安全法
+    issuer: 全国人民代表大会常务委员会
+    authority_type: law
+    url: https://www.samr.gov.cn/zw/zfxxgk/fdzdgknr/bgt/art/2023/art_33654085364e45e2a878c70a06934414.html
+    status: active
+    jurisdiction: China
+    applicability: data processing, classification, risk, incident and security obligations
+    product_mapping: data classification, responsibility, lifecycle, incident and audit
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+
+  - id: KS-TRAFFIC-INSPECTION-2025
+    domains: [traffic]
+    title: 交通运输涉企行政检查标准
+    issuer: 中华人民共和国交通运输部
+    authority_type: ministry_rule_or_guidance
+    url: https://www.mot.gov.cn/zhuanti/sheqixzjcgszl/jianchabz/202506/t20250611_4170318.html
+    status: active_as_verified
+    jurisdiction: China
+    applicability: transport-related enterprise administrative inspection
+    product_mapping: inspection templates, item evidence, enterprise/regulator alignment
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+  - id: KS-TRAFFIC-PRACTITIONERS-2026
+    domains: [traffic]
+    title: 道路运输从业人员管理规定（2026 修订）
+    issuer: 中华人民共和国交通运输部
+    authority_type: department_rule
+    url: https://xxgk.mot.gov.cn/gz/202602/t20260213_4200291.html
+    status: active_as_verified
+    jurisdiction: China
+    applicability: road transport practitioners and qualification lifecycle
+    product_mapping: practitioner file, qualification, validity, renewal and audit
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+  - id: KS-TRAFFIC-DANGEROUS-2026
+    domains: [traffic]
+    title: 道路危险货物运输管理规定（2026 修订）
+    issuer: 中华人民共和国交通运输部
+    authority_type: department_rule
+    url: https://xxgk.mot.gov.cn/jigou/fgs/202602/t20260213_4200285.html
+    status: active_as_verified
+    jurisdiction: China
+    applicability: dangerous-goods road transport
+    product_mapping: enterprise, vehicle, driver/escort, cargo, waybill, checks and human release
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+  - id: KS-TRAFFIC-TRAINING-2026
+    domains: [traffic]
+    title: 机动车驾驶员培训管理规定（2026 修订）
+    issuer: 中华人民共和国交通运输部
+    authority_type: department_rule
+    url: https://xxgk.mot.gov.cn/gz/202602/W020260213620830542770.pdf
+    status: active_as_verified
+    jurisdiction: China
+    applicability: driver training institutions, coaches, trainees, class hours and training lifecycle
+    product_mapping: training institution, coach/trainee, class-hour, exam and archive
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+
+  - id: KS-EDU-DIGITAL-CAMPUS
+    domains: [education-it]
+    title: 高等学校数字校园建设规范（试行）
+    issuer: 中华人民共和国教育部
+    authority_type: ministry_guidance
+    url: https://www.moe.gov.cn/jyb_xwfb/gzdt_gzdt/s5987/202103/t20210326_522685.html
+    status: active_as_verified
+    jurisdiction: China
+    applicability: higher-education digital campus planning and construction
+    product_mapping: campus platform, service, data, infrastructure and governance boundary
+    last_verified_at: 2026-07-11
+    refresh_days: 180
+  - id: KS-EDU-DATA-MANAGEMENT
+    domains: [education-it, data-product]
+    title: 教育部机关及直属事业单位教育数据管理办法
+    issuer: 中华人民共和国教育部
+    authority_type: ministry_rule
+    url: https://www.moe.gov.cn/srcsite/A03/s7050/201802/t20180211_327248.html
+    status: active_as_verified
+    jurisdiction: China
+    applicability: education data management in stated institutional scope
+    product_mapping: data ownership, sharing, management and security responsibility
+    last_verified_at: 2026-07-11
+    refresh_days: 180
+  - id: KS-EDU-CLASSIFICATION-0661
+    domains: [education-it, data-product]
+    title: JY/T 0661-2025 教育数据分类分级指南
+    issuer: 中华人民共和国教育部
+    authority_type: education_industry_standard
+    url: https://www.moe.gov.cn/srcsite/A16/s3342/202601/W020260107510856466340.pdf
+    status: effective_as_verified
+    jurisdiction: China
+    applicability: education data classification and grading
+    product_mapping: data inventory, classification, protection and authorization profiles
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+
+  - id: KS-MEDICAL-EMR-2017
+    domains: [medical-hospital-it]
+    title: 电子病历应用管理规范（试行）
+    issuer: 国家卫生计生委、国家中医药管理局
+    authority_type: ministry_normative_document
+    url: https://www.nhc.gov.cn/wjw/c100175/201702/90f3de8ae03d488cbddf509dc958f75b.shtml
+    status: active_as_verified
+    jurisdiction: China
+    applicability: medical-institution electronic medical record creation, modification, use, storage and management
+    product_mapping: signed record, amendment, trace, terminology, sharing and security
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+  - id: KS-MEDICAL-EMR-2025
+    domains: [medical-hospital-it]
+    title: 关于进一步加强医疗机构电子病历信息使用管理的通知
+    issuer: 国家卫生健康委员会
+    authority_type: ministry_notice
+    url: https://www.nhc.gov.cn/yzygj/c100068/202506/c68abee7c54b4651a774cd533761780b.shtml
+    status: active_as_verified
+    jurisdiction: China
+    applicability: medical-institution EMR information use and permission management
+    product_mapping: role/permission, creation, modification, storage, transfer and accountability
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+  - id: KS-MEDICAL-CYBERSECURITY-2022
+    domains: [medical-hospital-it]
+    title: 医疗卫生机构网络安全管理办法
+    issuer: 国家卫生健康委员会等
+    authority_type: ministry_rule
+    url: https://www.nhc.gov.cn/guihuaxxs/c100133/202208/8a23d01133214a779879094dd20cd383.shtml
+    status: active
+    jurisdiction: China
+    applicability: medical and health institution network/data security
+    product_mapping: classification, annual assessment, access, logs, lifecycle, cross-border and face data
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+  - id: KS-MEDICAL-FHIR-R5
+    domains: [medical-hospital-it]
+    title: HL7 FHIR R5
+    issuer: HL7 International
+    authority_type: interoperability_standard
+    url: https://hl7.org/fhir/overview.html
+    status: current_published_version_as_verified
+    jurisdiction: global
+    applicability: health data exchange where the project adopts FHIR
+    product_mapping: resource/API/profile/version/conformance contract
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+  - id: KS-MEDICAL-DICOM-CURRENT
+    domains: [medical-hospital-it]
+    title: DICOM Current Edition
+    issuer: NEMA/MITA
+    authority_type: interoperability_standard
+    url: https://www.dicomstandard.org/current/
+    status: continuously_updated
+    jurisdiction: global
+    applicability: medical imaging interoperability where DICOM is used
+    product_mapping: image object, exchange, web services, security and conformance
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+
+  - id: KS-OA-ESIGN
+    domains: [oa]
+    title: 中华人民共和国电子签名法
+    issuer: 全国人民代表大会常务委员会
+    authority_type: law
+    url: https://www.npc.gov.cn/zgrdw/npc/xinwen/2019-05/07/content_2086835.htm
+    status: active_as_verified
+    jurisdiction: China
+    applicability: electronic signatures and data messages within statutory scope
+    product_mapping: signature applicability, reliability, evidence and exclusion boundary
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+  - id: KS-OA-OFFICIAL-DOC
+    domains: [oa]
+    title: 党政机关公文处理工作条例
+    issuer: 中共中央办公厅、国务院办公厅
+    authority_type: regulation
+    url: https://www.miit.gov.cn/xwdt/szyw/art/2020/art_6afb8ee6d07540dcacccbeb47dbc0fd4.html
+    status: active_as_verified
+    jurisdiction: China
+    applicability: party/government official-document processing
+    product_mapping: document types, processing, issue/receipt, circulation and archive
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+  - id: KS-OA-ARCHIVE-39362
+    domains: [oa]
+    title: GB/T 39362-2020 党政机关电子公文归档规范
+    issuer: 国家市场监督管理总局、国家标准化管理委员会
+    authority_type: recommended_national_standard
+    url: https://std.samr.gov.cn/gb/search/gbDetailed?id=B4C25880C3DF1CB3E05397BE0A0A92D0
+    status: current_as_verified
+    jurisdiction: China
+    applicability: electronic official-document archiving where adopted/applicable
+    product_mapping: archive package, metadata, integrity and handoff
+    last_verified_at: 2026-07-11
+    refresh_days: 180
+  - id: KS-OA-EARCHIVE-2024
+    domains: [oa]
+    title: 电子档案管理办法
+    issuer: 国家档案局
+    authority_type: department_rule
+    url: https://www.saac.gov.cn/daj/xzfgk/202412/41b270e9dfc44f48a09adcc5f4fe8296/files/5f1c2c5c5762425e8639468cc83e5941.pdf
+    status: active_as_verified
+    jurisdiction: China
+    applicability: electronic archive management within stated scope
+    product_mapping: collection, transfer, storage, use, security and responsibility
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+
+  - id: KS-CRM-COMPLAINT-10002
+    domains: [crm]
+    title: ISO 10002:2018 Complaints handling in organizations
+    issuer: ISO
+    authority_type: international_standard
+    url: https://www.iso.org/standard/71580.html
+    status: confirmed_current
+    jurisdiction: global
+    applicability: customer complaint handling process guidance
+    product_mapping: intake, response, resolution, feedback, analysis, audit and improvement
+    last_verified_at: 2026-07-11
+    refresh_days: 180
+
+  - id: KS-DATA-PROV-O
+    domains: [data-product]
+    title: PROV-O The PROV Ontology
+    issuer: W3C
+    authority_type: recommendation
+    url: https://www.w3.org/TR/prov-o/
+    status: current_recommendation
+    jurisdiction: global
+    applicability: interoperable provenance modeling where RDF/PROV is appropriate
+    product_mapping: entity, activity, agent, derivation, responsibility and provenance exchange
+    last_verified_at: 2026-07-11
+    refresh_days: 180
+  - id: KS-DATA-OPENLINEAGE
+    domains: [data-product]
+    title: OpenLineage Specification
+    issuer: OpenLineage project
+    authority_type: open_standard
+    url: https://openlineage.io/docs/spec/facets/
+    status: current_as_verified
+    jurisdiction: global
+    applicability: job/run/dataset lineage event interoperability
+    product_mapping: run, job, dataset, facets, schema version and extensibility
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+  - id: KS-DATA-JSON-SCHEMA-2020
+    domains: [data-product, common]
+    title: JSON Schema Draft 2020-12
+    issuer: JSON Schema project
+    authority_type: specification
+    url: https://json-schema.org/draft/2020-12
+    status: current_as_verified
+    jurisdiction: global
+    applicability: JSON instance/schema validation
+    product_mapping: Product Truth and domain/change schema contracts
+    last_verified_at: 2026-07-11
+    refresh_days: 180
+
+  - id: KS-AI-ISO-42001
+    domains: [ai-native]
+    title: ISO/IEC 42001:2023 AI management systems
+    issuer: ISO/IEC
+    authority_type: international_standard
+    url: https://www.iso.org/standard/42001
+    status: current
+    jurisdiction: global
+    applicability: organizational AI management system governance
+    product_mapping: accountability, risk, lifecycle, controls, monitoring and improvement
+    last_verified_at: 2026-07-11
+    refresh_days: 180
+  - id: KS-AI-NIST-RMF
+    domains: [ai-native]
+    title: NIST AI Risk Management Framework 1.0
+    issuer: NIST
+    authority_type: framework
+    url: https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-ai-rmf-10
+    status: current_with_revision_underway
+    jurisdiction: United States / voluntary global reference
+    applicability: voluntary AI risk management reference
+    product_mapping: govern, map, measure and manage AI risk
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+  - id: KS-AI-CHINA-LABEL-2025
+    domains: [ai-native]
+    title: 人工智能生成合成内容标识办法
+    issuer: 国家互联网信息办公室等
+    authority_type: department_rule
+    url: https://www.cac.gov.cn/2025-03/14/c_1743654684782215.htm
+    status: effective
+    jurisdiction: China
+    applicability: AI-generated/synthesized content labeling within stated scope
+    product_mapping: explicit/implicit labeling, content metadata and platform responsibility
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+  - id: KS-AI-CHINA-ANTHROPOMORPHIC-2026
+    domains: [ai-native]
+    title: 人工智能拟人化互动服务管理暂行办法
+    issuer: 国家互联网信息办公室
+    authority_type: department_rule
+    url: https://www.cac.gov.cn/2026-04/10/c_1777558395078289.htm
+    status: active_as_verified
+    jurisdiction: China
+    applicability: anthropomorphic AI interaction services within stated scope
+    product_mapping: user protection, disclosure, dependency risk, content/service governance
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+
+  - id: KS-CAP-BPMN-202
+    domains: [capability-workflow]
+    title: BPMN 2.0.2
+    issuer: Object Management Group
+    authority_type: standard
+    url: https://www.omg.org/bpmn/
+    status: current_formal_version_as_verified
+    jurisdiction: global
+    applicability: business process modeling where BPMN is selected
+    product_mapping: process, collaboration, choreography and business/technical bridge
+    last_verified_at: 2026-07-11
+    refresh_days: 180
+  - id: KS-CAP-DMN-15
+    domains: [capability-workflow]
+    title: DMN 1.5
+    issuer: Object Management Group
+    authority_type: standard
+    url: https://www.omg.org/spec/DMN/
+    status: current_formal_version_as_verified
+    jurisdiction: global
+    applicability: decision modeling where DMN is selected
+    product_mapping: decision table, decision requirement and executable decision semantics
+    last_verified_at: 2026-07-11
+    refresh_days: 180
+  - id: KS-CAP-OPENAPI-32
+    domains: [capability-integration]
+    title: OpenAPI Specification 3.2.0
+    issuer: OpenAPI Initiative
+    authority_type: specification
+    url: https://spec.openapis.org/oas/latest.html
+    status: current_published_version_as_verified
+    jurisdiction: global
+    applicability: HTTP API description where OpenAPI is selected and tooling supports the version
+    product_mapping: human/machine API contract, documentation, generation and testing
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+  - id: KS-CAP-ASYNCAPI-31
+    domains: [capability-integration]
+    title: AsyncAPI Specification 3.1.0
+    issuer: AsyncAPI Initiative
+    authority_type: specification
+    url: https://www.asyncapi.com/docs/reference/specification/latest
+    status: current_published_version_as_verified
+    jurisdiction: global
+    applicability: message-driven API description where AsyncAPI is selected
+    product_mapping: channel, operation, message, binding and event contract
+    last_verified_at: 2026-07-11
+    refresh_days: 90
+  - id: KS-CAP-CLOUDEVENTS
+    domains: [capability-integration]
+    title: CloudEvents
+    issuer: CNCF CloudEvents project
+    authority_type: specification
+    url: https://cloudevents.io/
+    status: current_as_verified
+    jurisdiction: global
+    applicability: portable event envelope where CloudEvents is selected
+    product_mapping: event identity, source, type, time, subject and data envelope
+    last_verified_at: 2026-07-11
+    refresh_days: 90

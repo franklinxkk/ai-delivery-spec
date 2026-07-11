@@ -1,5 +1,8 @@
 # Domain: AI Native Product And Agentic Systems
 
+Source authority and freshness metadata: `references/domain-sources.yaml`.
+Coverage and maturity: `references/domain-coverage.yaml`.
+
 Use this replaceable domain module for AI-native products, agent workflows,
 LLM-powered applications, multi-agent systems, copilots, AI assistants, RAG
 products, tool-using agents, evaluation platforms, prompt/model operations, and
@@ -22,7 +25,7 @@ same 15 section headings used here and in `domain-module-template.md`.
 - UI / Mobile Patterns
 - Policy / Privacy Constraints
 - Domain Test Scenarios
-- Multi-Agent Lifecycle Verification Matrix
+- Evaluation Profile
 - Acceptance Checklist
 
 ## Domain Purpose
@@ -75,7 +78,7 @@ Durable AI-native trend map:
 
 | Term | Meaning | Source Of Truth |
 |---|---|---|
-| AI Feature | AI-supporting capability with a valid manual/deterministic path | PRD FRR + runtime contract |
+| AI Feature | AI-supporting capability with a valid manual/deterministic path | Product Truth + runtime contract |
 | AI-Core Workflow | primary user outcome depends on model/tool orchestration | AI runtime contract |
 | Agent | bounded AI actor with goal, tools, memory/context, eval, owner | agent registry |
 | Tool | callable system/API/function with permission and side-effect scope | tool registry |
@@ -253,45 +256,23 @@ Rules:
 | prompt rollback | operations owner | active prompt returns to last passing version |
 | adversarial prompt injection | risk reviewer | tool call blocked and event logged |
 
-## Multi-Agent Lifecycle Verification Matrix
+## Evaluation Profile
 
-| domain_id | stage | reviewer_agent | path_type | scenario_ref | evidence_ref | blocking_question | expected_result | test_marker | verdict |
-|---|---|---|---|---|---|---|---|---|---|
-| ai_native | Discover | PM Agent | happy_path | enterprise AI workflow | First-Principles Product Logic | What work outcome changes beyond using Claude/Codex/Trae/WorkBuddy as a tool? | work outcome, cycle time, and accountability are explicit | ai_native_discover_pm_happy_path | PASS |
-| ai_native | Discover | Domain Expert Agent | exception_path | hype-driven feature request | First-Principles Product Logic | Is the idea justified by work physics instead of tool novelty? | Work outcome first and Workflow before chat are applied | ai_native_discover_domain_exception_path | PASS |
-| ai_native | Discover | Architecture / Data / AI Agent | permission_privacy_path | enterprise knowledge context | AI Context Sources | Is context permitted, fresh, and citable before model choice? | Context before model and context_freshness are required | context_freshness | PASS |
-| ai_native | Discover | QA Agent | lifecycle_transition | AIUseCase lifecycle | State Machines | Can QA see idea -> monitored -> retired? | AIUseCase state path is testable | ai_native_discover_qa_lifecycle_transition | PASS |
-| ai_native | Discover | Coding Agent | acceptance_test_path | coding-agent surface | UI / Mobile Patterns | Can implementation trace source truth? | ac_structured, data-testid, data-action, data-state, data-api, data-method, manifest.json, source_of_truth_order required | ac_structured;data-testid;data-action;data-state;data-api;data-method;manifest.json;source_of_truth_order | PASS |
-| ai_native | Specify | PM Agent | happy_path | agent specification | Core Workflows | Does the PRD define goal, context, tools, write scope, human gate, eval? | agent contract is product-visible | human_gate;write_scope | PASS |
-| ai_native | Specify | Domain Expert Agent | exception_path | unsafe autonomous action | Policy / Privacy Constraints | Does reversibility determine autonomy? | high-impact actions require human accountability | ai_native_specify_domain_exception_path | PASS |
-| ai_native | Specify | Architecture / Data / AI Agent | permission_privacy_path | tool writeback | Aggregates and Entities / Content Assets | Are tool schema, side effects, rollback, and audit defined? | write_scope, human_gate, rollback are explicit | human_gate;write_scope;rollback | PASS |
-| ai_native | Specify | QA Agent | lifecycle_transition | AgentRun lifecycle | State Machines | Can runs complete, refuse, fail, or fallback? | AgentRun transitions are testable | eval_fallback | PASS |
-| ai_native | Specify | Coding Agent | acceptance_test_path | runtime contract | Acceptance Checklist | Does coding agent know contract depth? | ai_contract_lite or ai_runtime_contract chosen by risk | ai_native_specify_coding_acceptance_test_path | PASS |
-| ai_native | Plan | PM Agent | happy_path | internal efficiency agent | First-Principles Product Logic | Are learning-loop and productivity metrics planned? | eval is product telemetry, not demo copy | ai_native_plan_pm_happy_path | PASS |
-| ai_native | Plan | Domain Expert Agent | exception_path | knowledge engineering drift | Content / Knowledge Assets | Are knowledge owners and lifecycle planned? | knowledge base owner/source/effective date/freshness exist | ai_native_plan_domain_exception_path | PASS |
-| ai_native | Plan | Architecture / Data / AI Agent | permission_privacy_path | ontology action model | First-Principles Product Logic | Can ontology connect data to safe actions? | ontology_semantic_contract defines object/link/action/rule | ontology_semantic_contract | PASS |
-| ai_native | Plan | QA Agent | lifecycle_transition | prompt version lifecycle | State Machines | Can QA test draft -> active -> rollback? | PromptVersion rollback path exists | rollback | PASS |
-| ai_native | Plan | Coding Agent | acceptance_test_path | delivery package | Role Path Patterns | Can coding tasks avoid inventing states/tools? | source-of-truth order and runtime contract are required | source_of_truth_order;manifest.json | PASS |
-| ai_native | Tasks | PM Agent | happy_path | workflow compression | Core Workflows | Are tasks framed as workflow redesign, not chat UI labels? | repeated workflow has owner/action closure | ai_native_tasks_pm_happy_path | PASS |
-| ai_native | Tasks | Domain Expert Agent | exception_path | refusal policy | Content / Knowledge Assets | Are unsupported/unsafe cases tasked? | refusal policy and escalation are versioned | ai_native_tasks_domain_exception_path | PASS |
-| ai_native | Tasks | Architecture / Data / AI Agent | permission_privacy_path | tool registry | Content / Knowledge Assets | Are allowed/forbidden tools and side effects sliced? | tool scope and write scope are task inputs | write_scope | PASS |
-| ai_native | Tasks | QA Agent | lifecycle_transition | HumanReview lifecycle | State Machines | Are approve/edit/reject/escalate cases planned? | review decisions are auditable | human_gate | PASS |
-| ai_native | Tasks | Coding Agent | acceptance_test_path | data-* and AC | UI / Mobile Patterns | Are visible AI states testable? | draft/recommendation/published/written states map to tests | data-testid;data-action;data-state | PASS |
-| ai_native | Build/Verify | PM Agent | happy_path | grounded answer | Domain Test Scenarios | Does build prove user value with evidence? | answer cites permitted context and freshness | context_freshness | PASS |
-| ai_native | Build/Verify | Domain Expert Agent | exception_path | adversarial prompt injection | Domain Test Scenarios | Are attack paths blocked by policy/tool guard? | tool call blocked and event logged | agent_writeback_blocked | PASS |
-| ai_native | Build/Verify | Architecture / Data / AI Agent | permission_privacy_path | unauthorized data request | Domain Test Scenarios | Can model leak hidden data? | refusal without hidden-field leakage | ai_native_build_arch_permission_privacy_path | PASS |
-| ai_native | Build/Verify | QA Agent | lifecycle_transition | eval regression | Domain Test Scenarios | Does regression block release? | threshold failure blocks active release | eval_fallback | PASS |
-| ai_native | Build/Verify | Coding Agent | acceptance_test_path | implementation validation | Acceptance Checklist | Can tests bind to eval and fallback? | golden/adversarial tests and fallback path exist | ac_structured;eval_fallback | PASS |
-| ai_native | Launch | PM Agent | happy_path | AI-core launch | Metric / Indicator Governance | Are launch claims tied to baseline and thresholds? | task success/edit/refusal/tool metrics exist | ai_native_launch_pm_happy_path | PASS |
-| ai_native | Launch | Domain Expert Agent | exception_path | high-impact review | Policy / Privacy Constraints | Are consequential actions blocked without reviewer? | human accountability remains | human_gate | PASS |
-| ai_native | Launch | Architecture / Data / AI Agent | permission_privacy_path | production writeback | Core Workflows | Are write scope, trace, rollback, and on-call ready? | production tool write has guard and rollback | write_scope;rollback | PASS |
-| ai_native | Launch | QA Agent | lifecycle_transition | AgentDefinition active | State Machines | Can smoke tests verify active/degraded/disabled states? | launch state path is testable | ai_native_launch_qa_lifecycle_transition | PASS |
-| ai_native | Launch | Coding Agent | acceptance_test_path | coding-agent handoff | Acceptance Checklist | Can coding agent implement without hype assumptions? | source truth, contracts, eval, fallback are explicit | source_of_truth_order;manifest.json | PASS |
-| ai_native | Learn/Retire | PM Agent | happy_path | post-launch learning | Metric / Indicator Governance | Can telemetry decide continue/iterate/rollback/retire? | eval and live metrics feed product decision | ai_native_learn_pm_happy_path | PASS |
-| ai_native | Learn/Retire | Domain Expert Agent | exception_path | obsolete knowledge | Content / Knowledge Assets | Can stale knowledge be retired safely? | effective date and lifecycle review block old source | context_freshness | PASS |
-| ai_native | Learn/Retire | Architecture / Data / AI Agent | permission_privacy_path | trace retention | Policy / Privacy Constraints | Are prompts/context/traces retained/deleted correctly? | privacy retention and export/delete policy apply | ai_native_learn_arch_permission_privacy_path | PASS |
-| ai_native | Learn/Retire | QA Agent | lifecycle_transition | AgentDefinition retired | State Machines | Can QA verify deprecation/retirement? | active -> deprecated/suspended/retired is testable | ai_native_learn_qa_lifecycle_transition | PASS |
-| ai_native | Learn/Retire | Coding Agent | acceptance_test_path | regression continuity | Domain Test Scenarios | Can implementation keep rollback and AC history stable? | old prompt/model/eval versions remain traceable | source_of_truth_order;rollback | PASS |
+Domain knowledge is not execution evidence. Register coverage and maturity in
+`references/domain-coverage.yaml`; keep behavioral scenarios and run evidence
+outside this knowledge file.
+
+Before raising maturity, independently evaluate:
+
+- one primary happy path;
+- one validation or exception path;
+- one permission/privacy path;
+- one lifecycle transition;
+- one coding-agent no-guess handoff path;
+- applicable migration, integration-failure, AI, and high-risk human-gate paths.
+
+Record executor, input, environment, timestamp, result, and evidence location.
+Mocked matrices and simulated reviewers cannot satisfy expert review or audit.
 
 ## Acceptance Checklist
 

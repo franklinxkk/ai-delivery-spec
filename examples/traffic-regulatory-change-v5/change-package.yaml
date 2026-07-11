@@ -1,0 +1,75 @@
+schema_version: 5.0.0
+change_id: CHG-TRAFFIC-PRACTITIONER-2026
+title: 道路运输从业人员规则源更新影响评估
+reason: 权威来源登记更新到 2026 修订版本，需要核对人员资格、有效期、提醒和验收规则
+source_refs: [KS-TRAFFIC-PRACTITIONERS-2026]
+status: proposed
+baseline_version: "4.9.15"
+target_version: "5.0.0"
+decision_owner: 交通领域负责人和客户合规负责人
+
+impacts:
+  modules:
+    - ref: MOD-TRAFFIC-PERSONNEL
+      change_type: verify_only
+      reason: 核对人员档案和资格生命周期适用性
+  flows:
+    - ref: FLOW-TRAFFIC-QUALIFICATION
+      change_type: modify
+      reason: 核对新增/续期/失效/归档路径
+  views:
+    - ref: VIEW-TRAFFIC-PERSONNEL
+      change_type: verify_only
+      reason: 核对字段、提示和来源展示
+  actions:
+    - ref: ACT-TRAFFIC-QUALIFICATION-RENEW
+      change_type: verify_only
+      reason: 核对允许状态、责任人和审计
+  fields:
+    - ref: FLD-TRAFFIC-QUALIFICATION-EXPIRES
+      change_type: verify_only
+      reason: 核对有效期和提醒口径
+  states:
+    - ref: STM-TRAFFIC-QUALIFICATION
+      change_type: verify_only
+      reason: 核对修订后状态与转换
+  events:
+    - ref: EVT-TRAFFIC-QUALIFICATION-EXPIRED
+      change_type: verify_only
+      reason: 核对下游提醒和任务影响
+  acceptance:
+    - ref: AC-TRAFFIC-QUALIFICATION-2026
+      change_type: add
+      reason: 增加权威来源适用性和回归证据
+  integrations:
+    - ref: INT-TRAFFIC-PERSONNEL-SOURCE
+      change_type: verify_only
+      reason: 核对外部数据字段和更新频率
+  documentation:
+    - ref: KS-TRAFFIC-PRACTITIONERS-2026
+      change_type: add
+      reason: 登记权威来源和验证日期
+  data_migration:
+    required: false
+    strategy: 评估完成前不修改存量数据
+    rollback: 不适用；若后续激活规则，使用规则版本回退
+    reconciliation: 抽样核对人员档案与新规则映射
+
+compatibility:
+  stable_ids_preserved: true
+  deprecated_ids: []
+  replacement_map: {}
+  consumer_actions:
+    - 产品和领域负责人完成逐条适用性核对
+    - QA 增加状态、提醒、权限和历史记录回归
+
+verification:
+  acceptance_refs: [AC-TRAFFIC-QUALIFICATION-2026]
+  regression_refs: [AC-TRAFFIC-QUALIFICATION-LEGACY]
+  evidence_refs: []
+  result: not_run
+
+release:
+  rollout: 仅在适用性、客户配置和回归通过后分批激活规则版本
+  rollback_trigger: 错误阻断合法从业人员或导致存量档案异常
+  owner: 交通产品和运维负责人

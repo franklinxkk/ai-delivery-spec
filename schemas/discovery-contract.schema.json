@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/discovery-contract.schema.json",
+  "title": "AI Delivery Spec Discovery Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "contract_id", "project_id", "product", "delivery_context", "sources", "unknowns", "discovery_decision"],
+  "properties": {
+    "schema_version": { "const": "5.0.0" },
+    "contract_id": { "type": "string", "pattern": "^DISC-[A-Z0-9-]+$" },
+    "project_id": { "type": "string", "minLength": 1 },
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "outcome_status", "scope_status"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "outcome": { "type": "string" },
+        "outcome_status": { "enum": ["known", "partial", "unknown"] },
+        "scope": { "type": "array", "items": { "type": "string" } },
+        "scope_status": { "enum": ["approved", "partial", "unknown"] }
+      }
+    },
+    "delivery_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lifecycle_stage", "shape", "mode", "tier", "ai", "workflow", "info", "consumers"],
+      "properties": {
+        "lifecycle_stage": { "const": "discover" },
+        "shape": { "enum": ["greenfield", "brownfield", "hybrid"] },
+        "mode": { "enum": ["lite", "standard", "full"] },
+        "tier": { "enum": ["L0", "L1", "L2", "L3"] },
+        "ai": { "type": "boolean" },
+        "workflow": { "type": "boolean" },
+        "info": { "enum": ["complete", "partial", "missing"] },
+        "consumers": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "governance_profiles": { "type": "array", "items": { "type": "string" } },
+        "domain_packs": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "path", "authority", "status", "disposition"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^SRC-[A-Z0-9-]+$" },
+          "path": { "type": "string", "minLength": 1 },
+          "authority": { "enum": ["primary", "accountable", "secondary", "inferred", "unknown"] },
+          "status": { "enum": ["active", "missing", "superseded", "conflict", "unknown"] },
+          "disposition": { "enum": ["embedded", "authoritative_annex", "deferred", "conflict", "not_applicable"] },
+          "owner": { "type": "string" }
+        }
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "question", "impact", "priority", "owner", "status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^UNK-[A-Z0-9-]+$" },
+          "question": { "type": "string", "minLength": 1 },
+          "impact": { "enum": ["scope", "role", "state", "data", "compliance", "acceptance", "commercial", "risk"] },
+          "priority": { "enum": ["P0", "P1", "P2"] },
+          "owner": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["open", "answered", "blocked", "accepted_risk"] },
+          "answer": { "type": "string" }
+        }
+      }
+    },
+    "discovery_decision": {
+      "enum": ["READY_FOR_LIGHT_SPEC", "READY_FOR_PRODUCT_TRUTH", "READY_FOR_CHANGE_PACKAGE", "REVIEW_COMPLETE_WITH_GAPS", "BLOCKED_BY_P0_UNKNOWN"]
+    }
+  }
+}

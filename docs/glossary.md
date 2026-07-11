@@ -1,17 +1,18 @@
-# Glossary
-
-This glossary keeps the public README shorter and gives new users a quick way
-to decode AI Delivery Spec terms.
+# v5 Glossary
 
 | Term | Meaning |
 |---|---|
-| 0D triage | Initial classification of tier, AI centrality, workflow presence, and information completeness before loading references. |
-| Stage 0 | Reverse-engineering pass for existing prototypes, screenshots, legacy docs, spreadsheets, or competitor products before writing a PRD. |
-| IA Skeleton | Stage 3.5 structure that locks module, view, region, role, and primary action relationships before detailed PRD or prototype work. |
-| FRR | Functional Requirement Record; one complete function-level product specification with roles, pages, fields, actions, rules, states, permissions, exceptions, NFR, handoff notes, and acceptance. |
-| AC-YAML / ac_structured | Machine-readable acceptance criteria linked to FRRs, prototype anchors, data actions, and test paths. |
-| Human-First Full PRD | Default implementation handoff profile for human PM/RD/QA/vendor/customer teams; readable business specification comes before machine-readable contracts. |
-| AI-Coding Full PRD | Human-First PRD plus AC-YAML, API/data/event contracts, manifest, and coding-agent rules for Cursor, Claude Code, Codex, Copilot, or similar agents. |
-| Domain module | Replaceable `references/domain-*.md` file that adds industry vocabulary, states, policies, risks, UI patterns, and test scenarios without polluting the core protocol. |
-| Completion state | Final status of an output: `PASS`, `REVIEW_COMPLETE_WITH_GAPS`, or `BLOCKED`. |
-| Complexity budget | Rule for counting states, actions, APIs, agents, and document scope by business meaning so small work is not over-modeled. |
+| Triage | Lifecycle, project shape, risk, information, workflow, AI centrality, consumer, mode, and tier selection before loading references. |
+| Product Truth | Canonical schema-governed product facts shared by every human and machine projection. |
+| Projection | Human-First, prototype, coding-agent, QA, customer, or operations view generated from Product Truth. |
+| Stable ID | Permanent identity such as `FLOW/VIEW/ACT/STATE/AC`; rename preserves ID and replacement uses a Change Package. |
+| Project Domain Capsule | Project-scoped vocabulary, entities, states, workflows, policies, sources, unknowns, and scenarios used when no dedicated domain pack exists. |
+| Capability Pack | Cross-domain reusable contract such as identity/tenant, workflow/audit, content/resource, data/integration, AI governance, or operations/security. |
+| Governance Profile | ToB, ToG, regulated, greenfield, or brownfield delivery overlay; not an industry domain. |
+| Domain Pack | Optional professional knowledge accelerator with explicit applicability, evidence, maturity, and known gaps. |
+| Coverage | What knowledge, scenarios, behavior, and review are present; not the same as maturity. |
+| Maturity | `experimental`, `validated`, or `audited`, supported by defined evidence. |
+| Change Package | `CHG-*` impact, compatibility, migration, regression, rollout, and rollback contract. |
+| Acceptance | Expected visible/domain result and required evidence linked by `AC-*`. |
+| Evidence | Executed result with executor, time, environment, result, and location; a template or expected scenario is not evidence. |
+| Completion state | Scoped `PASS`, `REVIEW_COMPLETE_WITH_GAPS`, or `BLOCKED`. |

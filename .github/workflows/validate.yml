@@ -1,25 +1,60 @@
 name: Validate AI Delivery Spec
 
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
-    branches: [main]
+    branches: [main, "feature/**", "release/**"]
   pull_request:
     branches: [main]
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.12"]
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
+          cache: pip
 
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
 
-      - name: Run release checks
+      - name: Compile validators
+        run: python -m compileall -q scripts
+
+      - name: Run v5 release checks
         run: python scripts/ai_delivery_spec_cli.py check
+
+      - name: Validate Publishing Product Truth explicitly
+        run: >-
+          python scripts/validate_product_truth.py
+          examples/publishing-learning-v5/delivery/truth/product-truth.yaml
+
+      - name: Validators must not mutate tracked files
+        run: git diff --exit-code
+
+  required-gate:
+    name: required-gate
+    if: always()
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce all validation matrix jobs
+        run: |
+          if [ "${{ needs.validate.result }}" != "success" ]; then
+            echo "Validation matrix did not pass: ${{ needs.validate.result }}"
+            exit 1
+          fi

@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/execution-state.schema.json",
+  "title": "AI Delivery Spec Execution State",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "execution_id", "project_id", "contract_kind", "revision", "environment", "configured_environment", "status", "versions", "risk", "domain_assurance", "anchors", "access_scope", "stage", "policy", "previous_state_hash", "state_hash", "created_at", "updated_at"],
+  "properties": {
+    "schema_version": { "const": "5.0.0" },
+    "execution_id": { "type": "string", "pattern": "^EXEC-[A-Z0-9-]+$" },
+    "project_id": { "type": "string", "minLength": 1 },
+    "contract_kind": { "enum": ["discovery_contract", "product_truth"] },
+    "revision": { "type": "integer", "minimum": 0 },
+    "environment": { "enum": ["development", "test", "staging", "production"] },
+    "configured_environment": { "enum": ["development", "test", "staging", "production"] },
+    "status": { "enum": ["ready", "in_progress", "blocked", "completed"] },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expected_skill", "repository_skill", "installed_skill", "installed_skill_path", "repository_commit", "repository_tree_hash", "repository_dirty", "dependencies"],
+      "properties": {
+        "expected_skill": { "type": "string" },
+        "repository_skill": { "type": "string" },
+        "installed_skill": { "type": "string" },
+        "installed_skill_path": { "type": "string" },
+        "repository_commit": { "type": "string" },
+        "repository_tree_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "repository_dirty": { "type": "boolean" },
+        "dependencies": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "signals", "high_risk", "classification_basis"],
+      "properties": {
+        "profile": { "enum": ["minimal", "standard", "complex", "regulated"] },
+        "signals": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "high_risk": { "type": "boolean" },
+        "classification_basis": { "const": "structured_contract" }
+      }
+    },
+    "domain_assurance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["domain_id", "maturity", "source", "evidence_refs", "production_claim"],
+        "properties": {
+          "domain_id": { "type": "string" },
+          "maturity": { "enum": ["none", "experimental", "validated", "audited"] },
+          "source": { "enum": ["built_in", "project_evidence", "missing"] },
+          "evidence_refs": { "type": "array", "items": { "type": "string" } },
+          "production_claim": { "enum": ["allowed", "prohibited"] }
+        }
+      }
+    },
+    "anchors": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "path", "sha256"],
+        "properties": {
+          "kind": { "enum": ["discovery_contract", "product_truth", "spec_config", "domain_coverage", "assurance_evidence", "prohibited_actions", "access_scope"] },
+          "path": { "type": "string" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        }
+      }
+    },
+    "access_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed_ids", "allowed_domains", "denied_ids"],
+      "properties": {
+        "allowed_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "allowed_domains": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "denied_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      }
+    },
+    "stage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["current", "sequence", "turns", "completed", "required_gates"],
+      "properties": {
+        "current": { "enum": ["discover", "specify", "plan", "tasks", "build_verify", "launch", "learn_retire"] },
+        "sequence": { "type": "integer", "minimum": 0 },
+        "turns": { "type": "integer", "minimum": 0 },
+        "completed": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "required_gates": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["high_risk_failure", "low_risk_failure", "audit_mode", "max_turns_per_stage"],
+      "properties": {
+        "high_risk_failure": { "const": "block" },
+        "low_risk_failure": { "enum": ["block", "human_review"] },
+        "audit_mode": { "enum": ["hash_chain", "signed_external"] },
+        "max_turns_per_stage": { "type": "integer", "minimum": 1, "maximum": 200 }
+      }
+    },
+    "gate_result_refs": { "type": "array", "items": { "type": "string" } },
+    "approved_gaps": { "type": "array", "items": { "type": "string" } },
+    "failures": { "type": "array", "items": { "type": "string" } },
+    "previous_state_hash": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+    "state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

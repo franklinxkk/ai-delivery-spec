@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/change-package.schema.json",
+  "title": "AI Delivery Spec Change Package",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "change_id", "title", "reason", "source_refs", "status", "impacts", "verification"],
+  "properties": {
+    "schema_version": { "const": "5.0.0" },
+    "change_id": { "type": "string", "pattern": "^CHG-[A-Z0-9-]+$" },
+    "title": { "type": "string", "minLength": 1 },
+    "reason": { "type": "string", "minLength": 1 },
+    "source_refs": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "status": { "enum": ["proposed", "reviewing", "approved", "implemented", "verified", "released", "rejected", "superseded"] },
+    "baseline_version": { "type": "string" },
+    "target_version": { "type": "string" },
+    "decision_owner": { "type": "string" },
+    "impacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["modules", "flows", "views", "actions", "fields", "states", "events", "acceptance", "data_migration"],
+      "properties": {
+        "modules": { "$ref": "#/$defs/impactList" },
+        "flows": { "$ref": "#/$defs/impactList" },
+        "views": { "$ref": "#/$defs/impactList" },
+        "actions": { "$ref": "#/$defs/impactList" },
+        "fields": { "$ref": "#/$defs/impactList" },
+        "states": { "$ref": "#/$defs/impactList" },
+        "events": { "$ref": "#/$defs/impactList" },
+        "acceptance": { "$ref": "#/$defs/impactList" },
+        "integrations": { "$ref": "#/$defs/impactList" },
+        "documentation": { "$ref": "#/$defs/impactList" },
+        "data_migration": {
+          "type": "object",
+          "required": ["required", "strategy", "rollback"],
+          "properties": {
+            "required": { "type": "boolean" },
+            "strategy": { "type": "string" },
+            "rollback": { "type": "string" },
+            "reconciliation": { "type": "string" }
+          }
+        }
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "properties": {
+        "stable_ids_preserved": { "type": "boolean" },
+        "deprecated_ids": { "type": "array", "items": { "type": "string" } },
+        "replacement_map": { "type": "object", "additionalProperties": { "type": "string" } },
+        "consumer_actions": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "required": ["acceptance_refs", "regression_refs", "evidence_refs", "result"],
+      "properties": {
+        "acceptance_refs": { "type": "array", "items": { "type": "string" } },
+        "regression_refs": { "type": "array", "items": { "type": "string" } },
+        "evidence_refs": { "type": "array", "items": { "type": "string" } },
+        "result": { "enum": ["not_run", "failed", "partial", "passed"] }
+      }
+    },
+    "release": {
+      "type": "object",
+      "properties": {
+        "rollout": { "type": "string" },
+        "rollback_trigger": { "type": "string" },
+        "owner": { "type": "string" },
+        "released_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "$defs": {
+    "impactList": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ref", "change_type", "reason"],
+        "properties": {
+          "ref": { "type": "string" },
+          "change_type": { "enum": ["add", "modify", "deprecate", "remove", "verify_only", "none"] },
+          "reason": { "type": "string" }
+        }
+      }
+    }
+  }
+}

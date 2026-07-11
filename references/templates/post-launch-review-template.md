@@ -14,7 +14,7 @@ testing, or revenue attribution are required.
 | Review Window | |
 | Owner | |
 | Reviewers | PM / Dev / QA / Ops / Sponsor |
-| Linked PRD / FRR / AC IDs | |
+| Linked Product Truth / CHG / AC / EVD IDs | |
 
 ## 2. Original Intent
 

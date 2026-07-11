@@ -1,0 +1,44 @@
+{
+  "schema_version": "5.0.0",
+  "package_id": "PKG-PUBLISHING-V5-GOLDEN",
+  "status": "evaluation_fixture",
+  "source_of_truth": "truth/product-truth.yaml",
+  "artifacts": [
+    {
+      "path": "truth/product-truth.yaml",
+      "kind": "product_truth",
+      "authority": "canonical",
+      "status": "active"
+    },
+    {
+      "path": "projections/human-first-prd.md",
+      "kind": "human_first",
+      "authority": "projection",
+      "status": "generated"
+    },
+    {
+      "path": "projections/coding-agent-spec.md",
+      "kind": "coding_agent",
+      "authority": "projection",
+      "status": "generated"
+    },
+    {
+      "path": "evidence/context-plan.yaml",
+      "kind": "context_plan",
+      "authority": "derived",
+      "status": "generated"
+    },
+    {
+      "path": "evidence/content-module-slice.yaml",
+      "kind": "working_slice",
+      "authority": "derived",
+      "status": "generated"
+    }
+  ],
+  "claims": {
+    "schema_validated": true,
+    "behaviorally_evaluated": false,
+    "expert_reviewed": false,
+    "production_validated": false
+  }
+}

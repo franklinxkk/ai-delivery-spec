@@ -1,0 +1,145 @@
+schema_version: 5.0.0
+capsule_id: CAP-ENERGY-MAINTENANCE-001
+namespace: energy-maintenance
+project: 某园区能源设备运维需求发现
+scope: 设备点位、巡检、异常、工单、维修、复核和关闭的项目级发现模型
+status: project_scoped
+production_claim: prohibited_without_project_approval
+
+sources:
+  - id: SRC-ENERGY-INTERVIEW-001
+    title: 运维负责人访谈纪要
+    authority: accountable
+    status: active
+    location: project discovery interview
+    owner: 客户运维负责人
+  - id: SRC-ENERGY-LEGACY-001
+    title: 旧巡检表和维修台账
+    authority: secondary
+    status: active
+    location: legacy spreadsheet inventory
+    owner: 项目产品经理
+
+vocabulary:
+  - term: 点位
+    meaning: 设备上需要周期检查或采集状态的具体位置
+    source_ref: SRC-ENERGY-INTERVIEW-001
+    assertion_status: verified
+  - term: 停机许可
+    meaning: 维修前可能需要的安全审批或隔离确认，具体规则待核验
+    source_ref: SRC-ENERGY-INTERVIEW-001
+    assertion_status: inferred
+
+entities:
+  - id: ENT-ENERGY-EQUIPMENT
+    name: 设备
+    owner: 设备主数据负责人
+    state_machine_ref: STM-ENERGY-EQUIPMENT
+    assertion_status: verified
+  - id: ENT-ENERGY-INSPECTION
+    name: 巡检任务
+    owner: 运维班组负责人
+    state_machine_ref: STM-ENERGY-INSPECTION
+    assertion_status: verified
+  - id: ENT-ENERGY-WORKORDER
+    name: 维修工单
+    owner: 维修负责人
+    state_machine_ref: STM-ENERGY-WORKORDER
+    assertion_status: verified
+
+state_machines:
+  - id: STM-ENERGY-EQUIPMENT
+    owner_ref: ENT-ENERGY-EQUIPMENT
+    states: [active, maintenance, stopped, retired]
+    transitions: [active -> maintenance, maintenance -> active, active -> stopped]
+  - id: STM-ENERGY-INSPECTION
+    owner_ref: ENT-ENERGY-INSPECTION
+    states: [planned, assigned, executing, submitted, reviewed, closed, overdue]
+    transitions: [planned -> assigned, assigned -> executing, executing -> submitted, submitted -> reviewed, reviewed -> closed]
+  - id: STM-ENERGY-WORKORDER
+    owner_ref: ENT-ENERGY-WORKORDER
+    states: [created, accepted, repairing, pending_review, returned, closed, cancelled]
+    transitions: [created -> accepted, accepted -> repairing, repairing -> pending_review, pending_review -> closed, pending_review -> returned]
+
+workflows:
+  - id: FLOW-ENERGY-INSPECTION-CLOSE
+    name: 巡检异常到维修关闭
+    trigger: 巡检任务发现需要处理的设备异常
+    steps:
+      - 巡检员记录点位、读数、现象和证据
+      - 负责人判断是否创建维修工单及安全前置条件
+      - 维修人员接单、处理并提交结果
+      - 复核人验证设备状态和证据后关闭或退回
+    result: 异常、维修和复核证据形成可追溯闭环
+    exceptions: [设备离线, 重复异常, 备件缺失, 需要停机但许可未知, 复核不通过]
+
+policies:
+  - id: RULE-ENERGY-MAINTENANCE-SAFETY-GATE
+    rule: 涉及停机、隔离或高风险维修时，系统不得仅凭 AI 建议自动放行
+    source_ref: SRC-ENERGY-INTERVIEW-001
+    owner: 客户安全负责人
+    assertion_status: inferred
+    enforcement: human_gate
+    listens_to: [equipment.risk_level]
+    writes_to: [work_order.release_decision]
+    prompt: "Risk {{equipment.risk_level}} requires an accountable release decision."
+  - id: RULE-ENERGY-MAINTENANCE-CLOSE-EVIDENCE
+    rule: 维修工单关闭前必须有处理结果、复核人和时间证据
+    source_ref: SRC-ENERGY-INTERVIEW-001
+    owner: 客户运维负责人
+    assertion_status: verified
+    enforcement: backend_guard
+    listens_to: [work_order.evidence_complete]
+    writes_to: [work_order.close_decision]
+    prompt: "Close only when {{work_order.evidence_complete}} is true."
+
+context_dictionary:
+  - name: equipment.risk_level
+    type: enum
+    description: Accountable equipment risk classification
+  - name: work_order.release_decision
+    type: enum
+    description: Human-owned release or hold decision
+  - name: work_order.evidence_complete
+    type: boolean
+    description: Whether required repair and review evidence is complete
+  - name: work_order.close_decision
+    type: enum
+    description: Backend close or reject decision
+
+unknowns:
+  - id: UNK-ENERGY-SAFETY-SOURCE
+    question: 哪些维修类型必须停机、隔离、双人确认或引用法定/企业安全规则
+    impact: safety
+    owner: 客户安全负责人
+    status: open
+  - id: UNK-ENERGY-IOT-AUTHORITY
+    question: 传感器数据、人工读数和设备控制系统发生冲突时哪个是权威源
+    impact: data
+    owner: 客户设备负责人
+    status: open
+
+scenario_fixtures:
+  - id: SCN-ENERGY-HAPPY-001
+    type: happy
+    scenario: 巡检发现异常并创建工单，维修后复核通过关闭
+    expected: 异常、工单、设备状态和证据保持关联
+    status: project_confirmed
+  - id: SCN-ENERGY-SAFETY-001
+    type: safety
+    scenario: AI 建议立即维修，但停机和隔离规则尚未确认
+    expected: 系统阻止自动放行并要求安全负责人确认
+    status: mocked
+  - id: SCN-ENERGY-OFFLINE-001
+    type: integration_failure
+    scenario: 设备数据源离线时巡检员提交人工读数
+    expected: 标记数据来源和离线状态，恢复后进入对账而非静默覆盖
+    status: mocked
+
+promotion:
+  eligible: false
+  reason: 单项目发现，存在安全和权威数据源未知项
+  required_next_evidence:
+    - 权威安全规则和适用范围
+    - 至少两个独立能源运维项目的共性验证
+    - 行为评测和领域专家审查

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/context-plan.schema.json",
+  "title": "AI Delivery Spec Context Plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "profile", "assurance_profile", "budget", "selection", "overflow", "claim_boundary"],
+  "properties": {
+    "schema_version": { "const": "5.0.0" },
+    "profile": { "enum": ["minimal", "standard", "regulated", "large_program"] },
+    "assurance_profile": { "enum": ["minimal", "standard", "complex", "regulated"] },
+    "complexity_score": { "type": "integer", "minimum": 0 },
+    "risk_signals": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model_context_tokens", "model_context_source", "system_overhead_tokens", "reserved_output_tokens", "working_tokens", "estimated_truth_tokens", "estimated_reference_tokens", "estimated_total_selected_tokens"],
+      "properties": {
+        "model_context_tokens": { "type": "integer", "minimum": 4096 },
+        "model_context_source": { "enum": ["project_config", "default_assumption"] },
+        "system_overhead_tokens": { "type": "integer", "minimum": 0 },
+        "reserved_output_tokens": { "type": "integer", "minimum": 0 },
+        "working_tokens": { "type": "integer", "minimum": 0 },
+        "estimated_truth_tokens": { "type": "integer", "minimum": 0 },
+        "estimated_reference_tokens": { "type": "integer", "minimum": 0 },
+        "estimated_total_selected_tokens": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stage_references", "deferred_stage_references", "domain_packs", "deferred_domain_packs", "unresolved_domain_packs", "truth_strategy"],
+      "properties": {
+        "stage_references": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "deferred_stage_references": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "domain_packs": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "deferred_domain_packs": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "unresolved_domain_packs": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "truth_strategy": { "enum": ["full", "id_slice", "module_slice", "split_delivery"] },
+        "seed_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      }
+    },
+    "overflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["triggered", "hard_limit_exceeded", "strategy", "required_action", "compaction_manifest_required", "preserved_priorities", "silent_truncation_allowed"],
+      "properties": {
+        "triggered": { "type": "boolean" },
+        "hard_limit_exceeded": { "type": "boolean" },
+        "strategy": { "enum": ["retrieve", "summarize", "split", "block"] },
+        "required_action": { "enum": ["none", "retrieve_stable_id_slice", "write_compaction_manifest", "split_delivery", "block"] },
+        "compaction_manifest_required": { "type": "boolean" },
+        "preserved_priorities": { "type": "array", "items": { "enum": ["P0", "P1", "P2"] }, "minItems": 1, "uniqueItems": true },
+        "silent_truncation_allowed": { "const": false },
+        "reason": { "type": "string" }
+      }
+    },
+    "required_gates": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "claim_boundary": { "type": "string", "minLength": 1 }
+  }
+}

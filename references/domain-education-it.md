@@ -1,5 +1,8 @@
 # Domain: Higher-Education Informationization / 高校教育信息化
 
+Source authority and freshness metadata: `references/domain-sources.yaml`.
+Coverage and maturity: `references/domain-coverage.yaml`.
+
 Use this replaceable domain module for higher-education digital campus, vocational college digital transformation, academic affairs, student affairs, research administration, teaching quality, smart classroom, professional/program construction, one-stop service, data governance, data middle platform, AI assistant, and education data/BI scenarios.
 
 This module is distilled from multi-year higher-education informationization materials. Keep customer/project details out of the public protocol; preserve reusable domain rules only.
@@ -20,7 +23,7 @@ This module is distilled from multi-year higher-education informationization mat
 - UI / Mobile Patterns
 - Policy / Privacy Constraints
 - Domain Test Scenarios
-- Multi-Agent Lifecycle Verification Matrix
+- Evaluation Profile
 - Acceptance Checklist
 
 ## Domain Purpose
@@ -349,45 +352,23 @@ Common categories:
 | AI policy Q&A stale source | teacher/student | policy knowledge has old and new versions | ask question -> answer cites source | answer uses effective version or refuses with update warning |
 | dashboard privacy threshold | school leader | small sample group exists | drill into sensitive student indicator | aggregate shown; student-level detail hidden without authority |
 
-## Multi-Agent Lifecycle Verification Matrix
+## Evaluation Profile
 
-| domain_id | stage | reviewer_agent | path_type | scenario_ref | evidence_ref | blocking_question | expected_result | test_marker | verdict |
-|---|---|---|---|---|---|---|---|---|---|
-| education_it | Discover | PM Agent | happy_path | one-stop service / academic affairs | Domain Purpose | Is the education outcome measurable and scoped? | student/teacher/office value is explicit | education_discover_pm_happy_path | PASS |
-| education_it | Discover | Domain Expert Agent | exception_path | policy Q&A stale source | Domain Test Scenarios | Are school policy versions and owners discovered? | stale source is refused or warned | education_discover_domain_exception_path | PASS |
-| education_it | Discover | Architecture / Data / AI Agent | permission_privacy_path | student profile | AI Context Sources / Policy | Are student-sensitive sources scoped before use? | student_privacy_scope is required | student_privacy_scope | PASS |
-| education_it | Discover | QA Agent | lifecycle_transition | TrainingPlan lifecycle | State Machines | Can QA identify published/revised/archived states? | plan lifecycle is testable | education_discover_qa_lifecycle_transition | PASS |
-| education_it | Discover | Coding Agent | acceptance_test_path | delivery handoff | UI / Mobile Patterns | Can implementation trace source truth? | ac_structured, data-testid, data-action, data-state, data-api, data-method, manifest.json, source_of_truth_order required | ac_structured;data-testid;data-action;data-state;data-api;data-method;manifest.json;source_of_truth_order | PASS |
-| education_it | Specify | PM Agent | happy_path | OBE achievement analysis | Core Workflows | Does PRD connect course evidence to improvement? | obe_evidence_trace maps source -> result -> improvement | obe_evidence_trace | PASS |
-| education_it | Specify | Domain Expert Agent | exception_path | score release with appeal | Domain Test Scenarios | Are appeal and score adjustment rules explicit? | grade changes are human-approved and audited | grade_human_approval | PASS |
-| education_it | Specify | Architecture / Data / AI Agent | permission_privacy_path | dashboard drilldown | UI / Mobile Patterns / Policy | Are small-sample privacy guards specified? | dashboard_privacy_threshold blocks student-level leakage | dashboard_privacy_threshold | PASS |
-| education_it | Specify | QA Agent | lifecycle_transition | StudentAffairsCase returned | State Machines | Can returned/resubmitted paths be tested? | returned -> resubmitted -> processing exists | education_specify_qa_lifecycle_transition | PASS |
-| education_it | Specify | Coding Agent | acceptance_test_path | FRR/AC contract | Acceptance Checklist | Can coding agent implement without guessing school policy? | FRR, AC, field, permission, state are traceable | education_specify_coding_acceptance_test_path | PASS |
-| education_it | Plan | PM Agent | happy_path | professional construction | Core Workflows | Are annual construction owners and metrics planned? | target/task/indicator/owner/evidence chain exists | obe_evidence_trace | PASS |
-| education_it | Plan | Domain Expert Agent | exception_path | scholarship/aid review | Domain Test Scenarios | Are high-stakes student decisions human-owned? | final aid/award result requires human approval | grade_human_approval | PASS |
-| education_it | Plan | Architecture / Data / AI Agent | permission_privacy_path | research/fund data | Policy / Privacy Constraints | Are confidentiality and finance/audit scopes planned? | research data access is scoped/versioned/audited | education_plan_arch_permission_privacy_path | PASS |
-| education_it | Plan | QA Agent | lifecycle_transition | CourseObjectiveAchievement | State Machines | Can QA plan achievement recalculation tests? | mapped -> calculated -> reviewed -> improved path exists | obe_evidence_trace | PASS |
-| education_it | Plan | Coding Agent | acceptance_test_path | delivery package | UI / Mobile Patterns | Are view/action/testid paths discoverable? | source_of_truth_order and manifest are required | source_of_truth_order;manifest.json | PASS |
-| education_it | Tasks | PM Agent | happy_path | student affairs service | Core Workflows | Are tasks sliced by service closure? | submitted -> result/archive can be delivered vertically | education_tasks_pm_happy_path | PASS |
-| education_it | Tasks | Domain Expert Agent | exception_path | counseling risk follow-up | Domain Test Scenarios | Are sensitive mental-health paths separated? | AI cannot diagnose; referral/closure evidence exists | student_privacy_scope | PASS |
-| education_it | Tasks | Architecture / Data / AI Agent | permission_privacy_path | cross-system master data | Policy / Privacy Constraints | Do tasks preserve authoritative source and conflict rules? | source owner/freshness/conflict resolution recorded | education_tasks_arch_permission_privacy_path | PASS |
-| education_it | Tasks | QA Agent | lifecycle_transition | SmartClassroomSpace | State Machines | Are classroom device/evidence states planned? | active/maintenance/disabled paths are testable | education_tasks_qa_lifecycle_transition | PASS |
-| education_it | Tasks | Coding Agent | acceptance_test_path | mobile weak network | UI / Mobile Patterns | Can coding tasks cover student/teacher/counselor mobile paths? | data-* and offline behavior are testable | data-testid;data-action;data-state | PASS |
-| education_it | Build/Verify | PM Agent | happy_path | classroom AI evaluation | Domain Test Scenarios | Does build prove AI is evidence, not final evaluation? | human review publishes result | education_build_pm_happy_path | PASS |
-| education_it | Build/Verify | Domain Expert Agent | exception_path | training-plan version change | Domain Test Scenarios | Are old/new student cohorts protected? | old students keep old plan; target grade uses new version | education_build_domain_exception_path | PASS |
-| education_it | Build/Verify | Architecture / Data / AI Agent | permission_privacy_path | AI assistant answer | AI Context Sources | Does AI cite effective policy and preserve scope? | answer cites source/freshness or refuses | education_build_arch_permission_privacy_path | PASS |
-| education_it | Build/Verify | QA Agent | lifecycle_transition | research project fund lifecycle | Domain Test Scenarios | Can integration tests cover project/fund states? | arrival/allocation/reimbursement/settlement traceable | education_build_qa_lifecycle_transition | PASS |
-| education_it | Build/Verify | Coding Agent | acceptance_test_path | AC/prototype check | Acceptance Checklist | Can coding agent bind tests to AC and data-*? | ac_structured and data-* coverage exist | ac_structured;data-testid;data-action | PASS |
-| education_it | Launch | PM Agent | happy_path | indicator dashboard | Metric / Indicator Governance | Are school dashboards launch-ready with caliber/source? | indicator owner/source/version/privacy level visible | dashboard_privacy_threshold | PASS |
-| education_it | Launch | Domain Expert Agent | exception_path | grade/final decision | Policy / Privacy Constraints | Are official educational decisions human-approved? | final grades/graduation/aid/sanction need accountable human | grade_human_approval | PASS |
-| education_it | Launch | Architecture / Data / AI Agent | permission_privacy_path | export/API opening | Policy / Privacy Constraints | Are data export and API scope protected? | org/role/cohort/course scopes enforced | student_privacy_scope | PASS |
-| education_it | Launch | QA Agent | lifecycle_transition | ServiceProcess launch | State Machines | Can smoke tests verify submitted -> completed/returned/cancelled? | service process path is testable | education_launch_qa_lifecycle_transition | PASS |
-| education_it | Launch | Coding Agent | acceptance_test_path | release package | Acceptance Checklist | Can coding agent identify launch blockers? | lifecycle, permission, AI boundary, and acceptance evidence present | education_launch_coding_acceptance_test_path | PASS |
-| education_it | Learn/Retire | PM Agent | happy_path | continuous improvement | Core Workflows | Can learning close teaching quality improvement? | issue -> action -> review -> closure metrics exist | education_learn_pm_happy_path | PASS |
-| education_it | Learn/Retire | Domain Expert Agent | exception_path | deprecated policy/course plan | Content / Knowledge Assets | Can retired rules stop affecting new students? | versioned policy/plan lifecycle is explicit | education_learn_domain_exception_path | PASS |
-| education_it | Learn/Retire | Architecture / Data / AI Agent | permission_privacy_path | student record retention | Policy / Privacy Constraints | Are sensitive student/classroom records retained/deleted correctly? | retention, masking, audit, export controls apply | student_privacy_scope | PASS |
-| education_it | Learn/Retire | QA Agent | lifecycle_transition | DataResource deprecated | State Machines | Can QA verify data standard retirement? | active -> deprecated is testable | education_learn_qa_lifecycle_transition | PASS |
-| education_it | Learn/Retire | Coding Agent | acceptance_test_path | regression continuity | Acceptance Checklist | Can implementation preserve AC and evidence history? | source_of_truth_order and historical IDs remain traceable | source_of_truth_order | PASS |
+Domain knowledge is not execution evidence. Register coverage and maturity in
+`references/domain-coverage.yaml`; keep behavioral scenarios and run evidence
+outside this knowledge file.
+
+Before raising maturity, independently evaluate:
+
+- one primary happy path;
+- one validation or exception path;
+- one permission/privacy path;
+- one lifecycle transition;
+- one coding-agent no-guess handoff path;
+- applicable migration, integration-failure, AI, and high-risk human-gate paths.
+
+Record executor, input, environment, timestamp, result, and evidence location.
+Mocked matrices and simulated reviewers cannot satisfy expert review or audit.
 
 ## Acceptance Checklist
 

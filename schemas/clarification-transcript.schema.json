@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/clarification-transcript.schema.json",
+  "title": "AI Delivery Spec Clarification Transcript",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "transcript_id", "project_id", "turns"],
+  "properties": {
+    "schema_version": { "const": "5.0.0" },
+    "transcript_id": { "type": "string", "pattern": "^TRN-[A-Z0-9-]+$" },
+    "project_id": { "type": "string", "minLength": 1 },
+    "turns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["turn_id", "unknown_id", "question", "answer", "decision_owner", "status"],
+        "properties": {
+          "turn_id": { "type": "string", "pattern": "^TURN-[A-Z0-9-]+$" },
+          "unknown_id": { "type": "string", "pattern": "^UNK-[A-Z0-9-]+$" },
+          "question": { "type": "string", "minLength": 1 },
+          "answer": { "type": "string", "minLength": 1 },
+          "decision_owner": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["answered", "accepted_risk"] },
+          "evidence_refs": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

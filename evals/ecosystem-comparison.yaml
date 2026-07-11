@@ -1,0 +1,234 @@
+schema_version: 1.0.0
+snapshot_date: 2026-07-12
+scope: public_repository_and_primary_documentation_review
+execution_environment:
+  user_interface_label: GPT-5.6 SOL
+  attestation: user_reported
+  independently_verifiable_from_repository: false
+  note: The model label is recorded as displayed by the user's execution environment; repository artifacts cannot independently attest provider-side routing or model identity.
+method:
+  purpose: Compare documented workflow coverage and composability, not declare an overall winner.
+  evidence_rule: A rating requires an inspectable official repository, first-party documentation, or source file.
+  popularity_rule: Stars and forks are dated discovery signals only and never change a capability rating.
+  missing_evidence_rule: not_evidenced means not found in reviewed sources, not impossible.
+  ratings:
+    primary: A first-class workflow with explicit artifacts, rules, gates, or dedicated skills.
+    supported: Explicitly documented and usable, but not the organizing contract.
+    adjacent: Contributes indirectly or expects another artifact/tool to own the result.
+    not_evidenced: No sufficiently explicit evidence found in the reviewed primary sources.
+dimensions:
+  discovery_strategy: 产品发现与策略
+  clarification_scope: 需求澄清与范围
+  business_model_truth: 业务建模与统一规格
+  engineering_handoff: 工程交接与 Coding Agent
+  acceptance_traceability: 验收测试与追溯
+  change_management: 变更与存量演进
+  launch_learn_retire: 上线、运营、学习与退役
+  ai_governance_runtime_risk: AI 治理与运行风险
+  skill_engineering_maintainability: Skill 工程质量与可维护性
+tools:
+  - id: ai-delivery-spec
+    name: AI Delivery Spec 5.0.0
+    repository: https://github.com/franklinxkk/ai-delivery-spec
+    activity: {stars: 13, forks: 3, pushed: 2026-07-06, license: Apache-2.0}
+    platforms: [claude-code, codex, cursor, github-copilot, open-skills-compatible]
+    evidence:
+      - SKILL.md
+      - references/templates/product-truth-template.yaml
+      - references/execution-gates.md
+      - schemas/product-truth.schema.json
+      - evals/eval-catalog.yaml
+    ratings:
+      discovery_strategy: primary
+      clarification_scope: primary
+      business_model_truth: primary
+      engineering_handoff: primary
+      acceptance_traceability: primary
+      change_management: primary
+      launch_learn_retire: supported
+      ai_governance_runtime_risk: primary
+      skill_engineering_maintainability: primary
+  - id: github-spec-kit
+    name: GitHub Spec Kit
+    repository: https://github.com/github/spec-kit
+    activity: {stars: 119572, forks: 10601, pushed: 2026-07-10, license: MIT}
+    platforms: [claude-code, codex, github-copilot, cursor, multiple-coding-agents]
+    evidence:
+      - https://github.github.com/spec-kit/
+      - https://github.com/github/spec-kit
+    ratings:
+      discovery_strategy: adjacent
+      clarification_scope: supported
+      business_model_truth: adjacent
+      engineering_handoff: primary
+      acceptance_traceability: supported
+      change_management: supported
+      launch_learn_retire: adjacent
+      ai_governance_runtime_risk: adjacent
+      skill_engineering_maintainability: primary
+  - id: mattpocock-requirements-chain
+    name: mattpocock requirements chain
+    repository: https://github.com/mattpocock/skills
+    activity: {stars: 165691, forks: 14248, pushed: 2026-07-10, license: MIT}
+    platforms: [claude-code, codex, open-skills-compatible]
+    evidence:
+      - https://github.com/mattpocock/skills
+      - https://github.com/mattpocock/skills/blob/main/skills/engineering/to-prd/SKILL.md
+      - https://github.com/mattpocock/skills/issues/23
+    ratings:
+      discovery_strategy: primary
+      clarification_scope: primary
+      business_model_truth: adjacent
+      engineering_handoff: supported
+      acceptance_traceability: supported
+      change_management: adjacent
+      launch_learn_retire: adjacent
+      ai_governance_runtime_risk: adjacent
+      skill_engineering_maintainability: supported
+  - id: phuryn-pm-skills
+    name: phuryn/pm-skills
+    repository: https://github.com/phuryn/pm-skills
+    activity: {stars: 23514, forks: 2492, pushed: 2026-07-03, license: MIT}
+    platforms: [claude-code, claude-cowork, manually-portable]
+    evidence: [https://github.com/phuryn/pm-skills]
+    ratings:
+      discovery_strategy: primary
+      clarification_scope: primary
+      business_model_truth: supported
+      engineering_handoff: supported
+      acceptance_traceability: supported
+      change_management: supported
+      launch_learn_retire: primary
+      ai_governance_runtime_risk: supported
+      skill_engineering_maintainability: primary
+  - id: product-on-purpose-pm-skills
+    name: product-on-purpose/pm-skills
+    repository: https://github.com/product-on-purpose/pm-skills
+    activity: {stars: 456, forks: 59, pushed: 2026-07-07, license: Apache-2.0}
+    platforms: [claude-code, codex, cursor, github-copilot, open-skills-compatible]
+    evidence: [https://github.com/product-on-purpose/pm-skills]
+    ratings:
+      discovery_strategy: primary
+      clarification_scope: primary
+      business_model_truth: supported
+      engineering_handoff: supported
+      acceptance_traceability: supported
+      change_management: supported
+      launch_learn_retire: primary
+      ai_governance_runtime_risk: adjacent
+      skill_engineering_maintainability: primary
+  - id: alirezarezvani-product-skills
+    name: alirezarezvani Product Skills Pack
+    repository: https://github.com/alirezarezvani/claude-skills
+    activity: {stars: 22209, forks: 3101, pushed: 2026-07-11, license: MIT}
+    platforms: [claude-code, codex, gemini-cli, cursor, multiple-agents]
+    evidence:
+      - https://github.com/alirezarezvani/claude-skills
+      - https://github.com/alirezarezvani/claude-skills/issues/655
+    ratings:
+      discovery_strategy: supported
+      clarification_scope: supported
+      business_model_truth: adjacent
+      engineering_handoff: supported
+      acceptance_traceability: adjacent
+      change_management: adjacent
+      launch_learn_retire: supported
+      ai_governance_runtime_risk: supported
+      skill_engineering_maintainability: supported
+  - id: deanpeters-pm-skills
+    name: deanpeters/Product-Manager-Skills
+    repository: https://github.com/deanpeters/Product-Manager-Skills
+    activity: {stars: 5699, forks: 704, pushed: 2026-07-08, license: not-asserted-by-api}
+    platforms: [claude-code, claude-desktop, claude-cowork, codex, multiple-agents]
+    evidence: [https://github.com/deanpeters/Product-Manager-Skills]
+    ratings:
+      discovery_strategy: primary
+      clarification_scope: primary
+      business_model_truth: supported
+      engineering_handoff: supported
+      acceptance_traceability: supported
+      change_management: adjacent
+      launch_learn_retire: supported
+      ai_governance_runtime_risk: adjacent
+      skill_engineering_maintainability: primary
+  - id: max4c-requirements-flow
+    name: max4c requirements flow
+    repository: https://github.com/max4c/skills
+    activity: {stars: 6, forks: 1, pushed: 2026-06-06, license: MIT}
+    platforms: [claude-code, claude-plugin, codex-via-cookoff]
+    evidence: [https://github.com/max4c/skills]
+    ratings:
+      discovery_strategy: supported
+      clarification_scope: primary
+      business_model_truth: adjacent
+      engineering_handoff: primary
+      acceptance_traceability: primary
+      change_management: adjacent
+      launch_learn_retire: supported
+      ai_governance_runtime_risk: adjacent
+      skill_engineering_maintainability: supported
+  - id: github-awesome-copilot-prd
+    name: GitHub awesome-copilot PRD
+    repository: https://github.com/github/awesome-copilot
+    activity: {stars: 36453, forks: 4547, pushed: 2026-07-11, license: MIT}
+    platforms: [github-copilot, claude-code, codex, open-skills-compatible]
+    evidence:
+      - https://github.com/github/awesome-copilot/blob/main/docs/README.skills.md
+    ratings:
+      discovery_strategy: supported
+      clarification_scope: supported
+      business_model_truth: adjacent
+      engineering_handoff: supported
+      acceptance_traceability: adjacent
+      change_management: adjacent
+      launch_learn_retire: adjacent
+      ai_governance_runtime_risk: adjacent
+      skill_engineering_maintainability: primary
+  - id: digidai-product-manager-skills
+    name: Digidai/product-manager-skills
+    repository: https://github.com/Digidai/product-manager-skills
+    activity: {stars: 122, forks: 12, pushed: 2026-04-12, license: CC-BY-NC-SA-4.0-in-readme}
+    platforms: [claude-code, codex, cursor, windsurf, openclaw]
+    evidence: [https://github.com/Digidai/product-manager-skills]
+    ratings:
+      discovery_strategy: primary
+      clarification_scope: primary
+      business_model_truth: supported
+      engineering_handoff: supported
+      acceptance_traceability: supported
+      change_management: adjacent
+      launch_learn_retire: primary
+      ai_governance_runtime_risk: supported
+      skill_engineering_maintainability: supported
+  - id: pratikshadake-pm-skills
+    name: pratikshadake PM Skills
+    repository: https://github.com/pratikshadake/claude-product-management-skills
+    activity: {stars: 30, forks: 5, pushed: 2026-02-19, license: MIT}
+    platforms: [claude-code, cursor, cline, open-skills-compatible]
+    evidence: [https://github.com/pratikshadake/claude-product-management-skills]
+    ratings:
+      discovery_strategy: primary
+      clarification_scope: supported
+      business_model_truth: adjacent
+      engineering_handoff: adjacent
+      acceptance_traceability: supported
+      change_management: adjacent
+      launch_learn_retire: primary
+      ai_governance_runtime_risk: adjacent
+      skill_engineering_maintainability: supported
+  - id: superpowers
+    name: Superpowers
+    repository: https://github.com/obra/superpowers
+    activity: {stars: 252416, forks: 22530, pushed: 2026-07-10, license: MIT}
+    platforms: [claude-code, codex, multiple-coding-agents]
+    evidence: [https://github.com/obra/superpowers]
+    ratings:
+      discovery_strategy: supported
+      clarification_scope: supported
+      business_model_truth: adjacent
+      engineering_handoff: primary
+      acceptance_traceability: primary
+      change_management: supported
+      launch_learn_retire: supported
+      ai_governance_runtime_risk: adjacent
+      skill_engineering_maintainability: primary

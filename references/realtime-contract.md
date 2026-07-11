@@ -15,7 +15,7 @@ user-initiated refresh.
 
 ## When To Load
 
-Load this file in addition to `delivery-core.md` when any trigger applies:
+Load this file in addition to `references/specify.md` when any trigger applies:
 
 | Trigger | Action |
 |---|---|

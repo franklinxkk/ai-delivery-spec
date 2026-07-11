@@ -1,0 +1,35 @@
+schema_version: 5.0.0
+contract_id: DISC-PROJECT-001
+project_id: project-001
+product:
+  name: "{product or project name}"
+  outcome: "{known outcome or empty while unresolved}"
+  outcome_status: unknown
+  scope: []
+  scope_status: unknown
+delivery_context:
+  lifecycle_stage: discover
+  shape: greenfield
+  mode: standard
+  tier: L2
+  ai: false
+  workflow: false
+  info: missing
+  consumers: [product]
+  governance_profiles: []
+  domain_packs: []
+sources:
+  - id: SRC-PROJECT-001
+    path: "{source path, URL, meeting, or owner}"
+    authority: accountable
+    status: active
+    disposition: embedded
+    owner: "{source owner}"
+unknowns:
+  - id: UNK-SCOPE-001
+    question: "{material question}"
+    impact: scope
+    priority: P0
+    owner: "{decision owner}"
+    status: open
+discovery_decision: BLOCKED_BY_P0_UNKNOWN
