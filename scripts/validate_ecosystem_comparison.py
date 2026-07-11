@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -62,8 +62,12 @@ def main() -> int:
     except (KeyError, ValueError):
         failures.append("snapshot_date must be ISO YYYY-MM-DD")
         snapshot = None
-    if snapshot and snapshot > date.today():
-        failures.append("snapshot_date cannot be in the future")
+    # The report is stamped in the author's local date (Asia/Shanghai), while
+    # GitHub runners commonly evaluate `date.today()` in UTC. Allow the next
+    # UTC calendar date to avoid a false failure at the local midnight boundary.
+    max_snapshot_date = datetime.now(timezone.utc).date() + timedelta(days=1)
+    if snapshot and snapshot > max_snapshot_date:
+        failures.append("snapshot_date cannot be more than one local-date boundary ahead")
 
     environment = data.get("execution_environment", {})
     if environment.get("user_interface_label") != "GPT-5.6 SOL":
