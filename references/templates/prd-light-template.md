@@ -1,4 +1,4 @@
-# L1 Light PRD Template
+# L1 Light Product Contract Template
 
 Use for internal alignment, simple CRUD/workflow, or feature explanation before full development handoff.
 
@@ -115,4 +115,4 @@ Primary actions:
 - [ ] Every primary action has visible result.
 - [ ] Every state-changing action has domain result.
 - [ ] Known gaps are listed.
-- [ ] If moving to development, upgrade to L2 Standard PRD.
+- [ ] If moving to development, upgrade to v5 Product Truth and the required projections.

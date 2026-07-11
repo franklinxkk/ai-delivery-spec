@@ -1,5 +1,8 @@
 # Domain: CRM / Customer Response
 
+Source authority and freshness metadata: `references/domain-sources.yaml`.
+Coverage and maturity: `references/domain-coverage.yaml`.
+
 Use this file for CRM, sales pipeline, customer service, partner service, customer success, contract/payment follow-up, and product-feedback-loop scenarios.
 
 This file validates that the domain module contract can migrate beyond traffic safety.
@@ -20,7 +23,7 @@ This file validates that the domain module contract can migrate beyond traffic s
 - UI / Mobile Patterns
 - Policy / Privacy Constraints
 - Domain Test Scenarios
-- Multi-Agent Lifecycle Verification Matrix
+- Evaluation Profile
 - Multi-Module PRD Quality Gate
 - Acceptance Checklist
 
@@ -34,13 +37,11 @@ This file validates that the domain module contract can migrate beyond traffic s
 - Capability scope may include marketing lead acquisition, SFA pipeline,
   Customer 360, CPQ/quotation, contract/payment, service tickets, customer
   success/renewal, partner/channel operations, and product-feedback loops.
-- Stage 3.5 IA Skeleton should be used for CRM delivery when the scope covers
-  two or more modules (lead/opportunity/customer/ticket/contract/payment), two
-  or more primary roles, or any cross-module lifecycle.
-- FRR anti-bloat rule: do not repeat page layout and field dictionaries in every
-  CRM function. Lock module/view/region/action in the IA Skeleton, place common
-  fields in the global field dictionary, and keep each FRR focused on scenario,
-  state, rule, permission, exception, and acceptance differences.
+- Product Truth must lock module/view/region/action ownership when CRM spans
+  lead, opportunity, customer, ticket, contract, payment, multiple roles, or a
+  cross-module lifecycle.
+- Keep shared CRM fields canonical as `FLD-*`; projections show only relevant
+  scenario, state, rule, permission, exception, and acceptance differences.
 
 ## First-Principles Domain Lens
 
@@ -199,7 +200,7 @@ Demand: new -> reviewed -> scheduled -> released | rejected
 - quote/contract/payment flow: quote approval, contract state, payment plan, overdue follow-up;
 - mobile sales: customer lookup, followup, ticket submission, weak-network draft;
 - boss path: exception -> object detail -> owner action -> status verification.
-- IA Skeleton examples:
+- Product Truth view examples:
   - `M01-V01`: boss operating cockpit / exception dashboard;
   - `M02-V01`: lead pool and lead response queue;
   - `M03-V01`: opportunity pipeline;
@@ -208,9 +209,8 @@ Demand: new -> reviewed -> scheduled -> released | rejected
   - `M06-V01`: contract/payment follow-up;
   - `M02-V01-mobile`: sales mobile lead/customer follow-up when the mobile path
     has distinct navigation, permission, or offline behavior.
-- Coding-agent handoff should use the standard `delivery/` layout:
-  `delivery/ia-skeleton.yaml`, `delivery/prd/`, `delivery/prototype/`,
-  `delivery/acceptance/`, `delivery/agents/`, and `delivery/manifest.json`.
+- Coding-agent handoff uses `delivery/truth/product-truth.yaml`, approved
+  changes, projections, prototype, acceptance, agents, evidence, and manifest.
 
 ## Policy / Privacy Constraints
 
@@ -234,79 +234,23 @@ Demand: new -> reviewed -> scheduled -> released | rejected
 | renewal risk intervention | customer success | customer is at_risk | create plan -> follow up -> close | RenewalPlan ends renewed/churned |
 | ticket to demand loop | service/product | repeated product issue | convert ticket to demand | DemandCreatedFromTicket traceable |
 
-## Multi-Agent Lifecycle Verification Matrix
+## Evaluation Profile
 
-| domain_id | stage | reviewer_agent | path_type | scenario_ref | evidence_ref | blocking_question | expected_result | test_marker | verdict |
-|---|---|---|---|---|---|---|---|---|---|
-| crm | Discover | PM Agent | happy_path | lead response | Domain Purpose / Core Workflows | Is the business outcome lead response or wider customer operating response? | outcome and release boundary are explicit | crm_discover_pm_happy_path | PASS |
-| crm | Discover | Domain Expert Agent | exception_path | customer rejects ticket result | Domain Test Scenarios | Are sales/service/customer success exceptions discovered? | ticket rejection and escalation are in scope or de-scoped | crm_discover_domain_exception_path | PASS |
-| crm | Discover | Architecture / Data / AI Agent | permission_privacy_path | Customer 360 | Policy / Privacy Constraints | Are contact/payment/complaint data scopes identified? | customer360_masking and role scope are required | customer360_masking | PASS |
-| crm | Discover | QA Agent | lifecycle_transition | lead to opportunity | State Machines | Can QA see the first lifecycle chain? | Lead -> Opportunity path is testable | crm_discover_qa_lifecycle_transition | PASS |
-| crm | Discover | Coding Agent | acceptance_test_path | coding package | UI / Mobile Patterns | Can implementation sources be found? | ac_structured, data-testid, data-action, data-state, data-api, data-method, manifest.json, source_of_truth_order required | ac_structured;data-testid;data-action;data-state;data-api;data-method;manifest.json;source_of_truth_order | PASS |
-| crm | Specify | PM Agent | happy_path | opportunity conversion | Core Workflows | Does the PRD specify visible and revenue result? | lead_to_cash_trace starts from qualified lead | lead_to_cash_trace | PASS |
-| crm | Specify | Domain Expert Agent | exception_path | quote approval boundary | Domain Test Scenarios | Are discount and approval boundaries explicit? | QuoteApproved or rejection audit is specified | crm_specify_domain_exception_path | PASS |
-| crm | Specify | Architecture / Data / AI Agent | permission_privacy_path | contract/payment | AI Context Sources / Policy | Are finance fields masked and human-owned? | AI cannot confirm payment or approve contract | crm_specify_arch_permission_privacy_path | PASS |
-| crm | Specify | QA Agent | lifecycle_transition | ResponseTask SLA | State Machines | Can SLA state and escalation be tested? | pending -> overdue -> escalated -> closed is explicit | sla_response_task | PASS |
-| crm | Specify | Coding Agent | acceptance_test_path | FRR package | Acceptance Checklist | Can coding agent implement without guessing? | function, state, permission, and AC are traceable | crm_specify_coding_acceptance_test_path | PASS |
-| crm | Plan | PM Agent | happy_path | campaign to sales handoff | Core Workflows | Are marketing and sales owners aligned? | campaign leads hand off with SLA | crm_plan_pm_happy_path | PASS |
-| crm | Plan | Domain Expert Agent | exception_path | partner feedback delay | Metric / Indicator Governance | Are partner/channel SLA metrics planned? | partner_feedback_delay has owner and source | crm_plan_domain_exception_path | PASS |
-| crm | Plan | Architecture / Data / AI Agent | permission_privacy_path | row/field scope | Policy / Privacy Constraints | Are tenant/customer/partner scopes planned? | cross-tenant and cross-partner access blocked | crm_plan_arch_permission_privacy_path | PASS |
-| crm | Plan | QA Agent | lifecycle_transition | renewal plan | State Machines | Can QA plan customer success lifecycle tests? | RenewalPlan planned -> renewed/churned is explicit | crm_plan_qa_lifecycle_transition | PASS |
-| crm | Plan | Coding Agent | acceptance_test_path | AGENTS handoff | UI / Mobile Patterns | Are delivery paths and source order defined? | delivery/manifest and source_of_truth_order are required | source_of_truth_order;manifest.json | PASS |
-| crm | Tasks | PM Agent | happy_path | customer issue handling | Core Workflows | Are slices tied to customer closure? | ticket closed or demand created | ticket_to_demand_trace | PASS |
-| crm | Tasks | Domain Expert Agent | exception_path | quote rejected | State Machines | Are rejected/expired quote tasks split? | Quote states are not hidden under management | crm_tasks_domain_exception_path | PASS |
-| crm | Tasks | Architecture / Data / AI Agent | permission_privacy_path | Customer 360 masking | UI / Mobile Patterns / Policy | Do tasks preserve field-level masking? | customer360_masking is acceptance relevant | customer360_masking | PASS |
-| crm | Tasks | QA Agent | lifecycle_transition | ticket escalation | Domain Test Scenarios | Are escalation and urgent response tasks planned? | TicketEscalated and ResponseTask created | sla_response_task | PASS |
-| crm | Tasks | Coding Agent | acceptance_test_path | data-* mapping | UI / Mobile Patterns | Can coding tasks map views/actions? | data-testid/data-action/data-state/data-api/data-method are required | data-testid;data-action;data-state;data-api;data-method | PASS |
-| crm | Build/Verify | PM Agent | happy_path | boss exception cockpit | Role Path Patterns | Does build close operating exceptions? | owner action and verification visible | crm_build_pm_happy_path | PASS |
-| crm | Build/Verify | Domain Expert Agent | exception_path | ticket to demand loop | Domain Test Scenarios | Is product feedback traceable? | DemandCreatedFromTicket links service to roadmap | ticket_to_demand_trace | PASS |
-| crm | Build/Verify | Architecture / Data / AI Agent | permission_privacy_path | AI suggestion | Policy / Privacy Constraints | Does AI remain supporting behavior? | no payment/contract/ticket closure without human approval | crm_build_arch_permission_privacy_path | PASS |
-| crm | Build/Verify | QA Agent | lifecycle_transition | mobile weak network | Domain Test Scenarios | Are offline drafts and duplicate prevention tested? | draft preserved and no data loss | crm_build_qa_lifecycle_transition | PASS |
-| crm | Build/Verify | Coding Agent | acceptance_test_path | AC validation | Acceptance Checklist | Can tests bind to FRR and prototype? | ac_structured and data-* coverage required | ac_structured;data-testid;data-action | PASS |
-| crm | Launch | PM Agent | happy_path | lead-to-cash launch | Aggregates and Entities / Events | Are revenue-critical events ready? | lead_to_cash_trace covers LeadAssigned -> PaymentRegistered | lead_to_cash_trace | PASS |
-| crm | Launch | Domain Expert Agent | exception_path | churn risk intervention | Domain Test Scenarios | Are renewal risk launch controls explicit? | RenewalPlan closes renewed/churned with evidence | crm_launch_domain_exception_path | PASS |
-| crm | Launch | Architecture / Data / AI Agent | permission_privacy_path | export and finance | Policy / Privacy Constraints | Are export and sensitive fields audited? | export requires audit and role masking | crm_launch_arch_permission_privacy_path | PASS |
-| crm | Launch | QA Agent | lifecycle_transition | contract/payment | Aggregates and Entities | Can smoke tests cover payment overdue path? | Contract partially_paid/paid/overdue is testable | crm_launch_qa_lifecycle_transition | PASS |
-| crm | Launch | Coding Agent | acceptance_test_path | release package | Acceptance Checklist | Can coding agent identify launch blockers? | package paths and acceptance evidence are explicit | crm_launch_coding_acceptance_test_path | PASS |
-| crm | Learn/Retire | PM Agent | happy_path | funnel learning | Metric / Indicator Governance | Can post-launch learning improve conversion/SLA? | metrics have owners and sources | crm_learn_pm_happy_path | PASS |
-| crm | Learn/Retire | Domain Expert Agent | exception_path | deprecated playbook | Content / Knowledge Assets | Can outdated policies/playbooks retire safely? | playbook versions and governance exist | crm_learn_domain_exception_path | PASS |
-| crm | Learn/Retire | Architecture / Data / AI Agent | permission_privacy_path | retained customer data | Policy / Privacy Constraints | Are retention/export/privacy risks visible? | customer sensitive data remains scoped/audited | crm_learn_arch_permission_privacy_path | PASS |
-| crm | Learn/Retire | QA Agent | lifecycle_transition | response task regression | State Machines | Can regression preserve SLA lifecycle? | pending/overdue/escalated/closed remains covered | sla_response_task | PASS |
-| crm | Learn/Retire | Coding Agent | acceptance_test_path | historical AC | Acceptance Checklist | Can old AC IDs remain stable after iteration? | acceptance_test_path and source_of_truth_order preserved | crm_learn_coding_acceptance_test_path | PASS |
+Domain knowledge is not execution evidence. Register coverage and maturity in
+`references/domain-coverage.yaml`; keep behavioral scenarios and run evidence
+outside this knowledge file.
 
-## Multi-Module PRD Quality Gate
+Before raising maturity, independently evaluate:
 
-Apply this gate after generating all CRM module PRDs or after splitting a large
-CRM PRD into a master contract plus module PRDs. Any failed required item means
-`REVIEW_COMPLETE_WITH_GAPS`.
+- one primary happy path;
+- one validation or exception path;
+- one permission/privacy path;
+- one lifecycle transition;
+- one coding-agent no-guess handoff path;
+- applicable migration, integration-failure, AI, and high-risk human-gate paths.
 
-| Gate | Required Condition | Blocks |
-|---|---|---|
-| CRM-G1 Cross-module handoff | For every CRM handoff, the source module FRR states trigger action, target module, emitted event/audit, and failure path; the target module FRR states received data, initial state, duplicate rule, and owner; the master contract has field mapping and notification/event reference. | objects such as contracts, demands, or response tasks appearing without trace |
-| CRM-G2 Alert rule back-reference | Each configured response/alert rule such as R01-R12 is explicitly cited in the producing source module business rules using the pattern `Rxx -> creates M02 ResponseTask; owner=...; close_guard=...`. | alerts generated by rules that the source module never states |
-| CRM-G3 Entity/event/notification integrity | ER lines, field mappings, domain events, notification catalog, audit rule, and E2E row exist for lead-to-cash, ticket-to-demand, demand-to-iteration, contract/payment, partner/channel, and campaign handoff flows that are in scope. | master contract omissions that module PRDs cannot repair |
-| CRM-G4 Prototype testability | When a locked prototype exists, module sections for layout, flow, modal/detail, and acceptance reference stable `data-testid` / `data-action` anchors for primary happy and negative paths. | human-readable paths that QA/RPA/AI tests cannot locate |
-
-Post-generation CRM checklist:
-
-1. Master contract states module IDs, source-of-truth order, role/data scope,
-   entity relations, field mappings, event/notification catalog, and audit rule.
-2. Each module PRD has release functions, role paths, state/button matrix,
-   business rules, exceptions, and test/acceptance rows.
-3. Lead -> opportunity -> customer -> contract -> payment is covered or
-   explicitly de-scoped.
-4. Ticket -> demand -> iteration/release is covered or explicitly de-scoped.
-5. Campaign/partner/customer-success/CPQ/renewal flows are included or
-   explicitly deferred with owner and revisit condition.
-6. Every ResponseTask/alert has source rule, owner, SLA, close guard, and
-   target business action.
-7. Every money, contract approval, payment confirmation, roadmap commitment,
-   and customer-service closure keeps human accountability.
-8. Customer 360 aggregates cite their source modules and masking rules.
-9. Tests cover happy, validation, permission, duplicate, stale-state, timeout,
-   and dependency-failure paths for P0/P1 CRM flows.
-10. If prototype evidence exists, action/testid coverage gaps are listed before
-    any `PASS` claim.
+Record executor, input, environment, timestamp, result, and evidence location.
+Mocked matrices and simulated reviewers cannot satisfy expert review or audit.
 
 ## Acceptance Checklist
 
@@ -317,9 +261,9 @@ Post-generation CRM checklist:
 - [ ] Customer 360 shows business data, not only metadata.
 - [ ] Role/data isolation is explicit.
 - [ ] AI suggestions remain suggestions unless explicitly human-approved.
-- [ ] If the CRM scope spans multiple modules or roles, IA Skeleton is locked
-      before full FRR generation.
-- [ ] Common CRM fields are maintained in a global field dictionary and FRRs do
-      not duplicate unchanged field definitions.
+- [ ] If CRM spans multiple modules or roles, Product Truth locks shared
+      objects, state owners, views, actions, events, permissions, and flows.
+- [ ] Common CRM fields use canonical `FLD-*` definitions; projections do not
+      duplicate or redefine them.
 - [ ] Coding-agent delivery package paths are explicit when implementation by
       Claude Code, Cursor, Codex, or Copilot is expected.

@@ -1,30 +1,48 @@
 ---
-name: Domain Module Proposal
-about: Propose a new industry domain module
+name: Domain Pack Proposal
+about: Propose professional knowledge that may deserve a reusable domain pack
 title: "[Domain] "
-labels: ["domain-module"]
+labels: ["domain-pack", "needs-evidence"]
 assignees: []
 ---
 
-## Industry / Domain
-What industry is this for? (e.g., healthcare, fintech, e-commerce)
+## Domain And Product Boundary
 
-## Key Entities
-List the main domain entities (e.g., Patient, Appointment, Prescription).
+What business objects and lifecycle make this a domain rather than a generic
+capability? When should the pack not trigger?
 
-## Common Roles
-List the user roles in this domain.
+## Reuse Evidence
 
-## Typical Workflows
-1. 
-2. 
-3. 
+Which projects/scenarios show that the knowledge is reusable beyond one customer?
 
-## Regulatory Requirements
-Any industry-specific regulations or compliance requirements.
+## Core Model
 
-## Existing Reference Material
-Links to existing standards, frameworks, or documentation for this domain.
+- Roles and accountable decisions:
+- Entities and state owners:
+- Core and exception workflows:
+- Permissions/privacy/high-risk boundaries:
+- Metrics and acceptance evidence:
 
-## Would you like to contribute the module yourself?
-[Yes/No — if Yes, we'll help you get started]
+## Sources
+
+List authoritative/accountable sources, jurisdiction/applicability, version,
+status, verification date, and owner. Do not paste protected full text.
+
+## Proposed Coverage
+
+```yaml
+knowledge: absent | partial | structured | sourced
+scenarios: absent | mocked | project_sampled | multi_project
+behavioral_eval: not_run | failed | partial | passed
+expert_review: not_reviewed | reviewed_with_gaps | reviewed
+maturity: experimental | validated | audited
+```
+
+## Known Gaps And Forbidden Claims
+
+What must users still verify? What production claim must not be made?
+
+## Privacy And Rights
+
+Confirm that proposed examples contain no private customer data, secrets,
+personal data, or protected standards/research copied in full.

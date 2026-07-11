@@ -1,0 +1,470 @@
+schema_version: 5.0.0
+selection_policy: >-
+  Public, actively maintained repositories were selected for distinct ToB product
+  behaviors and repository shapes. Stars are discovery signals only. Each case
+  freezes a code ref and a concise requirement capture; it does not claim that
+  the source project endorses this skill or that an issue is current roadmap.
+cases:
+  - id: GH-CHATWOOT-VOICE
+    domain: customer-service
+    repository: chatwoot/chatwoot
+    default_branch: develop
+    pinned_ref: 98154bbeab2f5ea888dcb61bfd3a35a109ebb9a0
+    source_issue:
+      number: 11481
+      title: "feat: Voice Channel in Chatwoot"
+      url: https://github.com/chatwoot/chatwoot/issues/11481
+      retrieved_at: "2026-07-11"
+    captured_requirement: >-
+      Add a first Twilio-backed voice channel so agents can initiate outbound
+      calls and receive or accept inbound calls with minimal account setup.
+    source_paths:
+      - enterprise/app/services/voice/provider/twilio/token_service.rb
+      - enterprise/app/services/voice/provider/twilio/recording_attachment_service.rb
+      - spec/enterprise/models/channel/twilio_sms_voice_spec.rb
+    shape: brownfield
+    risk_signals: [realtime, external_provider, tenant_isolation, privacy]
+    stages:
+      requirement:
+        - {id: OBL-CW-REQ-OUTBOUND, priority: P0, weight: 10, statement: "Define agent outbound call start, visible call state, failure, and hang-up result.", evidence: artifact}
+        - {id: OBL-CW-REQ-INBOUND, priority: P0, weight: 10, statement: "Define inbound ringing, accept, reject, timeout, and concurrent-agent ownership.", evidence: artifact}
+        - {id: OBL-CW-REQ-UNKNOWN, priority: P0, weight: 8, statement: "Keep recording, consent, routing, transcription, and retention as explicit decisions rather than inferred scope.", evidence: source_mapping}
+      design:
+        - {id: OBL-CW-DES-STATE, priority: P0, weight: 10, statement: "Model provider and conversation call states with webhook idempotency and reconciliation.", evidence: artifact}
+        - {id: OBL-CW-DES-TENANT, priority: P0, weight: 10, statement: "Scope credentials, phone numbers, calls, media, and agent permissions to the owning account.", evidence: artifact}
+      coding_delivery:
+        - {id: OBL-CW-CODE-BASELINE, priority: P0, weight: 10, statement: "Probe the pinned voice services, migration, channel model, and existing specs before naming files or changes.", evidence: repository_probe}
+        - {id: OBL-CW-CODE-TEST, priority: P0, weight: 10, statement: "Bind implementation tests to inbound, outbound, provider failure, duplicate webhook, and cross-account denial paths.", evidence: test}
+
+  - id: GH-SALEOR-CHANNEL-ID
+    domain: ecommerce
+    repository: saleor/saleor
+    default_branch: main
+    pinned_ref: 697b9ec6ffb93199f62f783e7bf6c550cd3bcf7e
+    source_issue:
+      number: 12945
+      title: Allow to query channel-related objects with channel ID too
+      url: https://github.com/saleor/saleor/issues/12945
+      retrieved_at: "2026-07-11"
+    captured_requirement: >-
+      Let API clients query channel-related objects by immutable channel ID
+      while retaining an explicit slug path and a safe compatibility plan for
+      the mutable legacy channel argument.
+    source_paths:
+      - saleor/graphql/channel/types.py
+      - saleor/graphql/product/types/products.py
+      - saleor/graphql/product/schema.py
+    shape: brownfield
+    risk_signals: [api_compatibility, multi_channel, app_permissions]
+    stages:
+      requirement:
+        - {id: OBL-SAL-REQ-ID, priority: P0, weight: 10, statement: "Specify immutable ID and explicit slug query behavior without changing channel visibility rules.", evidence: artifact}
+        - {id: OBL-SAL-REQ-COMPAT, priority: P0, weight: 10, statement: "Define legacy channel argument deprecation, coexistence, and client migration behavior.", evidence: artifact}
+      design:
+        - {id: OBL-SAL-DES-PRECEDENCE, priority: P0, weight: 10, statement: "Define identifier precedence and conflict errors when ID, slug, or legacy argument are combined.", evidence: artifact}
+        - {id: OBL-SAL-DES-SCOPE, priority: P0, weight: 8, statement: "Preserve permission, app, channel availability, pagination, and filtering semantics.", evidence: artifact}
+      coding_delivery:
+        - {id: OBL-SAL-CODE-PROBE, priority: P0, weight: 10, statement: "Probe pinned product schema, channel types, resolvers, dataloaders, and tests before producing a task slice.", evidence: repository_probe}
+        - {id: OBL-SAL-CODE-CONTRACT, priority: P0, weight: 10, statement: "Require GraphQL schema snapshots and backward-compatibility tests for old and new arguments.", evidence: test}
+
+  - id: GH-OPENEDX-REINDEX
+    domain: education
+    repository: openedx/openedx-platform
+    default_branch: master
+    pinned_ref: 264ced21b08ac56906d233abf86a1db7d661b0c8
+    source_issue:
+      number: 36868
+      title: Improve Meilisearch Index upgrade workflow (reindex_studio)
+      url: https://github.com/openedx/openedx-platform/issues/36868
+      retrieved_at: "2026-07-11"
+    captured_requirement: >-
+      Make Studio search-index upgrades safe for both small and very large
+      installations by supporting resumable incremental population, an initial
+      usable empty index, and explicit operational completion.
+    source_paths:
+      - openedx/core/djangoapps/content/search/management/commands/reindex_studio.py
+      - openedx/core/djangoapps/content/search/api.py
+      - openedx/core/djangoapps/content/search/tests/test_reindex_cmd.py
+    shape: brownfield
+    risk_signals: [long_running_job, upgrade, partial_availability, rollback]
+    stages:
+      requirement:
+        - {id: OBL-EDX-REQ-LARGE, priority: P0, weight: 10, statement: "Distinguish small and large installations without blocking an upgrade for hours.", evidence: artifact}
+        - {id: OBL-EDX-REQ-RESUME, priority: P0, weight: 10, statement: "Define resumable incremental indexing and the user-visible meaning of incomplete results.", evidence: artifact}
+      design:
+        - {id: OBL-EDX-DES-STATE, priority: P0, weight: 10, statement: "Model index preparation, population, interruption, resume, cutover, completion, and failure states.", evidence: artifact}
+        - {id: OBL-EDX-DES-OPS, priority: P0, weight: 10, statement: "Define progress, observability, operator action, retry, and rollback for upgrade execution.", evidence: artifact}
+      coding_delivery:
+        - {id: OBL-EDX-CODE-PROBE, priority: P0, weight: 10, statement: "Read the pinned command, search API, and command tests before selecting migration or asynchronous implementation seams.", evidence: repository_probe}
+        - {id: OBL-EDX-CODE-TEST, priority: P0, weight: 10, statement: "Test initial-only, incremental resume, interruption, large-instance behavior, and existing command compatibility.", evidence: test}
+
+  - id: GH-TRACCAR-TOKEN-REVOCATION
+    domain: transport
+    repository: traccar/traccar
+    default_branch: master
+    pinned_ref: 8d082fbbcb59536cb54bfe4e4e533832b1e44bbf
+    source_issue:
+      number: 5273
+      title: Allow for user tokens to be invalidated
+      url: https://github.com/traccar/traccar/issues/5273
+      retrieved_at: "2026-07-11"
+    captured_requirement: >-
+      Track issued user tokens and allow authorized invalidation so leaked or
+      annually rotated school-bus tracking links can be revoked without
+      deleting and recreating user accounts.
+    source_paths:
+      - src/main/java/org/traccar/api/BaseObjectResource.java
+      - src/main/java/org/traccar/api/resource/OidcResource.java
+    shape: brownfield
+    risk_signals: [security, shared_link, privacy, backward_compatibility]
+    stages:
+      requirement:
+        - {id: OBL-TRK-REQ-REVOKE, priority: P0, weight: 10, statement: "Define who can list and revoke which tokens and the immediate observable effect.", evidence: artifact}
+        - {id: OBL-TRK-REQ-EXISTING, priority: P0, weight: 10, statement: "Define compatibility and migration behavior for tokens issued before persistence exists.", evidence: artifact}
+      design:
+        - {id: OBL-TRK-DES-LIFECYCLE, priority: P0, weight: 10, statement: "Model token issue, active, revoked, expired, rotated, and unknown-legacy states without storing plaintext secrets.", evidence: artifact}
+        - {id: OBL-TRK-DES-AUDIT, priority: P0, weight: 10, statement: "Define user scope, audit evidence, cache invalidation, and concurrent request behavior.", evidence: artifact}
+      coding_delivery:
+        - {id: OBL-TRK-CODE-PROBE, priority: P0, weight: 10, statement: "Probe pinned authentication, user-resource, permission, storage, and migration code before naming the implementation path.", evidence: repository_probe}
+        - {id: OBL-TRK-CODE-TEST, priority: P0, weight: 10, statement: "Test leakage response, revocation immediacy, cross-user denial, rotation, expiry, and legacy-token behavior.", evidence: test}
+
+  - id: GH-APPSMITH-REUSABLE-WIDGET
+    domain: low-code
+    repository: appsmithorg/appsmith
+    default_branch: release
+    pinned_ref: 315b36c78bfa672dc7b5f428e0b1e8494f0f0025
+    source_issue:
+      number: 5229
+      title: "[Feature] Reusable Widgets (UI Packages)"
+      url: https://github.com/appsmithorg/appsmith/issues/5229
+      retrieved_at: "2026-07-11"
+    captured_requirement: >-
+      Let builders create configurable and styleable reusable widgets, compose
+      them with APIs, reuse them in future apps, and control how later package
+      changes propagate to consuming applications.
+    source_paths:
+      - .cursor/docs/references/codebase-map.md
+      - app/server/appsmith-server/src/main/java/com/appsmith/server/widgets/refactors/WidgetRefactorUtil.java
+      - app/client/src/sagas/WidgetSelectionSagas.ts
+    shape: brownfield
+    risk_signals: [dependency_versioning, propagation, permissions, low_code_runtime]
+    stages:
+      requirement:
+        - {id: OBL-APP-REQ-REUSE, priority: P0, weight: 10, statement: "Define create, publish, discover, install, configure, update, and detach outcomes for a reusable widget package.", evidence: artifact}
+        - {id: OBL-APP-REQ-PROPAGATE, priority: P0, weight: 10, statement: "Resolve automatic propagation versus pinned versions and protect consuming app behavior.", evidence: artifact}
+      design:
+        - {id: OBL-APP-DES-OWNERSHIP, priority: P0, weight: 10, statement: "Model package ownership, versions, dependencies, permissions, bindings, and app-local overrides.", evidence: artifact}
+        - {id: OBL-APP-DES-FAILURE, priority: P0, weight: 8, statement: "Define incompatible update, missing API, deleted package, rollback, and fork behavior.", evidence: artifact}
+      coding_delivery:
+        - {id: OBL-APP-CODE-PROBE, priority: P0, weight: 10, statement: "Use the pinned codebase map and probe client/server widget ownership before proposing new package boundaries.", evidence: repository_probe}
+        - {id: OBL-APP-CODE-TEST, priority: P0, weight: 10, statement: "Test package version pinning, propagation, bindings, permission denial, rollback, and existing app compatibility.", evidence: test}
+
+  - id: GH-SUPERSET-THEMING
+    domain: data-product
+    repository: apache/superset
+    default_branch: master
+    pinned_ref: 3818152191286f3d6e35f7273a17fa3048611641
+    source_issue:
+      number: 20159
+      title: "[SIP-82] Improving Superset Theming"
+      url: https://github.com/apache/superset/issues/20159
+      retrieved_at: "2026-07-11"
+    captured_requirement: >-
+      Establish a coherent theme object across application components and chart
+      plugins, preserve public interfaces and compatibility, and use visual
+      regression evidence to prevent partial or unreadable theming.
+    source_paths:
+      - docs/admin_docs/configuration/theming.mdx
+      - superset-frontend/packages/superset-ui-core/src/components/ThemedAgGridReact/index.tsx
+      - superset-frontend/src/features/home/RightMenu.tsx
+    shape: brownfield
+    risk_signals: [public_interface, plugin_ecosystem, accessibility, visual_regression]
+    stages:
+      requirement:
+        - {id: OBL-SUP-REQ-COVERAGE, priority: P0, weight: 10, statement: "Define which application surfaces, chart plugins, and extension interfaces must consume the theme.", evidence: artifact}
+        - {id: OBL-SUP-REQ-COMPAT, priority: P0, weight: 10, statement: "Define compatibility, defaults, override precedence, migration, and rejected alternatives.", evidence: artifact}
+      design:
+        - {id: OBL-SUP-DES-TOKENS, priority: P0, weight: 10, statement: "Model semantic tokens, component mappings, plugin contracts, fallbacks, and administrator overrides.", evidence: artifact}
+        - {id: OBL-SUP-DES-A11Y, priority: P0, weight: 10, statement: "Define contrast, focus, charts, exports, and visual-regression acceptance across light and dark themes.", evidence: artifact}
+      coding_delivery:
+        - {id: OBL-SUP-CODE-PROBE, priority: P0, weight: 10, statement: "Probe pinned theming documentation, core theme types, representative components, plugins, and test infrastructure.", evidence: repository_probe}
+        - {id: OBL-SUP-CODE-TEST, priority: P0, weight: 10, statement: "Require type compatibility, representative plugin tests, accessibility checks, and visual regression evidence.", evidence: test}
+
+  - id: GH-FIREFLY-BANK-IMPORT
+    domain: accounting
+    repository: firefly-iii/data-importer
+    default_branch: main
+    pinned_ref: d48e235928663f5e0747973f8442a3cb3971a1e8
+    source_issue:
+      number: 10753
+      title: Add Enable Banking to Data Importer as alternative to GoCardless
+      url: https://github.com/firefly-iii/firefly-iii/issues/10753
+      retrieved_at: "2026-07-11"
+    captured_requirement: >-
+      Add an alternative open-banking provider that authenticates linked
+      accounts and imports balances and transactions while handling provider
+      sessions, secrets, consent, expiry, and duplicate data safely.
+    source_paths:
+      - app/Http/Controllers/Import/ConfigurationController.php
+      - app/Services/Nordigen/Authentication/SecretManager.php
+      - app/Services/Nordigen/Conversion/Routine/TransactionProcessor.php
+    shape: brownfield
+    risk_signals: [financial_data, oauth, external_provider, reconciliation, privacy]
+    stages:
+      requirement:
+        - {id: OBL-FF-REQ-CONSENT, priority: P0, weight: 10, statement: "Define provider setup, user consent, redirect, linked-account selection, session renewal, and disconnect behavior.", evidence: artifact}
+        - {id: OBL-FF-REQ-IMPORT, priority: P0, weight: 10, statement: "Define balances and transaction import, date windows, duplicates, partial failure, and re-run behavior.", evidence: artifact}
+      design:
+        - {id: OBL-FF-DES-SECURITY, priority: P0, weight: 10, statement: "Separate secrets, provider session, linked accounts, import jobs, consent, and audit with least privilege.", evidence: artifact}
+        - {id: OBL-FF-DES-RECONCILE, priority: P0, weight: 10, statement: "Define provider identifiers, idempotency, deduplication, reconciliation, rate limits, and expired-session recovery.", evidence: artifact}
+      coding_delivery:
+        - {id: OBL-FF-CODE-PROBE, priority: P0, weight: 10, statement: "Probe the pinned importer provider interfaces, configuration, jobs, secret handling, and tests before selecting files.", evidence: repository_probe}
+        - {id: OBL-FF-CODE-TEST, priority: P0, weight: 10, statement: "Test consent callback, expiry, duplicate transactions, partial account failure, retry, redaction, and disconnect.", evidence: test}
+
+  - id: GH-ORANGEHRM-PASSWORD-POLICY
+    domain: recruitment-hr
+    repository: orangehrm/orangehrm
+    default_branch: main
+    pinned_ref: 56e23b3b09e7af29317a0943523b825843fff527
+    source_issue:
+      number: 1686
+      title: Issues where you can't set a password policy with an admin account
+      url: https://github.com/orangehrm/orangehrm/issues/1686
+      retrieved_at: "2026-07-11"
+    captured_requirement: >-
+      Provide an administrator UI to configure password policy and consistently
+      enforce the selected policy whenever users create or reset passwords.
+    source_paths:
+      - src/client/src/core/util/composable/usePasswordPolicy.ts
+      - src/client/src/core/components/inputs/PasswordInput.vue
+      - src/plugins/orangehrmAuthenticationPlugin/Service/PasswordStrengthService.php
+      - src/plugins/orangehrmAuthenticationPlugin/PublicApi/PasswordStrengthValidationAPI.php
+    shape: brownfield
+    risk_signals: [security, admin_permission, policy_versioning]
+    stages:
+      requirement:
+        - {id: OBL-OHR-REQ-CONFIG, priority: P0, weight: 10, statement: "Define authorized administrator policy viewing, editing, validation, save result, and audit evidence.", evidence: artifact}
+        - {id: OBL-OHR-REQ-ENFORCE, priority: P0, weight: 10, statement: "Define enforcement for create, reset, change, invitation, and existing-session paths without client-only security.", evidence: artifact}
+      design:
+        - {id: OBL-OHR-DES-POLICY, priority: P0, weight: 10, statement: "Model policy versions, defaults, tenant scope, effective time, existing-user treatment, and rollback.", evidence: artifact}
+        - {id: OBL-OHR-DES-PERMISSION, priority: P0, weight: 10, statement: "Keep server enforcement authoritative and define admin permission, audit, and sensitive-value handling.", evidence: artifact}
+      coding_delivery:
+        - {id: OBL-OHR-CODE-PROBE, priority: P0, weight: 10, statement: "Probe pinned frontend policy composition, password input, backend config and validation services, and tests.", evidence: repository_probe}
+        - {id: OBL-OHR-CODE-TEST, priority: P0, weight: 10, statement: "Test authorized config, denial, all password write paths, policy transition, rollback, and frontend/backend parity.", evidence: test}
+
+  - id: GH-TWENTY-ROLE-NAVIGATION
+    domain: crm-customer
+    repository: twentyhq/twenty
+    default_branch: main
+    pinned_ref: 983f03adbe2309951ed17c548503db17215f02bf
+    source_issue:
+      number: 15612
+      title: Cannot see all objects in navigation bar.
+      url: https://github.com/twentyhq/twenty/issues/15612
+      retrieved_at: "2026-07-11"
+    captured_requirement: >-
+      Show every standard or custom object the current role may view in navigation,
+      including large object/role configurations, without confusing navigation
+      visibility with row-level data access.
+    source_paths:
+      - packages/twenty-front/src/modules/settings/roles/role-permissions/object-level-permissions/components/SettingsRolePermissionsObjectLevelTableRow.tsx
+      - packages/twenty-server/src/engine/metadata-modules/navigation-menu-item/services/navigation-menu-item-record-identifier.service.ts
+      - packages/twenty-front/src/modules/navigation/components/MobileNavigationBar.tsx
+    shape: brownfield
+    risk_signals: [role_permission, custom_objects, navigation, tenant_isolation]
+    stages:
+      requirement:
+        - {id: OBL-TW-REQ-VISIBLE, priority: P0, weight: 10, statement: "All objects with effective view permission appear through a usable navigation path at tested scale.", evidence: artifact}
+        - {id: OBL-TW-REQ-SCOPE, priority: P0, weight: 10, statement: "Do not infer row-level access or broaden object data access from navigation visibility.", evidence: source_mapping}
+      design:
+        - {id: OBL-TW-DES-DERIVE, priority: P0, weight: 10, statement: "Derive navigation from effective role/object permission with deterministic ordering, overflow, and search behavior.", evidence: artifact}
+        - {id: OBL-TW-DES-CHANGE, priority: P0, weight: 8, statement: "Define cache invalidation and visible refresh after role, object, workspace, or navigation configuration changes.", evidence: artifact}
+      coding_delivery:
+        - {id: OBL-TW-CODE-PROBE, priority: P0, weight: 10, statement: "Probe pinned permission tables, server navigation identifiers, desktop/mobile navigation, and metadata caching before editing.", evidence: repository_probe}
+        - {id: OBL-TW-CODE-TEST, priority: P0, weight: 10, statement: "Test many custom objects and roles, permission changes, mobile/desktop parity, direct URL access, and no data-scope expansion.", evidence: test}
+
+  - id: GH-OPENEMS-HISTORIC-AVERAGE
+    domain: energy
+    repository: OpenEMS/openems
+    default_branch: develop
+    pinned_ref: e59989de00fa45c7d31ec008084511d8ca679a44
+    source_issue:
+      number: 2920
+      title: Incorrect historic average values
+      url: https://github.com/OpenEMS/openems/issues/2920
+      retrieved_at: "2026-07-11"
+    captured_requirement: >-
+      Historical power averages must account for values persisting between sparse
+      change-only samples instead of averaging stored rows, with explicit time
+      range, resolution, gap, and boundary semantics.
+    source_paths:
+      - doc/modules/ROOT/pages/ui/implementing-a-widget/components/chart.adoc
+      - ui/src/app/shared/components/shared/testing/channels.spec.ts
+      - ui/src/app/edge/history/common/energy/chart/channels.spec.ts
+    shape: brownfield
+    risk_signals: [metric_caliber, sparse_timeseries, energy_control, data_quality]
+    stages:
+      requirement:
+        - {id: OBL-OE-REQ-CALIBER, priority: P0, weight: 10, statement: "Define time-weighted average caliber for sparse change-only samples and requested resolution.", evidence: artifact}
+        - {id: OBL-OE-REQ-GAPS, priority: P0, weight: 10, statement: "Define leading gaps, trailing persistence, stale limits, nulls, timezone, and query-boundary behavior.", evidence: artifact}
+      design:
+        - {id: OBL-OE-DES-OWNER, priority: P0, weight: 10, statement: "Assign one backend metric owner so API, chart, export, and report use the same aggregation semantics.", evidence: artifact}
+        - {id: OBL-OE-DES-QUALITY, priority: P0, weight: 10, statement: "Expose data-quality or incomplete-window behavior instead of fabricating persisted values beyond policy.", evidence: artifact}
+      coding_delivery:
+        - {id: OBL-OE-CODE-PROBE, priority: P0, weight: 10, statement: "Probe pinned historic query implementation and channel/chart tests before choosing Influx or UI changes.", evidence: repository_probe}
+        - {id: OBL-OE-CODE-TEST, priority: P0, weight: 10, statement: "Test irregular samples, constant spans, empty windows, first/last boundaries, timezone, resolutions, and legacy query parity.", evidence: test}
+
+  - id: GH-RMF-FLEET-TENANCY
+    domain: embodied-intelligence
+    repository: open-rmf/rmf-web
+    default_branch: main
+    pinned_ref: 9a4fb9eb0ed58cc77a98913a7651e2cfd88822bb
+    source_issue:
+      number: 1081
+      title: "[Feature request]: Fleet filtering feature for multi-tenant deployments"
+      url: https://github.com/open-rmf/rmf-web/issues/1081
+      retrieved_at: "2026-07-11"
+    captured_requirement: >-
+      Filter robot fleets, tasks, and allowed actions by department/fleet identity
+      and role claims across identity provider, API, and dashboard while making
+      the feature opt-in for existing deployments.
+    source_paths:
+      - packages/api-server/api_server/authenticator.py
+      - packages/api-server/api_server/models/user.py
+      - packages/rmf-dashboard-framework/examples/keycloak/api_server_config.py
+    shape: brownfield
+    risk_signals: [robot_control, multi_tenant, jwt_claims, backward_compatibility, safety]
+    stages:
+      requirement:
+        - {id: OBL-RMF-REQ-SCOPE, priority: P0, weight: 10, statement: "Define fleet membership, supervisor/user actions, data visibility, task ownership, and cross-fleet denial.", evidence: artifact}
+        - {id: OBL-RMF-REQ-OPTIN, priority: P0, weight: 10, statement: "Existing deployments without fleet claims remain functional through an explicit opt-in and migration policy.", evidence: artifact}
+      design:
+        - {id: OBL-RMF-DES-INTERSECT, priority: P0, weight: 10, statement: "Intersect authenticated fleet scope, role permission, endpoint, task, websocket, and robot command authorization.", evidence: artifact}
+        - {id: OBL-RMF-DES-SAFE, priority: P0, weight: 10, statement: "Missing, stale, or conflicting claims fail safely without leaking other fleets or silently hiding operational incidents.", evidence: artifact}
+      coding_delivery:
+        - {id: OBL-RMF-CODE-PROBE, priority: P0, weight: 10, statement: "Probe pinned authenticator, user model, API routes, websocket/event paths, Keycloak example, and dashboard stores.", evidence: repository_probe}
+        - {id: OBL-RMF-CODE-TEST, priority: P0, weight: 10, statement: "Test opt-in off/on, missing claim, two fleets, supervisor/user roles, event filtering, command denial, and upgrade compatibility.", evidence: test}
+
+  - id: GH-NEXTCLOUD-FEDERATED-CALENDAR
+    domain: enterprise-office
+    repository: nextcloud/server
+    default_branch: master
+    pinned_ref: ff5db606ed5b778caa7901bdd3b725714d904b07
+    source_issue:
+      number: 1440
+      title: Federated calendar and contacts sharing
+      url: https://github.com/nextcloud/server/issues/1440
+      retrieved_at: "2026-07-11"
+    captured_requirement: >-
+      Extend cross-instance federation beyond files so users can share calendars
+      and address books with explicit invitation, permission, synchronization,
+      revocation, and remote-instance failure behavior.
+    source_paths:
+      - apps/dav/lib/DAV/Sharing/Backend.php
+      - apps/dav/lib/CalDAV/Federation/FederatedCalendarAuth.php
+      - apps/dav/lib/CalDAV/Federation/CalendarFederationProvider.php
+    shape: brownfield
+    risk_signals: [federation, privacy, cross_instance, sync_conflict]
+    stages:
+      requirement:
+        - {id: OBL-NC-REQ-LIFECYCLE, priority: P0, weight: 10, statement: "Define invite, accept, decline, sync, permission change, revoke, remote deletion, and disconnect behavior.", evidence: artifact}
+        - {id: OBL-NC-REQ-TYPES, priority: P0, weight: 8, statement: "Separate calendar and address-book object, permission, conflict, recurrence, and privacy semantics.", evidence: artifact}
+      design:
+        - {id: OBL-NC-DES-TRUST, priority: P0, weight: 10, statement: "Model remote identity, trust, capability discovery, token/auth lifecycle, object mapping, and audit.", evidence: artifact}
+        - {id: OBL-NC-DES-CONFLICT, priority: P0, weight: 10, statement: "Define ordering, duplicate delivery, concurrent edits, remote outage, reconciliation, and user-visible stale state.", evidence: artifact}
+      coding_delivery:
+        - {id: OBL-NC-CODE-PROBE, priority: P0, weight: 10, statement: "Probe pinned DAV sharing backend, CalDAV federation auth/entity/provider/config, existing federation tests, and migrations.", evidence: repository_probe}
+        - {id: OBL-NC-CODE-TEST, priority: P0, weight: 10, statement: "Test two instances, permissions, recurrence/contact fields, revocation, remote outage, duplicate sync, conflict, and no cross-share leakage.", evidence: test}
+
+  - id: GH-QLOAPPS-OVERBOOKING-API
+    domain: tourism
+    repository: Qloapps/QloApps
+    default_branch: develop
+    pinned_ref: 5b4d65cbb8570a4ba46364ee0f2ded79d294ab84
+    source_issue:
+      number: 1539
+      title: Overbooking is not implemented in the webservice
+      url: https://github.com/Qloapps/QloApps/issues/1539
+      retrieved_at: "2026-07-11"
+    captured_requirement: >-
+      Booking webservice availability must honor the configured overbooking
+      policy consistently with other channels while preserving capacity limits,
+      date/room-type scope, pricing, and auditable reservation outcomes.
+    source_paths:
+      - modules/hotelreservationsystem/classes/HotelBookingDetail.php
+      - modules/hotelreservationsystem/CHANGELOG.txt
+      - classes/order/OrderState.php
+    shape: brownfield
+    risk_signals: [inventory_capacity, multi_channel, reservation, money]
+    stages:
+      requirement:
+        - {id: OBL-QLO-REQ-POLICY, priority: P0, weight: 10, statement: "Define overbooking enablement, limit, room type/property/date scope, authority, and user-visible availability.", evidence: artifact}
+        - {id: OBL-QLO-REQ-PARITY, priority: P0, weight: 10, statement: "Webservice, website, and back-office channels apply the same capacity and pricing policy or declare differences.", evidence: artifact}
+      design:
+        - {id: OBL-QLO-DES-INVENTORY, priority: P0, weight: 10, statement: "Model physical capacity, sellable capacity, booked, held, cancelled, no-show, and overbooked quantities atomically.", evidence: artifact}
+        - {id: OBL-QLO-DES-CONTROL, priority: P0, weight: 10, statement: "Define concurrency, idempotency, compensating cancellation, alerts, audit, and manual override ownership.", evidence: artifact}
+      coding_delivery:
+        - {id: OBL-QLO-CODE-PROBE, priority: P0, weight: 10, statement: "Probe pinned booking detail, availability/webservice, order state, configuration, and reservation tests before editing.", evidence: repository_probe}
+        - {id: OBL-QLO-CODE-TEST, priority: P0, weight: 10, statement: "Test disabled/enabled limits, concurrent last room, multi-night/room type, channel parity, cancellation release, price, and duplicate request.", evidence: test}
+
+  - id: GH-KILLBILL-INVOICE-AMOUNT
+    domain: finance-billing
+    repository: killbill/killbill
+    default_branch: master
+    pinned_ref: fcef98343e9893bcf654294fb46643f261c3f887
+    source_issue:
+      number: 2139
+      title: API endpoint /accounts/{accountId}/invoices is giving wrong amount value for invoices
+      url: https://github.com/killbill/killbill/issues/2139
+      retrieved_at: "2026-07-11"
+    captured_requirement: >-
+      Invoice list and invoice detail APIs must expose the same governed amount
+      and balance semantics for the same committed invoice, with explicit
+      component-loading, void, credit, refund, currency, and migration behavior.
+    source_paths:
+      - invoice/src/main/resources/org/killbill/billing/invoice/dao/InvoiceSqlDao.sql.stg
+      - invoice/src/main/java/org/killbill/billing/invoice/dao/InvoiceDao.java
+      - invoice/src/main/java/org/killbill/billing/invoice/api/InvoiceApiHelper.java
+    shape: brownfield
+    risk_signals: [money, api_consistency, invoice_caliber, tenant_isolation]
+    stages:
+      requirement:
+        - {id: OBL-KB-REQ-CALIBER, priority: P0, weight: 10, statement: "Define amount and balance caliber once and require list/detail consistency for identical query options.", evidence: artifact}
+        - {id: OBL-KB-REQ-OPTIONS, priority: P0, weight: 10, statement: "Define component, void, migration, unpaid, credit, refund, currency, and audit option effects without ambiguous zero values.", evidence: artifact}
+      design:
+        - {id: OBL-KB-DES-OWNER, priority: P0, weight: 10, statement: "Assign calculation ownership and prevent list optimization or partial hydration from changing financial semantics.", evidence: artifact}
+        - {id: OBL-KB-DES-AUDIT, priority: P0, weight: 10, statement: "Preserve tenant scope, invoice/item linkage, rounding, audit, and historical compatibility.", evidence: artifact}
+      coding_delivery:
+        - {id: OBL-KB-CODE-PROBE, priority: P0, weight: 10, statement: "Probe pinned invoice/item SQL, DAO, API helper, hydration options, REST resources, and tests before changing queries.", evidence: repository_probe}
+        - {id: OBL-KB-CODE-TEST, priority: P0, weight: 10, statement: "Test list/detail parity across options, committed/voided/migration invoices, credits/refunds, currencies, tenant isolation, and query performance.", evidence: test}
+
+  - id: GH-OPENBOXES-BULK-ADJUST
+    domain: logistics
+    repository: openboxes/openboxes
+    default_branch: develop
+    pinned_ref: 03548ddcc8138be42458745b86d97f3f80e7f163
+    source_issue:
+      number: 237
+      title: Adjust stock for new imported products
+      url: https://github.com/openboxes/openboxes/issues/237
+      retrieved_at: "2026-07-11"
+    captured_requirement: >-
+      Allow authorized warehouse users to bulk establish or adjust stock for
+      newly imported items whose quantity is null, including lot/serial and
+      location data, without bypassing inventory transaction and audit rules.
+    source_paths:
+      - src/js/components/stock-movement-wizard/modals/AdjustInventoryModal.jsx
+      - src/main/groovy/org/pih/warehouse/inventory/AdjustStockCommand.groovy
+      - grails-app/views/inventoryItem/_adjustStock.gsp
+    shape: brownfield
+    risk_signals: [inventory, bulk_operation, lot_serial, audit, concurrency]
+    stages:
+      requirement:
+        - {id: OBL-OB-REQ-NULL, priority: P0, weight: 10, statement: "Define null versus zero stock, initial record, adjustment reason, location, lot/serial, and validation behavior.", evidence: artifact}
+        - {id: OBL-OB-REQ-BULK, priority: P0, weight: 10, statement: "Define selection, per-row errors, partial versus atomic completion, permission, and visible summary for bulk adjustment.", evidence: artifact}
+      design:
+        - {id: OBL-OB-DES-LEDGER, priority: P0, weight: 10, statement: "Create inventory ledger transactions rather than directly mutating dashboard quantities, with user, time, reason, and source.", evidence: artifact}
+        - {id: OBL-OB-DES-CONSISTENCY, priority: P0, weight: 10, statement: "Define idempotency, concurrent adjustment, cache/summary refresh, rollback, and reconciliation.", evidence: artifact}
+      coding_delivery:
+        - {id: OBL-OB-CODE-PROBE, priority: P0, weight: 10, statement: "Probe pinned adjustment modal, command, legacy view, service/ledger, permissions, and inventory summary paths.", evidence: repository_probe}
+        - {id: OBL-OB-CODE-TEST, priority: P0, weight: 10, statement: "Test null/zero, lot/serial, mixed-validity bulk, duplicate submission, concurrency, denial, ledger audit, and summary refresh.", evidence: test}

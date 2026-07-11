@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/spec-config.schema.json",
+  "title": "AI Delivery Spec Project Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "context", "assurance", "execution", "evaluation"],
+  "properties": {
+    "schema_version": { "const": "5.0.0" },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "overflow_strategy", "never_truncate_priorities"],
+      "properties": {
+        "profile": { "enum": ["auto", "minimal", "standard", "regulated", "large_program"] },
+        "model_context_tokens": { "type": ["integer", "null"], "minimum": 4096 },
+        "reserved_output_tokens": { "type": "integer", "minimum": 512, "default": 4096 },
+        "system_overhead_tokens": { "type": "integer", "minimum": 512, "default": 4096 },
+        "max_stage_references": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "max_domain_packs": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "max_truth_items": { "type": "integer", "minimum": 10 },
+        "overflow_strategy": { "enum": ["retrieve", "summarize", "split", "block"] },
+        "never_truncate_priorities": {
+          "type": "array",
+          "items": { "enum": ["P0", "P1", "P2"] },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "warn_at_ratio": { "type": "number", "minimum": 0.5, "maximum": 0.95 }
+      }
+    },
+    "assurance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["auto_classify", "manual_profile", "human_gate_on"],
+      "properties": {
+        "auto_classify": { "type": "boolean" },
+        "manual_profile": { "enum": ["auto", "minimal", "standard", "complex", "regulated"] },
+        "human_gate_on": {
+          "type": "array",
+          "items": {
+            "enum": ["regulated", "money", "safety", "privacy", "tenant_isolation", "ai_writeback", "migration"]
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["environment", "expected_skill_version", "dependency_policy", "high_risk_failure", "low_risk_failure", "audit_mode", "max_turns_per_stage"],
+      "properties": {
+        "environment": { "enum": ["development", "test", "staging", "production"] },
+        "expected_skill_version": { "const": "5.0.0" },
+        "dependency_policy": { "const": "strict" },
+        "high_risk_failure": { "const": "block" },
+        "low_risk_failure": { "enum": ["block", "human_review"] },
+        "audit_mode": { "enum": ["hash_chain", "signed_external"] },
+        "max_turns_per_stage": { "type": "integer", "minimum": 1, "maximum": 200 },
+        "checkpoint_directory": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["release_profile", "minimum_repetitions", "require_comparable_baseline"],
+      "properties": {
+        "release_profile": { "enum": ["exploratory", "candidate", "release"] },
+        "minimum_repetitions": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "require_comparable_baseline": { "type": "boolean" }
+      }
+    }
+  }
+}

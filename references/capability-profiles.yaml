@@ -1,0 +1,43 @@
+schema_version: 5.0.0
+
+capabilities:
+  - id: identity-tenant
+    trigger: organization, tenant, department, agent, partner, integrator, or scoped data access
+    adds: [identity graph, tenant isolation, delegated administration, row/field/action scope, audit]
+  - id: workflow-audit
+    trigger: approval, task, escalation, long-running process, evidence, or audit lifecycle
+    adds: [state owner, node/assignee, SLA, escalation, return/retry, audit, compensation]
+  - id: content-resource
+    trigger: resource, content, knowledge, publishing, version, rights, course, or archive
+    adds: [asset identity, version lifecycle, rights, publishing, reference integrity, retirement]
+  - id: data-integration
+    trigger: import, API, event, sync, metric, lineage, BI, semantic layer, or reconciliation
+    adds: [source authority, freshness, quality, mapping, idempotency, lineage, failure/reconciliation]
+  - id: ai-governance
+    trigger: model, agent, knowledge retrieval, tool call, AI decision, or AI writeback
+    adds: [context permission/freshness, evaluation, tool scope, human gate, fallback, rollback, trace]
+  - id: operations-security
+    trigger: production, migration, SLA, incident, DR, sensitive data, regulated or high-risk operation
+    adds: [security baseline, observability, on-call, backup/restore, incident, rollout, rollback, retirement]
+
+profiles:
+  - id: tob
+    trigger: enterprise customer delivery
+    adds: [buyer-user-payer-acceptor map, pilot, contract scope, delivery baseline, adoption, renewal, exit]
+  - id: tog
+    trigger: government or public-sector delivery
+    adds: [establishment, budget, procurement, tender, contract, trial, acceptance, performance, audit, archive]
+  - id: regulated
+    trigger: law, safety, medical, finance, critical infrastructure, or irreversible decision
+    adds: [authority source, accountable human, prohibited automation, immutable evidence, incident and rollback]
+  - id: greenfield
+    trigger: new product or system with no production baseline
+    adds: [target assumptions, initial data, launch baseline, early rollback]
+  - id: brownfield
+    trigger: legacy system, existing customers, migration, redesign, replacement, or retirement
+    adds: [current-state ledger, parity, compatibility, migration, coexistence, rollback, retirement]
+
+promotion_rule:
+  capability_pack: reusable in at least three projects and two domains with a validator or evaluation
+  profile: changes delivery governance across at least two domains
+  project_specific_rule: remain in the Project Domain Capsule

@@ -1,36 +1,21 @@
 # Examples
 
-These examples show how AI Delivery Spec can be used by product managers,
-engineering leads, QA teams, and AI coding agents.
+v5 intentionally keeps a small number of evidence-shaped examples instead of
+many shallow domain PRDs.
 
-Each example includes:
-
-- a realistic input prompt;
-- the expected routing decision;
-- the artifacts to produce;
-- the gates that should be triggered;
-- the review focus for product, engineering, and QA.
-
-## Available Examples
-
-| Example | Best For | Domain Module |
+| Example | Purpose | Claim Status |
 |---|---|---|
-| [CRM End-to-End Delivery Package](crm-end-to-end-package/README.md) | full path from Stage 0 to IA, prototype, PRD, AC-YAML, manifest, and validation | `domain-crm.md` |
-| [CRM Response Center](crm-response-center/README.md) + [L1 PRD sample](crm-response-center/l1-prd-sample.md) | sales, customer service, product feedback loop | `domain-crm.md` |
-| [OA Collaborative Office](oa-collaborative-office/README.md) + [L1 PRD sample](oa-collaborative-office/l1-prd-sample.md) | workflow approval, official document, meeting, todo, AI office assistant | `domain-oa.md` |
-| [Multi-Domain Package](multi-domain-package/README.md) | CRM x OA x Data Mart composition, cross-module flow, E2E canvas | `domain-crm.md` + `domain-oa.md` + `domain-data-mart.md` |
-| [Traffic Safety SaaS](traffic-safety-saas/README.md) + [L1 PRD sample](traffic-safety-saas/l1-prd-sample.md) | regulated ToB/ToG SaaS, mobile field work | `domain-traffic.md` |
-| [Higher-Education IT](education-it/README.md) + [L1 PRD sample](education-it/l1-prd-sample.md) | academic affairs, student affairs, teaching systems | `domain-education-it.md` |
-| [Medical / Hospital IT](medical-hospital-it/README.md) + [L1 PRD sample](medical-hospital-it/l1-prd-sample.md) | clinical workflow, medical quality, AI-assisted review | `domain-medical-hospital-it.md` |
+| [Publishing Authorization and Learning v5](publishing-learning-v5/README.md) | canonical Product Truth, Human/Coding projections, multi-role ToB content/authorization/learning chain | schema/reference validated; behavior not run |
+| [Generic Energy Capsule v5](generic-energy-capsule-v5/README.md) | unfamiliar-domain discovery without a dedicated pack | capsule schema validated; professional unknowns remain |
+| [Traffic Regulatory Change v5](traffic-regulatory-change-v5/README.md) | regulated source update and impact/change semantics | change schema validated; behavior not run |
+| [Newcomer SaaS Light v5](minimal-v5/README.md) | low-context first use without heavy modeling | review-complete-with-gaps example |
 
-## How To Use
+New public examples must add a distinct product stage, project shape, consumer,
+or evaluation dimension. Do not add another short PRD merely to list a domain.
 
-Copy one prompt into your AI tool and point it to this repository:
+Behavioral scenarios live in `evals/eval-catalog.yaml`; evidence must be stored
+separately from expected behavior.
 
-```text
-Use AI Delivery Spec from this repository.
-Run 0D triage first.
-Load only the references needed by the scenario.
-Produce the requested artifact and end with gate results, verification, gaps,
-and completion state.
-```
+Real open-source requirement/design/handoff cases live in
+`evals/github-cases.yaml`, pinned to repository commits. They are evaluation
+inputs rather than examples to copy into customer products.

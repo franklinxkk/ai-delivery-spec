@@ -1,0 +1,25 @@
+schema_version: 5.0.0
+skill_version: 5.0.0
+runtime: pure_v5
+domain_packs:
+  count: 7
+  maturity:
+    experimental: 7
+  production_claims_allowed: 0
+evaluation_assets:
+  domain_fixtures: 14
+  github_cases: 15
+  catalog_status:
+    not_run: 4
+    partial: 8
+  github_matrix:
+    cases: 15
+    stage_cells: 45
+    not_run: 41
+    partial: 4
+    passed: 0
+known_limitations:
+- built-in domain packs are experimental
+- GitHub runs are exploratory and have zero release-passed cells
+- domain expert, customer, production, legal, safety, and financial correctness are
+  not proven

@@ -1,0 +1,46 @@
+schema_version: 5.0.0
+profile: regulated
+assurance_profile: regulated
+complexity_score: 26
+risk_signals:
+- migration
+- privacy
+budget:
+  model_context_tokens: 32768
+  model_context_source: default_assumption
+  system_overhead_tokens: 4096
+  reserved_output_tokens: 4096
+  working_tokens: 24576
+  estimated_truth_tokens: 5943
+  estimated_reference_tokens: 15397
+  estimated_total_selected_tokens: 21340
+selection:
+  stage_references:
+  - references/specify.md
+  - references/composition.md
+  - references/verify.md
+  deferred_stage_references: []
+  domain_packs:
+  - references/domain-education-it.md
+  deferred_domain_packs: []
+  unresolved_domain_packs: []
+  truth_strategy: id_slice
+  seed_ids:
+  - MOD-CONTENT-001
+overflow:
+  triggered: true
+  hard_limit_exceeded: false
+  strategy: retrieve
+  silent_truncation_allowed: false
+  reason: selected estimate=21340 tokens/items=58, working=24576, warn_at=0.8/max_items=160,
+    deferred_refs=0, deferred_domains=0, unresolved_domains=0
+required_gates:
+- discovery
+- product_truth
+- acceptance
+- change_migration
+- authority_applicability
+- human_accountability
+- rollback
+claim_boundary: Project complexity selects retrieval and assurance gates only; it
+  does not change domain-pack maturity.

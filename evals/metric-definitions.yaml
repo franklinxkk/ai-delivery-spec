@@ -1,0 +1,49 @@
+schema_version: 5.0.0
+measurement_policy:
+  - Compare any baseline and candidate only with the same input fingerprint, repository ref, model, settings, and repetition count.
+  - A missing P0 obligation, P0 invention, or silent compliance truncation blocks release regardless of aggregate score.
+  - Token reduction is measured per accepted acceptance path, not per document.
+  - Exploratory single runs may guide iteration but cannot support a general improvement claim.
+metrics:
+  contract_adherence_rate:
+    formula: satisfied obligation weight / total executed obligation weight
+    direction: higher_is_better
+    release_threshold: 0.95
+  p0_contract_adherence_rate:
+    formula: satisfied P0 obligation weight / total executed P0 obligation weight
+    direction: higher_is_better
+    release_threshold: 1.0
+  unsupported_invention_rate:
+    formula: unsupported business behaviors / delivered business behaviors
+    direction: lower_is_better
+    release_threshold: 0.0
+  context_loss_rate:
+    formula: missing or conflict obligation weight / total executed obligation weight
+    direction: lower_is_better
+    release_threshold: 0.05
+  change_regression_rate:
+    formula: failed impacted acceptance / impacted acceptance
+    direction: lower_is_better
+    release_threshold: 0.0
+  spec_rework_rate:
+    formula: slices reopened for specification mismatch / delivered slices
+    direction: lower_is_better
+    release_threshold: 0.05
+  tokens_per_accepted_ac:
+    formula: input plus output tokens / accepted acceptance paths
+    direction: lower_is_better
+    release_threshold: baseline_relative
+  human_navigation_seconds:
+    formula: measured time for an intended reader to find the required behavior
+    direction: lower_is_better
+    release_threshold: baseline_relative
+release_requirements:
+  minimum_repetitions: 3
+  required_stages: [requirement, design, coding_delivery]
+  required_shapes: [greenfield, brownfield]
+  critical_rules:
+    p0_missing: 0
+    p0_unsupported_inventions: 0
+    silent_truncation: 0
+    coding_delivery_requires_executed_slice: true
+    token_measurement_required: true

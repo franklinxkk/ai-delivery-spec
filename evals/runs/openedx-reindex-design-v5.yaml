@@ -1,0 +1,38 @@
+schema_version: 5.0.0
+run_id: RUN-OPENEDX-DESIGN-V5-20260711
+case_id: GH-OPENEDX-REINDEX
+stage: design
+system:
+  skill_version: 5.0.0-dev
+  model: codex-session-model
+  model_settings: not-externally-recorded
+  repository_ref: 264ced21b08ac56906d233abf86a1db7d661b0c8
+input_fingerprint: issue-36868+pinned-repository-ref
+repetitions: 1
+trial_evidence_refs: [evals/artifacts/openedx-reindex-design.md]
+observations:
+  - obligation_id: OBL-EDX-DES-STATE
+    result: satisfied
+    evidence_refs: [evals/artifacts/openedx-reindex-design.md]
+  - obligation_id: OBL-EDX-DES-OPS
+    result: satisfied
+    evidence_refs: [evals/artifacts/openedx-reindex-design.md]
+inventions:
+  unsupported_business_behaviors: 0
+  delivered_business_behaviors: 0
+  p0_unsupported: 0
+delivery:
+  impacted_acceptance: 0
+  failed_impacted_acceptance: 0
+  delivered_slices: 0
+  reopened_for_spec_mismatch: 0
+  accepted_acceptance: 0
+context:
+  input_tokens: null
+  output_tokens: null
+  cross_artifact_switches: 2
+  human_navigation_seconds: null
+evidence_refs:
+  - evals/artifacts/openedx-reindex-design.md
+  - https://github.com/openedx/openedx-platform/issues/36868
+status: completed

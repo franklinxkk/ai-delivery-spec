@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/gate-result.schema.json",
+  "title": "AI Delivery Spec Micro Gate Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "gate_id", "execution_id", "stage", "state_hash", "result", "checks", "evidence_refs", "executed_at", "result_hash"],
+  "properties": {
+    "schema_version": { "const": "5.0.0" },
+    "gate_id": { "enum": ["version_environment", "complexity_domain", "context_survival", "discovery_readiness", "contract_traceability", "audit_access", "fallback_risk"] },
+    "execution_id": { "type": "string" },
+    "stage": { "type": "string" },
+    "state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "result": { "enum": ["passed", "failed", "blocked", "review_required", "approved_with_gap"] },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "passed", "message"],
+        "properties": {
+          "id": { "type": "string" },
+          "passed": { "type": "boolean" },
+          "message": { "type": "string" }
+        }
+      }
+    },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } },
+    "human_approval": {
+      "type": ["object", "null"],
+      "properties": {
+        "reviewer": { "type": "string" },
+        "qualification": { "type": "string" },
+        "decision": { "enum": ["approve", "reject"] },
+        "approved_at": { "type": "string", "format": "date-time" },
+        "evidence_ref": { "type": "string" }
+      },
+      "required": ["reviewer", "qualification", "decision", "approved_at", "evidence_ref"]
+    },
+    "executed_at": { "type": "string", "format": "date-time" },
+    "result_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

@@ -1,90 +1,115 @@
-# Contributing to AI Delivery Spec
+# Contributing To AI Delivery Spec 5
 
-Thanks for helping improve AI Delivery Spec.
+Contributions must improve reusable delivery behavior without inflating the
+default runtime or overstating validation.
 
-## Ways To Contribute
+## Before Opening A Change
 
-### Report Issues
+Classify the proposal:
 
-- Open an issue.
-- Include expected behavior, actual behavior, reproduction steps, AI tool used,
-  and the relevant artifact path if possible.
+| Type | Belongs In |
+|---|---|
+| core routing or invariant used on nearly every task | `SKILL.md` |
+| lifecycle-stage procedure | one `references/*.md` stage file |
+| machine contract | `schemas/` plus validation |
+| reusable cross-domain concern | capability/profile catalog |
+| professional industry knowledge | one matched `references/domain-*.md` plus coverage metadata |
+| customer-specific behavior | project Product Truth / Project Domain Capsule, not this repo |
+| deterministic repeatable work | `scripts/` |
+| behavioral validation | `evals/` with evidence |
 
-### Suggest Enhancements
+Do not add a public file for a one-off project rule.
 
-- Open an issue with an `[Enhancement]` prefix.
-- Describe the scenario, current limitation, proposed solution, alternatives,
-  and why the change should live in the core spec instead of a project-local
-  PRD/template.
+## Runtime Budget
 
-### Add A Domain Module
+- Keep `SKILL.md` at or below 350 lines.
+- Keep stage references at or below 500 lines.
+- Do not duplicate a rule across SKILL, reference, template, and README.
+- Load domain/profile/capability material only on explicit triggers.
+- Prefer Schema and deterministic validation over long format instructions.
+- Remove superseded runtime material in the same PR; Git history is the archive.
 
-Domain modules make AI Delivery Spec useful in new industries.
+## Domain Pack Contribution
 
-1. Copy `references/domain-module-template.md`.
-2. Keep the 15-section domain contract exactly:
-   `Domain Purpose`, `Vocabulary`, `Aggregates and Entities`,
-   `Domain Events`, `State Machines`, `Metric / Indicator Governance`,
-   `AI Context Sources`, `Content / Knowledge Assets`, `Core Workflows`,
-   `Role Path Patterns`, `UI / Mobile Patterns`,
-   `Policy / Privacy Constraints`, `Domain Test Scenarios`,
-   `Multi-Agent Lifecycle Verification Matrix`, `Acceptance Checklist`.
-3. Fill in domain entities, roles, workflows, policies, terminology, privacy
-   rules, test scenarios, and a compact First-Principles Domain Lens.
-4. Name it `references/domain-{your-domain}.md`.
-5. Update `references/advanced-extensions.md` trigger matrix and domain list.
-6. Add or update at least one example if the domain is meant for public use.
+1. Start from `references/domain-module-template.md`.
+2. Add an entry to `references/domain-coverage.yaml`.
+3. State `applies_when` and `does_not_apply_when`.
+4. Define vocabulary, entities, state owners, events, metrics, context sources,
+   workflows, roles, UI patterns, permissions, risks, and scenarios.
+5. Register sources with authority, status, jurisdiction/applicability, version,
+   verification date, and owner where relevant.
+6. Keep customer rules separate from public/industry rules.
+7. Add evaluation scenarios to `evals/eval-catalog.yaml`.
+8. Declare actual maturity. New packs default to `experimental`.
 
-### Fix Bugs Or Improve Protocol
+The following do not count as expert or production validation:
 
-1. Fork the repo.
-2. Create a branch: `fix/short-description` or `feat/short-description`.
-3. Make a focused change.
-4. Run validation:
+- the existence of a domain file;
+- a generated checklist;
+- a prefilled PASS matrix;
+- a simulated reviewer;
+- a single undocumented customer anecdote.
 
-   ```powershell
-   py scripts/validate_skill_consistency.py
-   py scripts/validate_routing_scenarios.py
-   py scripts/validate_prd_quality.py references/templates/human-first-prd-template.md --allow-wildcards
-   py scripts/validate_prd_quality.py references/templates/ai-coding-prd-template.md --allow-wildcards
-   ```
+`validated` requires sourced knowledge, project-sampled scenarios, passing
+behavioral evidence, and accountable review. `audited` additionally requires
+independent audit evidence.
 
-5. Submit a PR with a clear description and test output.
+## Privacy, Copyright, And Evidence
+
+- Never submit secrets, credentials, personal data, private customer documents,
+  or insufficiently anonymized screenshots/data.
+- Do not copy protected standards or paid research in full. Store citation,
+  applicability, version, and the minimal product implication.
+- Generated or inferred professional claims must be marked as such.
+- Evaluation evidence records executor, input, environment, time, result, and
+  location. A document containing the word PASS is not execution evidence.
+
+## Change And Compatibility
+
+Breaking changes require:
+
+- affected Schema/runtime version;
+- stable ID and migration behavior;
+- previous-version or brownfield migration test where applicable;
+- updated golden example;
+- README/agent metadata/CHANGELOG alignment;
+- explicit removal of superseded runtime files.
+
+## Validation
+
+Run:
+
+```powershell
+py -3 scripts/ai_delivery_spec_cli.py check
+```
+
+For Product Truth changes:
+
+```powershell
+py -3 scripts/validate_product_truth.py path/to/product-truth.yaml
+```
+
+For prototype extraction or compatibility work, run the applicable artifact
+validator and record the command/result in the PR.
+
+Repository maintainers should configure the protected default branch to
+require the GitHub Actions status `required-gate`. The workflow aggregates the
+Windows/Linux and Python matrix, blocks schema, context-plan, exact runtime-rule
+duplication, maturity-evidence, migration, GitHub-case, and evaluation failures,
+and verifies that validators do not modify tracked files. The workflow file
+does not enforce merge protection until the repository ruleset marks this
+status as required.
 
 ## PR Checklist
 
-- [ ] Changes are consistent with the 4-entrypoint architecture.
-- [ ] The change is not a one-off reference file unless it is justified by at
-      least three real projects, two domains, and one validator change.
-- [ ] Domain-specific content stays in `references/domain-*.md`, not in core
-      runtime files.
-- [ ] New domain modules keep the 15-section domain contract.
-- [ ] New domain modules include a First-Principles Domain Lens without turning
-      the file into an industry encyclopedia.
-- [ ] New domain modules update `advanced-extensions.md` trigger matrix and
-      domain list.
-- [ ] Validation scripts pass where applicable.
-- [ ] README is updated if a public feature, install path, or domain changes.
-- [ ] No secrets, credentials, private customer data, or personal data are
-      included.
+- [ ] Change has one clear reusable purpose.
+- [ ] Runtime budget and progressive loading remain intact.
+- [ ] Product Truth / Schema / projection semantics remain consistent.
+- [ ] Stable IDs and migration impact are addressed.
+- [ ] Domain maturity and evidence claims are honest.
+- [ ] No private data, secrets, or protected full-text sources are included.
+- [ ] Relevant golden examples and eval scenarios are updated.
+- [ ] `ai_delivery_spec_cli.py check` passes.
+- [ ] README, agents metadata, version, and CHANGELOG agree when public behavior changes.
 
-## Design Principles
-
-1. Depth over breadth: one complete delivery protocol, not scattered skills.
-2. Routing over loading: load only what each artifact needs.
-3. Domain-neutral core: industry knowledge lives in replaceable modules.
-4. Gates guard quality: every artifact passes defined gates.
-5. Readable by humans and AI: Markdown that both can parse.
-6. Compact references: keep runtime entrypoints, current templates, domains,
-   coding-agent add-ons, validators, and examples; avoid legacy protocol sprawl.
-
-## Style
-
-- Markdown: clear headings, short sections, stable tables.
-- Python: PEP 8 where practical.
-- YAML: 2-space indentation.
-- Avoid mojibake or mixed encodings. Use UTF-8.
-
-## License
-
-By contributing, you agree your contributions are licensed under Apache-2.0.
+By contributing, you agree that your contribution is licensed under Apache-2.0.

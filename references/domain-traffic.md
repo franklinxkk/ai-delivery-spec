@@ -1,5 +1,8 @@
 # Domain: Traffic Safety And Road Transport SaaS
 
+Source authority and freshness metadata: `references/domain-sources.yaml`.
+Coverage and maturity: `references/domain-coverage.yaml`.
+
 Use this replaceable domain module for 运管、交通监管、道路运输企业安全生产、交通安全 SaaS、两客一危、普货、站场、维修、驾培、租赁、数据集市和指标库产品. A replacement `domain-*.md` must preserve the same 15 section headings used here and in `domain-module-template.md`.
 
 ## Contents
@@ -18,7 +21,7 @@ Use this replaceable domain module for 运管、交通监管、道路运输企�
 - UI / Mobile Patterns
 - Policy / Privacy Constraints
 - Domain Test Scenarios
-- Multi-Agent Lifecycle Verification Matrix
+- Evaluation Profile
 - Acceptance Checklist
 
 ## Domain Purpose
@@ -420,45 +423,23 @@ Scenic/tourism passenger transport should normally stay inside this traffic doma
 | old customer migration baseline | product / customer success | old usage, module depth, ARR/renewal risk, and upgrade target are frozen before rollout |
 | standards applicability conflict | regulator / legal reviewer | GB/industry/local/group/customer rule conflict is recorded with owner decision before activation |
 
-## Multi-Agent Lifecycle Verification Matrix
+## Evaluation Profile
 
-| domain_id | stage | reviewer_agent | path_type | scenario_ref | evidence_ref | blocking_question | expected_result | test_marker | verdict |
-|---|---|---|---|---|---|---|---|---|---|
-| traffic | Discover | PM Agent | happy_path | road transport SaaS positioning | Domain Purpose / First-Principles Domain Lens | Is the product regulator-facing, enterprise-facing, or both? | mode and primary outcome are explicit | traffic_discover_pm_positioning | PASS |
-| traffic | Discover | Domain Expert Agent | exception_path | standards applicability conflict | Content / Knowledge Assets | Are national, industry, local, group, and customer standards registered? | standards_corpus_register exists with issuer/region/effective date | standards_corpus_register | PASS |
-| traffic | Discover | Architecture / Data / AI Agent | permission_privacy_path | vehicle trajectory and warning data | AI Context Sources / Policy / Privacy Constraints | Can discovery avoid over-collecting sensitive trajectory data? | source freshness, scope, and masking are recorded | traffic_discover_arch_permission_privacy_path | PASS |
-| traffic | Discover | QA Agent | lifecycle_transition | alert disposition | State Machines / Domain Test Scenarios | Can QA identify the first lifecycle path? | Alert created -> closed/escalated is testable | traffic_discover_qa_lifecycle_transition | PASS |
-| traffic | Discover | Coding Agent | acceptance_test_path | delivery package handoff | Acceptance Checklist | Can a coding agent find source-of-truth order? | ac_structured, data-testid, data-action, data-state, data-api, data-method, manifest.json, source_of_truth_order required | ac_structured;data-testid;data-action;data-state;data-api;data-method;manifest.json;source_of_truth_order | PASS |
-| traffic | Specify | PM Agent | happy_path | safety inspection | Core Workflows | Does the PRD specify visible and domain result? | inspection -> rectification -> acceptance is explicit | traffic_specify_pm_happy_path | PASS |
-| traffic | Specify | Domain Expert Agent | exception_path | customer-specific driver onboarding | Core Workflows / State Machines | Can configured onboarding steps be specified without hardcoding one customer? | workflow instance and template version are explicit | traffic_specify_domain_onboarding_config | PASS |
-| traffic | Specify | Architecture / Data / AI Agent | permission_privacy_path | regulated action | Policy / Privacy Constraints | Are binding actions guarded by authorized humans? | regulated_action_human_accountability is mandatory | regulated_action_human_accountability | PASS |
-| traffic | Specify | QA Agent | lifecycle_transition | HiddenDanger lifecycle | State Machines | Can state transitions be converted to tests? | reported -> accepted and rejected return path are present | traffic_specify_qa_lifecycle_transition | PASS |
-| traffic | Specify | Coding Agent | acceptance_test_path | prototype/coding contract | UI / Mobile Patterns | Are stable actions and role paths implementable? | data-* and shadow_test_data requirements are visible | shadow_test_data | PASS |
-| traffic | Plan | PM Agent | happy_path | P1 pilot scope | Core Workflows / Metric Governance | Is rollout limited to validated scenarios instead of all nine industries? | P1 scope, pilot count, and de-scope are explicit | traffic_plan_pm_pilot_scope | PASS |
-| traffic | Plan | Domain Expert Agent | exception_path | multi-industry license check | Domain Test Scenarios | Are license union rules planned? | active industries determine required license set | traffic_plan_domain_exception_path | PASS |
-| traffic | Plan | Architecture / Data / AI Agent | permission_privacy_path | report indicators | Metric / Indicator Governance | Are metric owners and lineage planned? | indicator owner/source/version/quality are required | traffic_plan_arch_permission_privacy_path | PASS |
-| traffic | Plan | QA Agent | lifecycle_transition | ReportTask lifecycle | State Machines | Can QA plan report task state tests? | draft -> completed/failed/cancelled path exists | traffic_plan_qa_lifecycle_transition | PASS |
-| traffic | Plan | Coding Agent | acceptance_test_path | delivery manifest | Acceptance Checklist | Can tasks trace to FRR and AC? | source_of_truth_order and manifest are required | source_of_truth_order;manifest.json | PASS |
-| traffic | Tasks | PM Agent | happy_path | risk handling | Core Workflows | Are vertical slices tied to business closure? | alert/risk handling task closes with audit | traffic_tasks_pm_happy_path | PASS |
-| traffic | Tasks | Domain Expert Agent | exception_path | e-Waybill lifecycle | State Machines | Are domain-specific states sliced correctly? | draft -> completed/rejected/cancelled is explicit | traffic_tasks_domain_exception_path | PASS |
-| traffic | Tasks | Architecture / Data / AI Agent | permission_privacy_path | data isolation | Policy / Privacy Constraints | Do tasks preserve province/city/district/enterprise isolation? | isolation applies to UI/API/export/analytics/AI | traffic_tasks_arch_permission_privacy_path | PASS |
-| traffic | Tasks | QA Agent | lifecycle_transition | field inspection weak network | Domain Test Scenarios | Are weak-network and idempotent sync tests planned? | local draft and no duplicate result are required | traffic_tasks_qa_lifecycle_transition | PASS |
-| traffic | Tasks | Coding Agent | acceptance_test_path | batch operations | UI / Mobile Patterns | Can coding agent implement retry and per-item result? | data-action and acceptance_test_path are traceable | traffic_tasks_coding_acceptance_test_path | PASS |
-| traffic | Build/Verify | PM Agent | happy_path | enterprise initialization | Core Workflows | Does build verify usable operational result? | import/exception repair reaches confirmed master data | traffic_build_pm_happy_path | PASS |
-| traffic | Build/Verify | Domain Expert Agent | exception_path | dangerous goods AI pre-check | Core Workflows / AI Context Sources | Does AI produce evidence-backed suggestions only? | missing/conflict item and human confirmation are required | traffic_build_domain_dg_ai_precheck | PASS |
-| traffic | Build/Verify | Architecture / Data / AI Agent | permission_privacy_path | AI recommendation | Policy / Privacy Constraints | Does AI cite rule/model and avoid enforcement write? | AI source/confidence/version visible and non-binding | traffic_build_arch_permission_privacy_path | PASS |
-| traffic | Build/Verify | QA Agent | lifecycle_transition | Rectification returned | Domain Test Scenarios | Does regression cover rejected acceptance? | previous evidence immutable and new round created | traffic_build_qa_lifecycle_transition | PASS |
-| traffic | Build/Verify | Coding Agent | acceptance_test_path | browser verification | Policy / Privacy Constraints | Can automated tests avoid production pollution? | shadow_test_data and rollback-safe fixtures required | shadow_test_data | PASS |
-| traffic | Launch | PM Agent | happy_path | old customer migration | Core Workflows / Metric Governance | Is launch acceptance tied to adoption and renewal baseline? | baseline_frozen -> adopted/upgraded path is tracked | traffic_launch_pm_migration_baseline | PASS |
-| traffic | Launch | Domain Expert Agent | exception_path | driver fatigue recommendation | Domain Test Scenarios | Are binding interventions human-owned? | AI evidence visible; human decision required | regulated_action_human_accountability | PASS |
-| traffic | Launch | Architecture / Data / AI Agent | permission_privacy_path | embedded third-party data | Policy / Privacy Constraints | Are embedded systems subject to same data isolation? | isolation covers embedded pages and AI context | traffic_launch_arch_permission_privacy_path | PASS |
-| traffic | Launch | QA Agent | lifecycle_transition | ReportTask launch | State Machines | Can smoke tests verify publish/executing/completed? | launch state path and export are testable | traffic_launch_qa_lifecycle_transition | PASS |
-| traffic | Launch | Coding Agent | acceptance_test_path | delivery package | Acceptance Checklist | Can release artifacts guide implementation safely? | all lifecycle, permission, and test markers present | traffic_launch_coding_acceptance_test_path | PASS |
-| traffic | Learn/Retire | PM Agent | happy_path | risk dashboard learning | Metric / Indicator Governance | Can post-launch learning improve risk closure and adoption? | metrics have owner/version and change history | traffic_learn_pm_happy_path | PASS |
-| traffic | Learn/Retire | Domain Expert Agent | exception_path | deprecated standard | Content / Knowledge Assets | Can retired standards be replaced without silent rule drift? | retired/replaced standard version is traceable | standards_corpus_register | PASS |
-| traffic | Learn/Retire | Architecture / Data / AI Agent | permission_privacy_path | evidence retention | Policy / Privacy Constraints | Are retention/deletion/export rules explicit? | reports and enforcement evidence retain immutable snapshots | traffic_learn_arch_permission_privacy_path | PASS |
-| traffic | Learn/Retire | QA Agent | lifecycle_transition | migration rollback or module retirement | Acceptance Checklist | Can QA verify no orphaned workflow remains? | lifecycle de-scope and migration evidence required | traffic_learn_qa_lifecycle_transition | PASS |
-| traffic | Learn/Retire | Coding Agent | acceptance_test_path | regression suite | Domain Test Scenarios | Can coding agent keep historical AC IDs stable? | acceptance_test_path maps to regression scenarios | traffic_learn_coding_acceptance_test_path | PASS |
+Domain knowledge is not execution evidence. Register coverage and maturity in
+`references/domain-coverage.yaml`; keep behavioral scenarios and run evidence
+outside this knowledge file.
+
+Before raising maturity, independently evaluate:
+
+- one primary happy path;
+- one validation or exception path;
+- one permission/privacy path;
+- one lifecycle transition;
+- one coding-agent no-guess handoff path;
+- applicable migration, integration-failure, AI, and high-risk human-gate paths.
+
+Record executor, input, environment, timestamp, result, and evidence location.
+Mocked matrices and simulated reviewers cannot satisfy expert review or audit.
 
 ## Acceptance Checklist
 

@@ -1,5 +1,8 @@
 # AI + Data Product System Domain Module
 
+Source authority and freshness metadata: `references/domain-sources.yaml`.
+Coverage and maturity: `references/domain-coverage.yaml`.
+
 Use this replaceable domain module for AI+Data platforms, data marts, data warehouses, lakehouse products, BI, ChatBI, Data Agent, semantic/ontology products, metric platforms, dashboards, reporting, fill-in systems, data governance, data catalog, lineage, retrieval/search, and data analysis products. A replacement `domain-*.md` must preserve the same 15 section headings used here and in `domain-module-template.md`.
 
 This module is intentionally broader than a data mart checklist. It treats data products as an end-to-end system: source acquisition -> processing -> governance -> storage/retrieval -> semantic/ontology layer -> analytics/BI -> AI agents -> action/decision loop -> operations/evaluation.
@@ -20,7 +23,7 @@ This module is intentionally broader than a data mart checklist. It treats data 
 - UI / Mobile Patterns
 - Policy / Privacy Constraints
 - Domain Test Scenarios
-- Multi-Agent Lifecycle Verification Matrix
+- Evaluation Profile
 - Acceptance Checklist
 
 ## Domain Purpose
@@ -332,45 +335,23 @@ data_agent_contract:
 | dashboard drill | filter/drill respects dimension hierarchy and row-scope permissions |
 | retirement | consumers are notified, migration/retention is completed, old asset is blocked |
 
-## Multi-Agent Lifecycle Verification Matrix
+## Evaluation Profile
 
-| domain_id | stage | reviewer_agent | path_type | scenario_ref | evidence_ref | blocking_question | expected_result | test_marker | verdict |
-|---|---|---|---|---|---|---|---|---|---|
-| ai_data | Discover | PM Agent | happy_path | AI+Data value chain | Domain Purpose | Is the product a governed data operating chain, not only a dashboard? | source -> semantic -> agent -> action value is explicit | ai_data_discover_pm_happy_path | PASS |
-| ai_data | Discover | Domain Expert Agent | exception_path | source schema change | Domain Test Scenarios | Are upstream volatility and consumer impact discovered? | impacted pipelines/metrics/dashboards/agents are listed | ai_data_discover_domain_exception_path | PASS |
-| ai_data | Discover | Architecture / Data / AI Agent | permission_privacy_path | sensitive data source | Policy / Privacy Constraints | Are permissions applied before query/agent use? | row/column/action/tool permission is required | context_freshness;write_scope | PASS |
-| ai_data | Discover | QA Agent | lifecycle_transition | data source lifecycle | State Machines | Can QA see the first trusted data lifecycle? | draft -> active -> retired is testable | ai_data_discover_qa_lifecycle_transition | PASS |
-| ai_data | Discover | Coding Agent | acceptance_test_path | coding handoff | UI / Mobile Patterns | Can implementation trace data-* and AC? | ac_structured, data-testid, data-action, data-state, data-api, data-method, manifest.json, source_of_truth_order required | ac_structured;data-testid;data-action;data-state;data-api;data-method;manifest.json;source_of_truth_order | PASS |
-| ai_data | Specify | PM Agent | happy_path | BI/dashboard delivery | Core Workflows | Does the PRD specify metric, dimension, period, and business result? | dashboard uses declared metric caliber and source freshness | ai_data_specify_pm_happy_path | PASS |
-| ai_data | Specify | Domain Expert Agent | exception_path | ChatBI ambiguous question | Domain Test Scenarios | Does ChatBI ask clarification instead of inventing a metric? | ambiguity is refused or clarified through glossary | ontology_semantic_contract | PASS |
-| ai_data | Specify | Architecture / Data / AI Agent | permission_privacy_path | Data Agent writeback | AI Context Sources | Is writeback guarded by permission, confidence, and human gate? | low-confidence/disallowed action blocked and audited | human_gate;write_scope;agent_writeback_blocked | PASS |
-| ai_data | Specify | QA Agent | lifecycle_transition | SemanticModelPublished | Domain Events / State Machines | Can QA test semantic publish and rollback? | draft -> published -> rollback path is explicit | ontology_semantic_contract;rollback | PASS |
-| ai_data | Specify | Coding Agent | acceptance_test_path | AC/API/data contract | Acceptance Checklist | Can coding agent implement without raw-SQL guessing? | semantic and ontology contracts precede free-form SQL | ai_data_specify_coding_acceptance_test_path | PASS |
-| ai_data | Plan | PM Agent | happy_path | report/fill-in delivery | Core Workflows | Are sys/ext ownership and review planned? | sys/ext split, submit/review/return/audit are explicit | ai_data_plan_pm_happy_path | PASS |
-| ai_data | Plan | Domain Expert Agent | exception_path | metric caliber change | Metric / Indicator Governance | Are downstream impacts planned? | templates/reports/dashboards/AI answers are listed | ai_data_plan_domain_exception_path | PASS |
-| ai_data | Plan | Architecture / Data / AI Agent | permission_privacy_path | governed storage/retrieval | Aggregates and Entities | Are freshness, latency, retention, cost, and permission planned? | serving path declares all operational constraints | context_freshness | PASS |
-| ai_data | Plan | QA Agent | lifecycle_transition | pipeline run | State Machines | Can QA plan retry/backfill/idempotency tests? | failed -> retrying -> succeeded path is testable | ai_data_plan_qa_lifecycle_transition | PASS |
-| ai_data | Plan | Coding Agent | acceptance_test_path | delivery package | Content / Knowledge Assets | Are source-of-truth files ready for tasks? | manifest and contracts are required | source_of_truth_order;manifest.json | PASS |
-| ai_data | Tasks | PM Agent | happy_path | insight-to-action loop | Core Workflows | Are tasks tied to actionable decisions? | insight -> human confirm -> task/action -> outcome | ai_data_tasks_pm_happy_path | PASS |
-| ai_data | Tasks | Domain Expert Agent | exception_path | quality failure | Domain Test Scenarios | Are quality failures first-class tasks? | stale/quality warning or strict-use block required | ai_data_tasks_domain_exception_path | PASS |
-| ai_data | Tasks | Architecture / Data / AI Agent | permission_privacy_path | data governance agent | AI Context Sources | Can agent grant permissions silently? | no silent grants; access approval and audit required | human_gate;write_scope | PASS |
-| ai_data | Tasks | QA Agent | lifecycle_transition | report task lifecycle | State Machines | Can QA slice created -> archived report task? | collecting/aggregating/completed/failed paths exist | ai_data_tasks_qa_lifecycle_transition | PASS |
-| ai_data | Tasks | Coding Agent | acceptance_test_path | prototype mapping | UI / Mobile Patterns | Can tasks map ChatBI/Data Agent states? | thinking/answered/denied/stale and agent states are visible | data-testid;data-action;data-state | PASS |
-| ai_data | Build/Verify | PM Agent | happy_path | ChatBI enablement | Core Workflows | Does build verify user-facing analytical value? | golden questions pass and feedback is monitored | eval_fallback | PASS |
-| ai_data | Build/Verify | Domain Expert Agent | exception_path | lineage trace | Domain Test Scenarios | Can business verify metric lineage? | metric -> semantic -> pipeline -> source is traceable | ai_data_build_domain_exception_path | PASS |
-| ai_data | Build/Verify | Architecture / Data / AI Agent | permission_privacy_path | permission denial | Domain Test Scenarios | Are unauthorized query/export/inference blocked? | restricted rows/columns cannot be inferred | ai_data_build_arch_permission_privacy_path | PASS |
-| ai_data | Build/Verify | QA Agent | lifecycle_transition | data agent launch | Core Workflows / State Machines | Can QA test evaluated -> production -> rollback? | eval, pilot, rollback path is verifiable | eval_fallback;rollback | PASS |
-| ai_data | Build/Verify | Coding Agent | acceptance_test_path | validator handoff | Acceptance Checklist | Can coding agent generate tests from AC? | ingestion, cleaning, governance, semantic, BI, agent, permission tests are covered | ac_structured | PASS |
-| ai_data | Launch | PM Agent | happy_path | dashboard publish | UI / Mobile Patterns | Does launch show source freshness and caliber version? | dashboard publish includes freshness/caliber/permission state | context_freshness | PASS |
-| ai_data | Launch | Domain Expert Agent | exception_path | stale data answer | Domain Test Scenarios | Does ChatBI warn/refuse stale strict data? | freshness is cited or answer refused | context_freshness | PASS |
-| ai_data | Launch | Architecture / Data / AI Agent | permission_privacy_path | action agent | AI Context Sources | Are production tool scope and write scope locked? | allowed tools, write_scope, human_gate, rollback are recorded | human_gate;write_scope;rollback | PASS |
-| ai_data | Launch | QA Agent | lifecycle_transition | semantic model publish | State Machines | Can smoke tests verify active semantic version? | published/versioned model is testable | ontology_semantic_contract | PASS |
-| ai_data | Launch | Coding Agent | acceptance_test_path | release package | Acceptance Checklist | Can coding agent identify launch blockers? | eval/fallback, permission, freshness, export, retirement tests exist | eval_fallback;source_of_truth_order | PASS |
-| ai_data | Learn/Retire | PM Agent | happy_path | data product adoption | Metric / Indicator Governance | Can learning measure usage, trust, and action outcomes? | adoption, quality, cost, and failure metrics exist | ai_data_learn_pm_happy_path | PASS |
-| ai_data | Learn/Retire | Domain Expert Agent | exception_path | retired asset | Domain Test Scenarios | Are consumers migrated before retirement? | migration/retention completed and old asset blocked | ai_data_learn_domain_exception_path | PASS |
-| ai_data | Learn/Retire | Architecture / Data / AI Agent | permission_privacy_path | retained sensitive data | Policy / Privacy Constraints | Are deletion/export and access reviews complete? | retention and privacy controls persist through retirement | ai_data_learn_arch_permission_privacy_path | PASS |
-| ai_data | Learn/Retire | QA Agent | lifecycle_transition | DataProductRetired | Domain Events | Can QA test retirement event and blocked writes? | consumer notification and retired state are verified | ai_data_learn_qa_lifecycle_transition | PASS |
-| ai_data | Learn/Retire | Coding Agent | acceptance_test_path | regression continuity | Acceptance Checklist | Can historical AC and model versions stay traceable? | source_of_truth_order, rollback, and old/new version markers are preserved | source_of_truth_order;rollback | PASS |
+Domain knowledge is not execution evidence. Register coverage and maturity in
+`references/domain-coverage.yaml`; keep behavioral scenarios and run evidence
+outside this knowledge file.
+
+Before raising maturity, independently evaluate:
+
+- one primary happy path;
+- one validation or exception path;
+- one permission/privacy path;
+- one lifecycle transition;
+- one coding-agent no-guess handoff path;
+- applicable migration, integration-failure, AI, and high-risk human-gate paths.
+
+Record executor, input, environment, timestamp, result, and evidence location.
+Mocked matrices and simulated reviewers cannot satisfy expert review or audit.
 
 ## Acceptance Checklist
 

@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/project-domain-capsule.schema.json",
+  "title": "AI Delivery Spec Project Domain Capsule",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capsule_id",
+    "namespace",
+    "project",
+    "scope",
+    "sources",
+    "vocabulary",
+    "entities",
+    "state_machines",
+    "workflows",
+    "policies",
+    "context_dictionary",
+    "unknowns",
+    "scenario_fixtures",
+    "promotion"
+  ],
+  "properties": {
+    "schema_version": { "const": "5.0.0" },
+    "capsule_id": { "type": "string", "pattern": "^CAP-[A-Z0-9-]+$" },
+    "namespace": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "project": { "type": "string", "minLength": 1 },
+    "scope": { "type": "string", "minLength": 1 },
+    "status": { "const": "project_scoped" },
+    "production_claim": { "const": "prohibited_without_project_approval" },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "authority", "status", "owner"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^SRC-[A-Z0-9-]+$" },
+          "title": { "type": "string" },
+          "authority": { "enum": ["primary", "accountable", "secondary", "inferred", "unknown"] },
+          "status": { "enum": ["active", "draft", "unknown", "superseded"] },
+          "location": { "type": "string" },
+          "owner": { "type": "string" }
+        }
+      }
+    },
+    "vocabulary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["term", "meaning", "source_ref", "assertion_status"],
+        "properties": {
+          "term": { "type": "string" },
+          "meaning": { "type": "string" },
+          "source_ref": { "type": "string" },
+          "assertion_status": { "enum": ["verified", "inferred", "proposed", "unknown", "conflict"] }
+        }
+      }
+    },
+    "entities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "owner", "state_machine_ref", "assertion_status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^ENT-[A-Z0-9-]+$" },
+          "name": { "type": "string" },
+          "owner": { "type": "string" },
+          "state_machine_ref": { "type": "string" },
+          "assertion_status": { "enum": ["verified", "inferred", "proposed", "unknown", "conflict"] }
+        }
+      }
+    },
+    "state_machines": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "owner_ref", "states", "transitions"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^STM-[A-Z0-9-]+$" },
+          "owner_ref": { "type": "string" },
+          "states": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "transitions": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "workflows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "trigger", "steps", "result", "exceptions"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^FLOW-[A-Z0-9-]+$" },
+          "name": { "type": "string" },
+          "trigger": { "type": "string" },
+          "steps": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "result": { "type": "string" },
+          "exceptions": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "rule", "source_ref", "owner", "assertion_status", "enforcement"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^RULE-[A-Z0-9-]+$" },
+          "rule": { "type": "string" },
+          "source_ref": { "type": "string" },
+          "owner": { "type": "string" },
+          "assertion_status": { "enum": ["verified", "inferred", "proposed", "unknown", "conflict"] },
+          "enforcement": { "enum": ["question_only", "frontend_hint", "backend_guard", "human_gate", "audit_only"] },
+          "listens_to": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+          "writes_to": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+          "prompt": { "type": "string" }
+        }
+      }
+    },
+    "context_dictionary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "type", "description"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z][a-z0-9_.-]*$" },
+          "type": { "enum": ["string", "number", "boolean", "id", "enum", "object", "array"] },
+          "description": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "question", "impact", "owner", "status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^UNK-[A-Z0-9-]+$" },
+          "question": { "type": "string" },
+          "impact": { "enum": ["scope", "state", "data", "safety", "compliance", "acceptance", "commercial"] },
+          "owner": { "type": "string" },
+          "status": { "enum": ["open", "answered", "blocked", "accepted_risk"] }
+        }
+      }
+    },
+    "scenario_fixtures": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "scenario", "expected", "status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^SCN-[A-Z0-9-]+$" },
+          "type": { "enum": ["happy", "exception", "permission", "lifecycle", "safety", "integration_failure"] },
+          "scenario": { "type": "string" },
+          "expected": { "type": "string" },
+          "status": { "enum": ["mocked", "project_confirmed", "evaluated"] }
+        }
+      }
+    },
+    "promotion": {
+      "type": "object",
+      "required": ["eligible", "reason", "required_next_evidence"],
+      "properties": {
+        "eligible": { "type": "boolean" },
+        "reason": { "type": "string" },
+        "required_next_evidence": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

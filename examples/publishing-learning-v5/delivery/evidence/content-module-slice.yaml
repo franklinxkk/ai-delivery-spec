@@ -1,0 +1,282 @@
+schema_version: 5.0.0
+slice_type: product_truth_working_slice
+source_truth_id: TRUTH-PUBLISHING-001
+seed_ids:
+- MOD-CONTENT-001
+include_reverse: false
+product:
+  name: 融合出版与学习服务平台
+  outcome: 让内容方、渠道方和学员在可授权、可追溯、可验收的链路中完成资源发布、激活学习与证据交付
+  scope:
+  - 资源、知识点、题目和课程版本管理
+  - 图书批次及学习码生成
+  - 代理商和接入商资源授权
+  - 学员激活、学习、练习、考试和证据记录
+  out_of_scope:
+  - 第三方支付结算
+  - 法定职业资格证书签发
+  success_metrics:
+  - id: METRIC-ACTIVATION-001
+    name: 有效学习码激活成功率
+    caliber: 成功绑定学员且生成学习权益的码数 / 合法首次激活请求码数，按自然月统计
+    source_refs:
+    - SRC-PUBLISHING-REQ-001
+    owner: 运营负责人
+    target: 试点期达到 98%
+delivery_context:
+  lifecycle_stage: specify
+  delivery_mode: full
+  tier: L2
+  project_shape: brownfield
+  customer_profile:
+  - tob
+  - channel-delivery
+  governance_profiles:
+  - brownfield
+  capability_packs:
+  - identity-tenant
+  - content-resource
+  - workflow-audit
+  - data-integration
+  domain_packs:
+  - education-it
+  consumers:
+  - product
+  - customer
+  - engineering
+  - coding-agent
+  - qa
+  - operations
+items:
+  sources:
+  - id: SRC-PUBLISHING-REQ-001
+    kind: user_input
+    title: 客户补充的一书一码及资源授权流程
+    location: project discovery and prototype package
+    authority: accountable
+    status: active
+    disposition: embedded
+    owner: 客户产品负责人
+  roles:
+  - id: ROLE-CONTENT-ADMIN
+    name: 内容管理员
+    job: 将资源、知识点、题目组装为可发布课程版本
+    data_scope: 所属内容组织及获授权资源
+    forbidden_actions:
+    - 修改已发布课程版本
+  modules:
+  - id: MOD-CONTENT-001
+    name: 资源与课程编排
+    outcome: 形成带知识点、题目和资源引用的不可变课程版本
+    role_refs:
+    - ROLE-CONTENT-ADMIN
+    entity_refs:
+    - ENT-RESOURCE-001
+    - ENT-COURSE-001
+    flow_refs:
+    - FLOW-PUBLISH-001
+    view_refs:
+    - VIEW-COURSE-EDITOR
+    acceptance_refs:
+    - AC-PUBLISH-001
+  entities:
+  - id: ENT-COURSE-001
+    name: 课程版本
+    owner: 课程编排服务
+    field_refs:
+    - FLD-COURSE-NAME
+    - FLD-COURSE-VERSION
+    state_machine_ref: STM-COURSE-001
+    source_refs:
+    - SRC-PUBLISHING-REQ-001
+  - id: ENT-RESOURCE-001
+    name: 资源
+    owner: 资源管理服务
+    field_refs:
+    - FLD-RESOURCE-NAME
+    - FLD-RESOURCE-TYPE
+    state_machine_ref: STM-RESOURCE-001
+    source_refs:
+    - SRC-PUBLISHING-REQ-001
+  fields:
+  - id: FLD-COURSE-NAME
+    name: 课程名称
+    type: string
+    source: 内容管理员录入
+    required: true
+    validation: 1-100 字符
+    editable_by:
+    - ROLE-CONTENT-ADMIN
+    sensitivity: internal
+  - id: FLD-COURSE-VERSION
+    name: 课程版本
+    type: string
+    source: 系统按发布序列生成
+    required: true
+    validation: 发布后不可修改
+    editable_by: []
+    sensitivity: internal
+  - id: FLD-RESOURCE-NAME
+    name: 资源名称
+    type: string
+    source: 内容管理员录入
+    required: true
+    validation: 1-100 字符，同组织同类型不可重名
+    editable_by:
+    - ROLE-CONTENT-ADMIN
+    sensitivity: internal
+  - id: FLD-RESOURCE-TYPE
+    name: 资源类型
+    type: enum
+    source: 资源类型字典
+    required: true
+    dictionary:
+    - video
+    - document
+    - image
+    - package
+    validation: 必须选择有效字典值
+    editable_by:
+    - ROLE-CONTENT-ADMIN
+    sensitivity: internal
+  flows:
+  - id: FLOW-PUBLISH-001
+    name: 课程版本发布
+    actor_refs:
+    - ROLE-CONTENT-ADMIN
+    module_refs:
+    - MOD-CONTENT-001
+    start: 资源、知识点、题目及课程结构已完成
+    steps:
+    - order: 1
+      actor_ref: ROLE-CONTENT-ADMIN
+      view_ref: VIEW-COURSE-EDITOR
+      action_ref: ACT-COURSE-PUBLISH
+      visible_result: 页面显示已发布版本号及资源、知识点、题目数量
+      domain_result: 课程版本冻结并发布 CourseVersionPublished
+      failure: 缺少必填资源、知识点或题目时定位问题并保持草稿
+    result: 课程版本可被批次和授权引用
+    compensation: 发布前可撤销；发布后通过新版本替代
+    acceptance_refs:
+    - AC-PUBLISH-001
+  views:
+  - id: VIEW-COURSE-EDITOR
+    name: 课程编排与发布
+    module_ref: MOD-CONTENT-001
+    surface: web
+    role_refs:
+    - ROLE-CONTENT-ADMIN
+    regions:
+    - id: REG-COURSE-STRUCTURE
+      name: 课程结构区
+      content: 左侧章节树，中部资源/知识点/题目编排，右侧版本与校验摘要
+      field_refs:
+      - FLD-COURSE-NAME
+      - FLD-COURSE-VERSION
+      - FLD-RESOURCE-NAME
+      - FLD-RESOURCE-TYPE
+      action_refs:
+      - ACT-COURSE-PUBLISH
+    query_source: 课程编排服务及资源服务
+    states:
+    - default
+    - empty
+    - loading
+    - error
+    - no_permission
+    - success
+    responsive_rule: PC 主编辑；移动端只读预览
+  actions:
+  - id: ACT-COURSE-PUBLISH
+    name: 发布课程版本
+    trigger: 点击发布并确认
+    role_refs:
+    - ROLE-CONTENT-ADMIN
+    allowed_states:
+    - draft
+    - reviewing
+    guard_refs:
+    - RULE-COURSE-COMPLETE-001
+    confirmation: 显示版本冻结、影响范围和不可原地修改提示
+    visible_result: 页面进入已发布状态并展示版本号
+    command: PublishCourseVersion
+    domain_result: 冻结课程快照并变为 published
+    event_refs:
+    - EVT-COURSE-PUBLISHED
+    failure_result: 定位缺失项并保持可继续编辑的草稿
+    idempotency: course_id + draft_version
+    audit: 记录发布人、时间、前后版本和资源摘要
+    acceptance_refs:
+    - AC-PUBLISH-001
+  states:
+  - id: STM-COURSE-001
+    owner_ref: ENT-COURSE-001
+    states:
+    - draft
+    - reviewing
+    - published
+    - superseded
+    - retired
+    transitions:
+    - from: draft
+      action_ref: ACT-COURSE-PUBLISH
+      guard_refs:
+      - RULE-COURSE-COMPLETE-001
+      to: published
+      event_ref: EVT-COURSE-PUBLISHED
+  - id: STM-RESOURCE-001
+    owner_ref: ENT-RESOURCE-001
+    states:
+    - draft
+    - active
+    - retired
+    transitions: []
+  rules:
+  - id: RULE-COURSE-COMPLETE-001
+    statement: 发布前必须存在有效课程名称、至少一个资源、知识点映射、考核规则和版本说明
+    owner: 内容负责人
+    source_refs:
+    - SRC-PUBLISHING-REQ-001
+    enforcement: backend_guard
+    failure_behavior: 阻断发布并返回可定位的缺失项
+  events:
+  - id: EVT-COURSE-PUBLISHED
+    name: CourseVersionPublished
+    producer: 课程编排服务
+    consumers:
+    - 学习码服务
+    - 权益服务
+    - 学习服务
+    payload:
+    - course_id
+    - version
+    - resource_snapshot_hash
+    - published_at
+    - publisher_id
+    version: '1.0'
+    ordering: course_id + version
+    replay: 消费者按事件 ID 幂等
+    dead_letter_owner: 内容平台运维
+  acceptance:
+  - id: AC-PUBLISH-001
+    title: 完整课程草稿发布为不可变版本
+    priority: P0
+    type: happy
+    preconditions:
+    - 内容管理员登录
+    - 草稿包含资源、知识点、题目和考核规则
+    steps:
+    - 进入课程编排页
+    - 点击发布
+    - 确认版本冻结
+    expected_visible: 页面展示 published 状态、版本号和发布摘要
+    expected_domain: 创建课程版本快照并发布 CourseVersionPublished
+    test_anchors:
+    - data-testid=page-course-editor
+    - data-action=ACT-COURSE-PUBLISH
+    evidence_required:
+    - automated_test
+    - screenshot
+    - audit_record
+claim_boundary: A working slice is not an independent source of truth and must retain
+  source Product Truth IDs.

@@ -1,0 +1,233 @@
+schema_version: 5.0.0
+generated_from: domain-pack metadata and evaluation evidence
+evaluation_index: evals/domain-fixtures.yaml
+claim_policy:
+  rule: A domain file is knowledge coverage, not behavioral validation.
+  validated_requires:
+    - sourced knowledge
+    - passed behavioral evaluation
+    - accountable expert review
+    - project-sampled scenarios
+  audited_requires:
+    - validated requirements
+    - independent audit evidence
+  simulated_review_is_expert_review: false
+
+domains:
+  - domain_id: traffic
+    name: Traffic Safety and Road Transport SaaS
+    knowledge_file: references/domain-traffic.md
+    applies_when: [road transport, traffic safety, regulator supervision, transport enterprise]
+    does_not_apply_when: [generic workflow with no transport object]
+    coverage:
+      knowledge: structured
+      scenarios: project_sampled
+      behavioral_eval: not_run
+      expert_review: not_reviewed
+    maturity: experimental
+    evidence:
+      - id: EV-DOM-TRAFFIC-SOURCES
+        kind: official_source
+        location: references/domain-sources.yaml#KS-TRAFFIC-INSPECTION-2025
+        status: current
+        owner: domain maintainer
+      - id: EV-DOM-TRAFFIC-KNOWLEDGE
+        kind: project_sample
+        location: examples/traffic-regulatory-change-v5
+        status: current
+        owner: domain maintainer
+    known_gaps:
+      - Official source URLs and applicability records are not yet complete.
+      - Nine-industry depth has not been behaviorally evaluated.
+    last_verified_at: null
+    maintainer: ai-delivery-spec maintainers
+    production_claim: prohibited
+
+  - domain_id: crm
+    name: CRM and Customer Response
+    knowledge_file: references/domain-crm.md
+    applies_when: [lead, opportunity, customer, contract, payment, ticket, renewal]
+    does_not_apply_when: [generic contact list without customer lifecycle]
+    coverage:
+      knowledge: structured
+      scenarios: mocked
+      behavioral_eval: not_run
+      expert_review: not_reviewed
+    maturity: experimental
+    evidence:
+      - id: EV-DOM-CRM-SOURCES
+        kind: official_source
+        location: references/domain-sources.yaml#KS-CRM-COMPLAINT-10002
+        status: current
+        owner: domain maintainer
+      - id: EV-DOM-CRM-KNOWLEDGE
+        kind: mock_scenario
+        location: evals/domain-fixtures.yaml#FX-CRM-LEAD-REVENUE
+        status: current
+        owner: domain maintainer
+    known_gaps:
+      - CPQ, complex account hierarchy, customer success, and partner conflict need deeper evaluation.
+      - Current fixtures are evaluation inputs, not production evidence.
+    last_verified_at: null
+    maintainer: ai-delivery-spec maintainers
+    production_claim: prohibited
+
+  - domain_id: education-it
+    name: Education IT
+    knowledge_file: references/domain-education-it.md
+    applies_when: [academic affairs, student affairs, course, training, learning, assessment]
+    does_not_apply_when: [generic content publishing with no learner lifecycle]
+    coverage:
+      knowledge: structured
+      scenarios: project_sampled
+      behavioral_eval: not_run
+      expert_review: not_reviewed
+    maturity: experimental
+    evidence:
+      - id: EV-DOM-EDU-SOURCES
+        kind: official_source
+        location: references/domain-sources.yaml#KS-EDU-CLASSIFICATION-0661
+        status: current
+        owner: domain maintainer
+      - id: EV-DOM-EDU-KNOWLEDGE
+        kind: project_sample
+        location: examples/publishing-learning-v5
+        status: current
+        owner: domain maintainer
+    known_gaps:
+      - Current knowledge is higher-education heavy.
+      - Vocational education, enterprise training, one-book-one-code, channel authorization, and content rights require deeper coverage.
+    last_verified_at: null
+    maintainer: ai-delivery-spec maintainers
+    production_claim: prohibited
+
+  - domain_id: oa
+    name: Collaborative Office and OA
+    knowledge_file: references/domain-oa.md
+    applies_when: [approval, official document, meeting, supervision, office knowledge]
+    does_not_apply_when: [single approval action with no OA object or lifecycle]
+    coverage:
+      knowledge: structured
+      scenarios: mocked
+      behavioral_eval: not_run
+      expert_review: not_reviewed
+    maturity: experimental
+    evidence:
+      - id: EV-DOM-OA-SOURCES
+        kind: official_source
+        location: references/domain-sources.yaml#KS-OA-ESIGN
+        status: current
+        owner: domain maintainer
+      - id: EV-DOM-OA-KNOWLEDGE
+        kind: mock_scenario
+        location: evals/domain-fixtures.yaml#FX-OA-APPROVAL-RECALL
+        status: current
+        owner: domain maintainer
+    known_gaps:
+      - Electronic signature, seal, archive retention, confidentiality, and official-document sources need evidence mapping.
+    last_verified_at: null
+    maintainer: ai-delivery-spec maintainers
+    production_claim: prohibited
+
+  - domain_id: medical-hospital-it
+    name: Medical and Hospital IT
+    knowledge_file: references/domain-medical-hospital-it.md
+    applies_when: [patient, encounter, medical record, order, report, clinical workflow]
+    does_not_apply_when: [generic appointment or CRM flow without clinical decisions]
+    coverage:
+      knowledge: structured
+      scenarios: mocked
+      behavioral_eval: not_run
+      expert_review: not_reviewed
+    maturity: experimental
+    evidence:
+      - id: EV-DOM-MEDICAL-SOURCES
+        kind: official_source
+        location: references/domain-sources.yaml#KS-MEDICAL-EMR-2025
+        status: current
+        owner: domain maintainer
+      - id: EV-DOM-MEDICAL-KNOWLEDGE
+        kind: mock_scenario
+        location: evals/domain-fixtures.yaml#FX-MEDICAL-ORDER-CANCEL
+        status: current
+        owner: domain maintainer
+    known_gaps:
+      - High-risk clinical, legal, interoperability, privacy, and local-policy assertions require accountable review.
+      - No production claim is allowed from simulated scenarios.
+    last_verified_at: null
+    maintainer: ai-delivery-spec maintainers
+    production_claim: prohibited
+
+  - domain_id: data-product
+    name: AI and Data Product System
+    knowledge_file: references/domain-data-mart.md
+    applies_when: [data source, metric, lineage, semantic layer, BI, ChatBI, Data Agent]
+    does_not_apply_when: [simple transactional form with no governed data product]
+    coverage:
+      knowledge: structured
+      scenarios: mocked
+      behavioral_eval: not_run
+      expert_review: not_reviewed
+    maturity: experimental
+    evidence:
+      - id: EV-DOM-DATA-SOURCES
+        kind: official_source
+        location: references/domain-sources.yaml#KS-DATA-OPENLINEAGE
+        status: current
+        owner: domain maintainer
+      - id: EV-DOM-DATA-KNOWLEDGE
+        kind: mock_scenario
+        location: references/domain-data-mart.md
+        status: current
+        owner: domain maintainer
+    known_gaps:
+      - Formal provenance and OpenLineage mappings need executable examples.
+      - Data contract compatibility, cost, deletion propagation, and model/vector lineage need deeper coverage.
+    last_verified_at: null
+    maintainer: ai-delivery-spec maintainers
+    production_claim: prohibited
+
+  - domain_id: ai-native
+    name: AI Native and Agentic Systems
+    knowledge_file: references/domain-ai-native.md
+    applies_when: [agent, tool calling, model decision, AI writeback, memory, evaluation]
+    does_not_apply_when: [AI is only used to write documents or code]
+    coverage:
+      knowledge: structured
+      scenarios: mocked
+      behavioral_eval: not_run
+      expert_review: not_reviewed
+    maturity: experimental
+    evidence:
+      - id: EV-DOM-AI-SOURCES
+        kind: official_source
+        location: references/domain-sources.yaml#KS-AI-ISO-42001
+        status: current
+        owner: domain maintainer
+      - id: EV-DOM-AI-KNOWLEDGE
+        kind: mock_scenario
+        location: references/domain-ai-native.md
+        status: current
+        owner: domain maintainer
+    known_gaps:
+      - Agent delegation, identity, memory governance, prompt injection, red-team, and regulatory mappings need executable evaluations.
+    last_verified_at: null
+    maintainer: ai-delivery-spec maintainers
+    production_claim: prohibited
+
+fallback:
+  mode: project_domain_capsule
+  rule: Missing a dedicated domain pack never blocks generic delivery.
+  required_outputs:
+    - vocabulary
+    - entities
+    - state_machines
+    - workflows
+    - policies
+    - source_register
+    - unknowns
+    - scenario_fixtures
+  assertion_policy:
+    verified: attributable to an authoritative or accountable source
+    inferred: plausible but awaiting owner confirmation
+    unknown: missing information changes scope, safety, compliance, data, or acceptance

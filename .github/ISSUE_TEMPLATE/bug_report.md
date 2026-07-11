@@ -22,7 +22,7 @@ What actually happened.
 
 ## Environment
 - AI Tool: [e.g., Claude Code, Cursor, OpenClaw]
-- ai-delivery-spec version: [e.g., v4.5.2]
+- ai-delivery-spec version: [e.g., v5.0.0]
 - TIER used: [L0/L1/L2/L3]
 - WORKFLOW used: [prd/prototype/ai-native]
 

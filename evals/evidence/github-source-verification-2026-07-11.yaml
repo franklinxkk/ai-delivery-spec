@@ -1,0 +1,157 @@
+schema_version: 5.0.0
+evidence_type: online_github_source_verification
+verified_at: '2026-07-11T05:37:18.209878+00:00'
+supplemented_at: '2026-07-11T06:05:00+00:00'
+result: passed
+verification_channels:
+- GitHub REST API
+- GitHub connector fallback for rate-limited and second-wave cases
+- git ls-remote for pinned default-branch heads
+cases:
+- case_id: GH-APPSMITH-REUSABLE-WIDGET
+  repository: appsmithorg/appsmith
+  pinned_ref: 315b36c78bfa672dc7b5f428e0b1e8494f0f0025
+  pinned_ref_reachable: true
+  source_paths_exist: true
+  missing_paths: []
+  rest_api_warning: 'Anonymous REST rate limit was reached after commit and path verification.'
+  issue_reachable: true
+  current_branch_head: 315b36c78bfa672dc7b5f428e0b1e8494f0f0025
+  head_changed_since_pin: false
+  fallback_verified_at: '2026-07-11T05:39:00+00:00'
+- case_id: GH-CHATWOOT-VOICE
+  repository: chatwoot/chatwoot
+  pinned_ref: 98154bbeab2f5ea888dcb61bfd3a35a109ebb9a0
+  pinned_ref_reachable: true
+  source_paths_exist: true
+  missing_paths: []
+  issue_reachable: true
+  current_branch_head: 98154bbeab2f5ea888dcb61bfd3a35a109ebb9a0
+  head_changed_since_pin: false
+- case_id: GH-FIREFLY-BANK-IMPORT
+  repository: firefly-iii/data-importer
+  pinned_ref: d48e235928663f5e0747973f8442a3cb3971a1e8
+  pinned_ref_reachable: true
+  source_paths_exist: true
+  missing_paths: []
+  issue_reachable: true
+  current_branch_head: d48e235928663f5e0747973f8442a3cb3971a1e8
+  head_changed_since_pin: false
+- case_id: GH-OPENEDX-REINDEX
+  repository: openedx/openedx-platform
+  pinned_ref: 264ced21b08ac56906d233abf86a1db7d661b0c8
+  pinned_ref_reachable: true
+  source_paths_exist: true
+  missing_paths: []
+  issue_reachable: true
+  current_branch_head: 264ced21b08ac56906d233abf86a1db7d661b0c8
+  head_changed_since_pin: false
+- case_id: GH-ORANGEHRM-PASSWORD-POLICY
+  repository: orangehrm/orangehrm
+  pinned_ref: 56e23b3b09e7af29317a0943523b825843fff527
+  pinned_ref_reachable: true
+  source_paths_exist: true
+  missing_paths: []
+  issue_reachable: true
+  current_branch_head: 56e23b3b09e7af29317a0943523b825843fff527
+  head_changed_since_pin: false
+- case_id: GH-SALEOR-CHANNEL-ID
+  repository: saleor/saleor
+  pinned_ref: 697b9ec6ffb93199f62f783e7bf6c550cd3bcf7e
+  pinned_ref_reachable: true
+  source_paths_exist: true
+  missing_paths: []
+  issue_reachable: true
+  current_branch_head: 697b9ec6ffb93199f62f783e7bf6c550cd3bcf7e
+  head_changed_since_pin: false
+- case_id: GH-SUPERSET-THEMING
+  repository: apache/superset
+  pinned_ref: 3818152191286f3d6e35f7273a17fa3048611641
+  pinned_ref_reachable: true
+  source_paths_exist: true
+  missing_paths: []
+  issue_reachable: true
+  current_branch_head: 3818152191286f3d6e35f7273a17fa3048611641
+  head_changed_since_pin: false
+- case_id: GH-TRACCAR-TOKEN-REVOCATION
+  repository: traccar/traccar
+  pinned_ref: 8d082fbbcb59536cb54bfe4e4e533832b1e44bbf
+  pinned_ref_reachable: true
+  source_paths_exist: true
+  missing_paths: []
+  issue_reachable: true
+  current_branch_head: 8d082fbbcb59536cb54bfe4e4e533832b1e44bbf
+  head_changed_since_pin: false
+- case_id: GH-TWENTY-ROLE-NAVIGATION
+  repository: twentyhq/twenty
+  pinned_ref: 983f03adbe2309951ed17c548503db17215f02bf
+  pinned_ref_reachable: true
+  source_paths_exist: true
+  missing_paths: []
+  issue_reachable: true
+  current_branch_head: 983f03adbe2309951ed17c548503db17215f02bf
+  head_changed_since_pin: false
+  fallback_verification: GitHub connector code/issue search
+- case_id: GH-OPENEMS-HISTORIC-AVERAGE
+  repository: OpenEMS/openems
+  pinned_ref: e59989de00fa45c7d31ec008084511d8ca679a44
+  pinned_ref_reachable: true
+  source_paths_exist: true
+  missing_paths: []
+  issue_reachable: true
+  current_branch_head: e59989de00fa45c7d31ec008084511d8ca679a44
+  head_changed_since_pin: false
+  fallback_verification: GitHub connector code/issue search
+- case_id: GH-RMF-FLEET-TENANCY
+  repository: open-rmf/rmf-web
+  pinned_ref: 9a4fb9eb0ed58cc77a98913a7651e2cfd88822bb
+  pinned_ref_reachable: true
+  source_paths_exist: true
+  missing_paths: []
+  issue_reachable: true
+  current_branch_head: 9a4fb9eb0ed58cc77a98913a7651e2cfd88822bb
+  head_changed_since_pin: false
+  fallback_verification: GitHub connector plus git ls-remote
+- case_id: GH-NEXTCLOUD-FEDERATED-CALENDAR
+  repository: nextcloud/server
+  pinned_ref: ff5db606ed5b778caa7901bdd3b725714d904b07
+  pinned_ref_reachable: true
+  source_paths_exist: true
+  missing_paths: []
+  issue_reachable: true
+  current_branch_head: ff5db606ed5b778caa7901bdd3b725714d904b07
+  head_changed_since_pin: false
+  fallback_verification: GitHub connector code/issue search
+- case_id: GH-QLOAPPS-OVERBOOKING-API
+  repository: Qloapps/QloApps
+  pinned_ref: 5b4d65cbb8570a4ba46364ee0f2ded79d294ab84
+  pinned_ref_reachable: true
+  source_paths_exist: true
+  missing_paths: []
+  issue_reachable: true
+  current_branch_head: 5b4d65cbb8570a4ba46364ee0f2ded79d294ab84
+  head_changed_since_pin: false
+  fallback_verification: GitHub connector code/issue search
+- case_id: GH-KILLBILL-INVOICE-AMOUNT
+  repository: killbill/killbill
+  pinned_ref: fcef98343e9893bcf654294fb46643f261c3f887
+  pinned_ref_reachable: true
+  source_paths_exist: true
+  missing_paths: []
+  issue_reachable: true
+  current_branch_head: fcef98343e9893bcf654294fb46643f261c3f887
+  head_changed_since_pin: false
+  fallback_verification: GitHub connector code/issue search
+- case_id: GH-OPENBOXES-BULK-ADJUST
+  repository: openboxes/openboxes
+  pinned_ref: 03548ddcc8138be42458745b86d97f3f80e7f163
+  pinned_ref_reachable: true
+  source_paths_exist: true
+  missing_paths: []
+  issue_reachable: true
+  current_branch_head: 03548ddcc8138be42458745b86d97f3f80e7f163
+  head_changed_since_pin: false
+  fallback_verification: GitHub connector code/issue search
+claim_boundary: Proves that pinned refs, source paths, and issues were reachable at
+  verification time; it does not prove requirement correctness, roadmap status, or
+  implementation behavior.

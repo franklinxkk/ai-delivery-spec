@@ -1,0 +1,51 @@
+evidence_id: EVD-V5-HARDENING-20260711
+evidence_type: deterministic_release_regression
+executor: local Python validators and GitHub source inspection
+executed_at: '2026-07-11T06:15:00+00:00'
+environment: Windows, Python 3.12
+result: passed
+commands:
+  - py -3 -m compileall -q scripts
+  - py -3 scripts/ai_delivery_spec_cli.py check
+  - py -3 scripts/test_execution_state.py
+  - py -3 tests/test_v5_agent_deadlock.py
+  - py -3 tests/test_v5_capsule_pollution.py
+  - py -3 tests/test_v5_change_drift.py
+  - py -3 tests/test_v5_schema_grill.py
+  - py -3 tests/test_v5_status.py
+  - py -3 skill-creator/scripts/quick_validate.py .
+source_verification:
+  primary: GitHub REST API
+  fallback: GitHub connector and git ls-remote after anonymous REST rate limiting
+  evidence: evals/evidence/github-source-verification-2026-07-11.yaml
+proven:
+  - adaptive config and Context Plan schemas validate
+  - Publishing plan selects regulated assurance and an ID slice before the warning threshold
+  - context configuration cannot downgrade regulated assurance or silently drop deferred packs
+  - evaluation scoring blocks single-run, unmeasured-token, and non-executed coding release claims
+  - matched baseline/candidate comparison rejects different input fingerprints
+  - exact duplicated normative runtime rules fail CI
+  - 15 pinned GitHub cases expose 91 obligations across 45 stage cells
+  - Feature-to-source/behavior/acceptance closure blocks orphan release behavior
+  - execution checkpoints detect installed-version, anchor, repository-tree, and access-scope drift
+  - six state-bound micro-gates, one-node advancement, resume hashes, and low-risk outage approval execute successfully
+  - an incomplete requirement can start from a schema-valid Discovery Contract without inventing Product Truth
+  - open P0 discovery unknowns block stage advancement until an explicit checkpoint binds the clarified revision
+  - Product Truth can replace the discovery contract at the specify checkpoint while prior snapshots remain verifiable
+  - execution creation accepts either an installed skill directory or an explicit SKILL.md path
+  - each domain pack is cross-checked against at least two pinned or fixture evaluation assets
+  - lifecycle turn limits fail closed without overwriting the last stable state
+  - 80 percent context pressure requires retrieval, manifested compaction, split delivery, or blocking
+  - capsule namespaces, prompt variables, and read/write slots reject cross-capsule pollution
+  - structured clarification turns compile only owner-attributed answers into a revised Discovery Contract
+  - public claims, package hygiene, generic examples, and pure-v5 runtime boundaries are checked
+  - README keeps lightweight ToC idea-to-PRD entry points, install-before-detail onboarding, and a source-linked ecosystem comparison
+not_proven:
+  - independent performance improvement against a production baseline
+  - three-run statistical stability
+  - real coding-agent implementation and repository tests
+  - domain expert, customer acceptance, production, safety, financial, or regulatory correctness
+  - cryptographic identity, external signature service, or immutable audit-store guarantees
+claim_boundary: >-
+  This evidence proves deterministic mechanisms and frozen-source integrity only.
+  The GitHub matrix remains 4 partial, 41 not_run, and 0 release-passed cells.

@@ -1,0 +1,669 @@
+schema_version: 5.0.0
+truth_id: TRUTH-PUBLISHING-001
+
+product:
+  name: 融合出版与学习服务平台
+  outcome: 让内容方、渠道方和学员在可授权、可追溯、可验收的链路中完成资源发布、激活学习与证据交付
+  scope:
+    - 资源、知识点、题目和课程版本管理
+    - 图书批次及学习码生成
+    - 代理商和接入商资源授权
+    - 学员激活、学习、练习、考试和证据记录
+  out_of_scope:
+    - 第三方支付结算
+    - 法定职业资格证书签发
+  success_metrics:
+    - id: METRIC-ACTIVATION-001
+      name: 有效学习码激活成功率
+      caliber: 成功绑定学员且生成学习权益的码数 / 合法首次激活请求码数，按自然月统计
+      source_refs: [SRC-PUBLISHING-REQ-001]
+      owner: 运营负责人
+      target: 试点期达到 98%
+
+delivery_context:
+  lifecycle_stage: specify
+  delivery_mode: full
+  tier: L2
+  project_shape: brownfield
+  customer_profile: [tob, channel-delivery]
+  governance_profiles: [brownfield]
+  capability_packs: [identity-tenant, content-resource, workflow-audit, data-integration]
+  domain_packs: [education-it]
+  consumers: [product, customer, engineering, coding-agent, qa, operations]
+
+sources:
+  - id: SRC-PUBLISHING-REQ-001
+    kind: user_input
+    title: 客户补充的一书一码及资源授权流程
+    location: project discovery and prototype package
+    authority: accountable
+    status: active
+    disposition: embedded
+    owner: 客户产品负责人
+  - id: SRC-PUBLISHING-LEGACY-001
+    kind: legacy_system
+    title: 既有出版学习原型和历史需求
+    location: project prototype baseline
+    authority: secondary
+    status: active
+    disposition: authoritative_annex
+    owner: 项目产品经理
+
+assertions:
+  - id: AST-PUBLISHING-AUTH-001
+    statement: 学员只有在合法学习码激活并生成有效权益后才能访问课程资源
+    status: verified
+    source_refs: [SRC-PUBLISHING-REQ-001]
+    affected_refs: [FLOW-ACTIVATE-001, RULE-CODE-VALID-001]
+    owner: 客户产品负责人
+  - id: AST-PUBLISHING-VERSION-001
+    statement: 已发布课程版本不可被原地修改，变更通过新版本和权益迁移完成
+    status: proposed
+    source_refs: [SRC-PUBLISHING-REQ-001, SRC-PUBLISHING-LEGACY-001]
+    affected_refs: [ENT-COURSE-001, STM-COURSE-001]
+    owner: 内容负责人
+
+unknowns: []
+
+decisions:
+  - id: DEC-CODE-BIND-001
+    question: 学习码首次激活后能否转移给其他学员
+    decision: 默认不可转移；客服仅能通过有原因、有审计的人工流程处理误绑
+    rationale: 避免一码多用和渠道权益泄露
+    source_refs: [SRC-PUBLISHING-REQ-001]
+    affected_refs: [RULE-CODE-VALID-001, ACT-CODE-ACTIVATE]
+    owner: 客户产品负责人
+    status: approved
+
+conflicts: []
+
+roles:
+  - id: ROLE-CONTENT-ADMIN
+    name: 内容管理员
+    job: 将资源、知识点、题目组装为可发布课程版本
+    data_scope: 所属内容组织及获授权资源
+    forbidden_actions: [修改已发布课程版本]
+  - id: ROLE-CHANNEL-ADMIN
+    name: 渠道管理员
+    job: 将已购资源权益分配给下级代理商或接入商
+    data_scope: 本渠道及下级组织授权范围
+    forbidden_actions: [超量授权, 跨渠道查看]
+  - id: ROLE-LEARNER
+    name: 学员
+    job: 激活合法学习码并完成课程、练习和考试
+    data_scope: 本人权益、学习记录和成绩
+    forbidden_actions: [访问他人学习记录]
+  - id: ROLE-QA-ACCEPTOR
+    name: 客户验收人员
+    job: 按验收口径核验授权、激活、学习和证据闭环
+    data_scope: 授权试点范围和脱敏汇总
+    forbidden_actions: [修改业务记录]
+
+features:
+  - id: FEAT-CONTENT-PUBLISH-001
+    title: 资源、知识点、题库与课程版本化编排发布
+    scope_status: in_scope
+    priority: P0
+    source_refs: [SRC-PUBLISHING-REQ-001]
+    behavior_refs: [MOD-CONTENT-001, FLOW-PUBLISH-001, VIEW-COURSE-EDITOR, ACT-COURSE-PUBLISH]
+    acceptance_refs: [AC-PUBLISH-001]
+    owner: 内容产品负责人
+    version: "1.0"
+  - id: FEAT-CHANNEL-AUTH-001
+    title: 代理商与接入商资源额度授权
+    scope_status: in_scope
+    priority: P0
+    source_refs: [SRC-PUBLISHING-REQ-001]
+    behavior_refs: [MOD-AUTH-001, FLOW-AUTH-001, VIEW-AUTH-CONSOLE, ACT-AUTH-GRANT]
+    acceptance_refs: [AC-AUTH-001, AC-AUTH-OVERLIMIT-001]
+    owner: 渠道产品负责人
+    version: "1.0"
+  - id: FEAT-CODE-ACTIVATE-001
+    title: 学员一书一码激活并生成学习权益
+    scope_status: in_scope
+    priority: P0
+    source_refs: [SRC-PUBLISHING-REQ-001]
+    behavior_refs: [MOD-LEARNING-001, FLOW-ACTIVATE-001, VIEW-CODE-ACTIVATE, ACT-CODE-ACTIVATE]
+    acceptance_refs: [AC-ACTIVATE-001, AC-ACTIVATE-DUPLICATE-001]
+    owner: 学习产品负责人
+    version: "1.0"
+  - id: FEAT-LEARNING-EVIDENCE-001
+    title: 学习过程与验收证据闭环
+    scope_status: in_scope
+    priority: P0
+    source_refs: [SRC-PUBLISHING-REQ-001]
+    behavior_refs: [MOD-LEARNING-001, FLOW-LEARN-001, VIEW-LEARNING-HOME, ACT-LEARNING-COMPLETE]
+    acceptance_refs: [AC-LEARN-001]
+    owner: 教学运营负责人
+    version: "1.0"
+
+modules:
+  - id: MOD-CONTENT-001
+    name: 资源与课程编排
+    outcome: 形成带知识点、题目和资源引用的不可变课程版本
+    role_refs: [ROLE-CONTENT-ADMIN]
+    entity_refs: [ENT-RESOURCE-001, ENT-COURSE-001]
+    flow_refs: [FLOW-PUBLISH-001]
+    view_refs: [VIEW-COURSE-EDITOR]
+    acceptance_refs: [AC-PUBLISH-001]
+  - id: MOD-AUTH-001
+    name: 批次码与渠道授权
+    outcome: 生成可追溯学习码并在授权额度内分配给渠道组织
+    role_refs: [ROLE-CONTENT-ADMIN, ROLE-CHANNEL-ADMIN]
+    entity_refs: [ENT-CODE-001, ENT-AUTH-001]
+    flow_refs: [FLOW-AUTH-001]
+    view_refs: [VIEW-AUTH-CONSOLE]
+    acceptance_refs: [AC-AUTH-001, AC-AUTH-OVERLIMIT-001]
+  - id: MOD-LEARNING-001
+    name: 激活与学习
+    outcome: 学员获得课程权益并产生完整学习证据
+    role_refs: [ROLE-LEARNER]
+    entity_refs: [ENT-CODE-001, ENT-ENTITLEMENT-001, ENT-LEARNING-001]
+    flow_refs: [FLOW-ACTIVATE-001, FLOW-LEARN-001]
+    view_refs: [VIEW-CODE-ACTIVATE, VIEW-LEARNING-HOME]
+    acceptance_refs: [AC-ACTIVATE-001, AC-ACTIVATE-DUPLICATE-001, AC-LEARN-001]
+
+entities:
+  - id: ENT-RESOURCE-001
+    name: 资源
+    owner: 资源管理服务
+    field_refs: [FLD-RESOURCE-NAME, FLD-RESOURCE-TYPE]
+    state_machine_ref: STM-RESOURCE-001
+    source_refs: [SRC-PUBLISHING-REQ-001]
+  - id: ENT-COURSE-001
+    name: 课程版本
+    owner: 课程编排服务
+    field_refs: [FLD-COURSE-NAME, FLD-COURSE-VERSION]
+    state_machine_ref: STM-COURSE-001
+    source_refs: [SRC-PUBLISHING-REQ-001]
+  - id: ENT-CODE-001
+    name: 学习码
+    owner: 学习码服务
+    field_refs: [FLD-CODE-VALUE, FLD-CODE-EXPIRES]
+    state_machine_ref: STM-CODE-001
+    source_refs: [SRC-PUBLISHING-REQ-001]
+  - id: ENT-AUTH-001
+    name: 资源授权
+    owner: 授权服务
+    field_refs: [FLD-AUTH-QUOTA, FLD-AUTH-ORG]
+    state_machine_ref: STM-AUTH-001
+    source_refs: [SRC-PUBLISHING-REQ-001]
+  - id: ENT-ENTITLEMENT-001
+    name: 学习权益
+    owner: 权益服务
+    field_refs: [FLD-ENTITLEMENT-LEARNER]
+    state_machine_ref: STM-ENTITLEMENT-001
+    source_refs: [SRC-PUBLISHING-REQ-001]
+  - id: ENT-LEARNING-001
+    name: 学习记录
+    owner: 学习服务
+    field_refs: [FLD-LEARNING-PROGRESS]
+    state_machine_ref: STM-LEARNING-001
+    source_refs: [SRC-PUBLISHING-REQ-001]
+
+fields:
+  - id: FLD-RESOURCE-NAME
+    name: 资源名称
+    type: string
+    source: 内容管理员录入
+    required: true
+    validation: 1-100 字符，同组织同类型不可重名
+    editable_by: [ROLE-CONTENT-ADMIN]
+    sensitivity: internal
+  - id: FLD-RESOURCE-TYPE
+    name: 资源类型
+    type: enum
+    source: 资源类型字典
+    required: true
+    dictionary: [video, document, image, package]
+    validation: 必须选择有效字典值
+    editable_by: [ROLE-CONTENT-ADMIN]
+    sensitivity: internal
+  - id: FLD-COURSE-NAME
+    name: 课程名称
+    type: string
+    source: 内容管理员录入
+    required: true
+    validation: 1-100 字符
+    editable_by: [ROLE-CONTENT-ADMIN]
+    sensitivity: internal
+  - id: FLD-COURSE-VERSION
+    name: 课程版本
+    type: string
+    source: 系统按发布序列生成
+    required: true
+    validation: 发布后不可修改
+    editable_by: []
+    sensitivity: internal
+  - id: FLD-CODE-VALUE
+    name: 学习码
+    type: string
+    source: 学习码服务生成
+    required: true
+    validation: 全局唯一且不可明文批量导出
+    editable_by: []
+    sensitivity: restricted
+  - id: FLD-CODE-EXPIRES
+    name: 激活截止时间
+    type: datetime
+    source: 批次规则
+    required: true
+    validation: 不得早于批次生效时间
+    editable_by: [ROLE-CONTENT-ADMIN]
+    sensitivity: internal
+  - id: FLD-AUTH-QUOTA
+    name: 授权额度
+    type: integer
+    source: 上级授权余额
+    required: true
+    validation: 大于 0 且不超过可用余额
+    editable_by: [ROLE-CONTENT-ADMIN, ROLE-CHANNEL-ADMIN]
+    sensitivity: confidential
+  - id: FLD-AUTH-ORG
+    name: 被授权组织
+    type: organization_ref
+    source: 组织主数据
+    required: true
+    validation: 必须是授权方可管理的下级组织
+    editable_by: [ROLE-CONTENT-ADMIN, ROLE-CHANNEL-ADMIN]
+    sensitivity: confidential
+  - id: FLD-ENTITLEMENT-LEARNER
+    name: 学员
+    type: user_ref
+    source: 当前登录学员
+    required: true
+    validation: 一个学习码只能绑定一个有效学员
+    editable_by: []
+    sensitivity: restricted
+  - id: FLD-LEARNING-PROGRESS
+    name: 学习进度
+    type: decimal
+    source: 学习事件聚合
+    required: true
+    validation: 0-100，服务端按有效学习事件计算
+    editable_by: []
+    sensitivity: confidential
+
+flows:
+  - id: FLOW-PUBLISH-001
+    name: 课程版本发布
+    actor_refs: [ROLE-CONTENT-ADMIN]
+    module_refs: [MOD-CONTENT-001]
+    start: 资源、知识点、题目及课程结构已完成
+    steps:
+      - order: 1
+        actor_ref: ROLE-CONTENT-ADMIN
+        view_ref: VIEW-COURSE-EDITOR
+        action_ref: ACT-COURSE-PUBLISH
+        visible_result: 页面显示已发布版本号及资源、知识点、题目数量
+        domain_result: 课程版本冻结并发布 CourseVersionPublished
+        failure: 缺少必填资源、知识点或题目时定位问题并保持草稿
+    result: 课程版本可被批次和授权引用
+    compensation: 发布前可撤销；发布后通过新版本替代
+    acceptance_refs: [AC-PUBLISH-001]
+  - id: FLOW-AUTH-001
+    name: 渠道资源授权
+    actor_refs: [ROLE-CONTENT-ADMIN, ROLE-CHANNEL-ADMIN]
+    module_refs: [MOD-AUTH-001]
+    start: 存在已发布课程版本和可用授权余额
+    steps:
+      - order: 1
+        actor_ref: ROLE-CHANNEL-ADMIN
+        view_ref: VIEW-AUTH-CONSOLE
+        action_ref: ACT-AUTH-GRANT
+        visible_result: 授权列表新增记录并更新剩余额度
+        domain_result: 创建有效授权并发布 ResourceAuthorizationGranted
+        failure: 超额或越级授权被阻断，余额和原记录不变
+    result: 下级组织可分配或交付其授权范围内的学习码
+    compensation: 未使用额度可通过带原因的撤销流程回收
+    acceptance_refs: [AC-AUTH-001, AC-AUTH-OVERLIMIT-001]
+  - id: FLOW-ACTIVATE-001
+    name: 学习码激活
+    actor_refs: [ROLE-LEARNER]
+    module_refs: [MOD-LEARNING-001]
+    start: 学员已登录并持有未过期、未激活、处于有效授权范围的学习码
+    steps:
+      - order: 1
+        actor_ref: ROLE-LEARNER
+        view_ref: VIEW-CODE-ACTIVATE
+        action_ref: ACT-CODE-ACTIVATE
+        visible_result: 显示激活成功课程卡片和开始学习入口
+        domain_result: 学习码绑定学员、生成学习权益并发布 LearningCodeActivated
+        failure: 已使用、过期、撤销或越权码显示明确原因且不生成权益
+    result: 学员进入课程学习首页
+    compensation: 误绑仅通过客服人工审核流程处理
+    acceptance_refs: [AC-ACTIVATE-001, AC-ACTIVATE-DUPLICATE-001]
+  - id: FLOW-LEARN-001
+    name: 学习与证据生成
+    actor_refs: [ROLE-LEARNER, ROLE-QA-ACCEPTOR]
+    module_refs: [MOD-LEARNING-001]
+    start: 学员具有有效权益
+    steps:
+      - order: 1
+        actor_ref: ROLE-LEARNER
+        view_ref: VIEW-LEARNING-HOME
+        action_ref: ACT-LEARNING-COMPLETE
+        visible_result: 进度、练习和考试结果更新并显示完成状态
+        domain_result: 写入学习事件、完成记录和可验收证据
+        failure: 无效权益或重复完成事件被拒绝或幂等处理
+    result: 学习记录可按学员、课程版本、渠道和批次追溯
+    compensation: 异常事件进入重算或人工复核队列
+    acceptance_refs: [AC-LEARN-001]
+
+views:
+  - id: VIEW-COURSE-EDITOR
+    name: 课程编排与发布
+    module_ref: MOD-CONTENT-001
+    surface: web
+    role_refs: [ROLE-CONTENT-ADMIN]
+    regions:
+      - id: REG-COURSE-STRUCTURE
+        name: 课程结构区
+        content: 左侧章节树，中部资源/知识点/题目编排，右侧版本与校验摘要
+        field_refs: [FLD-COURSE-NAME, FLD-COURSE-VERSION, FLD-RESOURCE-NAME, FLD-RESOURCE-TYPE]
+        action_refs: [ACT-COURSE-PUBLISH]
+    query_source: 课程编排服务及资源服务
+    states: [default, empty, loading, error, no_permission, success]
+    responsive_rule: PC 主编辑；移动端只读预览
+  - id: VIEW-AUTH-CONSOLE
+    name: 渠道授权控制台
+    module_ref: MOD-AUTH-001
+    surface: web
+    role_refs: [ROLE-CONTENT-ADMIN, ROLE-CHANNEL-ADMIN]
+    regions:
+      - id: REG-AUTH-LIST
+        name: 授权列表与操作区
+        content: 按组织、课程、批次展示总额、已用、可用、状态和审计入口
+        field_refs: [FLD-AUTH-QUOTA, FLD-AUTH-ORG]
+        action_refs: [ACT-AUTH-GRANT]
+    query_source: 授权服务和组织主数据
+    states: [default, empty, loading, error, no_permission, partial, success]
+    responsive_rule: PC 管理；移动端只读摘要
+  - id: VIEW-CODE-ACTIVATE
+    name: 学习码激活页
+    module_ref: MOD-LEARNING-001
+    surface: mobile_web
+    role_refs: [ROLE-LEARNER]
+    regions:
+      - id: REG-CODE-INPUT
+        name: 扫码与输入区
+        content: 扫码结果、脱敏码、课程摘要、激活按钮和失败原因
+        field_refs: [FLD-CODE-VALUE, FLD-CODE-EXPIRES]
+        action_refs: [ACT-CODE-ACTIVATE]
+    query_source: 学习码服务和权益服务
+    states: [default, loading, error, no_permission, success]
+    responsive_rule: H5、小程序和 App 共享行为契约
+  - id: VIEW-LEARNING-HOME
+    name: 学习首页
+    module_ref: MOD-LEARNING-001
+    surface: mobile_web
+    role_refs: [ROLE-LEARNER]
+    regions:
+      - id: REG-LEARNING-PROGRESS
+        name: 课程进度与任务区
+        content: 章节、资源、练习、考试、进度、有效期和继续学习入口
+        field_refs: [FLD-LEARNING-PROGRESS, FLD-COURSE-NAME, FLD-COURSE-VERSION]
+        action_refs: [ACT-LEARNING-COMPLETE]
+    query_source: 权益服务、课程发布快照和学习事件聚合
+    states: [default, empty, loading, error, no_permission, partial, success]
+    responsive_rule: H5、小程序和 App 共享行为契约
+
+actions:
+  - id: ACT-COURSE-PUBLISH
+    name: 发布课程版本
+    trigger: 点击发布并确认
+    role_refs: [ROLE-CONTENT-ADMIN]
+    allowed_states: [draft, reviewing]
+    guard_refs: [RULE-COURSE-COMPLETE-001]
+    confirmation: 显示版本冻结、影响范围和不可原地修改提示
+    visible_result: 页面进入已发布状态并展示版本号
+    command: PublishCourseVersion
+    domain_result: 冻结课程快照并变为 published
+    event_refs: [EVT-COURSE-PUBLISHED]
+    failure_result: 定位缺失项并保持可继续编辑的草稿
+    idempotency: course_id + draft_version
+    audit: 记录发布人、时间、前后版本和资源摘要
+    acceptance_refs: [AC-PUBLISH-001]
+  - id: ACT-AUTH-GRANT
+    name: 授予资源额度
+    trigger: 填写组织和额度后提交
+    role_refs: [ROLE-CONTENT-ADMIN, ROLE-CHANNEL-ADMIN]
+    allowed_states: [available, active]
+    guard_refs: [RULE-AUTH-SCOPE-001]
+    confirmation: 展示被授权组织、课程范围、额度和有效期
+    visible_result: 新授权记录出现且剩余额度同步减少
+    command: GrantResourceAuthorization
+    domain_result: 创建 active 授权记录
+    event_refs: [EVT-AUTH-GRANTED]
+    failure_result: 超额、越级或重复授权显示原因且不扣减额度
+    idempotency: parent_authorization_id + target_org_id + request_id
+    audit: 记录授权链、额度、操作者、前后余额和原因
+    acceptance_refs: [AC-AUTH-001, AC-AUTH-OVERLIMIT-001]
+  - id: ACT-CODE-ACTIVATE
+    name: 激活学习码
+    trigger: 扫码或输入学习码后点击激活
+    role_refs: [ROLE-LEARNER]
+    allowed_states: [generated, authorized]
+    guard_refs: [RULE-CODE-VALID-001]
+    confirmation: 展示课程、有效期和绑定后不可自行转移提示
+    visible_result: 激活成功后显示课程卡片和开始学习入口
+    command: ActivateLearningCode
+    domain_result: 学习码变为 activated 并创建 active 权益
+    event_refs: [EVT-CODE-ACTIVATED]
+    failure_result: 显示已使用、过期、撤销、无权限或系统繁忙，并提供对应下一步
+    idempotency: code_id + learner_id
+    audit: 记录脱敏码、学员、渠道链、设备、时间和结果
+    acceptance_refs: [AC-ACTIVATE-001, AC-ACTIVATE-DUPLICATE-001]
+  - id: ACT-LEARNING-COMPLETE
+    name: 完成学习任务
+    trigger: 完成资源、练习或考试产生学习事件
+    role_refs: [ROLE-LEARNER]
+    allowed_states: [active, in_progress]
+    guard_refs: [RULE-ENTITLEMENT-ACTIVE-001]
+    confirmation: none
+    visible_result: 任务完成状态和总进度更新
+    command: RecordLearningCompletion
+    domain_result: 幂等写入学习事件并重算学习记录
+    event_refs: [EVT-LEARNING-UPDATED]
+    failure_result: 无效权益阻断；网络失败保留待同步状态并允许重试
+    idempotency: learner_id + task_id + completion_version
+    audit: 记录事件来源、时间、设备、课程版本和计算结果
+    acceptance_refs: [AC-LEARN-001]
+
+states:
+  - id: STM-RESOURCE-001
+    owner_ref: ENT-RESOURCE-001
+    states: [draft, active, retired]
+    transitions: []
+  - id: STM-COURSE-001
+    owner_ref: ENT-COURSE-001
+    states: [draft, reviewing, published, superseded, retired]
+    transitions:
+      - from: draft
+        action_ref: ACT-COURSE-PUBLISH
+        guard_refs: [RULE-COURSE-COMPLETE-001]
+        to: published
+        event_ref: EVT-COURSE-PUBLISHED
+  - id: STM-CODE-001
+    owner_ref: ENT-CODE-001
+    states: [generated, authorized, activated, expired, revoked]
+    transitions:
+      - from: authorized
+        action_ref: ACT-CODE-ACTIVATE
+        guard_refs: [RULE-CODE-VALID-001]
+        to: activated
+        event_ref: EVT-CODE-ACTIVATED
+  - id: STM-AUTH-001
+    owner_ref: ENT-AUTH-001
+    states: [available, active, exhausted, revoked, expired]
+    transitions:
+      - from: available
+        action_ref: ACT-AUTH-GRANT
+        guard_refs: [RULE-AUTH-SCOPE-001]
+        to: active
+        event_ref: EVT-AUTH-GRANTED
+  - id: STM-ENTITLEMENT-001
+    owner_ref: ENT-ENTITLEMENT-001
+    states: [active, expired, revoked, migrated]
+    transitions: []
+  - id: STM-LEARNING-001
+    owner_ref: ENT-LEARNING-001
+    states: [not_started, in_progress, completed, invalidated]
+    transitions:
+      - from: in_progress
+        action_ref: ACT-LEARNING-COMPLETE
+        guard_refs: [RULE-ENTITLEMENT-ACTIVE-001]
+        to: completed
+        event_ref: EVT-LEARNING-UPDATED
+
+rules:
+  - id: RULE-COURSE-COMPLETE-001
+    statement: 发布前必须存在有效课程名称、至少一个资源、知识点映射、考核规则和版本说明
+    owner: 内容负责人
+    source_refs: [SRC-PUBLISHING-REQ-001]
+    enforcement: backend_guard
+    failure_behavior: 阻断发布并返回可定位的缺失项
+  - id: RULE-AUTH-SCOPE-001
+    statement: 授权组织必须在授权方管理范围内，额度不得超过可用余额，扣减和授权创建必须原子完成
+    owner: 渠道运营负责人
+    source_refs: [SRC-PUBLISHING-REQ-001]
+    enforcement: backend_guard
+    failure_behavior: 阻断并保持原余额，记录失败审计
+  - id: RULE-CODE-VALID-001
+    statement: 只有未过期、未激活、未撤销且处于有效渠道授权链中的学习码可以绑定当前学员
+    owner: 产品负责人
+    source_refs: [SRC-PUBLISHING-REQ-001]
+    enforcement: backend_guard
+    failure_behavior: 不生成权益并返回具体可处理原因
+  - id: RULE-ENTITLEMENT-ACTIVE-001
+    statement: 只有有效权益产生的学习事件才能计入正式进度和验收证据
+    owner: 教学运营负责人
+    source_refs: [SRC-PUBLISHING-REQ-001]
+    enforcement: backend_guard
+    failure_behavior: 阻断或标记无效事件并进入复核
+
+events:
+  - id: EVT-COURSE-PUBLISHED
+    name: CourseVersionPublished
+    producer: 课程编排服务
+    consumers: [学习码服务, 权益服务, 学习服务]
+    payload: [course_id, version, resource_snapshot_hash, published_at, publisher_id]
+    version: "1.0"
+    ordering: course_id + version
+    replay: 消费者按事件 ID 幂等
+    dead_letter_owner: 内容平台运维
+  - id: EVT-AUTH-GRANTED
+    name: ResourceAuthorizationGranted
+    producer: 授权服务
+    consumers: [学习码服务, 运营报表]
+    payload: [authorization_id, parent_id, target_org_id, course_version_id, quota, effective_at]
+    version: "1.0"
+    ordering: parent_authorization_id
+    replay: 按 authorization_id 幂等
+    dead_letter_owner: 渠道平台运维
+  - id: EVT-CODE-ACTIVATED
+    name: LearningCodeActivated
+    producer: 学习码服务
+    consumers: [权益服务, 学习服务, 运营报表]
+    payload: [code_id, learner_id, course_version_id, authorization_chain, activated_at]
+    version: "1.0"
+    ordering: code_id
+    replay: 只允许同一 code_id + learner_id 幂等重放
+    dead_letter_owner: 学习平台运维
+  - id: EVT-LEARNING-UPDATED
+    name: LearningProgressUpdated
+    producer: 学习服务
+    consumers: [学习首页, 运营报表, 验收证据服务]
+    payload: [learner_id, course_version_id, task_id, progress, result, occurred_at]
+    version: "1.0"
+    ordering: learner_id + course_version_id
+    replay: 按学习事件 ID 幂等重算
+    dead_letter_owner: 学习平台运维
+
+integrations:
+  - id: INT-ORG-MASTER-001
+    system: 组织和渠道主数据
+    direction: inbound
+    contract: 查询授权方可管理的下级组织及有效状态
+    owner: 客户组织管理员
+    freshness: 准实时
+    failure_behavior: 禁止新增授权，保留已有只读数据并提示依赖不可用
+    reconciliation: 恢复后重试并核对授权目标组织状态
+
+acceptance:
+  - id: AC-PUBLISH-001
+    title: 完整课程草稿发布为不可变版本
+    priority: P0
+    type: happy
+    preconditions: [内容管理员登录, 草稿包含资源、知识点、题目和考核规则]
+    steps: [进入课程编排页, 点击发布, 确认版本冻结]
+    expected_visible: 页面展示 published 状态、版本号和发布摘要
+    expected_domain: 创建课程版本快照并发布 CourseVersionPublished
+    test_anchors: [data-testid=page-course-editor, data-action=ACT-COURSE-PUBLISH]
+    evidence_required: [automated_test, screenshot, audit_record]
+  - id: AC-AUTH-001
+    title: 渠道在余额内授权下级组织
+    priority: P0
+    type: happy
+    preconditions: [授权方有 100 个可用额度, 目标组织为有效下级组织]
+    steps: [选择目标组织, 输入 20, 确认授权]
+    expected_visible: 列表新增 20 个额度授权且余额变为 80
+    expected_domain: 创建 active 授权并原子扣减余额，发布 ResourceAuthorizationGranted
+    test_anchors: [data-testid=page-auth-console, data-action=ACT-AUTH-GRANT]
+    evidence_required: [automated_test, screenshot, audit_record]
+  - id: AC-AUTH-OVERLIMIT-001
+    title: 超额授权被阻断且余额不变
+    priority: P0
+    type: validation
+    preconditions: [授权方只有 10 个可用额度]
+    steps: [输入 20, 提交授权]
+    expected_visible: 显示可用额度不足并保留输入供修改
+    expected_domain: 不创建授权、不扣减余额，记录失败审计
+    test_anchors: [data-action=ACT-AUTH-GRANT]
+    evidence_required: [automated_test, screenshot, audit_record]
+  - id: AC-ACTIVATE-001
+    title: 学员首次激活合法学习码
+    priority: P0
+    type: happy
+    preconditions: [学员登录, 学习码有效且未使用, 渠道授权有效]
+    steps: [扫码, 核对课程摘要, 确认激活]
+    expected_visible: 显示激活成功、课程卡片和开始学习入口
+    expected_domain: 学习码绑定学员并生成有效权益，发布 LearningCodeActivated
+    test_anchors: [data-testid=page-code-activate, data-action=ACT-CODE-ACTIVATE]
+    evidence_required: [automated_test, screenshot, audit_record]
+  - id: AC-ACTIVATE-DUPLICATE-001
+    title: 已激活学习码不能绑定第二个学员
+    priority: P0
+    type: duplicate
+    preconditions: [学习码已绑定学员 A, 学员 B 登录]
+    steps: [学员 B 输入同一码, 点击激活]
+    expected_visible: 显示学习码已使用并提供客服入口
+    expected_domain: 原绑定和权益不变，不产生第二份权益
+    test_anchors: [data-action=ACT-CODE-ACTIVATE]
+    evidence_required: [automated_test, screenshot, audit_record]
+  - id: AC-LEARN-001
+    title: 有效权益完成学习并形成可追溯证据
+    priority: P0
+    type: happy
+    preconditions: [学员有有效权益, 当前任务未完成]
+    steps: [完成资源学习, 提交练习或考试, 返回学习首页]
+    expected_visible: 任务完成、进度和结果同步更新
+    expected_domain: 幂等记录学习事件并形成课程版本、渠道、批次、学员关联证据
+    test_anchors: [data-testid=page-learning-home, data-action=ACT-LEARNING-COMPLETE]
+    evidence_required: [automated_test, screenshot, audit_record, metric_snapshot]
+
+evidence: []
+
+projections:
+  - kind: human_first
+    path: projections/human-first-prd.md
+    generated_from: product_truth
+    generated_at: "2026-07-11T12:00:00+08:00"
+  - kind: coding_agent
+    path: projections/coding-agent-spec.md
+    generated_from: product_truth
+    generated_at: "2026-07-11T12:00:00+08:00"
+  - kind: qa_acceptance
+    path: acceptance/ac.yaml
+    generated_from: product_truth
+    generated_at: "2026-07-11T12:00:00+08:00"

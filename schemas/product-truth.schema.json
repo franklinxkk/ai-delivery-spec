@@ -1,0 +1,494 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/product-truth.schema.json",
+  "title": "AI Delivery Spec Product Truth",
+  "description": "Canonical product-delivery facts projected into human, prototype, coding-agent, QA, and customer views.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "product",
+    "delivery_context",
+    "sources",
+    "features",
+    "modules",
+    "flows",
+    "views",
+    "actions",
+    "states",
+    "acceptance"
+  ],
+  "properties": {
+    "schema_version": { "const": "5.0.0" },
+    "truth_id": { "$ref": "#/$defs/stableId" },
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "outcome", "scope"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "outcome": { "type": "string", "minLength": 1 },
+        "scope": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "out_of_scope": { "type": "array", "items": { "type": "string" } },
+        "success_metrics": { "type": "array", "items": { "$ref": "#/$defs/metric" } }
+      }
+    },
+    "delivery_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lifecycle_stage", "delivery_mode", "tier", "consumers"],
+      "properties": {
+        "lifecycle_stage": {
+          "enum": ["discover", "specify", "plan", "tasks", "build_verify", "launch", "learn_retire"]
+        },
+        "delivery_mode": { "enum": ["lite", "standard", "full"] },
+        "tier": { "enum": ["L0", "L1", "L2", "L3"] },
+        "project_shape": { "enum": ["greenfield", "brownfield", "hybrid"] },
+        "customer_profile": { "type": "array", "items": { "type": "string" } },
+        "governance_profiles": { "type": "array", "items": { "type": "string" } },
+        "capability_packs": { "type": "array", "items": { "type": "string" } },
+        "domain_packs": { "type": "array", "items": { "type": "string" } },
+        "consumers": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/source" },
+      "minItems": 1
+    },
+    "assertions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/assertion" }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/unknown" }
+    },
+    "decisions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/decision" }
+    },
+    "conflicts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/conflict" }
+    },
+    "roles": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/role" }
+    },
+    "features": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/feature" },
+      "minItems": 1
+    },
+    "modules": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/module" },
+      "minItems": 1
+    },
+    "entities": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entity" }
+    },
+    "fields": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/field" }
+    },
+    "flows": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/flow" },
+      "minItems": 1
+    },
+    "views": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/view" },
+      "minItems": 1
+    },
+    "actions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/action" },
+      "minItems": 1
+    },
+    "states": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/stateMachine" },
+      "minItems": 1
+    },
+    "rules": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/rule" }
+    },
+    "events": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/event" }
+    },
+    "integrations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/integration" }
+    },
+    "acceptance": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/acceptance" },
+      "minItems": 1
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidence" }
+    },
+    "projections": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/projection" }
+    }
+  },
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$"
+    },
+    "idList": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/stableId" },
+      "uniqueItems": true
+    },
+    "metric": {
+      "type": "object",
+      "required": ["id", "name", "caliber", "owner"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "name": { "type": "string" },
+        "caliber": { "type": "string" },
+        "source_refs": { "$ref": "#/$defs/idList" },
+        "owner": { "type": "string" },
+        "target": { "type": ["string", "number"] }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "authority", "status", "disposition"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "kind": {
+          "enum": ["user_input", "customer_artifact", "contract", "prototype", "legacy_system", "law", "regulation", "standard", "guidance", "project_rule", "inference"]
+        },
+        "title": { "type": "string" },
+        "location": { "type": "string" },
+        "authority": { "enum": ["primary", "accountable", "secondary", "inferred", "unknown"] },
+        "status": { "enum": ["active", "superseded", "draft", "unknown"] },
+        "disposition": { "enum": ["embedded", "authoritative_annex", "deferred", "conflict", "not_applicable"] },
+        "jurisdiction": { "type": "string" },
+        "effective_date": { "type": "string", "format": "date" },
+        "last_verified_at": { "type": "string", "format": "date-time" },
+        "owner": { "type": "string" }
+      }
+    },
+    "assertion": {
+      "type": "object",
+      "required": ["id", "statement", "status", "source_refs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "statement": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["verified", "inferred", "proposed", "unknown", "conflict"] },
+        "source_refs": { "$ref": "#/$defs/idList" },
+        "affected_refs": { "$ref": "#/$defs/idList" },
+        "owner": { "type": "string" }
+      }
+    },
+    "unknown": {
+      "type": "object",
+      "required": ["id", "question", "impact", "owner", "status"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "question": { "type": "string" },
+        "impact": { "enum": ["scope", "role", "state", "data", "compliance", "acceptance", "commercial", "risk"] },
+        "owner": { "type": "string" },
+        "due_date": { "type": "string", "format": "date" },
+        "status": { "enum": ["open", "answered", "blocked", "accepted_risk"] }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "required": ["id", "question", "decision", "owner", "status"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "question": { "type": "string" },
+        "decision": { "type": "string" },
+        "rationale": { "type": "string" },
+        "source_refs": { "$ref": "#/$defs/idList" },
+        "affected_refs": { "$ref": "#/$defs/idList" },
+        "owner": { "type": "string" },
+        "status": { "enum": ["proposed", "approved", "superseded"] },
+        "supersedes": { "$ref": "#/$defs/stableId" }
+      }
+    },
+    "conflict": {
+      "type": "object",
+      "required": ["id", "assertion_refs", "affected_refs", "decision_owner", "status"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "assertion_refs": { "$ref": "#/$defs/idList" },
+        "affected_refs": { "$ref": "#/$defs/idList" },
+        "temporary_behavior": { "type": "string" },
+        "decision_owner": { "type": "string" },
+        "resolution": { "type": "string" },
+        "status": { "enum": ["open", "resolved", "accepted_risk"] }
+      }
+    },
+    "role": {
+      "type": "object",
+      "required": ["id", "name", "job"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "name": { "type": "string" },
+        "job": { "type": "string" },
+        "data_scope": { "type": "string" },
+        "forbidden_actions": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "feature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "scope_status", "priority", "source_refs", "behavior_refs", "acceptance_refs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "title": { "type": "string", "minLength": 1 },
+        "scope_status": { "enum": ["in_scope", "deferred", "not_applicable", "out_of_scope", "unknown"] },
+        "priority": { "enum": ["P0", "P1", "P2"] },
+        "source_refs": { "$ref": "#/$defs/idList" },
+        "behavior_refs": { "$ref": "#/$defs/idList" },
+        "acceptance_refs": { "$ref": "#/$defs/idList" },
+        "owner": { "type": "string" },
+        "version": { "type": "string", "minLength": 1 },
+        "notes": { "type": "string" }
+      }
+    },
+    "module": {
+      "type": "object",
+      "required": ["id", "name", "outcome", "role_refs", "flow_refs", "acceptance_refs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "name": { "type": "string" },
+        "outcome": { "type": "string" },
+        "role_refs": { "$ref": "#/$defs/idList" },
+        "entity_refs": { "$ref": "#/$defs/idList" },
+        "flow_refs": { "$ref": "#/$defs/idList" },
+        "view_refs": { "$ref": "#/$defs/idList" },
+        "acceptance_refs": { "$ref": "#/$defs/idList" }
+      }
+    },
+    "entity": {
+      "type": "object",
+      "required": ["id", "name", "owner", "field_refs", "state_machine_ref"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "name": { "type": "string" },
+        "owner": { "type": "string" },
+        "field_refs": { "$ref": "#/$defs/idList" },
+        "state_machine_ref": { "$ref": "#/$defs/stableId" },
+        "source_refs": { "$ref": "#/$defs/idList" }
+      }
+    },
+    "field": {
+      "type": "object",
+      "required": ["id", "name", "type", "source", "required", "editable_by"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "source": { "type": "string" },
+        "required": { "type": "boolean" },
+        "dictionary": { "type": "array", "items": { "type": ["string", "number", "boolean"] } },
+        "validation": { "type": "string" },
+        "default": {},
+        "editable_by": { "$ref": "#/$defs/idList" },
+        "sensitivity": { "enum": ["public", "internal", "confidential", "restricted"] }
+      }
+    },
+    "flow": {
+      "type": "object",
+      "required": ["id", "name", "actor_refs", "module_refs", "start", "steps", "result", "acceptance_refs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "name": { "type": "string" },
+        "actor_refs": { "$ref": "#/$defs/idList" },
+        "module_refs": { "$ref": "#/$defs/idList" },
+        "start": { "type": "string" },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["order", "actor_ref", "action_ref", "visible_result", "domain_result"],
+            "properties": {
+              "order": { "type": "integer", "minimum": 1 },
+              "actor_ref": { "$ref": "#/$defs/stableId" },
+              "view_ref": { "$ref": "#/$defs/stableId" },
+              "action_ref": { "$ref": "#/$defs/stableId" },
+              "visible_result": { "type": "string" },
+              "domain_result": { "type": "string" },
+              "failure": { "type": "string" }
+            }
+          }
+        },
+        "result": { "type": "string" },
+        "compensation": { "type": "string" },
+        "acceptance_refs": { "$ref": "#/$defs/idList" }
+      }
+    },
+    "view": {
+      "type": "object",
+      "required": ["id", "name", "module_ref", "role_refs", "regions", "states"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "name": { "type": "string" },
+        "module_ref": { "$ref": "#/$defs/stableId" },
+        "surface": { "enum": ["web", "mobile_web", "mini_program", "app", "desktop", "api", "print"] },
+        "role_refs": { "$ref": "#/$defs/idList" },
+        "regions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "content"],
+            "properties": {
+              "id": { "$ref": "#/$defs/stableId" },
+              "name": { "type": "string" },
+              "content": { "type": "string" },
+              "field_refs": { "$ref": "#/$defs/idList" },
+              "action_refs": { "$ref": "#/$defs/idList" }
+            }
+          }
+        },
+        "query_source": { "type": "string" },
+        "states": { "type": "array", "items": { "enum": ["default", "empty", "loading", "error", "no_permission", "partial", "success"] }, "minItems": 1 },
+        "responsive_rule": { "type": "string" }
+      }
+    },
+    "action": {
+      "type": "object",
+      "required": ["id", "name", "trigger", "role_refs", "allowed_states", "visible_result", "domain_result", "acceptance_refs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "name": { "type": "string" },
+        "trigger": { "type": "string" },
+        "role_refs": { "$ref": "#/$defs/idList" },
+        "allowed_states": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "guard_refs": { "$ref": "#/$defs/idList" },
+        "confirmation": { "type": "string" },
+        "visible_result": { "type": "string", "minLength": 1 },
+        "command": { "type": "string" },
+        "domain_result": { "type": "string", "minLength": 1 },
+        "event_refs": { "$ref": "#/$defs/idList" },
+        "failure_result": { "type": "string" },
+        "idempotency": { "type": "string" },
+        "audit": { "type": "string" },
+        "acceptance_refs": { "$ref": "#/$defs/idList" }
+      }
+    },
+    "stateMachine": {
+      "type": "object",
+      "required": ["id", "owner_ref", "states", "transitions"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "owner_ref": { "$ref": "#/$defs/stableId" },
+        "states": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["from", "action_ref", "to"],
+            "properties": {
+              "from": { "type": "string" },
+              "action_ref": { "$ref": "#/$defs/stableId" },
+              "guard_refs": { "$ref": "#/$defs/idList" },
+              "to": { "type": "string" },
+              "event_ref": { "$ref": "#/$defs/stableId" }
+            }
+          }
+        }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "required": ["id", "statement", "owner", "source_refs", "enforcement"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "statement": { "type": "string" },
+        "owner": { "type": "string" },
+        "source_refs": { "$ref": "#/$defs/idList" },
+        "enforcement": { "enum": ["frontend_hint", "backend_guard", "human_gate", "audit_only"] },
+        "failure_behavior": { "type": "string" }
+      }
+    },
+    "event": {
+      "type": "object",
+      "required": ["id", "name", "producer", "consumers", "payload", "version"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "name": { "type": "string" },
+        "producer": { "type": "string" },
+        "consumers": { "type": "array", "items": { "type": "string" } },
+        "payload": { "type": "array", "items": { "type": "string" } },
+        "version": { "type": "string" },
+        "ordering": { "type": "string" },
+        "replay": { "type": "string" },
+        "dead_letter_owner": { "type": "string" }
+      }
+    },
+    "integration": {
+      "type": "object",
+      "required": ["id", "system", "direction", "contract", "owner", "failure_behavior"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "system": { "type": "string" },
+        "direction": { "enum": ["inbound", "outbound", "bidirectional"] },
+        "contract": { "type": "string" },
+        "owner": { "type": "string" },
+        "freshness": { "type": "string" },
+        "failure_behavior": { "type": "string" },
+        "reconciliation": { "type": "string" }
+      }
+    },
+    "acceptance": {
+      "type": "object",
+      "required": ["id", "title", "priority", "preconditions", "steps", "expected_visible", "expected_domain", "evidence_required"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "title": { "type": "string" },
+        "priority": { "enum": ["P0", "P1", "P2"] },
+        "type": { "enum": ["happy", "validation", "permission", "state_conflict", "duplicate", "timeout", "integration_failure", "migration", "accessibility", "security"] },
+        "preconditions": { "type": "array", "items": { "type": "string" } },
+        "steps": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "expected_visible": { "type": "string" },
+        "expected_domain": { "type": "string" },
+        "test_anchors": { "type": "array", "items": { "type": "string" } },
+        "evidence_required": { "type": "array", "items": { "enum": ["automated_test", "screenshot", "api_trace", "audit_record", "human_signoff", "metric_snapshot"] }, "minItems": 1 }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["id", "acceptance_ref", "kind", "executor", "executed_at", "result", "location"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "acceptance_ref": { "$ref": "#/$defs/stableId" },
+        "kind": { "enum": ["automated_test", "screenshot", "api_trace", "audit_record", "human_signoff", "metric_snapshot"] },
+        "executor": { "type": "string" },
+        "executed_at": { "type": "string", "format": "date-time" },
+        "environment": { "type": "string" },
+        "result": { "enum": ["passed", "failed", "blocked", "not_run"] },
+        "location": { "type": "string" },
+        "hash": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    },
+    "projection": {
+      "type": "object",
+      "required": ["kind", "path", "generated_from", "generated_at"],
+      "properties": {
+        "kind": { "enum": ["human_first", "prototype", "coding_agent", "qa_acceptance", "customer_contract"] },
+        "path": { "type": "string" },
+        "generated_from": { "const": "product_truth" },
+        "generated_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}
