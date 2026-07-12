@@ -1,4 +1,4 @@
-schema_version: 5.0.1
+schema_version: 5.0.2
 cases:
   - {id: T01, prompt: "Rename one optional label on a draft page", expected_mode: ultra_light, expected_tier: L0}
   - {id: T02, prompt: "Add one reversible optional field to a list", expected_mode: ultra_light, expected_tier: L0}

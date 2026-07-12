@@ -4,84 +4,84 @@ fixtures:
   - id: FX-TRAFFIC-RISK-CLOSE
     domain: traffic
     type: lifecycle
-    source: references/domain-traffic.md
+    source: references/domains/domain-traffic.md
     expected: risk detection, accountable disposition, rectification, evidence, and closure remain traceable
     status: not_run
   - id: FX-TRAFFIC-AI-BOUNDARY
     domain: traffic
     type: safety
-    source: references/domain-traffic.md
+    source: references/domains/domain-traffic.md
     expected: AI advice cannot approve or close an accountable safety decision
     status: not_run
   - id: FX-CRM-LEAD-REVENUE
     domain: crm
     type: lifecycle
-    source: references/domain-crm.md
+    source: references/domains/domain-crm.md
     expected: lead, opportunity, contract, invoice, and payment retain provenance and permissions
     status: not_run
   - id: FX-CRM-TICKET-DEMAND
     domain: crm
     type: cross_module
-    source: references/domain-crm.md
+    source: references/domains/domain-crm.md
     expected: ticket-to-demand handoff preserves owner, source, state, event, and acceptance evidence
     status: not_run
   - id: FX-EDU-COURSE-VERSION
     domain: education-it
     type: lifecycle
-    source: references/domain-education-it.md
+    source: references/domains/domain-education-it.md
     expected: learning evidence remains bound to the assigned course and assessment version
     status: not_run
   - id: FX-EDU-ENTITLEMENT-REVOKE
     domain: education-it
     type: permission
-    source: references/domain-education-it.md
+    source: references/domains/domain-education-it.md
     expected: entitlement revocation has an explicit effect on activated learners and retained evidence
     status: not_run
   - id: FX-OA-APPROVAL-RECALL
     domain: oa
     type: state_conflict
-    source: references/domain-oa.md
+    source: references/domains/domain-oa.md
     expected: recall, reject, resubmit, and concurrent approval retain an auditable state owner
     status: not_run
   - id: FX-OA-DOCUMENT-SEAL
     domain: oa
     type: compliance
-    source: references/domain-oa.md
+    source: references/domains/domain-oa.md
     expected: document, signature, seal, archive, and retention authority are not collapsed into one action
     status: not_run
   - id: FX-MEDICAL-ORDER-CANCEL
     domain: medical-hospital-it
     type: safety
-    source: references/domain-medical-hospital-it.md
+    source: references/domains/domain-medical-hospital-it.md
     expected: clinical cancellation requires accountable authority, downstream impact, and immutable evidence
     status: not_run
   - id: FX-MEDICAL-PATIENT-MERGE
     domain: medical-hospital-it
     type: data
-    source: references/domain-medical-hospital-it.md
+    source: references/domains/domain-medical-hospital-it.md
     expected: patient identity merge preserves provenance, access, correction, and rollback constraints
     status: not_run
   - id: FX-DATA-METRIC-VERSION
     domain: data-product
     type: lifecycle
-    source: references/domain-data-mart.md
+    source: references/domains/domain-data-mart.md
     expected: metric approval, version, lineage, historical recalculation, and consumer impact remain linked
     status: not_run
   - id: FX-DATA-AI-EVIDENCE
     domain: data-product
     type: ai_boundary
-    source: references/domain-data-mart.md
+    source: references/domains/domain-data-mart.md
     expected: generated analysis cites governed data, refuses unsupported scope, and records correction evidence
     status: not_run
   - id: FX-AI-TOOL-DENIAL
     domain: ai-native
     type: permission
-    source: references/domain-ai-native.md
+    source: references/domains/domain-ai-native.md
     expected: tool denial cannot be bypassed through delegation, memory, or prompt content
     status: not_run
   - id: FX-AI-LOOP-FALLBACK
     domain: ai-native
     type: convergence
-    source: references/domain-ai-native.md
+    source: references/domains/domain-ai-native.md
     expected: repeated propose-reject cycles stop at the configured limit and hand control to a human
     status: not_run

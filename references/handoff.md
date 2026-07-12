@@ -35,7 +35,7 @@ tracking outside the PRD projection.
 
 ## Prototype Projection
 
-Use `references/prototype-testability.md`. The prototype must preserve IDs:
+Use `references/runtime/prototype-testability.md`. The prototype must preserve IDs:
 
 ```text
 data-testid <- VIEW/REG/AC
@@ -51,7 +51,10 @@ environment.
 
 ## Coding-Agent Projection
 
-Generate only when implementation is requested. Include:
+Generate only when implementation is requested. If the user asks for a
+complete/final AI Coding PRD or direct system generation, first read
+`references/runtime/ai-coding-completeness.md` and use the complete template;
+the shorter projection below is not an acceptable substitute. Include:
 
 - source-of-truth order and manifest;
 - greenfield or brownfield repository baseline;
@@ -75,7 +78,9 @@ evidence.
 
 ```text
 delivery/
-  truth/product-truth.yaml
+  truth/index.yaml
+  truth/fragments/*.yaml
+  truth/compiled/product-truth.yaml
   projections/human-first-prd.md
   projections/coding-agent-spec.md
   prototype/
@@ -85,6 +90,10 @@ delivery/
   evidence/
   manifest.json
 ```
+
+Small bounded projects may retain `truth/product-truth.yaml`. Large-project
+authoring uses the index/fragments as the resumable source and treats the
+compiled document as read-only output.
 
 Only include directories required by scope. Manifest entries record path,
 version, hash when available, authority, and lifecycle status.

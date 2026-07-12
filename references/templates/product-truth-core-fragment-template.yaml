@@ -1,0 +1,18 @@
+schema_version: 5.0.2
+fragment_id: FRAG-CORE
+truth_id: TRUTH-PRODUCT-001
+content:
+  truth_id: TRUTH-PRODUCT-001
+  product:
+    name: "{product name}"
+    outcome: "{measurable outcome}"
+    scope: ["{approved scope}"]
+  delivery_context:
+    lifecycle_stage: specify
+    delivery_mode: standard
+    tier: L2
+    project_shape: greenfield
+    consumers: [product, engineering, qa, coding_agent]
+  sources: []
+  roles: []
+  features: []

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/product-truth-index.schema.json",
+  "title": "AI Delivery Spec Progressive Product Truth Index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "truth_id", "layout", "compiled_output", "fragments"],
+  "properties": {
+    "schema_version": { "const": "5.0.2" },
+    "truth_id": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$" },
+    "layout": { "const": "progressive_shards" },
+    "compiled_output": { "type": "string", "minLength": 1 },
+    "fragments": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "path", "owner", "status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^FRAG-[A-Z0-9-]+$" },
+          "path": { "type": "string", "minLength": 1 },
+          "owner": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["draft", "reviewed", "approved"] },
+          "scope_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+          "checkpoint": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

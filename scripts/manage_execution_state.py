@@ -486,7 +486,7 @@ def check(gate_id: str, state: dict[str, Any], args: argparse.Namespace) -> list
         if not truth_anchor:
             add("product_truth", False, "specify and later stages require an anchored Product Truth checkpoint")
         else:
-            command = [sys.executable, str(ROOT / "scripts" / "validate_product_truth.py"), truth_anchor["path"]]
+            command = [sys.executable, str(ROOT / "scripts" / "validators" / "validate_product_truth.py"), truth_anchor["path"]]
             result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, check=False)
             add("product_truth", result.returncode == 0, (result.stdout + result.stderr).strip())
             truth = load(Path(truth_anchor["path"]))
@@ -495,7 +495,7 @@ def check(gate_id: str, state: dict[str, Any], args: argparse.Namespace) -> list
                 text = projection.read_text(encoding="utf-8")
                 missing = sorted(required - set(re.findall(r"\bFEAT-[A-Z0-9-]+\b", text)))
                 projection_result = subprocess.run(
-                    [sys.executable, str(ROOT / "scripts" / "validate_projection_consistency.py"), "--truth", truth_anchor["path"], "--projection", str(projection)],
+                    [sys.executable, str(ROOT / "scripts" / "validators" / "validate_projection_consistency.py"), "--truth", truth_anchor["path"], "--projection", str(projection)],
                     cwd=ROOT, text=True, capture_output=True, check=False,
                 )
                 passed = not missing and projection_result.returncode == 0

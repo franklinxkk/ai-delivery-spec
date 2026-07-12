@@ -4,7 +4,7 @@
   "title": "AI Delivery Spec Domain Pack Metadata",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "domain_id", "name", "coverage", "maturity", "evidence", "known_gaps", "maintainer"],
+  "required": ["schema_version", "domain_id", "name", "coverage", "maturity", "practice_status", "evidence", "known_gaps", "maintainer"],
   "properties": {
     "schema_version": { "const": "5.0.0" },
     "domain_id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
@@ -24,6 +24,10 @@
       }
     },
     "maturity": { "enum": ["experimental", "validated", "audited"] },
+    "practice_status": {
+      "description": "Delivery-use evidence, kept separate from reusable knowledge-pack assurance.",
+      "enum": ["knowledge_only", "production_practiced", "production_observed"]
+    },
     "evidence": {
       "type": "array",
       "items": {
@@ -31,7 +35,7 @@
         "required": ["id", "kind", "location", "status"],
         "properties": {
           "id": { "type": "string" },
-          "kind": { "enum": ["official_source", "mock_scenario", "project_sample", "behavioral_eval", "expert_review", "audit"] },
+          "kind": { "enum": ["official_source", "mock_scenario", "project_sample", "owner_attestation", "behavioral_eval", "expert_review", "audit"] },
           "location": { "type": "string" },
           "status": { "enum": ["current", "expired", "failed", "passed", "unknown"] },
           "reviewed_at": { "type": "string", "format": "date-time" },

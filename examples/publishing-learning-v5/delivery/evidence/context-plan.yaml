@@ -17,11 +17,11 @@ budget:
 selection:
   stage_references:
   - references/specify.md
-  - references/composition.md
-  - references/verify.md
+  - references/runtime/composition.md
+  - references/runtime/verify.md
   deferred_stage_references: []
   domain_packs:
-  - references/domain-education-it.md
+  - references/domains/domain-education-it.md
   deferred_domain_packs: []
   unresolved_domain_packs: []
   truth_strategy: id_slice

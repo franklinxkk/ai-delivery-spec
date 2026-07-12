@@ -32,7 +32,7 @@ def main() -> int:
         contract["unknowns"][0].update({"id": "UNK-DEADLOCK-001", "owner": "test owner"})
         contract_path = work / "discovery.yaml"
         contract_path.write_text(yaml.safe_dump(contract, sort_keys=False), encoding="utf-8")
-        config = yaml.safe_load((ROOT / "spec.config.example.yaml").read_text(encoding="utf-8"))
+        config = yaml.safe_load((ROOT / "examples/spec.config.example.yaml").read_text(encoding="utf-8"))
         config["execution"]["max_turns_per_stage"] = 2
         config_path = work / "spec.config.yaml"
         config_path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")

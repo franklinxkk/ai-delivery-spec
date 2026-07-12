@@ -1,0 +1,23 @@
+schema_version: 5.0.2
+evidence_id: EV-PRACTICE-ATTESTATION-20260712
+kind: accountable_owner_attestation
+received_at: 2026-07-12T00:00:00+08:00
+assertion:
+  production_practiced_domains:
+    - traffic
+    - crm
+    - data-product
+    - education-it
+    - ai-native
+  statement: These domain methods have been used in products that were developed, released, and operated.
+claim_boundary:
+  proves:
+    - delivery practice exists beyond mock examples
+  does_not_prove:
+    - every reusable domain-pack rule is correct
+    - behavioral evaluation of this repository revision passed
+    - independent expert review or audit
+privacy:
+  project_names_included: false
+  customer_data_included: false
+owner: project and skill maintainer

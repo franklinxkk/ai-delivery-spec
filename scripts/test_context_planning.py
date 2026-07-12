@@ -14,7 +14,7 @@ from query_product_truth import make_slice
 
 ROOT = Path(__file__).resolve().parents[1]
 TRUTH_PATH = ROOT / "examples/publishing-learning-v5/delivery/truth/product-truth.yaml"
-CONFIG_PATH = ROOT / "spec.config.example.yaml"
+CONFIG_PATH = ROOT / "examples/spec.config.example.yaml"
 
 
 def main() -> int:

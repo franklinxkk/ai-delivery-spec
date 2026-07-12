@@ -91,7 +91,7 @@ scenarios:
     lifecycle: specify
     shape: hybrid
     perspective: accountable_domain_reviewer
-    input: references/domain-traffic.md
+    input: references/domains/domain-traffic.md
     expected:
       - distinguish regulator and enterprise responsibility
       - refuse unsupported legal conclusions

@@ -1,13 +1,18 @@
 ---
 name: ai-delivery-spec
-description: Turn rough product ideas, consumer or enterprise requests, customer materials, prototypes, legacy systems, or approved changes into traceable product truth, Human-First requirements, PRDs, testable prototypes, acceptance evidence, and coding-agent handoffs. Use for ToC idea clarification and lightweight PRDs, ToB/ToG delivery, product/domain modeling, AI/data/workflow products, brownfield change, customer acceptance, launch/operations, or multi-role lifecycle work. Excludes unrelated code debugging and copy rewriting.
+description: Turn rough product ideas, customer materials, prototypes, legacy systems, or approved changes into traceable Product Truth, Human-First requirements, complete AI Coding PRDs, testable prototypes, structured acceptance, and coding-agent handoffs. Use for ToC clarification/light PRDs, ToB/ToG delivery, multi-role workflows, product/domain modeling, AI/data products, brownfield change, customer acceptance, launch, or operations. Excludes unrelated code debugging and copy rewriting.
 ---
 
-# AI Delivery Spec 5.0.1 - Product Delivery Kernel, ToB/ToG Deep
+# AI Delivery Spec 5.0.2 — Product Delivery Kernel
 
-Create one canonical Product Truth and project it for product, engineering, QA,
-customers, coding agents, and operations. Dedicated domain packs accelerate
-professional work; they are never required for generic delivery.
+> 首次使用推荐：先跑 Ultra-Light 轻量模式快速体验。
+>
+> 切换领域：指令末尾加 `domain=traffic` 即可启用交通垂类规则。
+>
+> 完整文档：见 `README.md`。
+
+Maintain one evidence-backed product contract and project it for users,
+product, engineering, QA, customers, coding agents, and operations.
 
 ## 1. Triage Before Loading
 
@@ -21,266 +26,215 @@ Consumer: human|prototype|coding_agent|qa|customer|operations
 Override: mode=ultra_light|lite|standard|full; tier=L0|L1|L2|L3|L4; domain=generic|<pack>
 ```
 
-Rules:
+- Recommend `Ultra-Light` only for one reversible page/copy/field/rule change,
+  one primary role, no cross-module state, sensitive decision, migration, or
+  customer acceptance. Output one requirement card, assumptions, and positive/
+  negative AC; do not create Product Truth unless risk escalates.
+- `Heavy` includes development, QA, customer delivery, production, migration,
+  regulated behavior, multi-role workflow, or a complete AI Coding PRD.
+- Product behavior using a model/agent is `AI: true`; AI only writing artifacts
+  or code is `false`.
+- Approval, escalation, cross-module state, audit, or long-running work sets
+  `WORKFLOW: true`.
+- Mark information partial/missing only when an unknown can change outcome,
+  scope, owner, role, state, data authority, compliance, commercial promise, or
+  acceptance. Do not repeat discovery after the user has approved these.
 
-- Recommend `Ultra-Light` for one reversible page/copy/field/rule adjustment
-  with one primary role, no cross-module workflow, no regulated decision, and
-  no production migration. Accept one-line user overrides for mode/tier/domain.
+Higher assurance wins. Mode controls artifact breadth; tier controls rigor.
+Manual mode/tier/domain overrides are always accepted unless they would hide a
+P0 safety or compliance risk.
 
-- `Heavy`: development, QA, customer demo, bid/procurement, migration,
-  production, acceptance, regulated decision, or multi-role lifecycle.
-- `AI: true`: the product behavior uses models/agents. AI only writing the
-  artifact or code is `false`.
-- `WORKFLOW: true`: approval, task, escalation, cross-module state, audit, or
-  long-running process exists.
-- `INFO: partial/missing`: an unknown could change outcome, scope, ownership,
-  state, data authority, compliance, commercial promise, or acceptance.
-
-Mode and tier are independent:
-
-| Mode | Stop Boundary |
-|---|---|
-| Ultra-Light | one-page requirement card, assumptions, one happy/negative AC; no Product Truth unless risk escalates |
-| Lite | requested artifact plus explicit gaps |
-| Standard | implementation/QA/customer handoff plus unresolved decisions |
-| Full | complete truth, projections, manifest, readiness, and evidence |
-
-| Tier | Typical Use |
-|---|---|
-| L0 | exploration and proof of life |
-| L1 | bounded feature/product alignment |
-| L2 | standard product development and customer delivery |
-| L3 | AI core, regulated, money/safety/privacy impact, complex multi-agent |
-
-Higher assurance wins when signals conflict. Mode never expands artifact scope
-by itself.
-
-Smart recommendation: default to the smallest safe mode. Escalate Ultra-Light
-when a second role, approval, state machine, integration, sensitive data,
-money/safety impact, or irreversible change appears. Never truncate P0 behavior.
-
-## 2. Load Only What The Task Needs
-
-Read no more than the matching stage references and triggered add-ons.
+## 2. Load Only The Triggered References
 
 | Need | Read |
 |---|---|
-| ambiguous input, customer material, prototype/legacy inventory, unknown domain | `references/discover.md` |
-| material unknowns need active, one-question-at-a-time convergence | `references/schema-grill.md` |
-| Product Truth, module/flow/page/action/state/data specification | `references/specify.md` |
-| capabilities, ToB/ToG/regulated/greenfield/brownfield, domain selection | `references/composition.md` |
-| executable/clickable prototype | `references/prototype-testability.md` + `references/handoff.md` |
-| Human-First, Coding Agent, QA, customer projection | `references/handoff.md` |
-| change, version evolution, impact, migration | `references/change.md` |
-| review, acceptance, evidence, domain maturity, release evaluation | `references/verify.md` |
-| launch, operation, adoption, renewal, retirement | `references/operate.md` |
-| realtime/SSE/WebSocket/countdown/push | `references/realtime-contract.md` |
-| micro-change, regulated scope, large truth, or context pressure | `references/context-planning.md` |
-| long chain, resume, multi-agent, staging/production, or formal audit | `references/execution-gates.md` |
-| GLM 5.2, Qwen, DeepSeek, Kimi, WorkBuddy, Trae, Qoder, or Cursor | matching `agents/*.md` plus `agents/china-tools.md` |
+| source/prototype/legacy inventory or ambiguity | `references/discover.md` |
+| active clarification | `references/runtime/schema-grill.md` |
+| Product Truth and behavior specification | `references/specify.md` |
+| complete AI Coding PRD | `references/runtime/ai-coding-completeness.md` + `references/templates/ai-coding-prd-template.md` |
+| Human-First/Coding/QA/customer projection | `references/handoff.md` |
+| executable prototype | `references/runtime/prototype-testability.md` + `references/handoff.md` |
+| capability/domain composition | `references/runtime/composition.md` |
+| change/migration/rollback | `references/runtime/change.md` |
+| review/evidence/domain assurance | `references/runtime/verify.md` |
+| launch/operate/retire | `references/runtime/operate.md` |
+| realtime/push/countdown/SSE/WebSocket | `references/runtime/realtime-contract.md` |
+| large project/context pressure | `references/runtime/context-planning.md` |
+| long chain/formal checkpoint | `references/runtime/execution-gates.md` |
+| GLM/Qwen/DeepSeek/Kimi/WorkBuddy/Trae/Qoder/Cursor | matched `agents/domestic/*.md` + `agents/domestic/china-tools.md` |
 
-Do not load every domain or reference "for safety". Default task budget:
+Load one or two stage references, zero or one matched domain pack, and only
+triggered governance rules. Do not load README, history, examples, every domain,
+or every reference during runtime.
 
-- one or two stage references;
-- zero or one dedicated domain pack;
-- only triggered capability/governance rules;
-- no historical docs, README, examples, or CHANGELOG at runtime.
+## 3. Choose The Work Path
 
-For unusually small, regulated, or large work, generate an adaptive Context
-Plan from `spec.config.yaml` or the versioned example. Context planning may
-strengthen gates and retrieve Product Truth slices; it cannot change domain
-maturity or silently truncate P0 behavior.
+```text
+Discover 产品发现 → Specify 统一需求契约 → Plan/Tasks 工程交接
+→ Build/Verify 构建验收 → Launch 上线 → Learn/Retire 运营与退役
+```
 
-### Smart large-project mode
+- For an idea, clarify outcome, opportunity/problem, hypothesis, assumptions,
+  risks, metric, and next validation before a full PRD.
+- For customer material or an existing prototype, perform Stage 0 inventory:
+  views, roles, states, actions/handlers, entities/fields, metrics, sources,
+  unresolved gaps, and preserved behavior.
+- When scope is approved and the user requests a complete AI Coding PRD, use
+  the Complete Contract Route in §5. Do not return a thin projection.
+- For existing baselines, record `CHG-*`, impact, compatibility, migration,
+  regression, rollout, and rollback in `schemas/change-package.schema.json`;
+  regenerate only affected projections.
 
-Trigger when any two are true: 8+ roles, 12+ modules/views, 40+ actions, 80+
-fields, 5+ sources, 3+ integrations, or PRD + prototype + coding/QA handoff.
-Generate a Context Plan, inventory the complete ID graph once, work in
-module/flow ID slices, checkpoint accepted slices, and report context pressure
-as low/medium/high. Lite and Ultra-Light may prune prose and optional
-projections, never approved roles, primary flows, states, permissions,
-exceptions, or P0 acceptance.
+## 4. Canonical Product Truth Without Monolith Deadlocks
 
-For long-running discovery, start with
-`schemas/discovery-contract.schema.json`; do not fabricate a complete Product
-Truth merely to create an execution checkpoint.
-
-## 3. Canonical Product Truth
-
-Use `schemas/product-truth.schema.json`. Product Truth contains stable facts:
+Product Truth owns stable facts and IDs:
 
 ```text
 source/assertion/decision/unknown/conflict/feature
-role/module/entity/field
-flow/view/region/action
-state/rule/event/integration
-acceptance/evidence/change/projection
+role/module/entity/field/flow/view/region/action
+state/rule/event/integration/acceptance/evidence/change/projection
 ```
 
-Human-First PRD, prototype, Coding Agent spec, QA acceptance, and customer
-contract are projections from the same IDs. Never maintain separate truths.
+Use `schemas/product-truth.schema.json`. Core invariants:
 
-Core rules:
-
-- Evidence precedes assertion. Mark `verified`, `inferred`, `proposed`,
-  `unknown`, or `conflict`.
+- Evidence precedes assertions; mark verified/inferred/proposed/unknown/conflict.
 - Every primary action has visible and domain results.
-- Every lifecycle change has owner, guard, next state, event/audit, failure,
-  and acceptance.
+- Every state change has owner, guard, next state, event/audit, failure, and AC.
 - Every field has meaning, source, type/dictionary, editability, sensitivity,
   and validation when applicable.
-- Every cross-module flow has object ownership, mapping, event/command,
-  failure/compensation, reconciliation, and evidence.
-- Stable IDs are not reused for different behavior.
-- Every approved in-scope `FEAT-*` links source evidence to behavior and
-  acceptance; deferred, unknown, and not-applicable scope remains explicit.
+- Every cross-module flow has ownership, mapping, command/event, failure/
+  compensation, reconciliation, and evidence.
+- Every approved `FEAT-*` links source, behavior, and AC; deferred/out-of-scope/
+  unknown behavior remains explicit.
 
-## 4. Domain-Agnostic By Default
+### Progressive Truth is the large-project default
 
-Read `references/domain-coverage.yaml` before using a dedicated domain file.
-
-Three modes:
-
-| Mode | Behavior |
-|---|---|
-| generic | discover roles, objects, lifecycle, workflow, data, risk, and acceptance from project evidence |
-| project domain capsule | create scoped vocabulary/entities/states/workflows/policies/sources/unknowns/scenarios |
-| dedicated domain pack | reuse matched, maturity-aware professional knowledge and tests |
-
-No domain pack means more discovery and owner confirmation, not inability to
-deliver. Do not claim production validation from a domain file, mocked scenario,
-or simulated reviewer.
-
-Use `schemas/project-domain-capsule.schema.json` when the capsule becomes a
-reusable project artifact.
-
-When domains compose, use `references/composition.md` to resolve object/state/
-event/permission/metric/failure ownership. AI/data packs may narrow permission
-but cannot expand the owning business domain's authority.
-
-## 5. Work Paths
-
-Choose only the stages required by the request:
+Never ask an agent, subagent, Trae, or WorkBuddy to generate/rewrite one large
+`product-truth.yaml` in a single pass. Use:
 
 ```text
-Discover (产品发现与策略)
--> Specify (需求澄清、范围与统一规格)
--> Plan (工程方案与交接规划)
--> Tasks (任务拆解与 Coding Agent 切片)
--> Build/Verify (构建、验收测试与追溯)
--> Launch (上线与交付)
--> Learn/Retire (运营、学习与退役)
+delivery/truth/index.yaml
+delivery/truth/fragments/00-core.yaml
+delivery/truth/fragments/MOD-*.yaml
+delivery/truth/compiled/product-truth.yaml
 ```
 
-- Specify: what, why, behavior, boundary, acceptance.
-- Plan: implementation seams, dependencies, risk, migration, rollout.
-- Tasks: vertical slices tied to visible/domain result and AC IDs.
-- Build/Verify: implementation and evidence, never automatic launch approval.
+Write one fragment per module/flow slice, validate it, update its checkpoint,
+then compile deterministically. The index is the authoring source; the compiled
+file is the read-only canonical projection for existing tools. Use monolith only
+for bounded projects that fit comfortably in one context.
 
-For ToB/ToG, also model customer and governance lifecycle when in scope. PRD is
-not a project tracker: keep WBS, bugs, daily follow-up, and support tickets in
-their own artifacts linked by stable IDs.
+## 5. Complete AI Coding PRD Route
 
-## 6. Projections
+Use when consumer is `coding_agent` and the user asks for a complete/final/
+directly generatable PRD.
 
-Select the smallest view that satisfies the consumer:
+1. Lock a complete contract index: sources, modules, roles, journeys, views,
+   flows, entities, fields, states, integrations, metrics, and P0 AC IDs.
+2. Write Product Truth and PRD by ID slice; checkpoint each accepted module.
+3. Assemble `references/templates/ai-coding-prd-template.md` without dropping
+   sections. Use `Not applicable + reason + future trigger`, never an empty
+   heading.
+4. Require repository baseline; role/permission/data scope; IA/page layout;
+   fields/data flow; state/recovery; concrete API request/response/errors/
+   idempotency; versioned event payloads; integration/reconciliation; NFR;
+   metrics caliber; vertical files/dependencies; machine AC; deployment/
+   migration/rollback/operations; and forbidden invention.
+5. Run `validate_coding_agent_contract.py --level L2 --profile full_prd` (L3
+   for AI/high-risk). Fix the contract; never lower the level to obtain PASS.
+6. Cross-check every role journey and P0 flow against the IA/prototype and AC.
 
-| View | Required Output |
-|---|---|
-| Contract Summary | outcome, scope, decisions, gaps, upgrade triggers |
-| Human-First | scenario-first module slices, page/action effects, rules, exceptions, flow/data, acceptance |
-| Prototype | stable test/action/field/state anchors and demo-closed behavior |
-| Coding Agent | source order, repository baseline, contracts, vertical tasks, tests, forbidden invention |
-| QA | AC paths, evidence requirements, regression and failure cases |
-| Customer | scope, responsibility, deliverables, exclusions, acceptance, change control |
+Do not end after an outline, one module, one role, one validator, or one
+prototype page when the requested package is larger.
 
-Use templates only as projection aids:
+## 6. Smart Large-Project Mode
 
-- `references/templates/prd-light-template.md`
-- `references/templates/human-first-prd-template.md`
-- `references/templates/ai-coding-prd-template.md`
-- `references/templates/product-truth-template.yaml`
+Trigger when any two are true: 8+ roles, 12+ modules/views, 40+ actions, 80+
+fields, 5+ sources, 3+ integrations, or PRD + prototype + coding/QA handoff.
 
-## 7. Change Instead Of Regeneration
+1. Inventory the complete ID graph once.
+2. Generate a Context Plan and declare pressure `low|medium|high`.
+3. At medium pressure, stop reloading sources and work from approved IDs.
+4. At high pressure, checkpoint the current fragment/section and start the next
+   slice. Never merge roles or omit P0 states, permissions, exceptions, API
+   contracts, or AC to save tokens.
+5. Assemble and run global closure only after all slices pass locally.
 
-For an existing baseline, use `schemas/change-package.schema.json` and
-`references/change.md`. Record `CHG-*`, impacted IDs, compatibility, migration,
-regression, evidence, rollout, and rollback. Update Product Truth, then
-regenerate only affected projections.
+Lite/Ultra-Light may trim prose and optional projections, not approved P0
+behavior. If a safe slice does not fit, split it again or report a named P0
+blocker.
 
-Brownfield work starts with current-state and interaction parity evidence. Do
-not silently remove existing views, actions, states, integrations, data, or
-contract behavior.
+## 7. Domain Use And Honest Evidence
 
-## 8. Gates
+Read `references/domain-coverage.yaml` before a file in `references/domains/`.
 
-Apply only gates triggered by scope, but never weaken in-scope quality.
+- `practice_status` answers whether methods have been used in shipped projects.
+- `maturity` answers whether this reusable pack revision has sourced knowledge,
+  behavioral evaluation, accountable review, and audit evidence.
+- `production_practiced + experimental` is valid: it prevents denying real
+  delivery experience while forbidding unsupported universal claims.
 
-1. Discovery: outcome, sources, scope, owners, risk, P0 unknowns.
-2. Product Truth: role/flow/page/action/state/data/exception/AC closure.
-3. Prototype: every primary action has observable and durable behavior.
-4. Handoff: target consumer can proceed without inventing business behavior.
-5. Acceptance: AC IDs can produce named evidence.
-6. Change: impact, compatibility, migration, regression, rollback.
-7. Launch/Operate: readiness, support, observability, adoption, retirement.
-8. Domain: source/applicability, behavioral evaluation, expert evidence,
-   honest maturity.
+No matched pack means build a project-scoped Domain Capsule with
+`schemas/project-domain-capsule.schema.json`; it never prevents
+delivery. Composition may narrow permissions but cannot expand the owning
+business domain's authority.
 
-For long-running or governed work, create an execution checkpoint and rerun
-the six micro-gates before each stage transition. A classifier may strengthen
-rigor but cannot award domain maturity or human approval. Use
-`references/execution-gates.md`.
+## 8. Projection And Prototype Closure
 
-Completion is scoped:
+Generate only the views needed by the consumer, but preserve the same IDs.
+Interactive prototypes must be usable:
 
-- `PASS`: required gates have evidence;
-- `REVIEW_COMPLETE_WITH_GAPS`: useful result with named gaps and owners;
-- `BLOCKED`: a P0 decision or external condition prevents safe progress.
+```text
+data-testid <- VIEW/REG/AC
+data-action <- ACT
+data-field  <- FLD
+data-state  <- state enum
+data-api    <- command/API
+```
 
-Never infer completion from `PASS` text embedded in a template/reference.
+Every `data-action` needs a handler and visible outcome. Preserve existing
+interaction coverage unless explicitly de-scoped. Verify JavaScript syntax,
+all important role journeys, state/failure paths, and representative data.
 
-## 9. Deterministic Tools
+## 9. Gates And Completion
 
-Use scripts instead of retyping repeatable logic:
+Apply triggered gates without weakening in-scope quality:
+
+1. discovery: sources, outcome, scope, owner, risks, P0 unknowns;
+2. truth: role/flow/page/action/state/data/exception/AC closure;
+3. prototype: every primary action has observable durable behavior;
+4. handoff: target consumer proceeds without inventing business behavior;
+5. acceptance: AC IDs produce named evidence;
+6. change/launch: compatibility, migration, regression, rollout, rollback,
+   support, and observability;
+7. domain: practice and reusable-pack assurance claims remain distinct.
+
+Completion is scoped: `PASS`, `REVIEW_COMPLETE_WITH_GAPS`, or `BLOCKED`.
+Embedded PASS text is never execution evidence.
+
+## 10. Deterministic Commands
 
 ```powershell
 py -3 scripts/ai_delivery_spec_cli.py init-delivery --output delivery
-py -3 scripts/ai_delivery_spec_cli.py check
-py -3 scripts/validate_product_truth.py delivery/truth/product-truth.yaml
-py -3 scripts/plan_context.py --truth delivery/truth/product-truth.yaml --config delivery/spec.config.yaml
-py -3 scripts/query_product_truth.py --truth delivery/truth/product-truth.yaml --id MOD-EXAMPLE --output working-slice.yaml
-py -3 scripts/manage_execution_state.py create --truth delivery/truth/product-truth.yaml --config delivery/spec.config.yaml --installed-skill path/to/SKILL.md --output delivery/evidence/execution/state.yaml
-py -3 scripts/manage_execution_state.py create --discovery-contract discovery.yaml --config delivery/spec.config.yaml --installed-skill path/to/SKILL.md --output delivery/evidence/execution/state.yaml
-py -3 scripts/manage_execution_state.py checkpoint --state state.yaml --truth delivery/truth/product-truth.yaml --output next-state.yaml
-py -3 scripts/manage_execution_state.py record-turn --state state.yaml --output next-turn-state.yaml
-py -3 scripts/compile_clarification_transcript.py --contract discovery.yaml --transcript transcript.yaml --decision READY_FOR_PRODUCT_TRUTH --output discovery-next.yaml
+py -3 scripts/ai_delivery_spec_cli.py compile-truth --index delivery/truth/index.yaml
+py -3 scripts/plan_context.py --truth delivery/truth/compiled/product-truth.yaml --config delivery/spec.config.yaml
+py -3 scripts/query_product_truth.py --truth delivery/truth/compiled/product-truth.yaml --id MOD-EXAMPLE --output working-slice.yaml
+py -3 scripts/validators/validate_product_truth.py delivery/truth/compiled/product-truth.yaml
+py -3 scripts/validators/validate_prd_quality.py delivery/projections/human-first-prd.md --level L2
+py -3 scripts/validators/validate_ia_skeleton.py delivery/ia-skeleton.yaml --level L2
+py -3 scripts/validators/validate_coding_agent_contract.py delivery/projections/ai-coding-prd.md --level L2 --profile full_prd
 py -3 scripts/extract_interaction_ledger.py --input prototype.html --output interaction-ledger.json
-py -3 scripts/validate_projection_consistency.py --truth delivery/truth/product-truth.yaml --projection delivery/projections/human-first-prd.md
-py -3 scripts/render_mermaid_flow.py --truth delivery/truth/product-truth.yaml --output delivery/projections/flow.mmd
-py -3 scripts/validate_prd_quality.py delivery/projections/human-first-prd.md --level L2
-py -3 scripts/validate_ia_skeleton.py delivery/ia-skeleton.yaml --level L2
-py -3 scripts/validate_coding_agent_contract.py delivery/projections/coding-agent-spec.md --level L2
+py -3 scripts/render_mermaid_flow.py --truth delivery/truth/compiled/product-truth.yaml --output delivery/projections/flow.mmd
 ```
 
-Use `python` when available outside Windows.
+Use `python` outside Windows when available.
 
-Shortcuts: `Ultra-Light: <change>`; `Standard L2 domain=generic: <request>`;
-`Full L3 smart-large-project: <program>`; `Override: mode=lite tier=L1 domain=traffic`.
+## 11. Final Self-Check
 
-## 10. Final Self-Check
-
-Before handoff:
-
-- triage, lifecycle, shape, consumer, mode, and tier are explicit;
-- only relevant references/packs were loaded;
-- adaptive Context Plan/slicing was used when size or risk required it;
-- Product Truth or an explicitly lighter artifact is the named source;
-- supplied evidence has no silent omission;
-- P0 unknowns/conflicts have owners;
-- projections preserve stable IDs and do not contradict truth;
-- acceptance names required evidence;
-- domain maturity and validation claims are honest;
-- final state names verification performed and unresolved risks.
-
-Final response states created/updated artifacts, verification, scope, and one
-completion state.
+- triage, lifecycle, shape, consumer, mode, tier, and source precedence are clear;
+- approved source material has no silent omission;
+- all roles, journeys, flows, states, permissions, failures, and P0 AC close;
+- complete AI Coding requests pass the full contract validator;
+- large work used fragments/checkpoints instead of monolithic generation;
+- projections and prototype preserve IDs and interaction coverage;
+- evidence, practice, maturity, gaps, and completion state are honestly named.

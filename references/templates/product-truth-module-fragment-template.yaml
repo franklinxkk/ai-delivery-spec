@@ -1,0 +1,15 @@
+schema_version: 5.0.2
+fragment_id: FRAG-MODULE-EXAMPLE
+truth_id: TRUTH-PRODUCT-001
+content:
+  modules: []
+  entities: []
+  fields: []
+  flows: []
+  views: []
+  actions: []
+  states: []
+  rules: []
+  events: []
+  integrations: []
+  acceptance: []

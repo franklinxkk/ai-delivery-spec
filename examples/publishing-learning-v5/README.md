@@ -24,7 +24,7 @@ authoritative education-domain standard.
 ## Validation
 
 ```powershell
-py -3 scripts/validate_product_truth.py examples/publishing-learning-v5/delivery/truth/product-truth.yaml
+py -3 scripts/validators/validate_product_truth.py examples/publishing-learning-v5/delivery/truth/product-truth.yaml
 ```
 
 Schema/reference PASS proves structural closure only. Browser, domain-expert,

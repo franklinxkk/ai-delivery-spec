@@ -14,8 +14,8 @@ rewriting them unless asked.
 ## Deterministic Checks
 
 ```powershell
-py -3 scripts/validate_product_truth.py delivery/truth/product-truth.yaml
-py -3 scripts/validate_projection_consistency.py --truth delivery/truth/product-truth.yaml --projection delivery/projections/human-first-prd.md
+py -3 scripts/validators/validate_product_truth.py delivery/truth/product-truth.yaml
+py -3 scripts/validators/validate_projection_consistency.py --truth delivery/truth/product-truth.yaml --projection delivery/projections/human-first-prd.md
 ```
 
 Then review behavior:

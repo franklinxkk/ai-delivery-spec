@@ -3,6 +3,7 @@ generated_from: domain-pack metadata and evaluation evidence
 evaluation_index: evals/domain-fixtures.yaml
 claim_policy:
   rule: A domain file is knowledge coverage, not behavioral validation.
+  practice_rule: Production practice proves real delivery use but does not promote reusable-pack maturity.
   validated_requires:
     - sourced knowledge
     - passed behavioral evaluation
@@ -16,7 +17,7 @@ claim_policy:
 domains:
   - domain_id: traffic
     name: Traffic Safety and Road Transport SaaS
-    knowledge_file: references/domain-traffic.md
+    knowledge_file: references/domains/domain-traffic.md
     applies_when: [road transport, traffic safety, regulator supervision, transport enterprise]
     does_not_apply_when: [generic workflow with no transport object]
     coverage:
@@ -25,10 +26,16 @@ domains:
       behavioral_eval: not_run
       expert_review: not_reviewed
     maturity: experimental
+    practice_status: production_practiced
     evidence:
+      - id: EV-DOM-TRAFFIC-PRACTICE
+        kind: owner_attestation
+        location: evals/evidence/production-practice-attestation-2026-07-12.yaml
+        status: passed
+        owner: project and skill maintainer
       - id: EV-DOM-TRAFFIC-SOURCES
         kind: official_source
-        location: references/domain-sources.yaml#KS-TRAFFIC-INSPECTION-2025
+        location: references/domains/domain-sources.yaml#KS-TRAFFIC-INSPECTION-2025
         status: current
         owner: domain maintainer
       - id: EV-DOM-TRAFFIC-KNOWLEDGE
@@ -45,7 +52,7 @@ domains:
 
   - domain_id: crm
     name: CRM and Customer Response
-    knowledge_file: references/domain-crm.md
+    knowledge_file: references/domains/domain-crm.md
     applies_when: [lead, opportunity, customer, contract, payment, ticket, renewal]
     does_not_apply_when: [generic contact list without customer lifecycle]
     coverage:
@@ -54,10 +61,16 @@ domains:
       behavioral_eval: not_run
       expert_review: not_reviewed
     maturity: experimental
+    practice_status: production_practiced
     evidence:
+      - id: EV-DOM-CRM-PRACTICE
+        kind: owner_attestation
+        location: evals/evidence/production-practice-attestation-2026-07-12.yaml
+        status: passed
+        owner: project and skill maintainer
       - id: EV-DOM-CRM-SOURCES
         kind: official_source
-        location: references/domain-sources.yaml#KS-CRM-COMPLAINT-10002
+        location: references/domains/domain-sources.yaml#KS-CRM-COMPLAINT-10002
         status: current
         owner: domain maintainer
       - id: EV-DOM-CRM-KNOWLEDGE
@@ -74,7 +87,7 @@ domains:
 
   - domain_id: education-it
     name: Education IT
-    knowledge_file: references/domain-education-it.md
+    knowledge_file: references/domains/domain-education-it.md
     applies_when: [academic affairs, student affairs, course, training, learning, assessment]
     does_not_apply_when: [generic content publishing with no learner lifecycle]
     coverage:
@@ -83,10 +96,16 @@ domains:
       behavioral_eval: not_run
       expert_review: not_reviewed
     maturity: experimental
+    practice_status: production_practiced
     evidence:
+      - id: EV-DOM-EDU-PRACTICE
+        kind: owner_attestation
+        location: evals/evidence/production-practice-attestation-2026-07-12.yaml
+        status: passed
+        owner: project and skill maintainer
       - id: EV-DOM-EDU-SOURCES
         kind: official_source
-        location: references/domain-sources.yaml#KS-EDU-CLASSIFICATION-0661
+        location: references/domains/domain-sources.yaml#KS-EDU-CLASSIFICATION-0661
         status: current
         owner: domain maintainer
       - id: EV-DOM-EDU-KNOWLEDGE
@@ -103,7 +122,7 @@ domains:
 
   - domain_id: oa
     name: Collaborative Office and OA
-    knowledge_file: references/domain-oa.md
+    knowledge_file: references/domains/domain-oa.md
     applies_when: [approval, official document, meeting, supervision, office knowledge]
     does_not_apply_when: [single approval action with no OA object or lifecycle]
     coverage:
@@ -112,10 +131,11 @@ domains:
       behavioral_eval: not_run
       expert_review: not_reviewed
     maturity: experimental
+    practice_status: knowledge_only
     evidence:
       - id: EV-DOM-OA-SOURCES
         kind: official_source
-        location: references/domain-sources.yaml#KS-OA-ESIGN
+        location: references/domains/domain-sources.yaml#KS-OA-ESIGN
         status: current
         owner: domain maintainer
       - id: EV-DOM-OA-KNOWLEDGE
@@ -131,7 +151,7 @@ domains:
 
   - domain_id: medical-hospital-it
     name: Medical and Hospital IT
-    knowledge_file: references/domain-medical-hospital-it.md
+    knowledge_file: references/domains/domain-medical-hospital-it.md
     applies_when: [patient, encounter, medical record, order, report, clinical workflow]
     does_not_apply_when: [generic appointment or CRM flow without clinical decisions]
     coverage:
@@ -140,10 +160,11 @@ domains:
       behavioral_eval: not_run
       expert_review: not_reviewed
     maturity: experimental
+    practice_status: knowledge_only
     evidence:
       - id: EV-DOM-MEDICAL-SOURCES
         kind: official_source
-        location: references/domain-sources.yaml#KS-MEDICAL-EMR-2025
+        location: references/domains/domain-sources.yaml#KS-MEDICAL-EMR-2025
         status: current
         owner: domain maintainer
       - id: EV-DOM-MEDICAL-KNOWLEDGE
@@ -160,7 +181,7 @@ domains:
 
   - domain_id: data-product
     name: AI and Data Product System
-    knowledge_file: references/domain-data-mart.md
+    knowledge_file: references/domains/domain-data-mart.md
     applies_when: [data source, metric, lineage, semantic layer, BI, ChatBI, Data Agent]
     does_not_apply_when: [simple transactional form with no governed data product]
     coverage:
@@ -169,15 +190,21 @@ domains:
       behavioral_eval: not_run
       expert_review: not_reviewed
     maturity: experimental
+    practice_status: production_practiced
     evidence:
+      - id: EV-DOM-DATA-PRACTICE
+        kind: owner_attestation
+        location: evals/evidence/production-practice-attestation-2026-07-12.yaml
+        status: passed
+        owner: project and skill maintainer
       - id: EV-DOM-DATA-SOURCES
         kind: official_source
-        location: references/domain-sources.yaml#KS-DATA-OPENLINEAGE
+        location: references/domains/domain-sources.yaml#KS-DATA-OPENLINEAGE
         status: current
         owner: domain maintainer
       - id: EV-DOM-DATA-KNOWLEDGE
         kind: mock_scenario
-        location: references/domain-data-mart.md
+        location: references/domains/domain-data-mart.md
         status: current
         owner: domain maintainer
     known_gaps:
@@ -189,7 +216,7 @@ domains:
 
   - domain_id: ai-native
     name: AI Native and Agentic Systems
-    knowledge_file: references/domain-ai-native.md
+    knowledge_file: references/domains/domain-ai-native.md
     applies_when: [agent, tool calling, model decision, AI writeback, memory, evaluation]
     does_not_apply_when: [AI is only used to write documents or code]
     coverage:
@@ -198,15 +225,21 @@ domains:
       behavioral_eval: not_run
       expert_review: not_reviewed
     maturity: experimental
+    practice_status: production_practiced
     evidence:
+      - id: EV-DOM-AI-PRACTICE
+        kind: owner_attestation
+        location: evals/evidence/production-practice-attestation-2026-07-12.yaml
+        status: passed
+        owner: project and skill maintainer
       - id: EV-DOM-AI-SOURCES
         kind: official_source
-        location: references/domain-sources.yaml#KS-AI-ISO-42001
+        location: references/domains/domain-sources.yaml#KS-AI-ISO-42001
         status: current
         owner: domain maintainer
       - id: EV-DOM-AI-KNOWLEDGE
         kind: mock_scenario
-        location: references/domain-ai-native.md
+        location: references/domains/domain-ai-native.md
         status: current
         owner: domain maintainer
     known_gaps:
