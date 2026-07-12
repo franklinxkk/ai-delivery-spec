@@ -1,0 +1,8 @@
+modules: [{id: MOD-ONE}]
+roles: [{id: ROLE-USER}]
+views:
+  - id: VIEW-HOME
+    roles: [ROLE-USER]
+    regions: [REG-MAIN]
+    states: [default, empty, error, success]
+    actions: [ACT-SUBMIT]

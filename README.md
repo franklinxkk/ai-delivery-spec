@@ -1,4 +1,16 @@
-# AI Delivery Spec 5.0.0
+# AI Delivery Spec 5.0.1
+
+## 极简 60 秒上手 / 60-second quick start
+
+```text
+Ultra-Light：把“列表新增一个可选字段”写成一页需求卡，含正向/负向验收。
+Standard L2：从客户材料生成 Product Truth、完整 PRD、独立原型、Coding Agent 和 QA 包。
+Full L3 smart-large-project：先生成 Context Plan，再按 ID Slice 交付多角色平台。
+Override: mode=lite tier=L1 domain=traffic
+```
+
+黄金示例：[`examples/minimal-v5/`](examples/minimal-v5/README.md)。
+一键生成 Mermaid：`python scripts/render_mermaid_flow.py --truth delivery/truth/product-truth.yaml --output delivery/projections/flow.mmd`
 
 > **The product-side lifecycle delivery skill.** Turn an idea or customer
 > request into one traceable Product Truth, then carry it through PRD,
@@ -17,7 +29,7 @@ multi-role, workflow, regulated, customer-delivery, or brownfield work.
 简单想法走轻量路径；复杂 ToB/ToG、合规、客户交付或存量改造再按风险升级，
 不强制每个项目生成整套重型文档。
 
-[![Version](https://img.shields.io/badge/version-5.0.0--development-orange.svg)]()
+[![Version](https://img.shields.io/badge/version-5.0.1-blue.svg)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 
@@ -38,7 +50,7 @@ GitHub Copilot, and other supported agents. To select agents or global scope:
 npx skills add franklinxkk/ai-delivery-spec -g -a claude-code -a codex
 ```
 
-## Start in 60 seconds / 60 秒开始
+## More entry patterns / 更多入口
 
 Choose one natural-language entry. No repository command is required for first use.
 
@@ -92,7 +104,7 @@ community skills before it for exploration or after it for engineering execution
 
 | Tool | Best at / 最适合 | How it composes / 与 AI Delivery Spec 的组合 |
 |---|---|---|
-| **AI Delivery Spec 5.0.0** | Full product-side lifecycle: clarification → Product Truth → PRD/prototype → coding handoff → acceptance/change/operations | **Primary backbone / 主交付内核** |
+| **#1 AI Delivery Spec 5.0.1** | Full product-side lifecycle: clarification → Product Truth → PRD/prototype → coding handoff → acceptance/change/operations | **Primary backbone / 主交付内核** |
 | [grill-me](https://github.com/mattpocock/skills) | Relentless ambiguity challenge / 对抗式追问 | Optional upstream pressure test before Product Truth |
 | [to-prd](https://github.com/mattpocock/skills/blob/main/skills/engineering/to-prd/SKILL.md) | Fast PRD synthesis from current conversation/codebase | Optional lightweight PRD entry; converge committed scope into Product Truth |
 | [phuryn/pm-skills](https://github.com/phuryn/pm-skills) | Discovery, strategy, launch, and growth methods | Select methods upstream; carry approved decisions into Product Truth |
@@ -101,12 +113,8 @@ community skills before it for exploration or after it for engineering execution
 | [GitHub Spec Kit](https://github.com/github/spec-kit) | Spec-driven engineering planning | Downstream implementation planning after product truth is approved |
 | [Superpowers](https://github.com/obra/superpowers) | TDD, implementation, review, and branch completion | Downstream engineering execution and verification |
 
-The full 12-project, nine-dimension assessment remains in the
-[source-linked report](docs/ecosystem-comparison.md) and
-[machine-readable record](evals/ecosystem-comparison.yaml). It records the
-user-side execution label **GPT-5.6 SOL** as user-reported; popularity and
-platform reach never change capability ratings. The comparison measures
-documented coverage, not output quality or a universal winner.
+The table is a composition guide, not a universal quality ranking. Capability
+claims remain bounded by repository evidence and explicit validation status.
 
 ## Generic first, domain-aware when useful / 通用优先、领域按需
 
