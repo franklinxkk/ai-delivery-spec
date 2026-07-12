@@ -1,0 +1,31 @@
+schema_version: 5.0.2
+evidence_id: EV-AI-CODING-COMPLETENESS-20260712
+input:
+  project_type: anonymized multi-role publishing, authorization, and learning platform
+  initial_prd_bytes: 20001
+  engineering_addendum_bytes: 59145
+  source_distribution: private_not_shipped
+observed_failure:
+  initial_summary_sections: 12
+  result: insufficient_for_direct_product_engineering_qa_and_coding_agent_use
+  later_required_contract_surfaces:
+    - repository baseline and directory/CI boundary
+    - page and field additions discovered by E2E
+    - concrete API request and response schemas
+    - error catalog and idempotency behavior
+    - global field dictionaries
+    - machine-readable acceptance
+    - integration and versioned event payload contracts
+    - statistics fields and calculation methods
+    - vertical-slice likely files and dependencies
+v5_0_2_response:
+  complete_contract_route_added: true
+  keyword_only_validator_replaced: true
+  thin_summary_regression_rejected: true
+  remaining_source_gaps_detected:
+    - stable module IDs were not explicit
+    - stable state-machine IDs were not explicit
+claim_boundary:
+  engineering_prototype_verification: owner_reported
+  public_customer_or_project_identity_included: false
+  proves_general_quality_improvement: false

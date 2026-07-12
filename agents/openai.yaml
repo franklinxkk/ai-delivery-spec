@@ -1,13 +1,14 @@
 interface:
   display_name: "AI Delivery Spec"
-  version: "5.0.1"
-  short_description: "Idea-to-PRD and Product Truth delivery, with deep ToB/ToG handoff and acceptance."
+  version: "5.0.2"
+  short_description: "Complete PRD, progressive Product Truth, prototype, coding and acceptance contracts for ToB/ToG delivery."
   default_prompt: >
     Use $ai-delivery-spec. Support lightweight ToC idea clarification and PRDs
     as well as governed ToB/ToG delivery. Triage lifecycle, shape, risk, information,
     and consumer. Build one canonical Product Truth, use generic domain
-    discovery when no dedicated pack exists, and project only the Human-First,
-    prototype, coding-agent, QA, customer, or operations views requested.
+    discovery when no dedicated pack exists, use resumable Product Truth
+    fragments for large projects, and project the Human-First, prototype,
+    complete AI Coding PRD, QA, customer, or operations views requested.
     Preserve stable IDs, evidence, change impact, and honest completion state.
 
 inputs:

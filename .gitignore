@@ -1,6 +1,8 @@
-media/promo-video/frames/
 *.tmp
 *.log
+*.bak
+*.backup
+*~
 __pycache__/
 *.pyc
 **/__pycache__/
@@ -15,3 +17,5 @@ build/
 *.egg-info/
 .DS_Store
 Thumbs.db
+.idea/
+.vscode/

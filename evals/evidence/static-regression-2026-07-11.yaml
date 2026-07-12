@@ -10,11 +10,11 @@ claim_boundary: >-
   prove novice usability, coding-agent implementation, QA execution, domain
   expert correctness, customer acceptance, or production behavior.
 commands:
-  - py -3 scripts/validate_product_truth.py examples/publishing-learning-v5/delivery/truth/product-truth.yaml
-  - py -3 scripts/validate_projection_consistency.py --truth examples/publishing-learning-v5/delivery/truth/product-truth.yaml --projection examples/publishing-learning-v5/delivery/projections/human-first-prd.md
+  - py -3 scripts/validators/validate_product_truth.py examples/publishing-learning-v5/delivery/truth/product-truth.yaml
+  - py -3 scripts/validators/validate_projection_consistency.py --truth examples/publishing-learning-v5/delivery/truth/product-truth.yaml --projection examples/publishing-learning-v5/delivery/projections/human-first-prd.md
   - py -3 tests/test_v5_change_drift.py
-  - py -3 scripts/validate_project_domain_capsule.py examples/generic-energy-capsule-v5/project-domain-capsule.yaml
-  - py -3 scripts/validate_change_package.py examples/traffic-regulatory-change-v5/change-package.yaml
+  - py -3 scripts/validators/validate_project_domain_capsule.py examples/generic-energy-capsule-v5/project-domain-capsule.yaml
+  - py -3 scripts/validators/validate_change_package.py examples/traffic-regulatory-change-v5/change-package.yaml
 scenarios:
   - id: EVAL-PUBLISHING-PM-001
     proven: Product Truth and Human projection share only known stable IDs

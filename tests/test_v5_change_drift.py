@@ -15,7 +15,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 MANAGER = ROOT / "scripts/manage_execution_state.py"
 TRUTH = ROOT / "examples/publishing-learning-v5/delivery/truth/product-truth.yaml"
-CONFIG = ROOT / "spec.config.example.yaml"
+CONFIG = ROOT / "examples/spec.config.example.yaml"
 
 
 def run(*args: str, expected: int = 0) -> subprocess.CompletedProcess[str]:

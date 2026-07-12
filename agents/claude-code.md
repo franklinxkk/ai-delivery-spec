@@ -30,7 +30,7 @@ affected slice and report the stable IDs. Do not guess.
 Validate before implementation:
 
 ```powershell
-python scripts/validate_product_truth.py delivery/truth/product-truth.yaml
+python scripts/validators/validate_product_truth.py delivery/truth/product-truth.yaml
 ```
 
 After implementation, run repository tests and write evidence to the package.

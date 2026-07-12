@@ -42,14 +42,15 @@ def init_delivery(args: argparse.Namespace) -> int:
 
     config = target / "spec.config.yaml"
     if not config.exists():
-        shutil.copyfile(ROOT / "spec.config.example.yaml", config)
+        shutil.copyfile(ROOT / "examples/spec.config.example.yaml", config)
 
+    progressive = args.truth_layout == "progressive"
     manifest = target / "manifest.json"
     if not manifest.exists() or args.force:
         payload = {
             "schema_version": "5.0.0",
             "generated_by": f"ai-delivery-spec v{current_version()}",
-            "source_of_truth": "truth/product-truth.yaml",
+            "source_of_truth": "truth/index.yaml" if progressive else "truth/product-truth.yaml",
             "artifacts": [
                 {
                     "path": "spec.config.yaml",
@@ -67,9 +68,21 @@ def init_delivery(args: argparse.Namespace) -> int:
         }
         manifest.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    truth = target / "truth" / "product-truth.yaml"
-    if not truth.exists() or args.force:
-        shutil.copyfile(ROOT / "references" / "templates" / "product-truth-template.yaml", truth)
+    if progressive:
+        (target / "truth" / "fragments").mkdir(parents=True, exist_ok=True)
+        (target / "truth" / "compiled").mkdir(parents=True, exist_ok=True)
+        template_pairs = (
+            ("product-truth-index-template.yaml", target / "truth" / "index.yaml"),
+            ("product-truth-core-fragment-template.yaml", target / "truth" / "fragments" / "00-core.yaml"),
+            ("product-truth-module-fragment-template.yaml", target / "truth" / "fragments" / "MOD-EXAMPLE.yaml"),
+        )
+        for template, destination in template_pairs:
+            if not destination.exists() or args.force:
+                shutil.copyfile(ROOT / "references" / "templates" / template, destination)
+    else:
+        truth = target / "truth" / "product-truth.yaml"
+        if not truth.exists() or args.force:
+            shutil.copyfile(ROOT / "references" / "templates" / "product-truth-template.yaml", truth)
 
     print(f"initialized delivery package: {target}")
     return 0
@@ -77,22 +90,24 @@ def init_delivery(args: argparse.Namespace) -> int:
 
 def run_check(args: argparse.Namespace) -> int:
     commands: list[list[str]] = [
-        [sys.executable, "scripts/validate_v5_architecture.py"],
-        [sys.executable, "scripts/validate_spec_config.py", "spec.config.example.yaml"],
-        [sys.executable, "scripts/validate_runtime_rule_uniqueness.py"],
-        [sys.executable, "scripts/validate_domain_coverage.py"],
-        [sys.executable, "scripts/validate_domain_sources.py"],
-        [sys.executable, "scripts/validate_eval_catalog.py"],
-        [sys.executable, "scripts/validate_github_eval_cases.py"],
+        [sys.executable, "scripts/validators/validate_v5_architecture.py"],
+        [sys.executable, "scripts/validators/validate_spec_config.py", "examples/spec.config.example.yaml"],
+        [sys.executable, "scripts/validators/validate_runtime_rule_uniqueness.py"],
+        [sys.executable, "scripts/validators/validate_domain_coverage.py"],
+        [sys.executable, "scripts/validators/validate_domain_sources.py"],
+        [sys.executable, "scripts/validators/validate_eval_catalog.py"],
+        [sys.executable, "scripts/validators/validate_github_eval_cases.py"],
         [sys.executable, "tests/test_v501_triage.py"],
         [sys.executable, "tests/test_v501_validators.py"],
+        [sys.executable, "tests/test_v502_coding_contract.py"],
+        [sys.executable, "tests/test_v502_progressive_truth.py"],
         [
             sys.executable,
             "scripts/build_github_validation_matrix.py",
             "--check",
             "evals/evidence/github-validation-matrix.yaml",
         ],
-        [sys.executable, "scripts/validate_release_claims.py"],
+        [sys.executable, "scripts/validators/validate_release_claims.py"],
         [sys.executable, "scripts/test_context_planning.py"],
         [sys.executable, "scripts/test_evaluation_metrics.py"],
         [sys.executable, "scripts/test_execution_state.py"],
@@ -104,28 +119,28 @@ def run_check(args: argparse.Namespace) -> int:
         [sys.executable, "tests/test_v5_status.py"],
         [
             sys.executable,
-            "scripts/validate_project_domain_capsule.py",
+            "scripts/validators/validate_project_domain_capsule.py",
             "examples/generic-energy-capsule-v5/project-domain-capsule.yaml",
         ],
         [
             sys.executable,
-            "scripts/validate_capsule_composition.py",
+            "scripts/validators/validate_capsule_composition.py",
             "--capsule",
             "examples/generic-energy-capsule-v5/project-domain-capsule.yaml",
         ],
         [
             sys.executable,
-            "scripts/validate_change_package.py",
+            "scripts/validators/validate_change_package.py",
             "examples/traffic-regulatory-change-v5/change-package.yaml",
         ],
         [
             sys.executable,
-            "scripts/validate_product_truth.py",
+            "scripts/validators/validate_product_truth.py",
             "examples/publishing-learning-v5/delivery/truth/product-truth.yaml",
         ],
         [
             sys.executable,
-            "scripts/validate_projection_consistency.py",
+            "scripts/validators/validate_projection_consistency.py",
             "--truth",
             "examples/publishing-learning-v5/delivery/truth/product-truth.yaml",
             "--projection",
@@ -133,7 +148,7 @@ def run_check(args: argparse.Namespace) -> int:
         ],
         [
             sys.executable,
-            "scripts/validate_projection_consistency.py",
+            "scripts/validators/validate_projection_consistency.py",
             "--truth",
             "examples/publishing-learning-v5/delivery/truth/product-truth.yaml",
             "--projection",
@@ -146,7 +161,7 @@ def run_check(args: argparse.Namespace) -> int:
     ]
     if args.product_truth:
         commands.append(
-            [sys.executable, "scripts/validate_product_truth.py", str(args.product_truth)]
+            [sys.executable, "scripts/validators/validate_product_truth.py", str(args.product_truth)]
         )
 
     failed = 0
@@ -208,8 +223,10 @@ def status_report(args: argparse.Namespace) -> int:
     matrix = yaml.safe_load((ROOT / "evals/evidence/github-validation-matrix.yaml").read_text(encoding="utf-8"))
     catalog = yaml.safe_load((ROOT / "evals/eval-catalog.yaml").read_text(encoding="utf-8"))
     maturity: dict[str, int] = {}
+    practice: dict[str, int] = {}
     for domain in coverage.get("domains", []):
         maturity[domain["maturity"]] = maturity.get(domain["maturity"], 0) + 1
+        practice[domain["practice_status"]] = practice.get(domain["practice_status"], 0) + 1
     eval_status: dict[str, int] = {}
     for scenario in catalog.get("scenarios", []):
         eval_status[scenario["status"]] = eval_status.get(scenario["status"], 0) + 1
@@ -220,6 +237,7 @@ def status_report(args: argparse.Namespace) -> int:
         "domain_packs": {
             "count": len(coverage.get("domains", [])),
             "maturity": maturity,
+            "practice_status": practice,
             "production_claims_allowed": sum(
                 domain.get("production_claim") == "allowed" for domain in coverage.get("domains", [])
             ),
@@ -231,7 +249,7 @@ def status_report(args: argparse.Namespace) -> int:
             "github_matrix": matrix.get("summary", {}),
         },
         "known_limitations": [
-            "built-in domain packs are experimental",
+            "five domain methods have owner-attested production practice; reusable pack assurance remains experimental",
             "GitHub runs are exploratory and have zero release-passed cells",
             "domain expert, customer, production, legal, safety, and financial correctness are not proven",
         ],
@@ -244,6 +262,7 @@ def status_report(args: argparse.Namespace) -> int:
             "# AI Delivery Spec Status\n\n"
             f"- Version: `{report['skill_version']}` (`pure_v5`)\n"
             f"- Domain packs: {report['domain_packs']['count']}; maturity: `{maturity}`\n"
+            f"- Delivery practice: `{practice}`\n"
             f"- Production claims allowed by built-in packs: {report['domain_packs']['production_claims_allowed']}\n"
             f"- Domain fixtures: {report['evaluation_assets']['domain_fixtures']}\n"
             f"- Pinned GitHub cases: {report['evaluation_assets']['github_cases']}\n"
@@ -271,13 +290,26 @@ def compile_discovery(args: argparse.Namespace) -> int:
     )
 
 
+def compile_truth(args: argparse.Namespace) -> int:
+    values = ["--index", str(args.index)]
+    if args.output:
+        values.extend(["--output", str(args.output)])
+    if args.allow_incomplete:
+        values.append("--allow-incomplete")
+    return run_script("compile_product_truth.py", values)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="ai_delivery_spec_cli.py")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    init = sub.add_parser("init-delivery", help="Create the standard delivery/ package layout")
+    init = sub.add_parser("init-delivery", help="Create a resumable delivery/ package layout")
     init.add_argument("--output", type=Path, default=Path("delivery"))
     init.add_argument("--force", action="store_true", help="Overwrite manifest.json skeleton if it exists")
+    init.add_argument(
+        "--truth-layout", choices=["progressive", "monolith"], default="progressive",
+        help="Use small checkpointable fragments by default; monolith is for bounded projects only",
+    )
     init.set_defaults(func=init_delivery)
 
     check = sub.add_parser("check", help="Run v5 architecture and optional artifact validators")
@@ -287,7 +319,7 @@ def main() -> int:
 
     context = sub.add_parser("plan-context", help="Create an adaptive context and assurance plan")
     context.add_argument("--truth", type=Path, required=True)
-    context.add_argument("--config", type=Path, default=ROOT / "spec.config.example.yaml")
+    context.add_argument("--config", type=Path, default=ROOT / "examples/spec.config.example.yaml")
     context.add_argument("--seed-id", action="append", default=[])
     context.add_argument("--output", type=Path)
     context.set_defaults(func=plan_context)
@@ -328,6 +360,12 @@ def main() -> int:
     )
     compile_cmd.add_argument("--output", type=Path, required=True)
     compile_cmd.set_defaults(func=compile_discovery)
+
+    truth_cmd = sub.add_parser("compile-truth", help="Compile and validate progressive Product Truth fragments")
+    truth_cmd.add_argument("--index", type=Path, required=True)
+    truth_cmd.add_argument("--output", type=Path)
+    truth_cmd.add_argument("--allow-incomplete", action="store_true")
+    truth_cmd.set_defaults(func=compile_truth)
 
     version = sub.add_parser("version", help="Print AI Delivery Spec version")
     version.set_defaults(func=lambda _args: print(current_version()) or 0)

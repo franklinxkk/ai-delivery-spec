@@ -31,7 +31,7 @@ or propose a `CHG-*` when sources disagree.
 Validate Product Truth first:
 
 ```powershell
-py -3 scripts/validate_product_truth.py delivery/truth/product-truth.yaml
+py -3 scripts/validators/validate_product_truth.py delivery/truth/product-truth.yaml
 py -3 scripts/ai_delivery_spec_cli.py plan-context --truth delivery/truth/product-truth.yaml --config delivery/spec.config.yaml
 py -3 scripts/ai_delivery_spec_cli.py query-truth --truth delivery/truth/product-truth.yaml --id MOD-SLICE --output working-slice.yaml
 ```

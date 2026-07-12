@@ -12,30 +12,30 @@ from typing import Any
 import yaml
 from jsonschema import Draft202012Validator
 
-from validate_spec_config import validate as validate_config
+from validators.validate_spec_config import validate as validate_config
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CONFIG = ROOT / "spec.config.example.yaml"
+DEFAULT_CONFIG = ROOT / "examples/spec.config.example.yaml"
 
 STAGE_REFERENCES = {
     "discover": ["references/discover.md"],
     "specify": ["references/specify.md"],
-    "plan": ["references/specify.md", "references/change.md"],
+    "plan": ["references/specify.md", "references/runtime/change.md"],
     "tasks": ["references/handoff.md"],
-    "build_verify": ["references/handoff.md", "references/verify.md"],
-    "launch": ["references/verify.md", "references/operate.md"],
-    "learn_retire": ["references/operate.md"],
+    "build_verify": ["references/handoff.md", "references/runtime/verify.md"],
+    "launch": ["references/runtime/verify.md", "references/runtime/operate.md"],
+    "learn_retire": ["references/runtime/operate.md"],
 }
 
 DOMAIN_FILES = {
-    "traffic": "references/domain-traffic.md",
-    "crm": "references/domain-crm.md",
-    "education-it": "references/domain-education-it.md",
-    "oa": "references/domain-oa.md",
-    "medical-hospital-it": "references/domain-medical-hospital-it.md",
-    "data-product": "references/domain-data-mart.md",
-    "ai-native": "references/domain-ai-native.md",
+    "traffic": "references/domains/domain-traffic.md",
+    "crm": "references/domains/domain-crm.md",
+    "education-it": "references/domains/domain-education-it.md",
+    "oa": "references/domains/domain-oa.md",
+    "medical-hospital-it": "references/domains/domain-medical-hospital-it.md",
+    "data-product": "references/domains/domain-data-mart.md",
+    "ai-native": "references/domains/domain-ai-native.md",
 }
 
 
@@ -156,9 +156,9 @@ def build_plan(truth: dict[str, Any], config: dict[str, Any], seed_ids: list[str
     lifecycle = truth.get("delivery_context", {}).get("lifecycle_stage", "discover")
     stage_refs_all = list(STAGE_REFERENCES.get(lifecycle, ["references/discover.md"]))
     if truth.get("delivery_context", {}).get("domain_packs") or truth.get("delivery_context", {}).get("governance_profiles"):
-        stage_refs_all.append("references/composition.md")
-    if assurance == "regulated" and "references/verify.md" not in stage_refs_all:
-        stage_refs_all.append("references/verify.md")
+        stage_refs_all.append("references/runtime/composition.md")
+    if assurance == "regulated" and "references/runtime/verify.md" not in stage_refs_all:
+        stage_refs_all.append("references/runtime/verify.md")
     max_refs = config["context"].get("max_stage_references", 3)
     stage_refs_all = list(dict.fromkeys(stage_refs_all))
     stage_refs = stage_refs_all[:max_refs]

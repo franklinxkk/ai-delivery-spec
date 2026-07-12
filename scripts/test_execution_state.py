@@ -16,7 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MANAGER = ROOT / "scripts" / "manage_execution_state.py"
 TRUTH = ROOT / "examples" / "publishing-learning-v5" / "delivery" / "truth" / "product-truth.yaml"
-CONFIG = ROOT / "spec.config.example.yaml"
+CONFIG = ROOT / "examples/spec.config.example.yaml"
 PROJECTIONS = [
     ROOT / "examples" / "publishing-learning-v5" / "delivery" / "projections" / "human-first-prd.md",
     ROOT / "examples" / "publishing-learning-v5" / "delivery" / "projections" / "coding-agent-spec.md",
@@ -190,7 +190,7 @@ def main() -> int:
 
         old_skill = temp / "SKILL.md"
         old_skill.write_text(
-            (ROOT / "SKILL.md").read_text(encoding="utf-8").replace("AI Delivery Spec 5.0.1", "AI Delivery Spec 4.9.14", 1),
+            (ROOT / "SKILL.md").read_text(encoding="utf-8").replace("AI Delivery Spec 5.0.2", "AI Delivery Spec 4.9.14", 1),
             encoding="utf-8",
         )
         blocked = temp / "blocked.yaml"

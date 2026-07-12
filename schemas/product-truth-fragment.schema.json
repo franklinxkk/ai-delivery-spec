@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/product-truth-fragment.schema.json",
+  "title": "AI Delivery Spec Product Truth Fragment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "fragment_id", "truth_id", "content"],
+  "properties": {
+    "schema_version": { "const": "5.0.2" },
+    "fragment_id": { "type": "string", "pattern": "^FRAG-[A-Z0-9-]+$" },
+    "truth_id": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$" },
+    "content": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "truth_id": { "type": "string" },
+        "product": { "type": "object" },
+        "delivery_context": { "type": "object" },
+        "sources": { "$ref": "#/$defs/idObjects" },
+        "assertions": { "$ref": "#/$defs/idObjects" },
+        "unknowns": { "$ref": "#/$defs/idObjects" },
+        "decisions": { "$ref": "#/$defs/idObjects" },
+        "conflicts": { "$ref": "#/$defs/idObjects" },
+        "roles": { "$ref": "#/$defs/idObjects" },
+        "features": { "$ref": "#/$defs/idObjects" },
+        "modules": { "$ref": "#/$defs/idObjects" },
+        "entities": { "$ref": "#/$defs/idObjects" },
+        "fields": { "$ref": "#/$defs/idObjects" },
+        "flows": { "$ref": "#/$defs/idObjects" },
+        "views": { "$ref": "#/$defs/idObjects" },
+        "actions": { "$ref": "#/$defs/idObjects" },
+        "states": { "$ref": "#/$defs/idObjects" },
+        "rules": { "$ref": "#/$defs/idObjects" },
+        "events": { "$ref": "#/$defs/idObjects" },
+        "integrations": { "$ref": "#/$defs/idObjects" },
+        "acceptance": { "$ref": "#/$defs/idObjects" },
+        "evidence": { "$ref": "#/$defs/idObjects" },
+        "projections": { "type": "array", "items": { "type": "object" } }
+      }
+    }
+  },
+  "$defs": {
+    "idObjects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": { "id": { "type": "string", "minLength": 1 } }
+      }
+    }
+  }
+}

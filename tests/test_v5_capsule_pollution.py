@@ -13,7 +13,7 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VALIDATOR = ROOT / "scripts/validate_capsule_composition.py"
+VALIDATOR = ROOT / "scripts/validators/validate_capsule_composition.py"
 
 
 def main() -> int:

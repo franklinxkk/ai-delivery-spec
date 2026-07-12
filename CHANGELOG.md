@@ -1,5 +1,26 @@
 # Changelog
 
+## 5.0.2 - 2026-07-12
+
+- Added Progressive Product Truth: checkpointable core/module fragments, index
+  schemas, deterministic compilation, CLI defaults, and lossless regression
+  coverage for Trae/WorkBuddy and other interruption-prone large-project flows.
+- Added a complete AI Coding PRD route based on a verified delivery failure:
+  repository baseline, page/field/state/data contracts, concrete API schemas and
+  errors, versioned event/integration contracts, metrics caliber, vertical file
+  dependencies, structured AC, migration/rollback, and operations are now L2
+  contract surfaces.
+- Replaced the keyword-only Coding Agent validator with structural L0-L4 checks
+  and a regression that rejects the former thin-summary pattern.
+- Separated `practice_status` from reusable domain-pack `maturity`; traffic,
+  CRM, education IT, data product, and AI Native now record accountable
+  production-practice attestation without claiming unearned validation/audit.
+- Rebuilt README around pain-first positioning, copyable 60-second routes, four
+  capabilities, ecosystem responsibility mapping, and evidence-bounded claims.
+- Reduced the root to six files/eight directories and grouped runtime/domain
+  references, validators, domestic adapters, community documents, config, and
+  requirements by responsibility.
+
 ## 5.0.1 - 2026-07-12
 
 - Added Ultra-Light routing, smart recommendations/manual overrides, and smart
