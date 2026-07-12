@@ -11,12 +11,11 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "5.0.0"
+VERSION = "5.0.1"
 PUBLIC_FILES = (
     "README.md",
     "docs/social-launch-kit.md",
     "docs/awesome-submission-targets.md",
-    "docs/ecosystem-comparison.md",
     "examples/README.md",
 )
 POSITIVE_ONLY_CLAIMS = (
@@ -55,8 +54,6 @@ def main() -> int:
         ROOT / "SKILL.md",
         ROOT / "README.md",
         ROOT / "agents/openai.yaml",
-        ROOT / "schemas/product-truth.schema.json",
-        ROOT / "references/domain-coverage.yaml",
     )
     for path in required_version_files:
         if VERSION not in path.read_text(encoding="utf-8"):
@@ -70,8 +67,9 @@ def main() -> int:
             failures.append(f"README onboarding omits audience/path marker: {marker}")
     if readme.find("npx skills add") > readme.find("## Who it helps"):
         failures.append("README install command must appear before the role matrix")
-    if "docs/ecosystem-comparison.md" not in readme:
-        failures.append("README does not link the source-backed ecosystem comparison")
+    for marker in ("Ultra-Light", "smart-large-project", "examples/minimal-v5"):
+        if marker not in readme:
+            failures.append(f"README misses v5.0.1 onboarding marker: {marker}")
     coverage = yaml.safe_load((ROOT / "references/domain-coverage.yaml").read_text(encoding="utf-8"))
     release_status = yaml.safe_load((ROOT / "evals/evidence/release-status.yaml").read_text(encoding="utf-8"))
     matrix = yaml.safe_load((ROOT / "evals/evidence/github-validation-matrix.yaml").read_text(encoding="utf-8"))

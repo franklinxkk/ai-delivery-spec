@@ -1,6 +1,14 @@
 # Changelog
 
-## 5.0.0 - Unreleased
+## 5.0.1 - 2026-07-12
+
+- Added Ultra-Light routing, smart recommendations/manual overrides, and smart
+  large-project Context Plan + ID Slice guidance.
+- Added 60-second onboarding, Mermaid generation, China-model/tool adapters,
+  ten-case triage benchmark, and v5-native L0-L4 validators.
+- Removed obsolete comparison artifacts and strengthened repository hygiene.
+
+## 5.0.0 - 2026-07-11
 
 ### Architecture
 

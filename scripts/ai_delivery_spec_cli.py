@@ -84,7 +84,8 @@ def run_check(args: argparse.Namespace) -> int:
         [sys.executable, "scripts/validate_domain_sources.py"],
         [sys.executable, "scripts/validate_eval_catalog.py"],
         [sys.executable, "scripts/validate_github_eval_cases.py"],
-        [sys.executable, "scripts/validate_ecosystem_comparison.py"],
+        [sys.executable, "tests/test_v501_triage.py"],
+        [sys.executable, "tests/test_v501_validators.py"],
         [
             sys.executable,
             "scripts/build_github_validation_matrix.py",

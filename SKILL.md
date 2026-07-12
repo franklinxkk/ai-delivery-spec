@@ -3,7 +3,7 @@ name: ai-delivery-spec
 description: Turn rough product ideas, consumer or enterprise requests, customer materials, prototypes, legacy systems, or approved changes into traceable product truth, Human-First requirements, PRDs, testable prototypes, acceptance evidence, and coding-agent handoffs. Use for ToC idea clarification and lightweight PRDs, ToB/ToG delivery, product/domain modeling, AI/data/workflow products, brownfield change, customer acceptance, launch/operations, or multi-role lifecycle work. Excludes unrelated code debugging and copy rewriting.
 ---
 
-# AI Delivery Spec 5.0.0 - Product Delivery Kernel, ToB/ToG Deep
+# AI Delivery Spec 5.0.1 - Product Delivery Kernel, ToB/ToG Deep
 
 Create one canonical Product Truth and project it for product, engineering, QA,
 customers, coding agents, and operations. Dedicated domain packs accelerate
@@ -18,9 +18,14 @@ Declare:
 Lifecycle: discover|specify|plan|tasks|build_verify|launch|learn_retire
 Shape: greenfield|brownfield|hybrid
 Consumer: human|prototype|coding_agent|qa|customer|operations
+Override: mode=ultra_light|lite|standard|full; tier=L0|L1|L2|L3|L4; domain=generic|<pack>
 ```
 
 Rules:
+
+- Recommend `Ultra-Light` for one reversible page/copy/field/rule adjustment
+  with one primary role, no cross-module workflow, no regulated decision, and
+  no production migration. Accept one-line user overrides for mode/tier/domain.
 
 - `Heavy`: development, QA, customer demo, bid/procurement, migration,
   production, acceptance, regulated decision, or multi-role lifecycle.
@@ -35,6 +40,7 @@ Mode and tier are independent:
 
 | Mode | Stop Boundary |
 |---|---|
+| Ultra-Light | one-page requirement card, assumptions, one happy/negative AC; no Product Truth unless risk escalates |
 | Lite | requested artifact plus explicit gaps |
 | Standard | implementation/QA/customer handoff plus unresolved decisions |
 | Full | complete truth, projections, manifest, readiness, and evidence |
@@ -48,6 +54,10 @@ Mode and tier are independent:
 
 Higher assurance wins when signals conflict. Mode never expands artifact scope
 by itself.
+
+Smart recommendation: default to the smallest safe mode. Escalate Ultra-Light
+when a second role, approval, state machine, integration, sensitive data,
+money/safety impact, or irreversible change appears. Never truncate P0 behavior.
 
 ## 2. Load Only What The Task Needs
 
@@ -67,6 +77,7 @@ Read no more than the matching stage references and triggered add-ons.
 | realtime/SSE/WebSocket/countdown/push | `references/realtime-contract.md` |
 | micro-change, regulated scope, large truth, or context pressure | `references/context-planning.md` |
 | long chain, resume, multi-agent, staging/production, or formal audit | `references/execution-gates.md` |
+| GLM 5.2, Qwen, DeepSeek, Kimi, WorkBuddy, Trae, Qoder, or Cursor | matching `agents/*.md` plus `agents/china-tools.md` |
 
 Do not load every domain or reference "for safety". Default task budget:
 
@@ -79,6 +90,16 @@ For unusually small, regulated, or large work, generate an adaptive Context
 Plan from `spec.config.yaml` or the versioned example. Context planning may
 strengthen gates and retrieve Product Truth slices; it cannot change domain
 maturity or silently truncate P0 behavior.
+
+### Smart large-project mode
+
+Trigger when any two are true: 8+ roles, 12+ modules/views, 40+ actions, 80+
+fields, 5+ sources, 3+ integrations, or PRD + prototype + coding/QA handoff.
+Generate a Context Plan, inventory the complete ID graph once, work in
+module/flow ID slices, checkpoint accepted slices, and report context pressure
+as low/medium/high. Lite and Ultra-Light may prune prose and optional
+projections, never approved roles, primary flows, states, permissions,
+exceptions, or P0 acceptance.
 
 For long-running discovery, start with
 `schemas/discovery-contract.schema.json`; do not fabricate a complete Product
@@ -235,9 +256,16 @@ py -3 scripts/manage_execution_state.py record-turn --state state.yaml --output 
 py -3 scripts/compile_clarification_transcript.py --contract discovery.yaml --transcript transcript.yaml --decision READY_FOR_PRODUCT_TRUTH --output discovery-next.yaml
 py -3 scripts/extract_interaction_ledger.py --input prototype.html --output interaction-ledger.json
 py -3 scripts/validate_projection_consistency.py --truth delivery/truth/product-truth.yaml --projection delivery/projections/human-first-prd.md
+py -3 scripts/render_mermaid_flow.py --truth delivery/truth/product-truth.yaml --output delivery/projections/flow.mmd
+py -3 scripts/validate_prd_quality.py delivery/projections/human-first-prd.md --level L2
+py -3 scripts/validate_ia_skeleton.py delivery/ia-skeleton.yaml --level L2
+py -3 scripts/validate_coding_agent_contract.py delivery/projections/coding-agent-spec.md --level L2
 ```
 
 Use `python` when available outside Windows.
+
+Shortcuts: `Ultra-Light: <change>`; `Standard L2 domain=generic: <request>`;
+`Full L3 smart-large-project: <program>`; `Override: mode=lite tier=L1 domain=traffic`.
 
 ## 10. Final Self-Check
 

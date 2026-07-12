@@ -1,6 +1,6 @@
 interface:
   display_name: "AI Delivery Spec"
-  version: "5.0.0"
+  version: "5.0.1"
   short_description: "Idea-to-PRD and Product Truth delivery, with deep ToB/ToG handoff and acceptance."
   default_prompt: >
     Use $ai-delivery-spec. Support lightweight ToC idea clarification and PRDs

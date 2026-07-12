@@ -1,5 +1,5 @@
 schema_version: 5.0.0
-skill_version: 5.0.0
+skill_version: 5.0.1
 runtime: pure_v5
 domain_packs:
   count: 7
