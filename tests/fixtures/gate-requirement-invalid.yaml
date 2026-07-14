@@ -1,0 +1,21 @@
+schema_version: 5.1.0
+register_id: REGISTER-GATE-BAD
+product: Broken gate fixture
+requirements:
+  - id: REQ-GATE-BAD
+    title: Broken baseline
+    type: new_capability
+    stage: baselined
+    intake_decision: accept
+    priority: P1
+    outcome: Something happens.
+    source_refs: [SRC-GATE-BAD]
+    value: {level: high, rationale: requested}
+    complexity: {band: M, dimensions: [workflow], rationale: workflow changes}
+    uncertainty: {level: low, rationale: assumed complete}
+    owner: Product owner
+    baseline_version: 1.0
+    behavior_refs: []
+    acceptance_refs: []
+    dependency_refs: [REQ-NOT-FOUND]
+audit_log: []

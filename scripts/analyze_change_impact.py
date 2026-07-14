@@ -22,6 +22,27 @@ def graph_from_truth(document: dict[str, Any]) -> dict[str, set[str]]:
             for child in value:
                 yield from walk(child)
     ids = {node["id"] for node in walk(document) if isinstance(node.get("id"), str)}
+    # A traceability ledger stores relationships as from_id/to_id edges rather
+    # than nested *_ref(s).  Treat both formats as the same undirected impact
+    # graph so approved changes can start from either Product Truth or ledger.
+    for edge in document.get("edges", []) if isinstance(document, dict) else []:
+        if not isinstance(edge, dict):
+            continue
+        left, right = edge.get("from_id"), edge.get("to_id")
+        if isinstance(left, str) and isinstance(right, str):
+            ids.update((left, right))
+            graph[left].add(right)
+            graph[right].add(left)
+    for index_name in ("forward_index", "reverse_index"):
+        index = document.get(index_name, {}) if isinstance(document, dict) else {}
+        if isinstance(index, dict):
+            for owner, refs in index.items():
+                if isinstance(owner, str):
+                    ids.add(owner)
+                if isinstance(refs, list):
+                    ids.update(ref for ref in refs if isinstance(ref, str))
+    for item_id in ids:
+        graph.setdefault(item_id, set())
     for node in walk(document):
         owner = node.get("id")
         if not isinstance(owner, str):

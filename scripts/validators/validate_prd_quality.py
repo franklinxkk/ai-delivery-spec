@@ -9,6 +9,8 @@ from pathlib import Path
 
 import yaml
 
+from prd_structure import analyze as analyze_structure
+
 
 LEVELS = {
     "L0": ["goal", "scope", "acceptance"],
@@ -45,7 +47,8 @@ def main() -> int:
     parser.add_argument("--level", choices=LEVELS, default="L2")
     parser.add_argument("--domain-rules", type=Path)
     args = parser.parse_args()
-    text = args.document.read_text(encoding="utf-8").lower()
+    raw = args.document.read_text(encoding="utf-8")
+    text = raw.lower()
     failures = []
     for key in LEVELS[args.level]:
         if not any(term in text for term in TERMS[key]):
@@ -61,6 +64,7 @@ def main() -> int:
         ]:
             if not re.search(pattern, text):
                 failures.append(f"missing {label}")
+        failures.extend(analyze_structure(raw, full_prd=True))
     if failures:
         print("FAIL: " + "; ".join(failures))
         return 1

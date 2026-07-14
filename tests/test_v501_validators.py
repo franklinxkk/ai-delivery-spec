@@ -3,7 +3,7 @@ import subprocess, sys
 
 ROOT = Path(__file__).resolve().parents[1]
 cases = [
-    ("validate_prd_quality.py", "prd-l2.md"),
+    ("validate_prd_quality.py", "coding-l2.md"),
     ("validate_ia_skeleton.py", "ia-l2.yaml"),
     ("validate_coding_agent_contract.py", "coding-l2.md"),
 ]

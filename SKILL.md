@@ -55,10 +55,12 @@ Override: mode=<...>; tier=<...>; domain=generic|<pack>
 | 变更、影响分析、版本 diff | `references/runtime/change.md` |
 | 验收执行、证据与结论 | `references/runtime/verify.md` |
 | 可执行原型 | `references/runtime/prototype-testability.md` |
+| 最终 PRD/原型轻门禁 | `scripts/quality_gate.py`；只按需读取，不加载额外说明 |
 | 大项目/上下文压力 | `references/runtime/context-planning.md` |
 | 领域组合 | `references/runtime/composition.md` + 匹配领域包 |
-| 复用审批/列表/表单/权限/导入导出/集成模式 | `references/patterns/common-requirement-patterns.yaml` |
+| 复用审批/权限/集成/数量/金额/部分执行/跨聚合等通用模式 | `references/patterns/common-requirement-patterns.yaml` |
 | 国产模型/工具 | 匹配的 `agents/domestic/*.md` |
+| 修改 Skill/模板/领域包/校验器 | `references/runtime/assurance-lab.md`；仅发布保障，不进入客户项目必经链路 |
 
 一次只加载当前阶段的一至两个引用、零或一个领域包，以及被触发的治理规则。
 运行时不要加载 README、历史版本、所有示例或全部领域包。
@@ -84,6 +86,9 @@ Intake 准入 → Clarify 澄清 → Specify/Review 规格与评审
   规则、异常、验收与范围外项。
 - 识别“支持、灵活、适量、及时、等、默认、可配置”等歧义，并要求可判定阈值。
 - 关联 `REV-*` 评审问题、责任人、截止条件和关闭证据；不得把待办伪装成已确认事实。
+- 澄清门禁未关闭时，不加载最终 PRD 模板、不生成“最终 PRD/原型”，只交付已知事实、
+  P0 未知、禁止推断和下一批决策问题。词面歧义为零不等于角色、状态权威、金额/数量、
+  补偿、存量迁移或验收已经闭合。
 
 ### 3.3 统一规格交付
 
@@ -193,6 +198,14 @@ data-api    <- command/API
 完成状态仅为 `PASS`、`REVIEW_COMPLETE_WITH_GAPS` 或 `BLOCKED`。文档内写了 PASS
 不等于真实执行证据。
 
+最终门禁是守门员，不是作者：零模型调用、零子 Agent、每个输入至多读取一次；只定位
+稳定 ID 和违反的契约，不生成或自动修复需求。按产物选择 `requirement|prd|prototype|full`
+profile，默认最多输出 20 个问题。静态门禁不能替代关键角色浏览器走查、领域责任人确认
+或客户验收证据。
+
+跨行业多 Agent 模拟只在 Skill、共用模板、领域包或校验器发生实质变化时运行。它用于
+发现方法缺口，不提升领域成熟度，也不冒充专家评审或生产证明。
+
 ## 9. 确定性命令
 
 ```powershell
@@ -205,6 +218,8 @@ py -3 scripts/validators/validate_requirement_register.py requirements/register.
 py -3 scripts/validators/validate_acceptance_run.py requirements/acceptance/ARUN-001.yaml
 py -3 scripts/validators/validate_prd_quality.py requirements/PRD.md --level L2
 py -3 scripts/validators/validate_coding_agent_contract.py requirements/PRD.md --level L2 --profile full_prd
+py -3 scripts/ai_delivery_spec_cli.py gate --profile prd --prd requirements/PRD.md --level L2
+py -3 scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype prototype.html --level L2
 ```
 
 非 Windows 环境使用 `python`。

@@ -1,0 +1,48 @@
+schema_version: 5.1.0
+register_id: REGISTER-GATE-001
+product: Lightweight Gate Fixture
+current_baseline: "1.0"
+iterations:
+  - id: ITER-GATE-001
+    name: first baseline
+    status: baselined
+    requirement_refs: [REQ-GATE-001]
+requirements:
+  - id: REQ-GATE-001
+    title: Create a visible item
+    type: new_capability
+    stage: baselined
+    intake_decision: accept
+    priority: P1
+    outcome: An authorized user sees the item become active once.
+    source_refs: [SRC-GATE-001]
+    value:
+      level: high
+      rationale: Approved customer workflow cannot complete without the item.
+      evidence_refs: [SRC-GATE-001]
+    complexity:
+      band: M
+      dimensions: [roles, workflow, data]
+      rationale: One role, one guarded state transition, and one stored entity.
+    uncertainty:
+      level: low
+      rationale: Role, guard, result, and acceptance evidence are confirmed.
+    owner: Product owner
+    requester: Customer owner
+    iteration_ref: ITER-GATE-001
+    dependency_refs: []
+    behavior_refs: [ACT-GATE-SAVE]
+    acceptance_refs: [AC-GATE-001]
+    review_refs: [REV-GATE-001]
+    change_refs: []
+    baseline_version: "1.0"
+dependency_edges: []
+audit_log:
+  - id: AUDIT-GATE-001
+    requirement_ref: REQ-GATE-001
+    actor: Product owner
+    action: baselined
+    at: "2026-07-14T00:00:00Z"
+    reason: Approved review record REV-GATE-001.
+    to_version: "1.0"
+    evidence_refs: [EVD-GATE-001]

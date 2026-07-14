@@ -126,6 +126,21 @@ scenarios:
     status: not_run
     evidence: []
 
+  - id: EVAL-CROSS-INDUSTRY-ASSURANCE-001
+    project: cross-industry-assurance
+    lifecycle: review
+    shape: hybrid
+    perspective: multi_role_assurance
+    input: evals/industry-assurance-portfolio.yaml
+    expected:
+      - seven sectors traverse intake, clarify, specify, review, baseline, change and acceptance
+      - business, product, domain, UX, engineering, QA, compliance and customer lenses expose distinct P0/P1 gaps
+      - method gaps are fixed or explicitly bounded while missing project facts remain blocked
+      - final runtime gate remains zero-LLM, single-read and non-generative
+    dimensions: [clarification_quality, requirement_completeness, no_guess_handoff, change_safety, domain_accuracy, human_usability, context_efficiency]
+    status: partial
+    evidence: [evals/evidence/v510-cross-industry-multi-agent-simulation-2026-07-14.yaml]
+
   - id: EVAL-GITHUB-CHATWOOT-REQ-001
     project: chatwoot-voice-channel
     lifecycle: discover

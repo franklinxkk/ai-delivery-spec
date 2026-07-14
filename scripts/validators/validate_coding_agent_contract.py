@@ -9,6 +9,8 @@ from pathlib import Path
 
 import yaml
 
+from prd_structure import analyze as analyze_structure
+
 
 BASE_AREAS = {
     "source precedence, intake and scope": ("来源优先", "source-of-truth", "准入结论", "intake decision"),
@@ -108,6 +110,7 @@ def main() -> int:
                     failures.append(f"API contract misses {label}")
         if not has_any(text, ("异常", "失败", "failure")):
             failures.append("contract misses failure behavior")
+        failures.extend(analyze_structure(raw, full_prd=args.profile == "full_prd"))
 
     if args.domain_rules:
         rules = yaml.safe_load(args.domain_rules.read_text(encoding="utf-8")) or {}

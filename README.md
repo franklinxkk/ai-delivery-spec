@@ -78,8 +78,10 @@ npx skills add franklinxkk/ai-delivery-spec
    大项目仍采用分片真相，避免一次性巨型 YAML。
 4. **变更可计算**：从变更种子双向遍历关联 ID，生成影响清单和回归范围。
 5. **验收有结果**：AC、执行项、实际结果、证据、缺陷和签署形成闭环。
-6. **模式可复用**：审批、列表、表单、权限、导入导出和集成提供问题/异常/AC 蓝图，
-   但必须绑定项目证据，不能把模板当已确认需求。
+6. **模式可复用**：审批、权限、集成、数量谱系、金额结算、部分执行和跨聚合等
+   场景提供问题/异常/AC 蓝图，但必须绑定项目证据，不能把模板当已确认需求。
+7. **双层质量保障**：发布前用跨行业多 Agent 组合找方法缺口；每个项目末端只运行
+   零模型、单遍解析的轻量门禁，不把验证器做成第二个生成器。
 
 仓库内的 10 个结构化准入基准覆盖小改动、信息缺失、监管、安全、跨角色、依赖阻塞、
 低价值、重复、大项目和存量迁移，当前推荐结果为 10/10。
@@ -94,7 +96,25 @@ python scripts/validators/validate_requirement_register.py requirements/register
 python scripts/validators/validate_prd_quality.py requirements/PRD.md --level L2
 python scripts/validators/validate_coding_agent_contract.py requirements/PRD.md --level L2 --profile full_prd
 python scripts/validators/validate_acceptance_run.py requirements/acceptance/ARUN-CORE-001.yaml
+python scripts/ai_delivery_spec_cli.py gate --profile prd --prd requirements/PRD.md --level L2
+python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype prototype.html --level L2
 ```
+
+`gate` 只判定和定位，不生成、不自动修复；支持 `requirement`、`prd`、`prototype`、
+`full` 四个按需 Profile，默认最多报告 20 个问题。静态通过不替代领域负责人、浏览器
+关键旅程或客户验收。
+
+## 跨行业质量保障，而不是每项目多 Agent 税
+
+v5.1.0 的发布保障组合覆盖制造、医疗、金融保险、能源、零售电商、数字政府、
+建筑工程七类需求物理，以及既有交通、CRM、教育、数据产品和 AI Native 组合。
+每个场景贯穿准入、澄清、规格、评审、基线、变更、验收，并由业务、产品、领域、
+UX/原型、研发架构、测试验收、合规安全、客户验收八个镜头检查统一 PRD、工程原型
+和机器验收。详见 [保障实验室](references/runtime/assurance-lab.md) 与
+[行业组合](evals/industry-assurance-portfolio.yaml)。
+
+这套多 Agent 压测只在 Skill、模板、领域包或校验器变化时运行。模拟结果不等于行业
+专家确认、客户签署或生产证据；普通项目只承担与自身等级匹配的轻门禁成本。
 
 仅当规模/审计门槛触发时：
 
@@ -164,6 +184,9 @@ python scripts/ai_delivery_spec_cli.py check --keep-going
 python scripts/validators/validate_v5_architecture.py
 python tests/test_v510_requirement_management.py
 python tests/test_v510_unified_prd.py
+python tests/test_v510_semantic_guards.py
+python tests/test_v510_lightweight_gate.py
+python tests/test_v510_industry_assurance.py
 ```
 
 一键生成 Mermaid：

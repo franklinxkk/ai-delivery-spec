@@ -1,0 +1,448 @@
+schema_version: 5.1.0
+portfolio_id: PORT-V510-CROSS-INDUSTRY
+name: v5.1.0 跨行业需求保障实验室
+purpose: 发布前用代表性行业和独立角色视角暴露需求方法缺口，不增加客户项目最终门禁的生成负担。
+
+claim_boundary:
+  execution_status: contract_fixture
+  statement: 场景、角色和检查点是发布回归输入；不证明行业规则正确、专家评审、客户验收或生产效果。
+  simulated_review_is_expert_review: false
+  official_source_is_project_requirement: false
+  production_claim: prohibited
+
+selection_policy:
+  rule: 按业务覆盖面、数字化政策投入和需求物理差异选择代表行业，不发布市场规模排行榜。
+  dimensions:
+    - regulated human accountability
+    - money and reconciliation
+    - safety, assets, IoT and offline work
+    - high-scale transaction and concurrency
+    - cross-organization public approval and audit
+    - project, contract, measurement and settlement
+    - sensitive data, lineage and AI decision boundary
+  real_project_rule: 项目必须重新确认适用地域、版本、责任主体、客户解释和来源优先级。
+
+execution_model:
+  scope: offline_release_hardening
+  runtime_prerequisite: false
+  trigger:
+    - skill routing or completion contract changed
+    - unified PRD or prototype contract changed
+    - shared schema, pattern, domain pack or validator changed
+    - production escape exposes a missing requirement class
+  role_pass_shape: 一个角色 Agent 在一次有界输入中检查同一场景的七个阶段，不为每个阶段重启 Agent。
+  isolation: 每个角色只接收场景、角色契约、当前稳定 ID 切片和来源摘要，不接收全仓库或全部领域包。
+  finding_contract:
+    required: [id, stage, role, verdict, affected_ids, evidence_refs, gap, required_decision]
+    verdicts: [pass, finding, block, not_applicable]
+    max_findings_per_role_scenario: 5
+    max_evidence_refs_per_finding: 5
+    max_chars_per_gap: 240
+  aggregation:
+    key: affected stable ID plus stage
+    majority_can_override_blocker: false
+    blocker_classes: [safety, authority, privacy, money, customer_acceptance]
+    release_result: [PASS, REVIEW_COMPLETE_WITH_GAPS, BLOCKED]
+
+runtime_goalkeeper:
+  llm_calls: 0
+  subagent_calls: 0
+  generates_or_fixes_requirements: false
+  generates_product_truth: false
+  artifact_parse_passes: 1
+  default_behavior: fail_fast_on_P0_then_compact_P1_P2_summary
+  finding_fields: [severity, stable_ids, violated_contract, evidence_or_gap]
+  full_diagnostics: explicit_maintainer_opt_in
+  product_truth_rule: 仅在 SKILL.md 既有规模、长期变更或审计触发条件下要求。
+  browser_rule: 只要求覆盖范围内关键角色旅程和高风险交互证据，不穷举装饰控件。
+
+downstream_consumer_probes:
+  product_design_review:
+    consumer: 产品与业务评审
+    ready_when: 正文可顺序读懂目标范围角色旅程流程规则异常和验收，P0未知未伪装成事实。
+    forbidden: 用工程附录或关键词表代替业务评审。
+  prototype_build:
+    consumer: UX与原型工程
+    ready_when: VIEW/REG/ACT/FLD/STATE/AC、角色路径、全状态、代表数据和存量parity可直接映射。
+    forbidden: 原型自行创造业务状态、字段、权限或成功定义。
+  engineering_design:
+    consumer: 架构与研发负责人
+    ready_when: 状态权威、业务级接口事件、并发幂等、失败补偿、历史兼容和禁止推断明确。
+    forbidden: 用PRD指定无业务依据的数据库框架部署或任务拆分。
+  coding_implementation:
+    consumer: 开发与Coding Agent
+    ready_when: 任一REQ切片可沿ROLE/FLOW/VIEW/ACT/FLD/RULE/STATE/API/AC实现而无需发明业务决定。
+    forbidden: 只读机器附录跳过正文，或把实现完成冒充需求验收。
+  test_derivation:
+    consumer: 测试与质量
+    ready_when: P0 REQ有正反AC、数据、权限、并发、外部失败、存量回归和证据锚点。
+    forbidden: 从按钮或接口存在推断业务结果正确。
+  customer_acceptance:
+    consumer: 客户验收与业务负责人
+    ready_when: 关键角色真实走通，可见结果和领域结果有证据，缺陷可反查REQ并由有权人签署。
+    forbidden: 用静态门禁PASS、模拟评审或开发自测替代客户验收。
+
+role_lenses:
+  ROLE-LENS-SPONSOR: 业务发起人
+  ROLE-LENS-PRODUCT: 产品负责人
+  ROLE-LENS-DOMAIN: 领域负责人
+  ROLE-LENS-UX: UX 与原型负责人
+  ROLE-LENS-ENGINEERING: 研发与架构负责人
+  ROLE-LENS-QA: 测试与验收负责人
+  ROLE-LENS-COMPLIANCE: 合规与安全负责人
+  ROLE-LENS-CUSTOMER: 客户验收代表
+
+stages:
+  - id: intake
+    gate_question: 需求是否有证据、有负责人、有边界并值得进入正式设计？
+    mandatory_roles: &all_roles [ROLE-LENS-SPONSOR, ROLE-LENS-PRODUCT, ROLE-LENS-DOMAIN, ROLE-LENS-UX, ROLE-LENS-ENGINEERING, ROLE-LENS-QA, ROLE-LENS-COMPLIANCE, ROLE-LENS-CUSTOMER]
+    minimum_output:
+      ROLE-LENS-SPONSOR: [可观察结果, 价值证据, 决策权限, 目标迭代]
+      ROLE-LENS-PRODUCT: [REQ登记, 来源优先级, 范围, 依赖, 准入结论和层级]
+      ROLE-LENS-DOMAIN: [核心对象, 生命周期风险, 适用来源, 高影响未知]
+      ROLE-LENS-UX: [主角色任务, 入口假设, 是否需要原型, 可见成功结果]
+      ROLE-LENS-ENGINEERING: [影响维度, 集成和存量信号, 复杂度带, 不可逆性]
+      ROLE-LENS-QA: [可验收结果, 关键反例, 证据可得性, 测试阻断项]
+      ROLE-LENS-COMPLIANCE: [敏感数据, 责任决策, 审计触发, 禁止行为]
+      ROLE-LENS-CUSTOMER: [购买或使用结果, 验收主体, 外部约束, 不接受边界]
+  - id: clarify
+    gate_question: 会改变范围、责任、安全、数据或验收的未知是否已关闭或显式阻断？
+    mandatory_roles: *all_roles
+    minimum_output:
+      ROLE-LENS-SPONSOR: [业务规则决策, 范围取舍, 成功阈值, 未决项授权人]
+      ROLE-LENS-PRODUCT: [角色和数据范围, 主异常流程, 状态规则, 问题关闭证据]
+      ROLE-LENS-DOMAIN: [术语字典, 状态所有者, 不变量, 来源适用性和冲突]
+      ROLE-LENS-UX: [角色路径, 页面状态, 交接提示, 失败恢复, 可访问性风险]
+      ROLE-LENS-ENGINEERING: [接口语义, 幂等并发, 兼容迁移, 补偿对账未知]
+      ROLE-LENS-QA: [前置和反例, 可观察结果, 测试数据, 证据类型]
+      ROLE-LENS-COMPLIANCE: [合法权限, 最小数据, 人工责任, 留存撤销和审计]
+      ROLE-LENS-CUSTOMER: [现场操作路径, 组织边界, 验收口径, 条件通过规则]
+  - id: specify
+    gate_question: 人、业务和机器是否共享一个无需发明规则的精确需求契约？
+    mandatory_roles: *all_roles
+    minimum_output:
+      ROLE-LENS-SPONSOR: [目标范围确认, 业务例外, 指标口径, 范围外项]
+      ROLE-LENS-PRODUCT: [统一PRD主线, FLOW和REQ, 页面动作规则状态, 双向追溯]
+      ROLE-LENS-DOMAIN: [实体关系, 生命周期, 领域结果, 规则优先级和异常]
+      ROLE-LENS-UX: [布局入口, data注解, 全状态, 可见结果, 角色旅程]
+      ROLE-LENS-ENGINEERING: [业务级API事件, 权限幂等, 失败补偿, 禁止推断]
+      ROLE-LENS-QA: [可执行AC, 负例, 数据集, 证据锚点, 回归范围]
+      ROLE-LENS-COMPLIANCE: [数据分类, 授权守卫, 审计事件, 人工复核和禁止自动化]
+      ROLE-LENS-CUSTOMER: [业务可读性, 操作闭环, 报表或凭证, 验收映射]
+  - id: review
+    gate_question: 各角色是否独立发现并关闭了 P0/P1 缺口，而非只确认文档存在？
+    mandatory_roles: *all_roles
+    minimum_output:
+      ROLE-LENS-SPONSOR: [目标偏差, 价值或范围异议, 决策, 证据]
+      ROLE-LENS-PRODUCT: [REV记录, 受影响ID, owner, disposition和关闭证据]
+      ROLE-LENS-DOMAIN: [规则冲突, 生命周期断点, 适用性缺口, 责任归属]
+      ROLE-LENS-UX: [不可发现路径, 状态或反馈缺失, 原型偏差, 修复验收]
+      ROLE-LENS-ENGINEERING: [不可实现歧义, 一致性风险, 外部失败, 历史兼容]
+      ROLE-LENS-QA: [不可判定AC, 漏测分支, 证据缺口, 缺陷分类]
+      ROLE-LENS-COMPLIANCE: [越权或泄露, 不可审计决策, 留存冲突, blocker]
+      ROLE-LENS-CUSTOMER: [现场不可用点, 交付口径冲突, 验收意见, 签署条件]
+  - id: baseline
+    gate_question: 获批事实、版本和消费者是否被冻结并可复现？
+    mandatory_roles: *all_roles
+    minimum_output:
+      ROLE-LENS-SPONSOR: [业务批准, 范围版本, 遗留授权, 生效条件]
+      ROLE-LENS-PRODUCT: [基线ID, 纳入REQ, 来源优先级, unknown disposition, 同步清单]
+      ROLE-LENS-DOMAIN: [领域规则版本, 适用范围, 偏差, 未验证声明]
+      ROLE-LENS-UX: [原型锁, 视图动作数量, 已知差距, PRD版本绑定]
+      ROLE-LENS-ENGINEERING: [交接版本, 禁止推断清单, 外部依赖, 技术待设计边界]
+      ROLE-LENS-QA: [AC基线, 必过项, 测试映射, 未执行项]
+      ROLE-LENS-COMPLIANCE: [授权批准, 数据范围基线, 审计基线, 风险接受人]
+      ROLE-LENS-CUSTOMER: [验收版本, 场景范围, 条件或排除项, 确认记录]
+  - id: change
+    gate_question: 一处批准变更是否穿透所有受影响行为、数据、验收和历史？
+    mandatory_roles: *all_roles
+    minimum_output:
+      ROLE-LENS-SPONSOR: [变更原因和价值, 紧迫度, 预算或范围取舍, 批准]
+      ROLE-LENS-PRODUCT: [CHG种子, 双向影响, before_after, 同步和新基线]
+      ROLE-LENS-DOMAIN: [规则和状态影响, 历史语义, 领域兼容, 新异常]
+      ROLE-LENS-UX: [页面动作差异, 角色路径差异, parity, 恢复或撤销交互]
+      ROLE-LENS-ENGINEERING: [API事件数据影响, 幂等, 迁移回滚, 对账和回归]
+      ROLE-LENS-QA: [受影响AC, 回归集, 新反例, 旧证据有效性]
+      ROLE-LENS-COMPLIANCE: [授权变化, 数据再处理, 审计连续性, 风险重批]
+      ROLE-LENS-CUSTOMER: [现场流程差异, 存量处理, 新验收项, 版本确认]
+  - id: acceptance
+    gate_question: 每个必过项是否真实执行、有证据、可反查并获授权签署？
+    mandatory_roles: *all_roles
+    minimum_output:
+      ROLE-LENS-SPONSOR: [业务结果判断, 遗留风险, 条件接受, 最终决策]
+      ROLE-LENS-PRODUCT: [ARUN结论, REQ关闭条件, 缺陷和变更反查, 状态]
+      ROLE-LENS-DOMAIN: [领域结果核对, 关键不变量, 异常证据, 偏差处置]
+      ROLE-LENS-UX: [逐角色走查, 可见结果, 错误恢复, 浏览器证据]
+      ROLE-LENS-ENGINEERING: [集成和数据结果证据, 对账, 可恢复性, 残余限制]
+      ROLE-LENS-QA: [逐AC执行结果, actual, evidence, defects, reverse trace]
+      ROLE-LENS-COMPLIANCE: [权限证据, 审计证据, 人工签署, 隐私安全遗留]
+      ROLE-LENS-CUSTOMER: [业务验收记录, 条件和负责人, 签署, 拒绝原因]
+
+output_contracts:
+  unified_prd:
+    required:
+      - 一份正文加工程附录，不维护两份相互漂移的 PRD
+      - 背景目标范围角色旅程流程先于字段和接口附录
+      - 角色入口、权限、主异常路径、跨角色交接、数据和最终结果闭环
+      - 页面动作字段状态规则集成异常和验收均使用稳定 ID
+      - 业务级接口含权限、幂等、成功、业务错误、副作用、补偿和对账
+      - SRC到REQ到行为到AC到证据正向可查，AC缺陷变更反向可查
+      - 实现技术留给研发，业务决策不得留给研发或 Coding Agent 发明
+  interactive_prototype:
+    required:
+      - 关键 VIEW REG ACT FLD STATE AC 具备稳定 data 注解
+      - 每个 data-action 有处理器、可见结果、领域结果、失败恢复和AC
+      - 关键角色有入口、权限、主路径、交接、成功、退出和异常路径
+      - 适用的空加载错误无权冲突部分成功状态可实际触发
+      - 代表性长数据、多状态、受限数据和批量或并发边界可演示
+      - JavaScript语法、交互账本、CSS hidden隔离和浏览器关键走查可验证
+      - 存量迭代无未经CHG批准的视图动作处理器和角色路径退化
+  machine_acceptance:
+    required:
+      - 每个P0 REQ至少一个可执行AC
+      - AC含前置角色步骤输入可见结果领域结果反例和证据
+      - 失败AC或DEFECT可反查REQ SRC和适用CHG
+
+official_source_register:
+  - id: SRC-OFFICIAL-MANUFACTURING
+    owner: 工业和信息化部等
+    title: 制造业企业数字化转型实施指南
+    url: https://www.gov.cn/zhengce/zhengceku/202412/P020241226453066361975.pdf
+    use: 证明制造业数字化场景具备政策和业务代表性；项目规则仍需企业确认。
+  - id: SRC-OFFICIAL-MEDICAL
+    owner: 国家卫生健康委统计信息中心
+    title: 全国卫生健康信息化发展指数（2024）
+    url: https://www.nhc.gov.cn/mohwsbwstjxxzx/s8553/202407/6e45150d79ba4655af604d957d01d181.shtml
+    use: 证明卫生健康信息化具备广泛建设场景；不授权任何临床规则。
+  - id: SRC-OFFICIAL-FINANCE
+    owner: 国家金融监督管理总局
+    title: 关于银行业保险业数字化转型的指导意见
+    url: https://www.nfra.gov.cn/cn/view/pages/governmentDetail.html?docId=1034763&generaltype=1&itemId=861
+    use: 证明金融数字化、风险和数据治理是代表性场景；具体监管适用性需法务确认。
+  - id: SRC-OFFICIAL-ENERGY
+    owner: 国家能源局
+    title: 关于加快推进能源数字化智能化发展的若干意见
+    url: https://zfxxgk.nea.gov.cn/2023-03/28/c_1310707122.htm
+    use: 证明能源资产、感知、调控和安全场景具备代表性；不定义现场安全规程。
+  - id: SRC-OFFICIAL-RETAIL
+    owner: 商务部
+    title: 2025年我国电子商务发展情况
+    url: https://www.mofcom.gov.cn/syxwfb/art/2026/art_518fcaf90e674b959d3a5a0e8b74fc0f.html
+    use: 证明高规模网络交易场景具备广泛性；不定义平台交易规则。
+  - id: SRC-OFFICIAL-GOVERNMENT
+    owner: 国务院
+    title: 关于加强数字政府建设的指导意见
+    url: https://app.www.gov.cn/govdata/gov/202206/23/486412/article.html
+    use: 证明跨层级跨地域跨系统协同、数据和安全需求具备代表性。
+  - id: SRC-OFFICIAL-CONSTRUCTION
+    owner: 住房和城乡建设部
+    title: 智能建造与新型建筑工业化协同发展可复制经验做法清单
+    url: https://www.mohurd.gov.cn/gongkai/zc/wjk/art/2021/art_17339_761493.html
+    use: 证明建设全过程数字化协同具备代表性；合同结算规则需项目确认。
+
+scenarios:
+  - id: SCN-MFG-NCR-RELEASE
+    sector: manufacturing-industrial
+    title: 不合格批次处置与生产放行
+    domain_strategy: project_domain_capsule
+    source_refs: [SRC-OFFICIAL-MANUFACTURING]
+    profiles: [ToB, regulated, brownfield]
+    actors: [产线班组, 质量工程师, 生产负责人, 仓储, 供应商质量, 审计员]
+    request: 质检发现不合格后形成处置单，未经合格证据和责任审批不得放行批次，返工与让步接收保留批次谱系。
+    requirement_physics: [batch_genealogy, safety_quality_gate, approval, IoT_data, offline_recovery, supplier_handoff, audit]
+    deliverables: [unified_prd, interactive_prototype, machine_acceptance]
+    bridges: [data-product, ai-native, crm]
+    unknown_seeds: [检验抽样规则, 让步接收权限, 设备数据可信源, 返工批次编号, 供应商可见范围]
+    stage_checks:
+      intake: 阻断不合格放行的价值、责任人、存量系统和安全影响决定 L3 准入。
+      clarify: 批次、检验、处置、审批、返工、放行状态及设备离线补传边界闭合。
+      specify: 批次谱系、状态守卫、部分处置、供应商隔离和放行领域结果无需研发猜测。
+      review: 质量、生产、供应商和审计角色独立检查越权放行与证据缺口。
+      baseline: 规则版本、工厂适用范围、存量在制批次和审批人冻结。
+      change: 抽检阈值变化穿透规则、页面、设备接口、批次历史、AC和回归。
+      acceptance: 越权放行失败、离线恢复、返工谱系和合格放行均有批次级证据。
+    prd_focus: [状态所有权, 批次谱系, 让步接收, 部分成功, 设备对账, 供应商隔离]
+    prototype_focus: [质量与生产双角色路径, 不合格详情, 处置审批, 离线和冲突状态, 批次追溯]
+    change_probe: CHG-MFG-SAMPLING-RULE
+    acceptance_probe: AC-MFG-UNAUTHORIZED-RELEASE-DENIED
+
+  - id: SCN-MED-ORDER-CANCEL
+    sector: medical-healthcare
+    title: 医嘱取消、替代与下游执行阻断
+    domain_strategy: dedicated_pack_medical-hospital-it_plus_project_sources
+    source_refs: [SRC-OFFICIAL-MEDICAL]
+    profiles: [regulated, brownfield]
+    actors: [开立医生, 执行护士, 药师, 患者服务人员, 医务管理, 审计员]
+    request: 已开立医嘱的取消或替代必须校验执行进度和责任权限，并向药房、护理等下游传播且保留不可抵赖证据。
+    requirement_physics: [clinical_accountability, sensitive_data, state_conflict, downstream_compensation, human_gate, immutable_audit]
+    deliverables: [unified_prd, interactive_prototype, machine_acceptance]
+    bridges: [data-product, ai-native]
+    unknown_seeds: [医嘱类型差异, 已执行部分的处置, 紧急撤销权限, 患者告知, 本地留存要求]
+    stage_checks:
+      intake: 临床责任、敏感数据和存量集成触发 L3，未确认医嘱规则时只能 clarify。
+      clarify: 开立取消替代执行及回退状态、责任人、下游确认和告知规则闭合。
+      specify: AI只可提示风险，不得代替医务人员取消；每个下游失败有恢复和对账。
+      review: 医疗领域和合规责任人必须把未知标成 blocker，模拟评审不得冒充专家批准。
+      baseline: 机构适用规则、接口版本、角色权限和患者数据范围冻结。
+      change: 取消权限调整穿透医嘱、护理、药房、审计、AC及历史记录解释。
+      acceptance: 已执行、未执行、部分执行、下游失败和越权五条路径有执行证据和签署。
+    prd_focus: [临床责任, 状态冲突, 下游补偿, 敏感字段, 人工决策, 审计连续性]
+    prototype_focus: [医生护士药师路径, 医嘱时间线, 冲突和部分执行, 无权遮蔽, 恢复提示]
+    change_probe: CHG-MED-CANCEL-AUTHORITY
+    acceptance_probe: AC-MED-PARTIAL-EXECUTION-CANCEL
+
+  - id: SCN-FIN-CLAIM-DECISION
+    sector: finance-insurance
+    title: 保险理赔自动预审、人工复核与支付撤销
+    domain_strategy: project_domain_capsule
+    source_refs: [SRC-OFFICIAL-FINANCE]
+    profiles: [ToB, regulated, brownfield]
+    actors: [投保人, 理赔受理, 调查员, 核赔人, 财务支付, 合规审计, 渠道机构]
+    request: 理赔材料可自动预审，但拒赔、反欺诈和支付决策必须由有权人员复核，重复赔付与撤销需可对账。
+    requirement_physics: [regulated_money, explainable_decision, fraud_signal, human_gate, payment_idempotency, reversal, reconciliation, sensitive_data]
+    deliverables: [unified_prd, interactive_prototype, machine_acceptance]
+    bridges: [crm, data-product, ai-native]
+    unknown_seeds: [产品条款版本, 自动预审边界, 欺诈标签可见性, 渠道数据范围, 支付撤销时限]
+    stage_checks:
+      intake: 金额、消费者权益、自动决策和外部支付触发 L3 与合规负责人。
+      clarify: 案件、材料、预审、调查、核赔、支付、撤销和申诉的责任与状态闭合。
+      specify: 自动建议与人工决定分离，幂等键、拒赔理由、支付副作用和对账可判定。
+      review: 业务、合规、架构和验收代表检查误拒、重复赔付、越权及解释证据。
+      baseline: 条款版本、模型或规则版本、金额口径、支付接口和权限基线冻结。
+      change: 赔付阈值变更影响历史案件、进行中案件、规则、解释、支付AC和消费者告知。
+      acceptance: 正常赔付、拒赔复核、重复回调、支付失败、撤销和申诉链路有证据。
+    prd_focus: [金额口径, 条款版本, 人机决策边界, 支付幂等, 撤销对账, 申诉]
+    prototype_focus: [受理核赔财务角色路径, 决策解释, 重复支付阻断, 撤销状态, 敏感字段遮蔽]
+    change_probe: CHG-FIN-CLAIM-THRESHOLD
+    acceptance_probe: AC-FIN-DUPLICATE-PAYMENT-DENIED
+
+  - id: SCN-ENERGY-FAULT-WORK
+    sector: energy-utilities
+    title: 设备告警、现场检修与复电闭环
+    domain_strategy: project_domain_capsule
+    source_refs: [SRC-OFFICIAL-ENERGY]
+    profiles: [ToB, regulated, brownfield]
+    actors: [调度值班员, 设备运维, 现场检修, 外协人员, 安全负责人, 客户服务, 审计员]
+    request: 设备告警形成检修工单，现场弱网可执行安全步骤，但未经复核和设备状态对账不得恢复运行。
+    requirement_physics: [asset_twin, IoT_event, safety_permit, offline_first, contractor_scope, dispatch_handoff, reconciliation, recovery]
+    deliverables: [unified_prd, interactive_prototype, machine_acceptance]
+    bridges: [traffic, data-product, ai-native, crm]
+    unknown_seeds: [告警可信等级, 安全票证来源, 外协离线权限, 设备状态主源, 复电双人复核]
+    stage_checks:
+      intake: 人身设备安全、外协访问、弱网和调度集成触发 L3。
+      clarify: 告警确认、隔离、派工、许可、检修、复核、复电与回退的状态和责任闭合。
+      specify: 设备与工单状态不混同，离线动作有授权快照、冲突处理和重连对账。
+      review: 调度、现场、安全、外协和架构独立检查错误复电、过期权限和事件乱序。
+      baseline: 站点范围、设备主数据、告警源、安全规程来源和外协权限冻结。
+      change: 复电复核规则变化穿透移动端、调度端、事件、离线队列、审计和AC。
+      acceptance: 弱网、重复告警、过期许可、状态冲突、外协越权和正常复电均有证据。
+    prd_focus: [资产与工单双状态, 安全票证, 外协隔离, 弱网队列, 事件顺序, 复电对账]
+    prototype_focus: [调度与移动端路径, 离线标识, 安全步骤, 冲突合并, 设备状态时间线]
+    change_probe: CHG-ENERGY-RESTORE-REVIEW
+    acceptance_probe: AC-ENERGY-OFFLINE-PERMIT-EXPIRED
+
+  - id: SCN-RETAIL-OMNI-ORDER
+    sector: retail-ecommerce
+    title: 全渠道库存预占、拆单履约与退款
+    domain_strategy: project_domain_capsule
+    source_refs: [SRC-OFFICIAL-RETAIL]
+    profiles: [ToB, brownfield]
+    actors: [消费者, 客服, 门店, 仓库, 商家, 财务, 渠道运营]
+    request: 多渠道订单共享可售库存，拆单、取消、缺货和部分退款必须保持订单、库存、支付和履约一致。
+    requirement_physics: [high_concurrency, inventory_reservation, order_state, partial_fulfillment, payment_refund, idempotency, eventual_consistency, tenant_scope]
+    deliverables: [unified_prd, interactive_prototype, machine_acceptance]
+    bridges: [crm, data-product, ai-native]
+    unknown_seeds: [库存主源, 预占超时, 缺货优先级, 退款责任, 渠道回调语义, 商家数据隔离]
+    stage_checks:
+      intake: 跨订单库存支付履约、多商家和高并发决定 L2/L3，不能按单页面处理。
+      clarify: 预占释放、拆单发货、取消拒绝、退款和渠道回调的状态及口径闭合。
+      specify: 订单库存支付各自拥有状态，关联事件、幂等、部分成功和对账无需猜测。
+      review: 消费者、客服、商家、仓配、财务和架构检查超卖、重复退款和越租户。
+      baseline: 渠道范围、库存口径、支付接口、商家权限和超时规则冻结。
+      change: 预占超时变化影响下单页、库存服务、待支付订单、事件、退款和AC。
+      acceptance: 并发抢购、重复回调、部分发货取消、缺货替代、退款失败和越权均有证据。
+    prd_focus: [状态分治, 库存口径, 幂等回调, 部分履约, 退款对账, 商家隔离]
+    prototype_focus: [消费者客服仓库商家路径, 拆单时间线, 部分失败, 重试, 无权数据]
+    change_probe: CHG-RETAIL-RESERVATION-TTL
+    acceptance_probe: AC-RETAIL-CONCURRENT-LAST-STOCK
+
+  - id: SCN-GOV-PERMIT-COLLAB
+    sector: digital-government
+    title: 跨部门许可联办与材料复用
+    domain_strategy: project_domain_capsule
+    source_refs: [SRC-OFFICIAL-GOVERNMENT]
+    profiles: [ToG, regulated, brownfield]
+    actors: [申请人, 综合窗口, 部门经办, 部门审批, 数据提供部门, 监督人员, 档案人员]
+    request: 企业一次提交许可申请，多个部门按法定职责协同办理；材料复用必须有合法来源、授权、用途和全程留痕。
+    requirement_physics: [cross_agency, legal_authority, public_service, material_version, approval_deadline, data_minimization, audit_archive, correction_appeal]
+    deliverables: [unified_prd, interactive_prototype, machine_acceptance]
+    bridges: [traffic, crm, data-product, ai-native]
+    unknown_seeds: [事项清单版本, 法定时限, 材料免提交依据, 部门数据边界, 退补次数, 申诉路径]
+    stage_checks:
+      intake: 法定职责、跨部门数据和公众验收触发 L3，领导意见不能替代合法来源。
+      clarify: 申请、受理、分发、补正、部门决定、汇总、送达、归档和申诉闭合。
+      specify: 部门只见授权数据，材料版本、退补时限、超时升级和决定送达可判定。
+      review: 窗口、部门、数据、监督、档案和申请人视角检查职责越界与流程死角。
+      baseline: 事项版本、依据、部门职责、材料清单、时限和验收主体冻结。
+      change: 材料免提交规则变化穿透申请表、共享接口、授权、历史申请、AC和公告。
+      acceptance: 新办、补正、部门拒绝、数据不可用、超时、撤回和申诉有证据及签署。
+    prd_focus: [事项版本, 法定职责, 材料授权, 部门隔离, 时限升级, 送达归档]
+    prototype_focus: [申请人窗口部门监督路径, 进度可解释, 补正恢复, 无权遮蔽, 档案凭证]
+    change_probe: CHG-GOV-MATERIAL-EXEMPTION
+    acceptance_probe: AC-GOV-CROSS-DEPARTMENT-DATA-DENIED
+
+  - id: SCN-CONST-CHANGE-SETTLE
+    sector: construction-property
+    title: 工程变更、现场签证与进度结算
+    domain_strategy: project_domain_capsule
+    source_refs: [SRC-OFFICIAL-CONSTRUCTION]
+    profiles: [ToB, regulated, brownfield]
+    actors: [建设单位, 总包, 分包, 监理, 设计, 造价, 财务, 审计]
+    request: 工程变更关联图纸版本、现场签证和计量，未经多方确认不得进入进度结算，作废与冲销保留历史证据。
+    requirement_physics: [project_hierarchy, contract_version, drawing_version, multi_party_approval, quantity_measurement, settlement_money, evidence_chain, reversal]
+    deliverables: [unified_prd, interactive_prototype, machine_acceptance]
+    bridges: [crm, data-product, ai-native]
+    unknown_seeds: [合同计价方式, 图纸主源, 签证权限, 计量周期, 超合同阈值, 分包数据范围]
+    stage_checks:
+      intake: 合同金额、多组织审批、图纸版本和审计影响决定 L3。
+      clarify: 变更提出、设计确认、现场签证、计量、审核、结算、作废冲销状态闭合。
+      specify: 项目合同图纸签证计量结算保持版本关系，金额与数量口径不交给研发推断。
+      review: 业主总包监理设计造价财务审计检查重复计量、错版图纸和越权确认。
+      baseline: 合同和图纸版本、组织权限、计量规则、金额口径和审批链冻结。
+      change: 审批阈值变化影响在途签证、历史依据、表单、金额规则、AC和新基线。
+      acceptance: 超合同、重复计量、错版图纸、撤回冲销、分包越权和正常结算有证据。
+    prd_focus: [项目层级, 合同图纸版本, 计量口径, 多方签署, 金额冲销, 证据链]
+    prototype_focus: [多组织路径, 图纸对比, 签证时间线, 计量结算, 作废冲销, 数据隔离]
+    change_probe: CHG-CONST-APPROVAL-THRESHOLD
+    acceptance_probe: AC-CONST-DUPLICATE-MEASUREMENT-DENIED
+
+existing_domain_bridges:
+  traffic:
+    pack: references/domains/domain-traffic.md
+    scenarios: [SCN-ENERGY-FAULT-WORK, SCN-GOV-PERMIT-COLLAB]
+    bridge_question: 交通安全或运输许可的责任状态、监管来源和学时证据能否沿用同一追溯与变更闭环？
+  crm:
+    pack: references/domains/domain-crm.md
+    scenarios: [SCN-MFG-NCR-RELEASE, SCN-FIN-CLAIM-DECISION, SCN-RETAIL-OMNI-ORDER, SCN-CONST-CHANGE-SETTLE]
+    bridge_question: 客户渠道供应商与合同对象如何映射而不扩张所属业务域权限？
+  education-it:
+    pack: references/domains/domain-education-it.md
+    scenarios: [SCN-MFG-NCR-RELEASE, SCN-MED-ORDER-CANCEL, SCN-ENERGY-FAULT-WORK]
+    bridge_question: 岗前或继续教育的版本、资格和学习证据如何影响现场授权但不替代业务许可？
+  data-product:
+    pack: references/domains/domain-data-mart.md
+    scenarios: [SCN-MFG-NCR-RELEASE, SCN-MED-ORDER-CANCEL, SCN-FIN-CLAIM-DECISION, SCN-ENERGY-FAULT-WORK, SCN-RETAIL-OMNI-ORDER, SCN-GOV-PERMIT-COLLAB, SCN-CONST-CHANGE-SETTLE]
+    bridge_question: 指标、血缘、历史重算和消费者影响是否始终从业务事实收窄而不改写业务状态？
+  ai-native:
+    pack: references/domains/domain-ai-native.md
+    scenarios: [SCN-MFG-NCR-RELEASE, SCN-MED-ORDER-CANCEL, SCN-FIN-CLAIM-DECISION, SCN-ENERGY-FAULT-WORK, SCN-RETAIL-OMNI-ORDER, SCN-GOV-PERMIT-COLLAB, SCN-CONST-CHANGE-SETTLE]
+    bridge_question: AI建议、工具调用和写回是否受业务权限、人类责任、证据和拒绝路径约束？
+
+release_acceptance:
+  required:
+    - seven requirement stages are present and each requires all eight role lenses
+    - at least six new high-relevance sectors have distinct requirement physics
+    - every scenario exercises a unified PRD, interactive prototype and machine acceptance contract
+    - traffic, CRM, education, data-product and AI-native are bridged without maturity promotion
+    - runtime goalkeeper makes zero LLM or sub-agent calls and never generates or fixes requirements
+    - simulated findings remain fixtures until dated execution evidence is stored separately

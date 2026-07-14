@@ -14,7 +14,7 @@ evaluation_assets:
   github_cases: 15
   catalog_status:
     not_run: 4
-    partial: 8
+    partial: 9
   github_matrix:
     cases: 15
     stage_cells: 45

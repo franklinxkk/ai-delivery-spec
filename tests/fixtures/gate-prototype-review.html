@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><title>Review gap</title></head>
+<body>
+  <main data-testid="page-VIEW-GATE-REVIEW">
+    <button data-action="ACT-GATE-PING">检查连接</button>
+  </main>
+  <script>
+    document.addEventListener('click', (event) => {
+      const action = event.target.dataset.action;
+      if (action === 'ACT-GATE-PING') alert('连接正常');
+    });
+  </script>
+</body>
+</html>

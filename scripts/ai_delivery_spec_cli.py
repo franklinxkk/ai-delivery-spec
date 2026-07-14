@@ -155,6 +155,9 @@ def run_check(args: argparse.Namespace) -> int:
         [sys.executable, "tests/test_v502_progressive_truth.py"],
         [sys.executable, "tests/test_v510_requirement_management.py"],
         [sys.executable, "tests/test_v510_unified_prd.py"],
+        [sys.executable, "tests/test_v510_semantic_guards.py"],
+        [sys.executable, "tests/test_v510_lightweight_gate.py"],
+        [sys.executable, "tests/test_v510_industry_assurance.py"],
         [sys.executable, "scripts/validators/validate_requirement_patterns.py", "references/patterns/common-requirement-patterns.yaml"],
         [
             sys.executable,
@@ -365,6 +368,15 @@ def compile_truth(args: argparse.Namespace) -> int:
     return run_script("compile_product_truth.py", values)
 
 
+def quality_gate(args: argparse.Namespace) -> int:
+    values = ["--profile", args.profile, "--level", args.level, "--format", args.format, "--max-findings", str(args.max_findings)]
+    for name in ("requirement", "prd", "prototype"):
+        value = getattr(args, name)
+        if value:
+            values.extend([f"--{name}", str(value)])
+    return run_script("quality_gate.py", values)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="ai_delivery_spec_cli.py")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -388,6 +400,16 @@ def main() -> int:
     check.add_argument("--product-truth", type=Path)
     check.add_argument("--keep-going", action="store_true")
     check.set_defaults(func=run_check)
+
+    gate = sub.add_parser("gate", help="Run the token-free final requirement/PRD/prototype goalkeeper")
+    gate.add_argument("--profile", choices=["requirement", "prd", "prototype", "full"], required=True)
+    gate.add_argument("--requirement", type=Path)
+    gate.add_argument("--prd", type=Path)
+    gate.add_argument("--prototype", type=Path)
+    gate.add_argument("--level", choices=["L0", "L1", "L2", "L3", "L4"], default="L2")
+    gate.add_argument("--format", choices=["concise", "json"], default="concise")
+    gate.add_argument("--max-findings", type=int, default=20)
+    gate.set_defaults(func=quality_gate)
 
     context = sub.add_parser("plan-context", help="Create an adaptive context and assurance plan")
     context.add_argument("--truth", type=Path, required=True)

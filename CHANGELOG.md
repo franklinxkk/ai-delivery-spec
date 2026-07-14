@@ -25,6 +25,17 @@
   `.hidden` pollution scanning for interactive prototypes.
 - Migrated the publishing-learning golden example to `REQ-*` governance and one
   unified PRD; added v5.1 regression coverage for the full requirement loop.
+- Added a seven-sector, seven-stage, eight-role offline assurance portfolio for
+  PRD/prototype/change regression without making multi-agent review a runtime tax.
+- Added a zero-LLM, single-read `gate` for requirement registers, unified PRDs
+  and static prototypes; it reports bounded findings and never authors fixes.
+- Closed three forward-test escapes: keyword-only PRD shells now fail structural
+  checks, change impact reads standard trace-ledger edges, and clarification scan
+  exposes actor/state/money/quantity/brownfield gaps beyond lexical ambiguity.
+- Added reusable quantity-lineage, money-settlement, accountable-decision,
+  statutory-service, partial-execution and cross-aggregate fulfillment patterns;
+  removed unsafe realtime exactly-once/offline-queue assumptions and turned
+  timing/retry values into project-confirmed variables.
 
 ## 5.0.2 - 2026-07-12
 

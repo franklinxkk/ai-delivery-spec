@@ -65,14 +65,16 @@ pages.
 |---|---|---|
 | at-most-once | event may be lost; no retry | non-critical notifications (e.g., "someone is typing") |
 | at-least-once | event delivered at least once; may duplicate; consumer must be idempotent | task updates, alert triggers |
-| exactly-once | event delivered exactly once; deduplication via event ID | financial state changes, compliance audit events |
+| business-effect-once | transport may duplicate or reorder; one business effect is enforced by command idempotency, state guards, a durable processing ledger and reconciliation | financial, compliance, safety or other consequential state changes |
 
 Rules:
 
 - Most real-time updates should use `at-least-once` with client-side
   deduplication via `event_type + entityId + updatedAt` composite key.
-- `exactly-once` is expensive; reserve it for events where duplicate processing
-  causes business harm.
+- Do not claim end-to-end `exactly-once` from an event ID or transport feature.
+  When duplicates cause harm, define the authoritative state, idempotency key,
+  allowed transition, durable receipt/result lookup, compensation and owner-led
+  reconciliation.
 
 ## SLA Countdown Strategy
 
@@ -81,6 +83,10 @@ countdown), the PRD must specify the timer strategy, color thresholds, and
 server time calibration.
 
 ### Timer Strategy Table
+
+The values below are examples of a contract shape, not defaults. Every duration,
+threshold, pause rule and escalation needs a project source, owner and acceptance
+boundary before it becomes a requirement.
 
 | Timer ID | Display Name | Start Condition | Duration | Pauses On | Resumes On | Display Format | Color Thresholds |
 |---|---|---|---|---|---|---|---|
@@ -105,11 +111,11 @@ calibrated:
 | Property | Required Content |
 |---|---|
 | Time source | server time (from API response header `Date` or dedicated `/api/server-time` endpoint) |
-| Sync frequency | on page load + every 60 seconds + on each SSE event |
-| Drift tolerance | if drift > 5 seconds, adjust timer; if drift > 30 seconds, show warning |
+| Sync frequency | project-confirmed trigger/frequency; for example page load, reconnect and relevant state event |
+| Drift tolerance | project-confirmed adjustment and warning thresholds with clock/source evidence |
 | Timer computation | `remaining = serverDeadline - serverNow; display = formatDuration(remaining)` |
 | Client disconnect | on reconnect, fetch latest task state and recompute timer from server deadline |
-| Timezone | all times in server timezone (UTC+8); display in user's local timezone with offset |
+| Timezone | project-confirmed storage, calculation and display zones; never copy UTC+8 without a source |
 
 Rules:
 
@@ -170,13 +176,17 @@ the connection drops and how the client recovers.
 
 ### Reconnection Strategy
 
+The values in this table illustrate required decisions. They are not shared
+defaults; derive them from business freshness, load, device/network conditions
+and failure tolerance.
+
 | Property | Required Content |
 |---|---|
-| Heartbeat interval | server sends ping every 30 seconds; client expects pong within 10 seconds |
-| Heartbeat timeout | if no pong received within 10 seconds, client considers connection dead |
-| Max retry attempts | 10 (exponential backoff: 1s, 2s, 4s, 8s, 16s, 32s, 60s, 60s, 60s, 60s) |
-| Retry backoff | exponential: min(60, 2^n) seconds |
-| Max retry duration | 5 minutes; after that, switch to polling mode |
+| Heartbeat interval | project-confirmed interval or protocol-managed heartbeat |
+| Heartbeat timeout | project-confirmed stale/dead threshold and evidence source |
+| Max retry attempts | bounded project-confirmed attempts or duration |
+| Retry backoff | project-confirmed capped backoff with jitter where applicable |
+| Max retry duration | project-confirmed degradation trigger |
 | On reconnect | re-fetch missed events via `GET /events?since={lastEventId}` |
 | Connection states | connecting → connected → disconnected → reconnecting → polling (degraded) |
 | UI indicator | green dot (connected), yellow dot (reconnecting), red dot (disconnected/polling) |
@@ -188,10 +198,10 @@ When SSE/WebSocket cannot be restored, the client falls back to polling:
 
 | Data Type | Polling Endpoint | Frequency | Conflict Handling | Data Scope |
 |---|---|---|---|---|
-| Task list | `/api/tasks?since={lastUpdate}` | every 10 seconds | compare `updatedAt` timestamps; client-side merge | only tasks visible to current user |
-| Alert list | `/api/alerts?since={lastUpdate}` | every 5 seconds | deduplicate by `alert_id`; server is source of truth | only alerts for current user |
-| Dashboard metrics | `/api/dashboard/metrics` | every 30 seconds | full replace (server is source of truth) | all dashboard widgets |
-| SLA timers | N/A (client-side computation) | every 1 second (display tick) | re-sync from server every 60 seconds | current task only |
+| Task list | project endpoint | project-confirmed | compare authoritative version/cursor; preserve safe local draft | current authorized scope |
+| Alert list | project endpoint | project-confirmed | deduplicate by stable event/alert ID and refresh authoritative snapshot | current authorized scope |
+| Dashboard metrics | project endpoint | project-confirmed | replace or merge according to metric version/freshness contract | authorized widgets |
+| SLA timers | authoritative deadline endpoint/event | display tick plus project-confirmed resync | recompute from authoritative deadline | current authorized object |
 
 ### Polling Conflict Handling
 
@@ -207,9 +217,13 @@ When SSE/WebSocket cannot be restored, the client falls back to polling:
 
 - Polling is a degraded mode, not a replacement. The UI must indicate that
   real-time updates are unavailable.
-- Polling frequency should be conservative to avoid server overload. The
-  default is 10 seconds for list data and 30 seconds for aggregate metrics.
+- Polling frequency must be conservative and project-confirmed from freshness,
+  capacity and failure tolerance; this reference defines no universal default.
 - If polling also fails (network down), show offline indicator and queue
-  user actions for sync when connection restores.
+  only actions explicitly approved as queueable. Classify actions as read-only,
+  local draft/evidence capture, reversible command, or consequential command.
+  Safety, money, clinical, permission, final-approval and other irreversible
+  commands are blocked offline by default; never queue them merely because the
+  UI can store a request.
 - When SSE reconnects, the client must fetch all missed events using the last
   received event ID. Do not assume the SSE stream replays missed events.

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>Gate prototype</title>
+  <style>.hidden { display: none !important; } .status { color: #075ea8; }</style>
+</head>
+<body>
+  <main data-testid="page-VIEW-GATE-HOME" data-state="draft">
+    <section data-testid="region-REG-GATE-FORM">
+      <label>名称 <input data-field="FLD-GATE-NAME"></label>
+      <button data-action="ACT-GATE-SAVE">保存</button>
+      <p id="result" class="status" aria-live="polite">尚未保存</p>
+    </section>
+  </main>
+  <script>
+    document.addEventListener('click', (event) => {
+      const trigger = event.target.closest('[data-action]');
+      if (!trigger) return;
+      const action = trigger.dataset.action;
+      if (action === 'ACT-GATE-SAVE') {
+        document.querySelector('#result').textContent = '已保存并生效';
+        document.querySelector('main').setAttribute('data-state', 'active');
+      }
+    });
+  </script>
+</body>
+</html>
