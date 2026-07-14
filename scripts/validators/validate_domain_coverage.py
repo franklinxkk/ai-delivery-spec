@@ -72,8 +72,8 @@ def main() -> int:
             local = location.split("#", 1)[0]
             if not location.startswith(("https://", "http://")) and (not local or not (ROOT / local).exists()):
                 failures.append(f"{domain_id} evidence location is missing: {location}")
-        if maturity == "experimental" and item.get("production_claim") == "allowed":
-            failures.append(f"{domain_id} experimental pack cannot allow production claims")
+        if maturity in {"knowledge_backed", "contract_tested"} and item.get("production_claim") == "allowed":
+            failures.append(f"{domain_id} {maturity} pack cannot allow unqualified production claims")
         if practice_status in {"production_practiced", "production_observed"}:
             has_practice = any(
                 evidence.get("kind") == "owner_attestation" and evidence.get("status") == "passed"
@@ -81,6 +81,21 @@ def main() -> int:
             )
             if not has_practice:
                 failures.append(f"{domain_id} {practice_status} lacks accountable practice evidence")
+        if coverage.get("knowledge") == "sourced" and not any(
+            evidence.get("kind") == "official_source" and evidence.get("status") == "current"
+            for evidence in item.get("evidence", [])
+        ):
+            failures.append(f"{domain_id} claims sourced knowledge without current official evidence")
+        if coverage.get("contract_eval") == "passed":
+            has_contract = any(
+                evidence.get("kind") == "contract_eval" and evidence.get("status") == "passed"
+                for evidence in item.get("evidence", [])
+            )
+            if not has_contract:
+                failures.append(f"{domain_id} claims contract PASS without passing evidence")
+            domain_fixtures = [fixture for fixture in fixtures if fixture.get("domain") == domain_id]
+            if not domain_fixtures or any(fixture.get("status") != "passed" for fixture in domain_fixtures):
+                failures.append(f"{domain_id} contract PASS has missing or non-passing fixtures")
         if coverage.get("behavioral_eval") == "passed":
             has_eval = any(
                 evidence.get("kind") == "behavioral_eval" and evidence.get("status") == "passed"
@@ -95,14 +110,16 @@ def main() -> int:
             )
             if not has_review:
                 failures.append(f"{domain_id} claims expert review without accountable evidence")
-        if maturity in {"validated", "audited"}:
+        if maturity in {"contract_tested", "behavior_validated", "expert_reviewed", "audited"}:
             kinds = {(evidence.get("kind"), evidence.get("status")) for evidence in item.get("evidence", [])}
             required_kinds = {
                 ("official_source", "current"),
-                ("project_sample", "passed"),
-                ("behavioral_eval", "passed"),
-                ("expert_review", "passed"),
+                ("contract_eval", "passed"),
             }
+            if maturity in {"behavior_validated", "expert_reviewed", "audited"}:
+                required_kinds.add(("behavioral_eval", "passed"))
+            if maturity in {"expert_reviewed", "audited"}:
+                required_kinds.update({("project_sample", "passed"), ("expert_review", "passed")})
             missing_kinds = required_kinds - kinds
             if missing_kinds:
                 failures.append(
@@ -147,9 +164,7 @@ def main() -> int:
         return 1
 
     maturity = {item["domain_id"]: item["maturity"] for item in domains}
-    print(
-        f"PASS: {len(domains)} domain packs have honest coverage and >=2 eval assets: {maturity}"
-    )
+    print(f"PASS: {len(domains)} domain packs have evidence-bounded maturity and >=2 eval assets: {maturity}")
     return 0
 
 

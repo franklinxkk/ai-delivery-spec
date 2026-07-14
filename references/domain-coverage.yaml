@@ -1,16 +1,21 @@
-schema_version: 5.0.0
+schema_version: 5.1.1
 generated_from: domain-pack metadata and evaluation evidence
 evaluation_index: evals/domain-fixtures.yaml
 claim_policy:
-  rule: A domain file is knowledge coverage, not behavioral validation.
+  rule: Domain assurance has explicit sourced, contract, behavioral, expert and audit levels.
   practice_rule: Production practice proves real delivery use but does not promote reusable-pack maturity.
-  validated_requires:
+  contract_tested_requires:
     - sourced knowledge
-    - passed behavioral evaluation
+    - passed deterministic contract evaluation
+  behavior_validated_requires:
+    - contract-tested maturity
+    - passed fresh-agent behavioral evaluation
+  expert_reviewed_requires:
+    - behavior-validated maturity
     - accountable expert review
     - project-sampled scenarios
   audited_requires:
-    - validated requirements
+    - expert-reviewed requirements
     - independent audit evidence
   simulated_review_is_expert_review: false
 
@@ -21,11 +26,12 @@ domains:
     applies_when: [road transport, traffic safety, regulator supervision, transport enterprise]
     does_not_apply_when: [generic workflow with no transport object]
     coverage:
-      knowledge: structured
+      knowledge: sourced
       scenarios: project_sampled
+      contract_eval: passed
       behavioral_eval: not_run
       expert_review: not_reviewed
-    maturity: experimental
+    maturity: contract_tested
     practice_status: production_practiced
     evidence:
       - id: EV-DOM-TRAFFIC-PRACTICE
@@ -43,10 +49,15 @@ domains:
         location: examples/traffic-regulatory-change-v5
         status: current
         owner: domain maintainer
+      - id: EV-DOM-TRAFFIC-CONTRACT
+        kind: contract_eval
+        location: evals/domain-fixtures.yaml#FX-TRAFFIC-RISK-CLOSE
+        status: passed
+        owner: domain maintainer
     known_gaps:
       - Official source URLs and applicability records are not yet complete.
       - Nine-industry depth has not been behaviorally evaluated.
-    last_verified_at: null
+    last_verified_at: "2026-07-14T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -56,11 +67,12 @@ domains:
     applies_when: [lead, opportunity, customer, contract, payment, ticket, renewal]
     does_not_apply_when: [generic contact list without customer lifecycle]
     coverage:
-      knowledge: structured
+      knowledge: sourced
       scenarios: mocked
+      contract_eval: passed
       behavioral_eval: not_run
       expert_review: not_reviewed
-    maturity: experimental
+    maturity: contract_tested
     practice_status: production_practiced
     evidence:
       - id: EV-DOM-CRM-PRACTICE
@@ -78,10 +90,15 @@ domains:
         location: evals/domain-fixtures.yaml#FX-CRM-LEAD-REVENUE
         status: current
         owner: domain maintainer
+      - id: EV-DOM-CRM-CONTRACT
+        kind: contract_eval
+        location: evals/domain-fixtures.yaml#FX-CRM-LEAD-REVENUE
+        status: passed
+        owner: domain maintainer
     known_gaps:
       - CPQ, complex account hierarchy, customer success, and partner conflict need deeper evaluation.
       - Current fixtures are evaluation inputs, not production evidence.
-    last_verified_at: null
+    last_verified_at: "2026-07-14T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -91,11 +108,12 @@ domains:
     applies_when: [academic affairs, student affairs, course, training, learning, assessment]
     does_not_apply_when: [generic content publishing with no learner lifecycle]
     coverage:
-      knowledge: structured
+      knowledge: sourced
       scenarios: project_sampled
+      contract_eval: passed
       behavioral_eval: not_run
       expert_review: not_reviewed
-    maturity: experimental
+    maturity: contract_tested
     practice_status: production_practiced
     evidence:
       - id: EV-DOM-EDU-PRACTICE
@@ -113,10 +131,15 @@ domains:
         location: examples/publishing-learning-v5
         status: current
         owner: domain maintainer
+      - id: EV-DOM-EDU-CONTRACT
+        kind: contract_eval
+        location: evals/domain-fixtures.yaml#FX-EDU-COURSE-VERSION
+        status: passed
+        owner: domain maintainer
     known_gaps:
       - Current knowledge is higher-education heavy.
       - Vocational education, enterprise training, one-book-one-code, channel authorization, and content rights require deeper coverage.
-    last_verified_at: null
+    last_verified_at: "2026-07-14T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -126,11 +149,12 @@ domains:
     applies_when: [approval, official document, meeting, supervision, office knowledge]
     does_not_apply_when: [single approval action with no OA object or lifecycle]
     coverage:
-      knowledge: structured
+      knowledge: sourced
       scenarios: mocked
+      contract_eval: passed
       behavioral_eval: not_run
       expert_review: not_reviewed
-    maturity: experimental
+    maturity: contract_tested
     practice_status: knowledge_only
     evidence:
       - id: EV-DOM-OA-SOURCES
@@ -138,14 +162,41 @@ domains:
         location: references/domains/domain-sources.yaml#KS-OA-ESIGN
         status: current
         owner: domain maintainer
+      - id: EV-DOM-OA-OFFICIAL-DOC
+        kind: official_source
+        location: references/domains/domain-sources.yaml#KS-OA-OFFICIAL-DOC
+        status: current
+        owner: domain maintainer
+      - id: EV-DOM-OA-ARCHIVE
+        kind: official_source
+        location: references/domains/domain-sources.yaml#KS-OA-ARCHIVE-39362
+        status: current
+        owner: domain maintainer
+      - id: EV-DOM-OA-VENDOR-PATTERNS
+        kind: official_source
+        location: references/domains/domain-sources.yaml#KS-OA-WEAVER-WHITEPAPER
+        status: current
+        owner: domain maintainer
+      - id: EV-DOM-OA-OPEN-COMPONENTS
+        kind: official_source
+        location: references/domains/domain-sources.yaml#KS-OA-DINGTALK-OSS
+        status: current
+        owner: domain maintainer
       - id: EV-DOM-OA-KNOWLEDGE
         kind: mock_scenario
         location: evals/domain-fixtures.yaml#FX-OA-APPROVAL-RECALL
         status: current
         owner: domain maintainer
+      - id: EV-DOM-OA-CONTRACT
+        kind: contract_eval
+        location: evals/domain-fixtures.yaml#FX-OA-APPROVAL-RECALL
+        status: passed
+        owner: domain maintainer
     known_gaps:
-      - Electronic signature, seal, archive retention, confidentiality, and official-document sources need evidence mapping.
-    last_verified_at: null
+      - Vendor whitepapers and cases are product/scenario evidence, not independent outcome proof or project truth.
+      - DingTalk and Feishu public repositories validate exact SDK/demo/integration components only, not core-product open-source status.
+      - OA pack still needs fresh-agent behavioral runs and accountable OA practitioner review before behavior_validated or expert_reviewed promotion.
+    last_verified_at: "2026-07-14T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -155,11 +206,12 @@ domains:
     applies_when: [patient, encounter, medical record, order, report, clinical workflow]
     does_not_apply_when: [generic appointment or CRM flow without clinical decisions]
     coverage:
-      knowledge: structured
+      knowledge: sourced
       scenarios: mocked
+      contract_eval: passed
       behavioral_eval: not_run
       expert_review: not_reviewed
-    maturity: experimental
+    maturity: contract_tested
     practice_status: knowledge_only
     evidence:
       - id: EV-DOM-MEDICAL-SOURCES
@@ -172,10 +224,15 @@ domains:
         location: evals/domain-fixtures.yaml#FX-MEDICAL-ORDER-CANCEL
         status: current
         owner: domain maintainer
+      - id: EV-DOM-MEDICAL-CONTRACT
+        kind: contract_eval
+        location: evals/domain-fixtures.yaml#FX-MEDICAL-ORDER-CANCEL
+        status: passed
+        owner: domain maintainer
     known_gaps:
       - High-risk clinical, legal, interoperability, privacy, and local-policy assertions require accountable review.
       - No production claim is allowed from simulated scenarios.
-    last_verified_at: null
+    last_verified_at: "2026-07-14T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -185,11 +242,12 @@ domains:
     applies_when: [data source, metric, lineage, semantic layer, BI, ChatBI, Data Agent]
     does_not_apply_when: [simple transactional form with no governed data product]
     coverage:
-      knowledge: structured
+      knowledge: sourced
       scenarios: mocked
+      contract_eval: passed
       behavioral_eval: not_run
       expert_review: not_reviewed
-    maturity: experimental
+    maturity: contract_tested
     practice_status: production_practiced
     evidence:
       - id: EV-DOM-DATA-PRACTICE
@@ -207,10 +265,15 @@ domains:
         location: references/domains/domain-data-mart.md
         status: current
         owner: domain maintainer
+      - id: EV-DOM-DATA-CONTRACT
+        kind: contract_eval
+        location: evals/domain-fixtures.yaml#FX-DATA-METRIC-VERSION
+        status: passed
+        owner: domain maintainer
     known_gaps:
       - Formal provenance and OpenLineage mappings need executable examples.
       - Data contract compatibility, cost, deletion propagation, and model/vector lineage need deeper coverage.
-    last_verified_at: null
+    last_verified_at: "2026-07-14T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -220,11 +283,12 @@ domains:
     applies_when: [agent, tool calling, model decision, AI writeback, memory, evaluation]
     does_not_apply_when: [AI is only used to write documents or code]
     coverage:
-      knowledge: structured
+      knowledge: sourced
       scenarios: mocked
+      contract_eval: passed
       behavioral_eval: not_run
       expert_review: not_reviewed
-    maturity: experimental
+    maturity: contract_tested
     practice_status: production_practiced
     evidence:
       - id: EV-DOM-AI-PRACTICE
@@ -242,9 +306,14 @@ domains:
         location: references/domains/domain-ai-native.md
         status: current
         owner: domain maintainer
+      - id: EV-DOM-AI-CONTRACT
+        kind: contract_eval
+        location: evals/domain-fixtures.yaml#FX-AI-TOOL-DENIAL
+        status: passed
+        owner: domain maintainer
     known_gaps:
       - Agent delegation, identity, memory governance, prompt injection, red-team, and regulatory mappings need executable evaluations.
-    last_verified_at: null
+    last_verified_at: "2026-07-14T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 

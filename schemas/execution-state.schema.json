@@ -48,7 +48,7 @@
         "required": ["domain_id", "maturity", "source", "evidence_refs", "production_claim"],
         "properties": {
           "domain_id": { "type": "string" },
-          "maturity": { "enum": ["none", "experimental", "validated", "audited"] },
+          "maturity": { "enum": ["none", "knowledge_backed", "contract_tested", "behavior_validated", "expert_reviewed", "audited"] },
           "source": { "enum": ["built_in", "project_evidence", "missing"] },
           "evidence_refs": { "type": "array", "items": { "type": "string" } },
           "production_claim": { "enum": ["allowed", "prohibited"] }

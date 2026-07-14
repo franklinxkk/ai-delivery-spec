@@ -1,4 +1,4 @@
-# AI Delivery Spec 5.1.0
+# AI Delivery Spec 5.1.1
 
 > 需求一来就写 PRD，低价值需求也进入重型设计？
 >
@@ -13,7 +13,7 @@
 默认交付不是两套 PRD，而是**一份统一需求规格说明书**：正文让业务、产品和传统
 开发顺序读懂，工程附录让测试与 AI Coding 精确执行。
 
-[![Version](https://img.shields.io/badge/version-5.1.0-0052A4.svg)]()
+[![Version](https://img.shields.io/badge/version-5.1.1-0052A4.svg)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 
@@ -62,7 +62,7 @@ npx skills add franklinxkk/ai-delivery-spec
 研发排期、Sprint/任务、代码、CI/CD、部署执行、监控和运营属于下游系统。
 本项目只记录它们与需求/验收有关的外部引用，不接管流程。
 
-## 5.1.0 如何解决真实项目中的失败
+## 5.1.x 如何解决真实项目中的失败
 
 一次交通出版平台实战中，旧版结构校验可以 PASS，但仍出现三个典型问题：
 
@@ -70,7 +70,7 @@ npx skills add franklinxkk/ai-delivery-spec
 - Human-First 与 AI Coding PRD 分开维护，团队无法确认哪份才是基线；
 - 普通需求也先生成大型 Product Truth，长上下文工具反复中断，增加交付成本。
 
-5.1.0 因此改变默认路径：
+5.1.x 因此改变默认路径：
 
 1. **先准入**：没有价值证据、责任人或范围边界，先澄清，不直接上重型规格。
 2. **一份 PRD**：业务正文和工程附录在同一文件、同一版本、同一评审链路中。
@@ -98,6 +98,7 @@ python scripts/validators/validate_coding_agent_contract.py requirements/PRD.md 
 python scripts/validators/validate_acceptance_run.py requirements/acceptance/ARUN-CORE-001.yaml
 python scripts/ai_delivery_spec_cli.py gate --profile prd --prd requirements/PRD.md --level L2
 python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype prototype.html --level L2
+python scripts/query_domain.py --domain oa --format markdown
 ```
 
 `gate` 只判定和定位，不生成、不自动修复；支持 `requirement`、`prd`、`prototype`、
@@ -106,7 +107,7 @@ python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype prot
 
 ## 跨行业质量保障，而不是每项目多 Agent 税
 
-v5.1.0 的发布保障组合覆盖制造、医疗、金融保险、能源、零售电商、数字政府、
+v5.1.x 的发布保障组合覆盖制造、医疗、金融保险、能源、零售电商、数字政府、
 建筑工程七类需求物理，以及既有交通、CRM、教育、数据产品和 AI Native 组合。
 每个场景贯穿准入、澄清、规格、评审、基线、变更、验收，并由业务、产品、领域、
 UX/原型、研发架构、测试验收、合规安全、客户验收八个镜头检查统一 PRD、工程原型
@@ -136,20 +137,36 @@ python scripts/ai_delivery_spec_cli.py impact --truth requirements/truth/compile
 
 独立 YAML/JSON 是按工具需要导出的视图，不是第二份权威 PRD。
 
+## 各级产品、开发和架构师如何协同
+
+| 使用者 | 独立完成 | 必须升级/交接 |
+|---|---|---|
+| 初级产品 | 盘点、REQ/REV、旅程/规则/AC 草案 | 范围价值、权威冲突、敏感/监管规则和 P0 未知 |
+| 中高级产品 | 准入、澄清、统一 PRD、基线、变更和追溯 | 超出授权的客户、法律、安全和合同决策 |
+| 初中级开发/Coding Agent | 实现已基线的稳定 ID 切片并回报歧义 | 缺失角色、状态、权限、规则或接口语义，不得自行发明 |
+| 高级开发/架构师 | 可实现性、跨系统状态、接口事件、迁移、恢复和 NFR 设计 | 产品范围、客户验收和领域权威仍由责任人决定 |
+| 测试/领域/客户 | 反例、领域结果、执行证据和签署 | 静态 PASS 或开发自测不能替代其责任 |
+
+多角色或正式交接时才读取
+[角色阶段手册](references/runtime/role-stage-playbook.md)，普通单角色小改动不加载。
+
 ## 领域实践与知识包保证分开
 
 | 领域包 | 实践状态 | 可复用包成熟度 | 使用边界 |
 |---|---|---|---|
-| `traffic` | `production_practiced` | `experimental` | 方法已用于上线项目；具体法规与项目适用性仍需证据 |
-| `crm` | `production_practiced` | `experimental` | 方法已用于上线项目；复杂商业规则按项目确认 |
-| `education-it` | `production_practiced` | `experimental` | 方法已用于上线项目；教育形态按项目确认 |
-| `data-product` | `production_practiced` | `experimental` | 方法已用于上线项目；血缘/口径/删除传播按项目确认 |
-| `ai-native` | `production_practiced` | `experimental` | 方法已用于上线项目；模型与安全治理必须项目评测 |
-| `oa` | `knowledge_only` | `experimental` | 仅作候选问题与模式 |
-| `medical-hospital-it` | `knowledge_only` | `experimental` | 不得推导临床生产结论 |
+| `traffic` | `production_practiced` | `contract_tested` | 方法已用于上线项目；法规和项目适用性仍需确认 |
+| `crm` | `production_practiced` | `contract_tested` | 方法已用于上线项目；复杂商业规则按项目确认 |
+| `education-it` | `production_practiced` | `contract_tested` | 方法已用于上线项目；教育形态按项目确认 |
+| `data-product` | `production_practiced` | `contract_tested` | 方法已用于上线项目；血缘/口径/删除传播按项目确认 |
+| `ai-native` | `production_practiced` | `contract_tested` | 方法已用于上线项目；模型与安全治理必须项目评测 |
+| `oa` | `knowledge_only` | `contract_tested` | 法规/标准/厂商材料已映射；仍需真实行为和 OA 专家复核 |
+| `medical-hospital-it` | `knowledge_only` | `contract_tested` | 不得据此推导临床生产结论 |
 
-`production_practiced` 说明相关方法有真实上线实践；`experimental` 说明当前可复用包
-还未完成独立评测、专家审查或审计。两者不能互相替代。详见
+`production_practiced` 说明相关方法有真实上线实践；`contract_tested` 只说明来源、
+关键不变量和14个轻量契约场景通过确定性回归，不等于真实 Agent 行为、专家审查、
+客户验收或生产正确性。成熟度继续按 `behavior_validated → expert_reviewed → audited`
+逐领域升级。白皮书、案例、开放平台和 SDK 的证据边界详见
+[领域保证规则](references/runtime/domain-assurance.md) 与
 [references/domain-coverage.yaml](references/domain-coverage.yaml)。
 
 ## 与上下游工具的边界
@@ -157,7 +174,7 @@ python scripts/ai_delivery_spec_cli.py impact --truth requirements/truth/compile
 | 位置 | 工具类型 | 责任 |
 |---|---|---|
 | 上游 | 产品发现、调研、工作坊 | 发现机会、证据和策略假设 |
-| **需求管理内核** | **AI Delivery Spec 5.1.0** | 准入 → 澄清 → 基线 → 变更 → 追溯 → 验收 |
+| **需求管理内核** | **AI Delivery Spec 5.1.1** | 准入 → 澄清 → 基线 → 变更 → 追溯 → 验收 |
 | 下游 | Spec Kit、项目/研发管理工具 | 技术方案、任务、排期和依赖执行 |
 | 下游 | Codex、Trae、Cursor、Qoder 等 | 依据已基线需求编码、测试和修改 |
 | 外部证据 | CI、测试、发布、监控平台 | 向需求验收回传可引用证据 |
@@ -187,6 +204,10 @@ python tests/test_v510_unified_prd.py
 python tests/test_v510_semantic_guards.py
 python tests/test_v510_lightweight_gate.py
 python tests/test_v510_industry_assurance.py
+python tests/test_v511_runtime_budget.py
+python tests/test_v511_role_stage.py
+python tests/test_v511_domain_assurance.py
+python scripts/validators/validate_domain_contracts.py
 ```
 
 一键生成 Mermaid：

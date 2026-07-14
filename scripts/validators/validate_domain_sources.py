@@ -33,6 +33,23 @@ TRUSTED_HOST_SUFFIXES = (
     "asyncapi.com",
     "cloudevents.io",
 )
+VENDOR_HOST_SUFFIXES = (
+    "weaver.com.cn",
+    "seeyon.com",
+    "landray.com.cn",
+    "open.feishu.cn",
+    "open.dingtalk.com",
+)
+OFFICIAL_GITHUB_PREFIXES = (
+    "/open-dingtalk",
+    "/larksuite",
+)
+VENDOR_AUTHORITY_TYPES = {
+    "vendor_whitepaper",
+    "vendor_product_docs",
+    "vendor_case_library",
+    "vendor_open_source",
+}
 
 
 def main() -> int:
@@ -68,7 +85,23 @@ def main() -> int:
         if parsed.scheme != "https" or not parsed.netloc:
             failures.append(f"{source_id} must use a valid HTTPS URL: {url}")
         host = parsed.netloc.lower().split(":")[0]
-        if host and not any(host == suffix or host.endswith("." + suffix) for suffix in TRUSTED_HOST_SUFFIXES):
+        authority_type = source.get("authority_type")
+        government_or_standard = any(
+            host == suffix or host.endswith("." + suffix) for suffix in TRUSTED_HOST_SUFFIXES
+        )
+        vendor_host = any(
+            host == suffix or host.endswith("." + suffix) for suffix in VENDOR_HOST_SUFFIXES
+        )
+        official_github = host == "github.com" and any(
+            parsed.path.lower().startswith(prefix) for prefix in OFFICIAL_GITHUB_PREFIXES
+        )
+        if authority_type in VENDOR_AUTHORITY_TYPES:
+            if not (vendor_host or official_github):
+                failures.append(f"{source_id} uses an unregistered vendor authority: {host}{parsed.path}")
+            for field in ("evidence_role", "claim_limit"):
+                if not source.get(field):
+                    failures.append(f"{source_id} vendor evidence missing {field}")
+        elif not government_or_standard:
             failures.append(f"{source_id} uses an unregistered authority host: {host}")
         if url in seen_urls:
             failures.append(f"duplicate source URL: {url}")

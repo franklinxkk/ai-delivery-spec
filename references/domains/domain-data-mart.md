@@ -334,6 +334,8 @@ data_agent_contract:
 | report/fill sys/ext split | sys fields are locked/refreshed; ext fields validate, submit, return, audit |
 | dashboard drill | filter/drill respects dimension hierarchy and row-scope permissions |
 | retirement | consumers are notified, migration/retention is completed, old asset is blocked |
+| metric definition version change | owner approval, old/new caliber, lineage impact, historical recalculation decision, consumer notification and rollback are linked |
+| data-agent permission denial | denied query/write cannot be bypassed by prompt, tool delegation or cached context; denial is audited |
 
 ## Evaluation Profile
 

@@ -39,7 +39,8 @@ acceptance checklist
 
 Also add metadata to `references/domain-coverage.yaml`, source records to
 `references/domains/domain-sources.yaml`, and scenarios to `evals/eval-catalog.yaml`.
-New packs start as `experimental`.
+New packs start as `knowledge_backed` only after source and gap checks pass;
+otherwise keep them outside the built-in domain index.
 
 ## Domain Module Skeleton
 
@@ -181,13 +182,16 @@ Record executor, input, environment, timestamp, result, and evidence location.
 Do not prefill `PASS`. Mocked scenarios and simulated reviewers do not count as
 expert review, project validation, or audit.
 
-- `experimental`: may guide questions and candidate design; production claims prohibited.
-- `validated`: sourced knowledge, project-sampled scenarios, passed behavioral evaluation, and accountable review evidence.
-- `audited`: validated evidence plus passed independent audit in the declared scope.
+- `knowledge_backed`: sourced structure and explicit gaps; no behavior claim.
+- `contract_tested`: deterministic lifecycle/risk fixtures pass; no fresh-agent claim.
+- `behavior_validated`: fresh-agent positive/negative/domain runs pass with evidence.
+- `expert_reviewed`: project samples and accountable expert review pass in scope.
+- `audited`: expert-reviewed evidence plus passed independent audit in scope.
 
 Practice status is independent:
 
 - `knowledge_only`: no accountable production-use evidence is recorded;
+- `project_practiced`: used in a bounded accountable project;
 - `production_practiced`: an accountable owner confirms use in a shipped product;
 - `production_observed`: operation evidence is retained and reviewable.
 

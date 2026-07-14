@@ -74,5 +74,5 @@ Project overrides belong in `spec.config.yaml`, validated against
 
 Context/assurance profiles describe this project. Domain maturity describes
 the evidence behind a reusable domain pack. Automated classification may
-select stronger gates; it must never promote a pack from experimental to
-validated or audited.
+select stronger gates; it must never promote a pack from knowledge-backed or
+contract-tested to behavioral, expert-reviewed, or audited maturity.

@@ -59,13 +59,15 @@ Maturity behavior:
 
 | Maturity | Runtime Behavior |
 |---|---|
-| experimental | use as questions and candidate patterns; warn on unsupported claims |
-| validated | reuse evaluated paths; still confirm customer/jurisdiction applicability |
+| knowledge_backed | use sourced knowledge as questions/patterns; retain declared gaps |
+| contract_tested | reuse deterministic invariants; do not claim fresh-agent or expert validation |
+| behavior_validated | reuse evaluated paths; still confirm customer/jurisdiction applicability |
+| expert_reviewed | reuse within the reviewed scope; record deviations and source versions |
 | audited | reuse within audited scope; record deviations and source versions |
 
 `practice_status` is orthogonal: `production_practiced` means the method has
 been used in a shipped product, not that every reusable rule has passed the
-behavioral and accountable-review evidence required for `validated` maturity.
+contract, behavioral, accountable-review, or audit gates.
 
 Never convert a mocked scenario or simulated reviewer into expert/production
 evidence.

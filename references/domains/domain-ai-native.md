@@ -255,6 +255,8 @@ Rules:
 | fallback on model outage | operations owner | deterministic/manual fallback within SLA |
 | prompt rollback | operations owner | active prompt returns to last passing version |
 | adversarial prompt injection | risk reviewer | tool call blocked and event logged |
+| delegated tool denial | risk reviewer | a denied tool/action remains denied through agent delegation, memory and prompt content; denial is audited |
+| repeated propose-reject loop | accountable user | loop stops at configured limit and hands control to a human/manual path |
 
 ## Evaluation Profile
 

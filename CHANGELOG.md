@@ -1,5 +1,25 @@
 # Changelog
 
+## 5.1.1 - 2026-07-14
+
+- Reduced the always-loaded Skill from about 3,590 to about 1,870 `o200k`
+  tokens and added selective domain lookup so runtime agents do not load the
+  full domain catalog or an entire domain pack by default.
+- Added a seven-seniority, eight-role, seven-stage playbook that defines
+  decision ownership, escalation, engineering/architecture review, no-guess
+  handoffs and acceptance accountability without taking over sprint work.
+- Replaced the blanket `experimental` label with evidence-bounded reusable-pack
+  maturity: `knowledge_backed`, `contract_tested`, `behavior_validated`,
+  `expert_reviewed`, and `audited`; delivery practice remains an independent axis.
+- Added zero-model contract regression for all seven built-in domains and 14
+  lifecycle/risk scenarios. All built-in packs are now `contract_tested`; none
+  falsely claims fresh-agent behavior, expert review, customer acceptance, or
+  production correctness.
+- Added OA source triangulation for law/standards plus Weaver, Seeyon, Landray,
+  DingTalk and Feishu official materials, with explicit boundaries separating
+  whitepapers, vendor cases, open platforms and public SDK/demo repositories
+  from binding rules or core-product open-source claims.
+
 ## 5.1.0 - 2026-07-14
 
 - Narrowed the product from a full delivery-lifecycle kernel to a requirement-

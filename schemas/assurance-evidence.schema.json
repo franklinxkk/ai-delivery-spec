@@ -17,7 +17,7 @@
         "required": ["domain_id", "maturity", "evidence_refs", "production_claim", "reviewer"],
         "properties": {
           "domain_id": { "type": "string", "minLength": 1 },
-          "maturity": { "enum": ["validated", "audited"] },
+          "maturity": { "enum": ["validated", "expert_reviewed", "audited"] },
           "evidence_refs": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
           "production_claim": { "enum": ["allowed", "prohibited"] },
           "reviewer": {

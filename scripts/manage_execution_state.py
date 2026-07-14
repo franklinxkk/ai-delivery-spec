@@ -208,10 +208,13 @@ def domain_snapshot(
     for domain_id in domain_ids:
         if domain_id in supplied:
             item = supplied[domain_id]
+            maturity = item.get("maturity", "none")
+            if maturity == "validated":
+                maturity = "expert_reviewed"
             rows.append(
                 {
                     "domain_id": domain_id,
-                    "maturity": item.get("maturity", "none"),
+                    "maturity": maturity,
                     "source": "project_evidence",
                     "evidence_refs": item.get("evidence_refs", []),
                     "production_claim": item.get("production_claim", "prohibited"),
@@ -300,7 +303,7 @@ def initial_failures(state: dict[str, Any]) -> list[str]:
             failures.append("staging/production execution requires a clean repository tree")
         weak = [
             item["domain_id"] for item in state["domain_assurance"]
-            if item["maturity"] not in {"validated", "audited"}
+            if item["maturity"] not in {"expert_reviewed", "audited"}
             or item["production_claim"] != "allowed"
         ]
         if weak:
@@ -457,7 +460,10 @@ def check(gate_id: str, state: dict[str, Any], args: argparse.Namespace) -> list
         add("dependencies", not dependency_issues, "; ".join(dependency_issues) or "dependency versions satisfy v5 requirements")
     elif gate_id == "complexity_domain":
         add("structured_classification", state["risk"]["classification_basis"] == "structured_contract", "classification must use structured contract signals")
-        weak = [item["domain_id"] for item in state["domain_assurance"] if item["maturity"] in {"none", "experimental"}]
+        weak = [
+            item["domain_id"] for item in state["domain_assurance"]
+            if item["maturity"] not in {"expert_reviewed", "audited"}
+        ]
         production_ok = state["environment"] not in {"staging", "production"} or not weak
         add("domain_production_boundary", production_ok, "weak domains: " + (", ".join(weak) or "none"))
         audited_ok = not (state["risk"]["high_risk"] and state["environment"] in {"staging", "production"}) or any(
@@ -537,7 +543,7 @@ def check(gate_id: str, state: dict[str, Any], args: argparse.Namespace) -> list
         add("high_risk_fail_closed", state["policy"]["high_risk_failure"] == "block", "high-risk validation failure must block")
         add("low_risk_explicit", state["policy"]["low_risk_failure"] in {"block", "human_review"}, "low-risk fallback must be explicit")
         isolation_ok = state["environment"] != "production" or state["status"] != "blocked"
-        add("no_blocked_production", isolation_ok, "blocked/experimental execution cannot enter production")
+        add("no_blocked_production", isolation_ok, "blocked or non-expert-reviewed execution cannot enter production")
     return checks
 
 

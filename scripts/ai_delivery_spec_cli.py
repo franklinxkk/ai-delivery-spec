@@ -147,6 +147,7 @@ def run_check(args: argparse.Namespace) -> int:
         [sys.executable, "scripts/validators/validate_runtime_rule_uniqueness.py"],
         [sys.executable, "scripts/validators/validate_domain_coverage.py"],
         [sys.executable, "scripts/validators/validate_domain_sources.py"],
+        [sys.executable, "scripts/validators/validate_domain_contracts.py"],
         [sys.executable, "scripts/validators/validate_eval_catalog.py"],
         [sys.executable, "scripts/validators/validate_github_eval_cases.py"],
         [sys.executable, "tests/test_v501_triage.py"],
@@ -158,6 +159,9 @@ def run_check(args: argparse.Namespace) -> int:
         [sys.executable, "tests/test_v510_semantic_guards.py"],
         [sys.executable, "tests/test_v510_lightweight_gate.py"],
         [sys.executable, "tests/test_v510_industry_assurance.py"],
+        [sys.executable, "tests/test_v511_runtime_budget.py"],
+        [sys.executable, "tests/test_v511_role_stage.py"],
+        [sys.executable, "tests/test_v511_domain_assurance.py"],
         [sys.executable, "scripts/validators/validate_requirement_patterns.py", "references/patterns/common-requirement-patterns.yaml"],
         [
             sys.executable,
@@ -300,7 +304,7 @@ def status_report(args: argparse.Namespace) -> int:
     for scenario in catalog.get("scenarios", []):
         eval_status[scenario["status"]] = eval_status.get(scenario["status"], 0) + 1
     report = {
-        "schema_version": "5.0.0",
+        "schema_version": "5.1.1",
         "skill_version": current_version(),
         "runtime": "pure_v5",
         "domain_packs": {
@@ -313,12 +317,15 @@ def status_report(args: argparse.Namespace) -> int:
         },
         "evaluation_assets": {
             "domain_fixtures": len(fixtures.get("fixtures", [])),
+            "contract_fixtures_passed": sum(
+                fixture.get("status") == "passed" for fixture in fixtures.get("fixtures", [])
+            ),
             "github_cases": len(github_cases.get("cases", [])),
             "catalog_status": eval_status,
             "github_matrix": matrix.get("summary", {}),
         },
         "known_limitations": [
-            "five domain methods have owner-attested production practice; reusable pack assurance remains experimental",
+            "five domain methods have owner-attested production practice; all built-in packs pass deterministic contract checks but fresh-agent/expert maturity remains separate",
             "GitHub runs are exploratory and have zero release-passed cells",
             "domain expert, customer, production, legal, safety, and financial correctness are not proven",
         ],

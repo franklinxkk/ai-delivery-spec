@@ -233,6 +233,7 @@ Demand: new -> reviewed -> scheduled -> released | rejected
 | quote approval boundary | sales manager/finance | quote exceeds discount threshold | submit -> review -> approve/reject | QuoteApproved or rejection audit |
 | renewal risk intervention | customer success | customer is at_risk | create plan -> follow up -> close | RenewalPlan ends renewed/churned |
 | ticket to demand loop | service/product | repeated product issue | convert ticket to demand | DemandCreatedFromTicket traceable |
+| lead to collected revenue | sales/finance | qualified lead exists | convert -> win opportunity -> sign contract -> invoice -> register payment | lead, opportunity, customer, contract, invoice, and payment retain source IDs, state owners, permissions, and audit |
 
 ## Evaluation Profile
 

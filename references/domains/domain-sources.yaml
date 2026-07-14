@@ -1,5 +1,5 @@
-schema_version: 5.0.0
-last_catalog_review: 2026-07-11
+schema_version: 5.1.1
+last_catalog_review: 2026-07-14
 policy:
   primary_sources_only_for_binding_claims: true
   model_memory_is_authority: false
@@ -264,6 +264,81 @@ sources:
     applicability: electronic archive management within stated scope
     product_mapping: collection, transfer, storage, use, security and responsibility
     last_verified_at: 2026-07-11
+    refresh_days: 90
+
+  - id: KS-OA-WEAVER-WHITEPAPER
+    domains: [oa]
+    title: Weaver e-cology Product Whitepaper
+    issuer: 泛微网络
+    authority_type: vendor_whitepaper
+    url: https://www.weaver.com.cn/subpage/apply/Weaver_e-cology_Product_Whitepaper.pdf
+    status: current_as_verified
+    jurisdiction: vendor product evidence
+    applicability: Weaver e-cology capability and terminology patterns described by the vendor
+    product_mapping: workflow, portal, document, organization and collaborative-office capability hypotheses
+    evidence_role: capability_map_and_vendor_terminology
+    claim_limit: vendor-authored whitepaper; not legal authority, independent outcome proof, or proof of current behavior outside the stated product/version
+    last_verified_at: 2026-07-14
+    refresh_days: 90
+
+  - id: KS-OA-SEEYON-OPEN-PLATFORM
+    domains: [oa]
+    title: Seeyon Open Platform Product Documentation
+    issuer: 致远互联
+    authority_type: vendor_product_docs
+    url: https://open.seeyon.com/book/product.html
+    status: current_as_verified
+    jurisdiction: vendor product evidence
+    applicability: Seeyon open-platform objects, extension and integration contracts
+    product_mapping: organization, workflow, application extension, API and integration scenario hypotheses
+    evidence_role: product_and_integration_contract
+    claim_limit: open-platform documentation is not proof that the proprietary OA core is open source or that every commercial edition behaves identically
+    last_verified_at: 2026-07-14
+    refresh_days: 90
+
+  - id: KS-OA-LANDRAY-CASES
+    domains: [oa]
+    title: Landray Customer Case Library
+    issuer: 蓝凌软件
+    authority_type: vendor_case_library
+    url: https://www.landray.com.cn/case
+    status: current_as_verified
+    jurisdiction: vendor scenario evidence
+    applicability: industry, role, workflow and deployment scenario discovery
+    product_mapping: scenario seeds for knowledge, portal, workflow, collaboration and industry OA
+    evidence_role: scenario_seed
+    claim_limit: vendor case testimony; not independent proof of result, universal rule, or customer acceptance
+    last_verified_at: 2026-07-14
+    refresh_days: 90
+
+  - id: KS-OA-DINGTALK-OSS
+    domains: [oa]
+    title: DingTalk Open Platform Team Public Repositories
+    issuer: 钉钉开放平台团队
+    authority_type: vendor_open_source
+    url: https://github.com/open-dingtalk
+    status: current_as_verified
+    jurisdiction: exact public repositories and licensed components
+    applicability: DingTalk SDK, demo, stream, callback and open-platform integration behavior at a referenced commit
+    product_mapping: integration authentication, callback, stream, SDK and demo contract evidence
+    evidence_role: exact_component_implementation
+    claim_limit: public SDKs, demos and tools do not prove that DingTalk core OA/product services are open source
+    last_verified_at: 2026-07-14
+    refresh_days: 90
+
+  - id: KS-OA-FEISHU-OSS
+    domains: [oa]
+    title: Lark and Feishu Public Repositories
+    issuer: Lark Technologies / 飞书
+    authority_type: vendor_open_source
+    url: https://github.com/larksuite
+    status: current_as_verified
+    jurisdiction: exact public repositories and licensed components
+    applicability: Feishu/Lark SDK, CLI, OpenAPI and integration behavior at a referenced commit
+    product_mapping: API, event, SDK, CLI and integration contract evidence
+    evidence_role: exact_component_implementation
+    claim_limit: public SDKs, CLI and integration components do not prove that Feishu core collaboration products are open source
+    last_verified_at: 2026-07-14
     refresh_days: 90
 
   - id: KS-CRM-COMPLAINT-10002

@@ -43,6 +43,8 @@ REQUIRED_FILES = (
     "references/runtime/context-planning.md",
     "references/runtime/execution-gates.md",
     "references/runtime/ai-coding-completeness.md",
+    "references/runtime/role-stage-playbook.md",
+    "references/runtime/domain-assurance.md",
     "references/domain-coverage.yaml",
     "references/domains/domain-sources.yaml",
     "references/runtime/capability-profiles.yaml",
@@ -66,10 +68,12 @@ REQUIRED_FILES = (
     "scripts/validators/validate_traceability_ledger.py",
     "scripts/validators/validate_acceptance_run.py",
     "scripts/validators/validate_review_record.py",
+    "scripts/validators/validate_domain_contracts.py",
     "scripts/validators/validate_requirement_patterns.py",
     "scripts/triage_requirement.py",
     "scripts/analyze_change_impact.py",
     "scripts/build_traceability_ledger.py",
+    "scripts/query_domain.py",
     "scripts/scan_requirement_ambiguity.py",
     "scripts/scan_prototype_css.py",
     "scripts/render_mermaid_flow.py",
@@ -79,6 +83,9 @@ REQUIRED_FILES = (
     "tests/test_v502_progressive_truth.py",
     "tests/test_v510_requirement_management.py",
     "tests/test_v510_unified_prd.py",
+    "tests/test_v511_role_stage.py",
+    "tests/test_v511_runtime_budget.py",
+    "tests/test_v511_domain_assurance.py",
     "scripts/compile_product_truth.py",
     "scripts/compile_clarification_transcript.py",
     "scripts/validators/validate_capsule_composition.py",
@@ -102,7 +109,8 @@ REQUIRED_FILES = (
 )
 
 STAGE_REFERENCE_BUDGET = 500
-SKILL_LINE_BUDGET = 350
+SKILL_LINE_BUDGET = 180
+SKILL_CHAR_BUDGET = 8500
 
 
 def line_count(path: Path) -> int:
@@ -114,14 +122,16 @@ def main() -> int:
     skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
     if line_count(ROOT / "SKILL.md") > SKILL_LINE_BUDGET:
         failures.append(f"SKILL.md exceeds {SKILL_LINE_BUDGET} lines")
+    if len(skill) > SKILL_CHAR_BUDGET:
+        failures.append(f"SKILL.md exceeds {SKILL_CHAR_BUDGET} characters")
     for marker in (
         "ToB/ToG",
         "Requirement Management Kernel",
         "Product Truth",
-        "一份统一 PRD",
-        "双向追溯",
-        "需求准入",
-        "references/domain-coverage.yaml",
+        "one human-readable",
+        "both directions",
+        "Start with intake",
+        "scripts/query_domain.py",
         "schemas/change-package.schema.json",
         "schemas/requirement-register.schema.json",
     ):

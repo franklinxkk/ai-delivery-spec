@@ -352,7 +352,7 @@ Mobile rules:
 |---|---|---|
 | OA-001 | Employee submits expense workflow and manager returns it | instance returns to configured node with opinion, editable fields, audit, and todo |
 | OA-002 | Approver opens a stale todo after another approver has processed it | system blocks duplicate action and refreshes current state |
-| OA-003 | Official document is issued then needs correction | withdrawal/correction creates versioned evidence; original remains auditable |
+| OA-003 | Official document is issued then needs correction | correction requires new versioned evidence; original remains auditable |
 | OA-004 | Meeting minutes publish three resolutions | resolution tasks are created with owner, deadline, reminders, and close evidence |
 | OA-005 | Supervision task is overdue | reminder/escalation creates visible owner action and audit trail |
 | OA-006 | Employee asks AI to summarize a confidential document outside scope | AI refuses or hides source; access is audited |
@@ -360,6 +360,7 @@ Mobile rules:
 | OA-008 | Workflow definition changes while old instances are running | old instances continue on snapshot version; new submits use new version |
 | OA-009 | E-signature certificate is expired | signing is blocked and routed to certificate renewal/manual handling |
 | OA-010 | Browser test submits a real approval path | request uses shadow/test mode; no production workflow/seal/payment side effect remains |
+| OA-011 | Submitter recalls while parallel approvers are processing, then resubmits | recall uses a configured state guard; stale approvals are rejected; new run/version, opinions and prior audit remain traceable |
 
 ## Evaluation Profile
 

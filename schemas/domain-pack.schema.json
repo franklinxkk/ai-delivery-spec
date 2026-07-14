@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["schema_version", "domain_id", "name", "coverage", "maturity", "practice_status", "evidence", "known_gaps", "maintainer"],
   "properties": {
-    "schema_version": { "const": "5.0.0" },
+    "schema_version": { "enum": ["5.0.0", "5.1.1"] },
     "domain_id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
     "name": { "type": "string", "minLength": 1 },
     "knowledge_file": { "type": "string" },
@@ -15,18 +15,19 @@
     "coverage": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["knowledge", "scenarios", "behavioral_eval", "expert_review"],
+      "required": ["knowledge", "scenarios", "contract_eval", "behavioral_eval", "expert_review"],
       "properties": {
         "knowledge": { "enum": ["absent", "partial", "structured", "sourced"] },
         "scenarios": { "enum": ["absent", "mocked", "project_sampled", "multi_project"] },
+        "contract_eval": { "enum": ["not_run", "failed", "partial", "passed"] },
         "behavioral_eval": { "enum": ["not_run", "failed", "partial", "passed"] },
         "expert_review": { "enum": ["not_reviewed", "reviewed_with_gaps", "reviewed"] }
       }
     },
-    "maturity": { "enum": ["experimental", "validated", "audited"] },
+    "maturity": { "enum": ["knowledge_backed", "contract_tested", "behavior_validated", "expert_reviewed", "audited"] },
     "practice_status": {
       "description": "Delivery-use evidence, kept separate from reusable knowledge-pack assurance.",
-      "enum": ["knowledge_only", "production_practiced", "production_observed"]
+      "enum": ["knowledge_only", "project_practiced", "production_practiced", "production_observed"]
     },
     "evidence": {
       "type": "array",
@@ -35,7 +36,7 @@
         "required": ["id", "kind", "location", "status"],
         "properties": {
           "id": { "type": "string" },
-          "kind": { "enum": ["official_source", "mock_scenario", "project_sample", "owner_attestation", "behavioral_eval", "expert_review", "audit"] },
+          "kind": { "enum": ["official_source", "mock_scenario", "project_sample", "owner_attestation", "contract_eval", "behavioral_eval", "expert_review", "audit"] },
           "location": { "type": "string" },
           "status": { "enum": ["current", "expired", "failed", "passed", "unknown"] },
           "reviewed_at": { "type": "string", "format": "date-time" },
@@ -50,18 +51,54 @@
   },
   "allOf": [
     {
-      "if": { "properties": { "maturity": { "const": "validated" } } },
+      "if": { "properties": { "maturity": { "const": "knowledge_backed" } } },
+      "then": {
+        "properties": {
+          "coverage": { "properties": { "knowledge": { "const": "sourced" } } }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "maturity": { "const": "contract_tested" } } },
+      "then": {
+        "properties": {
+          "coverage": {
+            "properties": {
+              "knowledge": { "const": "sourced" },
+              "contract_eval": { "const": "passed" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "maturity": { "const": "behavior_validated" } } },
+      "then": {
+        "properties": {
+          "coverage": {
+            "properties": {
+              "knowledge": { "const": "sourced" },
+              "contract_eval": { "const": "passed" },
+              "behavioral_eval": { "const": "passed" },
+              "expert_review": { "enum": ["not_reviewed", "reviewed_with_gaps", "reviewed"] }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "maturity": { "enum": ["expert_reviewed", "audited"] } } },
       "then": {
         "properties": {
           "coverage": {
             "properties": {
               "knowledge": { "const": "sourced" },
               "scenarios": { "enum": ["project_sampled", "multi_project"] },
+              "contract_eval": { "const": "passed" },
               "behavioral_eval": { "const": "passed" },
               "expert_review": { "enum": ["reviewed_with_gaps", "reviewed"] }
             }
-          },
-          "production_claim": { "enum": ["allowed_with_warning", "allowed"] }
+          }
         }
       }
     },
@@ -69,14 +106,7 @@
       "if": { "properties": { "maturity": { "const": "audited" } } },
       "then": {
         "properties": {
-          "coverage": {
-            "properties": {
-              "knowledge": { "const": "sourced" },
-              "scenarios": { "enum": ["project_sampled", "multi_project"] },
-              "behavioral_eval": { "const": "passed" },
-              "expert_review": { "const": "reviewed" }
-            }
-          },
+          "coverage": { "properties": { "expert_review": { "const": "reviewed" } } },
           "production_claim": { "const": "allowed" }
         }
       }

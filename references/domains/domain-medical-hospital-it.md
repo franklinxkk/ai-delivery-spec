@@ -327,6 +327,8 @@ Mobile/field rules:
 | MED-008 | AI service times out during outpatient record summary | manual path remains available; AI state becomes failed/fallback; no clinical state is written |
 | MED-009 | Department director opens dashboard with stale source data | page shows freshness warning and prevents misleading real-time claims |
 | MED-010 | Automated browser acceptance test submits a clinical workflow | request is tagged as test/shadow mode; no real clinical/billing side effect remains |
+| MED-011 | Two patient identities are confirmed as the same person | merge requires accountable approval; surviving identity, source provenance, access history, correction and rollback evidence remain traceable |
+| MED-012 | Clinician cancels a submitted or verified clinical order | role and state guard are checked; downstream execution or billing impact is reconciled; reason and immutable audit remain visible |
 
 ## Evaluation Profile
 

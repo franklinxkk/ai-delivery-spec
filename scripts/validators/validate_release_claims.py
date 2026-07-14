@@ -11,7 +11,7 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[2]
-VERSION = "5.1.0"
+VERSION = "5.1.1"
 PUBLIC_FILES = (
     "README.md",
     ".github/docs/social-launch-kit.md",
@@ -88,8 +88,8 @@ def main() -> int:
             failures.append(f"README omits maturity vocabulary: {domain['maturity']}")
         if domain["practice_status"] not in readme:
             failures.append(f"README omits practice status: {domain['practice_status']}")
-        if domain["maturity"] == "experimental" and domain.get("production_claim") == "allowed":
-            failures.append(f"experimental domain allows production claim: {domain['domain_id']}")
+        if domain["maturity"] in {"knowledge_backed", "contract_tested"} and domain.get("production_claim") == "allowed":
+            failures.append(f"non-expert domain allows unqualified production claim: {domain['domain_id']}")
 
     for relative in PUBLIC_FILES:
         path = ROOT / relative

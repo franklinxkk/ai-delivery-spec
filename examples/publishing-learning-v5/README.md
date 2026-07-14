@@ -34,4 +34,4 @@ before the example can claim behavioral validation.
 The Context Plan classifies this fixture as regulated because it is brownfield
 and contains restricted learner identity data. The content slice contains 17
 linked items. Neither derived artifact changes the education pack's
-experimental maturity.
+contract-tested maturity; project-specific applicability still requires accountable confirmation.
