@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.1.4 - 2026-07-14
+
+- Made selective domain lookup emit UTF-8 explicitly, so multilingual source
+  titles and known gaps work on Windows hosts with legacy console encodings.
+  The runtime-budget regression now forces `cp1252` and decodes UTF-8 on every
+  OS, preventing this CLI boundary from escaping local validation again.
+
 ## 5.1.3 - 2026-07-14
 
 - Rebuilt the README first-use path around pain, outcome, honest public adoption

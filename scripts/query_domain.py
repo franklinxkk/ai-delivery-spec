@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
 import yaml
@@ -15,6 +16,12 @@ SOURCE_CATALOG = ROOT / "references" / "domains" / "domain-sources.yaml"
 
 
 def main() -> int:
+    # Domain records intentionally contain multilingual source titles and gaps.
+    # Emit a deterministic UTF-8 stream even when a Windows host exposes a
+    # narrow legacy console encoding such as cp1252.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--domain", required=True)
     parser.add_argument("--format", choices=["yaml", "markdown"], default="yaml")

@@ -1,5 +1,6 @@
 """Keep the always-loaded Skill body lean and domain retrieval selective."""
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -22,8 +23,10 @@ probe = subprocess.run(
     [sys.executable, str(ROOT / "scripts/query_domain.py"), "--domain", "oa"],
     cwd=ROOT,
     text=True,
+    encoding="utf-8",
     capture_output=True,
     check=False,
+    env={**os.environ, "PYTHONIOENCODING": "cp1252"},
 )
 if probe.returncode != 0:
     failures.append("OA compact-domain query failed: " + probe.stdout + probe.stderr)
