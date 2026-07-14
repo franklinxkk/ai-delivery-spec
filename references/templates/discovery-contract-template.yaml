@@ -1,4 +1,4 @@
-schema_version: 5.0.0
+schema_version: 5.1.0
 contract_id: DISC-PROJECT-001
 project_id: project-001
 product:
@@ -8,7 +8,7 @@ product:
   scope: []
   scope_status: unknown
 delivery_context:
-  lifecycle_stage: discover
+  lifecycle_stage: intake
   shape: greenfield
   mode: standard
   tier: L2

@@ -1,7 +1,7 @@
 # Publishing Authorization and Learning — v5 Golden Example
 
-This example demonstrates the v5 Product Truth model on a multi-role ToB
-education/content delivery lifecycle:
+This example demonstrates the v5.1 requirement-management model on a multi-role
+ToB education/content chain:
 
 ```text
 resource -> knowledge point -> question -> course version
@@ -14,17 +14,17 @@ authoritative education-domain standard.
 
 ## Artifacts
 
-- `delivery/truth/product-truth.yaml`: canonical facts and stable IDs.
-- `delivery/projections/human-first-prd.md`: customer/product/engineering view.
-- `delivery/projections/coding-agent-spec.md`: implementation-agent view.
+- `delivery/truth/product-truth.yaml`: optional large-project structured authority.
+- `delivery/projections/unified-prd.md`: one customer/product/development/QA/Coding Agent PRD.
 - `delivery/evidence/context-plan.yaml`: adaptive risk/context selection.
 - `delivery/evidence/content-module-slice.yaml`: reference-closed working slice.
-- `delivery/manifest.json`: authority and lifecycle metadata.
+- `delivery/manifest.json`: authority and requirement-baseline metadata.
 
 ## Validation
 
 ```powershell
 py -3 scripts/validators/validate_product_truth.py examples/publishing-learning-v5/delivery/truth/product-truth.yaml
+py -3 scripts/validators/validate_unified_prd.py examples/publishing-learning-v5/delivery/projections/unified-prd.md
 ```
 
 Schema/reference PASS proves structural closure only. Browser, domain-expert,

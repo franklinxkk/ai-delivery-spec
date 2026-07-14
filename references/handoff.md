@@ -1,99 +1,58 @@
-# Project Product Truth Into Delivery Views
+# Unified Requirement Handoff
 
-Use this reference after Product Truth is complete enough for the selected
-consumer. Generate views; do not author independent specifications.
+## Default Projection
 
-## Projection Rules
+Deliver one governed PRD by default. The document has two reading layers:
 
-Every projection records `generated_from: product_truth`, generation time, and
-the in-scope `FEAT-*` plus stable behavior/acceptance IDs it covers. A projection may improve navigation and explanation,
-but cannot change scope, rules, states, permissions, or acceptance.
+1. a Human-First main body that business, product, design, development and QA
+   can read in order;
+2. engineering and machine annexes in the same file for fields, states, APIs,
+   traceability and executable acceptance.
 
-| Projection | Consumer | Emphasis |
+Do not create independent “Human PRD” and “AI Coding PRD” documents unless a
+consumer explicitly requires a separate export. Parallel PRDs drift, create
+review fatigue and make it unclear which one development should implement.
+
+Use `references/templates/unified-requirement-prd-template.md` as the default.
+
+## Consumer Views
+
+| Consumer | Primary reading path | Optional export |
 |---|---|---|
-| Human-First | PM, customer, sponsor, frontend/backend/QA/vendor | scenarios, module slices, page/action effects, rules, exceptions, acceptance |
-| Prototype | user, PM, customer, QA | visible states, interactions, representative data, role paths |
-| Coding Agent | Codex, Claude Code, Cursor, Copilot, implementation team | source order, repository baseline, contracts, tasks, tests, forbidden inventions |
-| QA / Acceptance | QA, UAT, customer acceptor | preconditions, steps, visible/domain result, evidence |
-| Customer Contract | sales, delivery, customer | scope, responsibilities, deliverables, exclusions, acceptance, change control |
+| customer/business | goals, scope, role journeys, business flows, acceptance | customer contract summary |
+| product/design | full main body and page interactions | prototype/IA index |
+| traditional development | main body then fields/states/interfaces annex | field/API extracts |
+| QA | role journeys, exceptions, AC and trace index | executable acceptance list |
+| Coding Agent | complete document plus machine annex | YAML/JSON slice if tool requires it |
 
-## Human-First Projection
+All exports preserve stable IDs and baseline version. An export is generated
+from the baseline; it never becomes a second authority.
 
-Organize by module and end-to-end flow. For each module show:
+## Handoff Gate
 
-1. outcome and role journey;
-2. page map with fields and visible states;
-3. numbered interaction flow;
-4. action/result matrix;
-5. rules, lifecycle, permissions, exceptions;
-6. cross-module/data flow;
-7. acceptance and open decisions.
+The receiving role must be able to proceed without inventing:
 
-Embed or link annotated prototype views by `VIEW/REG/ACT` IDs so readers do not
-switch blindly between prose and prototype. Keep WBS, bug logs, and daily
-tracking outside the PRD projection.
+- who may act and which data they may access;
+- trigger, precondition, happy path, branch, failure and recovery;
+- field meaning, validation, edit authority and sensitivity;
+- state transition, rule precedence and concurrency/idempotency behavior;
+- integration input/output/error/reconciliation behavior;
+- acceptance result and required evidence.
 
-## Prototype Projection
+Technical implementation choices remain with engineering unless the choice is
+a customer-visible, interoperability, security, compliance or acceptance
+contract.
 
-Use `references/runtime/prototype-testability.md`. The prototype must preserve IDs:
+## Prototype Handoff
 
-```text
-data-testid <- VIEW/REG/AC
-data-action <- ACT
-data-field  <- FLD
-data-state  <- STATE
-data-api    <- Action command/API when known
-```
+Map stable IDs to `data-testid`, `data-action`, `data-field`, `data-state`, and
+`data-api`. Every action needs a handler and visible outcome. Compare the role,
+view, action, modal, handler and representative data coverage against the
+approved baseline; a visually polished regression is still a failed handoff.
 
-Every primary action produces a visible and domain result. Browser tests use
-isolated mock/shadow data unless the user explicitly authorizes a safe test
-environment.
+## Change Handoff
 
-## Coding-Agent Projection
-
-Generate only when implementation is requested. If the user asks for a
-complete/final AI Coding PRD or direct system generation, first read
-`references/runtime/ai-coding-completeness.md` and use the complete template;
-the shorter projection below is not an acceptable substitute. Include:
-
-- source-of-truth order and manifest;
-- greenfield or brownfield repository baseline;
-- module/flow/view/action/state/event/field/AC maps;
-- API/event/data contracts only at known implementation boundaries;
-- vertical slices tied to visible/domain results and AC IDs;
-- explicit unknowns and forbidden invention;
-- validation commands and evidence writeback path.
-
-The coding agent must report conflicts between Product Truth and repository
-reality as `CFL-*` or `CHG-*`; it must not silently rewrite business behavior.
-
-## QA Projection
-
-Generate happy, validation, permission, state-conflict, duplicate, timeout,
-integration-failure, migration, accessibility, and security paths as applicable.
-Bind every test to `AC-*` and evidence type. A document assertion is not test
-evidence.
-
-## Delivery Package
-
-```text
-delivery/
-  truth/index.yaml
-  truth/fragments/*.yaml
-  truth/compiled/product-truth.yaml
-  projections/human-first-prd.md
-  projections/coding-agent-spec.md
-  prototype/
-  acceptance/
-  changes/
-  agents/
-  evidence/
-  manifest.json
-```
-
-Small bounded projects may retain `truth/product-truth.yaml`. Large-project
-authoring uses the index/fragments as the resumable source and treats the
-compiled document as read-only output.
-
-Only include directories required by scope. Manifest entries record path,
-version, hash when available, authority, and lifecycle status.
+A changed baseline is not ready until the change package names affected IDs,
+before/after behavior, approvals, synchronized consumers, updated artifacts and
+regression evidence. Notify only the affected consumers, but retain the audit
+record for all baseline changes.

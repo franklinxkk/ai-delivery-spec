@@ -1,0 +1,32 @@
+schema_version: 5.1.0
+cases:
+  - id: INTAKE-TINY-001
+    input: {title: 改字段名, outcome: 用户理解更准确, owner: pm, source_refs: [SRC-1], value_evidence: [已批准反馈], value: medium, roles: [ROLE-1], modules: [MOD-1], reversible: true}
+    expected: {decision: accept, priority: P2, mode: ultra_light, tier: L0}
+  - id: INTAKE-MISSING-002
+    input: {title: 做一个平台, roles: [], modules: [], reversible: false}
+    expected: {decision: clarify, priority: P2, mode: lite, tier: L1}
+  - id: INTAKE-REGULATED-003
+    input: {title: 法规变更, outcome: 按期满足监管, owner: pm, source_refs: [SRC-LAW], value_evidence: [监管截止], value: high, roles: [ROLE-1, ROLE-2], modules: [MOD-1, MOD-2], reversible: false, compliance: true, regulatory_deadline: true}
+    expected: {decision: accept, priority: P0, mode: full, tier: L3}
+  - id: INTAKE-SAFETY-004
+    input: {title: 安全放行, outcome: 阻断不合格放行, owner: safety, source_refs: [SRC-SAFE], value_evidence: [安全责任], value: high, roles: [ROLE-1], modules: [MOD-1], reversible: false, safety_critical: true}
+    expected: {decision: accept, priority: P0, mode: full, tier: L4}
+  - id: INTAKE-MULTIROLE-005
+    input: {title: 跨角色审批, outcome: 申请可闭环, owner: pm, source_refs: [SRC-5], value_evidence: [客户确认], value: high, roles: [ROLE-1, ROLE-2, ROLE-3], modules: [MOD-1, MOD-2], reversible: false, cross_module_state: true, customer_acceptance: true}
+    expected: {decision: accept, priority: P1, mode: standard, tier: L2}
+  - id: INTAKE-BLOCKED-006
+    input: {title: 外部主数据, outcome: 统一组织, owner: pm, source_refs: [SRC-6], value_evidence: [数据治理], value: medium, roles: [ROLE-1], modules: [MOD-1], integrations: [INT-1], reversible: false, blocked_dependency: true}
+    expected: {decision: defer, priority: P2, mode: standard, tier: L2}
+  - id: INTAKE-LOW-007
+    input: {title: 装饰动效, outcome: 视觉更丰富, owner: pm, source_refs: [SRC-7], value_evidence: [单个建议], value: low, roles: [ROLE-1], modules: [MOD-1], reversible: true}
+    expected: {decision: defer, priority: P3, mode: ultra_light, tier: L0}
+  - id: INTAKE-DUPLICATE-008
+    input: {title: 重复报表, outcome: 查看同一指标, owner: pm, source_refs: [SRC-8], value_evidence: [需求单], value: medium, roles: [ROLE-1], modules: [MOD-1], reversible: false, duplicate_of: REQ-OLD}
+    expected: {decision: reject, priority: P2, mode: lite, tier: L1}
+  - id: INTAKE-LARGE-009
+    input: {title: 多模块平台, outcome: 全角色闭环, owner: pm, source_refs: [SRC-9], value_evidence: [合同], value: high, roles: [R1, R2, R3, R4, R5, R6, R7, R8], modules: [M1, M2, M3, M4, M5, M6, M7, M8, M9, M10, M11, M12], reversible: false}
+    expected: {decision: accept, priority: P1, mode: full, tier: L3}
+  - id: INTAKE-MIGRATION-010
+    input: {title: 存量规则切换, outcome: 新旧数据口径一致, owner: pm, source_refs: [SRC-10], value_evidence: [已批准变更], value: medium, roles: [ROLE-1, ROLE-2], modules: [MOD-1, MOD-2], reversible: false, migration: true}
+    expected: {decision: accept, priority: P2, mode: full, tier: L3}

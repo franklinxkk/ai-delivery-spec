@@ -1,4 +1,4 @@
-schema_version: 5.0.0
+schema_version: 5.1.0
 truth_id: TRUTH-PUBLISHING-001
 
 product:
@@ -21,7 +21,7 @@ product:
       target: 试点期达到 98%
 
 delivery_context:
-  lifecycle_stage: specify
+  lifecycle_stage: baseline
   delivery_mode: full
   tier: L2
   project_shape: brownfield
@@ -29,7 +29,7 @@ delivery_context:
   governance_profiles: [brownfield]
   capability_packs: [identity-tenant, content-resource, workflow-audit, data-integration]
   domain_packs: [education-it]
-  consumers: [product, customer, engineering, coding-agent, qa, operations]
+  consumers: [product, customer, engineering, coding-agent, qa]
 
 sources:
   - id: SRC-PUBLISHING-REQ-001
@@ -98,6 +98,60 @@ roles:
     job: 按验收口径核验授权、激活、学习和证据闭环
     data_scope: 授权试点范围和脱敏汇总
     forbidden_actions: [修改业务记录]
+
+requirements:
+  - id: REQ-CONTENT-PUBLISH-001
+    title: 资源、知识点、题库与课程版本化编排发布
+    stage: baselined
+    priority: P0
+    source_refs: [SRC-PUBLISHING-REQ-001]
+    behavior_refs: [MOD-CONTENT-001, FLOW-PUBLISH-001, VIEW-COURSE-EDITOR, ACT-COURSE-PUBLISH]
+    acceptance_refs: [AC-PUBLISH-001]
+    review_refs: []
+    change_refs: []
+    owner: 内容产品负责人
+    iteration: 一期
+    baseline_version: "1.0"
+    outcome: 内容管理员形成不可变课程版本
+  - id: REQ-CHANNEL-AUTH-001
+    title: 代理商与接入商资源额度授权
+    stage: baselined
+    priority: P0
+    source_refs: [SRC-PUBLISHING-REQ-001]
+    behavior_refs: [MOD-AUTH-001, FLOW-AUTH-001, VIEW-AUTH-CONSOLE, ACT-AUTH-GRANT]
+    acceptance_refs: [AC-AUTH-001, AC-AUTH-OVERLIMIT-001]
+    review_refs: []
+    change_refs: []
+    owner: 渠道产品负责人
+    iteration: 一期
+    baseline_version: "1.0"
+    outcome: 渠道在授权额度内取得资源权益
+  - id: REQ-CODE-ACTIVATE-001
+    title: 学员一书一码激活并生成学习权益
+    stage: baselined
+    priority: P0
+    source_refs: [SRC-PUBLISHING-REQ-001]
+    behavior_refs: [MOD-LEARNING-001, FLOW-ACTIVATE-001, VIEW-CODE-ACTIVATE, ACT-CODE-ACTIVATE]
+    acceptance_refs: [AC-ACTIVATE-001, AC-ACTIVATE-DUPLICATE-001]
+    review_refs: []
+    change_refs: []
+    owner: 学习产品负责人
+    iteration: 一期
+    baseline_version: "1.0"
+    outcome: 合法学习码为唯一学员生成学习权益
+  - id: REQ-LEARNING-EVIDENCE-001
+    title: 学习过程与验收证据闭环
+    stage: baselined
+    priority: P0
+    source_refs: [SRC-PUBLISHING-REQ-001]
+    behavior_refs: [MOD-LEARNING-001, FLOW-LEARN-001, VIEW-LEARNING-HOME, ACT-LEARNING-COMPLETE]
+    acceptance_refs: [AC-LEARN-001]
+    review_refs: []
+    change_refs: []
+    owner: 教学运营负责人
+    iteration: 一期
+    baseline_version: "1.0"
+    outcome: 有权益的学习形成可追溯证据
 
 features:
   - id: FEAT-CONTENT-PUBLISH-001
@@ -655,15 +709,11 @@ acceptance:
 evidence: []
 
 projections:
-  - kind: human_first
-    path: projections/human-first-prd.md
+  - kind: unified_prd
+    path: projections/unified-prd.md
     generated_from: product_truth
-    generated_at: "2026-07-11T12:00:00+08:00"
-  - kind: coding_agent
-    path: projections/coding-agent-spec.md
-    generated_from: product_truth
-    generated_at: "2026-07-11T12:00:00+08:00"
+    generated_at: "2026-07-14T12:00:00+08:00"
   - kind: qa_acceptance
     path: acceptance/ac.yaml
     generated_from: product_truth
-    generated_at: "2026-07-11T12:00:00+08:00"
+    generated_at: "2026-07-14T12:00:00+08:00"

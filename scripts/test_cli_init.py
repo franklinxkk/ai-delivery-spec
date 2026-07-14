@@ -46,7 +46,7 @@ def main() -> int:
         for item in failures:
             print(f"FAIL: {item}")
         return 1
-    print("PASS: init-delivery creates v5.0.2 progressive truth layout and preserves project overrides")
+    print("PASS: legacy init-delivery remains compatible while v5.1 defaults to init-requirements")
     return 0
 
 

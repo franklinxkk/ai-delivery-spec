@@ -1,0 +1,48 @@
+schema_version: 5.1.0
+register_id: REGISTER-REQ-001
+product: "{product name}"
+current_baseline: "0.1-draft"
+iterations:
+  - id: ITER-001
+    name: "{iteration name}"
+    status: planned
+    requirement_refs: [REQ-CORE-001]
+requirements:
+  - id: REQ-CORE-001
+    title: "{requirement title}"
+    type: new_capability
+    stage: clarifying
+    intake_decision: clarify
+    priority: P2
+    outcome: "{observable outcome}"
+    source_refs: [SRC-REQ-001]
+    value:
+      level: medium
+      rationale: "{why this is worth doing}"
+      evidence_refs: [SRC-REQ-001]
+    complexity:
+      band: M
+      dimensions: [roles, workflow]
+      rationale: "{impacted dimensions; do not invent person-days}"
+    uncertainty:
+      level: medium
+      rationale: "{material questions still open}"
+    owner: "{owner}"
+    requester: "{requester}"
+    iteration_ref: ITER-001
+    dependency_refs: []
+    behavior_refs: []
+    acceptance_refs: []
+    review_refs: []
+    change_refs: []
+    baseline_version: "0.1-draft"
+dependency_edges: []
+audit_log:
+  - id: AUDIT-REQ-001
+    requirement_ref: REQ-CORE-001
+    actor: "{actor}"
+    action: created
+    at: "2026-01-01T00:00:00Z"
+    reason: "initial intake"
+    to_version: "0.1-draft"
+    evidence_refs: [SRC-REQ-001]

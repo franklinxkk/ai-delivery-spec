@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["schema_version", "contract_id", "project_id", "product", "delivery_context", "sources", "unknowns", "discovery_decision"],
   "properties": {
-    "schema_version": { "const": "5.0.0" },
+    "schema_version": { "enum": ["5.0.0", "5.1.0"] },
     "contract_id": { "type": "string", "pattern": "^DISC-[A-Z0-9-]+$" },
     "project_id": { "type": "string", "minLength": 1 },
     "product": {
@@ -26,10 +26,10 @@
       "additionalProperties": false,
       "required": ["lifecycle_stage", "shape", "mode", "tier", "ai", "workflow", "info", "consumers"],
       "properties": {
-        "lifecycle_stage": { "const": "discover" },
+        "lifecycle_stage": { "enum": ["discover", "intake"] },
         "shape": { "enum": ["greenfield", "brownfield", "hybrid"] },
-        "mode": { "enum": ["lite", "standard", "full"] },
-        "tier": { "enum": ["L0", "L1", "L2", "L3"] },
+        "mode": { "enum": ["ultra_light", "lite", "standard", "full"] },
+        "tier": { "enum": ["L0", "L1", "L2", "L3", "L4"] },
         "ai": { "type": "boolean" },
         "workflow": { "type": "boolean" },
         "info": { "enum": ["complete", "partial", "missing"] },
@@ -73,7 +73,7 @@
       }
     },
     "discovery_decision": {
-      "enum": ["READY_FOR_LIGHT_SPEC", "READY_FOR_PRODUCT_TRUTH", "READY_FOR_CHANGE_PACKAGE", "REVIEW_COMPLETE_WITH_GAPS", "BLOCKED_BY_P0_UNKNOWN"]
+      "enum": ["READY_FOR_LIGHT_SPEC", "READY_FOR_UNIFIED_PRD", "READY_FOR_PRODUCT_TRUTH", "READY_FOR_CHANGE_PACKAGE", "REVIEW_COMPLETE_WITH_GAPS", "BLOCKED_BY_P0_UNKNOWN"]
     }
   }
 }

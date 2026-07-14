@@ -1,5 +1,31 @@
 # Changelog
 
+## 5.1.0 - 2026-07-14
+
+- Narrowed the product from a full delivery-lifecycle kernel to a requirement-
+  management kernel with six governed concerns: intake, clarification,
+  specification, change, traceability and acceptance. Sprint/task management,
+  code, CI/CD, deployment execution and operations are explicit downstream
+  boundaries.
+- Added a requirement register with evidence-backed value, complexity bands,
+  priority, intake decision, iteration/dependency metadata, audit history and
+  external milestone references. Exact effort/cost remains engineering-owned.
+- Replaced separate Human-First and AI Coding PRDs with one unified PRD by
+  default: a sequential human reading path plus field/state/API/traceability/
+  machine-acceptance annexes in the same baseline.
+- Made independent Product Truth conditional on scale, repeated change,
+  multiple governed exports or audit. Bounded projects start from a focused
+  requirement workspace; large projects retain progressive fragments.
+- Added bidirectional traceability, deterministic change-impact traversal,
+  structured change diff/approval/synchronization, acceptance-run evidence and
+  reverse defect/test trace contracts.
+- Added guided ambiguity scanning, requirement-intake recommendations and a
+  focused `init-requirements` CLI route.
+- Added unified-PRD readability/engineering validators and CSS `!important` /
+  `.hidden` pollution scanning for interactive prototypes.
+- Migrated the publishing-learning golden example to `REQ-*` governance and one
+  unified PRD; added v5.1 regression coverage for the full requirement loop.
+
 ## 5.0.2 - 2026-07-12
 
 - Added Progressive Product Truth: checkpointable core/module fragments, index

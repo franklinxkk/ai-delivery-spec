@@ -20,6 +20,11 @@ REQUIRED_FILES = (
     "schemas/clarification-transcript.schema.json",
     "schemas/domain-pack.schema.json",
     "schemas/change-package.schema.json",
+    "schemas/requirement-register.schema.json",
+    "schemas/traceability-ledger.schema.json",
+    "schemas/acceptance-run.schema.json",
+    "schemas/review-record.schema.json",
+    "schemas/requirement-pattern-library.schema.json",
     "schemas/project-domain-capsule.schema.json",
     "schemas/spec-config.schema.json",
     "schemas/context-plan.schema.json",
@@ -29,12 +34,12 @@ REQUIRED_FILES = (
     "schemas/eval-case.schema.json",
     "schemas/evaluation-run.schema.json",
     "references/discover.md",
+    "references/requirement-management.md",
     "references/specify.md",
     "references/runtime/composition.md",
     "references/handoff.md",
     "references/runtime/change.md",
     "references/runtime/verify.md",
-    "references/runtime/operate.md",
     "references/runtime/context-planning.md",
     "references/runtime/execution-gates.md",
     "references/runtime/ai-coding-completeness.md",
@@ -52,14 +57,28 @@ REQUIRED_FILES = (
     "evals/evidence/production-practice-attestation-2026-07-12.yaml",
     "evals/evidence/release-status.yaml",
     "evals/triage-benchmark.yaml",
+    "evals/requirement-intake-benchmark.yaml",
     "scripts/validators/validate_prd_quality.py",
     "scripts/validators/validate_ia_skeleton.py",
     "scripts/validators/validate_coding_agent_contract.py",
+    "scripts/validators/validate_unified_prd.py",
+    "scripts/validators/validate_requirement_register.py",
+    "scripts/validators/validate_traceability_ledger.py",
+    "scripts/validators/validate_acceptance_run.py",
+    "scripts/validators/validate_review_record.py",
+    "scripts/validators/validate_requirement_patterns.py",
+    "scripts/triage_requirement.py",
+    "scripts/analyze_change_impact.py",
+    "scripts/build_traceability_ledger.py",
+    "scripts/scan_requirement_ambiguity.py",
+    "scripts/scan_prototype_css.py",
     "scripts/render_mermaid_flow.py",
     "tests/test_v501_triage.py",
     "tests/test_v501_validators.py",
     "tests/test_v502_coding_contract.py",
     "tests/test_v502_progressive_truth.py",
+    "tests/test_v510_requirement_management.py",
+    "tests/test_v510_unified_prd.py",
     "scripts/compile_product_truth.py",
     "scripts/compile_clarification_transcript.py",
     "scripts/validators/validate_capsule_composition.py",
@@ -74,6 +93,12 @@ REQUIRED_FILES = (
     "references/templates/product-truth-core-fragment-template.yaml",
     "references/templates/product-truth-module-fragment-template.yaml",
     "references/templates/discovery-contract-template.yaml",
+    "references/templates/unified-requirement-prd-template.md",
+    "references/templates/requirement-register-template.yaml",
+    "references/templates/change-request-template.yaml",
+    "references/templates/acceptance-run-template.yaml",
+    "references/templates/review-record-template.yaml",
+    "references/patterns/common-requirement-patterns.yaml",
 )
 
 STAGE_REFERENCE_BUDGET = 500
@@ -91,13 +116,14 @@ def main() -> int:
         failures.append(f"SKILL.md exceeds {SKILL_LINE_BUDGET} lines")
     for marker in (
         "ToB/ToG",
+        "Requirement Management Kernel",
         "Product Truth",
-        "domain capsule",
-        "progressive truth",
-        "complete ai coding prd",
+        "一份统一 PRD",
+        "双向追溯",
+        "需求准入",
         "references/domain-coverage.yaml",
         "schemas/change-package.schema.json",
-        "schemas/project-domain-capsule.schema.json",
+        "schemas/requirement-register.schema.json",
     ):
         if marker.lower() not in skill.lower():
             failures.append(f"SKILL.md missing v5 marker: {marker}")
@@ -118,6 +144,11 @@ def main() -> int:
         "schemas/clarification-transcript.schema.json",
         "schemas/domain-pack.schema.json",
         "schemas/change-package.schema.json",
+        "schemas/requirement-register.schema.json",
+        "schemas/traceability-ledger.schema.json",
+        "schemas/acceptance-run.schema.json",
+        "schemas/review-record.schema.json",
+        "schemas/requirement-pattern-library.schema.json",
         "schemas/project-domain-capsule.schema.json",
         "schemas/spec-config.schema.json",
         "schemas/context-plan.schema.json",
@@ -145,16 +176,13 @@ def main() -> int:
     except Exception as exc:  # noqa: BLE001
         failures.append(f"invalid YAML asset: {exc}")
 
-    human = (ROOT / "references/templates/human-first-prd-template.md").read_text(encoding="utf-8")
-    coding = (ROOT / "references/templates/ai-coding-prd-template.md").read_text(encoding="utf-8")
-    if not re.search(r"not\s+an independent source of truth", human.lower()):
-        failures.append("Human-First template does not declare projection semantics")
-    for marker in ("not a thin summary", "repository baseline", "request/response", "machine-readable acceptance"):
-        if marker not in coding.lower():
-            failures.append(f"AI Coding template misses complete-contract marker: {marker}")
+    unified = (ROOT / "references/templates/unified-requirement-prd-template.md").read_text(encoding="utf-8")
+    for marker in ("角色旅程", "页面与布局", "全局字段字典", "api、事件与集成业务契约", "机器可读验收", "双向追溯矩阵", "禁止推断清单"):
+        if marker not in unified.lower():
+            failures.append(f"Unified PRD template misses contract marker: {marker}")
     for forbidden in ("Bug Management", "Sprint Task Breakdown / WBS", "Development Follow-Up"):
-        if forbidden in human:
-            failures.append(f"Human-First template contains project-tracking section: {forbidden}")
+        if forbidden in unified:
+            failures.append(f"Unified PRD template contains project-tracking section: {forbidden}")
 
     allowed_root_files = {
         ".gitattributes", ".gitignore", "CHANGELOG.md", "LICENSE", "README.md", "SKILL.md"
@@ -173,8 +201,8 @@ def main() -> int:
     if any((ROOT / "agents").glob("qwen.md")) or any((ROOT / "agents").glob("deepseek.md")):
         failures.append("domestic adapters must live under agents/domestic")
     reference_files = {path.name for path in (ROOT / "references").iterdir() if path.is_file()}
-    if reference_files != {"discover.md", "specify.md", "handoff.md", "domain-coverage.yaml"}:
-        failures.append(f"references root is not reduced to three runtime entries plus domain index: {sorted(reference_files)}")
+    if reference_files != {"discover.md", "specify.md", "handoff.md", "requirement-management.md", "domain-coverage.yaml"}:
+        failures.append(f"references root is not reduced to requirement runtime entries plus domain index: {sorted(reference_files)}")
 
     if failures:
         for item in failures:

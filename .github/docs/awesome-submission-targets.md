@@ -11,7 +11,7 @@ or acceptance status. Check each community's current rules before posting.
 1. Agent skills and coding-agent workflows.
 2. Product management, ProductOps, and requirements engineering.
 3. Spec-driven development and acceptance testing.
-4. Enterprise AI governance and AI product delivery.
+4. Enterprise AI governance and requirement management.
 
 Potential channels include skills.sh-compatible indexes, Claude/Codex skill
 collections, product-management lists, SDD communities, and enterprise AI
@@ -21,16 +21,16 @@ engineering communities.
 
 ```md
 - [AI Delivery Spec](https://github.com/franklinxkk/ai-delivery-spec) -
-  Product Truth and delivery kernel for idea-to-PRD, Human-First requirements,
-  prototypes, coding-agent handoff, acceptance, change, and lifecycle evidence.
+  Requirement-management kernel for intake, clarification, one unified PRD,
+  prototype requirements, change, traceability, and acceptance.
 ```
 
 ## Chinese entry / 中文短描述
 
 ```md
 - [AI Delivery Spec](https://github.com/franklinxkk/ai-delivery-spec) -
-  通用 Product Truth 与产品交付内核，支持轻量 ToC 想法到 PRD，并深度覆盖
-  ToB/ToG 的可测原型、编码智能体交接、验收、变更和生命周期证据。
+  面向 ToC/ToB/ToG 的需求管理内核，覆盖准入、澄清、一份统一 PRD、
+  可测原型需求、变更、双向追溯和验收。
 ```
 
 ## Submission checklist / 提交检查

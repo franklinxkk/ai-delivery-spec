@@ -5,13 +5,14 @@ many shallow domain PRDs.
 
 | Example | Purpose | Claim Status |
 |---|---|---|
-| [Publishing Authorization and Learning v5](publishing-learning-v5/README.md) | canonical Product Truth, Human/Coding projections, multi-role ToB content/authorization/learning chain | schema/reference validated; behavior not run |
+| [Publishing Authorization and Learning v5](publishing-learning-v5/README.md) | optional large-project Product Truth + one unified PRD for a multi-role ToB chain | schema/reference validated; behavior not run |
 | [Generic Energy Capsule v5](generic-energy-capsule-v5/README.md) | unfamiliar-domain discovery without a dedicated pack | capsule schema validated; professional unknowns remain |
 | [Traffic Regulatory Change v5](traffic-regulatory-change-v5/README.md) | regulated source update and impact/change semantics | change schema validated; behavior not run |
 | [Newcomer SaaS Light v5](minimal-v5/README.md) | low-context first use without heavy modeling | review-complete-with-gaps example |
 
-New public examples must add a distinct product stage, project shape, consumer,
-or evaluation dimension. Do not add another short PRD merely to list a domain.
+New public examples must add a distinct requirement-management stage, project
+shape, consumer, or evaluation dimension. Do not add another short PRD merely
+to list a domain.
 
 Behavioral scenarios live in `evals/eval-catalog.yaml`; evidence must be stored
 separately from expected behavior.

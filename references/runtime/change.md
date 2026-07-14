@@ -1,54 +1,69 @@
-# Change And Brownfield Delivery
+# Requirement Change Control
 
-Use this reference for requirement updates, locked prototype revisions,
-existing products, migrations, policy updates, and post-launch iteration.
+Use for any modification to a baselined `REQ-*`, rule, field, page, interface,
+acceptance criterion or source precedence.
 
-## Change Package
+## 1. Change Request
 
-Use `schemas/change-package.schema.json`. A `CHG-*` records reason, source,
-baseline, target, owner, affected IDs, compatibility, data migration,
-regression, evidence, rollout, and rollback.
+Create `CHG-*` with:
 
-Never regenerate the entire PRD to hide a local change. Update Product Truth,
-then regenerate affected projections.
+- requester, source/authority, reason and urgency;
+- original baseline version and seed IDs;
+- proposed before/after behavior;
+- affected users/roles and requested target baseline;
+- approval policy and required reviewers.
 
-## Impact Analysis
+Reject an untraceable verbal change as `clarify`; do not silently edit the PRD.
 
-Traverse both directions:
+## 2. Impact Traversal
+
+Traverse both outgoing and incoming stable-ID references from every seed. At
+minimum inspect:
 
 ```text
-source/policy -> rule -> field/action/state/flow -> view/module -> AC/test/evidence
-repository/test failure -> AC/action -> flow/rule -> source/decision
+REQ, SRC, ROLE, FLOW, VIEW, REG, ACT, FLD, ENT, RULE, STATE,
+API/EVT/INT, AC, TEST, DEFECT, ARUN, EVD, CHG, projection
 ```
 
-At minimum assess module, flow, view, action, field, state, event, integration,
-acceptance, documentation, data migration, operations, and customer promise.
+Classify impacts as direct, transitive, regression-only or no-impact-with-reason.
+Check permission/data scope, historical data, compatibility, migration,
+reporting/caliber, reconciliation and customer contract separately.
 
-## Stable Identity
+Run:
 
-- Rename: keep ID.
-- Behavior changes: keep ID and version through `CHG-*` when identity remains.
-- Split: preserve valid old behavior; create new IDs and replacement map.
-- Merge: keep still-valid IDs or deprecate with explicit replacements.
-- Remove: deprecate first unless safety or law requires immediate removal.
-- Acceptance history: never reuse an old AC ID for a different behavior.
+```bash
+python scripts/analyze_change_impact.py \
+  --truth requirements/product-truth.yaml \
+  --change requirements/changes/CHG-001.yaml \
+  --output requirements/changes/CHG-001-impact.yaml
+```
 
-## Brownfield Baseline
+## 3. Diff And Version
 
-Before target design, inventory:
+Record field-level before/after values for machine contracts and a readable
+behavior diff for reviewers. Retain the old baseline; never overwrite history.
+Each accepted change increments the requirement baseline version and links the
+superseded version.
 
-- current modules, views, actions, handlers, states, integrations, reports;
-- real usage, customers, ARR/contract dependence, workarounds, support burden;
-- data volumes, quality, ownership, retention, migration constraints;
-- compatibility promises and behavior that must remain;
-- keep, improve, replace, retire decisions and owners.
+## 4. Approval And Synchronization
 
-Define coexistence, migration batches, reconciliation, rollback, training,
-customer communication, support, and retirement evidence. A new prototype fails
-if it silently removes baseline behavior.
+Approval must match authority and impact. Typical reviewers are product owner,
+business/customer owner, engineering, QA, data/security/compliance when
+triggered. Record decision, time, conditions and evidence.
 
-## Change Completion
+After approval, update every affected authority/export and record recipient,
+artifact/version, status and timestamp. A broadcast message without artifact
+version is not closed synchronization.
 
-A change is not verified until affected Product Truth IDs, projections,
-acceptance, regression, migration, and operational evidence agree. Failed or
-missing evidence leaves the change `implemented` or `partial`, not `verified`.
+## 5. Regression And Closure
+
+Update or add affected AC/tests, execute mandatory regression, link evidence and
+open defects. Close only when:
+
+- impact inventory has no unexplained orphan;
+- required approvals are complete;
+- all governed artifacts share the new baseline;
+- mandatory regression is pass or an accountable exception is approved;
+- changed consumers received the versioned update.
+
+If any condition fails, keep `CHG-*` open and do not advertise the new baseline.

@@ -1,37 +1,33 @@
-# Claude Code / Cursor Coding-Agent Entry - v5
+# Claude Code / Cursor Coding-Agent Entry - v5.1
 
-Use for implementation only after Product Truth or an approved Change Package
-exists. Read `SKILL.md` and `references/handoff.md`; do not load unrelated
-domains or lifecycle stages.
-Use the Context Plan and stable-ID Truth slices for large or regulated work;
-never silently truncate P0 or compliance behavior to fit context.
+Use for implementation only after one unified PRD is baselined. Read `SKILL.md`
+and `references/handoff.md`; do not load unrelated domains or requirement stages.
+When optional Product Truth exists, retrieve stable-ID slices instead of loading
+the entire graph.
+
+Treat every stable ID as a permanent requirement/test anchor across the unified
+PRD, prototype, implementation and evidence.
 
 ## Source Order
 
 ```text
-Product Truth -> approved Change Package -> locked prototype -> acceptance
--> repository constraints
+manifest/current baseline -> unified PRD -> optional Product Truth
+-> approved Change Package -> locked prototype -> acceptance -> repository constraints
 ```
 
-If a required behavior is absent or conflicts with the repository, stop the
-affected slice and report the stable IDs. Do not guess.
+If governed artifacts conflict or behavior is absent, stop the affected slice
+and report `REQ/CFL/CHG` IDs. Do not guess.
 
 ## Required Behavior
 
-- Work in vertical user/domain-result slices.
-- Preserve `VIEW/REG/ACT/FLD/STATE/AC` IDs in UI and tests.
+- Work in vertical user/domain-result slices from the downstream technical plan.
+- Preserve `REQ/VIEW/REG/ACT/FLD/STATE/AC` IDs in UI and tests.
 - Enforce business invariants and permission on the backend.
-- Treat AI behavior as governed only when Product Truth defines context,
-  evaluation, write scope, human gate, fallback, observability, and rollback.
-- Generate `CLAUDE.md`, `.cursor/rules/*.mdc`, or project instructions from the
-  Product Truth source order; do not copy a second PRD.
-- Bind every product test to AC and evidence IDs.
+- Treat AI behavior as governed only when context, evaluation, write scope,
+  human gate and fallback are specified.
+- Do not generate or maintain a second PRD.
+- Bind implementation tests and evidence back to AC and REQ.
 
-Validate before implementation:
-
-```powershell
-python scripts/validators/validate_product_truth.py delivery/truth/product-truth.yaml
-```
-
-After implementation, run repository tests and write evidence to the package.
-Passing text in a template is not execution evidence.
+Validate the unified requirement contract before implementation. Product Truth
+validation is conditional on that artifact existing. Repository architecture,
+files, tasks and deployment remain downstream engineering decisions.

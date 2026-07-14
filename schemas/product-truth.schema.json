@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/product-truth.schema.json",
   "title": "AI Delivery Spec Product Truth",
-  "description": "Canonical product-delivery facts projected into human, prototype, coding-agent, QA, and customer views.",
+  "description": "Optional structured authority for large or audited requirements, projected into one unified PRD, prototype, QA and customer views.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -10,7 +10,6 @@
     "product",
     "delivery_context",
     "sources",
-    "features",
     "modules",
     "flows",
     "views",
@@ -18,8 +17,12 @@
     "states",
     "acceptance"
   ],
+  "anyOf": [
+    { "required": ["requirements"], "properties": { "requirements": { "minItems": 1 } } },
+    { "required": ["features"], "properties": { "features": { "minItems": 1 } } }
+  ],
   "properties": {
-    "schema_version": { "const": "5.0.0" },
+    "schema_version": { "enum": ["5.0.0", "5.1.0"] },
     "truth_id": { "$ref": "#/$defs/stableId" },
     "product": {
       "type": "object",
@@ -39,10 +42,10 @@
       "required": ["lifecycle_stage", "delivery_mode", "tier", "consumers"],
       "properties": {
         "lifecycle_stage": {
-          "enum": ["discover", "specify", "plan", "tasks", "build_verify", "launch", "learn_retire"]
+          "enum": ["intake", "clarify", "specify", "review", "baseline", "change", "acceptance", "closed", "discover", "plan", "tasks", "build_verify", "launch", "learn_retire"]
         },
-        "delivery_mode": { "enum": ["lite", "standard", "full"] },
-        "tier": { "enum": ["L0", "L1", "L2", "L3"] },
+        "delivery_mode": { "enum": ["ultra_light", "lite", "standard", "full"] },
+        "tier": { "enum": ["L0", "L1", "L2", "L3", "L4"] },
         "project_shape": { "enum": ["greenfield", "brownfield", "hybrid"] },
         "customer_profile": { "type": "array", "items": { "type": "string" } },
         "governance_profiles": { "type": "array", "items": { "type": "string" } },
@@ -76,10 +79,13 @@
       "type": "array",
       "items": { "$ref": "#/$defs/role" }
     },
+    "requirements": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/requirement" }
+    },
     "features": {
       "type": "array",
-      "items": { "$ref": "#/$defs/feature" },
-      "minItems": 1
+      "items": { "$ref": "#/$defs/feature" }
     },
     "modules": {
       "type": "array",
@@ -243,6 +249,26 @@
         "job": { "type": "string" },
         "data_scope": { "type": "string" },
         "forbidden_actions": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "stage", "priority", "source_refs", "behavior_refs", "acceptance_refs", "baseline_version"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "title": { "type": "string", "minLength": 1 },
+        "stage": { "enum": ["submitted", "triaging", "clarifying", "specified", "reviewing", "baselined", "change_requested", "acceptance", "accepted", "closed", "deferred", "rejected", "cancelled", "superseded"] },
+        "priority": { "enum": ["P0", "P1", "P2", "P3"] },
+        "source_refs": { "$ref": "#/$defs/idList" },
+        "behavior_refs": { "$ref": "#/$defs/idList" },
+        "acceptance_refs": { "$ref": "#/$defs/idList" },
+        "review_refs": { "$ref": "#/$defs/idList" },
+        "change_refs": { "$ref": "#/$defs/idList" },
+        "owner": { "type": "string" },
+        "iteration": { "type": "string" },
+        "baseline_version": { "type": "string", "minLength": 1 },
+        "outcome": { "type": "string" }
       }
     },
     "feature": {
@@ -484,7 +510,7 @@
       "type": "object",
       "required": ["kind", "path", "generated_from", "generated_at"],
       "properties": {
-        "kind": { "enum": ["human_first", "prototype", "coding_agent", "qa_acceptance", "customer_contract"] },
+        "kind": { "enum": ["unified_prd", "human_first", "prototype", "coding_agent", "qa_acceptance", "customer_contract"] },
         "path": { "type": "string" },
         "generated_from": { "const": "product_truth" },
         "generated_at": { "type": "string", "format": "date-time" }

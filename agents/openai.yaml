@@ -1,29 +1,29 @@
 interface:
   display_name: "AI Delivery Spec"
-  version: "5.0.2"
-  short_description: "Complete PRD, progressive Product Truth, prototype, coding and acceptance contracts for ToB/ToG delivery."
+  version: "5.1.0"
+  short_description: "Requirement management from intake and clarification through change, traceability, and acceptance."
   default_prompt: >
-    Use $ai-delivery-spec. Support lightweight ToC idea clarification and PRDs
-    as well as governed ToB/ToG delivery. Triage lifecycle, shape, risk, information,
-    and consumer. Build one canonical Product Truth, use generic domain
-    discovery when no dedicated pack exists, use resumable Product Truth
-    fragments for large projects, and project the Human-First, prototype,
-    complete AI Coding PRD, QA, customer, or operations views requested.
-    Preserve stable IDs, evidence, change impact, and honest completion state.
+    Use $ai-delivery-spec as a requirement-management kernel. Start with intake
+    and triage, then clarify, specify, review and baseline the requirement. By
+    default produce one human-readable PRD with engineering and AI-coding
+    appendices instead of separate competing PRDs. Preserve stable requirement
+    IDs, bidirectional traceability, change impact, executable acceptance and
+    evidence. Treat implementation, release and operations as external systems,
+    not workflows managed by this skill.
 
 inputs:
   artifact_type:
-    enum: ["idea", "product_truth", "human_first", "prototype", "acceptance", "change", "coding_agent_handoff", "review"]
+    enum: ["intake", "clarification", "unified_prd", "prototype", "change", "traceability", "acceptance", "review"]
   projection:
-    enum: ["contract_summary", "human_first", "prototype", "coding_agent", "qa_acceptance", "customer_contract"]
-    default: "human_first"
+    enum: ["unified_prd", "requirement_card", "prototype", "qa_acceptance", "customer_contract", "machine_annex"]
+    default: "unified_prd"
   delivery_tier:
-    enum: ["L0", "L1", "L2", "L3"]
+    enum: ["L0", "L1", "L2", "L3", "L4"]
 
 outputs:
   required_final_fields:
-    - triage
-    - lifecycle_stage
+    - intake_decision
+    - requirement_stage
     - artifact_scope
     - mode_and_tier
     - triggered_gates

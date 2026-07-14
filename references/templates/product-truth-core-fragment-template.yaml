@@ -1,4 +1,4 @@
-schema_version: 5.0.2
+schema_version: 5.1.0
 fragment_id: FRAG-CORE
 truth_id: TRUTH-PRODUCT-001
 content:
@@ -15,4 +15,5 @@ content:
     consumers: [product, engineering, qa, coding_agent]
   sources: []
   roles: []
+  requirements: []
   features: []

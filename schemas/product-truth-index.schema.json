@@ -6,7 +6,8 @@
   "additionalProperties": false,
   "required": ["schema_version", "truth_id", "layout", "compiled_output", "fragments"],
   "properties": {
-    "schema_version": { "const": "5.0.2" },
+    "schema_version": { "enum": ["5.0.2", "5.1.0"] },
+    "target_schema_version": { "enum": ["5.0.0", "5.1.0"] },
     "truth_id": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$" },
     "layout": { "const": "progressive_shards" },
     "compiled_output": { "type": "string", "minLength": 1 },

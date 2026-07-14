@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/requirement-register.schema.json",
+  "title": "AI Delivery Spec Requirement Register",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "register_id", "product", "requirements", "audit_log"],
+  "properties": {
+    "schema_version": { "const": "5.1.0" },
+    "register_id": { "$ref": "#/$defs/stableId" },
+    "product": { "type": "string", "minLength": 1 },
+    "current_baseline": { "type": "string" },
+    "iterations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "status"],
+        "properties": {
+          "id": { "$ref": "#/$defs/stableId" },
+          "name": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["planned", "active", "baselined", "closed"] },
+          "requirement_refs": { "$ref": "#/$defs/idList" }
+        }
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/requirement" }
+    },
+    "dependency_edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from_ref", "to_ref", "kind"],
+        "properties": {
+          "from_ref": { "$ref": "#/$defs/stableId" },
+          "to_ref": { "$ref": "#/$defs/stableId" },
+          "kind": { "enum": ["blocks", "depends_on", "conflicts_with", "duplicates", "relates_to"] },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "audit_log": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/audit" }
+    }
+  },
+  "$defs": {
+    "stableId": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$" },
+    "idList": { "type": "array", "items": { "$ref": "#/$defs/stableId" }, "uniqueItems": true },
+    "assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "rationale"],
+      "properties": {
+        "level": { "enum": ["low", "medium", "high"] },
+        "rationale": { "type": "string", "minLength": 1 },
+        "evidence_refs": { "$ref": "#/$defs/idList" }
+      }
+    },
+    "complexity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["band", "dimensions", "rationale"],
+      "properties": {
+        "band": { "enum": ["S", "M", "L", "XL"] },
+        "dimensions": {
+          "type": "array",
+          "items": { "enum": ["roles", "modules", "workflow", "data", "integration", "migration", "compliance", "acceptance", "ai"] },
+          "uniqueItems": true
+        },
+        "rationale": { "type": "string", "minLength": 1 },
+        "engineering_estimate_ref": { "type": "string" }
+      }
+    },
+    "externalMilestone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "status", "reference"],
+      "properties": {
+        "system": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "minLength": 1 },
+        "reference": { "type": "string", "minLength": 1 },
+        "observed_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "type", "stage", "intake_decision", "priority", "outcome", "source_refs", "value", "complexity", "uncertainty", "owner", "baseline_version", "behavior_refs", "acceptance_refs"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "title": { "type": "string", "minLength": 1 },
+        "type": { "enum": ["new_capability", "change", "defect_requirement", "compliance", "integration", "data", "experience", "decommission"] },
+        "stage": { "enum": ["submitted", "triaging", "clarifying", "specified", "reviewing", "baselined", "change_requested", "acceptance", "accepted", "closed", "deferred", "rejected", "cancelled", "superseded"] },
+        "intake_decision": { "enum": ["accept", "clarify", "defer", "reject"] },
+        "priority": { "enum": ["P0", "P1", "P2", "P3"] },
+        "outcome": { "type": "string", "minLength": 1 },
+        "source_refs": { "$ref": "#/$defs/idList" },
+        "value": { "$ref": "#/$defs/assessment" },
+        "complexity": { "$ref": "#/$defs/complexity" },
+        "uncertainty": { "$ref": "#/$defs/assessment" },
+        "owner": { "type": "string", "minLength": 1 },
+        "requester": { "type": "string" },
+        "iteration_ref": { "$ref": "#/$defs/stableId" },
+        "dependency_refs": { "$ref": "#/$defs/idList" },
+        "behavior_refs": { "$ref": "#/$defs/idList" },
+        "acceptance_refs": { "$ref": "#/$defs/idList" },
+        "review_refs": { "$ref": "#/$defs/idList" },
+        "change_refs": { "$ref": "#/$defs/idList" },
+        "baseline_version": { "type": "string", "minLength": 1 },
+        "external_milestones": { "type": "array", "items": { "$ref": "#/$defs/externalMilestone" } },
+        "notes": { "type": "string" }
+      }
+    },
+    "audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "requirement_ref", "actor", "action", "at", "reason"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "requirement_ref": { "$ref": "#/$defs/stableId" },
+        "actor": { "type": "string", "minLength": 1 },
+        "action": { "type": "string", "minLength": 1 },
+        "at": { "type": "string", "format": "date-time" },
+        "reason": { "type": "string", "minLength": 1 },
+        "from_version": { "type": "string" },
+        "to_version": { "type": "string" },
+        "evidence_refs": { "$ref": "#/$defs/idList" }
+      }
+    }
+  }
+}

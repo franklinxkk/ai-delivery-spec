@@ -1,7 +1,7 @@
 # Minimal v5 — 10-minute first run / 十分钟上手
 
-This example demonstrates the bounded discovery path. A one-sentence idea does
-not force a full Product Truth, domain packs, APIs, or operations package.
+This example demonstrates the bounded requirement-intake path. A one-sentence
+idea does not force Product Truth, domain packs or an engineering package.
 
 本例演示最小需求澄清：一句想法不会被强行扩写成大而全 PRD。
 
@@ -14,13 +14,12 @@ not force a full Product Truth, domain packs, APIs, or operations package.
 ## Run / 执行
 
 ```bash
-python scripts/ai_delivery_spec_cli.py init-delivery --output delivery
-python scripts/ai_delivery_spec_cli.py check
-python scripts/ai_delivery_spec_cli.py status
+python scripts/ai_delivery_spec_cli.py init-requirements --output requirements
+python scripts/ai_delivery_spec_cli.py triage --input requirements/intake.yaml
 ```
 
-Ask the agent to inventory evidence and ask one material question at a time.
-要求 Agent 先盘点证据，一次只问一个会改变范围或交付的问题。
+Ask the agent to inventory evidence and batch independent material questions.
+要求 Agent 先盘点证据，互不依赖的问题成批澄清，有前后依赖时再逐步确认。
 
 ## Minimum useful result / 最小有效结果
 

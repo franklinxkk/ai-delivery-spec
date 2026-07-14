@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["schema_version", "fragment_id", "truth_id", "content"],
   "properties": {
-    "schema_version": { "const": "5.0.2" },
+    "schema_version": { "enum": ["5.0.2", "5.1.0"] },
     "fragment_id": { "type": "string", "pattern": "^FRAG-[A-Z0-9-]+$" },
     "truth_id": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$" },
     "content": {
@@ -23,6 +23,7 @@
         "decisions": { "$ref": "#/$defs/idObjects" },
         "conflicts": { "$ref": "#/$defs/idObjects" },
         "roles": { "$ref": "#/$defs/idObjects" },
+        "requirements": { "$ref": "#/$defs/idObjects" },
         "features": { "$ref": "#/$defs/idObjects" },
         "modules": { "$ref": "#/$defs/idObjects" },
         "entities": { "$ref": "#/$defs/idObjects" },

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/requirement-pattern-library.schema.json",
+  "title": "AI Delivery Spec Requirement Pattern Library",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "library_id", "patterns"],
+  "properties": {
+    "schema_version": { "const": "5.1.0" },
+    "library_id": { "type": "string", "pattern": "^PATLIB-[A-Z0-9-]+$" },
+    "patterns": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "applies_when", "required_questions", "behavior_contract", "exception_contract", "acceptance_blueprints", "anti_patterns"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^PAT-[A-Z0-9-]+$" },
+          "name": { "type": "string", "minLength": 1 },
+          "applies_when": { "type": "string", "minLength": 1 },
+          "required_questions": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+          "behavior_contract": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+          "exception_contract": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+          "acceptance_blueprints": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+          "anti_patterns": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

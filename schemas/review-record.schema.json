@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/review-record.schema.json",
+  "title": "AI Delivery Spec Requirement Review Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "review_id", "baseline_version", "review_type", "status", "reviewers", "findings"],
+  "properties": {
+    "schema_version": { "const": "5.1.0" },
+    "review_id": { "type": "string", "pattern": "^REVIEW-[A-Z0-9-]+$" },
+    "baseline_version": { "type": "string", "minLength": 1 },
+    "review_type": { "enum": ["intake", "business", "product", "engineering", "qa", "customer", "compliance"] },
+    "status": { "enum": ["scheduled", "in_review", "changes_requested", "completed", "cancelled"] },
+    "reviewers": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "reviewed_at": { "type": "string", "format": "date-time" },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "severity", "requirement_refs", "description", "owner", "status", "disposition"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^REV-[A-Z0-9-]+$" },
+          "severity": { "enum": ["P0", "P1", "P2", "P3"] },
+          "requirement_refs": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^REQ-[A-Z0-9-]+$" } },
+          "description": { "type": "string", "minLength": 1 },
+          "owner": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["open", "resolved", "deferred", "rejected"] },
+          "disposition": { "enum": ["change_requirement", "clarify", "accept_risk", "no_change", "defer"] },
+          "resolution": { "type": "string" },
+          "evidence_refs": { "type": "array", "items": { "type": "string" } },
+          "closed_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "conclusion": { "type": "string" }
+  }
+}

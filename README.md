@@ -1,149 +1,176 @@
-# AI Delivery Spec 5.0.2
+# AI Delivery Spec 5.1.0
 
-> PRD 写了几十页，开发仍在猜业务规则？
+> 需求一来就写 PRD，低价值需求也进入重型设计？
 >
-> 原型能演示，角色、异常和数据却走不通？
+> PRD 写了几十页，传统开发看不下去，AI Coding 仍在猜规则？
 >
-> 客户、产品、研发、测试各拿一套口径，最后靠返工对齐？
+> 需求一变，页面、字段、接口、测试和验收漏改，最后无法审计？
 
-**AI Delivery Spec 不是 PRD 模板，而是面向 ToB/ToG 的产研统一交付契约。**
-它把需求、页面、动作、状态、数据、接口、验收和变更锁定在同一组稳定 ID 上，让人类团队和 AI Coding 工具基于同一事实工作。
+**AI Delivery Spec 是面向 ToB/ToG、兼顾 ToC 的需求管理内核。**
+它不做大而全的研发管理，只把需求的准入、澄清、规格交付、变更、追溯和验收
+管成一条可读、可开发、可测试、可审计的闭环。
 
-交通、CRM、教育 IT、数据产品、AI Native 方法已由项目负责人确认用于开发上线项目；仓库同时保留独立的知识包验证等级，避免把“做过项目”夸大成“所有规则都已审计”。
+默认交付不是两套 PRD，而是**一份统一需求规格说明书**：正文让业务、产品和传统
+开发顺序读懂，工程附录让测试与 AI Coding 精确执行。
 
-[![Version](https://img.shields.io/badge/version-5.0.2-0052A4.svg)]()
+[![Version](https://img.shields.io/badge/version-5.1.0-0052A4.svg)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 
 ## 60 秒上手：无需克隆，Agent 直接调用
 
-先安装一次：
+先安装：
 
 ```bash
 npx skills add franklinxkk/ai-delivery-spec
 ```
 
-然后复制与你场景匹配的一条指令：
+再复制一条指令。
 
-### Ultra-Light — ToC/单页/小改动/快速 Idea/PRD
+### Ultra-Light — 一个可逆小改动 / ToC Idea
 
 ```text
-使用 AI Delivery Spec Ultra-Light：把“列表新增一个可选字段”写成一页需求卡，包含范围、字段规则、正向和负向验收；不要生成整套 Product Truth。
+使用 AI Delivery Spec Ultra-Light：先做需求准入，再把“列表新增一个可选字段”写成一页需求卡；包含目标、范围、字段规则、正反验收。不要生成独立 Product Truth。
 ```
 
-### Standard L2 — 常规产品开发与客户交付
+### Standard L2 — 常规需求 / 一份完整 PRD
 
 ```text
-使用 AI Delivery Spec Standard L2：先盘点我给的材料和已确认决策，再生成完整 Human-First PRD、可测试原型、完整 AI Coding PRD 和机器可读验收；所有角色、流程、状态和数据必须闭环。domain=generic
+使用 AI Delivery Spec Standard L2：盘点我给的材料，批量澄清互不依赖的问题，然后交付一份人类可读且 AI Coding 可直接使用的统一 PRD。所有角色、流程、状态、权限、字段、异常和验收必须闭环，不要拆成两套 PRD。domain=generic
 ```
 
-### Full L3 smart-large-project — 多角色/多模块/AI/监管项目
+### Full L3 smart-large-project — 多角色 / 存量改造 / 监管项目
 
 ```text
-使用 AI Delivery Spec Full L3 smart-large-project：先建立完整 ID 清单，再按模块写入分片 Product Truth 和 PRD 切片，持续检查点交付；不得因上下文压力省略 P0 角色、异常、权限、接口或验收。domain=traffic
+使用 AI Delivery Spec Full L3 smart-large-project：先完成需求准入和全量 REQ/角色/流程/页面/字段/验收索引，再按切片持续写入同一份统一 PRD；仅在多文档、持续变更或强审计需要时生成分片 Product Truth。domain=traffic
 ```
 
 手动修正：`mode=ultra_light|lite|standard|full tier=L0|L1|L2|L3|L4 domain=<pack>`。
 黄金入门示例见 [examples/minimal-v5](examples/minimal-v5/README.md)。
 
-## 四个核心能力
+## 只管六件事
 
-**分层弹性交付**：一个字段改动不背重框架，复杂 ToB/ToG 项目也不会被轻量模式偷偷裁掉关键行为。
+| 能力 | 解决的问题 | 核心产物 |
+|---|---|---|
+| 需求准入 | 过滤低价值、边界不清或错配等级的需求 | `REQ-*`、价值/复杂度/优先级、准入结论 |
+| 需求澄清 | 从模糊 Idea 到可判定业务规则 | 来源、问题批次、`REV-*`、关闭证据 |
+| 规格交付 | 全角色共用口径且传统开发可读 | 一份统一 PRD + 同文档工程附录 |
+| 需求变更 | 防止口头变更和漏改 | `CHG-*`、影响分析、diff、审批、同步、回归 |
+| 双向追溯 | 从需求追到页面/字段/AC，也可从缺陷反查 | 正向/反向稳定 ID 账本、审计日志 |
+| 需求验收 | 不止定义 AC，还记录执行结果 | `ARUN-*`、证据、缺陷、条件、签署结论 |
 
-**单源 Product Truth**：角色、流程、页面、动作、状态、字段、事件和验收只维护一次，再投影给产品、原型、研发、QA 和客户。
+研发排期、Sprint/任务、代码、CI/CD、部署执行、监控和运营属于下游系统。
+本项目只记录它们与需求/验收有关的外部引用，不接管流程。
 
-**AI 原生治理**：为 AI 功能对齐业务不变量、运行时、评测、权限、人工责任和运维契约。
+## 5.1.0 如何解决真实项目中的失败
 
-**工程化校验**：L0–L4 校验器检查结构和可执行契约，不再用几个关键词把残缺 PRD 判成通过。
+一次交通出版平台实战中，旧版结构校验可以 PASS，但仍出现三个典型问题：
 
-## 5.0.2 为什么更快、更完整
+- 机器契约直接成为主文档，90KB PRD 对传统开发不可读；
+- Human-First 与 AI Coding PRD 分开维护，团队无法确认哪份才是基线；
+- 普通需求也先生成大型 Product Truth，长上下文工具反复中断，增加交付成本。
 
-- **分片真相**：大项目默认生成 `truth/index.yaml + fragments/*.yaml`；Agent 每次只写一个模块，脚本确定性合并，Trae/WorkBuddy 不再承担巨型 YAML 的一次性生成。
-- **完整契约直达**：需求已澄清且用户明确要 AI Coding PRD 时，直接按完整契约分节写作，不先生成一份薄投影再反复补洞。
-- **断点续作**：先锁定全量 ID 清单，再按模块/流程检查点推进；上下文紧张时切片，不压缩 P0 行为。
-- **结构验收**：L2 必检仓库基线、页面布局、字段字典、API 请求/响应、错误码、事件 Payload、集成、统计口径、切片依赖和机器 AC。
+5.1.0 因此改变默认路径：
 
-初始化分片交付包并编译：
+1. **先准入**：没有价值证据、责任人或范围边界，先澄清，不直接上重型规格。
+2. **一份 PRD**：业务正文和工程附录在同一文件、同一版本、同一评审链路中。
+3. **Product Truth 按需**：12+ 页面/模块、持续变更、多投影或强审计才独立生成；
+   大项目仍采用分片真相，避免一次性巨型 YAML。
+4. **变更可计算**：从变更种子双向遍历关联 ID，生成影响清单和回归范围。
+5. **验收有结果**：AC、执行项、实际结果、证据、缺陷和签署形成闭环。
+6. **模式可复用**：审批、列表、表单、权限、导入导出和集成提供问题/异常/AC 蓝图，
+   但必须绑定项目证据，不能把模板当已确认需求。
+
+仓库内的 10 个结构化准入基准覆盖小改动、信息缺失、监管、安全、跨角色、依赖阻塞、
+低价值、重复、大项目和存量迁移，当前推荐结果为 10/10。
+
+## 快速命令
 
 ```bash
-python scripts/ai_delivery_spec_cli.py init-delivery --output delivery
-python scripts/ai_delivery_spec_cli.py compile-truth --index delivery/truth/index.yaml
-python scripts/validators/validate_coding_agent_contract.py delivery/projections/ai-coding-prd.md --level L2 --profile full_prd
+python scripts/ai_delivery_spec_cli.py init-requirements --output requirements
+python scripts/ai_delivery_spec_cli.py triage --input requirements/intake.yaml --format markdown
+python scripts/scan_requirement_ambiguity.py requirements/PRD.md
+python scripts/validators/validate_requirement_register.py requirements/register.yaml
+python scripts/validators/validate_prd_quality.py requirements/PRD.md --level L2
+python scripts/validators/validate_coding_agent_contract.py requirements/PRD.md --level L2 --profile full_prd
+python scripts/validators/validate_acceptance_run.py requirements/acceptance/ARUN-CORE-001.yaml
 ```
 
-小项目确需单文件时使用 `--truth-layout monolith`。
+仅当规模/审计门槛触发时：
 
-## 主力定位与生态链路
+```bash
+python scripts/ai_delivery_spec_cli.py init-requirements --output requirements --with-product-truth
+python scripts/ai_delivery_spec_cli.py trace --truth requirements/truth/compiled/product-truth.yaml --output requirements/traceability.yaml --baseline-version 1.0
+python scripts/ai_delivery_spec_cli.py impact --truth requirements/truth/compiled/product-truth.yaml --change requirements/changes/CHG-001.yaml
+```
 
-### ToB/ToG 交付工具定位榜（按交付生命周期覆盖）
+## 一份统一 PRD 的阅读层次
 
-| 定位 | 工具 | 最适合承担的环节 |
+| 阅读者 | 先读 | 需要的精确内容 |
 |---|---|---|
-| **主力交付内核** | **AI Delivery Spec 5.0.2** | 澄清 → 统一事实 → PRD/原型 → AI Coding/QA → 验收/变更/运营 |
-| 上游发现方法 | pm-skills / product discovery skills | 机会识别、发散、工作坊、战略与指标方法 |
-| 上游压力测试 | grill-me / schema questioning | 对抗式追问、暴露歧义 |
-| 下游工程规格 | GitHub Spec Kit | 已确认产品契约后的技术规划与任务化 |
-| 下游工程执行 | Superpowers / Coding Agents | TDD、实现、审查、分支与发布 |
+| 客户/业务 | 背景、范围、角色旅程、业务流程、验收 | 目标、边界、责任和结果 |
+| 产品/设计 | 正文全部 | 页面、交互、状态、规则和异常 |
+| 传统开发 | 正文后读工程附录 | 字段、状态机、API、事件、兼容 |
+| 测试 | 流程/异常/验收和追溯附录 | 正反用例、证据和缺陷回链 |
+| Coding Agent | 全文 | 禁止推断清单、稳定 ID、机器 AC |
 
-这是按生命周期职责划分的定位榜，不是未经对照实验的“质量排行榜”。
+独立 YAML/JSON 是按工具需要导出的视图，不是第二份权威 PRD。
 
-### 上下游互补链路
+## 领域实践与知识包保证分开
 
-| 阶段 | 可组合工具 | AI Delivery Spec 的责任 |
-|---|---|---|
-| 探索 | PM 方法、调研、工作坊 | 接收已确认的 outcome、机会、假设和证据 |
-| 澄清/收敛 | grill-me、访谈、材料盘点 | 建立来源优先级、决策、未知项和范围 |
-| **主交付** | **AI Delivery Spec** | 统一角色/流程/页面/数据/接口/验收契约 |
-| 规划/编码 | Spec Kit、Codex、Trae、Cursor、Qoder | 提供禁止发明的完整 AI Coding 契约和切片 |
-| 验证/上线 | QA、CI、运维平台 | 绑定 AC、证据、变更、回滚与运营责任 |
-
-## 领域实践状态不是知识包验证等级
-
-| 领域包 | 交付实践状态 | 可复用知识包保证等级 | 当前使用边界 |
+| 领域包 | 实践状态 | 可复用包成熟度 | 使用边界 |
 |---|---|---|---|
-| `traffic` | `production_practiced` | `experimental` | 已有上线实践；通用包仍需项目证据和适用性确认 |
-| `crm` | `production_practiced` | `experimental` | 已有上线实践；复杂 CPQ/伙伴冲突仍需项目验证 |
-| `education-it` | `production_practiced` | `experimental` | 已有上线实践；细分教育形态仍需项目验证 |
-| `data-product` | `production_practiced` | `experimental` | 已有上线实践；血缘/成本/删除传播按项目验证 |
-| `ai-native` | `production_practiced` | `experimental` | 已有上线实践；模型、工具和安全治理按项目评测 |
-| `oa` | `knowledge_only` | `experimental` | 作为问题和候选模式使用 |
-| `medical-hospital-it` | `knowledge_only` | `experimental` | 不允许从模拟场景推导临床生产结论 |
+| `traffic` | `production_practiced` | `experimental` | 方法已用于上线项目；具体法规与项目适用性仍需证据 |
+| `crm` | `production_practiced` | `experimental` | 方法已用于上线项目；复杂商业规则按项目确认 |
+| `education-it` | `production_practiced` | `experimental` | 方法已用于上线项目；教育形态按项目确认 |
+| `data-product` | `production_practiced` | `experimental` | 方法已用于上线项目；血缘/口径/删除传播按项目确认 |
+| `ai-native` | `production_practiced` | `experimental` | 方法已用于上线项目；模型与安全治理必须项目评测 |
+| `oa` | `knowledge_only` | `experimental` | 仅作候选问题与模式 |
+| `medical-hospital-it` | `knowledge_only` | `experimental` | 不得推导临床生产结论 |
 
-`production_practiced` 证明相关方法在上线项目中使用过，不等于当前仓库版本已通过独立行为评测、专家审查或审计。证据与边界见 [references/domain-coverage.yaml](references/domain-coverage.yaml)。
+`production_practiced` 说明相关方法有真实上线实践；`experimental` 说明当前可复用包
+还未完成独立评测、专家审查或审计。两者不能互相替代。详见
+[references/domain-coverage.yaml](references/domain-coverage.yaml)。
 
-## 适配工具
+## 与上下游工具的边界
 
-Codex、Claude Code、Cursor 以及 GLM 5.2、Qwen、DeepSeek、Kimi、WorkBuddy、Trae、Qoder 的入口说明位于 `agents/`；国产工具的短上下文、断点续作和分片规则位于 `agents/domestic/`。
+| 位置 | 工具类型 | 责任 |
+|---|---|---|
+| 上游 | 产品发现、调研、工作坊 | 发现机会、证据和策略假设 |
+| **需求管理内核** | **AI Delivery Spec 5.1.0** | 准入 → 澄清 → 基线 → 变更 → 追溯 → 验收 |
+| 下游 | Spec Kit、项目/研发管理工具 | 技术方案、任务、排期和依赖执行 |
+| 下游 | Codex、Trae、Cursor、Qoder 等 | 依据已基线需求编码、测试和修改 |
+| 外部证据 | CI、测试、发布、监控平台 | 向需求验收回传可引用证据 |
+
+这是职责互补关系，不是未经对照实验的质量排行榜。
 
 ## 仓库结构
 
 ```text
 .github/      社区文件、工作流和发布材料
-agents/       Agent 入口；国产适配在 domestic/
+agents/       Agent 入口与国产工具适配
 evals/        基准、运行记录和证据
 examples/     极简、标准和领域示例
-references/   3 个核心入口、领域索引、runtime/domains/templates
-schemas/      Product Truth、分片、变更和验收 Schema
-scripts/      CLI、编译器；校验器在 validators/
+references/   需求管理规则、领域包和模板
+schemas/      需求登记、Product Truth、变更、追溯和验收契约
+scripts/      CLI、编译/分析脚本和 validators/
 tests/        结构、行为和回归测试
 ```
-
-根目录只保留 `README.md`、`SKILL.md`、`LICENSE`、`CHANGELOG.md`、`.gitignore`、`.gitattributes`。
 
 ## 维护与验证
 
 ```bash
 python scripts/ai_delivery_spec_cli.py check --keep-going
 python scripts/validators/validate_v5_architecture.py
-python scripts/validators/validate_domain_coverage.py
-python tests/test_v502_progressive_truth.py
-python tests/test_v502_coding_contract.py
+python tests/test_v510_requirement_management.py
+python tests/test_v510_unified_prd.py
 ```
 
 一键生成 Mermaid：
 
 ```bash
-python scripts/render_mermaid_flow.py --truth delivery/truth/compiled/product-truth.yaml --output delivery/projections/flow.mmd
+python scripts/render_mermaid_flow.py --truth product-truth.yaml --output flow.mmd
 ```
 
-贡献、安全与许可证见 [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md)、[.github/SECURITY.md](.github/SECURITY.md) 和 [LICENSE](LICENSE)。
+贡献、安全与许可证见 [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md)、
+[.github/SECURITY.md](.github/SECURITY.md) 和 [LICENSE](LICENSE)。

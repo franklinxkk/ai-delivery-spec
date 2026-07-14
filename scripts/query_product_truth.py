@@ -16,7 +16,7 @@ from manage_execution_state import load, sha256_file, verify_state_value
 ID_PATTERN = re.compile(r"^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$")
 COLLECTIONS = (
     "sources", "assertions", "unknowns", "decisions", "conflicts", "roles",
-    "features", "modules", "entities", "fields", "flows", "views", "actions", "states",
+    "requirements", "features", "modules", "entities", "fields", "flows", "views", "actions", "states",
     "rules", "events", "integrations", "acceptance", "evidence", "projections",
 )
 
@@ -77,7 +77,7 @@ def make_slice(
         grouped[collection].sort(key=lambda item: item.get("id", ""))
 
     return {
-        "schema_version": "5.0.0",
+        "schema_version": "5.1.0",
         "slice_type": "product_truth_working_slice",
         "source_truth_id": truth.get("truth_id", "UNKNOWN"),
         "seed_ids": seeds,

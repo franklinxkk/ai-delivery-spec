@@ -27,6 +27,13 @@ DELIVERY_DIRS = (
     "evidence",
 )
 
+REQUIREMENT_DIRS = (
+    "reviews",
+    "changes",
+    "acceptance",
+    "exports",
+)
+
 
 def current_version() -> str:
     text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
@@ -88,6 +95,51 @@ def init_delivery(args: argparse.Namespace) -> int:
     return 0
 
 
+def init_requirements(args: argparse.Namespace) -> int:
+    """Create the focused requirement-management workspace used by v5.1+."""
+    target = args.output.resolve()
+    target.mkdir(parents=True, exist_ok=True)
+    for rel in REQUIREMENT_DIRS:
+        (target / rel).mkdir(parents=True, exist_ok=True)
+    templates = (
+        ("requirement-intake-template.yaml", target / "intake.yaml"),
+        ("requirement-register-template.yaml", target / "register.yaml"),
+        ("unified-requirement-prd-template.md", target / "PRD.md"),
+        ("review-record-template.yaml", target / "reviews" / "REVIEW-CORE-001.yaml"),
+        ("change-request-template.yaml", target / "changes" / "CHG-CORE-001.yaml"),
+        ("acceptance-run-template.yaml", target / "acceptance" / "ARUN-CORE-001.yaml"),
+    )
+    for template, destination in templates:
+        if not destination.exists() or args.force:
+            shutil.copyfile(ROOT / "references" / "templates" / template, destination)
+    if args.with_product_truth:
+        truth_dir = target / "truth"
+        (truth_dir / "fragments").mkdir(parents=True, exist_ok=True)
+        (truth_dir / "compiled").mkdir(parents=True, exist_ok=True)
+        for template, destination in (
+            ("product-truth-index-template.yaml", truth_dir / "index.yaml"),
+            ("product-truth-core-fragment-template.yaml", truth_dir / "fragments" / "00-core.yaml"),
+            ("product-truth-module-fragment-template.yaml", truth_dir / "fragments" / "MOD-EXAMPLE.yaml"),
+        ):
+            if not destination.exists() or args.force:
+                shutil.copyfile(ROOT / "references" / "templates" / template, destination)
+    manifest = {
+        "schema_version": "5.1.0",
+        "generated_by": f"ai-delivery-spec v{current_version()}",
+        "human_baseline": "PRD.md",
+        "requirement_register": "register.yaml",
+        "independent_product_truth": bool(args.with_product_truth),
+        "structured_authority": "truth/index.yaml" if args.with_product_truth else None,
+        "authority_rule": "one PRD is the review baseline; optional structured truth must preserve the same stable IDs and cannot become a second PRD",
+        "boundary": "requirements_intake_to_acceptance",
+    }
+    manifest_path = target / "manifest.json"
+    if not manifest_path.exists() or args.force:
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"initialized requirement workspace: {target}")
+    return 0
+
+
 def run_check(args: argparse.Namespace) -> int:
     commands: list[list[str]] = [
         [sys.executable, "scripts/validators/validate_v5_architecture.py"],
@@ -101,6 +153,9 @@ def run_check(args: argparse.Namespace) -> int:
         [sys.executable, "tests/test_v501_validators.py"],
         [sys.executable, "tests/test_v502_coding_contract.py"],
         [sys.executable, "tests/test_v502_progressive_truth.py"],
+        [sys.executable, "tests/test_v510_requirement_management.py"],
+        [sys.executable, "tests/test_v510_unified_prd.py"],
+        [sys.executable, "scripts/validators/validate_requirement_patterns.py", "references/patterns/common-requirement-patterns.yaml"],
         [
             sys.executable,
             "scripts/build_github_validation_matrix.py",
@@ -144,16 +199,9 @@ def run_check(args: argparse.Namespace) -> int:
             "--truth",
             "examples/publishing-learning-v5/delivery/truth/product-truth.yaml",
             "--projection",
-            "examples/publishing-learning-v5/delivery/projections/human-first-prd.md",
+            "examples/publishing-learning-v5/delivery/projections/unified-prd.md",
         ],
-        [
-            sys.executable,
-            "scripts/validators/validate_projection_consistency.py",
-            "--truth",
-            "examples/publishing-learning-v5/delivery/truth/product-truth.yaml",
-            "--projection",
-            "examples/publishing-learning-v5/delivery/projections/coding-agent-spec.md",
-        ],
+        [sys.executable, "scripts/validators/validate_unified_prd.py", "examples/publishing-learning-v5/delivery/projections/unified-prd.md"],
         [sys.executable, "scripts/score_evaluation_run.py", "evals/runs/chatwoot-voice-requirement-v5.yaml", "--quiet"],
         [sys.executable, "scripts/score_evaluation_run.py", "evals/runs/saleor-channel-id-design-v5.yaml", "--quiet"],
         [sys.executable, "scripts/score_evaluation_run.py", "evals/runs/openedx-reindex-design-v5.yaml", "--quiet"],
@@ -196,6 +244,24 @@ def query_truth(args: argparse.Namespace) -> int:
     if args.execution_state:
         values.extend(["--execution-state", str(args.execution_state)])
     return run_script("query_product_truth.py", values)
+
+
+def triage_requirement(args: argparse.Namespace) -> int:
+    values = [str(args.input), "--format", args.format]
+    if args.output:
+        values.extend(["--output", str(args.output)])
+    return run_script("triage_requirement.py", values)
+
+
+def analyze_change(args: argparse.Namespace) -> int:
+    values = ["--truth", str(args.truth), "--change", str(args.change), "--max-depth", str(args.max_depth)]
+    if args.output:
+        values.extend(["--output", str(args.output)])
+    return run_script("analyze_change_impact.py", values)
+
+
+def build_trace(args: argparse.Namespace) -> int:
+    return run_script("build_traceability_ledger.py", ["--truth", str(args.truth), "--output", str(args.output), "--baseline-version", args.baseline_version])
 
 
 def score_eval(args: argparse.Namespace) -> int:
@@ -312,6 +378,12 @@ def main() -> int:
     )
     init.set_defaults(func=init_delivery)
 
+    req_init = sub.add_parser("init-requirements", help="Create a focused intake-to-acceptance requirement workspace")
+    req_init.add_argument("--output", type=Path, default=Path("requirements"))
+    req_init.add_argument("--force", action="store_true")
+    req_init.add_argument("--with-product-truth", action="store_true", help="Add progressive Product Truth only for scale/audit needs")
+    req_init.set_defaults(func=init_requirements)
+
     check = sub.add_parser("check", help="Run v5 architecture and optional artifact validators")
     check.add_argument("--product-truth", type=Path)
     check.add_argument("--keep-going", action="store_true")
@@ -331,6 +403,25 @@ def main() -> int:
     query.add_argument("--execution-state", type=Path)
     query.add_argument("--output", type=Path, required=True)
     query.set_defaults(func=query_truth)
+
+    triage = sub.add_parser("triage", help="Recommend requirement intake decision, priority, mode and tier")
+    triage.add_argument("--input", type=Path, required=True)
+    triage.add_argument("--format", choices=["markdown", "yaml", "json"], default="markdown")
+    triage.add_argument("--output", type=Path)
+    triage.set_defaults(func=triage_requirement)
+
+    impact = sub.add_parser("impact", help="Analyze bidirectional change impact from seed IDs")
+    impact.add_argument("--truth", type=Path, required=True)
+    impact.add_argument("--change", type=Path, required=True)
+    impact.add_argument("--output", type=Path)
+    impact.add_argument("--max-depth", type=int, default=4)
+    impact.set_defaults(func=analyze_change)
+
+    trace = sub.add_parser("trace", help="Build a bidirectional traceability ledger")
+    trace.add_argument("--truth", type=Path, required=True)
+    trace.add_argument("--output", type=Path, required=True)
+    trace.add_argument("--baseline-version", default="unversioned")
+    trace.set_defaults(func=build_trace)
 
     score = sub.add_parser("score-eval", help="Score one requirement/design/coding evaluation run")
     score.add_argument("run", type=Path)
@@ -355,7 +446,7 @@ def main() -> int:
     compile_cmd.add_argument("--transcript", type=Path, required=True)
     compile_cmd.add_argument(
         "--decision",
-        choices=["READY_FOR_LIGHT_SPEC", "READY_FOR_PRODUCT_TRUTH", "READY_FOR_CHANGE_PACKAGE", "REVIEW_COMPLETE_WITH_GAPS", "BLOCKED_BY_P0_UNKNOWN"],
+        choices=["READY_FOR_LIGHT_SPEC", "READY_FOR_UNIFIED_PRD", "READY_FOR_PRODUCT_TRUTH", "READY_FOR_CHANGE_PACKAGE", "REVIEW_COMPLETE_WITH_GAPS", "BLOCKED_BY_P0_UNKNOWN"],
         required=True,
     )
     compile_cmd.add_argument("--output", type=Path, required=True)

@@ -1,0 +1,19 @@
+schema_version: 5.1.0
+run_id: ARUN-CORE-001
+baseline_version: "1.0"
+environment: "{acceptance environment}"
+executor: "{executor}"
+executed_at: "2026-01-01T00:00:00Z"
+items:
+  - id: ARITEM-CORE-001
+    acceptance_ref: AC-CORE-001
+    requirement_refs: [REQ-CORE-001]
+    mandatory: true
+    result: not_run
+    actual_result: ""
+    evidence_refs: []
+    defect_refs: []
+residual_issues: []
+conclusion: pending
+conditions: []
+sign_offs: []

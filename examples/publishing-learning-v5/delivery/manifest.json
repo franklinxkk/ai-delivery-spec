@@ -1,25 +1,20 @@
 {
-  "schema_version": "5.0.0",
+  "schema_version": "5.1.0",
   "package_id": "PKG-PUBLISHING-V5-GOLDEN",
   "status": "evaluation_fixture",
   "source_of_truth": "truth/product-truth.yaml",
+  "human_baseline": "projections/unified-prd.md",
   "artifacts": [
     {
       "path": "truth/product-truth.yaml",
       "kind": "product_truth",
-      "authority": "canonical",
+      "authority": "structured_authority",
       "status": "active"
     },
     {
-      "path": "projections/human-first-prd.md",
-      "kind": "human_first",
-      "authority": "projection",
-      "status": "generated"
-    },
-    {
-      "path": "projections/coding-agent-spec.md",
-      "kind": "coding_agent",
-      "authority": "projection",
+      "path": "projections/unified-prd.md",
+      "kind": "unified_requirement_prd",
+      "authority": "human_baseline",
       "status": "generated"
     },
     {

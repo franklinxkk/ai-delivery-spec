@@ -1,0 +1,18 @@
+schema_version: 5.1.0
+review_id: REVIEW-CORE-001
+baseline_version: "0.1-draft"
+review_type: product
+status: in_review
+reviewers: ["{reviewer}"]
+reviewed_at: "2026-01-01T00:00:00Z"
+findings:
+  - id: REV-CORE-001
+    severity: P1
+    requirement_refs: [REQ-CORE-001]
+    description: "{review question or finding}"
+    owner: "{owner}"
+    status: open
+    disposition: clarify
+    resolution: ""
+    evidence_refs: []
+conclusion: "P0/P1 findings must close before baseline"

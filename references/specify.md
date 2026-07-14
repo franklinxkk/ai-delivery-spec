@@ -1,22 +1,24 @@
-# Specify Product Truth
+# Specify The Requirement Baseline
 
-Use this reference to turn approved discovery evidence into one canonical
-Product Truth that can be projected for humans, prototypes, coding agents, QA,
-customers, and operations.
+Use this reference to turn accepted and clarified requirements into one
+baseline. The default authority is one unified PRD with an embedded stable-ID
+index. Add independent Product Truth only for scale, repeated change, multiple
+controlled exports or strong audit needs.
 
 ## Source Model
 
-`schemas/product-truth.schema.json` is the machine contract. Product Truth is
-the shared factual layer; Markdown PRDs and coding specifications are views.
+`REQ-*` is the scope and traceability authority. When Product Truth is used,
+`schemas/product-truth.schema.json` is its machine contract; the unified PRD is
+the human reading path and approved baseline projection.
 
 Required identity graph:
 
 ```text
-SRC -> FEAT -> MOD -> FLOW -> VIEW -> ACT
-                                  |       |
-                                  FLD     RULE
-                                           |
-ENTITY -> STATE <- transition <- EVENT     AC -> EVD
+SRC -> REQ -> MOD/FLOW -> VIEW/REG -> ACT/FLD/RULE/STATE/API
+          |                                      |
+          +---------------------> AC -> TEST/ARUN -> EVD
+          ^                                      |
+          +---------------- CHG / DEFECT <--------+
 ```
 
 Stable prefixes:
@@ -24,19 +26,20 @@ Stable prefixes:
 | Object | Prefix |
 |---|---|
 | source / assertion / decision / unknown / conflict | `SRC` / `AST` / `DEC` / `UNK` / `CFL` |
-| feature / role / module / entity / field | `FEAT` / `ROLE` / `MOD` / `ENT` / `FLD` |
+| requirement / feature / review | `REQ` / `FEAT` / `REV` |
+| role / module / entity / field | `ROLE` / `MOD` / `ENT` / `FLD` |
 | flow / view / region / action | `FLOW` / `VIEW` / `REG` / `ACT` |
-| state machine / rule / event / integration | `STM` / `RULE` / `EVT` / `INT` |
-| acceptance / evidence / change | `AC` / `EVD` / `CHG` |
+| state machine / rule / event / integration/API | `STM` / `RULE` / `EVT` / `INT` / `API` |
+| acceptance / test / run / defect / evidence / change | `AC` / `TEST` / `ARUN` / `DEFECT` / `EVD` / `CHG` |
 
 IDs are permanent. Rename without changing semantic identity. For split,
 merge, deprecation, or removal, preserve history in a Change Package with
 `deprecated_ids` and `replacement_map`.
 
-Each approved `FEAT-*` is a scope index, not a second requirements document.
-Bind it to source, module/flow/view/action behavior, acceptance, owner, priority,
-scope status, and version. Every released behavior and AC belongs to a Feature;
-deferred, unknown, not-applicable, and out-of-scope items remain explicit.
+Each baselined `REQ-*` binds source, outcome, behavior, acceptance, owner,
+priority, stage and version. `FEAT-*` may remain as a compatibility or capability
+grouping but cannot replace the requirement record. Deferred, rejected,
+superseded, unknown, not-applicable and out-of-scope items remain explicit.
 
 ## Module Delivery Slice
 
@@ -52,9 +55,9 @@ in-scope module needs:
 7. integrations, freshness, idempotency, reconciliation, and dependency owner;
 8. acceptance paths and required evidence.
 
-Avoid a second chapter-oriented truth. A Human-First projection may organize
-the same IDs for readability, but it cannot invent behavior absent from Product
-Truth.
+The unified PRD main body may organize the same IDs for readability. Its
+engineering annexes and optional Product Truth cannot contradict or invent
+behavior absent from the approved requirement baseline.
 
 ## Page Contract
 
@@ -113,9 +116,9 @@ Load only applicable profiles. Do not force arbitrary numbers.
 | AI core | eval, safety, context, tool scope, fallback, rollback, observability |
 | regulated/high risk | authority, human gate, immutable evidence, recovery, incident owner |
 
-## Completion Gate
+## Baseline Gate
 
-Product Truth is not complete when:
+The requirement baseline is not complete when:
 
 - a primary role cannot finish its task;
 - an action lacks visible or domain result;
@@ -123,5 +126,5 @@ Product Truth is not complete when:
 - a cross-module handoff lacks failure and reconciliation;
 - a field lacks source/meaning/editability;
 - a P0 assertion is inferred without owner review;
-- a released module, flow, view, action, or AC has no Feature binding;
+- a released module, flow, view, action, field, rule, API or AC has no REQ binding;
 - an acceptance path cannot produce the required evidence.

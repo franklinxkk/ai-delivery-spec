@@ -20,7 +20,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 
 ROOT = Path(__file__).resolve().parents[1]
-STAGES = ["discover", "specify", "plan", "tasks", "build_verify", "launch", "learn_retire"]
+STAGES = ["intake", "clarify", "specify", "review", "baseline", "change", "acceptance", "closed"]
 DISCOVERY_GATES = [
     "version_environment",
     "complexity_domain",
@@ -45,7 +45,7 @@ class LifecycleConvergenceError(RuntimeError):
 
 
 def gates_for_stage(stage: str) -> list[str]:
-    return DISCOVERY_GATES if stage == "discover" else DELIVERY_GATES
+    return DISCOVERY_GATES if stage == "intake" else DELIVERY_GATES
 
 
 def now() -> str:
@@ -274,8 +274,13 @@ def contract_input(args: argparse.Namespace) -> tuple[str, Path, str]:
 
 def normalized_stage(contract: dict[str, Any], kind: str) -> str:
     if kind == "discovery_contract":
-        return "discover"
-    return contract.get("delivery_context", {}).get("lifecycle_stage", "specify")
+        return "intake"
+    raw = contract.get("delivery_context", {}).get("lifecycle_stage", "specify")
+    legacy = {
+        "discover": "intake", "plan": "review", "tasks": "review",
+        "build_verify": "acceptance", "launch": "acceptance", "learn_retire": "closed",
+    }
+    return legacy.get(raw, raw)
 
 
 def initial_failures(state: dict[str, Any]) -> list[str]:
@@ -478,7 +483,7 @@ def check(gate_id: str, state: dict[str, Any], args: argparse.Namespace) -> list
             ]
             add("p0_unknowns", not open_p0, "open P0 unknowns: " + (", ".join(open_p0) or "none"))
             ready = discovery.get("discovery_decision") in {
-                "READY_FOR_LIGHT_SPEC", "READY_FOR_PRODUCT_TRUTH", "READY_FOR_CHANGE_PACKAGE"
+                "READY_FOR_LIGHT_SPEC", "READY_FOR_UNIFIED_PRD", "READY_FOR_PRODUCT_TRUTH", "READY_FOR_CHANGE_PACKAGE"
             }
             add("discovery_decision", ready, f"decision={discovery.get('discovery_decision')}")
     elif gate_id == "contract_traceability":
@@ -490,16 +495,27 @@ def check(gate_id: str, state: dict[str, Any], args: argparse.Namespace) -> list
             result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, check=False)
             add("product_truth", result.returncode == 0, (result.stdout + result.stderr).strip())
             truth = load(Path(truth_anchor["path"]))
-            required = {item["id"] for item in truth.get("features", []) if item.get("scope_status") == "in_scope"}
+            requirements = truth.get("requirements", [])
+            if requirements:
+                required = {
+                    item["id"] for item in requirements
+                    if item.get("stage") not in {"deferred", "rejected", "cancelled", "superseded"}
+                }
+                id_pattern = r"\bREQ-[A-Z0-9-]+\b"
+                owner_label = "requirements"
+            else:
+                required = {item["id"] for item in truth.get("features", []) if item.get("scope_status") == "in_scope"}
+                id_pattern = r"\bFEAT-[A-Z0-9-]+\b"
+                owner_label = "features"
             for projection in args.projection:
                 text = projection.read_text(encoding="utf-8")
-                missing = sorted(required - set(re.findall(r"\bFEAT-[A-Z0-9-]+\b", text)))
+                missing = sorted(required - set(re.findall(id_pattern, text)))
                 projection_result = subprocess.run(
                     [sys.executable, str(ROOT / "scripts" / "validators" / "validate_projection_consistency.py"), "--truth", truth_anchor["path"], "--projection", str(projection)],
                     cwd=ROOT, text=True, capture_output=True, check=False,
                 )
                 passed = not missing and projection_result.returncode == 0
-                message = "missing in-scope features: " + (", ".join(missing) or "none")
+                message = f"missing in-scope {owner_label}: " + (", ".join(missing) or "none")
                 if projection_result.returncode != 0:
                     message += "; " + (projection_result.stdout + projection_result.stderr).strip()
                 add(f"projection:{projection.name}", passed, message)
@@ -583,11 +599,11 @@ def checkpoint_state(args: argparse.Namespace) -> int:
             print(f"BLOCK: {failure}")
         return 1
     kind, contract_path, contract_schema = contract_input(args)
-    if state["stage"]["current"] == "discover" and kind != "discovery_contract":
-        print("BLOCK: advance to specify before binding Product Truth")
+    if state["stage"]["current"] == "intake" and kind != "discovery_contract":
+        print("BLOCK: complete intake before binding Product Truth")
         return 1
-    if state["stage"]["current"] != "discover" and kind == "discovery_contract":
-        print("BLOCK: discovery contract cannot replace Product Truth after discover")
+    if state["stage"]["current"] not in {"intake", "clarify"} and kind == "discovery_contract":
+        print("BLOCK: discovery contract cannot replace the requirement baseline after clarification")
         return 1
     contract = load(contract_path)
     input_failures = schema_failures(contract, contract_schema)
@@ -726,7 +742,7 @@ def advance_state(args: argparse.Namespace) -> int:
         f"approved validator outage at {item['gate_id']}: {item['human_approval']['evidence_ref']}"
         for item in results if item.get("result") == "approved_with_gap"
     ]))
-    state["status"] = "completed" if args.to_stage == "learn_retire" else "in_progress"
+    state["status"] = "completed" if args.to_stage == "closed" else "in_progress"
     state["updated_at"] = now()
     state["state_hash"] = object_hash(state, "state_hash")
     failures = schema_failures(state, "execution-state.schema.json")

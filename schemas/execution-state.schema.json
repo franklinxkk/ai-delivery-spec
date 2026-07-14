@@ -84,7 +84,7 @@
       "additionalProperties": false,
       "required": ["current", "sequence", "turns", "completed", "required_gates"],
       "properties": {
-        "current": { "enum": ["discover", "specify", "plan", "tasks", "build_verify", "launch", "learn_retire"] },
+        "current": { "enum": ["intake", "clarify", "specify", "review", "baseline", "change", "acceptance", "closed"] },
         "sequence": { "type": "integer", "minimum": 0 },
         "turns": { "type": "integer", "minimum": 0 },
         "completed": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },

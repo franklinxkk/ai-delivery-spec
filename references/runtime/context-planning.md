@@ -16,11 +16,11 @@ Use `schemas/context-plan.schema.json` and `scripts/plan_context.py`.
 
 Prefer structured evidence over keywords:
 
-- lifecycle, mode, tier, and project shape;
+- requirement stage, mode, tier, and project shape;
 - number of modules, roles, flows, actions, transitions, integrations, and P0 ACs;
 - regulated sources and governance profiles;
 - restricted fields, tenant isolation, money/safety/privacy consequences;
-- AI writeback, migration, coexistence, compensation, and rollback;
+- AI writeback, historical compatibility, coexistence, compensation, and recovery;
 - open P0 unknowns or conflicts.
 
 Keywords may suggest discovery questions. They cannot prove regulation,
@@ -42,7 +42,7 @@ model's context window.
 
 1. Reserve system and output tokens first.
 2. Never silently truncate P0 rules, regulated assertions, permissions,
-   state transitions, failure behavior, acceptance, migration, or rollback.
+   state transitions, failure behavior, acceptance, compatibility, or recovery.
 3. Query Product Truth by stable ID or module with
    `scripts/query_product_truth.py`.
 4. Treat reference/domain limits as batch limits. Record required deferred or

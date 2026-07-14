@@ -73,8 +73,13 @@ def semantic_failures(document: dict[str, Any]) -> list[str]:
     unresolved_features = [
         item for item in document.get("features", []) if item.get("scope_status") in {"unknown", "deferred"}
     ]
-    if not in_scope_features and not unresolved_features:
-        failures.append("no approved or explicitly unresolved Feature IDs")
+    requirements = document.get("requirements", [])
+    governed_requirements = [
+        item for item in requirements
+        if item.get("stage") in {"specified", "reviewing", "baselined", "change_requested", "acceptance", "accepted", "closed"}
+    ]
+    if not in_scope_features and not unresolved_features and not requirements:
+        failures.append("no Requirement or approved/explicitly unresolved Feature IDs")
     for feature in in_scope_features:
         if not feature.get("source_refs"):
             failures.append(f"{feature['id']} has no source evidence")
@@ -83,24 +88,38 @@ def semantic_failures(document: dict[str, Any]) -> list[str]:
         if not feature.get("acceptance_refs"):
             failures.append(f"{feature['id']} has no acceptance coverage")
 
-    feature_behavior_refs = {
-        reference for feature in document.get("features", []) for reference in feature.get("behavior_refs", [])
+    for requirement in governed_requirements:
+        if not requirement.get("source_refs"):
+            failures.append(f"{requirement['id']} has no source evidence")
+        if not requirement.get("behavior_refs"):
+            failures.append(f"{requirement['id']} has no behavior coverage")
+        if not requirement.get("acceptance_refs"):
+            failures.append(f"{requirement['id']} has no acceptance coverage")
+
+    scope_behavior_refs = {
+        reference
+        for item in (governed_requirements if requirements else document.get("features", []))
+        for reference in item.get("behavior_refs", [])
     }
     release_behavior_ids = {
         item["id"]
         for collection in ("modules", "flows", "views", "actions")
         for item in document.get(collection, [])
     }
-    orphan_behavior = sorted(release_behavior_ids - feature_behavior_refs)
+    orphan_behavior = sorted(release_behavior_ids - scope_behavior_refs)
     if orphan_behavior:
-        failures.append("delivery behavior has no Feature binding: " + ", ".join(orphan_behavior))
+        owner = "Requirement" if requirements else "Feature"
+        failures.append(f"delivery behavior has no {owner} binding: " + ", ".join(orphan_behavior))
 
-    feature_acceptance_refs = {
-        reference for feature in document.get("features", []) for reference in feature.get("acceptance_refs", [])
+    scope_acceptance_refs = {
+        reference
+        for item in (governed_requirements if requirements else document.get("features", []))
+        for reference in item.get("acceptance_refs", [])
     }
-    orphan_acceptance = sorted(set(acceptance) - feature_acceptance_refs)
+    orphan_acceptance = sorted(set(acceptance) - scope_acceptance_refs)
     if orphan_acceptance:
-        failures.append("acceptance has no Feature binding: " + ", ".join(orphan_acceptance))
+        owner = "Requirement" if requirements else "Feature"
+        failures.append(f"acceptance has no {owner} binding: " + ", ".join(orphan_acceptance))
 
     for action_id, action in actions.items():
         if not action.get("visible_result", "").strip():
@@ -174,7 +193,8 @@ def validate(path: Path) -> int:
     identifiers, _ = collect_ids(document)
     print(
         "PASS: Product Truth is schema-valid and reference-closed "
-        f"({len(identifiers)} stable IDs, {len(document.get('features', []))} features, "
+        f"({len(identifiers)} stable IDs, {len(document.get('requirements', []))} requirements, "
+        f"{len(document.get('features', []))} features, "
         f"{len(document.get('acceptance', []))} acceptance paths)"
     )
     return 0

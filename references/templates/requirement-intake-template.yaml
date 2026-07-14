@@ -1,0 +1,20 @@
+title: "{requirement title}"
+outcome: "{observable customer or business result}"
+owner: "{accountable product owner}"
+source_refs: [SRC-REQ-001]
+value: medium
+value_evidence:
+  - "{customer evidence, policy, metric or approved decision}"
+roles: [ROLE-PRIMARY]
+modules: [MOD-PRIMARY]
+integrations: []
+reversible: false
+cross_module_state: false
+sensitive_data: false
+compliance: false
+migration: false
+customer_acceptance: false
+ai_behavior: false
+urgent: false
+blocked_dependency: false
+ambiguity: high

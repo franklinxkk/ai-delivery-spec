@@ -18,7 +18,7 @@ FRAGMENT_SCHEMA = ROOT / "schemas" / "product-truth-fragment.schema.json"
 TRUTH_SCHEMA = ROOT / "schemas" / "product-truth.schema.json"
 LIST_KEYS = {
     "sources", "assertions", "unknowns", "decisions", "conflicts", "roles",
-    "features", "modules", "entities", "fields", "flows", "views", "actions",
+    "requirements", "features", "modules", "entities", "fields", "flows", "views", "actions",
     "states", "rules", "events", "integrations", "acceptance", "evidence",
     "projections",
 }
@@ -45,7 +45,7 @@ def compile_index(index_path: Path, validate_final: bool = True) -> tuple[dict[s
     index_path = index_path.resolve()
     index = load_yaml(index_path)
     failures = schema_failures(index, index_path, INDEX_SCHEMA)
-    merged: dict[str, Any] = {"schema_version": "5.0.0"}
+    merged: dict[str, Any] = {"schema_version": index.get("target_schema_version", "5.0.0")}
     seen_ids: dict[str, str] = {}
 
     for entry in index.get("fragments", []):

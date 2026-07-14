@@ -21,5 +21,5 @@ rejected = subprocess.run(
 if rejected.returncode == 0:
     raise SystemExit("thin keyword-only handoff must fail")
 
-print("PASS: v5.0.2 accepts complete contracts and rejects thin keyword summaries "
+print("PASS: v5.1.0 accepts complete unified contracts and rejects thin keyword summaries "
       f"({rejected.stdout.count('FAIL:')} missing-contract findings)")

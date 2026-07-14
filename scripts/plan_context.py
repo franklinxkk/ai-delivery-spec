@@ -19,13 +19,20 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "examples/spec.config.example.yaml"
 
 STAGE_REFERENCES = {
+    "intake": ["references/requirement-management.md"],
+    "clarify": ["references/discover.md", "references/runtime/schema-grill.md"],
+    "review": ["references/specify.md", "references/runtime/verify.md"],
+    "baseline": ["references/handoff.md"],
+    "change": ["references/runtime/change.md"],
+    "acceptance": ["references/runtime/verify.md"],
+    "closed": ["references/requirement-management.md"],
     "discover": ["references/discover.md"],
     "specify": ["references/specify.md"],
-    "plan": ["references/specify.md", "references/runtime/change.md"],
+    "plan": ["references/handoff.md"],
     "tasks": ["references/handoff.md"],
-    "build_verify": ["references/handoff.md", "references/runtime/verify.md"],
-    "launch": ["references/runtime/verify.md", "references/runtime/operate.md"],
-    "learn_retire": ["references/runtime/operate.md"],
+    "build_verify": ["references/runtime/verify.md"],
+    "launch": ["references/runtime/verify.md"],
+    "learn_retire": ["references/requirement-management.md"],
 }
 
 DOMAIN_FILES = {
@@ -62,6 +69,7 @@ def classify(truth: dict[str, Any]) -> tuple[int, list[str], str, list[str]]:
     signals: list[str] = []
 
     counts = {
+        "requirements": len(truth.get("requirements", [])),
         "modules": len(truth.get("modules", [])),
         "roles": len(truth.get("roles", [])),
         "flows": len(truth.get("flows", [])),
@@ -70,6 +78,7 @@ def classify(truth: dict[str, Any]) -> tuple[int, list[str], str, list[str]]:
         "unknowns": len([item for item in truth.get("unknowns", []) if item.get("status") == "open"]),
         "conflicts": len([item for item in truth.get("conflicts", []) if item.get("status") == "open"]),
     }
+    score += max(0, counts["requirements"] - 3)
     score += max(0, counts["modules"] - 1) * 2
     score += max(0, counts["roles"] - 2)
     score += max(0, counts["flows"] - 1) * 2
@@ -81,7 +90,7 @@ def classify(truth: dict[str, Any]) -> tuple[int, list[str], str, list[str]]:
         signals.append("migration")
     if context.get("delivery_mode") == "full":
         score += 3
-    if context.get("tier") == "L3":
+    if context.get("tier") in {"L3", "L4"}:
         score += 8
         signals.append("high_consequence")
 
@@ -114,11 +123,11 @@ def classify(truth: dict[str, Any]) -> tuple[int, list[str], str, list[str]]:
     else:
         assurance = "minimal"
 
-    gates = ["discovery", "product_truth", "acceptance"]
+    gates = ["intake", "clarification", "specification", "traceability", "acceptance"]
     if context.get("consumers") and "coding_agent" in context.get("consumers", []):
-        gates.append("coding_handoff")
+        gates.append("unified_prd_handoff")
     if context.get("project_shape") in {"brownfield", "hybrid"}:
-        gates.append("change_migration")
+        gates.append("change_impact")
     if assurance == "regulated":
         gates.extend(["authority_applicability", "human_accountability", "rollback"])
     return score, signals, assurance, list(dict.fromkeys(gates))
@@ -180,7 +189,7 @@ def build_plan(truth: dict[str, Any], config: dict[str, Any], seed_ids: list[str
     total_selected_tokens = truth_tokens + reference_tokens
 
     item_count = sum(len(truth.get(key, [])) for key in (
-        "sources", "roles", "modules", "entities", "fields", "flows", "views",
+        "sources", "requirements", "roles", "modules", "entities", "fields", "flows", "views",
         "actions", "states", "rules", "events", "integrations", "acceptance",
     ))
     max_items = config["context"].get("max_truth_items", 160)

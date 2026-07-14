@@ -11,7 +11,7 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[2]
-VERSION = "5.0.2"
+VERSION = "5.1.0"
 PUBLIC_FILES = (
     "README.md",
     ".github/docs/social-launch-kit.md",
@@ -69,9 +69,9 @@ def main() -> int:
     quick_start = readme.find("## 60 秒上手")
     if quick_start < 0 or readme.find("npx skills add") < quick_start:
         failures.append("README must put install inside the first 60-second entry")
-    for marker in ("Ultra-Light", "smart-large-project", "examples/minimal-v5", "分片真相", "完整契约直达"):
+    for marker in ("Ultra-Light", "smart-large-project", "examples/minimal-v5", "分片真相", "一份统一"):
         if marker not in readme:
-            failures.append(f"README misses v5.0.2 onboarding marker: {marker}")
+            failures.append(f"README misses v5.1.0 onboarding marker: {marker}")
     coverage = yaml.safe_load((ROOT / "references/domain-coverage.yaml").read_text(encoding="utf-8"))
     release_status = yaml.safe_load((ROOT / "evals/evidence/release-status.yaml").read_text(encoding="utf-8"))
     matrix = yaml.safe_load((ROOT / "evals/evidence/github-validation-matrix.yaml").read_text(encoding="utf-8"))

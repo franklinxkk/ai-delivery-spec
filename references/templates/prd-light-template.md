@@ -1,11 +1,11 @@
-# L1 Light Product Contract Template
+# L1 Light Requirement Contract Template
 
 Use for internal alignment, simple CRUD/workflow, or feature explanation before full development handoff.
 
 ## Contents
 
 - 1. Version
-- 2. Background
+- 2. Intake And Background
 - 3. Goal And Non-Goal
 - 4. Users And Roles
 - 5. Scope
@@ -26,7 +26,11 @@ Use for internal alignment, simple CRUD/workflow, or feature explanation before 
 | Date | |
 | Reviewers | PM / Dev / QA / Sponsor |
 
-## 2. Background
+## 2. Intake And Background
+
+| REQ ID | Intake decision | Value evidence | Complexity | Priority | Owner | Dependency |
+|---|---|---|---|---|---|---|
+| REQ-LIGHT-001 | accept / clarify / defer / reject | | S / M | P0-P3 | | |
 
 Current situation:
 
@@ -64,7 +68,7 @@ Not included in this version:
 
 ## 6. User Stories
 
-| Story ID | Role | User Story | Acceptance Criteria | Test Case |
+| Story ID / REQ | Role | User Story | Acceptance Criteria | Test Case |
 |---|---|---|---|---|
 | US-001 | | As a ..., I want ..., so that ... | Given / When / Then + visible result + domain result | TC-001 |
 
@@ -115,4 +119,6 @@ Primary actions:
 - [ ] Every primary action has visible result.
 - [ ] Every state-changing action has domain result.
 - [ ] Known gaps are listed.
-- [ ] If moving to development, upgrade to v5 Product Truth and the required projections.
+- [ ] AC/test can reverse-trace to `REQ-LIGHT-001`.
+- [ ] If scope expands, upgrade this file to the unified PRD; add Product Truth
+      only when scale, repeated change, multiple exports or audit triggers it.

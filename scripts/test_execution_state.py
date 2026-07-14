@@ -18,8 +18,7 @@ MANAGER = ROOT / "scripts" / "manage_execution_state.py"
 TRUTH = ROOT / "examples" / "publishing-learning-v5" / "delivery" / "truth" / "product-truth.yaml"
 CONFIG = ROOT / "examples/spec.config.example.yaml"
 PROJECTIONS = [
-    ROOT / "examples" / "publishing-learning-v5" / "delivery" / "projections" / "human-first-prd.md",
-    ROOT / "examples" / "publishing-learning-v5" / "delivery" / "projections" / "coding-agent-spec.md",
+    ROOT / "examples" / "publishing-learning-v5" / "delivery" / "projections" / "unified-prd.md",
 ]
 GATES = ["version_environment", "complexity_domain", "context_survival", "contract_traceability", "audit_access", "fallback_risk"]
 DISCOVERY_GATES = ["version_environment", "complexity_domain", "context_survival", "discovery_readiness", "audit_access", "fallback_risk"]
@@ -71,7 +70,7 @@ def main() -> int:
             gate_paths.append(output)
 
         advanced = temp / "state-001.yaml"
-        values = ["advance", "--state", str(state), "--to", "plan", "--output", str(advanced)]
+        values = ["advance", "--state", str(state), "--to", "change", "--output", str(advanced)]
         for gate_path in gate_paths:
             values.extend(["--gate-result", str(gate_path)])
         run(*values)
@@ -128,7 +127,7 @@ def main() -> int:
             run("gate", "--state", str(discovery_ready_state), "--gate-id", gate_id, "--output", str(output))
             discovery_gate_paths.append(output)
         discovery_specify = temp / "discovery-state-002.yaml"
-        values = ["advance", "--state", str(discovery_ready_state), "--to", "specify", "--output", str(discovery_specify)]
+        values = ["advance", "--state", str(discovery_ready_state), "--to", "clarify", "--output", str(discovery_specify)]
         for gate_path in discovery_gate_paths:
             values.extend(["--gate-result", str(gate_path)])
         run(*values)
@@ -190,7 +189,7 @@ def main() -> int:
 
         old_skill = temp / "SKILL.md"
         old_skill.write_text(
-            (ROOT / "SKILL.md").read_text(encoding="utf-8").replace("AI Delivery Spec 5.0.2", "AI Delivery Spec 4.9.14", 1),
+            (ROOT / "SKILL.md").read_text(encoding="utf-8").replace("AI Delivery Spec 5.1.0", "AI Delivery Spec 4.9.14", 1),
             encoding="utf-8",
         )
         blocked = temp / "blocked.yaml"
@@ -202,7 +201,7 @@ def main() -> int:
         if "installed skill version does not match" not in result.stdout:
             raise AssertionError("version drift was not explained")
 
-    print("PASS: discovery contract, versioned checkpoints, contract rebinding, six gates, scoped retrieval, stage advance, and version-drift blocking work")
+    print("PASS: requirement checkpoints, contract rebinding, gates, scoped retrieval, stage advance, and version-drift blocking work")
     return 0
 
 

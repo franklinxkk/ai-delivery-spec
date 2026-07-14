@@ -11,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 RUNTIME_FILES = [
     "SKILL.md",
+    "references/requirement-management.md",
     "references/discover.md",
     "references/runtime/schema-grill.md",
     "references/specify.md",
@@ -18,7 +19,6 @@ RUNTIME_FILES = [
     "references/handoff.md",
     "references/runtime/change.md",
     "references/runtime/verify.md",
-    "references/runtime/operate.md",
     "references/runtime/context-planning.md",
     "references/runtime/execution-gates.md",
     "references/runtime/prototype-testability.md",

@@ -1,0 +1,51 @@
+schema_version: 5.1.0
+library_id: PATLIB-COMMON-001
+patterns:
+  - id: PAT-APPROVAL-001
+    name: 审批流
+    applies_when: 业务对象必须经一个或多个有权角色确认后生效
+    required_questions: [审批对象与状态权威是谁, 节点和审批人如何确定, 驳回撤回转交加签如何处理, 超时和重复提交如何处理]
+    behavior_contract: [申请前置与快照, 节点顺序和守卫, 审批结果及状态/事件/审计, 通知与待办仅作可见结果]
+    exception_contract: [审批人失效, 规则变更中的在途实例, 并发审批, 外部通知失败]
+    acceptance_blueprints: [合法审批到终态, 越权审批被拒, 驳回后重提, 重复请求幂等]
+    anti_patterns: [只写支持审批, 用按钮可见性代替服务端授权, 不定义在途版本]
+  - id: PAT-LIST-001
+    name: 列表与检索
+    applies_when: 用户需要在数据范围内查找排序筛选和批量处理记录
+    required_questions: [默认范围与排序是什么, 筛选字典和组合规则是什么, 总数与分页口径是什么, 批量操作的选择范围是什么]
+    behavior_contract: [查询条件和数据范围, 空加载错误无权状态, 排序分页总数, 导出与批量动作权限]
+    exception_contract: [条件无效, 数据更新导致翻页漂移, 部分记录无权, 大结果集]
+    acceptance_blueprints: [默认查询, 组合筛选, 无权隔离, 跨页批量边界]
+    anti_patterns: [写常规列表即可, 不定义默认排序, 前端过滤代替数据权限]
+  - id: PAT-FORM-001
+    name: 表单创建与编辑
+    applies_when: 用户创建或修改一个有业务状态的对象
+    required_questions: [字段含义来源和编辑权是什么, 草稿与提交如何区分, 并发覆盖如何处理, 取消是否保留]
+    behavior_contract: [字段字典和校验, 默认值来源, 保存/提交状态变化, 乐观锁和幂等]
+    exception_contract: [校验失败, 并发冲突, 依赖不可用, 部分保存]
+    acceptance_blueprints: [合法创建, 边界值, 越权字段, 重复提交, 并发编辑]
+    anti_patterns: [仅贴原型, 让研发决定业务必填, 自动覆盖并发修改]
+  - id: PAT-PERMISSION-001
+    name: 角色权限与数据范围
+    applies_when: 不同角色或组织只能查看或操作部分功能/数据
+    required_questions: [功能权和数据权如何组合, 数据范围的组织层级是什么, 字段级限制是什么, 兼任委托离职如何处理]
+    behavior_contract: [服务端授权, 查询过滤, 写入守卫, 越权审计, UI 显示仅作体验]
+    exception_contract: [角色变更缓存, 跨组织引用, 导出泄露, 聚合小样本泄露]
+    acceptance_blueprints: [同角色不同范围, 跨租户拒绝, 字段脱敏, 权限变更生效]
+    anti_patterns: [隐藏按钮等于权限, 管理员默认全权, 只验页面不验接口]
+  - id: PAT-IMPORT-EXPORT-001
+    name: 导入导出
+    applies_when: 用户批量输入或提取结构化业务数据
+    required_questions: [模板和版本是什么, 校验是全有全无还是部分成功, 数据范围和敏感字段是什么, 大文件如何处理]
+    behavior_contract: [模板版本, 字段映射, 预检与执行, 结果文件, 权限水印和审计]
+    exception_contract: [重复数据, 部分失败, 中断重试, 文件过期, 公式注入]
+    acceptance_blueprints: [合法导入, 错误行定位, 重复幂等, 越权导出, 大文件任务]
+    anti_patterns: [只写支持 Excel, 不定义失败策略, 导出绕过页面数据范围]
+  - id: PAT-INTEGRATION-001
+    name: 外部系统集成
+    applies_when: 需求依赖外部主数据、命令、事件或回调
+    required_questions: [哪方权威, 字段映射和版本是什么, 鉴权限流是什么, 失败重试对账撤销如何处理]
+    behavior_contract: [请求响应/事件语义, 幂等和顺序, 超时重试, 对账补偿, 权威冲突]
+    exception_contract: [外部不可用, 重复乱序, 部分成功, 字典漂移, 撤销失败]
+    acceptance_blueprints: [成功同步, 超时重试, 重复幂等, 对账修复, 权威冲突]
+    anti_patterns: [写对接接口即可, 无数据权威, 重试但不幂等, 无对账责任人]

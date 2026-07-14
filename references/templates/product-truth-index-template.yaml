@@ -1,4 +1,5 @@
-schema_version: 5.0.2
+schema_version: 5.1.0
+target_schema_version: 5.1.0
 truth_id: TRUTH-PRODUCT-001
 layout: progressive_shards
 compiled_output: compiled/product-truth.yaml

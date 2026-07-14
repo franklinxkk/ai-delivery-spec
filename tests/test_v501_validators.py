@@ -15,4 +15,4 @@ for level in ("L0", "L1", "L2", "L3", "L4"):
         )
         if result.returncode:
             raise SystemExit(f"failed {script} {level}")
-print("PASS: three v5.0.2 core validators enforce L0-L4")
+print("PASS: three v5.1.0 core validators enforce L0-L4")

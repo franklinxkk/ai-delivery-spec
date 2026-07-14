@@ -2,8 +2,9 @@
 
 Use this reference when the input is ambiguous, idea-only, a customer request,
 a meeting note, an old system, a prototype, or a domain without a dedicated
-pack. Stop when the opportunity, delivery context, evidence, and P0 unknowns
-are explicit enough for the selected artifact.
+pack. First complete requirement intake. Stop when outcome, scope, evidence,
+authority and P0 unknowns are explicit enough for the selected requirement
+artifact.
 
 ## Contents
 
@@ -36,9 +37,11 @@ Do not ask the user to repeat facts already visible in a supplied source.
 
 ## Risk-Adaptive Clarification
 
-Ask one focused question at a time in a guided conversation. A context dump or
-best-guess mode may batch assumptions when the user explicitly prefers speed.
-Question depth follows risk, not a fixed questionnaire.
+Ask dependent questions in order. Batch independent questions by outcome,
+role/permission, flow/state, data/integration and acceptance so the user does
+not endure unnecessary one-by-one interrogation. A context dump or best-guess
+mode may batch assumptions when the user explicitly prefers speed. Question
+depth follows risk, not a fixed questionnaire.
 
 | Signal | Mandatory Clarification |
 |---|---|
@@ -67,26 +70,20 @@ or acceptance. Do not silently default them.
 
 ## ToB / ToG Context
 
-For enterprise or public-sector delivery, identify the four lifecycles that
-intersect the product:
+For enterprise or public-sector requirements, record the external business,
+customer, engineering and governance context only where it constrains scope,
+authority, acceptance or evidence. Do not manage those lifecycles here.
 
-```text
-Product: discover -> validate -> define -> build -> pilot -> scale -> evolve -> retire
-Customer: qualify -> discover -> solution -> pilot -> contract -> deliver -> accept -> adopt -> renew/exit
-Engineering: specify -> plan -> tasks -> build -> verify -> release -> operate
-Governance: propose -> review -> approve -> execute -> evidence -> close/supersede
-```
-
-For ToG or state-owned delivery, add project establishment, budget,
-procurement/tender, contract, trial operation, formal acceptance, performance,
-audit, and archive where applicable.
+For ToG or state-owned delivery, capture project establishment, procurement,
+contract, trial operation, formal acceptance and audit as sources, constraints,
+approvals or acceptance milestones when applicable.
 
 Minimum enterprise context:
 
 - buyer, sponsor, end user, payer, acceptance owner, operations owner;
 - organization, department, tenant, partner/agent/integrator hierarchy;
-- contract scope, pilot success, delivery baseline, acceptance evidence;
-- legacy system, data migration, rollout, training, SLA, renewal, and exit;
+- contract scope, pilot success, requirement baseline, acceptance evidence;
+- legacy system, data migration, training/SLA constraints and exit obligations;
 - jurisdiction, regulation, security, privacy, records, and audit boundary.
 
 ## Project Domain Capsule
@@ -112,17 +109,18 @@ high-risk behavior, and acceptance. Mark unsupported professional conclusions
 after multi-project reuse, sourced knowledge, behavioral evaluation, and
 accountable expert review.
 
-## Discovery Completion
+## Clarification Completion
 
 Return one decision:
 
 | Decision | Meaning |
 |---|---|
-| `READY_FOR_LIGHT_SPEC` | enough for opportunity/scope alignment |
-| `READY_FOR_PRODUCT_TRUTH` | enough for development-oriented specification |
+| `READY_FOR_LIGHT_SPEC` | accepted bounded requirement; enough for a requirement card |
+| `READY_FOR_PRODUCT_TRUTH` | accepted large/audited requirement; independent truth is justified |
+| `READY_FOR_UNIFIED_PRD` | accepted requirement; enough for the unified PRD baseline |
 | `READY_FOR_CHANGE_PACKAGE` | an existing baseline and requested change are understood |
 | `REVIEW_COMPLETE_WITH_GAPS` | useful output is possible but named unknowns remain |
 | `BLOCKED_BY_P0_UNKNOWN` | proceeding would invent a material business or risk decision |
 
-Discovery is complete only when the outcome, users, scope, evidence, risk,
-next artifact, and decision owners are explicit.
+Clarification is complete only when the intake decision, outcome, users, scope,
+evidence, authority, risk, next artifact and decision owners are explicit.

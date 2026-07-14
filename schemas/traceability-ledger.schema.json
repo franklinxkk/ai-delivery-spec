@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/traceability-ledger.schema.json",
+  "title": "AI Delivery Spec Bidirectional Traceability Ledger",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "ledger_id", "baseline_version", "edges", "forward_index", "reverse_index", "orphans"],
+  "properties": {
+    "schema_version": { "const": "5.1.0" },
+    "ledger_id": { "$ref": "#/$defs/stableId" },
+    "baseline_version": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from_id", "to_id", "relation", "source"],
+        "properties": {
+          "from_id": { "$ref": "#/$defs/stableId" },
+          "to_id": { "$ref": "#/$defs/stableId" },
+          "relation": { "enum": ["derived_from", "specifies", "contains", "uses", "governs", "verified_by", "evidenced_by", "failed_by", "changed_by", "supersedes", "depends_on", "relates_to"] },
+          "source": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "forward_index": { "$ref": "#/$defs/index" },
+    "reverse_index": { "$ref": "#/$defs/index" },
+    "orphans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "classification", "reason"],
+        "properties": {
+          "id": { "$ref": "#/$defs/stableId" },
+          "classification": { "enum": ["error", "draft", "reusable_reference", "out_of_scope", "legacy_evidence"] },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "stableId": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$" },
+    "index": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "$ref": "#/$defs/stableId" },
+        "uniqueItems": true
+      }
+    }
+  }
+}

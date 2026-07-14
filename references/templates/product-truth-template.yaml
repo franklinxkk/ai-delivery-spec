@@ -1,4 +1,4 @@
-schema_version: 5.0.0
+schema_version: 5.1.0
 truth_id: TRUTH-PRODUCT-001
 
 product:
@@ -54,16 +54,20 @@ roles:
     data_scope: "{tenant/org/department/owner/record scope}"
     forbidden_actions: []
 
-features:
-  - id: FEAT-CORE-001
-    title: "{approved in-scope capability}"
-    scope_status: in_scope
+requirements:
+  - id: REQ-CORE-001
+    title: "{approved requirement}"
+    stage: baselined
     priority: P0
     source_refs: [SRC-PROJECT-001]
     behavior_refs: [MOD-CORE-001, FLOW-CORE-001, VIEW-CORE-001, ACT-CORE-SUBMIT]
     acceptance_refs: [AC-CORE-001]
+    review_refs: []
+    change_refs: []
     owner: "{product owner}"
-    version: "1.0"
+    iteration: "{iteration}"
+    baseline_version: "1.0"
+    outcome: "{observable requirement result}"
 
 modules:
   - id: MOD-CORE-001
@@ -191,7 +195,7 @@ acceptance:
 evidence: []
 
 projections:
-  - kind: human_first
-    path: projections/human-first-prd.md
+  - kind: unified_prd
+    path: projections/unified-prd.md
     generated_from: product_truth
     generated_at: "{ISO-8601 timestamp}"

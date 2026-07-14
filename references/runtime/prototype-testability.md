@@ -213,3 +213,13 @@ Prototype completion requires:
 - no unapproved parity loss;
 - browser evidence exists for required ACs;
 - unresolved gaps have owner and completion state.
+Before accepting an HTML prototype, run:
+
+```bash
+python scripts/scan_prototype_css.py prototype.html
+```
+
+The scanner requires a single isolated `.hidden { display: none ... }` utility
+when the class is used and rejects `!important` outside that utility. Duplicate
+or combined `.hidden` selectors are treated as cascade pollution because they
+commonly make modal/view state impossible to reason about.

@@ -12,12 +12,12 @@ TRUTH = ROOT / "examples/publishing-learning-v5/delivery/truth/product-truth.yam
 COMPILER = ROOT / "scripts/compile_product_truth.py"
 LIST_KEYS = {
     "sources", "assertions", "unknowns", "decisions", "conflicts", "roles",
-    "features", "modules", "entities", "fields", "flows", "views", "actions",
+    "requirements", "features", "modules", "entities", "fields", "flows", "views", "actions",
     "states", "rules", "events", "integrations", "acceptance", "evidence", "projections",
 }
 
 truth = yaml.safe_load(TRUTH.read_text(encoding="utf-8"))
-core_keys = {"truth_id", "product", "delivery_context", "sources", "assertions", "unknowns", "decisions", "conflicts", "roles", "features"}
+core_keys = {"truth_id", "product", "delivery_context", "sources", "assertions", "unknowns", "decisions", "conflicts", "roles", "requirements", "features"}
 core = {key: value for key, value in truth.items() if key in core_keys}
 module = {key: value for key, value in truth.items() if key in LIST_KEYS and key not in core_keys}
 
@@ -25,7 +25,7 @@ with tempfile.TemporaryDirectory(prefix="truth-shards-") as temp:
     base = Path(temp)
     (base / "fragments").mkdir()
     index = {
-        "schema_version": "5.0.2", "truth_id": truth["truth_id"],
+        "schema_version": "5.1.0", "target_schema_version": truth["schema_version"], "truth_id": truth["truth_id"],
         "layout": "progressive_shards", "compiled_output": "compiled/product-truth.yaml",
         "fragments": [
             {"id": "FRAG-CORE", "path": "fragments/00-core.yaml", "owner": "test", "status": "approved"},
@@ -33,8 +33,8 @@ with tempfile.TemporaryDirectory(prefix="truth-shards-") as temp:
         ],
     }
     fragments = [
-        ("00-core.yaml", {"schema_version": "5.0.2", "fragment_id": "FRAG-CORE", "truth_id": truth["truth_id"], "content": core}),
-        ("MOD-ALL.yaml", {"schema_version": "5.0.2", "fragment_id": "FRAG-MODULE", "truth_id": truth["truth_id"], "content": module}),
+        ("00-core.yaml", {"schema_version": "5.1.0", "fragment_id": "FRAG-CORE", "truth_id": truth["truth_id"], "content": core}),
+        ("MOD-ALL.yaml", {"schema_version": "5.1.0", "fragment_id": "FRAG-MODULE", "truth_id": truth["truth_id"], "content": module}),
     ]
     (base / "index.yaml").write_text(yaml.safe_dump(index, sort_keys=False), encoding="utf-8")
     for name, value in fragments:

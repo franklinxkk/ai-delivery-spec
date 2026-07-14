@@ -28,8 +28,26 @@ def main() -> int:
 
     status = document.get("status")
     result = document.get("verification", {}).get("result")
-    if status in {"verified", "released"} and result != "passed":
+    if status in {"verified", "baselined", "released"} and result != "passed":
         failures.append(f"{status} change requires passed verification, got {result}")
+    if document.get("schema_version") == "5.1.0":
+        approvals = document.get("approvals", [])
+        if status in {"approved", "synchronized", "verified", "baselined"} and not approvals:
+            failures.append(f"{status} change requires approval records")
+        invalid_approvals = [item.get("role") for item in approvals if item.get("decision") not in {"approved", "approved_with_conditions"}]
+        if status in {"approved", "synchronized", "verified", "baselined"} and invalid_approvals:
+            failures.append("change has non-approved decisions: " + ", ".join(invalid_approvals))
+        if status in {"approved", "synchronized", "verified", "baselined"} and not document.get("diff"):
+            failures.append(f"{status} change requires a before/after diff")
+        if status in {"synchronized", "verified", "baselined"}:
+            synchronization = document.get("synchronization", [])
+            if not synchronization:
+                failures.append(f"{status} change requires versioned consumer synchronization records")
+            pending = [item.get("consumer") for item in synchronization if item.get("status") not in {"sent", "acknowledged"}]
+            if pending:
+                failures.append("change has unsynchronized consumers: " + ", ".join(pending))
+        if status == "baselined" and document.get("baseline_version") == document.get("target_version"):
+            failures.append("baselined change must advance target_version from baseline_version")
     if document.get("impacts", {}).get("data_migration", {}).get("required"):
         migration = document["impacts"]["data_migration"]
         if not migration.get("strategy") or not migration.get("rollback"):

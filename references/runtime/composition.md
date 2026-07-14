@@ -6,7 +6,7 @@ governance overlays, or dedicated domain knowledge.
 ## Four Layers
 
 ```text
-Core delivery kernel
+Requirement management kernel
   + Capability packs
   + Governance / project profiles
   + Domain pack or Project Domain Capsule
@@ -26,7 +26,7 @@ Load only when triggered:
 | content/resource | resource, version, publishing, rights, knowledge, archive |
 | data/integration | import, API, event, data product, lineage, reconciliation |
 | AI governance | model/agent behavior, knowledge context, tool call, AI writeback |
-| operations/security | production, migration, SLA, incident, DR, high-risk security |
+| resilience/security | migration constraint, SLA, DR, high-risk security or auditable recovery requirement |
 
 A capability pack adds reusable contracts; it never owns a business-domain
 state unless the Product Truth assigns ownership.

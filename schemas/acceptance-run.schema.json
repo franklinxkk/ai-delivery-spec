@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/acceptance-run.schema.json",
+  "title": "AI Delivery Spec Acceptance Run",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "baseline_version", "environment", "executor", "executed_at", "items", "conclusion", "sign_offs"],
+  "properties": {
+    "schema_version": { "const": "5.1.0" },
+    "run_id": { "type": "string", "pattern": "^ARUN-[A-Z0-9-]+$" },
+    "baseline_version": { "type": "string", "minLength": 1 },
+    "environment": { "type": "string", "minLength": 1 },
+    "executor": { "type": "string", "minLength": 1 },
+    "executed_at": { "type": "string", "format": "date-time" },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "acceptance_ref", "requirement_refs", "mandatory", "result", "actual_result", "evidence_refs", "defect_refs"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^ARITEM-[A-Z0-9-]+$" },
+          "acceptance_ref": { "type": "string", "pattern": "^AC-[A-Z0-9-]+$" },
+          "requirement_refs": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^REQ-[A-Z0-9-]+$" } },
+          "mandatory": { "type": "boolean" },
+          "result": { "enum": ["pass", "fail", "blocked", "not_run"] },
+          "actual_result": { "type": "string" },
+          "evidence_refs": { "type": "array", "items": { "type": "string" } },
+          "defect_refs": { "type": "array", "items": { "type": "string" } },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "residual_issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description", "owner", "disposition"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^(REV|DEFECT)-[A-Z0-9-]+$" },
+          "description": { "type": "string", "minLength": 1 },
+          "owner": { "type": "string", "minLength": 1 },
+          "disposition": { "enum": ["fix_before_acceptance", "accepted_risk", "deferred", "rejected"] },
+          "due_criterion": { "type": "string" }
+        }
+      }
+    },
+    "conclusion": { "enum": ["pending", "accepted", "accepted_with_conditions", "rejected"] },
+    "conditions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["description", "owner", "due_criterion"],
+        "properties": {
+          "description": { "type": "string", "minLength": 1 },
+          "owner": { "type": "string", "minLength": 1 },
+          "due_criterion": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "sign_offs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "actor", "decision", "at"],
+        "properties": {
+          "role": { "type": "string", "minLength": 1 },
+          "actor": { "type": "string", "minLength": 1 },
+          "decision": { "enum": ["approve", "approve_with_conditions", "reject"] },
+          "at": { "type": "string", "format": "date-time" },
+          "evidence_ref": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -1,188 +1,172 @@
 ---
 name: ai-delivery-spec
-description: Turn rough product ideas, customer materials, prototypes, legacy systems, or approved changes into traceable Product Truth, Human-First requirements, complete AI Coding PRDs, testable prototypes, structured acceptance, and coding-agent handoffs. Use for ToC clarification/light PRDs, ToB/ToG delivery, multi-role workflows, product/domain modeling, AI/data products, brownfield change, customer acceptance, launch, or operations. Excludes unrelated code debugging and copy rewriting.
+description: Manage product requirements from intake through clarification, specification, baseline, change, traceability, and acceptance. Turn rough ideas, customer materials, prototypes, or approved changes into one human-readable, AI-coding-ready requirement contract with stable IDs and executable acceptance. Use for ToC/ToB/ToG requirement intake, PRDs, multi-role workflow closure, brownfield change, prototype requirements, acceptance, or audit traceability. Excludes sprint/task management, implementation management, CI/CD, production operations, and unrelated code debugging or copy rewriting.
 ---
 
-# AI Delivery Spec 5.0.2 — Product Delivery Kernel
+# AI Delivery Spec 5.1.0 — Requirement Management Kernel
 
-> 首次使用推荐：先跑 Ultra-Light 轻量模式快速体验。
+> 首次使用：先执行需求准入；小需求可走 `mode=ultra_light`。
 >
-> 切换领域：指令末尾加 `domain=traffic` 即可启用交通垂类规则。
+> 切换领域：在指令末尾加 `domain=traffic` 等领域参数。
 >
-> 完整文档：见 `README.md`。
+> 默认交付：一份人类可读、开发/测试/AI Coding 共用的统一 PRD。
 
-Maintain one evidence-backed product contract and project it for users,
-product, engineering, QA, customers, coding agents, and operations.
+把需求从入口管到验收闭环。只管理六件事：准入、澄清、规格交付、
+变更、追溯、验收。研发排期、任务、代码、部署和运营由下游工具负责；
+本 Skill 只记录它们与需求有关的外部状态或证据，不接管其流程。
 
-## 1. Triage Before Loading
+## 1. 先准入，再写规格
 
-Declare:
+任何正式设计前先给出：
 
 ```text
-[TIER: Heavy|Light] | [AI: true|false] | [WORKFLOW: true|false] | [INFO: complete|partial|missing]
-Lifecycle: discover|specify|plan|tasks|build_verify|launch|learn_retire
-Shape: greenfield|brownfield|hybrid
-Consumer: human|prototype|coding_agent|qa|customer|operations
-Override: mode=ultra_light|lite|standard|full; tier=L0|L1|L2|L3|L4; domain=generic|<pack>
+Decision: accept|clarify|defer|reject
+Priority: P0|P1|P2|P3
+Value: high|medium|low + evidence
+Complexity: S|M|L|XL + impact dimensions
+Uncertainty: low|medium|high + unresolved questions
+Mode/Tier: ultra_light|lite|standard|full + L0|L1|L2|L3|L4
+Requirement stage: intake|clarify|specify|review|baseline|change|acceptance|closed
+Override: mode=<...>; tier=<...>; domain=generic|<pack>
 ```
 
-- Recommend `Ultra-Light` only for one reversible page/copy/field/rule change,
-  one primary role, no cross-module state, sensitive decision, migration, or
-  customer acceptance. Output one requirement card, assumptions, and positive/
-  negative AC; do not create Product Truth unless risk escalates.
-- `Heavy` includes development, QA, customer delivery, production, migration,
-  regulated behavior, multi-role workflow, or a complete AI Coding PRD.
-- Product behavior using a model/agent is `AI: true`; AI only writing artifacts
-  or code is `false`.
-- Approval, escalation, cross-module state, audit, or long-running work sets
-  `WORKFLOW: true`.
-- Mark information partial/missing only when an unknown can change outcome,
-  scope, owner, role, state, data authority, compliance, commercial promise, or
-  acceptance. Do not repeat discovery after the user has approved these.
+- 价值、复杂度和优先级必须说明证据；没有研发确认时不得伪造人天或成本。
+- `Ultra-Light` 仅用于一个可逆页面/文案/字段/规则改动：单主角色、无跨模块
+  状态、敏感数据、合规决策、客户验收或存量迁移。
+- 多角色流程、存量改造、监管/审计、正式客户验收或完整 PRD 至少用 L2。
+- 自动推荐可被手动覆盖；覆盖不得隐藏 P0 安全、合规或合同风险。
+- 多需求并行时登记版本归属、依赖、冲突和排序，不直接展开全部重型规格。
 
-Higher assurance wins. Mode controls artifact breadth; tier controls rigor.
-Manual mode/tier/domain overrides are always accepted unless they would hide a
-P0 safety or compliance risk.
+运行 `scripts/triage_requirement.py`，或按 `references/requirement-management.md`
+和 `schemas/requirement-register.schema.json` 完成准入。未通过准入的需求不得进入
+完整规格设计。
 
-## 2. Load Only The Triggered References
+## 2. 只加载当前阶段材料
 
-| Need | Read |
+| 当前工作 | 必读 |
 |---|---|
-| source/prototype/legacy inventory or ambiguity | `references/discover.md` |
-| active clarification | `references/runtime/schema-grill.md` |
-| Product Truth and behavior specification | `references/specify.md` |
-| complete AI Coding PRD | `references/runtime/ai-coding-completeness.md` + `references/templates/ai-coding-prd-template.md` |
-| Human-First/Coding/QA/customer projection | `references/handoff.md` |
-| executable prototype | `references/runtime/prototype-testability.md` + `references/handoff.md` |
-| capability/domain composition | `references/runtime/composition.md` |
-| change/migration/rollback | `references/runtime/change.md` |
-| review/evidence/domain assurance | `references/runtime/verify.md` |
-| launch/operate/retire | `references/runtime/operate.md` |
-| realtime/push/countdown/SSE/WebSocket | `references/runtime/realtime-contract.md` |
-| large project/context pressure | `references/runtime/context-planning.md` |
-| long chain/formal checkpoint | `references/runtime/execution-gates.md` |
-| GLM/Qwen/DeepSeek/Kimi/WorkBuddy/Trae/Qoder/Cursor | matched `agents/domestic/*.md` + `agents/domestic/china-tools.md` |
+| 准入、需求池、六阶段闭环 | `references/requirement-management.md` |
+| 材料/原型/旧系统盘点 | `references/discover.md` |
+| 主动澄清、歧义扫描、评审问题 | `references/runtime/schema-grill.md` |
+| 行为规格与稳定 ID | `references/specify.md` |
+| 一份统一 PRD | `references/templates/unified-requirement-prd-template.md` |
+| 机器附录最低契约 | `references/runtime/ai-coding-completeness.md` |
+| 投影与工程交接 | `references/handoff.md` |
+| 变更、影响分析、版本 diff | `references/runtime/change.md` |
+| 验收执行、证据与结论 | `references/runtime/verify.md` |
+| 可执行原型 | `references/runtime/prototype-testability.md` |
+| 大项目/上下文压力 | `references/runtime/context-planning.md` |
+| 领域组合 | `references/runtime/composition.md` + 匹配领域包 |
+| 复用审批/列表/表单/权限/导入导出/集成模式 | `references/patterns/common-requirement-patterns.yaml` |
+| 国产模型/工具 | 匹配的 `agents/domestic/*.md` |
 
-Load one or two stage references, zero or one matched domain pack, and only
-triggered governance rules. Do not load README, history, examples, every domain,
-or every reference during runtime.
+一次只加载当前阶段的一至两个引用、零或一个领域包，以及被触发的治理规则。
+运行时不要加载 README、历史版本、所有示例或全部领域包。
+使用领域包前先读 `references/domain-coverage.yaml`，再加载匹配领域文件；实践状态
+不能替代可复用知识包的保证等级。
 
-## 3. Choose The Work Path
-
-```text
-Discover 产品发现 → Specify 统一需求契约 → Plan/Tasks 工程交接
-→ Build/Verify 构建验收 → Launch 上线 → Learn/Retire 运营与退役
-```
-
-- For an idea, clarify outcome, opportunity/problem, hypothesis, assumptions,
-  risks, metric, and next validation before a full PRD.
-- For customer material or an existing prototype, perform Stage 0 inventory:
-  views, roles, states, actions/handlers, entities/fields, metrics, sources,
-  unresolved gaps, and preserved behavior.
-- When scope is approved and the user requests a complete AI Coding PRD, use
-  the Complete Contract Route in §5. Do not return a thin projection.
-- For existing baselines, record `CHG-*`, impact, compatibility, migration,
-  regression, rollout, and rollback in `schemas/change-package.schema.json`;
-  regenerate only affected projections.
-
-## 4. Canonical Product Truth Without Monolith Deadlocks
-
-Product Truth owns stable facts and IDs:
+## 3. 六阶段需求闭环
 
 ```text
-source/assertion/decision/unknown/conflict/feature
-role/module/entity/field/flow/view/region/action
-state/rule/event/integration/acceptance/evidence/change/projection
+Intake 准入 → Clarify 澄清 → Specify/Review 规格与评审
+→ Baseline 基线 → Change 变更 → Acceptance 验收 → Closed
 ```
 
-Use `schemas/product-truth.schema.json`. Core invariants:
+### 3.1 准入
 
-- Evidence precedes assertions; mark verified/inferred/proposed/unknown/conflict.
-- Every primary action has visible and domain results.
-- Every state change has owner, guard, next state, event/audit, failure, and AC.
-- Every field has meaning, source, type/dictionary, editability, sensitivity,
-  and validation when applicable.
-- Every cross-module flow has ownership, mapping, command/event, failure/
-  compensation, reconciliation, and evidence.
-- Every approved `FEAT-*` links source, behavior, and AC; deferred/out-of-scope/
-  unknown behavior remains explicit.
+- 建立 `REQ-*`，记录来源、目标结果、价值证据、复杂度带、优先级、版本归属、
+  依赖、负责人和准入结论。
+- 区分需求优先级与事故/安全等级；不能用“领导要求”代替价值和边界说明。
 
-### Progressive Truth is the large-project default
+### 3.2 澄清
 
-Never ask an agent, subagent, Trae, or WorkBuddy to generate/rewrite one large
-`product-truth.yaml` in a single pass. Use:
+- 依次闭合用户/角色、触发场景、业务结果、主流程、权限/数据范围、状态、
+  规则、异常、验收与范围外项。
+- 识别“支持、灵活、适量、及时、等、默认、可配置”等歧义，并要求可判定阈值。
+- 关联 `REV-*` 评审问题、责任人、截止条件和关闭证据；不得把待办伪装成已确认事实。
+
+### 3.3 统一规格交付
+
+- 默认只交付一份统一 PRD：前半部分供业务、产品和传统开发顺序阅读；后半部分
+  是字段、状态、接口、事件、追溯和机器 AC 附录，供开发、测试与 Coding Agent 使用。
+- 正文先讲目标、范围、角色旅程、模块和业务流程，不让机器表格淹没阅读路径。
+- 工程附录必须禁止 AI/研发发明业务规则，但不得把数据库、框架或部署实现写成产品需求，
+  除非它们本身是客户/业务契约。
+- 复用模式只提供问题、契约、异常和 AC 蓝图；复制后必须绑定项目 `REQ-*` 和证据，
+  不得把通用模式当成已确认需求。
+
+### 3.4 变更
+
+- 每个变更按 `schemas/change-package.schema.json` 建立 `CHG-*`：原因、来源、
+  原基线、新旧差异、影响、审批、同步和回归。
+- 从变更种子双向遍历 `REQ/Page/Field/Rule/API/AC/Test/Defect/Evidence`，禁止只改 PRD 正文。
+- 变更未完成影响分析、版本留存、审批和受影响方同步前，不得建立新基线。
+
+### 3.5 双向追溯
+
+- 需求必须能正向追到页面、字段、规则、动作、状态、接口、验收、测试和证据；
+  验收失败或缺陷必须能反向定位到原需求和变更。
+- 细粒度绑定采用稳定 ID；谁在何时修改了什么以及依据是什么，写入审计记录。
+- Product Truth 仅在多文档、多模块长期变更、强审计或大项目时独立生成；普通单文件
+  PRD 在附录内维护稳定 ID 索引即可，避免为 YAML 而 YAML。
+
+### 3.6 验收
+
+- `AC-*` 必须拆成可执行项：前置、角色、步骤/输入、可见结果、领域结果、反例、证据。
+- `ARUN-*` 记录执行环境、执行人、时间、逐项结果、缺陷、遗留项、签署和结论。
+- 只有证据绑定后才能 `accepted`。开发中/待上线等只记录为外部里程碑，
+  不是本 Skill 管理的任务状态。
+
+## 4. 统一事实与适用门槛
+
+稳定事实对象：
 
 ```text
-delivery/truth/index.yaml
-delivery/truth/fragments/00-core.yaml
-delivery/truth/fragments/MOD-*.yaml
-delivery/truth/compiled/product-truth.yaml
+source/assertion/decision/unknown/conflict/requirement/review/change
+role/module/entity/field/flow/view/region/action/state/rule/event/integration
+acceptance/test/defect/evidence/projection
 ```
 
-Write one fragment per module/flow slice, validate it, update its checkpoint,
-then compile deterministically. The index is the authoring source; the compiled
-file is the read-only canonical projection for existing tools. Use monolith only
-for bounded projects that fit comfortably in one context.
+始终遵守：
 
-## 5. Complete AI Coding PRD Route
+- 证据先于结论，区分 verified/inferred/proposed/unknown/conflict。
+- 每个主动作有可见结果和领域结果；每个状态变化有守卫、失败、审计与 AC。
+- 每个字段有含义、来源、字典、编辑权、敏感性和校验；每条跨模块流有所有权、
+  映射、失败/补偿和对账。
+- 每个已基线 `REQ-*` 关联来源、行为和验收；延期、拒绝、范围外和未知不得静默丢失。
 
-Use when consumer is `coding_agent` and the user asks for a complete/final/
-directly generatable PRD.
+满足任一条件时使用独立 Product Truth：12+ 页面/模块、40+ 动作、80+ 字段、
+5+ 来源、3+ 集成、多份受控投影、持续变更或强审计。否则用统一 PRD 内嵌索引。
 
-1. Lock a complete contract index: sources, modules, roles, journeys, views,
-   flows, entities, fields, states, integrations, metrics, and P0 AC IDs.
-2. Write Product Truth and PRD by ID slice; checkpoint each accepted module.
-3. Assemble `references/templates/ai-coding-prd-template.md` without dropping
-   sections. Use `Not applicable + reason + future trigger`, never an empty
-   heading.
-4. Require repository baseline; role/permission/data scope; IA/page layout;
-   fields/data flow; state/recovery; concrete API request/response/errors/
-   idempotency; versioned event payloads; integration/reconciliation; NFR;
-   metrics caliber; vertical files/dependencies; machine AC; deployment/
-   migration/rollback/operations; and forbidden invention.
-5. Run `validate_coding_agent_contract.py --level L2 --profile full_prd` (L3
-   for AI/high-risk). Fix the contract; never lower the level to obtain PASS.
-6. Cross-check every role journey and P0 flow against the IA/prototype and AC.
+大项目不得一次性生成巨型 YAML；按 `00-core + REQ/MOD/FLOW` 分片，逐片校验后
+确定性编译。Product Truth 是可选的规模化机制，不是所有需求的前置税。
 
-Do not end after an outline, one module, one role, one validator, or one
-prototype page when the requested package is larger.
+## 5. 既有原型/系统的 Stage 0
 
-## 6. Smart Large-Project Mode
+从已有 HTML、应用方案、会议纪要或旧系统生成 PRD 前，先提取：
 
-Trigger when any two are true: 8+ roles, 12+ modules/views, 40+ actions, 80+
-fields, 5+ sources, 3+ integrations, or PRD + prototype + coding/QA handoff.
+```text
+views, regions, roles, actions/handlers, states, entities/fields,
+data actions, metrics, representative data, source conflicts, unresolved gaps
+```
 
-1. Inventory the complete ID graph once.
-2. Generate a Context Plan and declare pressure `low|medium|high`.
-3. At medium pressure, stop reloading sources and work from approved IDs.
-4. At high pressure, checkpoint the current fragment/section and start the next
-   slice. Never merge roles or omit P0 states, permissions, exceptions, API
-   contracts, or AC to save tokens.
-5. Assemble and run global closure only after all slices pass locally.
+建立保留清单并比较新旧视图、动作、处理器、弹窗、角色路径和数据量。未经明确
+缩减，不得让新原型的交互覆盖低于可信基线。
 
-Lite/Ultra-Light may trim prose and optional projections, not approved P0
-behavior. If a safe slice does not fit, split it again or report a named P0
-blocker.
+## 6. 完整 PRD 的闭合标准
 
-## 7. Domain Use And Honest Evidence
+用户要求“完整/最终/直接开发/AI Coding PRD”时：
 
-Read `references/domain-coverage.yaml` before a file in `references/domains/`.
+1. 锁定全量需求、角色、旅程、模块、页面、流程、实体、字段、状态、接口和 P0 AC 索引。
+2. 按 `REQ-*` 或模块切片写入统一 PRD；每片完成正文和对应工程附录，禁止最后补契约。
+3. 逐角色走通入口、权限、主路径、异常、退出/交接、数据变化和验收结果。
+4. 接口必须给出业务级请求/响应、错误、幂等、权限和对账；不替研发指定无业务依据的实现。
+5. 运行 L2 完整性、PRD 可读性、追溯、验收和适用领域校验；修复内容，不能降级求 PASS。
+6. 交付一份主 PRD。只有下游工具明确需要时，再导出独立 YAML/JSON/测试清单。
 
-- `practice_status` answers whether methods have been used in shipped projects.
-- `maturity` answers whether this reusable pack revision has sourced knowledge,
-  behavioral evaluation, accountable review, and audit evidence.
-- `production_practiced + experimental` is valid: it prevents denying real
-  delivery experience while forbidding unsupported universal claims.
+不得在只完成目录、一个模块、一个角色、一页原型或一次校验后宣称完成。
 
-No matched pack means build a project-scoped Domain Capsule with
-`schemas/project-domain-capsule.schema.json`; it never prevents
-delivery. Composition may narrow permissions but cannot expand the owning
-business domain's authority.
-
-## 8. Projection And Prototype Closure
-
-Generate only the views needed by the consumer, but preserve the same IDs.
-Interactive prototypes must be usable:
+## 7. 原型与验收可测试性
 
 ```text
 data-testid <- VIEW/REG/AC
@@ -192,49 +176,46 @@ data-state  <- state enum
 data-api    <- command/API
 ```
 
-Every `data-action` needs a handler and visible outcome. Preserve existing
-interaction coverage unless explicitly de-scoped. Verify JavaScript syntax,
-all important role journeys, state/failure paths, and representative data.
+每个 `data-action` 必须有处理器和可见结果。验证 JavaScript 语法、关键角色旅程、
+权限、状态/失败路径、代表性数据以及 `.hidden`/`!important` 污染。原型是需求验证载体，
+不是需求事实的替代品。
 
-## 9. Gates And Completion
+## 8. 门禁与完成状态
 
-Apply triggered gates without weakening in-scope quality:
+1. intake：价值、范围、复杂度、优先级、版本和依赖可判定；
+2. clarification：P0 歧义、冲突和评审问题已关闭或明确阻断；
+3. specification：角色/流程/页面/动作/状态/字段/异常/AC 闭合且正文可读；
+4. baseline：版本、批准人和追溯基线已冻结；
+5. change：影响、diff、审批、同步和回归闭合；
+6. acceptance：可执行项、结果、缺陷、证据和签署闭合；
+7. domain：实践状态与可复用知识包保证等级保持分离。
 
-1. discovery: sources, outcome, scope, owner, risks, P0 unknowns;
-2. truth: role/flow/page/action/state/data/exception/AC closure;
-3. prototype: every primary action has observable durable behavior;
-4. handoff: target consumer proceeds without inventing business behavior;
-5. acceptance: AC IDs produce named evidence;
-6. change/launch: compatibility, migration, regression, rollout, rollback,
-   support, and observability;
-7. domain: practice and reusable-pack assurance claims remain distinct.
+完成状态仅为 `PASS`、`REVIEW_COMPLETE_WITH_GAPS` 或 `BLOCKED`。文档内写了 PASS
+不等于真实执行证据。
 
-Completion is scoped: `PASS`, `REVIEW_COMPLETE_WITH_GAPS`, or `BLOCKED`.
-Embedded PASS text is never execution evidence.
-
-## 10. Deterministic Commands
+## 9. 确定性命令
 
 ```powershell
-py -3 scripts/ai_delivery_spec_cli.py init-delivery --output delivery
-py -3 scripts/ai_delivery_spec_cli.py compile-truth --index delivery/truth/index.yaml
-py -3 scripts/plan_context.py --truth delivery/truth/compiled/product-truth.yaml --config delivery/spec.config.yaml
-py -3 scripts/query_product_truth.py --truth delivery/truth/compiled/product-truth.yaml --id MOD-EXAMPLE --output working-slice.yaml
-py -3 scripts/validators/validate_product_truth.py delivery/truth/compiled/product-truth.yaml
-py -3 scripts/validators/validate_prd_quality.py delivery/projections/human-first-prd.md --level L2
-py -3 scripts/validators/validate_ia_skeleton.py delivery/ia-skeleton.yaml --level L2
-py -3 scripts/validators/validate_coding_agent_contract.py delivery/projections/ai-coding-prd.md --level L2 --profile full_prd
-py -3 scripts/extract_interaction_ledger.py --input prototype.html --output interaction-ledger.json
-py -3 scripts/render_mermaid_flow.py --truth delivery/truth/compiled/product-truth.yaml --output delivery/projections/flow.mmd
+py -3 scripts/ai_delivery_spec_cli.py init-requirements --output requirements
+py -3 scripts/ai_delivery_spec_cli.py triage --input requirements/intake.yaml --format markdown
+py -3 scripts/scan_requirement_ambiguity.py requirements/PRD.md
+py -3 scripts/analyze_change_impact.py --truth requirements/product-truth.yaml --change requirements/changes/CHG-001.yaml
+py -3 scripts/build_traceability_ledger.py --truth requirements/product-truth.yaml --output requirements/traceability.yaml
+py -3 scripts/validators/validate_requirement_register.py requirements/register.yaml
+py -3 scripts/validators/validate_acceptance_run.py requirements/acceptance/ARUN-001.yaml
+py -3 scripts/validators/validate_prd_quality.py requirements/PRD.md --level L2
+py -3 scripts/validators/validate_coding_agent_contract.py requirements/PRD.md --level L2 --profile full_prd
 ```
 
-Use `python` outside Windows when available.
+非 Windows 环境使用 `python`。
 
-## 11. Final Self-Check
+## 10. 最终自检
 
-- triage, lifecycle, shape, consumer, mode, tier, and source precedence are clear;
-- approved source material has no silent omission;
-- all roles, journeys, flows, states, permissions, failures, and P0 AC close;
-- complete AI Coding requests pass the full contract validator;
-- large work used fragments/checkpoints instead of monolithic generation;
-- projections and prototype preserve IDs and interaction coverage;
-- evidence, practice, maturity, gaps, and completion state are honestly named.
+- 准入结论、价值证据、复杂度、优先级、版本和依赖清晰；
+- 已确认材料无静默遗漏，冲突与假设可见；
+- 所有角色的入口、权限、主/异常路径、交接和数据结果闭环；
+- 统一 PRD 对人可顺序阅读，对研发/测试/AI Coding 不要求发明规则；
+- 变更可 diff、可评估、可审批、可同步、可回归；
+- 任何 AC/测试/缺陷均能反查 REQ，验收结论有证据；
+- 大项目使用分片和检查点，小项目不被 Product Truth 过度治理；
+- 未越界接管任务、代码、发布或运营管理。

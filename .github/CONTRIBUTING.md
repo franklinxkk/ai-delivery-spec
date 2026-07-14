@@ -10,7 +10,7 @@ Classify the proposal:
 | Type | Belongs In |
 |---|---|
 | core routing or invariant used on nearly every task | `SKILL.md` |
-| lifecycle-stage procedure | one `references/runtime/*.md` stage file |
+| requirement-stage procedure | one focused `references/runtime/*.md` file |
 | machine contract | `schemas/` plus validation |
 | reusable cross-domain concern | capability/profile catalog |
 | professional industry knowledge | one matched `references/domains/domain-*.md` plus coverage metadata |
