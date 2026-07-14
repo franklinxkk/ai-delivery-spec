@@ -16,7 +16,7 @@ assurance:
   human_gate_on: [regulated, money, safety, privacy, tenant_isolation, ai_writeback, migration]
 execution:
   environment: development
-  expected_skill_version: 5.1.2
+  expected_skill_version: 5.1.3
   dependency_policy: strict
   high_risk_failure: block
   low_risk_failure: human_review

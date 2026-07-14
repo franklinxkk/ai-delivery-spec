@@ -11,7 +11,7 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[2]
-VERSION = "5.1.2"
+VERSION = "5.1.3"
 PUBLIC_FILES = (
     "README.md",
     ".github/docs/social-launch-kit.md",

@@ -1,4 +1,4 @@
-# AI Delivery Spec 5.1.2
+# AI Delivery Spec 5.1.3
 
 > 需求一来就写 PRD，低价值需求也进入重型设计？
 >
@@ -6,26 +6,38 @@
 >
 > 需求一变，页面、字段、接口、测试和验收漏改，最后无法审计？
 
-**AI Delivery Spec 是面向 ToB/ToG、兼顾 ToC 的需求管理内核。**
-它不做大而全的研发管理，只把需求的准入、澄清、规格交付、变更、追溯和验收
-管成一条可读、可开发、可测试、可审计的闭环。
+**AI Delivery Spec 是面向 ToB/ToG、兼顾 ToC 的需求管理 Skill。**
+它不接管研发项目管理，只把需求从准入、澄清、定稿、变更、追溯到验收，变成
+业务能确认、产品能维护、开发和测试能执行、Coding Agent 不必猜的同一份交付契约。
 
-默认交付不是两套 PRD，而是**一份统一需求规格说明书**：正文让业务、产品和传统
-开发顺序读懂，工程附录让测试与 AI Coding 精确执行。
+默认交付不是两套 PRD，也不是先造一个巨型 YAML，而是**一份统一需求规格说明书**：
+正文让客户、产品和传统开发顺序读懂，同文档工程附录让测试与 AI Coding 精确执行。
+只有大项目、持续变更、多投影或强审计场景才启用分片 Product Truth。
 
-[![Version](https://img.shields.io/badge/version-5.1.2-0052A4.svg)]()
+[![Version](https://img.shields.io/badge/version-5.1.3-0052A4.svg)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 
-## 60 秒上手：无需克隆，Agent 直接调用
+**公开采用信号（截至 2026-07-14）**：
+[ClawHub 606 次下载](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec) ·
+[skills.sh 16 次安装](https://www.skills.sh/franklinxkk/ai-delivery-spec) ·
+[SkillHub TRACE 4.7/5](https://skillhub.cn/dashboard/evaluation/ai-delivery-spec)，双安全扫描无 P0/P1 风险。
+这些是第三方平台的动态公开快照，用于说明已有真实关注与安装，不替代项目适用性判断。
 
-先安装：
+## 60 秒上手：选一个任务，复制即用
+
+不必手工克隆仓库。任选与你的 Agent 环境匹配的安装方式：
 
 ```bash
+# Codex / Claude Code / Cursor / Trae 等 Agent Skills 兼容工具
 npx skills add franklinxkk/ai-delivery-spec
+
+# OpenClaw
+openclaw skills install @franklinxkk/ai-delivery-spec
 ```
 
-再复制一条指令。
+安装后复制下面一条指令；拿不准时从 **Standard L2** 开始，Skill 会先分诊，不会把
+小需求强行升级成重交付。
 
 ### Ultra-Light — 一个可逆小改动 / ToC Idea
 
@@ -47,6 +59,33 @@ npx skills add franklinxkk/ai-delivery-spec
 
 手动修正：`mode=ultra_light|lite|standard|full tier=L0|L1|L2|L3|L4 domain=<pack>`。
 黄金入门示例见 [examples/minimal-v5](examples/minimal-v5/README.md)。
+
+## 第一次使用，你会拿到什么
+
+- **先有准入结论**：目标、价值、范围、责任人和未知项不足时，先列出需要确认的批次，
+  不用一份看似完整的 PRD 掩盖决策空洞。
+- **再有一份可读的基线**：角色旅程、页面、字段、规则、权限、状态、异常、接口和验收
+  使用稳定 ID 互相绑定；传统开发读正文，Coding Agent 同时读取工程附录。
+- **需要原型时才交付原型契约**：已有原型先做 Stage 0 反向盘点，保留视图、动作、状态
+  和角色路径覆盖；新原型要求每个动作有处理器和可见结果。
+- **最后有轻量门禁结论**：`PASS`、`REVIEW_COMPLETE_WITH_GAPS` 或 `BLOCKED`，明确哪些
+  已被静态证明、哪些仍需领域负责人、浏览器旅程或客户验收。
+
+## 常见的第一次疑问
+
+**这个 Skill 重吗？** 不是固定重。单字段、单角色、可逆改动走 Ultra-Light；常规需求
+走 Standard L2；只有规模或审计阈值触发才加载分片真相、领域包和完整门禁。
+
+**每次都要生成 Product Truth YAML 吗？** 不要。它是复杂项目的内部单源事实，不是
+默认交付物。普通项目以一份统一 PRD 为基线，避免 Trae、WorkBuddy 等工具被巨型 YAML
+拖慢或中断。
+
+**PRD 能直接交给开发和 Coding Agent 吗？** Standard L2 以上在角色、流程、状态、权限、
+字段、接口、异常和机器验收通过对应门禁后，可以作为同一开发基线；未确认的法规、客户
+决策和领域规则仍必须显式标为未知，Agent 不得自行发明。
+
+**它会替代产品、架构、测试或甲方吗？** 不会。它统一交付口径、暴露缺口并保留证据，
+但范围决策、技术方案、专业领域判断和最终签署仍由相应责任人完成。
 
 ## 只管六件事
 
@@ -174,7 +213,7 @@ python scripts/ai_delivery_spec_cli.py impact --truth requirements/truth/compile
 | 位置 | 工具类型 | 责任 |
 |---|---|---|
 | 上游 | 产品发现、调研、工作坊 | 发现机会、证据和策略假设 |
-| **需求管理内核** | **AI Delivery Spec 5.1.2** | 准入 → 澄清 → 基线 → 变更 → 追溯 → 验收 |
+| **需求管理内核** | **AI Delivery Spec 5.1.3** | 准入 → 澄清 → 基线 → 变更 → 追溯 → 验收 |
 | 下游 | Spec Kit、项目/研发管理工具 | 技术方案、任务、排期和依赖执行 |
 | 下游 | Codex、Trae、Cursor、Qoder 等 | 依据已基线需求编码、测试和修改 |
 | 外部证据 | CI、测试、发布、监控平台 | 向需求验收回传可引用证据 |

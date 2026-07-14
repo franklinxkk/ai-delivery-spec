@@ -288,7 +288,17 @@ class Gate:
                 command = [node, "--check"]
                 if module_script:
                     command.insert(1, "--input-type=module")
-                checked = subprocess.run(command, input=scripts, text=True, capture_output=True, timeout=15)
+                # Node consumes JavaScript as UTF-8.  Do not inherit the Windows
+                # runner's narrow locale (for example cp1252), otherwise a valid
+                # prototype containing Chinese text can fail before Node starts.
+                checked = subprocess.run(
+                    command,
+                    input=scripts,
+                    text=True,
+                    encoding="utf-8",
+                    capture_output=True,
+                    timeout=15,
+                )
                 if checked.returncode:
                     detail = next((line.strip() for line in checked.stderr.splitlines() if "SyntaxError" in line), "JavaScript syntax check failed")
                     self.add("BLOCK", "PROTO-JS-SYNTAX", path, detail)

@@ -1,5 +1,15 @@
 # Changelog
 
+## 5.1.3 - 2026-07-14
+
+- Rebuilt the README first-use path around pain, outcome, honest public adoption
+  signals, two install routes, three copyable task routes, expected deliverables,
+  and concise answers to the four questions new users ask before adoption.
+- Completed the Windows encoding fix at the real boundary: JavaScript extracted
+  from multilingual prototypes is now sent to Node explicitly as UTF-8 instead
+  of inheriting a narrow runner locale. The existing `cp1252` regression covers
+  both JSON output and the nested Node syntax-check path.
+
 ## 5.1.2 - 2026-07-14
 
 - Made machine-readable quality-gate JSON ASCII-safe so Chinese findings cannot
