@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.1.2 - 2026-07-14
+
+- Made machine-readable quality-gate JSON ASCII-safe so Chinese findings cannot
+  crash on Windows runners with a narrow default console encoding. The
+  lightweight-gate regression now forces `cp1252` output to reproduce this
+  cross-platform boundary on every OS.
+
 ## 5.1.1 - 2026-07-14
 
 - Reduced the always-loaded Skill from about 3,590 to about 1,870 `o200k`

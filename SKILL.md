@@ -3,7 +3,7 @@ name: ai-delivery-spec
 description: Manage product requirements from intake through clarification, specification, baseline, change, traceability, and acceptance. Turn rough ideas, customer materials, prototypes, legacy systems, or approved changes into one human-readable, AI-coding-ready requirement contract with stable IDs and executable acceptance. Use for ToC/ToB/ToG requirement intake, PRDs, role workflow closure, brownfield change, prototypes, acceptance, or audit traceability. Excludes sprint/task management, implementation management, CI/CD, production operations, and unrelated code debugging or copy rewriting.
 ---
 
-# AI Delivery Spec 5.1.1 — Requirement Management Kernel
+# AI Delivery Spec 5.1.2 — Requirement Management Kernel
 
 > First use: run requirement intake; use `mode=ultra_light` only for one reversible change.
 >

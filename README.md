@@ -1,4 +1,4 @@
-# AI Delivery Spec 5.1.1
+# AI Delivery Spec 5.1.2
 
 > 需求一来就写 PRD，低价值需求也进入重型设计？
 >
@@ -13,7 +13,7 @@
 默认交付不是两套 PRD，而是**一份统一需求规格说明书**：正文让业务、产品和传统
 开发顺序读懂，工程附录让测试与 AI Coding 精确执行。
 
-[![Version](https://img.shields.io/badge/version-5.1.1-0052A4.svg)]()
+[![Version](https://img.shields.io/badge/version-5.1.2-0052A4.svg)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 
@@ -174,7 +174,7 @@ python scripts/ai_delivery_spec_cli.py impact --truth requirements/truth/compile
 | 位置 | 工具类型 | 责任 |
 |---|---|---|
 | 上游 | 产品发现、调研、工作坊 | 发现机会、证据和策略假设 |
-| **需求管理内核** | **AI Delivery Spec 5.1.1** | 准入 → 澄清 → 基线 → 变更 → 追溯 → 验收 |
+| **需求管理内核** | **AI Delivery Spec 5.1.2** | 准入 → 澄清 → 基线 → 变更 → 追溯 → 验收 |
 | 下游 | Spec Kit、项目/研发管理工具 | 技术方案、任务、排期和依赖执行 |
 | 下游 | Codex、Trae、Cursor、Qoder 等 | 依据已基线需求编码、测试和修改 |
 | 外部证据 | CI、测试、发布、监控平台 | 向需求验收回传可引用证据 |

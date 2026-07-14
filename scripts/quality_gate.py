@@ -373,7 +373,7 @@ def main() -> int:
             gate.check_prototype(value, args.level)
     payload = result_payload(gate, args.profile)
     if args.format == "json":
-        print(json.dumps({key: value for key, value in payload.items() if key != "exit_code"}, ensure_ascii=False, indent=2))
+        print(json.dumps({key: value for key, value in payload.items() if key != "exit_code"}, ensure_ascii=True, indent=2))
     else:
         summary = payload["summary"]
         print(f"{payload['status']} profile={args.profile} blockers={summary['blockers']} gaps={summary['gaps']}")

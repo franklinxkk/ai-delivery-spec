@@ -51,7 +51,7 @@
       "required": ["environment", "expected_skill_version", "dependency_policy", "high_risk_failure", "low_risk_failure", "audit_mode", "max_turns_per_stage"],
       "properties": {
         "environment": { "enum": ["development", "test", "staging", "production"] },
-        "expected_skill_version": { "enum": ["5.1.0", "5.1.1"] },
+        "expected_skill_version": { "enum": ["5.1.0", "5.1.1", "5.1.2"] },
         "dependency_policy": { "const": "strict" },
         "high_risk_failure": { "const": "block" },
         "low_risk_failure": { "enum": ["block", "human_review"] },

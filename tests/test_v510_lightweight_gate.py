@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -15,7 +16,11 @@ failures: list[str] = []
 
 
 def run(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run([sys.executable, str(GATE), *args], cwd=ROOT, text=True, capture_output=True)
+    env = {**os.environ, "PYTHONIOENCODING": "cp1252"}
+    return subprocess.run(
+        [sys.executable, str(GATE), *args], cwd=ROOT, text=True,
+        encoding="utf-8", capture_output=True, env=env,
+    )
 
 
 valid_requirement = FIXTURES / "gate-requirement-valid.yaml"
