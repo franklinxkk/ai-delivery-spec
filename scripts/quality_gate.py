@@ -214,6 +214,82 @@ class Gate:
                 self.add("BLOCK", "PRD-NO-FAILURE", path, "contract misses failure behavior")
             for failure in analyze_prd_structure(raw, full_prd=True):
                 self.add("BLOCK", "PRD-STRUCTURE", path, failure)
+        if level in {"L3", "L4"}:
+            frontmatter: dict[str, Any] = {}
+            match = re.match(r"\A---\s*\n(.*?)\n---\s*\n", raw, re.S)
+            if match:
+                try:
+                    loaded = yaml.safe_load(match.group(1)) or {}
+                    if isinstance(loaded, dict):
+                        frontmatter = loaded
+                except yaml.YAMLError:
+                    pass
+            declared_views = frontmatter.get("page_contract_view_ids", [])
+            if not isinstance(declared_views, list) or not declared_views:
+                self.add("BLOCK", "PRD-NO-PAGE-CONTRACT-SCOPE", path, "L3 direct-implementation PRD must declare page_contract_view_ids in frontmatter")
+                declared_views = []
+            markers = list(re.finditer(r"<!--\s*PAGE-CONTRACT:\s*(VIEW-[A-Z0-9-]+)\s*-->", raw, re.I))
+            blocks: dict[str, str] = {}
+            for index, marker in enumerate(markers):
+                end = markers[index + 1].start() if index + 1 < len(markers) else len(raw)
+                blocks[marker.group(1).upper()] = raw[marker.end():end]
+            required_surfaces = {
+                "purpose/entry": ("页面目标", "purpose", "入口"),
+                "region layout": ("区域布局", "layout"),
+                "metric caliber": ("指标口径", "metric"),
+                "filters": ("筛选", "filter"),
+                "columns/tree/canvas": ("列表列", "列", "树", "画布", "column"),
+                "fields/controls": ("字段与控件", "控件", "field"),
+                "actions/permissions": ("动作", "权限", "action"),
+                "pagination/batch": ("分页", "pagination"),
+                "import": ("导入", "不适用", "not applicable"),
+                "export": ("导出", "不适用", "not applicable"),
+                "states/exceptions": ("状态", "异常", "exception"),
+                "prototype binding": ("原型绑定", "prototype binding"),
+            }
+            for view in [str(item).upper() for item in declared_views]:
+                block = blocks.get(view, "")
+                if not block:
+                    self.add("BLOCK", "PRD-MISSING-PAGE-CONTRACT", path, "declared view has no PAGE-CONTRACT block", view)
+                    continue
+                lowered_block = block.lower()
+                for label, terms in required_surfaces.items():
+                    if not any(term.lower() in lowered_block for term in terms):
+                        self.add("BLOCK", "PRD-INCOMPLETE-PAGE-CONTRACT", path, f"page contract misses {label}", view)
+                metric_not_applicable = bool(re.search(r"指标[^\n]{0,40}(?:不适用|not applicable)", lowered_block))
+                if not metric_not_applicable and not (
+                    re.search(r"\bMETRIC-[A-Z0-9-]+\b", block, re.I)
+                    and has_any(lowered_block, ("公式", "分子", "分母", "去重", "时间窗口"))
+                ):
+                    self.add("BLOCK", "PRD-METRIC-NO-CALIBER", path, "displayed metrics need METRIC IDs and explicit formula/caliber or Not applicable", view)
+                def concrete_ids(prefix: str) -> set[str]:
+                    values: set[str] = set()
+                    for found in re.finditer(rf"\b{prefix}-[A-Z0-9-]+", block, re.I):
+                        value = found.group(0).upper()
+                        if value.endswith("-") or (found.end() < len(block) and block[found.end()] == "*"):
+                            continue
+                        values.add(value)
+                    return values
+
+                field_not_applicable = bool(re.search(
+                    r"(?:字段|字段与控件)\s*(?:[:：—-]\s*)?(?:不适用|不存在可编辑业务字段|not applicable)",
+                    lowered_block,
+                ))
+                if not field_not_applicable and len(concrete_ids("FLD")) < 2:
+                    self.add("BLOCK", "PRD-PAGE-NO-FIELDS", path, "four-lens handoff needs concrete stable FLD contracts for the view", view)
+                if len(concrete_ids("ACT")) < 2:
+                    self.add("BLOCK", "PRD-PAGE-NO-ACTIONS", path, "four-lens handoff needs at least two concrete ACT contracts or an explicit read-only decision", view)
+                if not concrete_ids("AC"):
+                    self.add("BLOCK", "PRD-PAGE-NO-AC", path, "QA lens needs a concrete AC linked inside the page contract", view)
+                api_trace = any(
+                    view.lower() in line.lower() and ("/api/" in line.lower() or re.search(r"\bAPI-[A-Z0-9-]+\b", line, re.I))
+                    for line in raw.splitlines()
+                )
+                if not api_trace:
+                    self.add("BLOCK", "PRD-PAGE-NO-API-TRACE", path, "backend/Coding Agent lens needs an explicit view-to-API or no-write mapping", view)
+            for extra in sorted(set(blocks) - {str(item).upper() for item in declared_views}):
+                self.add("GAP", "PRD-UNDECLARED-PAGE-CONTRACT", path, "PAGE-CONTRACT block is not declared in page_contract_view_ids", extra)
+            self.metrics["prd_page_contracts"] = len(blocks)
         self.metrics.update({"prd_headings": len(re.findall(r"(?m)^#{1,4}\s+\S", raw)), "prd_requirement_ids": len(requirement_ids)})
 
     def check_prototype(self, path: Path, level: str) -> None:
@@ -247,6 +323,29 @@ class Gate:
                 script_blocks.append(body)
                 module_script = module_script or script_type == "module"
         scripts = "\n".join(script_blocks)
+        if level in {"L3", "L4"}:
+            inline_handlers = re.findall(r"\bon(?:click|change|input|submit|dragstart|drop)\s*=", raw, re.I)
+            if inline_handlers:
+                self.add("BLOCK", "PROTO-INLINE-HANDLER", path, f"L3 prototype contains {len(inline_handlers)} inline event handlers; use one explicit action registry")
+            missing_action_controls = []
+            missing_ac_controls = []
+            for tag in re.findall(r"<(?:button|a)\b[^>]*>", raw, re.I | re.S):
+                if re.search(r"\bdisabled\b", tag, re.I):
+                    continue
+                if not re.search(r"\bdata-action\s*=", tag, re.I):
+                    missing_action_controls.append(re.sub(r"\s+", " ", tag)[:120])
+                elif not re.search(r"\bdata-ac\s*=\s*['\"]AC-[A-Z0-9-]+['\"]", tag, re.I):
+                    missing_ac_controls.append(re.sub(r"\s+", " ", tag)[:120])
+            if missing_action_controls:
+                self.add("BLOCK", "PROTO-CONTROL-NO-ACTION", path, f"{len(missing_action_controls)} button/link controls have no stable data-action", missing_action_controls[0])
+            if missing_ac_controls:
+                self.add("BLOCK", "PROTO-ACTION-NO-AC", path, f"{len(missing_ac_controls)} action controls have no data-ac trace", missing_ac_controls[0])
+            function_names = re.findall(r"\bfunction\s+([A-Za-z_$][\w$]*)\s*\(", scripts)
+            duplicates = sorted(name for name, count in Counter(function_names).items() if count > 1)
+            for name in duplicates[:10]:
+                self.add("BLOCK", "PROTO-DUPLICATE-FUNCTION", path, "duplicate function declaration indicates stacked prototype overrides", name)
+            if re.search(r"(?:setAttribute\s*\(\s*['\"]data-action|dataset\.action\s*=)", scripts, re.I):
+                self.add("BLOCK", "PROTO-RUNTIME-ACTION-RETROFIT", path, "data-action IDs must be authored in view templates, not retrofitted at runtime")
         inline_action_tags = {
             action
             for tag in re.findall(r"<[^>]+\bdata-action\s*=\s*['\"][^'\"]+['\"][^>]*>", raw, re.I | re.S)

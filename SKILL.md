@@ -1,9 +1,9 @@
 ---
 name: ai-delivery-spec
-description: Manage product requirements from intake through clarification, specification, baseline, change, traceability, and acceptance. Turn rough ideas, customer materials, prototypes, legacy systems, or approved changes into one human-readable, AI-coding-ready requirement contract with stable IDs and executable acceptance. Use for ToC/ToB/ToG requirement intake, PRDs, role workflow closure, brownfield change, prototypes, acceptance, or audit traceability. Excludes sprint/task management, implementation management, CI/CD, production operations, and unrelated code debugging or copy rewriting.
+description: Manage requirements from intake through clarification, specification, baseline, change, traceability, and acceptance. Produce one human-readable, AI-coding-ready contract with stable IDs and executable acceptance for ToC/ToB/ToG PRDs, prototypes, brownfield change, and audit. Excludes delivery execution, CI/CD, operations, and unrelated code work.
 ---
 
-# AI Delivery Spec 5.1.4 — Requirement Management Kernel
+# AI Delivery Spec 5.1.5 — Requirement Management Kernel
 
 > First use: run requirement intake; use `mode=ultra_light` only for one reversible change.
 >
@@ -11,10 +11,8 @@ description: Manage product requirements from intake through clarification, spec
 >
 > Domain route: append `domain=traffic|crm|education-it|oa|medical-hospital-it|data-product|ai-native`.
 
-Manage six concerns only: intake, clarification, specification, change,
-traceability, and acceptance. Treat planning, tasks, code, CI/CD, deployment,
-and operations as downstream systems; retain only requirement-related links or
-evidence.
+Manage intake, clarification, specification, change, traceability, and
+acceptance only. Planning, code, CI/CD, deployment, and operations are downstream.
 
 ## 1. Start with intake
 
@@ -32,17 +30,13 @@ Override: mode=<...>; tier=<...>; domain=generic|<pack>
 ```
 
 - Do not invent cost or effort without engineering confirmation.
-- Use Ultra-Light only for one reversible page/copy/field/rule change with one
-  primary role and no cross-module state, sensitive data, regulated decision,
-  customer acceptance, or migration.
-- Multi-role flows, brownfield change, regulation/audit, complete PRDs, and
-  customer acceptance require at least L2.
+- Ultra-Light is only for one reversible change with one role and no cross-module
+  state, sensitive data, regulation, acceptance, or migration.
+- Multi-role, brownfield, regulated, complete-PRD, or acceptance work is L2+.
 - Register iteration, dependencies, conflicts, and ordering for parallel needs.
 
-Run `scripts/triage_requirement.py` or use
-`references/requirement-management.md` and
-`schemas/requirement-register.schema.json`. Do not write a final PRD before
-intake and P0 clarification gates pass.
+Run `scripts/triage_requirement.py` or use `references/requirement-management.md`.
+Do not finalize before intake and P0 clarification pass.
 
 ## 2. Load only the active slice
 
@@ -53,20 +47,19 @@ intake and P0 clarification gates pass.
 | ambiguity and clarification | `references/runtime/schema-grill.md` |
 | behavior and stable IDs | `references/specify.md` |
 | unified PRD | `references/templates/unified-requirement-prd-template.md` |
+| page contract + four-lens sign-off | `references/runtime/page-delivery-contract.md` + `references/runtime/four-lens-module-walkthrough.md` |
 | machine annex | `references/runtime/ai-coding-completeness.md` |
-| multi-role or seniority handoff | `references/runtime/role-stage-playbook.md` |
+| role/seniority handoff | `references/runtime/role-stage-playbook.md` |
 | prototype | `references/runtime/prototype-testability.md` |
-| change / acceptance | `references/runtime/change.md` / `references/runtime/verify.md` |
+| change/acceptance | `references/runtime/change.md` / `references/runtime/verify.md` |
 | large context | `references/runtime/context-planning.md` |
-| domain work | run `scripts/query_domain.py --domain <pack>`, then read only matching domain sections |
+| domain work | `scripts/query_domain.py --domain <pack>`, then matching sections only |
 | domain evidence or promotion | `references/runtime/domain-assurance.md` |
 | common reusable pattern | matching entry in `references/patterns/common-requirement-patterns.yaml` |
 | Skill/template/validator release | `references/runtime/assurance-lab.md` |
 
-Load one stage reference, optionally one domain pack, and only triggered
-governance. Do not load README, all examples, all domains, or the full repository
-at runtime. For long domain files, search the contents/table first and read only
-the relevant section plus Evaluation Profile.
+Load one stage reference, optionally one domain pack, and triggered governance.
+Do not load the README, all examples/domains, or full repository at runtime.
 
 ## 3. Run the requirement loop
 
@@ -74,35 +67,31 @@ the relevant section plus Evaluation Profile.
 Intake → Clarify → Specify → Review → Baseline → Change → Acceptance → Closed
 ```
 
-1. **Intake** — create `REQ-*`; record source, outcome, evidence, scope, owner,
-   dependency, priority, complexity, target version, and decision.
-2. **Clarify** — close roles, trigger, result, flow, permission/data scope,
-   state authority, rule, exception, migration/integration, acceptance, and
-   out-of-scope. Batch independent questions. Record unresolved material issues
-   as `REV-*` with owner and closure evidence.
-3. **Specify** — write one sequential PRD. The main body explains why/what,
-   roles, journeys, modules, flows, pages, rules, exceptions, and acceptance.
-   Append field/state/API/event/trace/machine-AC contracts for engineering and
-   Coding Agents. Do not turn database/framework/deployment choices into product
-   requirements unless they are business contracts.
-4. **Review** — product, domain, UX, engineering/architecture, QA, compliance,
-   and customer lenses independently check their required outputs. Read
-   `references/runtime/role-stage-playbook.md` for multi-role work.
-5. **Baseline** — freeze version, included IDs, source precedence, approvals,
-   unresolved dispositions, prototype binding, and consumer synchronization.
+1. **Intake** — create `REQ-*` against
+   `schemas/requirement-register.schema.json`; record source, outcome, evidence,
+   scope, owner, dependency, priority, complexity, version, and decision.
+2. **Clarify** — close roles, trigger/result, flow, scope, state, rule,
+   exception, integration, acceptance, and out-of-scope. Track open P0 as `REV-*`.
+3. **Specify** — write one sequential PRD: readable business narrative first,
+   field/state/API/event/trace/machine-AC annex second. Keep implementation choices
+   out unless contractual. For implementation/prototypes, declare every view and
+   give it a Page Delivery Contract; CRUD/import/export labels are insufficient.
+4. **Review** — product, domain, UX, engineering, QA, compliance, and customer
+   lenses check outputs. For L3/L4 multi-page work, run every view through the
+   four-lens walkthrough and fix the one PRD/prototype, not a parallel spec.
+5. **Baseline** — freeze version, IDs, source precedence, approvals, open-item
+   dispositions, prototype binding, and consumer synchronization.
 6. **Change** — create `CHG-*` under
    `schemas/change-package.schema.json`; traverse requirement, role, flow,
    view/action/field, state/rule, API/event, acceptance/test/evidence, and
    history in both directions; approve, synchronize, regress, and re-baseline.
-7. **Acceptance** — turn every `AC-*` into executed items with actual result,
-   evidence, defect/change reverse links, conditions, and accountable sign-off.
+7. **Acceptance** — record actual result, evidence, defect/change reverse links,
+   conditions, and sign-off for every `AC-*`.
 
-Use `Product Truth` only when 12+ modules/views, repeated material change,
-multiple governed projections, long-lived audit, or explicit user choice makes
-an independent truth model valuable. Otherwise keep the requirement register,
-one PRD, change package, trace ledger, and acceptance run as the baseline. For
-large truth, use progressive fragments and ID slices; never generate one giant
-YAML in a single pass.
+Use `Product Truth` only for 12+ views/modules, repeated material change,
+governed projections, long audit, or explicit choice. Otherwise keep the
+register, one PRD, change/trace, and acceptance. Large truth uses fragments/ID
+slices, never one giant YAML pass.
 
 ## 4. Preserve one implementation contract
 
@@ -116,8 +105,20 @@ YAML in a single pass.
 - A prototype must preserve declared views/actions/states and use stable
   `data-testid`, `data-action`, `data-state`, and `data-field`; every action has a
   visible outcome and no unexplained handler.
+- Every displayed metric defines population, formula, time/status/filter/dedup
+  caliber, source, freshness, zero denominator and format beside its view.
+- Every list/form/composer declares columns, filters, controls, validation,
+  editability, pagination, import/export and modal chains or explicitly states
+  why a surface does not apply.
+- Every declared L3/L4 view has stable `FLD/ACT/AC`, an explicit API/data-flow
+  mapping, and a four-lens sign-off. A cross-module happy path cannot compensate
+  for a thin page.
+- Do not patch a duplicate-handler legacy prototype into apparent compliance.
+  Rebuild from a trusted interaction ledger when overrides, inline handlers or
+  cross-entity modal reuse make action ownership ambiguous.
 - A Coding Agent must be able to implement one `REQ-*` slice without inventing
-  roles, fields, states, business rules, errors, or success criteria.
+  roles, fields, metrics, controls, limits, states, business rules, errors, or
+  success criteria.
 
 ## 5. Use domain evidence honestly
 

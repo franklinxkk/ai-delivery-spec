@@ -14,6 +14,8 @@ Before UI work, obtain or recover:
 - visible and domain result of every primary action;
 - representative data, dictionaries, long-data and large-list behavior;
 - modal/drawer chains, responsive surfaces, print/export when in scope.
+- the declared page whitelist and the complete Page Delivery Contract for each
+  view, including metrics, columns, filters, controls, limits and pagination.
 
 If the input is an existing prototype, first run:
 
@@ -39,6 +41,9 @@ sets, and gaps before changing the prototype.
 
 Every important interactive/testable element has a stable anchor. Do not expose
 unresolved template strings such as `data-state="${state}"` in rendered DOM.
+Write these anchors in the source markup/template itself. A runtime pass that
+retrofits generic `ACT-UI-*` identifiers onto unrelated legacy commands does
+not establish traceability.
 
 ## 3. State-Driven UI
 
@@ -79,6 +84,11 @@ Every `data-action` needs:
 Toast-only completion fails for a core state-changing action. Prefer list/card/
 detail/state changes that let users see what was created or changed.
 
+Do not use one generic “edit/detail” modal across different entities unless its
+schema and handler are explicitly entity-aware. A question edit action opening
+a resource detail surface is a blocker even when both controls technically have
+handlers.
+
 Parent click handlers must ignore nested interactive/editable targets:
 
 ```javascript
@@ -86,6 +96,8 @@ if (event.target.closest("button,input,textarea,select,a,[contenteditable]")) re
 ```
 
 Prefer event delegation with `data-*` values over inline `onclick` strings.
+For L3 handoff, inline `onclick` and generic alert-only fallbacks are prohibited.
+Use one explicit action registry whose keys are the static `ACT-*` values.
 
 ## 5. Required UI States
 
@@ -147,6 +159,12 @@ When revising an existing prototype, compare before/after:
 Removal requires an approved `CHG-*` or explicit de-scope. A visually cleaner
 prototype that loses behavior fails parity.
 
+If the existing artifact contains duplicate function declarations, stacked
+override layers, inline-handler quoting, runtime action-ID retrofits, or entity
+actions routed to the wrong modal, stop patching. Preserve the interaction
+ledger and representative data, then rebuild a clean projection with one state
+store, one renderer per view and one action registry.
+
 State changes should update only necessary classes/attributes/content when
 possible; unnecessary DOM reconstruction can lose focus, cursor, scroll, and
 element references.
@@ -161,6 +179,11 @@ element references.
 6. Confirm all runtime annotations are concrete and unique where required.
 7. Capture screenshot/trace/audit evidence by AC ID.
 8. Re-run parity after fixes.
+
+At L3, sweep every visible action on every declared page, not only one happy
+path per role. Assert that the opened page/modal belongs to the action's entity,
+that field controls match the Page Delivery Contract and that the durable result
+appears in the owning list/detail after close.
 
 Automated writes use mock, shadow, or disposable test data. Never pollute live
 customer data or production metrics without explicit authorization and a safe
@@ -186,6 +209,13 @@ blocker; do not explain the intended route during the test.
   moves to another surface.
 - Print/export views preserve required fields, pagination, signatures, version,
   and archive metadata when they are acceptance evidence.
+
+When the user requests visual redesign, first choose and record a design-system
+baseline (for example Ant Design 5 tokens/components) and, when useful, apply a
+specialized frontend-design skill for art direction. The design skill improves
+hierarchy and craft; the enterprise component system preserves predictable
+forms, tables and states. Capture full-page screenshots at desktop and one
+narrow width and perform a visual critique before completion.
 
 Visual fidelity does not excuse missing interaction or business behavior.
 
@@ -223,3 +253,9 @@ The scanner requires a single isolated `.hidden { display: none ... }` utility
 when the class is used and rejects `!important` outside that utility. Duplicate
 or combined `.hidden` selectors are treated as cascade pollution because they
 commonly make modal/view state impossible to reason about.
+
+Generic behavior/state classes must also be component-scoped. Do not group a
+global `.active`, `.open`, `.selected`, `.disabled`, `.loading`, `.error`,
+`.success` or `.failed` selector with business status colors: it can recolor or
+hide the active page, navigation or tab. Use separate selectors such as
+`.status.active`, `.tab.active` and `.page.active`.

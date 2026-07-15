@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Detect !important pollution and conflicting .hidden utilities in HTML/CSS prototypes."""
+"""Detect !important, utility and generic-state selector pollution in prototypes."""
 
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ def scan(text: str) -> list[dict[str, str]]:
     css = "\n".join(css_parts)
     findings: list[dict[str, str]] = []
     hidden_rules: list[tuple[str, str]] = []
+    generic_state_classes = {"active", "open", "selected", "disabled", "loading", "error", "success", "failed"}
     for selector_raw, body_raw in RULE.findall(css):
         selector = " ".join(selector_raw.split())
         body = " ".join(body_raw.split())
@@ -27,6 +28,15 @@ def scan(text: str) -> list[dict[str, str]]:
                 findings.append({"kind": "hidden-without-display-none", "selector": selector, "detail": body})
             if "," in selector or selector.strip() != ".hidden":
                 findings.append({"kind": "hidden-selector-pollution", "selector": selector, "detail": "keep the utility isolated as .hidden"})
+        simple_group = [item.strip() for item in selector.split(",")]
+        simple_classes = [match.group(1).lower() for item in simple_group if (match := re.fullmatch(r"\.([A-Za-z_-][\w-]*)", item))]
+        polluted = sorted(set(simple_classes) & generic_state_classes)
+        if len(simple_group) > 1 and polluted:
+            findings.append({
+                "kind": "generic-state-selector-pollution",
+                "selector": selector,
+                "detail": "scope generic state classes to their component, for example .status.active instead of grouped .active",
+            })
         for declaration in re.findall(r"[^;{}]+!important", body, re.I):
             allowed = selector.strip() == ".hidden" and re.search(r"display\s*:\s*none\s*!important", declaration, re.I)
             if not allowed:
@@ -51,7 +61,7 @@ def main() -> int:
             print(f"FAIL: {item['kind']} [{item['selector']}]: {item['detail']}")
     if findings:
         return 1
-    print("PASS: prototype CSS has one isolated .hidden utility and no !important pollution")
+    print("PASS: prototype CSS utilities and generic state selectors are scoped without !important pollution")
     return 0
 
 

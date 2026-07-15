@@ -1,5 +1,20 @@
 # Changelog
 
+## 5.1.5 - 2026-07-15
+
+### Page-level engineering closure
+
+- Added `page-delivery-contract.md`: every implementation view must define local metric caliber, filters, columns, controls, validation, action guards, modal chains, pagination, import/export and UI states.
+- Added L3 `page_contract_view_ids` plus deterministic `PAGE-CONTRACT` coverage checks, so one global field/API appendix can no longer hide thin pages.
+- Tightened prototype L3 checks: block inline handlers, buttons without stable actions/AC trace, duplicate function overrides and runtime action-ID retrofits.
+- Added clean-rebuild guidance for legacy prototypes with stacked overrides or cross-entity modal routing, and a visual-design route combining a design skill with an enterprise component system.
+- Added a per-view four-lens walkthrough for frontend, backend, QA and Coding
+  Agents. L3/L4 gates now require concrete fields, actions, AC linkage and an
+  explicit view-to-API/no-write mapping for every declared page.
+- Extended CSS pollution checks beyond `.hidden` and `!important`: grouped
+  global state selectors such as `.published,.active` now fail because they can
+  silently recolor active pages, navigation and tabs.
+
 ## 5.1.4 - 2026-07-14
 
 - Made selective domain lookup emit UTF-8 explicitly, so multilingual source
