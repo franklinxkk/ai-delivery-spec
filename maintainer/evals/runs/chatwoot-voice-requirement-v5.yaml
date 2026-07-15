@@ -1,0 +1,41 @@
+schema_version: 5.0.0
+run_id: RUN-CHATWOOT-REQUIREMENT-V5-20260711
+case_id: GH-CHATWOOT-VOICE
+stage: requirement
+system:
+  skill_version: 5.0.0-dev
+  model: codex-session-model
+  model_settings: not-externally-recorded
+  repository_ref: 98154bbeab2f5ea888dcb61bfd3a35a109ebb9a0
+input_fingerprint: issue-11481+pinned-repository-ref
+repetitions: 1
+trial_evidence_refs: [maintainer/evals/artifacts/github-scenario-artifacts.md]
+observations:
+  - obligation_id: OBL-CW-REQ-OUTBOUND
+    result: satisfied
+    evidence_refs: [maintainer/evals/artifacts/github-scenario-artifacts.md]
+  - obligation_id: OBL-CW-REQ-INBOUND
+    result: satisfied
+    evidence_refs: [maintainer/evals/artifacts/github-scenario-artifacts.md]
+  - obligation_id: OBL-CW-REQ-UNKNOWN
+    result: satisfied
+    evidence_refs: [maintainer/evals/artifacts/github-scenario-artifacts.md]
+inventions:
+  unsupported_business_behaviors: 0
+  delivered_business_behaviors: 0
+  p0_unsupported: 0
+delivery:
+  impacted_acceptance: 0
+  failed_impacted_acceptance: 0
+  delivered_slices: 0
+  reopened_for_spec_mismatch: 0
+  accepted_acceptance: 0
+context:
+  input_tokens: null
+  output_tokens: null
+  cross_artifact_switches: 3
+  human_navigation_seconds: null
+evidence_refs:
+  - maintainer/evals/artifacts/github-scenario-artifacts.md
+  - https://github.com/chatwoot/chatwoot/issues/11481
+status: completed

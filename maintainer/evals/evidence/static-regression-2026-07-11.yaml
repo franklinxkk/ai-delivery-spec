@@ -1,0 +1,30 @@
+evidence_id: EVD-EVAL-STATIC-20260711
+evidence_type: deterministic_static_regression
+executor: local Python validators
+executed_at: 2026-07-11T12:00:00+08:00
+environment: Windows, Python 3.12
+result: passed
+claim_boundary: >-
+  Proves schema/reference closure, projection ID consistency, source metadata,
+  honest maturity/eval status, and change-package closure. It does not
+  prove novice usability, coding-agent implementation, QA execution, domain
+  expert correctness, customer acceptance, or production behavior.
+commands:
+  - py -3 scripts/validators/validate_product_truth.py maintainer/examples/publishing-learning-v5/delivery/truth/product-truth.yaml
+  - py -3 scripts/validators/validate_projection_consistency.py --truth maintainer/examples/publishing-learning-v5/delivery/truth/product-truth.yaml --projection maintainer/examples/publishing-learning-v5/delivery/projections/unified-prd.md
+  - py -3 maintainer/tests/test_v5_change_drift.py
+  - py -3 scripts/validators/validate_project_domain_capsule.py maintainer/examples/generic-energy-capsule-v5/project-domain-capsule.yaml
+  - py -3 scripts/validators/validate_change_package.py maintainer/examples/traffic-regulatory-change-v5/change-package.yaml
+scenarios:
+  - id: EVAL-PUBLISHING-PM-001
+    proven: Product Truth and the unified PRD share only known stable IDs
+    not_proven: human reader can complete an unguided product review
+  - id: EVAL-BROWNFIELD-CHANGE-001
+    proven: a proposed change preserves explicit impact, rollback, and unresolved evidence
+    not_proven: complete real-project parity and data migration
+  - id: EVAL-GENERIC-ENERGY-001
+    proven: unfamiliar-domain capsule has required objects, sources, unknowns, and scenarios
+    not_proven: energy-domain accuracy or expert approval
+  - id: EVAL-TRAFFIC-REGULATED-001
+    proven: proposed regulatory change is structured and not falsely verified
+    not_proven: rule applicability, implementation, or accountable domain review

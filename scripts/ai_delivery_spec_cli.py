@@ -142,79 +142,78 @@ def init_requirements(args: argparse.Namespace) -> int:
 
 def run_check(args: argparse.Namespace) -> int:
     commands: list[list[str]] = [
-        [sys.executable, "scripts/validators/validate_v5_architecture.py"],
+        [sys.executable, "maintainer/tools/validators/validate_v5_architecture.py"],
         [sys.executable, "scripts/validators/validate_spec_config.py", "examples/spec.config.example.yaml"],
-        [sys.executable, "scripts/validators/validate_runtime_rule_uniqueness.py"],
-        [sys.executable, "scripts/validators/validate_domain_coverage.py"],
-        [sys.executable, "scripts/validators/validate_domain_sources.py"],
-        [sys.executable, "scripts/validators/validate_domain_contracts.py"],
-        [sys.executable, "scripts/validators/validate_eval_catalog.py"],
-        [sys.executable, "scripts/validators/validate_github_eval_cases.py"],
-        [sys.executable, "tests/test_v501_triage.py"],
-        [sys.executable, "tests/test_v501_validators.py"],
-        [sys.executable, "tests/test_v502_coding_contract.py"],
-        [sys.executable, "tests/test_v502_progressive_truth.py"],
-        [sys.executable, "tests/test_v510_requirement_management.py"],
-        [sys.executable, "tests/test_v510_unified_prd.py"],
-        [sys.executable, "tests/test_v510_semantic_guards.py"],
-        [sys.executable, "tests/test_v510_lightweight_gate.py"],
-        [sys.executable, "tests/test_v510_industry_assurance.py"],
-        [sys.executable, "tests/test_v511_runtime_budget.py"],
-        [sys.executable, "tests/test_v511_role_stage.py"],
-        [sys.executable, "tests/test_v511_domain_assurance.py"],
-        [sys.executable, "tests/test_v515_page_delivery_contract.py"],
-        [sys.executable, "tests/test_v516_ai_applicability.py"],
+        [sys.executable, "maintainer/tools/validators/validate_runtime_rule_uniqueness.py"],
+        [sys.executable, "maintainer/tools/validators/validate_domain_coverage.py"],
+        [sys.executable, "maintainer/tools/validators/validate_domain_sources.py"],
+        [sys.executable, "maintainer/tools/validators/validate_domain_contracts.py"],
+        [sys.executable, "maintainer/tools/validators/validate_eval_catalog.py"],
+        [sys.executable, "maintainer/tools/validators/validate_github_eval_cases.py"],
+        [sys.executable, "maintainer/tests/test_v501_validators.py"],
+        [sys.executable, "maintainer/tests/test_v502_coding_contract.py"],
+        [sys.executable, "maintainer/tests/test_v502_progressive_truth.py"],
+        [sys.executable, "maintainer/tests/test_v510_requirement_management.py"],
+        [sys.executable, "maintainer/tests/test_v510_unified_prd.py"],
+        [sys.executable, "maintainer/tests/test_v510_semantic_guards.py"],
+        [sys.executable, "maintainer/tests/test_v510_lightweight_gate.py"],
+        [sys.executable, "maintainer/tests/test_v510_industry_assurance.py"],
+        [sys.executable, "maintainer/tests/test_v511_runtime_budget.py"],
+        [sys.executable, "maintainer/tests/test_v511_role_stage.py"],
+        [sys.executable, "maintainer/tests/test_v511_domain_assurance.py"],
+        [sys.executable, "maintainer/tests/test_v515_page_delivery_contract.py"],
+        [sys.executable, "maintainer/tests/test_v516_ai_applicability.py"],
         [sys.executable, "scripts/validators/validate_requirement_patterns.py", "references/patterns/common-requirement-patterns.yaml"],
         [
             sys.executable,
-            "scripts/build_github_validation_matrix.py",
+            "maintainer/tools/build_github_validation_matrix.py",
             "--check",
-            "evals/evidence/github-validation-matrix.yaml",
+            "maintainer/evals/evidence/github-validation-matrix.yaml",
         ],
-        [sys.executable, "scripts/validators/validate_release_claims.py"],
-        [sys.executable, "scripts/test_context_planning.py"],
-        [sys.executable, "scripts/test_evaluation_metrics.py"],
-        [sys.executable, "scripts/test_execution_state.py"],
-        [sys.executable, "scripts/test_cli_init.py"],
-        [sys.executable, "tests/test_v5_agent_deadlock.py"],
-        [sys.executable, "tests/test_v5_capsule_pollution.py"],
-        [sys.executable, "tests/test_v5_change_drift.py"],
-        [sys.executable, "tests/test_v5_schema_grill.py"],
-        [sys.executable, "tests/test_v5_status.py"],
+        [sys.executable, "maintainer/tools/validators/validate_release_claims.py"],
+        [sys.executable, "maintainer/tests/test_context_planning.py"],
+        [sys.executable, "maintainer/tests/test_evaluation_metrics.py"],
+        [sys.executable, "maintainer/tests/test_execution_state.py"],
+        [sys.executable, "maintainer/tests/test_cli_init.py"],
+        [sys.executable, "maintainer/tests/test_v5_agent_deadlock.py"],
+        [sys.executable, "maintainer/tests/test_v5_capsule_pollution.py"],
+        [sys.executable, "maintainer/tests/test_v5_change_drift.py"],
+        [sys.executable, "maintainer/tests/test_v5_schema_grill.py"],
+        [sys.executable, "maintainer/tests/test_v5_status.py"],
         [
             sys.executable,
             "scripts/validators/validate_project_domain_capsule.py",
-            "examples/generic-energy-capsule-v5/project-domain-capsule.yaml",
+            "maintainer/examples/generic-energy-capsule-v5/project-domain-capsule.yaml",
         ],
         [
             sys.executable,
             "scripts/validators/validate_capsule_composition.py",
             "--capsule",
-            "examples/generic-energy-capsule-v5/project-domain-capsule.yaml",
+            "maintainer/examples/generic-energy-capsule-v5/project-domain-capsule.yaml",
         ],
         [
             sys.executable,
             "scripts/validators/validate_change_package.py",
-            "examples/traffic-regulatory-change-v5/change-package.yaml",
+            "maintainer/examples/traffic-regulatory-change-v5/change-package.yaml",
         ],
         [
             sys.executable,
             "scripts/validators/validate_product_truth.py",
-            "examples/publishing-learning-v5/delivery/truth/product-truth.yaml",
+            "maintainer/examples/publishing-learning-v5/delivery/truth/product-truth.yaml",
         ],
         [
             sys.executable,
             "scripts/validators/validate_projection_consistency.py",
             "--truth",
-            "examples/publishing-learning-v5/delivery/truth/product-truth.yaml",
+            "maintainer/examples/publishing-learning-v5/delivery/truth/product-truth.yaml",
             "--projection",
-            "examples/publishing-learning-v5/delivery/projections/unified-prd.md",
+            "maintainer/examples/publishing-learning-v5/delivery/projections/unified-prd.md",
         ],
-        [sys.executable, "scripts/validators/validate_unified_prd.py", "examples/publishing-learning-v5/delivery/projections/unified-prd.md"],
-        [sys.executable, "scripts/score_evaluation_run.py", "evals/runs/chatwoot-voice-requirement-v5.yaml", "--quiet"],
-        [sys.executable, "scripts/score_evaluation_run.py", "evals/runs/saleor-channel-id-design-v5.yaml", "--quiet"],
-        [sys.executable, "scripts/score_evaluation_run.py", "evals/runs/openedx-reindex-design-v5.yaml", "--quiet"],
-        [sys.executable, "scripts/score_evaluation_run.py", "evals/runs/orangehrm-password-policy-handoff-v5.yaml", "--quiet"],
+        [sys.executable, "scripts/validators/validate_unified_prd.py", "maintainer/examples/publishing-learning-v5/delivery/projections/unified-prd.md"],
+        [sys.executable, "maintainer/tools/score_evaluation_run.py", "maintainer/evals/runs/chatwoot-voice-requirement-v5.yaml", "--quiet"],
+        [sys.executable, "maintainer/tools/score_evaluation_run.py", "maintainer/evals/runs/saleor-channel-id-design-v5.yaml", "--quiet"],
+        [sys.executable, "maintainer/tools/score_evaluation_run.py", "maintainer/evals/runs/openedx-reindex-design-v5.yaml", "--quiet"],
+        [sys.executable, "maintainer/tools/score_evaluation_run.py", "maintainer/evals/runs/orangehrm-password-policy-handoff-v5.yaml", "--quiet"],
     ]
     if args.product_truth:
         commands.append(
@@ -233,6 +232,11 @@ def run_check(args: argparse.Namespace) -> int:
 
 def run_script(script: str, values: list[str]) -> int:
     return subprocess.run([sys.executable, str(ROOT / "scripts" / script), *values], cwd=ROOT, text=True).returncode
+
+
+def run_repo_tool(relative: str, values: list[str]) -> int:
+    """Run an explicitly located repository tool without mixing it into runtime scripts."""
+    return subprocess.run([sys.executable, str(ROOT / relative), *values], cwd=ROOT, text=True).returncode
 
 
 def plan_context(args: argparse.Namespace) -> int:
@@ -281,22 +285,23 @@ def score_eval(args: argparse.Namespace) -> int:
         values.append("--require-release-pass")
     if args.quiet:
         values.append("--quiet")
-    return run_script("score_evaluation_run.py", values)
+    return run_repo_tool("maintainer/tools/score_evaluation_run.py", values)
 
 
 def compare_evals(args: argparse.Namespace) -> int:
     values = ["--baseline", str(args.baseline), "--candidate", str(args.candidate)]
     if args.output:
         values.extend(["--output", str(args.output)])
-    return run_script("compare_evaluation_runs.py", values)
+    return run_repo_tool("maintainer/tools/compare_evaluation_runs.py", values)
 
 
 def status_report(args: argparse.Namespace) -> int:
     coverage = yaml.safe_load((ROOT / "references/domain-coverage.yaml").read_text(encoding="utf-8"))
-    fixtures = yaml.safe_load((ROOT / "evals/domain-fixtures.yaml").read_text(encoding="utf-8"))
-    github_cases = yaml.safe_load((ROOT / "evals/github-cases.yaml").read_text(encoding="utf-8"))
-    matrix = yaml.safe_load((ROOT / "evals/evidence/github-validation-matrix.yaml").read_text(encoding="utf-8"))
-    catalog = yaml.safe_load((ROOT / "evals/eval-catalog.yaml").read_text(encoding="utf-8"))
+    fixtures = yaml.safe_load((ROOT / "maintainer/evals/domain-fixtures.yaml").read_text(encoding="utf-8"))
+    github_cases = yaml.safe_load((ROOT / "maintainer/evals/github-cases.yaml").read_text(encoding="utf-8"))
+    matrix = yaml.safe_load((ROOT / "maintainer/evals/evidence/github-validation-matrix.yaml").read_text(encoding="utf-8"))
+    catalog = yaml.safe_load((ROOT / "maintainer/evals/eval-catalog.yaml").read_text(encoding="utf-8"))
+    lifecycle_forward = yaml.safe_load((ROOT / "maintainer/evals/evidence/v517-lifecycle-forward-test-2026-07-15.yaml").read_text(encoding="utf-8"))
     maturity: dict[str, int] = {}
     practice: dict[str, int] = {}
     for domain in coverage.get("domains", []):
@@ -323,6 +328,7 @@ def status_report(args: argparse.Namespace) -> int:
                 fixture.get("status") == "passed" for fixture in fixtures.get("fixtures", [])
             ),
             "github_cases": len(github_cases.get("cases", [])),
+            "lifecycle_forward_test_cases": len(lifecycle_forward.get("cases", [])),
             "catalog_status": eval_status,
             "github_matrix": matrix.get("summary", {}),
         },
@@ -330,6 +336,7 @@ def status_report(args: argparse.Namespace) -> int:
             "five domain methods have owner-attested production practice; all built-in packs pass deterministic contract checks but fresh-agent/expert maturity remains separate",
             "GitHub runs are exploratory and have zero release-passed cells",
             "domain expert, customer, production, legal, safety, and financial correctness are not proven",
+            "lifecycle simulations and private brownfield calibration expose method gaps but do not prove implementation or customer acceptance",
         ],
     }
     if args.format == "yaml":
@@ -381,7 +388,10 @@ def quality_gate(args: argparse.Namespace) -> int:
     values = ["--profile", args.profile, "--level", args.level, "--format", args.format, "--max-findings", str(args.max_findings)]
     for name in ("requirement", "prd", "prototype"):
         value = getattr(args, name)
-        if value:
+        if isinstance(value, list):
+            for item in value:
+                values.extend([f"--{name}", str(item)])
+        elif value:
             values.extend([f"--{name}", str(value)])
     return run_script("quality_gate.py", values)
 
@@ -405,16 +415,16 @@ def main() -> int:
     req_init.add_argument("--with-product-truth", action="store_true", help="Add progressive Product Truth only for scale/audit needs")
     req_init.set_defaults(func=init_requirements)
 
-    check = sub.add_parser("check", help="Run v5 architecture and optional artifact validators")
+    check = sub.add_parser("check", help="Run the maintainer assurance suite and optional artifact validators")
     check.add_argument("--product-truth", type=Path)
     check.add_argument("--keep-going", action="store_true")
     check.set_defaults(func=run_check)
 
     gate = sub.add_parser("gate", help="Run the token-free final requirement/PRD/prototype goalkeeper")
-    gate.add_argument("--profile", choices=["requirement", "prd", "prototype", "full"], required=True)
+    gate.add_argument("--profile", choices=["requirement", "prd", "prototype", "handoff", "full"], required=True)
     gate.add_argument("--requirement", type=Path)
     gate.add_argument("--prd", type=Path)
-    gate.add_argument("--prototype", type=Path)
+    gate.add_argument("--prototype", type=Path, action="append", help="Repeat for admin/H5/multi-surface prototypes")
     gate.add_argument("--level", choices=["L0", "L1", "L2", "L3", "L4"], default="L2")
     gate.add_argument("--format", choices=["concise", "json"], default="concise")
     gate.add_argument("--max-findings", type=int, default=20)
@@ -454,20 +464,20 @@ def main() -> int:
     trace.add_argument("--baseline-version", default="unversioned")
     trace.set_defaults(func=build_trace)
 
-    score = sub.add_parser("score-eval", help="Score one requirement/design/coding evaluation run")
+    score = sub.add_parser("score-eval", help="Maintainer: score one requirement/design/coding evaluation run")
     score.add_argument("run", type=Path)
     score.add_argument("--output", type=Path)
     score.add_argument("--require-release-pass", action="store_true")
     score.add_argument("--quiet", action="store_true")
     score.set_defaults(func=score_eval)
 
-    compare = sub.add_parser("compare-evals", help="Compare matched baseline and candidate evaluation runs")
+    compare = sub.add_parser("compare-evals", help="Maintainer: compare matched baseline and candidate evaluation runs")
     compare.add_argument("--baseline", type=Path, required=True)
     compare.add_argument("--candidate", type=Path, required=True)
     compare.add_argument("--output", type=Path)
     compare.set_defaults(func=compare_evals)
 
-    status = sub.add_parser("status", help="Show evidence-backed domain and evaluation status")
+    status = sub.add_parser("status", help="Maintainer: show evidence-backed domain and evaluation status")
     status.add_argument("--format", choices=["markdown", "yaml"], default="markdown")
     status.add_argument("--output", type=Path)
     status.set_defaults(func=status_report)

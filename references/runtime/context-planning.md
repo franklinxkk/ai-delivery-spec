@@ -76,3 +76,32 @@ Context/assurance profiles describe this project. Domain maturity describes
 the evidence behind a reusable domain pack. Automated classification may
 select stronger gates; it must never promote a pack from knowledge-backed or
 contract-tested to behavioral, expert-reviewed, or audited maturity.
+
+## Checkpoint And Micro-Gate Protocol
+
+Use checkpoints for long-running, resumed, regulated, audit-heavy or formal
+acceptance work. They preserve requirement decisions when conversation context
+does not survive; they do not manage sprints, code, releases or operations.
+
+- Reload the latest verified checkpoint before each requirement stage.
+- Use a Discovery Contract before specification exists.
+- Edit the working contract and create a new snapshot; never edit a snapshot.
+- Hash chains detect local change but do not replace accountable external
+  signing when stronger evidence is required.
+
+```powershell
+py -3 scripts/manage_execution_state.py create --truth product-truth.yaml --config spec.config.yaml --installed-skill C:/path/to/ai-delivery-spec/SKILL.md --execution-id EXEC-PROJECT-001 --output evidence/state-000.yaml
+py -3 scripts/manage_execution_state.py verify --state evidence/state-000.yaml
+py -3 scripts/manage_execution_state.py gate --state evidence/state-000.yaml --gate-id contract_traceability --projection requirements/PRD.md --output gate-contract.yaml
+```
+
+Active gates cover version/environment, complexity/domain evidence,
+context survival, discovery readiness, contract traceability, audit/access and
+fallback risk. Advance exactly one requirement stage after required gates pass;
+retain the prior checkpoint. After interruption, resume only from the latest
+state whose hashes and anchors still verify.
+
+High-risk failure is `BLOCKED`. A declared validator outage may become an
+explicit human-reviewed gap only under configured low-risk policy; it is never
+silent PASS. Missing links, stale gates, scope downgrade or version drift block
+the affected baseline.

@@ -1,0 +1,99 @@
+schema_version: 5.1.7
+evidence_id: EV-V517-LIFECYCLE-FORWARD-20260715
+executed_at: 2026-07-15
+status: review_complete_with_gaps
+purpose: 用独立 Agent 校准真实棕地可开发基线，并压力测试一句话需求与竞品定位两条未充分验证的需求生命周期；只用于发现方法缺口。
+
+claim_boundary:
+  expert_review: false
+  customer_acceptance: false
+  production_validation: false
+  code_implemented_or_tested: false
+  domain_maturity_promotion: false
+
+method:
+  agents: [/root/crm_baseline_audit, /root/one_line_lifecycle, /root/competitive_ideation]
+  lenses: [business, product, ux_prototype, frontend, backend, architecture, qa, coding_agent, acceptance]
+  tracks: [brownfield_artifact_to_implementation, one_sentence_to_handoff, competitor_to_positioning_to_handoff]
+  rule: 模拟评审与真实开发反馈分开；缺项目权威事实时保留 UNK 或阻断，不用静态 PASS 代替实现和验收。
+
+cases:
+  - id: FT-BROWNFIELD-MULTI-LOOP-CRM
+    shape: private_brownfield
+    flows: [ticket_to_demand_to_iteration, lead_to_opportunity_to_contract_to_payment, partner_sourced_sales_and_service]
+    result: blocked
+    calibration: 既有产物能在少量面对面澄清后被工程师实现，但文档内仍有状态、权限、金额、外键和跨模块首跳冲突；口头澄清属于缺失的 SRC/DEC/REV。
+  - id: FT-ONE-LINE-TOC
+    shape: greenfield_behavior_change
+    result: review_complete_with_gaps
+  - id: FT-ONE-LINE-TOB
+    shape: enterprise_approval
+    result: review_complete_with_gaps
+  - id: FT-ONE-LINE-TOG
+    shape: regulated_public_service
+    result: blocked_by_p0_unknown
+  - id: FT-COMPETITIVE-CRM-OA
+    shape: multi_domain_positioning
+    result: review_complete_with_gaps
+  - id: FT-COMPETITIVE-CONTENT-LEARNING
+    shape: content_entitlement_and_evidence
+    result: review_complete_with_gaps
+  - id: FT-COMPETITIVE-AI-DATA
+    shape: governed_ai_data_product
+    result: review_complete_with_gaps
+
+static_replays:
+  - id: REPLAY-PRIVATE-BROWNFIELD-L3
+    inputs: [one_unified_prd, one_legacy_prototype]
+    result: blocked
+    blocker_count: 410
+    dominant_findings: [unstable_prototype_actions, machine_acceptance_missing, duplicate_handler, runtime_anchor_retrofit, css_state_pollution]
+  - id: REPLAY-PRIVATE-MULTISURFACE-L3
+    inputs: [one_unified_prd, admin_prototype, learner_h5_prototype]
+    result: blocked
+    blocker_count: 89
+    dominant_findings: [machine_acceptance_gap, wildcard_ids, prototype_only_actions, metric_ids_missing, undeclared_view, source_and_p0_disposition_missing]
+  - note: 两次回放只证明新版门禁能识别已知缺口；不把私有材料写入仓库，也不宣称门禁理解了全部业务语义。
+
+gaps_and_disposition:
+  - id: GAP-ONE-LINE-UNBOUNDED
+    severity: P0
+    disposition: resolved
+    changes: [references/discover.md]
+  - id: GAP-BATCH-ANSWER-LOSS
+    severity: P0
+    disposition: resolved
+    changes: [references/discover.md, references/templates/unified-requirement-prd-template.md]
+  - id: GAP-COMPETITOR-BECOMES-RULE
+    severity: P0
+    disposition: resolved
+    changes: [references/discover.md]
+  - id: GAP-LEGACY-BUILDABILITY-EQUALS-CONFORMANCE
+    severity: P0
+    disposition: resolved
+    changes: [references/discover.md]
+  - id: GAP-PRD-PROTOTYPES-NOT-CROSSCHECKED
+    severity: P0
+    disposition: resolved
+    changes: [scripts/quality_gate.py, scripts/ai_delivery_spec_cli.py, maintainer/tests/test_v510_lightweight_gate.py]
+  - id: GAP-CROSS-MODULE-MISSING-HOP
+    severity: P0
+    disposition: resolved
+    changes: [references/templates/unified-requirement-prd-template.md, references/patterns/common-requirement-patterns.yaml, scripts/quality_gate.py]
+  - id: GAP-GENERIC-DISPATCH-FALSE-CLOSURE
+    severity: P0
+    disposition: resolved
+    changes: [scripts/quality_gate.py, maintainer/tests/test_v515_page_delivery_contract.py]
+  - id: GAP-AI-PRESENCE-OVERROUTES-L3
+    severity: P1
+    disposition: resolved
+    changes: [scripts/triage_requirement.py, references/templates/requirement-intake-template.yaml, maintainer/tests/test_v510_requirement_management.py]
+  - id: GAP-SEMANTIC-CONTRADICTION-AUTOMATION
+    severity: P1
+    disposition: accepted_boundary
+    guard: 当前轻门禁校验可确定的跨产物 ID、来源、AC 和动作所有权；同义状态、金额或权限矛盾继续由四镜头评审发现，不引入 LLM 运行时税。
+
+release_assessment:
+  result: PASS_WITH_EXPLICIT_BOUNDARIES
+  runtime_tax: zero_llm_zero_subagent_single_read
+  honest_handoff: Skill 可完成需求准入到可实现合同和验收定义；代码执行、浏览器证据、领域签署与客户验收仍由下游承担。

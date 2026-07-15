@@ -3,7 +3,7 @@ name: ai-delivery-spec
 description: Manage requirements from intake through clarification, specification, baseline, change, traceability, and acceptance. Produce one human-readable, AI-coding-ready contract with stable IDs and executable acceptance for ToC/ToB/ToG PRDs, prototypes, brownfield change, and audit. Excludes delivery execution, CI/CD, operations, and unrelated code work.
 ---
 
-# AI Delivery Spec 5.1.6 — Requirement Management Kernel
+# AI Delivery Spec 5.1.7 — Requirement Management Kernel
 
 > First use: run requirement intake; use `mode=ultra_light` only for one reversible change.
 >
@@ -11,8 +11,7 @@ description: Manage requirements from intake through clarification, specificatio
 >
 > Domain route: append `domain=traffic|crm|education-it|oa|medical-hospital-it|data-product|ai-native`.
 
-Manage intake, clarification, specification, change, traceability, and
-acceptance only. Planning, code, CI/CD, deployment, and operations are downstream.
+Manage requirements only; planning, code, CI/CD, deployment, and operations are downstream.
 
 ## 1. Start with intake
 
@@ -25,7 +24,7 @@ Value: high|medium|low + evidence
 Complexity: S|M|L|XL + impacted dimensions
 Uncertainty: low|medium|high + unresolved decisions
 Mode/Tier: ultra_light|lite|standard|full + L0|L1|L2|L3|L4
-Stage: intake|clarify|specify|review|baseline|change|acceptance|closed
+Stage: submitted|triaging|clarifying|specified|reviewing|baselined|change_requested|acceptance|accepted|closed
 Override: mode=<...>; tier=<...>; domain=generic|<pack>
 ```
 
@@ -43,23 +42,25 @@ Do not finalize before intake and P0 clarification pass.
 | Need | Read |
 |---|---|
 | intake, lifecycle, requirement pool | `references/requirement-management.md` |
-| source/prototype/legacy inventory | `references/discover.md` |
-| ambiguity and clarification | `references/runtime/schema-grill.md` |
+| source/legacy, one-line idea, competitor, clarification | `references/discover.md` |
 | behavior and stable IDs | `references/specify.md` |
+| L0/L1 card | `references/templates/prd-light-template.md` |
 | unified PRD | `references/templates/unified-requirement-prd-template.md` |
-| page contract + four-lens sign-off | `references/runtime/page-delivery-contract.md` + `references/runtime/four-lens-module-walkthrough.md` |
+| page contract + four-lens sign-off | `references/runtime/page-delivery-contract.md` |
 | machine annex | `references/runtime/ai-coding-completeness.md` |
+| Coding Agent/tool | `references/tool-adapters.md` |
 | role/seniority handoff | `references/runtime/role-stage-playbook.md` |
 | prototype | `references/runtime/prototype-testability.md` |
-| change/acceptance | `references/runtime/change.md` / `references/runtime/verify.md` |
+| change/acceptance | `references/runtime/change.md` |
 | large context | `references/runtime/context-planning.md` |
+| multiple domains with shared objects/states | `references/runtime/composition.md` |
 | domain work | `scripts/query_domain.py --domain <pack>`, then matching sections only |
-| domain evidence or promotion | `references/runtime/domain-assurance.md` |
 | common reusable pattern | matching entry in `references/patterns/common-requirement-patterns.yaml` |
-| Skill/template/validator release | `references/runtime/assurance-lab.md` |
+| Skill/template/validator release | `maintainer/README.md` |
 
 Load one stage reference, optionally one domain pack, and triggered governance.
-Do not load the README, all examples/domains, or full repository at runtime.
+Do not load README, `maintainer/`, all examples/domains, or the repository at
+runtime. `maintainer/` is release assurance, not a project stage.
 
 ## 3. Run the requirement loop
 
@@ -67,61 +68,49 @@ Do not load the README, all examples/domains, or full repository at runtime.
 Intake → Clarify → Specify → Review → Baseline → Change → Acceptance → Closed
 ```
 
-1. **Intake** — create `REQ-*` against
-   `schemas/requirement-register.schema.json`; record source, outcome, evidence,
-   scope, owner, dependency, priority, complexity, version, and decision.
+1. **Intake** — create `REQ-*` against `schemas/requirement-register.schema.json`;
+   record source, outcome, evidence, scope, owner, dependency, priority and decision.
 2. **Clarify** — close roles, trigger/result, flow, scope, state, rule,
    exception, integration, acceptance, and out-of-scope. Track open P0 as `REV-*`.
-3. **Specify** — write one sequential PRD: readable business narrative first,
-   field/state/API/event/trace/machine-AC annex second. Keep implementation choices
-   out unless contractual. For implementation/prototypes, declare every view and
-   give it a Page Delivery Contract; CRUD/import/export labels are insufficient.
+3. **Specify** — write one PRD: readable narrative first, precise engineering annex
+   second. Declare every implementation view and its Page Delivery Contract.
 4. **Review** — product, domain, UX, engineering, QA, compliance, and customer
    lenses check outputs. For L3/L4 multi-page work, run every view through the
    four-lens walkthrough and fix the one PRD/prototype, not a parallel spec.
 5. **Baseline** — freeze version, IDs, source precedence, approvals, open-item
    dispositions, prototype binding, and consumer synchronization.
-6. **Change** — create `CHG-*` under
-   `schemas/change-package.schema.json`; traverse requirement, role, flow,
-   view/action/field, state/rule, API/event, acceptance/test/evidence, and
-   history in both directions; approve, synchronize, regress, and re-baseline.
+6. **Change** — create `CHG-*` under `schemas/change-package.schema.json`;
+   traverse the ID graph in both directions, approve, synchronize, regress, and re-baseline.
 7. **Acceptance** — record actual result, evidence, defect/change reverse links,
    conditions, and sign-off for every `AC-*`.
 
-Use `Product Truth` only for 12+ views/modules, repeated material change,
-governed projections, long audit, or explicit choice. Otherwise keep the
-register, one PRD, change/trace, and acceptance. Large truth uses fragments/ID
-slices, never one giant YAML pass.
+Use `Product Truth` only for 12+ views/modules, repeated change, governed
+projections, long audit, or explicit choice. Large truth uses fragments/ID slices.
 
 ## 4. Preserve one implementation contract
 
-- Stable IDs cover `REQ/ROLE/FLOW/VIEW/REG/ACT/FLD/STATE/RULE/API/EVT/INT/AC/TEST/DEF/EV/CHG/REV`.
-- Every important role reaches an authorized exit, denial, recovery, or explicit
-  handoff; no journey ends at an unexplained button or notification.
+- Stable IDs cover `REQ/ROLE/FLOW/VIEW/REG/ACT/FLD/STM/STATE/RULE/API/EVT/INT/METRIC/REL/AC/TEST/DEF/EVD/CHG/REV`.
+- Every role reaches an authorized exit, denial, recovery, or explicit handoff.
 - Every action has precondition, authority, input, state/result, failure,
   audit/event, and acceptance linkage.
 - Every P0 requirement has positive and negative acceptance, observable result,
   test data/evidence, and reverse trace.
-- A prototype must preserve declared views/actions/states and use stable
-  `data-testid`, `data-action`, `data-state`, and `data-field`; every action has a
-  visible outcome and no unexplained handler.
+- Prototypes preserve declared behavior with stable `data-testid`, `data-action`,
+  `data-state`, `data-field`, visible outcomes and explicit handlers.
 - Every displayed metric defines population, formula, time/status/filter/dedup
   caliber, source, freshness, zero denominator and format beside its view.
 - Every list/form/composer declares columns, filters, controls, validation,
   editability, pagination, import/export and modal chains or explicitly states
   why a surface does not apply.
-- Every key role task maps to a work surface and result/recovery. Parent counts
-  do not replace a `REL-*` child/bulk contract; external roles do not justify
-  invented portals.
+- Every role task maps to a work surface and recovery. Counts do not replace a
+  `REL-*` child/bulk contract; external roles do not justify invented portals.
 - Every declared L3/L4 view has stable `FLD/ACT/AC`, an explicit API/data-flow
   mapping, and a four-lens sign-off. A cross-module happy path cannot compensate
   for a thin page.
 - Do not patch a duplicate-handler legacy prototype into apparent compliance.
   Rebuild from a trusted interaction ledger when overrides, inline handlers or
   cross-entity modal reuse make action ownership ambiguous.
-- A Coding Agent must be able to implement one `REQ-*` slice without inventing
-  roles, fields, metrics, controls, limits, states, business rules, errors, or
-  success criteria.
+- A Coding Agent implements one `REQ-*` slice without inventing business decisions.
 
 ## 5. Use domain evidence honestly
 
@@ -142,6 +131,7 @@ keywords, project complexity, simulation, or static PASS alone.
 ```bash
 python scripts/ai_delivery_spec_cli.py gate --profile prd --prd requirements/PRD.md --level L2
 python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype prototype.html --level L2
+python scripts/ai_delivery_spec_cli.py gate --profile handoff --prd requirements/PRD.md --prototype admin.html --prototype h5.html --level L3
 ```
 
 The final gate is a zero-LLM, zero-subagent, single-read goalkeeper. It locates
@@ -155,7 +145,11 @@ Return one completion state:
 PASS
 REVIEW_COMPLETE_WITH_GAPS
 BLOCKED_BY_P0_UNKNOWN
+BLOCKED
 ```
+
+`BLOCKED_BY_P0_UNKNOWN` is a discovery/specification decision; `BLOCKED` is a
+deterministic artifact-gate result. Neither is a synonym for “task was hard”.
 
 Do not call work complete when only files, headings, buttons, or schemas exist.
 For an authorized long task, continue through all requested artifacts and gates;

@@ -55,7 +55,8 @@ domain-neutral.
   official document, meeting, calendar, task/supervision, knowledge, cloud docs,
   low-code forms, data/reporting, helpdesk, HR/expense/legal integrations,
   mobile office, e-signature, and AI office assistant.
-- Product Truth must lock module/view/region/action ownership when OA spans
+- When the core Product Truth scale/audit threshold is met, Product Truth must
+  lock module/view/region/action ownership when OA spans
   multiple modules, roles, PC/mobile surfaces, or todo -> workflow -> document
   -> archive lifecycles.
 - Keep organization, user, workflow-node, document, and archive fields canonical
@@ -400,7 +401,8 @@ Mocked matrices and simulated reviewers cannot satisfy expert review or audit.
       mobile is in scope.
 - [ ] Common OA fields use canonical `FLD-*` definitions; projections do not
       duplicate unchanged definitions.
-- [ ] Product Truth is locked before projections when scope spans multiple
+- [ ] When the core scale/audit threshold is met, Product Truth is locked before
+  projections when scope spans multiple
       modules, roles, or surfaces.
 - [ ] Coding-agent delivery package paths are explicit when implementation by
       Claude Code, Cursor, Codex, or Copilot is expected.

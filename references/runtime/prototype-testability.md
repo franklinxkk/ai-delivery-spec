@@ -34,12 +34,15 @@ sets, and gaps before changing the prototype.
 | `REG-*` | container `data-testid="region-{region_id}"` |
 | `ACT-*` | interactive control `data-action="{ACT-*}"` |
 | `FLD-*` | field/value `data-field="{FLD-*}"` or `data-bind` |
+| `METRIC-*` | displayed KPI root `data-metric="{METRIC-*}"` |
 | state enum | `data-state="{concrete-state}"` |
 | role scope | `data-visible-role` where useful for tests |
 | command/API | `data-api` and `data-method` only when known |
 | `AC-*` | stable test anchor and scenario reference |
 
-Every important interactive/testable element has a stable anchor. Do not expose
+Every important interactive/testable element has a stable anchor. Every displayed
+statistic/KPI has `data-metric` and resolves to the PRD's page-local caliber;
+the label and sample number alone are not a metric contract. Do not expose
 unresolved template strings such as `data-state="${state}"` in rendered DOM.
 Write these anchors in the source markup/template itself. A runtime pass that
 retrofits generic `ACT-UI-*` identifiers onto unrelated legacy commands does

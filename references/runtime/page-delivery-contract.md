@@ -34,7 +34,8 @@ a surface genuinely does not apply; silence is not a decision.
    responsive priority, empty/loading/error/no-permission states.
 3. **Metric caliber** — `METRIC-*`, definition, formula, numerator/denominator,
    time window, timezone, filters, status inclusion, deduplication, freshness,
-   source, zero denominator and display format.
+   source, zero denominator and display format. The prototype root for each
+   displayed metric uses `data-metric="METRIC-*"`.
 4. **Filters and search** — field, control, operator, options/source, default,
    cascade, reset and query behavior.
 5. **List/tree/canvas columns** — column, bound field, format, width, null,
@@ -105,15 +106,48 @@ hover cue, invalid drop, ordering persistence, undo or recovery, concurrent
 editing and a keyboard/button alternative. Every aggregate metric must refresh
 from the persisted draft model, not inferred DOM text.
 
-## 6. No-Guess Handoff Check
+## 6. Four-Lens No-Guess Handoff
 
-Before baseline, run every declared view through the four lenses in
-`four-lens-module-walkthrough.md`. Ask frontend, backend, QA and a Coding Agent
-to reconstruct their implementation or test plan using only that page block and
-shared appendices. The contract fails if any lens must invent a displayed
-column, field rule, endpoint, entity relationship, metric formula, action guard,
-modal content, pagination limit, import/export rule, negative test or
-post-action state.
+Before baselining a multi-page L3/L4 PRD or prototype, review every declared
+`VIEW-*` independently using only its page block and shared appendices. A green
+cross-module happy path cannot hide a thin page.
+
+### Frontend lens
+
+Reconstruct entry, regions, placement, responsive/scroll behavior, metrics,
+filters, columns/tree/canvas, row actions, pagination, modal/drawer chains,
+fields and all visible states. Reject when a frontend developer must invent a
+component, field, validation, empty/error state or post-action display.
+
+### Backend lens
+
+Trace list/detail/option queries and writes through permission/data scope,
+state/dependency guards, entity relationships, API semantics, transactions,
+idempotency, locking, async retry, events/audit, metrics and recovery. Reject
+when a backend developer must invent ownership, an endpoint, state transition,
+scope filter, aggregation or failure behavior.
+
+### QA lens
+
+Derive positive and negative `AC-*` for field boundaries, permission/isolation,
+stale versions, duplicate/retry, filtering/paging/export reconciliation,
+relation batches, modal identity and downstream handoffs. Reject when QA must
+translate prose into an undisclosed rule or cannot independently observe the
+domain result.
+
+### Coding Agent lens
+
+The page must yield one deterministic implementation plan containing exact
+components and `data-*` anchors, typed fields/DTOs, endpoints, state guards,
+metric queries, handler-to-domain mapping, tests and explicit `GAP-*`. Material
+`GAP-*` must be empty at baseline; reject when two agents can make materially
+different business choices while both claiming compliance.
+
+Record only a compact sign-off, not a second PRD:
+
+| VIEW | frontend | backend | QA | Coding Agent | gaps fixed | evidence |
+|---|---|---|---|---|---|---|
+| VIEW-* | pass/fail | pass/fail | pass/fail | pass/fail | CHG/GAP IDs | page/API/AC/browser refs |
 
 ## 7. Managed Relation Contract
 

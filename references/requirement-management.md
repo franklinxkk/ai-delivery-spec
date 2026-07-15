@@ -166,7 +166,8 @@ milestones with a source URL/ID. They do not drive the requirement state machine
 
 Before returning `PASS`, verify intake evidence, closed P0 questions, readable
 specification, stable baseline, trace closure, change consistency and executed
-acceptance evidence. Otherwise return `REVIEW_COMPLETE_WITH_GAPS` or `BLOCKED`
+acceptance evidence. Otherwise return `REVIEW_COMPLETE_WITH_GAPS` or
+`BLOCKED_BY_P0_UNKNOWN`
 with named IDs and owners.
 
 ## 11. Reusable Patterns

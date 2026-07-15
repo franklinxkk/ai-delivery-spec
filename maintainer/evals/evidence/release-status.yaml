@@ -1,0 +1,31 @@
+schema_version: 5.1.1
+skill_version: 5.1.7
+runtime: pure_v5
+domain_packs:
+  count: 7
+  maturity:
+    contract_tested: 7
+  practice_status:
+    production_practiced: 5
+    knowledge_only: 2
+  production_claims_allowed: 0
+evaluation_assets:
+  domain_fixtures: 14
+  contract_fixtures_passed: 14
+  github_cases: 15
+  lifecycle_forward_test_cases: 7
+  catalog_status:
+    not_run: 4
+    partial: 10
+  github_matrix:
+    cases: 15
+    stage_cells: 45
+    not_run: 41
+    partial: 4
+    passed: 0
+known_limitations:
+- five domain methods have owner-attested production practice; all built-in packs pass deterministic contract checks but fresh-agent/expert maturity remains separate
+- GitHub runs are exploratory and have zero release-passed cells
+- domain expert, customer, production, legal, safety, and financial correctness are
+  not proven
+- lifecycle simulations and private brownfield calibration expose method gaps but do not prove implementation or customer acceptance

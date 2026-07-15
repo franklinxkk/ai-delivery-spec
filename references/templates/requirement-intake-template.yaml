@@ -15,6 +15,10 @@ compliance: false
 migration: false
 customer_acceptance: false
 ai_behavior: false
+ai_centrality: none # none | incidental | supporting | core
+ai_write_scope: none # none | read_only | draft_only | consequential_write
+ai_reversible: true
+ai_human_gate: true
 urgent: false
 blocked_dependency: false
 ambiguity: high

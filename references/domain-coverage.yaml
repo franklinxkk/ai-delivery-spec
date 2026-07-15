@@ -1,6 +1,6 @@
 schema_version: 5.1.1
 generated_from: domain-pack metadata and evaluation evidence
-evaluation_index: evals/domain-fixtures.yaml
+evaluation_index: maintainer/evals/domain-fixtures.yaml
 claim_policy:
   rule: Domain assurance has explicit sourced, contract, behavioral, expert and audit levels.
   practice_rule: Production practice proves real delivery use but does not promote reusable-pack maturity.
@@ -36,7 +36,7 @@ domains:
     evidence:
       - id: EV-DOM-TRAFFIC-PRACTICE
         kind: owner_attestation
-        location: evals/evidence/production-practice-attestation-2026-07-12.yaml
+        location: maintainer/evals/evidence/production-practice-attestation-2026-07-12.yaml
         status: passed
         owner: project and skill maintainer
       - id: EV-DOM-TRAFFIC-SOURCES
@@ -46,12 +46,12 @@ domains:
         owner: domain maintainer
       - id: EV-DOM-TRAFFIC-KNOWLEDGE
         kind: project_sample
-        location: examples/traffic-regulatory-change-v5
+        location: maintainer/examples/traffic-regulatory-change-v5
         status: current
         owner: domain maintainer
       - id: EV-DOM-TRAFFIC-CONTRACT
         kind: contract_eval
-        location: evals/domain-fixtures.yaml#FX-TRAFFIC-RISK-CLOSE
+        location: maintainer/evals/domain-fixtures.yaml#FX-TRAFFIC-RISK-CLOSE
         status: passed
         owner: domain maintainer
     known_gaps:
@@ -77,7 +77,7 @@ domains:
     evidence:
       - id: EV-DOM-CRM-PRACTICE
         kind: owner_attestation
-        location: evals/evidence/production-practice-attestation-2026-07-12.yaml
+        location: maintainer/evals/evidence/production-practice-attestation-2026-07-12.yaml
         status: passed
         owner: project and skill maintainer
       - id: EV-DOM-CRM-SOURCES
@@ -87,12 +87,12 @@ domains:
         owner: domain maintainer
       - id: EV-DOM-CRM-KNOWLEDGE
         kind: mock_scenario
-        location: evals/domain-fixtures.yaml#FX-CRM-LEAD-REVENUE
+        location: maintainer/evals/domain-fixtures.yaml#FX-CRM-LEAD-REVENUE
         status: current
         owner: domain maintainer
       - id: EV-DOM-CRM-CONTRACT
         kind: contract_eval
-        location: evals/domain-fixtures.yaml#FX-CRM-LEAD-REVENUE
+        location: maintainer/evals/domain-fixtures.yaml#FX-CRM-LEAD-REVENUE
         status: passed
         owner: domain maintainer
     known_gaps:
@@ -118,7 +118,7 @@ domains:
     evidence:
       - id: EV-DOM-EDU-PRACTICE
         kind: owner_attestation
-        location: evals/evidence/production-practice-attestation-2026-07-12.yaml
+        location: maintainer/evals/evidence/production-practice-attestation-2026-07-12.yaml
         status: passed
         owner: project and skill maintainer
       - id: EV-DOM-EDU-SOURCES
@@ -128,12 +128,12 @@ domains:
         owner: domain maintainer
       - id: EV-DOM-EDU-KNOWLEDGE
         kind: project_sample
-        location: examples/publishing-learning-v5
+        location: maintainer/examples/publishing-learning-v5
         status: current
         owner: domain maintainer
       - id: EV-DOM-EDU-CONTRACT
         kind: contract_eval
-        location: evals/domain-fixtures.yaml#FX-EDU-COURSE-VERSION
+        location: maintainer/evals/domain-fixtures.yaml#FX-EDU-COURSE-VERSION
         status: passed
         owner: domain maintainer
     known_gaps:
@@ -184,12 +184,12 @@ domains:
         owner: domain maintainer
       - id: EV-DOM-OA-KNOWLEDGE
         kind: mock_scenario
-        location: evals/domain-fixtures.yaml#FX-OA-APPROVAL-RECALL
+        location: maintainer/evals/domain-fixtures.yaml#FX-OA-APPROVAL-RECALL
         status: current
         owner: domain maintainer
       - id: EV-DOM-OA-CONTRACT
         kind: contract_eval
-        location: evals/domain-fixtures.yaml#FX-OA-APPROVAL-RECALL
+        location: maintainer/evals/domain-fixtures.yaml#FX-OA-APPROVAL-RECALL
         status: passed
         owner: domain maintainer
     known_gaps:
@@ -221,12 +221,12 @@ domains:
         owner: domain maintainer
       - id: EV-DOM-MEDICAL-KNOWLEDGE
         kind: mock_scenario
-        location: evals/domain-fixtures.yaml#FX-MEDICAL-ORDER-CANCEL
+        location: maintainer/evals/domain-fixtures.yaml#FX-MEDICAL-ORDER-CANCEL
         status: current
         owner: domain maintainer
       - id: EV-DOM-MEDICAL-CONTRACT
         kind: contract_eval
-        location: evals/domain-fixtures.yaml#FX-MEDICAL-ORDER-CANCEL
+        location: maintainer/evals/domain-fixtures.yaml#FX-MEDICAL-ORDER-CANCEL
         status: passed
         owner: domain maintainer
     known_gaps:
@@ -252,7 +252,7 @@ domains:
     evidence:
       - id: EV-DOM-DATA-PRACTICE
         kind: owner_attestation
-        location: evals/evidence/production-practice-attestation-2026-07-12.yaml
+        location: maintainer/evals/evidence/production-practice-attestation-2026-07-12.yaml
         status: passed
         owner: project and skill maintainer
       - id: EV-DOM-DATA-SOURCES
@@ -267,7 +267,7 @@ domains:
         owner: domain maintainer
       - id: EV-DOM-DATA-CONTRACT
         kind: contract_eval
-        location: evals/domain-fixtures.yaml#FX-DATA-METRIC-VERSION
+        location: maintainer/evals/domain-fixtures.yaml#FX-DATA-METRIC-VERSION
         status: passed
         owner: domain maintainer
     known_gaps:
@@ -293,7 +293,7 @@ domains:
     evidence:
       - id: EV-DOM-AI-PRACTICE
         kind: owner_attestation
-        location: evals/evidence/production-practice-attestation-2026-07-12.yaml
+        location: maintainer/evals/evidence/production-practice-attestation-2026-07-12.yaml
         status: passed
         owner: project and skill maintainer
       - id: EV-DOM-AI-SOURCES
@@ -308,7 +308,7 @@ domains:
         owner: domain maintainer
       - id: EV-DOM-AI-CONTRACT
         kind: contract_eval
-        location: evals/domain-fixtures.yaml#FX-AI-TOOL-DENIAL
+        location: maintainer/evals/domain-fixtures.yaml#FX-AI-TOOL-DENIAL
         status: passed
         owner: domain maintainer
     known_gaps:

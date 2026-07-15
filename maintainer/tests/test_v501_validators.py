@@ -1,0 +1,18 @@
+from pathlib import Path
+import subprocess, sys
+
+ROOT = Path(__file__).resolve().parents[2]
+cases = [
+    ("validate_prd_quality.py", "coding-l2.md"),
+    ("validate_ia_skeleton.py", "ia-l2.yaml"),
+    ("validate_coding_agent_contract.py", "coding-l2.md"),
+]
+for level in ("L0", "L1", "L2", "L3", "L4"):
+    for script, fixture in cases:
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts/validators" / script), str(ROOT / "maintainer/tests/fixtures" / fixture), "--level", level],
+            cwd=ROOT,
+        )
+        if result.returncode:
+            raise SystemExit(f"failed {script} {level}")
+print("PASS: three v5.1.0 core validators enforce L0-L4")
