@@ -114,3 +114,18 @@ shared appendices. The contract fails if any lens must invent a displayed
 column, field rule, endpoint, entity relationship, metric formula, action guard,
 modal content, pagination limit, import/export rule, negative test or
 post-action state.
+
+## 7. Managed Relation Contract
+
+When a role manages a parent object's complete child/target collection—such as
+an organization's members, a partner's authorizations, a course's resources,
+or an order's lines—declare the view in `managed_relation_view_ids` and add a
+`REL-*` contract inside that page block. A parent-row count and a one-off create
+button are not a maintenance surface.
+
+The relation contract must name the parent, child/target and immutable version;
+inventory entry, filters and columns; direct versus inherited/source relations;
+single and bulk add/adjust/revoke; preflight and conflict policy; partial failure,
+idempotency and concurrency; downstream impact and recovery; API, event/audit and
+`AC-*`. If no such collection exists, state `Not applicable + reason`; never add
+an external-role portal merely to satisfy this check.
