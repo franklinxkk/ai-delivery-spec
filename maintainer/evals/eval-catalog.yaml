@@ -1,0 +1,214 @@
+schema_version: 5.0.0
+claim_policy:
+  structural_pass_is_behavioral_pass: false
+  simulated_reviewer_is_expert_review: false
+  passed_requires_evidence: true
+  quantitative_metrics: maintainer/evals/metric-definitions.yaml
+
+dimensions:
+  - trigger_accuracy
+  - clarification_quality
+  - requirement_completeness
+  - no_guess_handoff
+  - cross_artifact_consistency
+  - domain_accuracy
+  - change_safety
+  - human_usability
+  - context_efficiency
+
+scenarios:
+  - id: EVAL-NEWCOMER-SAAS-001
+    project: newcomer-saas
+    lifecycle: discover
+    shape: greenfield
+    perspective: newcomer
+    input: examples/minimal-v5/README.md
+    expected:
+      - ask only material clarification
+      - produce a bounded Light specification
+      - explain next upgrade trigger without internal jargon
+    dimensions: [trigger_accuracy, clarification_quality, human_usability, context_efficiency]
+    status: not_run
+    evidence: []
+
+  - id: EVAL-PUBLISHING-PM-001
+    project: publishing-learning
+    lifecycle: specify
+    shape: brownfield
+    perspective: product_owner
+    input: maintainer/examples/publishing-learning-v5/delivery/truth/product-truth.yaml
+    expected:
+      - resource, course, authorization, activation, learning, and evidence form one readable chain
+      - page and click behavior can be reviewed without blind prototype switching
+      - gaps and project-specific assertions are visible
+    dimensions: [requirement_completeness, cross_artifact_consistency, human_usability]
+    status: partial
+    evidence: [maintainer/evals/evidence/static-regression-2026-07-11.yaml]
+
+  - id: EVAL-PUBLISHING-CODING-001
+    project: publishing-learning
+    lifecycle: build_verify
+    shape: brownfield
+    perspective: coding_agent
+    input: maintainer/examples/publishing-learning-v5/delivery
+    expected:
+      - implement one vertical slice without inventing pages, fields, states, or rules
+      - report repository conflicts instead of silently adapting business behavior
+      - bind tests and evidence to AC IDs
+    dimensions: [no_guess_handoff, cross_artifact_consistency, change_safety]
+    status: not_run
+    evidence: []
+
+  - id: EVAL-PUBLISHING-QA-001
+    project: publishing-learning
+    lifecycle: build_verify
+    shape: brownfield
+    perspective: qa
+    input: maintainer/examples/publishing-learning-v5/delivery/truth/product-truth.yaml
+    expected:
+      - derive happy, over-limit, duplicate activation, dependency, and idempotency tests
+      - distinguish required evidence from executed evidence
+    dimensions: [requirement_completeness, cross_artifact_consistency]
+    status: not_run
+    evidence: []
+
+  - id: EVAL-BROWNFIELD-CHANGE-001
+    project: traffic-regulatory-change
+    lifecycle: change
+    shape: brownfield
+    perspective: product_engineering
+    input: maintainer/examples/traffic-regulatory-change-v5/change-package.yaml
+    expected:
+      - preserve impacted stable IDs without silently losing approved behavior
+      - expose unresolved evidence and approvals instead of inventing them
+      - identify regression, rollout, rollback, and data migration impact
+    dimensions: [change_safety, cross_artifact_consistency, no_guess_handoff]
+    status: partial
+    evidence: [maintainer/evals/evidence/static-regression-2026-07-11.yaml]
+
+  - id: EVAL-TRAFFIC-REGULATED-001
+    project: traffic-safety
+    lifecycle: specify
+    shape: hybrid
+    perspective: accountable_domain_reviewer
+    input: references/domains/domain-traffic.md
+    expected:
+      - distinguish regulator and enterprise responsibility
+      - refuse unsupported legal conclusions
+      - show source applicability and unresolved verification gaps
+    dimensions: [domain_accuracy, requirement_completeness]
+    status: partial
+    evidence: [maintainer/evals/evidence/static-regression-2026-07-11.yaml]
+
+  - id: EVAL-GENERIC-ENERGY-001
+    project: energy-device-maintenance
+    lifecycle: discover
+    shape: brownfield
+    perspective: product_owner
+    input: maintainer/examples/generic-energy-capsule-v5/project-domain-capsule.yaml
+    expected:
+      - use generic rules instead of blocking delivery
+      - build a Project Domain Capsule
+      - mark safety and regulatory claims inferred or unknown until confirmed
+    dimensions: [clarification_quality, requirement_completeness, domain_accuracy]
+    status: partial
+    evidence: [maintainer/evals/evidence/static-regression-2026-07-11.yaml]
+
+  - id: EVAL-NEGATIVE-TRIGGER-001
+    project: unrelated-debugging
+    lifecycle: discover
+    shape: greenfield
+    perspective: routing
+    input: 修复一个与产品交付无关的 Python 语法错误
+    expected:
+      - do not trigger ai-delivery-spec
+    dimensions: [trigger_accuracy, context_efficiency]
+    status: not_run
+    evidence: []
+
+  - id: EVAL-CROSS-INDUSTRY-ASSURANCE-001
+    project: cross-industry-assurance
+    lifecycle: review
+    shape: hybrid
+    perspective: multi_role_assurance
+    input: maintainer/evals/industry-assurance-portfolio.yaml
+    expected:
+      - seven sectors traverse intake, clarify, specify, review, baseline, change and acceptance
+      - business, product, domain, UX, engineering, QA, compliance and customer lenses expose distinct P0/P1 gaps
+      - method gaps are fixed or explicitly bounded while missing project facts remain blocked
+      - final runtime gate remains zero-LLM, single-read and non-generative
+    dimensions: [clarification_quality, requirement_completeness, no_guess_handoff, change_safety, domain_accuracy, human_usability, context_efficiency]
+    status: partial
+    evidence: [maintainer/evals/evidence/v510-cross-industry-multi-agent-simulation-2026-07-14.yaml]
+
+  - id: EVAL-GITHUB-CHATWOOT-REQ-001
+    project: chatwoot-voice-channel
+    lifecycle: discover
+    shape: brownfield
+    perspective: product_owner
+    input: maintainer/evals/github-cases.yaml#GH-CHATWOOT-VOICE
+    expected:
+      - expand inbound and outbound call behavior without inventing v2 scope
+      - preserve recording, consent, routing, and retention as explicit unknowns
+      - detect current repository voice implementation before writing a new PRD
+    dimensions: [clarification_quality, requirement_completeness, domain_accuracy]
+    status: partial
+    evidence: [maintainer/evals/evidence/chatwoot-voice-requirement-score.yaml, maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
+
+  - id: EVAL-GITHUB-SALEOR-DESIGN-001
+    project: saleor-channel-identifier
+    lifecycle: specify
+    shape: brownfield
+    perspective: product_engineering
+    input: maintainer/evals/github-cases.yaml#GH-SALEOR-CHANNEL-ID
+    expected:
+      - define ID, slug, and legacy selector compatibility and conflict behavior
+      - preserve permissions, visibility, pagination, and filtering semantics
+      - distinguish a user issue from an approved project roadmap
+    dimensions: [requirement_completeness, change_safety, cross_artifact_consistency]
+    status: partial
+    evidence: [maintainer/evals/evidence/saleor-channel-id-design-score.yaml, maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
+
+  - id: EVAL-GITHUB-OPENEDX-DESIGN-001
+    project: openedx-reindex-upgrade
+    lifecycle: change
+    shape: brownfield
+    perspective: product_engineering
+    input: maintainer/evals/github-cases.yaml#GH-OPENEDX-REINDEX
+    expected:
+      - detect that async incremental indexing already exists in the pinned baseline
+      - separate verified current state from remaining operations gaps
+      - refuse to regenerate a stale feature request
+    dimensions: [change_safety, no_guess_handoff, cross_artifact_consistency]
+    status: partial
+    evidence: [maintainer/evals/evidence/openedx-reindex-design-score.yaml, maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
+
+  - id: EVAL-GITHUB-ORANGEHRM-HANDOFF-001
+    project: orangehrm-password-policy
+    lifecycle: build_verify
+    shape: brownfield
+    perspective: coding_agent
+    input: maintainer/evals/github-cases.yaml#GH-ORANGEHRM-PASSWORD-POLICY
+    expected:
+      - inspect frontend and backend password enforcement before selecting files
+      - keep server enforcement authoritative across every password write path
+      - produce vertical slices and tests without pretending code was executed
+    dimensions: [no_guess_handoff, change_safety, cross_artifact_consistency]
+    status: partial
+    evidence: [maintainer/evals/evidence/orangehrm-password-policy-handoff-score.yaml, maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
+
+  - id: EVAL-LIFECYCLE-FORWARD-001
+    project: generic-lifecycle-forward-test
+    lifecycle: discover_to_acceptance_definition
+    shape: greenfield_and_brownfield
+    perspective: multi_role_assurance
+    input: private artifact calibration plus synthetic one-line and competitive scenarios
+    expected:
+      - batch answers remain bound to their unknowns and affected contracts
+      - competitor facts do not silently become product rules
+      - every cross-module hop and generated object's next action is explicit
+      - one PRD and all supplied prototypes remain ID-closed without a generative runtime gate
+      - simulations do not claim implementation, expert review or customer acceptance
+    dimensions: [clarification_quality, requirement_completeness, no_guess_handoff, cross_artifact_consistency, human_usability, context_efficiency]
+    status: partial
+    evidence: [maintainer/evals/evidence/v517-lifecycle-forward-test-2026-07-15.yaml]

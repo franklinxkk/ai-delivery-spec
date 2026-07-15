@@ -39,6 +39,15 @@ def recommend(doc: dict[str, Any]) -> dict[str, Any]:
     roles = size(doc.get("roles"))
     modules = size(doc.get("modules"))
     integrations = size(doc.get("integrations"))
+    ai_behavior = bool(doc.get("ai_behavior"))
+    ai_centrality = str(doc.get("ai_centrality", "unknown")).lower()
+    ai_write_scope = str(doc.get("ai_write_scope", "unknown")).lower()
+    ai_high_risk = ai_behavior and not (
+        ai_centrality in {"incidental", "supporting"}
+        and ai_write_scope in {"none", "read_only", "draft_only"}
+        and doc.get("ai_reversible") is True
+        and doc.get("ai_human_gate") is True
+    )
     dimensions = []
     for key in ("cross_module_state", "sensitive_data", "compliance", "migration", "customer_acceptance", "ai_behavior"):
         if doc.get(key):
@@ -84,7 +93,7 @@ def recommend(doc: dict[str, Any]) -> dict[str, Any]:
         mode, tier = "ultra_light", "L0"
     elif band == "S" and not doc.get("customer_acceptance"):
         mode, tier = "lite", "L1"
-    elif doc.get("compliance") or doc.get("migration") or doc.get("ai_behavior"):
+    elif doc.get("compliance") or doc.get("migration") or ai_high_risk:
         mode, tier = "full", "L3"
     elif roles >= 8 or modules >= 12 or band == "XL":
         mode, tier = "full", "L3"

@@ -16,7 +16,7 @@ Classify the proposal:
 | professional industry knowledge | one matched `references/domains/domain-*.md` plus coverage metadata |
 | customer-specific behavior | project Product Truth / Project Domain Capsule, not this repo |
 | deterministic repeatable work | `scripts/` |
-| behavioral validation | `evals/` with evidence |
+| behavioral validation | `maintainer/evals/` with evidence |
 
 Do not add a public file for a one-off project rule.
 
@@ -31,7 +31,7 @@ Do not add a public file for a one-off project rule.
 
 ## Domain Pack Contribution
 
-1. Start from `references/domains/domain-module-template.md`.
+1. Start from `maintainer/templates/domain-module-template.md`.
 2. Add an entry to `references/domain-coverage.yaml`.
 3. State `applies_when` and `does_not_apply_when`.
 4. Define vocabulary, entities, state owners, events, metrics, context sources,
@@ -39,7 +39,7 @@ Do not add a public file for a one-off project rule.
 5. Register sources with authority, status, jurisdiction/applicability, version,
    verification date, and owner where relevant.
 6. Keep customer rules separate from public/industry rules.
-7. Add evaluation scenarios to `evals/eval-catalog.yaml`.
+7. Add evaluation scenarios to `maintainer/evals/eval-catalog.yaml`.
 8. Declare actual reusable-pack maturity and delivery `practice_status`
    separately. New packs default to `experimental` + `knowledge_only`.
 

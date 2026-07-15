@@ -71,6 +71,21 @@ class Gate:
     def add(self, severity: str, code: str, path: Path, message: str, ref: str = "") -> None:
         self.findings.append(Finding(severity, code, str(path), message, ref))
 
+    @staticmethod
+    def _frontmatter(raw: str) -> dict[str, Any]:
+        match = re.match(r"\A---\s*\n(.*?)\n---\s*\n", raw, re.S)
+        if not match:
+            return {}
+        try:
+            loaded = yaml.safe_load(match.group(1)) or {}
+        except yaml.YAMLError:
+            return {}
+        return loaded if isinstance(loaded, dict) else {}
+
+    @staticmethod
+    def _tag_source(raw: str) -> str:
+        return "\n".join(re.findall(r"<[A-Za-z][^>]*>", raw, re.S))
+
     def check_requirement(self, path: Path) -> None:
         try:
             raw = self.read(path)
@@ -215,15 +230,46 @@ class Gate:
             for failure in analyze_prd_structure(raw, full_prd=True):
                 self.add("BLOCK", "PRD-STRUCTURE", path, failure)
         if level in {"L3", "L4"}:
-            frontmatter: dict[str, Any] = {}
-            match = re.match(r"\A---\s*\n(.*?)\n---\s*\n", raw, re.S)
-            if match:
-                try:
-                    loaded = yaml.safe_load(match.group(1)) or {}
-                    if isinstance(loaded, dict):
-                        frontmatter = loaded
-                except yaml.YAMLError:
-                    pass
+            frontmatter = self._frontmatter(raw)
+            source_refs = frontmatter.get("source_refs")
+            if not isinstance(source_refs, list) or not source_refs:
+                self.add("BLOCK", "PRD-NO-SOURCE-SCOPE", path, "L3/L4 handoff must declare non-empty source_refs in frontmatter")
+                source_refs = []
+            if not has_any(lowered, ("来源登记", "source register")):
+                self.add("BLOCK", "PRD-NO-SOURCE-REGISTER", path, "L3/L4 handoff needs a source register with authority and disposition")
+            for source_ref in [str(item).upper() for item in source_refs]:
+                if len(re.findall(rf"\b{re.escape(source_ref)}\b", raw, re.I)) < 2:
+                    self.add("BLOCK", "PRD-UNRESOLVED-SOURCE", path, "frontmatter source_ref is not resolved in the source register/body", source_ref)
+            if "open_p0_unknown_ids" not in frontmatter:
+                self.add("BLOCK", "PRD-NO-P0-DISPOSITION", path, "L3/L4 handoff must declare open_p0_unknown_ids, using [] when all are closed")
+            elif not isinstance(frontmatter.get("open_p0_unknown_ids"), list):
+                self.add("BLOCK", "PRD-BAD-P0-DISPOSITION", path, "open_p0_unknown_ids must be a list")
+            elif frontmatter.get("open_p0_unknown_ids"):
+                self.add("BLOCK", "PRD-OPEN-P0-UNKNOWN", path, "direct implementation cannot baseline with unresolved P0 unknowns", ", ".join(map(str, frontmatter["open_p0_unknown_ids"])))
+
+            ac_refs = {item.upper() for item in re.findall(r"\bAC-[A-Z0-9-]+\b", raw, re.I)}
+            machine_ac_defs = {
+                item.upper()
+                for item in re.findall(r"(?m)^\s*(?:-\s+)?id:\s*['\"]?(AC-[A-Z0-9-]+)\b", raw, re.I)
+            }
+            for ac_id in sorted(ac_refs - machine_ac_defs):
+                self.add("BLOCK", "PRD-AC-NO-MACHINE-DEFINITION", path, "referenced AC has no exact machine-readable definition", ac_id)
+            for line_no, line in enumerate(raw.splitlines(), 1):
+                if not re.match(r"\s*(?:\||-\s+id:)", line):
+                    continue
+                loose = re.search(
+                    r"\b(?:REQ|ROLE|FLOW|VIEW|REG|ACT|FLD|STM|STATE|RULE|API|EVT|INT|AC|TEST|EVD|CHG|REV|REL|METRIC)-[A-Z0-9-]*(?:\*|\.\.|…)",
+                    line,
+                    re.I,
+                )
+                if loose:
+                    self.add("BLOCK", "PRD-NONEXACT-ID", path, "baseline contract rows cannot use wildcard/range stable IDs", f"line {line_no}: {loose.group(0)}")
+            module_ids = {item.upper() for item in re.findall(r"\bMOD-[A-Z0-9-]+\b", raw, re.I)}
+            if len(module_ids) > 1:
+                if not has_any(lowered, ("跨模块逐边契约", "cross-module edge contract")):
+                    self.add("BLOCK", "PRD-NO-CROSS-MODULE-EDGE-CONTRACT", path, "multi-module L3/L4 handoff must specify every cross-module edge")
+                if not has_any(lowered, ("后继可达性", "successor reachability")):
+                    self.add("BLOCK", "PRD-NO-SUCCESSOR-REACHABILITY", path, "created/converted objects need an authorized reachable next action")
             declared_views = frontmatter.get("page_contract_view_ids", [])
             if not isinstance(declared_views, list) or not declared_views:
                 self.add("BLOCK", "PRD-NO-PAGE-CONTRACT-SCOPE", path, "L3 direct-implementation PRD must declare page_contract_view_ids in frontmatter")
@@ -327,11 +373,12 @@ class Gate:
         # Restrict attribute discovery to actual HTML-like opening tags. Raw
         # regex over the whole document also matches JavaScript selectors such
         # as `[data-testid="page-X"]` and falsely reports duplicate pages.
-        tag_source = "\n".join(re.findall(r"<[A-Za-z][^>]*>", raw, re.S))
+        tag_source = self._tag_source(raw)
         testids = re.findall(r"\bdata-testid\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)
         actions = sorted(set(re.findall(r"\bdata-action\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
         states = sorted(set(re.findall(r"\bdata-state\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
         fields = sorted(set(re.findall(r"\bdata-(?:field|bind)\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
+        metrics = sorted(set(re.findall(r"\bdata-metric\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
         page_testids = [item for item in testids if item.lower().startswith("page-")]
         if not page_testids:
             self.add("BLOCK" if actions or level in {"L2", "L3", "L4"} else "GAP", "PROTO-NO-PAGE-ANCHOR", path, "no page-* data-testid root was found")
@@ -341,6 +388,9 @@ class Gate:
             for action in actions:
                 if not re.fullmatch(r"ACT-[A-Z0-9-]+", action, re.I):
                     self.add("BLOCK", "PROTO-UNSTABLE-ACTION", path, "data-action must bind a stable ACT-* ID", action)
+            for metric in metrics:
+                if not re.fullmatch(r"METRIC-[A-Z0-9-]+", metric, re.I):
+                    self.add("BLOCK", "PROTO-UNSTABLE-METRIC", path, "data-metric must bind a stable METRIC-* ID", metric)
         if not actions:
             self.add("GAP", "PROTO-NO-ACTIONS", path, "no data-action controls were found; confirm this is intentionally static")
 
@@ -354,6 +404,13 @@ class Gate:
                 module_script = module_script or script_type == "module"
         scripts = "\n".join(script_blocks)
         if level in {"L3", "L4"}:
+            metric_like_tags = [
+                tag for tag in re.findall(r"<[A-Za-z][^>]*>", raw, re.S)
+                if re.search(r"\bclass\s*=\s*['\"][^'\"]*\b(?:metric|metric-card|stat-card|kpi)\b", tag, re.I)
+                and not re.search(r"\bdata-metric\s*=", tag, re.I)
+            ]
+            if metric_like_tags:
+                self.add("BLOCK", "PROTO-METRIC-NO-ID", path, f"{len(metric_like_tags)} displayed metric elements have no stable data-metric", re.sub(r"\s+", " ", metric_like_tags[0])[:120])
             inline_handlers = re.findall(r"\bon(?:click|change|input|submit|dragstart|drop)\s*=", raw, re.I)
             if inline_handlers:
                 self.add("BLOCK", "PROTO-INLINE-HANDLER", path, f"L3 prototype contains {len(inline_handlers)} inline event handlers; use one explicit action registry")
@@ -384,10 +441,13 @@ class Gate:
         }
         has_listener = bool(re.search(r"addEventListener\s*\(\s*['\"](?:click|change|submit|input)['\"]", scripts, re.I))
         reads_action = bool(re.search(r"dataset\.action|getAttribute\s*\(\s*['\"]data-action['\"]|closest\s*\(\s*['\"]\[data-action\]", scripts, re.I))
-        generic_dispatch = bool(re.search(r"(?:handlers?|actions?|actionHandlers?)\s*\[\s*action\s*\]|(?:dispatch|handle)Action\s*\(\s*action\b", scripts, re.I))
         for action in actions:
-            exact_in_script = bool(re.search(rf"(?<![A-Z0-9-]){re.escape(action)}(?![A-Z0-9-])", scripts, re.I))
-            if action not in inline_action_tags and not (has_listener and reads_action and (generic_dispatch or exact_in_script)):
+            dispatch_evidence = bool(re.search(
+                rf"(?:case\s+['\"]{re.escape(action)}['\"]|(?:action|actionId)\s*===?\s*['\"]{re.escape(action)}['\"]|['\"]{re.escape(action)}['\"]\s*:|\.set\s*\(\s*['\"]{re.escape(action)}['\"]|\[\s*['\"]{re.escape(action)}['\"]\s*\]\s*=)",
+                scripts,
+                re.I,
+            ))
+            if action not in inline_action_tags and not (has_listener and reads_action and dispatch_evidence):
                 self.add("BLOCK", "PROTO-UNHANDLED-ACTION", path, "no static event-handler evidence for data-action", action)
 
         durable_result = bool(re.search(
@@ -438,7 +498,58 @@ class Gate:
         external_scripts = re.findall(r"<script\b[^>]*\bsrc\s*=\s*['\"]([^'\"]+)['\"]", raw, re.I)
         if external_scripts:
             self.add("GAP", "PROTO-EXTERNAL-JS", path, "external scripts are outside this single-file static scan", ", ".join(external_scripts[:3]))
-        self.metrics.update({"prototype_pages": len(page_testids), "prototype_actions": len(actions), "prototype_states": len(states), "prototype_fields": len(fields)})
+        self.metrics.update({"prototype_pages": len(page_testids), "prototype_actions": len(actions), "prototype_states": len(states), "prototype_fields": len(fields), "prototype_metrics": len(metrics)})
+
+    def check_handoff(self, prd_path: Path, prototype_paths: list[Path], level: str) -> None:
+        """Cross-check the one PRD baseline against one or more prototype projections."""
+        try:
+            prd = self.read(prd_path)
+            prototype_raw = [(path, self.read(path)) for path in prototype_paths]
+        except (OSError, UnicodeError) as exc:
+            self.add("BLOCK", "HANDOFF-READ", prd_path, f"handoff artifact cannot be read: {exc}")
+            return
+
+        frontmatter = self._frontmatter(prd)
+        declared_views = {str(item).upper() for item in frontmatter.get("page_contract_view_ids", []) if item}
+        prd_actions = {item.upper() for item in re.findall(r"\bACT-[A-Z0-9-]+\b", prd, re.I)}
+        prd_ac_refs = {item.upper() for item in re.findall(r"\bAC-[A-Z0-9-]+\b", prd, re.I)}
+        prd_metric_refs = {item.upper() for item in re.findall(r"\bMETRIC-[A-Z0-9-]+\b", prd, re.I)}
+        machine_ac_defs = {
+            item.upper()
+            for item in re.findall(r"(?m)^\s*(?:-\s+)?id:\s*['\"]?(AC-[A-Z0-9-]+)\b", prd, re.I)
+        }
+        prototype_views: set[str] = set()
+        prototype_actions: set[str] = set()
+        prototype_acs: set[str] = set()
+        prototype_metrics: set[str] = set()
+        for path, raw in prototype_raw:
+            tags = self._tag_source(raw)
+            prototype_views.update(item.upper() for item in re.findall(r"\bdata-view\s*=\s*['\"](VIEW-[A-Z0-9-]+)['\"]", tags, re.I))
+            prototype_views.update(item.upper() for item in re.findall(r"\bdata-testid\s*=\s*['\"]page-(VIEW-[A-Z0-9-]+)['\"]", tags, re.I))
+            prototype_actions.update(item.upper() for item in re.findall(r"\bdata-action\s*=\s*['\"](ACT-[A-Z0-9-]+)['\"]", tags, re.I))
+            prototype_acs.update(item.upper() for item in re.findall(r"\bdata-ac\s*=\s*['\"](AC-[A-Z0-9-]+)['\"]", tags, re.I))
+            prototype_metrics.update(item.upper() for item in re.findall(r"\bdata-metric\s*=\s*['\"](METRIC-[A-Z0-9-]+)['\"]", tags, re.I))
+
+        for action in sorted(prototype_actions - prd_actions):
+            self.add("BLOCK", "HANDOFF-PROTOTYPE-ACTION-NOT-IN-PRD", prd_path, "prototype action is absent from the PRD baseline", action)
+        for ac_id in sorted(prototype_acs - prd_ac_refs):
+            self.add("BLOCK", "HANDOFF-PROTOTYPE-AC-NOT-IN-PRD", prd_path, "prototype AC is absent from the PRD baseline", ac_id)
+        if level in {"L3", "L4"}:
+            for ac_id in sorted(prototype_acs - machine_ac_defs):
+                self.add("BLOCK", "HANDOFF-PROTOTYPE-AC-NOT-MACHINE-DEFINED", prd_path, "prototype AC has no machine-readable PRD definition", ac_id)
+            for view in sorted(prototype_views - declared_views):
+                self.add("BLOCK", "HANDOFF-UNDECLARED-PROTOTYPE-VIEW", prd_path, "prototype exposes a view outside the declared PRD scope", view)
+            for view in sorted(declared_views - prototype_views):
+                self.add("BLOCK", "HANDOFF-DECLARED-VIEW-NOT-PROTOTYPED", prd_path, "declared implementation view is absent from all supplied prototypes", view)
+            for metric in sorted(prototype_metrics - prd_metric_refs):
+                self.add("BLOCK", "HANDOFF-PROTOTYPE-METRIC-NOT-IN-PRD", prd_path, "prototype metric is absent from the PRD caliber contract", metric)
+        self.metrics.update({
+            "handoff_prototypes": len(prototype_paths),
+            "handoff_views": len(prototype_views),
+            "handoff_actions": len(prototype_actions),
+            "handoff_acceptance_refs": len(prototype_acs),
+            "handoff_metrics": len(prototype_metrics),
+        })
 
 
 def _balanced_javascript(source: str) -> bool:
@@ -483,10 +594,10 @@ def result_payload(gate: Gate, profile: str) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Lightweight, non-generative final quality gate")
-    parser.add_argument("--profile", choices=["requirement", "prd", "prototype", "full"], required=True)
+    parser.add_argument("--profile", choices=["requirement", "prd", "prototype", "handoff", "full"], required=True)
     parser.add_argument("--requirement", type=Path, help="requirement register YAML")
     parser.add_argument("--prd", type=Path, help="unified PRD Markdown")
-    parser.add_argument("--prototype", type=Path, help="single-file HTML prototype")
+    parser.add_argument("--prototype", type=Path, action="append", help="HTML prototype; repeat for admin/H5/multi-surface handoff")
     parser.add_argument("--level", choices=list(LEVELS), default="L2")
     parser.add_argument("--format", choices=["concise", "json"], default="concise")
     parser.add_argument("--max-findings", type=int, default=20)
@@ -495,21 +606,29 @@ def main() -> int:
         "requirement": ("requirement",),
         "prd": ("prd",),
         "prototype": ("prototype",),
+        "handoff": ("prd", "prototype"),
         "full": ("requirement", "prd", "prototype"),
     }[args.profile]
     gate = Gate()
     for name in required:
         value = getattr(args, name)
-        if value is None:
+        values = value if name == "prototype" and isinstance(value, list) else [value]
+        if not value:
             gate.add("BLOCK", "GATE-MISSING-INPUT", Path("<input>"), f"--{name} is required for profile={args.profile}", name)
-        elif not value.is_file():
-            gate.add("BLOCK", "GATE-NOT-FILE", value, "input does not exist or is not a file", name)
-        elif name == "requirement":
-            gate.check_requirement(value)
-        elif name == "prd":
-            gate.check_prd(value, args.level)
-        else:
-            gate.check_prototype(value, args.level)
+            continue
+        for item in values:
+            if not item.is_file():
+                gate.add("BLOCK", "GATE-NOT-FILE", item, "input does not exist or is not a file", name)
+            elif name == "requirement":
+                gate.check_requirement(item)
+            elif name == "prd":
+                gate.check_prd(item, args.level)
+            else:
+                gate.check_prototype(item, args.level)
+    valid_prd = args.prd if args.prd and args.prd.is_file() else None
+    valid_prototypes = [path for path in (args.prototype or []) if path.is_file()]
+    if args.profile in {"handoff", "full"} and valid_prd and valid_prototypes:
+        gate.check_handoff(valid_prd, valid_prototypes, args.level)
     payload = result_payload(gate, args.profile)
     if args.format == "json":
         print(json.dumps({key: value for key, value in payload.items() if key != "exit_code"}, ensure_ascii=True, indent=2))

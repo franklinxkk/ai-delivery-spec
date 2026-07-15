@@ -1,4 +1,4 @@
-# Unified PRD Engineering Completeness
+# Unified PRD Engineering Completeness And Handoff
 
 Use when development, QA or a Coding Agent must implement an accepted
 requirement without inventing business behavior. This is an annex route inside
@@ -49,3 +49,30 @@ At medium pressure, stop reloading raw sources and continue from approved IDs.
 At high pressure, checkpoint the current requirement/module slice and continue
 in the same document. Never merge roles or omit P0 behavior merely to fit one
 context window.
+
+## Consumer Reading Paths
+
+| Consumer | Primary reading path | Optional export |
+|---|---|---|
+| customer/business | goals, scope, role journeys, flows, acceptance | customer contract summary |
+| product/design | full main body and page interactions | prototype/IA index |
+| traditional development | main body then fields/states/interfaces annex | field/API extract |
+| QA | journeys, exceptions, AC and trace index | executable acceptance list |
+| Coding Agent | complete document plus machine annex | stable-ID YAML/JSON slice |
+
+Exports preserve stable IDs and baseline version. They are generated from the
+one PRD baseline and never become a second authority.
+
+## Handoff Gate
+
+The receiver must be able to proceed without inventing actor/data scope, flow
+branches, failure/recovery, field rules, state transitions, rule precedence,
+concurrency/idempotency, integration semantics or acceptance evidence.
+Technical implementation choices remain with engineering unless customer
+behavior, interoperability, security, compliance or acceptance makes them part
+of the requirement contract.
+
+Prototype handoff maps stable IDs to `data-testid`, `data-action`, `data-field`,
+`data-state` and applicable `data-api`; every action has a handler and visible
+outcome. Change handoff includes affected IDs, before/after, approvals,
+synchronized consumers, updated artifacts and regression evidence.

@@ -1,5 +1,25 @@
 # Changelog
 
+## 5.1.7 - 2026-07-15
+
+- Added dependency-layered one-sentence clarification with bounded answer batches,
+  durable `UNK/DEC/REQ` answer binding, option tradeoffs and a lightweight ToC
+  behavior-change route.
+- Added competitor-evidence discipline: versioned facts, claim limits, reusable
+  patterns, prohibited copying, positioning decisions and measurable differentiation.
+- Added brownfield triangulation across written requirements, observed behavior and
+  live engineering clarification; historical buildability no longer masquerades as
+  current contract conformance.
+- Added cross-module edge and successor-reachability contracts plus a reusable
+  object-conversion pattern, closing orphan drafts and missing intermediate hops.
+- Added the zero-model `handoff` gate for one PRD and multiple prototypes. It checks
+  view/action/AC/metric drift, exact machine AC coverage, source/P0 disposition,
+  stable `data-metric` anchors and explicit action-dispatch evidence.
+- Refined AI triage so reversible, human-gated read/draft assistance is not promoted
+  to L3 solely because AI is present, while consequential AI writes remain L3+.
+- Unified requirement lifecycle vocabulary with the register schema and clarified
+  `STM-*` (state machine) versus `STATE-*` (concrete state).
+
 ## 5.1.6 - 2026-07-15
 
 - Added a role-to-work-surface closure matrix so a role task cannot terminate at

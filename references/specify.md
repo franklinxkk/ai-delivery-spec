@@ -29,7 +29,7 @@ Stable prefixes:
 | requirement / feature / review | `REQ` / `FEAT` / `REV` |
 | role / module / entity / field | `ROLE` / `MOD` / `ENT` / `FLD` |
 | flow / view / region / action | `FLOW` / `VIEW` / `REG` / `ACT` |
-| state machine / rule / event / integration/API | `STM` / `RULE` / `EVT` / `INT` / `API` |
+| state machine / concrete state / rule / event / integration/API | `STM` / `STATE` / `RULE` / `EVT` / `INT` / `API` |
 | acceptance / test / run / defect / evidence / change | `AC` / `TEST` / `ARUN` / `DEFECT` / `EVD` / `CHG` |
 
 IDs are permanent. Rename without changing semantic identity. For split,
