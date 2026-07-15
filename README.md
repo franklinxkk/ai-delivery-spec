@@ -1,4 +1,4 @@
-# AI Delivery Spec 5.1.5
+# AI Delivery Spec 5.1.6
 
 > 需求一来就写 PRD，低价值需求也进入重型设计？
 >
@@ -14,7 +14,7 @@
 正文让客户、产品和传统开发顺序读懂，同文档工程附录让测试与 AI Coding 精确执行。
 只有大项目、持续变更、多投影或强审计场景才启用分片 Product Truth。
 
-[![Version](https://img.shields.io/badge/version-5.1.5-0052A4.svg)]()
+[![Version](https://img.shields.io/badge/version-5.1.6-0052A4.svg)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 
@@ -23,6 +23,16 @@
 [skills.sh 16 次安装](https://www.skills.sh/franklinxkk/ai-delivery-spec) ·
 [SkillHub TRACE 4.7/5](https://skillhub.cn/dashboard/evaluation/ai-delivery-spec)，双安全扫描无 P0/P1 风险。
 这些是第三方平台的动态公开快照，用于说明已有真实关注与安装，不替代项目适用性判断。
+
+## 它直接帮助谁
+
+| 使用者 | 直接获得的帮助 |
+|---|---|
+| 客户、业务与项目负责人 | 在投入设计前确认价值、范围、优先级、责任和验收边界 |
+| 初中高级产品与设计 | 分批澄清，形成一份可读 PRD，并把角色旅程、页面、字段、状态和异常闭环 |
+| 前后端与架构师 | 获得可施工的页面合同、关系台账、指标口径、数据流、接口语义和禁止推断边界 |
+| 测试、实施与验收人员 | 从 `AC-*` 生成正反用例、证据要求，并把缺陷反向追到原需求 |
+| Codex、Trae、Cursor、Qoder 等 Coding Agent | 按稳定 ID 切片实现，不再猜角色、字段、业务规则或成功标准 |
 
 ## 60 秒上手：选一个任务，复制即用
 
@@ -101,9 +111,9 @@ openclaw skills install @franklinxkk/ai-delivery-spec
 研发排期、Sprint/任务、代码、CI/CD、部署执行、监控和运营属于下游系统。
 本项目只记录它们与需求/验收有关的外部引用，不接管流程。
 
-## 5.1.x 如何解决真实项目中的失败
+## 5.1.x 重点解决的交付失败
 
-一次交通出版平台实战中，旧版结构校验可以 PASS，但仍出现三个典型问题：
+结构完整不等于需求可读、可施工。团队常见的三个失败是：
 
 - 机器契约直接成为主文档，90KB PRD 对传统开发不可读；
 - Human-First 与 AI Coding PRD 分开维护，团队无法确认哪份才是基线；
@@ -213,7 +223,7 @@ python scripts/ai_delivery_spec_cli.py impact --truth requirements/truth/compile
 | 位置 | 工具类型 | 责任 |
 |---|---|---|
 | 上游 | 产品发现、调研、工作坊 | 发现机会、证据和策略假设 |
-| **需求管理内核** | **AI Delivery Spec 5.1.5** | 准入 → 澄清 → 基线 → 变更 → 追溯 → 验收 |
+| **需求管理内核** | **AI Delivery Spec 5.1.6** | 准入 → 澄清 → 基线 → 变更 → 追溯 → 验收 |
 | 下游 | Spec Kit、项目/研发管理工具 | 技术方案、任务、排期和依赖执行 |
 | 下游 | Codex、Trae、Cursor、Qoder 等 | 依据已基线需求编码、测试和修改 |
 | 外部证据 | CI、测试、发布、监控平台 | 向需求验收回传可引用证据 |
@@ -247,6 +257,7 @@ python tests/test_v511_runtime_budget.py
 python tests/test_v511_role_stage.py
 python tests/test_v511_domain_assurance.py
 python tests/test_v515_page_delivery_contract.py
+python tests/test_v516_ai_applicability.py
 python scripts/validators/validate_domain_contracts.py
 ```
 

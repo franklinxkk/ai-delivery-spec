@@ -1,5 +1,21 @@
 # Changelog
 
+## 5.1.6 - 2026-07-15
+
+- Added a role-to-work-surface closure matrix so a role task cannot terminate at
+  a summary count or unexplained handoff.
+- Added `managed_relation_view_ids` and `REL-*` contracts for parent-child or
+  many-to-many inventories, including source/inheritance, preflight, batch
+  adjust/revoke, partial failure, idempotency, downstream impact, API and AC.
+- Added a deterministic L3/L4 gate regression for managed relation contracts.
+- Scoped prototype attribute discovery to real HTML-like tags so JavaScript
+  selectors no longer create false duplicate-page findings.
+- Limited L3/L4 AI-runtime checks to positively applicable AI product behavior;
+  an explicit out-of-scope statement or the phrase "AI Coding" no longer creates
+  a false requirement for model, prompt, tool-policy and evaluation contracts.
+- Reworked the README around user roles, direct outcomes and copyable first-use
+  routes, without relying on any named customer-project claim.
+
 ## 5.1.5 - 2026-07-15
 
 ### Page-level engineering closure

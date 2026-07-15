@@ -63,6 +63,39 @@ def has_any(text: str, terms: tuple[str, ...]) -> bool:
     return any(term.lower() in text for term in terms)
 
 
+AI_PRODUCT_PATTERNS = (
+    r"\bai[- ]?native\b",
+    r"ai\s+runtime",
+    r"ai\s*(?:组课|推荐|生成|审核|客服|决策)",
+    r"人工智能\s*(?:组课|推荐|生成|审核|客服|决策)",
+    r"(?:大模型|模型)\s*(?:调用|推理|生成|编排|契约|输出)",
+    r"智能体\s*(?:工作流|编排|运行时|调用|协作)",
+    r"prompt\s+version|tool\s+policy|human\s+gate",
+)
+AI_NON_PRODUCT_MARKERS = (
+    "不建设", "不包含", "不在本期", "不适用", "排除", "仅预留",
+    "out of scope", "not applicable", "excluded", "future phase only",
+)
+
+
+def ai_contract_applicable(raw: str) -> bool:
+    """Detect positive AI product behavior without treating exclusions as scope.
+
+    "AI Coding" describes a document consumer, not an AI product feature. Split
+    clauses before applying exclusion markers so a later positive AI clause on
+    the same line still activates the runtime/evaluation contract.
+    """
+    for clause in re.split(r"[。；;\n]", raw):
+        lowered = clause.lower().strip()
+        if not lowered or "ai coding" in lowered or "coding agent" in lowered:
+            continue
+        if any(marker in lowered for marker in AI_NON_PRODUCT_MARKERS):
+            continue
+        if any(re.search(pattern, lowered, re.I) for pattern in AI_PRODUCT_PATTERNS):
+            return True
+    return False
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("document", type=Path)
@@ -78,7 +111,7 @@ def main() -> int:
         required = {"goal": ("目标", "goal"), "scope": ("范围", "scope"), "acceptance": ("验收", "ac-")}
     else:
         required = dict(BASE_AREAS if args.profile == "full_prd" else SLICE_AREAS)
-        if args.level in {"L3", "L4"} and has_any(text, ("ai runtime", "模型", "智能体", "大模型")):
+        if args.level in {"L3", "L4"} and ai_contract_applicable(raw):
             required.update(L3_AREAS)
     for area, terms in required.items():
         if not has_any(text, terms):

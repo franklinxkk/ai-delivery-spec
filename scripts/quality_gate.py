@@ -228,6 +228,10 @@ class Gate:
             if not isinstance(declared_views, list) or not declared_views:
                 self.add("BLOCK", "PRD-NO-PAGE-CONTRACT-SCOPE", path, "L3 direct-implementation PRD must declare page_contract_view_ids in frontmatter")
                 declared_views = []
+            managed_views = frontmatter.get("managed_relation_view_ids", [])
+            if not isinstance(managed_views, list):
+                self.add("BLOCK", "PRD-MANAGED-RELATION-SCOPE", path, "managed_relation_view_ids must be a list when present")
+                managed_views = []
             markers = list(re.finditer(r"<!--\s*PAGE-CONTRACT:\s*(VIEW-[A-Z0-9-]+)\s*-->", raw, re.I))
             blocks: dict[str, str] = {}
             for index, marker in enumerate(markers):
@@ -289,6 +293,28 @@ class Gate:
                     self.add("BLOCK", "PRD-PAGE-NO-API-TRACE", path, "backend/Coding Agent lens needs an explicit view-to-API or no-write mapping", view)
             for extra in sorted(set(blocks) - {str(item).upper() for item in declared_views}):
                 self.add("GAP", "PRD-UNDECLARED-PAGE-CONTRACT", path, "PAGE-CONTRACT block is not declared in page_contract_view_ids", extra)
+            declared_set = {str(item).upper() for item in declared_views}
+            managed_set = {str(item).upper() for item in managed_views}
+            for view in sorted(managed_set - declared_set):
+                self.add("BLOCK", "PRD-MANAGED-RELATION-UNDECLARED-VIEW", path, "managed relation view must also be a declared page contract", view)
+            if managed_set and not has_any(lowered, ("角色—工作面闭环矩阵", "角色-工作面闭环矩阵", "role-work-surface")):
+                self.add("BLOCK", "PRD-NO-ROLE-WORK-SURFACE-MATRIX", path, "managed relations require a role-to-work-surface closure matrix")
+            relation_terms = {
+                "stable REL ID": ("REL-",),
+                "inventory": ("台账", "inventory"),
+                "source/inheritance": ("来源", "继承", "source", "inherit"),
+                "batch behavior": ("批量", "batch"),
+                "preflight": ("预检", "preflight"),
+                "partial failure": ("部分失败", "partial failure"),
+                "idempotency": ("幂等", "idempot"),
+                "API": ("/api/", "API-"),
+            }
+            for view in sorted(managed_set & declared_set):
+                block = blocks.get(view, "")
+                lowered_block = block.lower()
+                for label, terms in relation_terms.items():
+                    if not any(term.lower() in lowered_block for term in terms):
+                        self.add("BLOCK", "PRD-INCOMPLETE-MANAGED-RELATION", path, f"managed relation contract misses {label}", view)
             self.metrics["prd_page_contracts"] = len(blocks)
         self.metrics.update({"prd_headings": len(re.findall(r"(?m)^#{1,4}\s+\S", raw)), "prd_requirement_ids": len(requirement_ids)})
 
@@ -298,10 +324,14 @@ class Gate:
         except (OSError, UnicodeError) as exc:
             self.add("BLOCK", "PROTO-READ", path, f"prototype cannot be read: {exc}")
             return
-        testids = re.findall(r"\bdata-testid\s*=\s*['\"]([^'\"]+)['\"]", raw, re.I)
-        actions = sorted(set(re.findall(r"\bdata-action\s*=\s*['\"]([^'\"]+)['\"]", raw, re.I)))
-        states = sorted(set(re.findall(r"\bdata-state\s*=\s*['\"]([^'\"]+)['\"]", raw, re.I)))
-        fields = sorted(set(re.findall(r"\bdata-(?:field|bind)\s*=\s*['\"]([^'\"]+)['\"]", raw, re.I)))
+        # Restrict attribute discovery to actual HTML-like opening tags. Raw
+        # regex over the whole document also matches JavaScript selectors such
+        # as `[data-testid="page-X"]` and falsely reports duplicate pages.
+        tag_source = "\n".join(re.findall(r"<[A-Za-z][^>]*>", raw, re.S))
+        testids = re.findall(r"\bdata-testid\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)
+        actions = sorted(set(re.findall(r"\bdata-action\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
+        states = sorted(set(re.findall(r"\bdata-state\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
+        fields = sorted(set(re.findall(r"\bdata-(?:field|bind)\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
         page_testids = [item for item in testids if item.lower().startswith("page-")]
         if not page_testids:
             self.add("BLOCK" if actions or level in {"L2", "L3", "L4"} else "GAP", "PROTO-NO-PAGE-ANCHOR", path, "no page-* data-testid root was found")

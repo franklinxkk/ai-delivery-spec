@@ -162,6 +162,8 @@ def run_check(args: argparse.Namespace) -> int:
         [sys.executable, "tests/test_v511_runtime_budget.py"],
         [sys.executable, "tests/test_v511_role_stage.py"],
         [sys.executable, "tests/test_v511_domain_assurance.py"],
+        [sys.executable, "tests/test_v515_page_delivery_contract.py"],
+        [sys.executable, "tests/test_v516_ai_applicability.py"],
         [sys.executable, "scripts/validators/validate_requirement_patterns.py", "references/patterns/common-requirement-patterns.yaml"],
         [
             sys.executable,

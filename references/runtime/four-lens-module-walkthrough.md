@@ -10,6 +10,8 @@ For each view, reconstruct the screen without guessing:
 
 - entry, regions, placement, sticky/scroll/responsive behavior;
 - metrics, filters, columns/tree/canvas, row actions and pagination;
+- every role task reaches an inventory/work surface; parent counts do not replace
+  child-relation tables, drawers or bulk maintenance;
 - every create/edit/detail/review modal or drawer, including all `FLD-*`;
 - required/default/control/type/length/dictionary/dependency/editability;
 - upload types, size/count, preview, import/export and partial failure;
@@ -27,6 +29,8 @@ For each view, trace its queries and writes:
 - list/detail/option-source API paths, request/response fields and types;
 - permission/data-scope and state/dependency guards;
 - domain entity/version/snapshot relationships and ownership;
+- managed relations preserve parent scope, direct/inherited source and per-item
+  outcomes for batch add/adjust/revoke;
 - transaction boundary, idempotency, optimistic locking and async retry;
 - domain result, event/audit, downstream visibility and rollback/recovery;
 - every displayed metric maps to a server-side formula, source and refresh;
@@ -44,6 +48,8 @@ For each view, derive executable positive and negative tests:
 - field boundaries cover empty/min/max/format/dictionary/dependency/concurrency;
 - permission, data isolation, stale version, duplicate request and retry paths;
 - list/filter/sort/page/export values reconcile with source facts and metrics;
+- relation batches cover preflight, mixed validity, partial success, conflict,
+  idempotent retry and downstream impact;
 - modal identity tests prevent cross-entity reuse;
 - role handoff and downstream pool visibility are tested end to end;
 - defects can reverse-trace to `REQ/VIEW/ACT/API/AC` and object version.
@@ -57,6 +63,8 @@ Give the agent only one page contract plus shared appendices. It must be able to
 produce a deterministic implementation plan containing:
 
 - exact components and `data-*` anchors;
+- `REL-*` parent/target/version DTOs and inventory/batch commands when the view
+  manages a child collection;
 - typed fields, DTOs, endpoints and state guards;
 - metric queries and zero/error behavior;
 - action handler to domain-service mapping;

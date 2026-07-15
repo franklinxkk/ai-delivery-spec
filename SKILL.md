@@ -3,7 +3,7 @@ name: ai-delivery-spec
 description: Manage requirements from intake through clarification, specification, baseline, change, traceability, and acceptance. Produce one human-readable, AI-coding-ready contract with stable IDs and executable acceptance for ToC/ToB/ToG PRDs, prototypes, brownfield change, and audit. Excludes delivery execution, CI/CD, operations, and unrelated code work.
 ---
 
-# AI Delivery Spec 5.1.5 — Requirement Management Kernel
+# AI Delivery Spec 5.1.6 — Requirement Management Kernel
 
 > First use: run requirement intake; use `mode=ultra_light` only for one reversible change.
 >
@@ -110,6 +110,9 @@ slices, never one giant YAML pass.
 - Every list/form/composer declares columns, filters, controls, validation,
   editability, pagination, import/export and modal chains or explicitly states
   why a surface does not apply.
+- Every key role task maps to a work surface and result/recovery. Parent counts
+  do not replace a `REL-*` child/bulk contract; external roles do not justify
+  invented portals.
 - Every declared L3/L4 view has stable `FLD/ACT/AC`, an explicit API/data-flow
   mapping, and a four-lens sign-off. A cross-module happy path cannot compensate
   for a thin page.
