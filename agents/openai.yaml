@@ -1,6 +1,6 @@
 interface:
   display_name: "AI Delivery Spec"
-  version: "5.1.7"
+  version: "5.2.0"
   short_description: "Requirement management from intake and clarification through change, traceability, and acceptance."
   default_prompt: >
     Use $ai-delivery-spec as a requirement-management kernel. Start with intake

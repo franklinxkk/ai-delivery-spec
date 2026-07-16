@@ -443,6 +443,33 @@ def verify_state(args: argparse.Namespace) -> int:
     return 0
 
 
+def resume_state(args: argparse.Namespace) -> int:
+    """Show the last valid checkpoint and the bounded next action without mutation."""
+    state_path = args.state.resolve()
+    state = load(state_path)
+    failures = verify_state_value(state)
+    if failures:
+        print(f"BLOCKED: checkpoint cannot resume -> {state_path}")
+        for failure in failures:
+            print(f"- {failure}")
+        print("FIX: restore the pinned artifact/version or create an approved new checkpoint; never continue from a drifted state.")
+        print(f"RETRY: python scripts/ai_delivery_spec_cli.py resume --state {state_path}")
+        return 1
+    stage = state.get("stage", {})
+    anchors = state.get("anchors", [])
+    print(f"PASS: resumable checkpoint -> {state_path}")
+    print(f"- execution: {state.get('execution_id', '<unknown>')}")
+    print(f"- revision: {state.get('revision', 0)}")
+    print(f"- stage: {stage.get('current', '<unknown>')}")
+    print(f"- status: {state.get('status', '<unknown>')}")
+    print(f"- required gates: {', '.join(stage.get('required_gates', [])) or 'none'}")
+    print("- pinned anchors:")
+    for item in anchors:
+        print(f"  - {item.get('kind', '<unknown>')}: {item.get('path', '<missing>')}")
+    print("NEXT: continue only the current stable-ID/stage slice, then record a new checkpoint before advancing.")
+    return 0
+
+
 def check(gate_id: str, state: dict[str, Any], args: argparse.Namespace) -> list[dict[str, Any]]:
     checks: list[dict[str, Any]] = []
 
@@ -783,6 +810,10 @@ def main() -> int:
     verify = sub.add_parser("verify")
     verify.add_argument("--state", type=Path, required=True)
     verify.set_defaults(func=verify_state)
+
+    resume = sub.add_parser("resume")
+    resume.add_argument("--state", type=Path, required=True)
+    resume.set_defaults(func=resume_state)
 
     gate = sub.add_parser("gate")
     gate.add_argument("--state", type=Path, required=True)

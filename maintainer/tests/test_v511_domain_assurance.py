@@ -1,6 +1,8 @@
 """Regression for evidence-bounded domain maturity and OA source semantics."""
 
 from pathlib import Path
+import subprocess
+import sys
 
 import yaml
 
@@ -37,6 +39,32 @@ for source_id in ("KS-OA-DINGTALK-OSS", "KS-OA-FEISHU-OSS"):
     if "do not prove" not in source_map[source_id]["claim_limit"]:
         failures.append(f"{source_id} confuses open component with open core product")
 
+for source_id in (
+    "KS-DATA-PROPERTY-REGISTER-2026", "KS-DATA-PUBLIC-AUTH-2025",
+    "KS-DATA-HQ-DATASET-2026", "KS-DATA-MODEL-DATA-2026",
+    "KS-DATA-ACCOUNTING-2023", "KS-DATA-EU-AI-ACT-2024",
+):
+    if source_id not in source_map:
+        failures.append(f"missing data-value/AI-supply evidence: {source_id}")
+
+data_pack = (ROOT / "references/domains/domain-data-mart.md").read_text(encoding="utf-8")
+for invariant in (
+    "registration-accounting separation", "digital-contract enforcement",
+    "model feedback flywheel", "split leakage/contamination",
+):
+    if invariant not in data_pack:
+        failures.append(f"data pack misses lifecycle invariant: {invariant}")
+
+section_query = subprocess.run(
+    [
+        sys.executable, str(ROOT / "scripts/query_domain.py"), "--domain", "data-product",
+        "--section", "Core Workflows", "--format", "markdown",
+    ],
+    cwd=ROOT, text=True, encoding="utf-8", capture_output=True,
+)
+if section_query.returncode or "## Core Workflows" not in section_query.stdout or "## Acceptance Checklist" in section_query.stdout:
+    failures.append("domain query did not return the exact requested section")
+
 if failures:
     raise SystemExit("\n".join(failures))
-print("PASS: seven packs are contract-tested without behavioral overclaim; OA vendor evidence is scope-bounded")
+print("PASS: seven packs remain evidence-bounded; OA and data-value/AI-supply sources and section retrieval are verified")

@@ -1,5 +1,27 @@
 # Changelog
 
+## 5.2.0 - 2026-07-16
+
+- Expanded the data-product pack from analytics/semantic governance to the full
+  data-value and AI-data supply chain: source/right evidence, public-data and
+  property registration, authorized operation, trusted data spaces, digital
+  contracts, data products/services, accounting separation, high-quality
+  datasets, labeling, train/validation/test/preference data, contamination,
+  model feedback and measurable value.
+- Added evidence-bounded 2026-2028 planning directions and current primary
+  sources from the National Data Administration, Ministry of Finance, Sichuan,
+  the EU and OECD without promoting domain maturity or turning policy direction
+  into universal product requirements.
+- Added section-level domain retrieval so large packs can be loaded by exact
+  heading instead of consuming the whole knowledge file.
+- Made final-gate findings actionable with deterministic cause, repair direction
+  and retry command fields; added the lightweight explain-finding command.
+- Exposed the existing tamper-evident checkpoint verification through one resume
+  command, preventing interrupted large projects from restarting or silently
+  continuing after source/version drift.
+- Centralized troubleshooting, recovery, Product Truth interruption guidance,
+  FAQ and anti-patterns in one runtime reference to improve first-use recovery
+  without expanding the default context.
 ## 5.1.7 - 2026-07-15
 
 - Added dependency-layered one-sentence clarification with bounded answer batches,

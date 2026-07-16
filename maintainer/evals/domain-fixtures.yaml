@@ -97,6 +97,22 @@ fixtures:
     contract_assertions:
       must_include: [ChatBI stale data, answer cites freshness or refuses]
     status: passed
+  - id: FX-DATA-REGISTRATION-SEPARATION
+    domain: data-product
+    type: rights_and_accounting
+    source: references/domains/domain-data-mart.md
+    expected: registration evidence, accounting recognition, valuation and financing remain separate accountable decisions
+    contract_assertions:
+      must_include: [registration-accounting separation, issued credential does not automatically mark the resource as accounting-recognized, valued, financeable or dispute-free]
+    status: passed
+  - id: FX-DATA-MODEL-FEEDBACK-FLYWHEEL
+    domain: data-product
+    type: ai_dataset_lifecycle
+    source: references/domains/domain-data-mart.md
+    expected: approved model feedback creates a traceable new dataset version without contaminating held-out evaluation
+    contract_assertions:
+      must_include: [model feedback flywheel, accepted failure slices create a new dataset version, old data and held-out benchmark are not silently mutated]
+    status: passed
   - id: FX-AI-TOOL-DENIAL
     domain: ai-native
     type: permission

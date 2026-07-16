@@ -118,10 +118,15 @@ bad_prototype = run("--profile", "prototype", "--prototype", str(invalid_prototy
 if bad_prototype.returncode != 2:
     failures.append("broken prototype was not blocked")
 else:
-    codes = {item["code"] for item in json.loads(bad_prototype.stdout)["findings"]}
+    payload = json.loads(bad_prototype.stdout)
+    codes = {item["code"] for item in payload["findings"]}
     required_codes = {"PROTO-NO-PAGE-ANCHOR", "PROTO-UNHANDLED-ACTION", "PROTO-JS-SYNTAX"}
     if not required_codes.issubset(codes) or not any(code.startswith("PROTO-CSS-") for code in codes):
         failures.append(f"prototype blockers were not precise enough: {sorted(codes)}")
+    if not payload.get("retry_command") or any(
+        not item.get("cause") or not item.get("how_to_fix") for item in payload["findings"]
+    ):
+        failures.append("gate findings do not provide bounded cause/fix/retry guidance")
 
 review = run("--profile", "prototype", "--prototype", str(review_prototype), "--format", "json")
 if review.returncode != 1:

@@ -1,5 +1,5 @@
 schema_version: 5.1.1
-last_catalog_review: 2026-07-14
+last_catalog_review: 2026-07-16
 policy:
   primary_sources_only_for_binding_claims: true
   model_memory_is_authority: false
@@ -391,6 +391,138 @@ sources:
     last_verified_at: 2026-07-11
     refresh_days: 180
 
+  - id: KS-DATA-NATIONAL-INFRA-2024
+    domains: [data-product, ai-native]
+    title: 国家数据基础设施建设指引
+    issuer: 国家发展改革委、国家数据局、工业和信息化部
+    authority_type: national_policy_guidance
+    url: https://www.nda.gov.cn/sjj/ywpd/szkjyjcss/0110/20250106095112713400492_pc.html
+    status: active_as_verified
+    jurisdiction: China
+    applicability: national data infrastructure planning, circulation, compute, network and security
+    product_mapping: regional/industry/enterprise data infrastructure, trusted circulation, interoperability and security
+    last_verified_at: 2026-07-16
+    refresh_days: 180
+  - id: KS-DATA-TRUSTED-SPACE-2024
+    domains: [data-product]
+    title: 可信数据空间发展行动计划（2024—2028年）
+    issuer: 国家数据局
+    authority_type: national_action_plan
+    url: https://www.nda.gov.cn/sjj/zwgk/zcfb/1122/ff808081-92b8a4f1-0193-530c6ac8-0475.pdf
+    status: active_plan
+    jurisdiction: China
+    applicability: enterprise, industry, city, personal and cross-border trusted data spaces
+    product_mapping: participant, digital contract, trusted control, resource exchange, value co-creation and ecosystem operation
+    last_verified_at: 2026-07-16
+    refresh_days: 180
+  - id: KS-DATA-PUBLIC-REGISTER-2025
+    domains: [data-product]
+    title: 公共数据资源登记管理暂行办法
+    issuer: 国家发展改革委、国家数据局
+    authority_type: administrative_normative_document
+    url: https://www.nda.gov.cn/sjj/zwgk/zcfb/0120/ff808081-93de5a43-0194-8300870a-0b64.pdf
+    status: effective
+    jurisdiction: China
+    applicability: public data resources and public data products/services within the stated registration scope
+    product_mapping: applicant, registration object, materials, review, credential, publication and change
+    last_verified_at: 2026-07-16
+    refresh_days: 90
+  - id: KS-DATA-PUBLIC-AUTH-2025
+    domains: [data-product]
+    title: 公共数据资源授权运营实施规范（试行）
+    issuer: 国家发展改革委、国家数据局
+    authority_type: administrative_normative_document
+    url: https://www.nda.gov.cn/sjj/xxgk/zc/xzgfxwj/0120/20250120175648588490013_pc.html
+    status: effective
+    jurisdiction: China
+    applicability: public data authorized-operation planning, agreement, implementation, supervision and exit
+    product_mapping: implementing/operating roles, resource-product-service scope, controlled environment, price, disclosure and evaluation
+    last_verified_at: 2026-07-16
+    refresh_days: 90
+  - id: KS-DATA-PROPERTY-REGISTER-2026
+    domains: [data-product]
+    title: 数据产权登记工作指引（试行）
+    issuer: 国家数据局
+    authority_type: national_work_guidance
+    url: https://www.nda.gov.cn/sjj/zwgk/tzgg/0703/20260703230745065425855_pc.html
+    status: active_as_verified
+    jurisdiction: China
+    applicability: data-resource and data-product property registration under the stated voluntary framework
+    product_mapping: registration institution, applicant, object, initial/transfer/change/renewal/cancellation, review, notice, objection and credential
+    last_verified_at: 2026-07-16
+    refresh_days: 90
+  - id: KS-DATA-HQ-DATASET-2026
+    domains: [data-product, ai-native]
+    title: 关于推进行业高质量数据集建设行动的实施方案
+    issuer: 国家数据局
+    authority_type: national_action_plan
+    url: https://www.nda.gov.cn/sjj/zwgk/tzgg/0608/20260608172117399715004_pc.html
+    status: active_plan
+    jurisdiction: China
+    applicability: industry general/specialized high-quality datasets for AI development and training
+    product_mapping: scenario demand, supply, labeling, quality, model/application verification, management and value release
+    last_verified_at: 2026-07-16
+    refresh_days: 90
+  - id: KS-DATA-MODEL-DATA-2026
+    domains: [data-product, ai-native]
+    title: 2026年“模数共振”行动
+    issuer: 工业和信息化部、国家数据局
+    authority_type: joint_action_notice
+    url: https://www.nda.gov.cn/sjj/zwgk/tzgg/0428/20260428215540161552208_pc.html
+    status: active_2026
+    jurisdiction: China
+    applicability: industry datasets, models, agents, evaluation datasets and cross-entity model-data collaboration
+    product_mapping: data-model-scenario flywheel, industry general/specialized datasets, evaluation feedback and collaboration space
+    last_verified_at: 2026-07-16
+    refresh_days: 90
+  - id: KS-DATA-ACCOUNTING-2023
+    domains: [data-product]
+    title: 企业数据资源相关会计处理暂行规定
+    issuer: 中华人民共和国财政部
+    authority_type: accounting_rule
+    url: https://www.mof.gov.cn/gkml/caizhengwengao/wg2023/wg202308/202312/t20231227_3924258.htm
+    status: effective
+    jurisdiction: China
+    applicability: enterprise accounting treatment and disclosure for applicable data resources
+    product_mapping: economic purpose, cost, recognition judgment, useful life, impairment and disclosure separated from registration and valuation
+    last_verified_at: 2026-07-16
+    refresh_days: 180
+  - id: KS-DATA-SICHUAN-ACTION-2025
+    domains: [data-product]
+    title: 四川省“数据要素×”重点工作方案（2025—2026年）
+    issuer: 四川省发展和改革委员会等部门
+    authority_type: regional_action_plan
+    url: https://credit.sc.gov.cn/640.news.detail.dhtml?news_id=16899
+    status: active_plan
+    jurisdiction: China-Sichuan
+    applicability: Sichuan data-element scenarios, trusted spaces, public/enterprise data use and regional coordination
+    product_mapping: provincial scenario portfolio, industrial trusted space, traceability and public-service value
+    last_verified_at: 2026-07-16
+    refresh_days: 180
+  - id: KS-DATA-EU-AI-ACT-2024
+    domains: [data-product, ai-native]
+    title: Regulation (EU) 2024/1689, Article 10 Data and data governance
+    issuer: European Union
+    authority_type: regulation
+    url: https://eur-lex.europa.eu/eli/reg/2024/1689/oj?locale=en
+    status: in_force_with_staged_application
+    jurisdiction: European-Union
+    applicability: training, validation and testing data governance for high-risk AI in the Regulation scope
+    product_mapping: intended-purpose data governance, provenance, preparation, assumptions, bias, gaps and fitness
+    last_verified_at: 2026-07-16
+    refresh_days: 90
+  - id: KS-DATA-OECD-AI-PROVENANCE-2025
+    domains: [data-product, ai-native]
+    title: Mapping relevant data collection mechanisms for AI training
+    issuer: OECD
+    authority_type: intergovernmental_policy_report
+    url: https://www.oecd.org/content/dam/oecd/en/publications/reports/2025/10/mapping-relevant-data-collection-mechanisms-for-ai-training_62921889/3264cd4c-en.pdf
+    status: published
+    jurisdiction: global
+    applicability: comparative AI training-data collection, provenance, licensing and policy mechanisms
+    product_mapping: collection source, documented provenance, permitted uses, dataset maintenance and cross-jurisdiction questions
+    last_verified_at: 2026-07-16
+    refresh_days: 180
   - id: KS-AI-ISO-42001
     domains: [ai-native]
     title: ISO/IEC 42001:2023 AI management systems

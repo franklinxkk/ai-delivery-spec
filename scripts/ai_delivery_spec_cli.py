@@ -396,6 +396,22 @@ def quality_gate(args: argparse.Namespace) -> int:
     return run_script("quality_gate.py", values)
 
 
+def explain_finding(args: argparse.Namespace) -> int:
+    from quality_gate import guidance_for
+
+    cause, how_to_fix = guidance_for(args.code)
+    payload = {"code": args.code, "cause": cause, "how_to_fix": how_to_fix}
+    if args.format == "json":
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+    else:
+        print(f"{args.code}\nCAUSE: {cause}\nFIX: {how_to_fix}")
+    return 0
+
+
+def resume_execution(args: argparse.Namespace) -> int:
+    return run_script("manage_execution_state.py", ["resume", "--state", str(args.state)])
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="ai_delivery_spec_cli.py")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -429,6 +445,15 @@ def main() -> int:
     gate.add_argument("--format", choices=["concise", "json"], default="concise")
     gate.add_argument("--max-findings", type=int, default=20)
     gate.set_defaults(func=quality_gate)
+
+    explain = sub.add_parser("explain-finding", help="Explain one gate code and show a bounded repair direction")
+    explain.add_argument("code")
+    explain.add_argument("--format", choices=["concise", "json"], default="concise")
+    explain.set_defaults(func=explain_finding)
+
+    resume = sub.add_parser("resume", help="Verify and resume from the last valid large-project checkpoint")
+    resume.add_argument("--state", type=Path, required=True)
+    resume.set_defaults(func=resume_execution)
 
     context = sub.add_parser("plan-context", help="Create an adaptive context and assurance plan")
     context.add_argument("--truth", type=Path, required=True)

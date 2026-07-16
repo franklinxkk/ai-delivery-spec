@@ -32,6 +32,11 @@ TRUSTED_HOST_SUFFIXES = (
     "openapis.org",
     "asyncapi.com",
     "cloudevents.io",
+    "nda.gov.cn",
+    "mof.gov.cn",
+    "sc.gov.cn",
+    "europa.eu",
+    "oecd.org",
 )
 VENDOR_HOST_SUFFIXES = (
     "weaver.com.cn",

@@ -239,7 +239,7 @@ domains:
   - domain_id: data-product
     name: AI and Data Product System
     knowledge_file: references/domains/domain-data-mart.md
-    applies_when: [data source, metric, lineage, semantic layer, BI, ChatBI, Data Agent]
+    applies_when: [data registration, authorized operation, trusted data space, data product, high-quality dataset, data labeling, training data, evaluation data, preference data, data source, metric, lineage, semantic layer, BI, ChatBI, Data Agent]
     does_not_apply_when: [simple transactional form with no governed data product]
     coverage:
       knowledge: sourced
@@ -257,7 +257,7 @@ domains:
         owner: project and skill maintainer
       - id: EV-DOM-DATA-SOURCES
         kind: official_source
-        location: references/domains/domain-sources.yaml#KS-DATA-OPENLINEAGE
+        location: references/domains/domain-sources.yaml#KS-DATA-PROPERTY-REGISTER-2026
         status: current
         owner: domain maintainer
       - id: EV-DOM-DATA-KNOWLEDGE
@@ -271,9 +271,10 @@ domains:
         status: passed
         owner: domain maintainer
     known_gaps:
-      - Formal provenance and OpenLineage mappings need executable examples.
-      - Data contract compatibility, cost, deletion propagation, and model/vector lineage need deeper coverage.
-    last_verified_at: "2026-07-14T00:00:00+08:00"
+      - Formal provenance, digital-contract and OpenLineage mappings need executable examples.
+      - Regional implementation details, sector rules, price/settlement, accounting judgment and cross-border applicability remain project evidence.
+      - Fresh-agent behavior, data-domain expert review and production correctness are not proven by the expanded knowledge or static contracts.
+    last_verified_at: "2026-07-16T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 

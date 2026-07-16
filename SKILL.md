@@ -3,7 +3,7 @@ name: ai-delivery-spec
 description: Manage requirements from intake through clarification, specification, baseline, change, traceability, and acceptance. Produce one human-readable, AI-coding-ready contract with stable IDs and executable acceptance for ToC/ToB/ToG PRDs, prototypes, brownfield change, and audit. Excludes delivery execution, CI/CD, operations, and unrelated code work.
 ---
 
-# AI Delivery Spec 5.1.7 — Requirement Management Kernel
+# AI Delivery Spec 5.2.0 — Requirement Management Kernel
 
 > First use: run requirement intake; use `mode=ultra_light` only for one reversible change.
 >
@@ -52,9 +52,10 @@ Do not finalize before intake and P0 clarification pass.
 | role/seniority handoff | `references/runtime/role-stage-playbook.md` |
 | prototype | `references/runtime/prototype-testability.md` |
 | change/acceptance | `references/runtime/change.md` |
-| large context | `references/runtime/context-planning.md` |
-| multiple domains with shared objects/states | `references/runtime/composition.md` |
-| domain work | `scripts/query_domain.py --domain <pack>`, then matching sections only |
+| large context | references/runtime/context-planning.md |
+| failure, interruption, FAQ, anti-pattern | references/runtime/troubleshooting.md |
+| multiple domains with shared objects/states | references/runtime/composition.md |
+| domain work | scripts/query_domain.py --domain <pack> --section "<heading>"; load only matching sections |
 | common reusable pattern | matching entry in `references/patterns/common-requirement-patterns.yaml` |
 | Skill/template/validator release | `maintainer/README.md` |
 
@@ -132,8 +133,11 @@ keywords, project complexity, simulation, or static PASS alone.
 python scripts/ai_delivery_spec_cli.py gate --profile prd --prd requirements/PRD.md --level L2
 python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype prototype.html --level L2
 python scripts/ai_delivery_spec_cli.py gate --profile handoff --prd requirements/PRD.md --prototype admin.html --prototype h5.html --level L3
+python scripts/ai_delivery_spec_cli.py explain-finding PRD-STRUCTURE
+python scripts/ai_delivery_spec_cli.py resume --state delivery/evidence/execution-state.yaml
 ```
 
+On failure, repair the bounded finding, then rerun the emitted RETRY command.
 The final gate is a zero-LLM, zero-subagent, single-read goalkeeper. It locates
 bounded violations but does not author or fix requirements. Static PASS never
 replaces domain-owner review, browser journeys, QA execution, or customer

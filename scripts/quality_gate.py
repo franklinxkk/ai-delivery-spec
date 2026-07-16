@@ -52,6 +52,69 @@ class Finding:
     artifact: str
     message: str
     ref: str = ""
+    cause: str = ""
+    how_to_fix: str = ""
+
+
+FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
+    "GATE-MISSING-INPUT": (
+        "The selected gate profile requires an artifact that was not supplied.",
+        "Add the missing --requirement, --prd, or --prototype argument shown in the finding.",
+    ),
+    "GATE-NOT-FILE": (
+        "The supplied path does not resolve to a readable file.",
+        "Correct the path and confirm the artifact exists before rerunning the same command.",
+    ),
+    "REQ-PARSE": (
+        "The requirement register is not readable UTF-8 YAML.",
+        "Fix YAML indentation/quoting or file encoding, then validate the register again.",
+    ),
+    "REQ-SCHEMA": (
+        "The requirement register does not satisfy the declared JSON Schema contract.",
+        "Use the finding ref as the field path and copy the expected shape from references/templates/requirement-register-template.yaml.",
+    ),
+    "PRD-STRUCTURE": (
+        "The document has headings or keywords but no verifiable unified-PRD structure.",
+        "Add the missing business narrative or engineering annex section using references/templates/unified-requirement-prd-template.md.",
+    ),
+    "PRD-TOO-THIN": (
+        "The requested delivery level needs more page/rule/acceptance detail than the document contains.",
+        "Complete the required unified-PRD sections; do not pad the document with empty headings.",
+    ),
+    "PROTO-NO-PAGE-ANCHOR": (
+        "The prototype has no stable page identity for traceability and automated tests.",
+        "Add a unique data-testid=\"page-VIEW-*\" anchor to each declared page root.",
+    ),
+    "PROTO-UNHANDLED-ACTION": (
+        "A declared prototype action has no observable dispatch path.",
+        "Bind the data-action to one handler and produce a visible state, view, modal, toast, or data result.",
+    ),
+    "PROTO-JS-SYNTAX": (
+        "Static inspection found unbalanced JavaScript delimiters or quotes.",
+        "Run a JavaScript syntax check, repair the referenced script block, and verify the document tail.",
+    ),
+}
+
+PREFIX_GUIDANCE: tuple[tuple[str, str, str], ...] = (
+    ("HANDOFF-", "The PRD and prototype disagree on a stable implementation contract.", "Align the referenced VIEW/ACT/AC/METRIC in the single PRD baseline and every affected prototype."),
+    ("PROTO-CSS-", "CSS changes or overrides a state contract in a way that can hide or corrupt behavior.", "Remove global/!important pollution and scope visibility rules to the owning component and explicit data-state."),
+    ("PROTO-", "The prototype is missing a testable interaction or state contract.", "Repair the referenced element using stable data-testid/data-action/data-state/data-field anchors and a visible outcome."),
+    ("PRD-", "The PRD is missing a contract required by the selected delivery level.", "Complete the referenced section with project-confirmed rules, stable IDs, exceptions, and acceptance; do not invent values."),
+    ("REQ-", "The requirement lifecycle record is incomplete or internally inconsistent.", "Repair the referenced requirement field and preserve its stable ID, source, decision, and audit history."),
+)
+
+
+def guidance_for(code: str) -> tuple[str, str]:
+    """Return bounded, deterministic repair guidance for one finding code."""
+    if code in FINDING_GUIDANCE:
+        return FINDING_GUIDANCE[code]
+    for prefix, cause, fix in PREFIX_GUIDANCE:
+        if code.startswith(prefix):
+            return cause, fix
+    return (
+        "The artifact violates a deterministic delivery contract.",
+        "Use the code, artifact and ref to repair the bounded contract, then rerun the same gate command.",
+    )
 
 
 class Gate:
@@ -69,7 +132,8 @@ class Gate:
         return self._cache[key]
 
     def add(self, severity: str, code: str, path: Path, message: str, ref: str = "") -> None:
-        self.findings.append(Finding(severity, code, str(path), message, ref))
+        cause, how_to_fix = guidance_for(code)
+        self.findings.append(Finding(severity, code, str(path), message, ref, cause, how_to_fix))
 
     @staticmethod
     def _frontmatter(raw: str) -> dict[str, Any]:
@@ -577,7 +641,7 @@ def _balanced_javascript(source: str) -> bool:
     return not quote and not stack
 
 
-def result_payload(gate: Gate, profile: str) -> dict[str, Any]:
+def result_payload(gate: Gate, profile: str, retry_command: str = "") -> dict[str, Any]:
     blocks = sum(item.severity == "BLOCK" for item in gate.findings)
     gaps = sum(item.severity == "GAP" for item in gate.findings)
     code = 2 if blocks else 1 if gaps else 0
@@ -586,6 +650,7 @@ def result_payload(gate: Gate, profile: str) -> dict[str, Any]:
         "profile": profile,
         "summary": {"blockers": blocks, "gaps": gaps, "findings": len(gate.findings)},
         "coverage": "deterministic static scan; no browser and no generative model",
+        "retry_command": retry_command,
         "metrics": {**gate.metrics, "input_read_counts": dict(gate.read_counts)},
         "findings": [asdict(item) for item in gate.findings],
         "exit_code": code,
@@ -629,7 +694,8 @@ def main() -> int:
     valid_prototypes = [path for path in (args.prototype or []) if path.is_file()]
     if args.profile in {"handoff", "full"} and valid_prd and valid_prototypes:
         gate.check_handoff(valid_prd, valid_prototypes, args.level)
-    payload = result_payload(gate, args.profile)
+    retry_command = "python scripts/quality_gate.py " + subprocess.list2cmdline(sys.argv[1:])
+    payload = result_payload(gate, args.profile, retry_command)
     if args.format == "json":
         print(json.dumps({key: value for key, value in payload.items() if key != "exit_code"}, ensure_ascii=True, indent=2))
     else:
@@ -638,9 +704,12 @@ def main() -> int:
         for item in gate.findings[: max(args.max_findings, 0)]:
             ref = f" [{item.ref}]" if item.ref else ""
             print(f"{item.severity} {item.code}{ref}: {item.message}")
+            print(f"  FIX: {item.how_to_fix}")
         hidden = len(gate.findings) - max(args.max_findings, 0)
         if hidden > 0:
             print(f"... {hidden} additional findings; rerun with --format json")
+        if gate.findings:
+            print(f"RETRY: {payload['retry_command']}")
     return int(payload["exit_code"])
 
 

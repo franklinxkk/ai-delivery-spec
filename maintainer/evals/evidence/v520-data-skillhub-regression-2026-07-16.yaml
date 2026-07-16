@@ -1,0 +1,62 @@
+evidence_id: EV-REL-5.2.0-DATA-SKILLHUB
+executed_at: "2026-07-16T00:00:00+08:00"
+release_candidate: 5.2.0
+scope:
+  - data-product knowledge expansion
+  - SkillHub first-use and recovery regression
+inputs:
+  skillhub_snapshot:
+    url: https://skillhub.cn/skills/ai-delivery-spec
+    displayed_score: 4.5
+    lowest_observed_dimensions:
+      error_handling: 4.0
+      anti_patterns_and_faq: 4.0
+      runtime_stability: 4.3
+      documentation_quality: 4.3
+    observed_gaps:
+      - error findings did not tell a new user how to repair and retry
+      - FAQ and anti-pattern guidance was scattered
+      - interrupted large-project runs lacked a single discoverable resume entry
+  primary_source_registry: references/domains/domain-sources.yaml
+decisions:
+  - keep the default SKILL entry small and retrieve data knowledge by exact section
+  - make each final-gate finding expose deterministic cause and repair direction
+  - resume only from a verified checkpoint and never auto-fix business truth
+  - keep registration, accounting recognition, valuation, authorization, and financing as separate decisions
+  - trace AI dataset versions, splits, labels, preference data, evaluation evidence, and model feedback
+verification:
+  authoritative_sources: 50
+  domain_packs: 7
+  domain_contract_fixtures: 16
+  skill_lines: 161
+  skill_characters: 8498
+  publishable_files_before_this_evidence: 183
+  deterministic_checks:
+    - all YAML and JSON parse
+    - domain source registry passes URL, applicability, and freshness checks
+    - all domain contract fixtures pass without behavioral or production overclaim
+    - release claims and version surfaces are aligned
+    - exact-section data-product retrieval returns only the requested section
+    - quality-gate JSON contains cause, how_to_fix, and retry_command
+    - execution-state resume verifies checkpoint integrity before continuing
+  temporary_workspace_regressions:
+    count: 13
+    status: passed
+    cases:
+      - progressive truth
+      - requirement management
+      - unified PRD
+      - lightweight gate
+      - page delivery contract
+      - evaluation metrics
+      - execution state
+      - CLI init
+      - agent deadlock
+      - capsule pollution
+      - change drift
+      - schema grill
+      - status
+limitations:
+  - A future SkillHub score is controlled by the external platform and is not guaranteed by this regression.
+  - Static and fixture PASS do not prove fresh-agent behavior, domain-expert approval, legal/accounting correctness, customer acceptance, or production performance.
+  - The aggregate check wrapper exceeded the desktop command time limit after its component checks had passed; release evidence therefore relies on the recorded component checks and targeted regressions.

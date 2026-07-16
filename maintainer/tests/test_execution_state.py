@@ -43,6 +43,9 @@ def main() -> int:
             "--project-id", "publishing-test", "--output", str(state),
         )
         run("verify", "--state", str(state))
+        resumed = run("resume", "--state", str(state))
+        if "stage: baseline" not in resumed.stdout or "NEXT: continue only the current stable-ID/stage slice" not in resumed.stdout:
+            raise AssertionError("resume did not expose the last valid stage and bounded next action")
 
         gate_paths: list[Path] = []
         approval = temp / "human-approval.json"
@@ -189,7 +192,7 @@ def main() -> int:
 
         old_skill = temp / "SKILL.md"
         old_skill.write_text(
-            (ROOT / "SKILL.md").read_text(encoding="utf-8").replace("AI Delivery Spec 5.1.7", "AI Delivery Spec 4.9.15", 1),
+            (ROOT / "SKILL.md").read_text(encoding="utf-8").replace("AI Delivery Spec 5.2.0", "AI Delivery Spec 4.9.15", 1),
             encoding="utf-8",
         )
         blocked = temp / "blocked.yaml"
