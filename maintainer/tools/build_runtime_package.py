@@ -7,6 +7,7 @@ import argparse
 import fnmatch
 import hashlib
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -53,8 +54,9 @@ def self_check(root: Path) -> list[str]:
         [sys.executable, "scripts/ai_delivery_spec_cli.py", "version"],
         [sys.executable, "scripts/validators/validate_spec_config.py", "examples/spec.config.example.yaml"],
     )
+    clean_env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
     for command in commands:
-        result = subprocess.run(command, cwd=root, text=True, encoding="utf-8", capture_output=True)
+        result = subprocess.run(command, cwd=root, text=True, encoding="utf-8", capture_output=True, env=clean_env)
         if result.returncode:
             failures.append(" ".join(command[1:]) + ": " + result.stdout + result.stderr)
     prototype = root / "package-self-check.html"
@@ -65,6 +67,7 @@ def self_check(root: Path) -> list[str]:
     result = subprocess.run(
         [sys.executable, "scripts/quality_gate.py", "--profile", "prototype", "--prototype", prototype.name, "--level", "L2", "--format", "json"],
         cwd=root, text=True, encoding="utf-8", capture_output=True,
+        env=clean_env,
     )
     prototype.unlink(missing_ok=True)
     if result.returncode not in {0, 1}:  # explicit-state GAP is acceptable for this minimal package smoke test
@@ -103,9 +106,10 @@ def main() -> int:
         if args.output and not failures:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             with zipfile.ZipFile(args.output, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-                for path in sorted(temp.rglob("*")):
-                    if path.is_file():
-                        archive.write(path, path.relative_to(temp).as_posix())
+                for source in files:
+                    relative = source.relative_to(ROOT).as_posix()
+                    archive.write(temp / relative, relative)
+                archive.write(temp / "runtime-manifest.json", "runtime-manifest.json")
     if failures:
         for failure in failures:
             print("FAIL: " + failure)

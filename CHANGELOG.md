@@ -44,6 +44,8 @@
   overrides remain prohibited.
 - Added friendly dependency diagnostics and automatic discovery of the latest
   conventional execution checkpoint for interrupted large-project work.
+- Made runtime archives allowlist-only and bytecode-free even after their
+  extracted self-check, with a regression that rejects `__pycache__`/`*.pyc`.
 
 ## 5.2.0 - 2026-07-16
 
