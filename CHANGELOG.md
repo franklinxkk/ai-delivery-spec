@@ -46,6 +46,10 @@
   conventional execution checkpoint for interrupted large-project work.
 - Made runtime archives allowlist-only and bytecode-free even after their
   extracted self-check, with a regression that rejects `__pycache__`/`*.pyc`.
+- Replaced the command dump with a five-minute team onboarding path for local
+  project domains, company PRD overlays, declarative gates and first workspace.
+- Fixed project-facing CLI path resolution so relative `custom/`, `requirements/`
+  and artifact paths resolve from the user's project instead of the Skill folder.
 
 ## 5.2.0 - 2026-07-16
 

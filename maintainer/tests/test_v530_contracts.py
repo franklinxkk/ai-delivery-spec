@@ -296,6 +296,44 @@ ACT-LEGACY-OPEN / AC-LEGACY-001；VIEW-LEGACY-NA → API-LEGACY-GET /api/legacy�
     if result.returncode != 0 or "local_private" not in result.stdout or "DEC-CONFLICT" not in result.stdout:
         failures.append("official + local private domain composition did not preserve conflict semantics")
 
+    caller_project = temp / "caller-project"
+    caller_project.mkdir()
+    for command in (
+        [sys.executable, str(CLI), "init-custom", "--output", "custom"],
+        [
+            sys.executable, str(CLI), "init-requirements", "--output", "requirements",
+            "--custom-root", "custom", "--template", "my-team",
+        ],
+    ):
+        result = subprocess.run(
+            command, cwd=caller_project, text=True, encoding="utf-8", capture_output=True,
+        )
+        if result.returncode != 0:
+            failures.append("five-minute project setup failed outside the Skill repository: " + result.stdout + result.stderr)
+    result = subprocess.run(
+        [
+            sys.executable, str(CLI), "query-domain", "--domain", "traffic+my-team",
+            "--custom-root", "custom", "--format", "yaml",
+        ],
+        cwd=caller_project, text=True, encoding="utf-8", capture_output=True,
+    )
+    if result.returncode != 0 or "local_private" not in result.stdout:
+        failures.append("relative custom domain did not resolve from the caller project")
+    result = subprocess.run(
+        [
+            sys.executable, str(CLI), "gate", "--profile", "prd", "--prd", "requirements/PRD.md",
+            "--level", "L2", "--custom-root", "custom", "--format", "json",
+        ],
+        cwd=caller_project, text=True, encoding="utf-8", capture_output=True,
+    )
+    try:
+        caller_gate = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        failures.append("relative caller-project gate did not return JSON: " + result.stdout + result.stderr)
+    else:
+        if "GATE-NOT-FILE" in codes(caller_gate):
+            failures.append("relative PRD path was still resolved from the installed Skill directory")
+
     # New gate output remains schema-valid and exposes consumer/source diagnostics.
     gate_schema = json.loads((ROOT / "schemas" / "gate-result.schema.json").read_text(encoding="utf-8"))
     schema_errors = list(Draft202012Validator(gate_schema).iter_errors(payload))

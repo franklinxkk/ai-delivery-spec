@@ -322,7 +322,12 @@ def run_check(args: argparse.Namespace) -> int:
     return failed
 
 def run_script(script: str, values: list[str]) -> int:
-    return subprocess.run([sys.executable, str(ROOT / "scripts" / script), *values], cwd=ROOT, text=True).returncode
+    # Resolve project-facing arguments from the caller's workspace, not from
+    # the installed Skill directory. Bundled resources are located via __file__.
+    return subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / script), *values],
+        cwd=Path.cwd(), text=True,
+    ).returncode
 
 
 def run_repo_tool(relative: str, values: list[str]) -> int:
