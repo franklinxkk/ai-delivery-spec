@@ -9,14 +9,14 @@ system:
   repository_ref: 697b9ec6ffb93199f62f783e7bf6c550cd3bcf7e
 input_fingerprint: issue-12945+pinned-repository-ref
 repetitions: 1
-trial_evidence_refs: [maintainer/evals/artifacts/github-scenario-artifacts.md]
+trial_evidence_refs: [maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
 observations:
   - obligation_id: OBL-SAL-DES-PRECEDENCE
     result: satisfied
-    evidence_refs: [maintainer/evals/artifacts/github-scenario-artifacts.md]
+    evidence_refs: [maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
   - obligation_id: OBL-SAL-DES-SCOPE
     result: satisfied
-    evidence_refs: [maintainer/evals/artifacts/github-scenario-artifacts.md]
+    evidence_refs: [maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
 inventions:
   unsupported_business_behaviors: 0
   delivered_business_behaviors: 0
@@ -33,6 +33,6 @@ context:
   cross_artifact_switches: 2
   human_navigation_seconds: null
 evidence_refs:
-  - maintainer/evals/artifacts/github-scenario-artifacts.md
+  - maintainer/evals/evidence/github-source-verification-2026-07-11.yaml
   - https://github.com/saleor/saleor/issues/12945
 status: completed

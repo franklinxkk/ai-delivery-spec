@@ -128,3 +128,27 @@ The requirement baseline is not complete when:
 - a P0 assertion is inferred without owner review;
 - a released module, flow, view, action, field, rule, API or AC has no REQ binding;
 - an acceptance path cannot produce the required evidence.
+
+## AI-Coding Handoff Without A Second PRD
+
+The unified PRD is both the human review path and the business implementation
+contract. Machine-oriented tables and YAML are annexes/projections of the same
+baseline, not independent authority. At L2+ the receiver must be able to derive:
+
+- exact roles/data scope, flow branches and recovery;
+- page regions, fields/controls/validation and visible states;
+- action guards, domain result, state transition, event/audit and idempotency;
+- business API/event inputs, outputs, errors, compatibility and reconciliation;
+- positive/negative AC, fixtures/evidence and reverse trace;
+- explicit forbidden-invention and open-decision lists.
+
+Technical framework, database DDL, repository layout and deployment topology
+remain engineering decisions unless interoperability, compliance or acceptance
+makes them a business contract. A module can be implementation-ready while the
+project lacks an engineering baseline only if the result is reported as a
+handoff GAP, never as full development-readiness PASS.
+
+High-risk `RULE-*` lines bind an authoritative `SRC-*`, approved `DEC-*`, or
+explicit `ASSUMPTION-*` owner. AI behavior additionally declares input/output,
+model/prompt/tool versions, human gate, fallback, evaluation and observability.
+Data lineage behavior declares source, transformation, owner and change impact.

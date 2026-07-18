@@ -154,7 +154,7 @@ def main() -> int:
         for failure in failures:
             print(f"FAIL: {failure}")
         return 1
-    print(f"PASS: unified PRD engineering annex satisfies {args.level} v5.1.0 requirement contract")
+    print(f"PASS: unified PRD engineering annex satisfies current {args.level} requirement contract")
     return 0
 
 

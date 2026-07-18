@@ -30,18 +30,20 @@ REQUIRED_FILES = (
     "schemas/context-plan.schema.json",
     "schemas/execution-state.schema.json",
     "schemas/gate-result.schema.json",
+    "schemas/agent-handoff.schema.json",
+    "schemas/domain-candidate.schema.json",
+    "schemas/domain-usage-log.schema.json",
     "maintainer/schemas/assurance-evidence.schema.json",
     "maintainer/schemas/eval-case.schema.json",
     "maintainer/schemas/evaluation-run.schema.json",
     "references/discover.md",
-    "references/requirement-management.md",
+    "references/lifecycle.md",
     "references/specify.md",
+    "references/prototype.md",
+    "references/context.md",
+    "references/change-acceptance.md",
+    "references/troubleshooting.md",
     "references/tool-adapters.md",
-    "references/runtime/composition.md",
-    "references/runtime/ai-coding-completeness.md",
-    "references/runtime/change.md",
-    "references/runtime/context-planning.md",
-    "references/runtime/role-stage-playbook.md",
     "maintainer/README.md",
     "maintainer/community.md",
     "maintainer/templates/domain-module-template.md",
@@ -53,8 +55,7 @@ REQUIRED_FILES = (
     "maintainer/evals/metric-definitions.yaml",
     "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml",
     "maintainer/evals/evidence/github-validation-matrix.yaml",
-    "maintainer/evals/evidence/v5-hardening-regression-2026-07-11.yaml",
-    "maintainer/evals/evidence/ai-coding-completeness-regression-2026-07-12.yaml",
+    "maintainer/evals/evidence/static-regression-2026-07-11.yaml",
     "maintainer/evals/evidence/production-practice-attestation-2026-07-12.yaml",
     "maintainer/evals/evidence/release-status.yaml",
     "maintainer/evals/requirement-intake-benchmark.yaml",
@@ -75,12 +76,10 @@ REQUIRED_FILES = (
     "scripts/scan_requirement_ambiguity.py",
     "scripts/scan_prototype_css.py",
     "scripts/render_mermaid_flow.py",
-    "maintainer/tests/test_v501_validators.py",
     "maintainer/tests/test_v502_coding_contract.py",
     "maintainer/tests/test_v502_progressive_truth.py",
     "maintainer/tests/test_v510_requirement_management.py",
     "maintainer/tests/test_v510_unified_prd.py",
-    "maintainer/tests/test_v511_role_stage.py",
     "maintainer/tests/test_v511_runtime_budget.py",
     "maintainer/tests/test_v511_domain_assurance.py",
     "scripts/compile_product_truth.py",
@@ -102,13 +101,14 @@ REQUIRED_FILES = (
     "references/templates/change-request-template.yaml",
     "references/templates/acceptance-run-template.yaml",
     "references/templates/review-record-template.yaml",
+    "references/templates/agent-handoff-manifest-template.yaml",
     "references/patterns/common-requirement-patterns.yaml",
 )
 
 STAGE_REFERENCE_BUDGET = 500
-SKILL_LINE_BUDGET = 180
-SKILL_CHAR_BUDGET = 8500
-REPOSITORY_FILE_BUDGET = 190
+SKILL_LINE_BUDGET = 130
+SKILL_CHAR_BUDGET = 6500
+REPOSITORY_FILE_BUDGET = 180
 
 
 def line_count(path: Path) -> int:
@@ -130,8 +130,8 @@ def main() -> int:
         "both directions",
         "Start with intake",
         "scripts/query_domain.py",
-        "schemas/change-package.schema.json",
-        "schemas/requirement-register.schema.json",
+        "schemas/agent-handoff.schema.json",
+        "schemas/domain-candidate.schema.json",
     ):
         if marker.lower() not in skill.lower():
             failures.append(f"SKILL.md missing v5 marker: {marker}")
@@ -162,6 +162,9 @@ def main() -> int:
         "schemas/context-plan.schema.json",
         "schemas/execution-state.schema.json",
         "schemas/gate-result.schema.json",
+        "schemas/agent-handoff.schema.json",
+        "schemas/domain-candidate.schema.json",
+        "schemas/domain-usage-log.schema.json",
         "maintainer/schemas/assurance-evidence.schema.json",
         "maintainer/schemas/eval-case.schema.json",
         "maintainer/schemas/evaluation-run.schema.json",
@@ -210,7 +213,12 @@ def main() -> int:
     if agent_files != {"openai.yaml"}:
         failures.append(f"agents/ must contain UI metadata only: {sorted(agent_files)}")
     reference_files = {path.name for path in (ROOT / "references").iterdir() if path.is_file()}
-    if reference_files != {"discover.md", "specify.md", "tool-adapters.md", "requirement-management.md", "domain-coverage.yaml"}:
+    expected_reference_files = {
+        "discover.md", "lifecycle.md", "specify.md", "prototype.md",
+        "context.md", "change-acceptance.md", "troubleshooting.md",
+        "tool-adapters.md", "domain-coverage.yaml",
+    }
+    if reference_files != expected_reference_files:
         failures.append(f"references root is not reduced to requirement runtime entries plus domain index: {sorted(reference_files)}")
 
     misplaced_maintainer_dirs = [name for name in ("tests", "evals") if (ROOT / name).exists()]

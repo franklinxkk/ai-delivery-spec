@@ -5,10 +5,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
 
 
 def load(path: Path) -> dict[str, Any]:
@@ -103,6 +110,43 @@ def recommend(doc: dict[str, Any]) -> dict[str, Any]:
     if doc.get("safety_critical") or doc.get("clinical"):
         mode, tier = "full", "L4"
 
+    if doc.get("safety_critical") or doc.get("clinical"):
+        assurance_profile = "safety_critical"
+    elif any(doc.get(key) for key in ("compliance", "money", "sensitive_data", "tenant_isolation", "migration")) or ai_high_risk:
+        assurance_profile = "high_risk"
+    elif ultra:
+        assurance_profile = "bounded"
+    else:
+        assurance_profile = "standard"
+
+    cross_edges = size(doc.get("cross_module_edges"))
+    crosscut = size(doc.get("cross_cutting_policies"))
+    controlled_projections = size(doc.get("controlled_projections"))
+    coupling_signals = {
+        "cross_module_edges": cross_edges,
+        "cross_cutting_policies": crosscut,
+        "controlled_projections": controlled_projections,
+        "data_lineage": bool(doc.get("data_lineage")),
+        "frequent_change": str(doc.get("change_frequency", "")).lower() in {"high", "frequent"},
+        "strong_audit": bool(doc.get("strong_audit") or doc.get("audit_required")),
+    }
+    governed_trigger = (
+        controlled_projections >= 3
+        or (cross_edges >= 3 and (crosscut >= 1 or coupling_signals["frequent_change"]))
+        or bool(coupling_signals["data_lineage"] and coupling_signals["strong_audit"])
+        or bool(doc.get("governed_truth_requested"))
+    )
+    if ultra:
+        delivery_shape = "requirement_card"
+    elif governed_trigger:
+        delivery_shape = "governed_truth"
+    else:
+        delivery_shape = "unified_prd"
+
+    override_shape = str(doc.get("delivery_shape", "")).lower()
+    if override_shape in {"requirement_card", "unified_prd", "governed_truth"}:
+        delivery_shape = override_shape
+
     if doc.get("safety_critical") or doc.get("contract_deadline") or doc.get("regulatory_deadline"):
         priority = "P0"
     elif doc.get("urgent") or doc.get("value") == "high":
@@ -113,13 +157,16 @@ def recommend(doc: dict[str, Any]) -> dict[str, Any]:
         priority = "P2"
 
     return {
-        "schema_version": "5.1.0",
+        "schema_version": "5.3.0",
         "decision": decision,
         "priority": priority,
         "complexity": {"band": band, "dimensions": sorted(set(dimensions))},
         "uncertainty": "high" if missing or doc.get("ambiguity") == "high" else doc.get("ambiguity", "low"),
         "recommended_mode": mode,
         "recommended_tier": tier,
+        "delivery_shape": delivery_shape,
+        "assurance_profile": assurance_profile,
+        "routing_signals": coupling_signals,
         "missing_for_intake": sorted(set(missing)),
         "reasons": reasons,
         "estimate_boundary": "complexity band only; engineering effort/cost requires accountable engineering confirmation",
@@ -134,6 +181,7 @@ def render_markdown(result: dict[str, Any]) -> str:
         f"- Complexity: `{result['complexity']['band']}` ({', '.join(result['complexity']['dimensions']) or 'bounded'})\n"
         f"- Uncertainty: `{result['uncertainty']}`\n"
         f"- Mode/Tier: `{result['recommended_mode']} / {result['recommended_tier']}`\n"
+        f"- Delivery/Assurance: `{result['delivery_shape']} / {result['assurance_profile']}`\n"
         f"- Missing: `{', '.join(result['missing_for_intake']) or 'none'}`\n\n"
         + "".join(f"- Rationale: {item}\n" for item in result["reasons"])
         + f"- Estimate boundary: {result['estimate_boundary']}\n"

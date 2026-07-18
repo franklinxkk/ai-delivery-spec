@@ -54,7 +54,7 @@ def main() -> int:
             "--output",
             str(report_path),
         ]
-        comparable = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
+        comparable = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, encoding="utf-8")
         if comparable.returncode != 0 or not report_path.exists():
             failures.append("matched baseline/candidate fixture was not accepted as comparable")
         else:
@@ -67,7 +67,7 @@ def main() -> int:
         mismatched = copy.deepcopy(candidate)
         mismatched["input_fingerprint"] = "different-input"
         candidate_path.write_text(yaml.safe_dump(mismatched, sort_keys=False), encoding="utf-8")
-        rejected = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
+        rejected = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, encoding="utf-8")
         if rejected.returncode == 0:
             failures.append("comparison accepted mismatched input fingerprints")
 

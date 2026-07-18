@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/agent-handoff.schema.json",
+  "title": "AI Delivery Spec Agent Handoff Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "status", "baseline", "packets", "handoffs"],
+  "properties": {
+    "schema_version": { "const": "5.3.0" },
+    "status": { "enum": ["draft", "review_ready", "ready_for_implementation", "superseded"] },
+    "engineering_baseline_ref": { "type": ["string", "null"] },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "hash", "requirement_ref"],
+      "properties": {
+        "version": { "type": "string", "minLength": 1 },
+        "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "requirement_ref": { "type": "string", "minLength": 1 }
+      }
+    },
+    "packets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "owner", "path", "baseline_hash", "scope_refs", "acceptance_refs"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^(MOD|XCT|EDGE)-[A-Z0-9-]+$" },
+          "kind": { "enum": ["mod", "xct", "edge"] },
+          "owner": { "type": "string", "minLength": 1 },
+          "path": { "type": "string", "minLength": 1 },
+          "baseline_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "content_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "scope_refs": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "pattern": "^(REQ|FLOW|VIEW|STATE|RULE|API|AC)-[A-Z0-9-]+$" }
+          },
+          "input_refs": { "type": "array", "items": { "type": "string" } },
+          "output_refs": { "type": "array", "items": { "type": "string" } },
+          "acceptance_refs": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "pattern": "^AC-[A-Z0-9-]+$" }
+          }
+        }
+      }
+    },
+    "handoffs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["handoff_id", "from", "to", "intent", "scope_refs", "facts", "assumptions", "affected_packets", "requested_action", "ack_status"],
+        "properties": {
+          "handoff_id": { "type": "string", "pattern": "^HANDOFF-[A-Z0-9-]+$" },
+          "from": { "$ref": "#/$defs/party" },
+          "to": { "$ref": "#/$defs/party" },
+          "intent": { "enum": ["inform", "request", "proposal", "evidence"] },
+          "scope_refs": { "type": "array", "items": { "type": "string" } },
+          "facts": { "type": "array", "items": { "type": "string" } },
+          "assumptions": { "type": "array", "items": { "type": "string" } },
+          "decision_refs": { "type": "array", "items": { "type": "string", "pattern": "^(DEC|CHG)-[A-Z0-9-]+$" } },
+          "affected_packets": { "type": "array", "items": { "type": "string", "pattern": "^(MOD|XCT|EDGE)-[A-Z0-9-]+$" } },
+          "requested_action": { "type": "string", "minLength": 1 },
+          "due_or_expiry": { "type": ["string", "null"] },
+          "ack_status": { "enum": ["pending", "acknowledged", "applied", "rejected", "superseded"] }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "party": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["human_owner", "agent_role"],
+      "properties": {
+        "human_owner": { "type": "string", "minLength": 1 },
+        "agent_role": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

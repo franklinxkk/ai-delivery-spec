@@ -15,7 +15,7 @@ from scan_requirement_ambiguity import scan, scan_closure
 
 
 def run(*parts: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run([sys.executable, *parts], cwd=ROOT, text=True, capture_output=True)
+    return subprocess.run([sys.executable, *parts], cwd=ROOT, text=True, encoding="utf-8", capture_output=True)
 
 
 failures: list[str] = []
@@ -61,4 +61,3 @@ if graph.get("REQ-DEMO-001") != {"ACT-DEMO-001"} or graph.get("AC-DEMO-001") != 
 if failures:
     raise SystemExit("\n".join(failures))
 print("PASS: v5.1.0 rejects keyword shells, exposes structural clarification gaps, and traverses trace ledgers")
-

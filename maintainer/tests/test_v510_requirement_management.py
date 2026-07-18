@@ -19,7 +19,7 @@ from triage_requirement import recommend  # noqa: E402
 
 
 def run(*parts: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run([sys.executable, *parts], cwd=ROOT, text=True, capture_output=True)
+    return subprocess.run([sys.executable, *parts], cwd=ROOT, text=True, encoding="utf-8", capture_output=True)
 
 
 failures: list[str] = []
@@ -75,6 +75,24 @@ if ai_write["recommended_tier"] != "L3":
 unclear = recommend({"title": "idea", "roles": [], "modules": [], "reversible": False})
 if unclear["decision"] != "clarify" or not unclear["missing_for_intake"]:
     failures.append("unclear intake must not enter specification")
+
+large_by_count = recommend({
+    "title": "large readable PRD", "outcome": "all roles share one baseline", "owner": "pm",
+    "source_refs": ["SRC-LARGE"], "value_evidence": ["approved scope"],
+    "roles": [f"ROLE-{i}" for i in range(8)], "modules": [f"MOD-{i}" for i in range(12)],
+    "reversible": False,
+})
+if large_by_count["delivery_shape"] != "unified_prd":
+    failures.append("counts alone incorrectly forced governed Product Truth")
+
+governed = recommend({
+    "title": "controlled projections", "outcome": "all projections share governed facts", "owner": "pm",
+    "source_refs": ["SRC-GOV"], "value_evidence": ["audit decision"],
+    "roles": ["ROLE-1"], "modules": ["MOD-1"], "reversible": False,
+    "controlled_projections": ["PRD", "admin", "H5"], "strong_audit": True,
+})
+if governed["delivery_shape"] != "governed_truth":
+    failures.append("controlled multi-projection work did not trigger governed truth")
 
 with tempfile.TemporaryDirectory(prefix="ads-v510-") as temp:
     workspace = Path(temp) / "requirements"
@@ -155,3 +173,17 @@ with tempfile.TemporaryDirectory(prefix="ads-v510-") as temp:
 if failures:
     raise SystemExit("\n".join(failures))
 print("PASS: v5.1.0 10/10 intake, focused workspace, change, traceability and acceptance are closed")
+
+# Role/seniority ownership is part of the lifecycle reference, not a second runtime file.
+lifecycle = (ROOT / "references/lifecycle.md").read_text(encoding="utf-8")
+skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+for marker in (
+    "Junior product", "Mid/senior product", "Developers and Coding Agents", "Architects",
+    "sponsor/business", "domain owner", "UX/prototype", "engineering/architecture",
+    "QA/acceptance", "compliance/security", "baseline version/hash", "REV/CHG",
+):
+    if marker not in lifecycle:
+        raise SystemExit(f"lifecycle ownership misses {marker}")
+if "references/lifecycle.md" not in skill:
+    raise SystemExit("SKILL does not selectively route lifecycle/role work")
+print("PASS: role and seniority ownership is bounded inside the lifecycle route")

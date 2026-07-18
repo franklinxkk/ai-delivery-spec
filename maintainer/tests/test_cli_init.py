@@ -49,7 +49,7 @@ def main() -> int:
         for item in failures:
             print(f"FAIL: {item}")
         return 1
-    print("PASS: legacy init-delivery remains compatible while v5.1 defaults to init-requirements")
+    print("PASS: legacy init-delivery remains compatible while requirement-first init remains the default")
     return 0
 
 

@@ -19,3 +19,4 @@ build/
 Thumbs.db
 .idea/
 .vscode/
+/custom/

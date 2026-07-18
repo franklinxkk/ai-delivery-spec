@@ -1,19 +1,38 @@
 ---
 artifact: unified_requirement_prd
 baseline_version: 0.1-draft
+delivery_shape: unified_prd
+assurance_profile: standard
 requirement_ids: []
 source_refs: []
 open_p0_unknown_ids: []
+unknowns: []
+acceptance_plan:
+  owner: null
+  scope_refs: []
+  pass_rule: null
+  evidence_types: []
+  signoff_roles: []
 status: draft
 page_contract_view_ids: []
 managed_relation_view_ids: []
+workflow: false
+ai_runtime: false
+lineage: false
+governance:
+  canonical_authoring_surface: unified_prd
+  decision_ref: DEC-AUTHORITY-001
+  binding_sources: []
+  source_conflicts: []
+  projection_policy: update_in_same_change
 ---
 
 # {产品/项目名称}需求规格说明书
 
 > 本文档是业务、产品、设计、开发、测试和 AI Coding 共用的一份需求基线。
 > 正文用于顺序阅读；附录用于精确实现、测试和追溯。若两处冲突，以稳定 ID
-> 对应的最新基线及变更记录为准。
+> 对应的已批准基线及变更记录为准；若来源冲突，必须先由 `DEC-CONFLICT-*`
+> 限定适用范围，不能按文件名、日期或内容多少自行选择。
 
 ## 0. 文档控制
 
@@ -54,6 +73,8 @@ managed_relation_view_ids: []
 |---|---|---|---|---|---|
 
 用户按序号批量回答时，逐项绑定原问题 ID 和受影响合同；不得把一段聊天当作无归属结论。
+P0 未知项必须使用 `UNK-*`，并在 frontmatter `unknowns` 中写清优先级、状态、
+阻断阶段、责任人和影响范围；`REV-*` 只是评审问题，不能冒充阻塞未知项。
 
 > 第一部分：为什么做、为谁做
 
@@ -178,10 +199,14 @@ managed_relation_view_ids: []
 
 当本文档用于直接开发、测试或生成原型时，以上每个 in-scope `VIEW-*`
 继续写完整页面交付契约。先阅读
-`references/runtime/page-delivery-contract.md`；不得用“支持增删改查、导入导出、
+`references/prototype.md`；不得用“支持增删改查、导入导出、
 统计分析”代替实现细节。
 
-<!-- PAGE-CONTRACT: VIEW-EXAMPLE-LIST -->
+<!-- PAGE-CONTRACT: VIEW-EXAMPLE-LIST; primary=list; layout=composite; surfaces=metrics,list,drawer_form,import,export,preview -->
+
+先声明页面 `primary`、`layout=single|composite|builder|portal` 和实际 `surfaces`。
+只填写被激活表面，但每个“不适用”必须有业务原因和未来触发条件；不得为通过模板
+机械制造空表。移动/H5 另声明 `device_capabilities`，不要从页面名称推断扫码、离线或推送。
 
 ##### 页面目标与入口
 
@@ -347,3 +372,11 @@ acceptance:
 
 | ID | 类型 | 关联 REQ | 问题/变更 | 影响 | 责任人 | 结论/版本 | 证据 |
 |---|---|---|---|---|---|---|---|
+
+## 附录 J：Agent 交接投影（按需）
+
+只有长周期、多模块或多 Agent 实现才生成 `handoff-manifest.yaml`。清单必须绑定本
+PRD 的版本/hash、架构负责人提供的 `engineering_baseline_ref`，以及激活的
+`MOD/XCT/EDGE/HANDOFF` 包。模块包内含 `qa_projection`；工具专用规则只能引用本
+基线，不得复制并改写业务事实。未提供工程基线时，本 PRD 可通过需求基线门禁，
+但开发交接状态必须是 GAP。

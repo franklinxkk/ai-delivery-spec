@@ -61,17 +61,17 @@ skill_gaps_and_disposition:
     severity: P0
     finding: 实时规范可能让安全、资金、临床等不可逆命令离线排队。
     disposition: resolved
-    changes: [references/runtime/realtime-contract.md]
+    changes: [references/patterns/realtime-contract.md]
   - id: GAP-EXACTLY-ONCE-CLAIM
     severity: P0
     finding: 事件ID去重被错误描述为端到端exactly-once。
     disposition: resolved
-    changes: [references/runtime/realtime-contract.md]
+    changes: [references/patterns/realtime-contract.md]
   - id: GAP-FIXED-REALTIME-DEFAULTS
     severity: P1
     finding: 心跳、重试、轮询、漂移和时区示例可能被复制为无来源需求。
     disposition: resolved
-    changes: [references/runtime/realtime-contract.md]
+    changes: [references/patterns/realtime-contract.md]
   - id: GAP-CROSS-DOMAIN-PATTERNS
     severity: P1
     finding: 缺少数量谱系、金额结算、高影响人工决策和法定事项复用骨架。

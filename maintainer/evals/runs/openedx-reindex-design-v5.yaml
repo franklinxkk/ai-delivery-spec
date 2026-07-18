@@ -9,14 +9,14 @@ system:
   repository_ref: 264ced21b08ac56906d233abf86a1db7d661b0c8
 input_fingerprint: issue-36868+pinned-repository-ref
 repetitions: 1
-trial_evidence_refs: [maintainer/evals/artifacts/github-scenario-artifacts.md]
+trial_evidence_refs: [maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
 observations:
   - obligation_id: OBL-EDX-DES-STATE
     result: satisfied
-    evidence_refs: [maintainer/evals/artifacts/github-scenario-artifacts.md]
+    evidence_refs: [maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
   - obligation_id: OBL-EDX-DES-OPS
     result: satisfied
-    evidence_refs: [maintainer/evals/artifacts/github-scenario-artifacts.md]
+    evidence_refs: [maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
 inventions:
   unsupported_business_behaviors: 0
   delivered_business_behaviors: 0
@@ -33,6 +33,6 @@ context:
   cross_artifact_switches: 2
   human_navigation_seconds: null
 evidence_refs:
-  - maintainer/evals/artifacts/github-scenario-artifacts.md
+  - maintainer/evals/evidence/github-source-verification-2026-07-11.yaml
   - https://github.com/openedx/openedx-platform/issues/36868
 status: completed

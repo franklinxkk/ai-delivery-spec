@@ -1,4 +1,4 @@
-# Requirement Review, Change And Acceptance Control
+# Change, Traceability And Acceptance
 
 Use for any modification to a baselined `REQ-*`, rule, field, page, interface,
 acceptance criterion or source precedence.
@@ -82,6 +82,11 @@ acceptance executability and traceability.
 An executable `AC-*` names requirement/behavior references, preconditions,
 actor/data scope, steps or input, expected visible and domain results,
 negative/exception behavior and mandatory evidence.
+
+Before an L3/L4 baseline, frontmatter `acceptance_plan` names the accountable
+owner, exact scope refs (or scope rule), pass rule, evidence types and sign-off
+roles. This plans acceptance without pretending it has run. A static gate PASS
+must list what remains unproven; only `ARUN-*` plus evidence can prove execution.
 
 Use `schemas/acceptance-run.schema.json`. Each `ARUN-*` records baseline,
 environment, executor, item results, actual behavior, evidence, defects,

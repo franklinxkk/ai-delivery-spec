@@ -1,4 +1,4 @@
-# Prototype And Testability - v5
+# Page, Prototype And Testability Contract
 
 Use when creating, reverse-engineering, reviewing, or repairing an interactive
 prototype. The prototype is a projection of Product Truth, not an independent
@@ -46,7 +46,10 @@ the label and sample number alone are not a metric contract. Do not expose
 unresolved template strings such as `data-state="${state}"` in rendered DOM.
 Write these anchors in the source markup/template itself. A runtime pass that
 retrofits generic `ACT-UI-*` identifiers onto unrelated legacy commands does
-not establish traceability.
+not establish traceability. Never hide an anchor name with string concatenation
+such as `data-'+'action`; a static PASS is allowed only when the gate can enumerate
+the authored anchors. Generated controls must still expose a statically inspectable
+template/registry and must be proven separately by browser acceptance evidence.
 
 ## 3. State-Driven UI
 
@@ -142,7 +145,7 @@ alternative where required.
 
 ### Async, Realtime, And Weak Network
 
-Use `references/runtime/realtime-contract.md` for SSE/WebSocket/countdown/push. Show
+Use `references/patterns/realtime-contract.md` for SSE/WebSocket/countdown/push. Show
 reconnect, stale state, duplicate, offline queue, conflict, retry, and manual
 reconciliation behavior when applicable.
 
@@ -262,3 +265,62 @@ global `.active`, `.open`, `.selected`, `.disabled`, `.loading`, `.error`,
 `.success` or `.failed` selector with business status colors: it can recolor or
 hide the active page, navigation or tab. Use separate selectors such as
 `.status.active`, `.tab.active` and `.page.active`.
+
+## Page Profiles And Conditional Surfaces
+
+Each implementation view starts with a machine-readable marker:
+
+```markdown
+<!-- PAGE-CONTRACT: VIEW-RESOURCE; primary=list; layout=composite; surfaces=metrics,list,drawer_form,preview -->
+```
+
+`layout` is `single`, `composite`, `builder`, or `portal`. `surfaces` are composed
+from `metrics`, `list`, `form`, `drawer_form`, `detail`, `workflow`, `composer`,
+`resource_pool`, `hierarchy`, `assessment_insert`, `import`, `export`, and
+`preview`. Do not create industry-specific page profiles. A composite view has
+at least two real surfaces; a builder declares composer, resource pool and
+hierarchy. Mobile/H5 capabilities are separate (`scan`, `camera`,
+`weak_network`, `offline_draft`, `push`) and are never inferred.
+
+Only activated surfaces are mandatory. For each view specify purpose/entry,
+regions/layout, role and data scope, default/empty/loading/error/no-permission/
+stale/success states, modal/drawer chains, pagination/bulk behavior, prototype
+anchors and applicable API/AC trace. Then add conditional contracts:
+
+- metrics: population, numerator/denominator, window/timezone, status/filter,
+  deduplication, source/freshness, zero/null and format;
+- list/tree: filters, columns, format/width/null/sort, selection and page size;
+- form/upload: control, required/default, type/length, dictionary, validation,
+  editability, extension/MIME, count/size, preflight, conversion and recovery;
+- action/workflow: guard, confirmation, visible/domain result, state/event/audit,
+  permission, idempotency, failure/compensation and AC;
+- import/export: template/version, scope, partial failure, async threshold,
+  file expiry, masking and audit;
+- preview: per-file controls, conversion failure and authorization/watermark;
+- composer: hierarchy, allowed source/target, insertion/order, invalid drop,
+  persistence, undo/recovery, concurrency and keyboard/mobile alternative.
+
+When the user requests high-fidelity, branding, visual redesign, or a
+production-grade prototype, freeze the UI requirement contract first. Prefer a
+design-system-oriented UI/UX skill for complex enterprise back offices and a
+frontend art-direction skill for brand/H5 differentiation; never let two tools
+create competing design systems. Visual quality does not replace interaction
+closure or business truth.
+
+## Stage 0 For Existing Prototypes
+
+Before rewriting an existing artifact, inventory every view, action, handler,
+state, role, object, field/metric and external handoff with `source_ref`, source
+location and classification: `confirmed`, `inferred`, `unknown`, or
+`defect_candidate`. Core unknowns become `UNK-*` with priority, owner and
+`blocks_stage`; defects cannot silently become target requirements. Multiple
+candidate baselines require a scoped `DEC-CONFLICT-*`. Only a fully classified,
+source-located inventory may declare `inventory_complete`; that proves inventory
+coverage, not business approval.
+
+If a PRD baseline exists, use `INV-*` for recovered prototype observations and
+map them to declared `baseline_requirement_refs` with `mapping_status` plus exact
+`target_refs`. Put every inferred item into an owned `RBATCH-*`; do not declare
+`baseline_ready` until those batches are confirmed, rejected or converted to
+owned unknowns. Reverse extraction can recover interaction evidence, but cannot
+infer API semantics, metric caliber, permission authority, compliance or AC truth.

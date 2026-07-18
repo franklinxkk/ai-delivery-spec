@@ -25,7 +25,7 @@ DISCOVERY_GATES = ["version_environment", "complexity_domain", "context_survival
 
 
 def run(*args: str, expected: int = 0) -> subprocess.CompletedProcess[str]:
-    result = subprocess.run([sys.executable, str(MANAGER), *args], cwd=ROOT, text=True, capture_output=True)
+    result = subprocess.run([sys.executable, str(MANAGER), *args], cwd=ROOT, text=True, encoding="utf-8", capture_output=True)
     if result.returncode != expected:
         raise AssertionError(
             f"expected {expected}, got {result.returncode}: {' '.join(args)}\n{result.stdout}\n{result.stderr}"
@@ -148,7 +148,7 @@ def main() -> int:
                 "--truth", str(TRUTH), "--id", "FEAT-CONTENT-PUBLISH-001",
                 "--execution-state", str(state), "--output", str(scoped),
             ],
-            cwd=ROOT, text=True, capture_output=True,
+            cwd=ROOT, text=True, encoding="utf-8", capture_output=True,
         )
         if query.returncode != 0 or "execution_state_hash" not in scoped.read_text(encoding="utf-8"):
             raise AssertionError("scoped Product Truth retrieval did not bind the checkpoint")
@@ -165,7 +165,7 @@ def main() -> int:
                 "--truth", str(TRUTH), "--id", "FEAT-CONTENT-PUBLISH-001",
                 "--execution-state", str(denied_path), "--output", str(temp / "denied.yaml"),
             ],
-            cwd=ROOT, text=True, capture_output=True,
+            cwd=ROOT, text=True, encoding="utf-8", capture_output=True,
         )
         if denied.returncode == 0 or "outside execution access scope" not in denied.stdout:
             raise AssertionError("out-of-scope Product Truth seed was not blocked")
@@ -192,7 +192,7 @@ def main() -> int:
 
         old_skill = temp / "SKILL.md"
         old_skill.write_text(
-            (ROOT / "SKILL.md").read_text(encoding="utf-8").replace("AI Delivery Spec 5.2.0", "AI Delivery Spec 4.9.15", 1),
+            (ROOT / "SKILL.md").read_text(encoding="utf-8").replace("AI Delivery Spec 5.3.0", "AI Delivery Spec 4.9.15", 1),
             encoding="utf-8",
         )
         blocked = temp / "blocked.yaml"

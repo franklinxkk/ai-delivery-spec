@@ -1,5 +1,50 @@
 # Changelog
 
+## 5.3.0 - 2026-07-18
+
+- Replaced the public mode maze with a silent two-axis route: delivery shape
+  (`requirement_card`, `unified_prd`, `governed_truth`) and assurance profile;
+  L0—L4 remain compatible gate metadata instead of mandatory user vocabulary.
+- Added source-authority bootstrap and `DEC-CONFLICT-*` blocking for competing
+  canonical materials; Product Truth remains optional and requires an explicit
+  writing-surface and projection decision.
+- Added deterministic Stage 0 inventory checks for brownfield PRDs/prototypes,
+  including source locations, confirmed/inferred/unknown/defect classification,
+  owned P0 unknowns, and protection against silently promoting legacy defects.
+- Added composite page contracts (`primary + layout + surfaces`) so metrics,
+  lists, forms, preview, workflow and builder rules are required only when
+  applicable while preserving page-level implementation detail.
+- Added stage- and scope-aware P0 unknown handling with the distinct
+  `BLOCKED_BY_P0_UNKNOWN` status/exit code 3; structural blockers retain higher
+  precedence and all findings carry Chinese cause/fix plus consumer/source refs.
+- Added governed Coding-Agent handoff manifests with baseline hashes,
+  engineering-baseline references, `MOD/XCT/EDGE/HANDOFF` packets and embedded
+  QA projections; packet drift and unapproved proposals now block handoff.
+- Added opt-in, project-local domain candidate and usage-log schemas. Learning is
+  disabled/no-network by default and never auto-promotes project material.
+- Consolidated overlapping runtime references into lifecycle, specification,
+  page/prototype, context/handoff, change/acceptance and troubleshooting routes.
+- Added smart large-input rounds, source-expiry warnings, Windows-safe UTF-8 CLI
+  output, one canonical gate implementation and v5.3 deterministic regressions.
+- Introduced a maintainable full-repository budget and a runtime allowlist
+  packaging path for third-party platforms that should not ship the lab.
+- Refined README onboarding with concise English value anchors and refreshed
+  dated public adoption signals from ClawHub, skills.sh and SkillHub TRACE.
+- Closed the static-prototype blind spot for concatenated/runtime `data-action`
+  anchors at L2+, and exposed dynamic action candidates without pretending the
+  rendered controls were proven.
+- Required structured `UNK-*` records for every open P0 item, exact stable IDs
+  in all non-code baseline prose, and an owned L3/L4 acceptance plan.
+- Added honest `not_proven` gate output, Chinese cause/fix/repair examples and
+  regressions that keep official examples on the same user-facing gate kernel.
+- Added reverse-inventory `INV-* -> REQ-*` mapping plus owned confirmation
+  batches so reverse extraction cannot become a competing requirements baseline.
+- Added private-by-default `custom/` domains, inherited PRD overlays and
+  declarative validators; executable local validators and silent high-risk rule
+  overrides remain prohibited.
+- Added friendly dependency diagnostics and automatic discovery of the latest
+  conventional execution checkpoint for interrupted large-project work.
+
 ## 5.2.0 - 2026-07-16
 
 - Expanded the data-product pack from analytics/semantic governance to the full

@@ -1,4 +1,4 @@
-# Troubleshooting, Recovery, and Anti-Patterns
+# Troubleshooting, Recovery And Anti-Patterns
 
 Load this reference only when a command fails, a large run is interrupted, or a
 user asks why an artifact was blocked. Do not load it during a successful
@@ -17,7 +17,7 @@ Ultra-Light or Standard flow.
 5. Rerun the exact RETRY command printed by the gate.
 6. For an interrupted large-project run, verify the checkpoint first:
 
-    python scripts/ai_delivery_spec_cli.py resume --state delivery/evidence/execution-state.yaml
+    python scripts/ai_delivery_spec_cli.py resume
 
 Continue only the reported stage and stable-ID slice. If the checkpoint reports
 version, anchor, or repository drift, create an approved new checkpoint instead
@@ -27,23 +27,27 @@ of silently continuing.
 
 | Symptom | Likely Cause | Repair |
 |---|---|---|
+| ModuleNotFoundError | 首次运行未安装 PyYAML/jsonschema | `python -m pip install -r scripts/requirements.txt`；Windows 可用 `py -3 -m pip ...` |
 | GATE-MISSING-INPUT | gate profile and supplied artifacts differ | add the named PRD/register/prototype path or choose the narrower profile |
 | REQ-PARSE / REQ-SCHEMA | malformed YAML or missing lifecycle field | repair the exact schema path using the requirement-register template |
 | PRD-STRUCTURE / PRD-TOO-THIN | headings exist without implementable local contracts | complete the relevant narrative and engineering annex; do not add empty headings |
 | PROTO-NO-PAGE-ANCHOR | page cannot be traced to VIEW-* | add one unique data-testid="page-VIEW-*" root |
 | PROTO-UNHANDLED-ACTION | button has no dispatch or visible outcome | bind one data-action handler and expose success/failure/state result |
+| PROTO-DYNAMIC-ANCHOR-CONSTRUCTION | data-* 名称由字符串拼接，静态门禁无法枚举真实动作 | 在模板源码直接写稳定锚点；再用浏览器证据证明动态控件 |
+| PRD-P0-UNKNOWN-NOT-STRUCTURED | open ID 只有 REV/自由文本，没有 owner/阶段/影响范围 | 使用 `UNK-*` 结构化登记并同步 open_p0_unknown_ids |
 | PROTO-CSS-* | global or !important rules corrupt visibility/state | scope CSS to the owning component and explicit data-state |
 | HANDOFF-* | PRD and one or more prototypes drift | repair the single PRD baseline and every affected surface using the same stable ID |
 | Product Truth compile stops | monolith or unresolved cross-fragment reference | keep fragments, validate the current fragment, compile, repair unresolved IDs, resume |
 | run interrupted or context lost | no visible checkpoint/recovery entry | run resume; continue the last valid stage/ID slice only |
 
-JSON gate output includes cause, how_to_fix, and retry_command so IDEs and
-Coding Agents can show the same guidance without parsing prose.
+JSON output includes Chinese cause/fix/repair example, retry command and
+`not_proven`, so IDE/Coding Agent need not parse prose or误读静态 PASS。
 
 ## Product Truth Without Long-Run Deadlock
 
-Product Truth remains conditional. Use it only for 12+ views/modules, repeated
-material change, governed projections, long audit, or explicit choice.
+Product Truth remains conditional. Use it for controlled projections, repeated
+cross-module change, lineage, strong audit, or an explicit authority decision.
+Page/module/input counts alone are not a sufficient trigger.
 
 When triggered:
 
@@ -66,9 +70,9 @@ acceptance remain accountable evidence.
 make business decisions. Mechanical formatting may be automated; roles, rules,
 limits, permissions, states, and acceptance values require evidence or an owner.
 
-**Why did a small request trigger many artifacts?** Check triage. Ultra-Light is
-valid only for one reversible, single-role, non-regulated change. Manually
-override with mode=ultra_light only when those conditions are true.
+**Why did a small request trigger many artifacts?** Inspect the silent route.
+One reversible, role-local, non-regulated change should be a requirement card;
+override `delivery_shape` only when the impact evidence supports it.
 
 **Why did the gate reject a long PRD?** Length is not completeness. Every
 implemented view needs its local fields, actions, states, metrics, exceptions,
@@ -77,6 +81,10 @@ data flow, and acceptance links.
 **Can I continue after a validator outage?** Only through the explicit
 service-outage and human-approval path already defined by execution state.
 Never convert an unavailable validator into an implicit pass.
+
+**How do we keep private rules out of the public repository?** Run
+`init-custom`. The generated directory is ignored by default. Only declarative
+regex validators are loaded; binding-rule conflicts require `DEC-CONFLICT-*`.
 
 ## Anti-Patterns
 

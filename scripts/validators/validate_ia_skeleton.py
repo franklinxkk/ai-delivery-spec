@@ -24,5 +24,5 @@ def main()->int:
   for term in rules.get("validators",{}).get("ia",{}).get("required_view_ids",[]):
    if term not in ids:fail.append(f"missing domain view {term}")
  if fail:print("FAIL: "+"; ".join(fail));return 1
- print(f"PASS: IA satisfies {a.level} v5.1.0 contract ({len(ids)} views)");return 0
+ print(f"PASS: IA satisfies current {a.level} contract ({len(ids)} views)");return 0
 if __name__=="__main__":raise SystemExit(main())

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/domain-candidate.schema.json",
+  "title": "Project-local Domain Knowledge Candidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "candidate_id", "domain", "statement", "candidate_type", "status", "reuse_scope", "submitted_by", "decision_owner", "source_refs", "evidence_refs", "sensitive_data", "created_at"],
+  "properties": {
+    "schema_version": { "const": "5.3.0" },
+    "candidate_id": { "type": "string", "pattern": "^CAND-[A-Z0-9-]+$" },
+    "domain": { "type": "string", "minLength": 1 },
+    "statement": { "type": "string", "minLength": 8 },
+    "candidate_type": { "enum": ["pattern", "invariant", "boundary", "field", "counterexample", "source_update"] },
+    "status": { "enum": ["proposed", "corroborated", "confirmed", "rejected", "deprecated"] },
+    "reuse_scope": { "enum": ["project_only", "organization", "public_candidate"] },
+    "submitted_by": { "type": "string", "minLength": 1 },
+    "decision_owner": { "type": "string", "minLength": 1 },
+    "reuse_approver": { "type": ["string", "null"] },
+    "source_refs": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "evidence_refs": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "applicability": { "type": "array", "items": { "type": "string" } },
+    "exclusions": { "type": "array", "items": { "type": "string" } },
+    "jurisdiction": { "type": ["string", "null"] },
+    "regulatory_version": { "type": ["string", "null"] },
+    "sensitive_data": { "type": "boolean" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": ["string", "null"], "format": "date-time" }
+  }
+}

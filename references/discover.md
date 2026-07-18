@@ -19,7 +19,10 @@ artifact.
 ## Evidence Before Questions
 
 Inventory supplied artifacts before asking what they already answer. Register
-each source with `SRC-*`, authority, status, disposition, owner, and location.
+each source with `SRC-*`, binding type (`binding`, `supporting`, `contextual`,
+`historical`, `untrusted`), status, scope, interpretation owner and location.
+If more than one source claims canonical authority for the same scope, stop and
+record `DEC-CONFLICT-*`; never select by filename, timestamp or apparent detail.
 
 Extract when present:
 
@@ -61,8 +64,11 @@ Record material questions:
 unknown:
   id: UNK-001
   question:
+  priority: P0 | P1 | P2
   impact: scope | role | state | data | compliance | acceptance | commercial | risk
   owner:
+  affected_refs: []
+  blocks_stage: clarify | specify | review | baseline | implementation | acceptance
   due_date:
   status: open | answered | blocked | accepted_risk
 ```
@@ -130,6 +136,28 @@ requester in person is a missing requirement contract, not proof that no contrac
 needed. Conversely, a legacy artifact that lacks new IDs must not be dismissed when
 its behavior is richer than a newly generated projection.
 
+Before any overwrite, create a Stage 0 inventory with one record for every view,
+action/handler, state, role, object, field/metric and external handoff. Each record
+must include `id`, `type`, `source_ref`, `source_location` and `classification`:
+`confirmed`, `inferred`, `unknown` or `defect_candidate`. A core unknown includes
+owned P0 `UNK-*` and `blocks_stage`; a defect candidate cannot become target scope
+without `DEC/CHG`. Multiple candidate baselines require `DEC-CONFLICT-*`.
+
+When a forward PRD baseline already exists, reverse-engineered observations use
+`INV-*`, never a second set of `REQ-*`. Declare `baseline_requirement_refs`; each
+confirmed/inferred observation records `mapping_status` and exact `target_refs`.
+An unmapped core behavior becomes an owned `UNK-*`, not an invented requirement.
+Group inferred observations into `RBATCH-*` with `owner`; batch-confirm, reject or
+convert them before `target_status: baseline_ready`. This makes reverse output an
+auditable interaction draft and gap ledger, not a competing baseline.
+
+`inventory_complete` means every observed item has a source and classification;
+it does not approve inferred behavior or prove the target design. Validate it with:
+
+```bash
+python scripts/ai_delivery_spec_cli.py gate --profile stage0 --inventory stage0.yaml
+```
+
 ## ToB / ToG Context
 
 For enterprise or public-sector requirements, record the external business,
@@ -178,7 +206,7 @@ Return one decision:
 | Decision | Meaning |
 |---|---|
 | `READY_FOR_LIGHT_SPEC` | accepted bounded requirement; enough for a requirement card |
-| `READY_FOR_PRODUCT_TRUTH` | accepted large/audited requirement; independent truth is justified |
+| `READY_FOR_PRODUCT_TRUTH` | compatibility name for `governed_truth`: controlled projections, repeated cross-module change, lineage or strong audit justify independent truth |
 | `READY_FOR_UNIFIED_PRD` | accepted requirement; enough for the unified PRD baseline |
 | `READY_FOR_CHANGE_PACKAGE` | an existing baseline and requested change are understood |
 | `REVIEW_COMPLETE_WITH_GAPS` | useful output is possible but named unknowns remain |

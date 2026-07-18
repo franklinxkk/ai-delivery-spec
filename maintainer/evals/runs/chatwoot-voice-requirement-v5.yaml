@@ -9,17 +9,17 @@ system:
   repository_ref: 98154bbeab2f5ea888dcb61bfd3a35a109ebb9a0
 input_fingerprint: issue-11481+pinned-repository-ref
 repetitions: 1
-trial_evidence_refs: [maintainer/evals/artifacts/github-scenario-artifacts.md]
+trial_evidence_refs: [maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
 observations:
   - obligation_id: OBL-CW-REQ-OUTBOUND
     result: satisfied
-    evidence_refs: [maintainer/evals/artifacts/github-scenario-artifacts.md]
+    evidence_refs: [maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
   - obligation_id: OBL-CW-REQ-INBOUND
     result: satisfied
-    evidence_refs: [maintainer/evals/artifacts/github-scenario-artifacts.md]
+    evidence_refs: [maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
   - obligation_id: OBL-CW-REQ-UNKNOWN
     result: satisfied
-    evidence_refs: [maintainer/evals/artifacts/github-scenario-artifacts.md]
+    evidence_refs: [maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
 inventions:
   unsupported_business_behaviors: 0
   delivered_business_behaviors: 0
@@ -36,6 +36,6 @@ context:
   cross_artifact_switches: 3
   human_navigation_seconds: null
 evidence_refs:
-  - maintainer/evals/artifacts/github-scenario-artifacts.md
+  - maintainer/evals/evidence/github-source-verification-2026-07-11.yaml
   - https://github.com/chatwoot/chatwoot/issues/11481
 status: completed

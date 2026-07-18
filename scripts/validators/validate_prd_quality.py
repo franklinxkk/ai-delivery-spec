@@ -68,7 +68,7 @@ def main() -> int:
     if failures:
         print("FAIL: " + "; ".join(failures))
         return 1
-    print(f"PASS: PRD satisfies {args.level} v5.1.0 requirement-quality contract")
+    print(f"PASS: PRD satisfies current {args.level} requirement-quality contract")
     return 0
 
 

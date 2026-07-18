@@ -11,18 +11,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 RUNTIME_FILES = [
     "SKILL.md",
-    "references/requirement-management.md",
+    "references/lifecycle.md",
     "references/discover.md",
     "references/specify.md",
+    "references/prototype.md",
+    "references/context.md",
+    "references/change-acceptance.md",
+    "references/troubleshooting.md",
     "references/tool-adapters.md",
-    "references/runtime/composition.md",
-    "references/runtime/ai-coding-completeness.md",
-    "references/runtime/change.md",
-    "references/runtime/context-planning.md",
-    "references/runtime/page-delivery-contract.md",
-    "references/runtime/prototype-testability.md",
-    "references/runtime/realtime-contract.md",
-    "references/runtime/role-stage-playbook.md",
+    "references/patterns/realtime-contract.md",
 ]
 NORMATIVE = re.compile(r"\b(must|must not|never|do not|cannot|should not|required|禁止|必须|不得|不能)\b", re.I)
 

@@ -15,7 +15,7 @@ failures = []
 
 
 def run(script: str, document: Path, *args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run([sys.executable, str(ROOT / script), str(document), *args], cwd=ROOT, text=True, capture_output=True)
+    return subprocess.run([sys.executable, str(ROOT / script), str(document), *args], cwd=ROOT, text=True, encoding="utf-8", capture_output=True)
 
 
 for script, args in (

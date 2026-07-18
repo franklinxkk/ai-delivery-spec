@@ -17,8 +17,8 @@ budget:
 selection:
   stage_references:
   - references/specify.md
-  - references/runtime/composition.md
-  - references/runtime/change.md
+  - references/context.md
+  - references/change-acceptance.md
   deferred_stage_references: []
   domain_packs:
   - references/domains/domain-education-it.md

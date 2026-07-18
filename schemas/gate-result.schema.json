@@ -1,43 +1,77 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/gate-result.schema.json",
-  "title": "AI Delivery Spec Micro Gate Result",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["schema_version", "gate_id", "execution_id", "stage", "state_hash", "result", "checks", "evidence_refs", "executed_at", "result_hash"],
-  "properties": {
-    "schema_version": { "const": "5.0.0" },
-    "gate_id": { "enum": ["version_environment", "complexity_domain", "context_survival", "discovery_readiness", "contract_traceability", "audit_access", "fallback_risk"] },
-    "execution_id": { "type": "string" },
-    "stage": { "type": "string" },
-    "state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
-    "result": { "enum": ["passed", "failed", "blocked", "review_required", "approved_with_gap"] },
-    "checks": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["id", "passed", "message"],
-        "properties": {
-          "id": { "type": "string" },
-          "passed": { "type": "boolean" },
-          "message": { "type": "string" }
+  "title": "AI Delivery Spec Gate Result",
+  "oneOf": [
+    { "$ref": "#/$defs/artifactGate" },
+    { "$ref": "#/$defs/legacyMicroGate" }
+  ],
+  "$defs": {
+    "artifactGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "profile", "summary", "coverage", "not_proven", "retry_command", "metrics", "findings"],
+      "properties": {
+        "status": { "enum": ["PASS", "REVIEW_COMPLETE_WITH_GAPS", "BLOCKED", "BLOCKED_BY_P0_UNKNOWN"] },
+        "profile": { "enum": ["requirement", "prd", "prototype", "handoff", "full", "stage0", "agent_handoff"] },
+        "summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["blockers", "p0_unknowns", "gaps", "findings"],
+          "properties": {
+            "blockers": { "type": "integer", "minimum": 0 },
+            "p0_unknowns": { "type": "integer", "minimum": 0 },
+            "gaps": { "type": "integer", "minimum": 0 },
+            "findings": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "coverage": { "type": "string" },
+        "not_proven": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "retry_command": { "type": "string" },
+        "metrics": { "type": "object" },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["severity", "code", "artifact", "message_zh", "cause_zh", "fix_zh", "repair_example_zh", "affected_consumers", "related_refs", "binding_source_refs"],
+            "properties": {
+              "severity": { "enum": ["BLOCK", "P0_UNKNOWN", "GAP", "INFO"] },
+              "code": { "type": "string" },
+              "artifact": { "type": "string" },
+              "ref": { "type": "string" },
+              "message": { "type": "string" },
+              "cause": { "type": "string" },
+              "how_to_fix": { "type": "string" },
+              "repair_example": { "type": "string" },
+              "message_zh": { "type": "string" },
+              "cause_zh": { "type": "string" },
+              "fix_zh": { "type": "string" },
+              "repair_example_zh": { "type": "string" },
+              "affected_consumers": { "type": "array", "items": { "type": "string" } },
+              "related_refs": { "type": "array", "items": { "type": "string" } },
+              "binding_source_refs": { "type": "array", "items": { "type": "string" } }
+            }
+          }
         }
       }
     },
-    "evidence_refs": { "type": "array", "items": { "type": "string" } },
-    "human_approval": {
-      "type": ["object", "null"],
+    "legacyMicroGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "gate_id", "execution_id", "stage", "state_hash", "result", "checks", "evidence_refs", "executed_at", "result_hash"],
       "properties": {
-        "reviewer": { "type": "string" },
-        "qualification": { "type": "string" },
-        "decision": { "enum": ["approve", "reject"] },
-        "approved_at": { "type": "string", "format": "date-time" },
-        "evidence_ref": { "type": "string" }
-      },
-      "required": ["reviewer", "qualification", "decision", "approved_at", "evidence_ref"]
-    },
-    "executed_at": { "type": "string", "format": "date-time" },
-    "result_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        "schema_version": { "const": "5.0.0" },
+        "gate_id": { "enum": ["version_environment", "complexity_domain", "context_survival", "discovery_readiness", "contract_traceability", "audit_access", "fallback_risk"] },
+        "execution_id": { "type": "string" },
+        "stage": { "type": "string" },
+        "state_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "result": { "enum": ["passed", "failed", "blocked", "review_required", "approved_with_gap"] },
+        "checks": { "type": "array", "items": { "type": "object" } },
+        "evidence_refs": { "type": "array", "items": { "type": "string" } },
+        "human_approval": { "type": ["object", "null"] },
+        "executed_at": { "type": "string", "format": "date-time" },
+        "result_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    }
   }
 }

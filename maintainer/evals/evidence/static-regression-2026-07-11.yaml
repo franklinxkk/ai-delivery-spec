@@ -28,3 +28,21 @@ scenarios:
   - id: EVAL-TRAFFIC-REGULATED-001
     proven: proposed regulatory change is structured and not falsely verified
     not_proven: rule applicability, implementation, or accountable domain review
+historical_regressions:
+  - evidence_id: EVD-ANJIA-14-LENS-20260718
+    input: private publishing/authorization/learning PRD v3.3 RC1, prototype v3.2 and 14-agent simulation; project artifacts not shipped
+    observed_failure: L2 static prototype gate missed concatenated data-action anchors; manual REV entries bypassed structured P0 unknowns; reverse requirements used a competing REQ namespace
+    resolved_by: dynamic-anchor blocking and candidate inventory; structured UNK enforcement; INV-to-REQ mapping and owned review batches; explicit not_proven output
+    regression_command: py -3 maintainer/tests/test_v530_contracts.py
+    result: passed
+    proven: deterministic gates reject the reproduced structural bypasses and the full repository assurance suite passes
+    not_proven: project business correctness, real-browser journeys, coding implementation, customer decisions or acceptance
+  - evidence_id: EV-AI-CODING-COMPLETENESS-20260712
+    input: anonymized multi-role publishing/authorization/learning project; private material not shipped
+    observed_failure: a short machine-first PRD lacked page/field, API/error/idempotency, metric, acceptance and integration contracts
+    resolved_by: complete unified-PRD contract plus thin-summary rejection
+    remaining_boundary: static structure does not prove implementation or customer acceptance
+  - evidence_id: EVD-V5-HARDENING-20260711
+    result: passed
+    proven: schema/trace closure, checkpoint drift detection, domain evidence bounds, context survival and public-claim hygiene
+    not_proven: coding execution, expert/customer approval, production, legal, safety or financial correctness

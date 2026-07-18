@@ -1,161 +1,123 @@
 ---
 name: ai-delivery-spec
-description: Manage requirements from intake through clarification, specification, baseline, change, traceability, and acceptance. Produce one human-readable, AI-coding-ready contract with stable IDs and executable acceptance for ToC/ToB/ToG PRDs, prototypes, brownfield change, and audit. Excludes delivery execution, CI/CD, operations, and unrelated code work.
+description: Manage requirements from intake through one implementable PRD/prototype baseline, change, traceability, Agent handoff, and acceptance. Use for ideas, customer materials, brownfield systems, ToC/ToB/ToG requirements, AI-coding handoffs, or audits. Excludes sprint management, coding, CI/CD, deployment, and operations.
 ---
 
-# AI Delivery Spec 5.2.0 — Requirement Management Kernel
+# AI Delivery Spec 5.3.0 — Requirement Management Kernel
 
-> First use: run requirement intake; use `mode=ultra_light` only for one reversible change.
->
-> Default deliverable: one human-readable PRD shared by product, engineering, QA, and Coding Agents.
->
-> Domain route: append `domain=traffic|crm|education-it|oa|medical-hospital-it|data-product|ai-native`.
+Create one human-readable, AI-coding-ready baseline. Trace truth in both
+directions: source → behavior → acceptance and evidence/change → decision.
+Product Truth is optional governed authority, not a mandatory first output.
 
-Manage requirements only; planning, code, CI/CD, deployment, and operations are downstream.
+First run: Python 3.10+; `python -m pip install -r scripts/requirements.txt`.
+Terms: Stable ID = durable name; Product Truth = optional structured authority;
+gate = static structure/trace check, never business/browser proof.
 
-## 1. Start with intake
+## Start with intake, silently
 
-Before formal design, report:
+Internally classify two axes; expose them only when useful or overridden:
 
-```text
-Decision: accept|clarify|defer|reject
-Priority: P0|P1|P2|P3
-Value: high|medium|low + evidence
-Complexity: S|M|L|XL + impacted dimensions
-Uncertainty: low|medium|high + unresolved decisions
-Mode/Tier: ultra_light|lite|standard|full + L0|L1|L2|L3|L4
-Stage: submitted|triaging|clarifying|specified|reviewing|baselined|change_requested|acceptance|accepted|closed
-Override: mode=<...>; tier=<...>; domain=generic|<pack>
-```
+- `delivery_shape`: `requirement_card`, `unified_prd`, or `governed_truth`;
+- `assurance_profile`: `bounded`, `standard`, `high_risk`, or `safety_critical`.
 
-- Do not invent cost or effort without engineering confirmation.
-- Ultra-Light is only for one reversible change with one role and no cross-module
-  state, sensitive data, regulation, acceptance, or migration.
-- Multi-role, brownfield, regulated, complete-PRD, or acceptance work is L2+.
-- Register iteration, dependencies, conflicts, and ordering for parallel needs.
+Use a card for one reversible role-local change, one PRD for normal work, and
+governed truth only for controlled multi-output, repeated cross-module change,
+lineage or strong audit. Size or “AI” alone never forces it. L0—L4 remain gate
+intensity metadata, not user homework.
 
-Run `scripts/triage_requirement.py` or use `references/requirement-management.md`.
-Do not finalize before intake and P0 clarification pass.
+Confirm outcome, users, scope, authority, owner, uncertainty, priority,
+dependencies, acceptance and exclusions. Batch independent questions. Record
+P0 unknowns as owned, scoped `UNK-*`; never invent engineering cost.
 
-## 2. Load only the active slice
+## Load one active slice
 
-| Need | Read |
+| Active need | Read |
 |---|---|
-| intake, lifecycle, requirement pool | `references/requirement-management.md` |
-| source/legacy, one-line idea, competitor, clarification | `references/discover.md` |
-| behavior and stable IDs | `references/specify.md` |
-| L0/L1 card | `references/templates/prd-light-template.md` |
-| unified PRD | `references/templates/unified-requirement-prd-template.md` |
-| page contract + four-lens sign-off | `references/runtime/page-delivery-contract.md` |
-| machine annex | `references/runtime/ai-coding-completeness.md` |
-| Coding Agent/tool | `references/tool-adapters.md` |
-| role/seniority handoff | `references/runtime/role-stage-playbook.md` |
-| prototype | `references/runtime/prototype-testability.md` |
-| change/acceptance | `references/runtime/change.md` |
-| large context | references/runtime/context-planning.md |
-| failure, interruption, FAQ, anti-pattern | references/runtime/troubleshooting.md |
-| multiple domains with shared objects/states | references/runtime/composition.md |
-| domain work | scripts/query_domain.py --domain <pack> --section "<heading>"; load only matching sections |
-| common reusable pattern | matching entry in `references/patterns/common-requirement-patterns.yaml` |
-| Skill/template/validator release | `maintainer/README.md` |
+| intake, stages, roles, baseline | `references/lifecycle.md` |
+| one-line idea, sources, competitor, brownfield inventory | `references/discover.md` |
+| PRD, fields, rules, interfaces, machine annex | `references/specify.md` |
+| page contract, Stage 0, prototype, visual route | `references/prototype.md` |
+| change, traceability, acceptance result | `references/change-acceptance.md` |
+| large input, composition, checkpoints, Agent packets | `references/context.md` |
+| Coding tool projection | `references/tool-adapters.md` |
+| failure/FAQ/anti-pattern | `references/troubleshooting.md` |
+| domain evidence | `scripts/query_domain.py --domain <pack> --section "<heading>"` |
+| private domain/template/rules | `init-custom`; local declarations override presentation only |
 
-Load one stage reference, optionally one domain pack, and triggered governance.
-Do not load README, `maintainer/`, all examples/domains, or the repository at
-runtime. `maintainer/` is release assurance, not a project stage.
+Load one stage reference plus one exact domain section by default.
+Do not load README, `maintainer/`, all templates, examples, domains, or the whole
+repository during a project task. Load optional realtime/common patterns only
+when their trigger is present.
 
-## 3. Run the requirement loop
+## Run the requirement loop
 
 ```text
 Intake → Clarify → Specify → Review → Baseline → Change → Acceptance → Closed
 ```
 
-1. **Intake** — create `REQ-*` against `schemas/requirement-register.schema.json`;
-   record source, outcome, evidence, scope, owner, dependency, priority and decision.
-2. **Clarify** — close roles, trigger/result, flow, scope, state, rule,
-   exception, integration, acceptance, and out-of-scope. Track open P0 as `REV-*`.
-3. **Specify** — write one PRD: readable narrative first, precise engineering annex
-   second. Declare every implementation view and its Page Delivery Contract.
-4. **Review** — product, domain, UX, engineering, QA, compliance, and customer
-   lenses check outputs. For L3/L4 multi-page work, run every view through the
-   four-lens walkthrough and fix the one PRD/prototype, not a parallel spec.
-5. **Baseline** — freeze version, IDs, source precedence, approvals, open-item
-   dispositions, prototype binding, and consumer synchronization.
-6. **Change** — create `CHG-*` under `schemas/change-package.schema.json`;
-   traverse the ID graph in both directions, approve, synchronize, regress, and re-baseline.
-7. **Acceptance** — record actual result, evidence, defect/change reverse links,
-   conditions, and sign-off for every `AC-*`.
+1. Bind `REQ-*` to source, outcome, scope, owner and acceptance.
+2. Close roles/data scope, flows, states, rules, fields, exceptions, recovery,
+   metrics and prohibited behavior.
+3. Deliver one PRD: readable narrative, then exact engineering/AI annexes.
+4. Review through product, domain, UX, engineering, QA, compliance and customer;
+   keep unresolved `REV/UNK` explicit.
+5. Baseline version, authority, IDs and approvals; conflicts need `DEC-CONFLICT-*`.
+6. `CHG-*` traverses both directions, updates projections and regresses.
+7. Each mandatory `AC-*` records actual evidence, result and accountable sign-off.
 
-Use `Product Truth` only for 12+ views/modules, repeated change, governed
-projections, long audit, or explicit choice. Large truth uses fragments/ID slices.
+## Preserve the no-guess contract
 
-## 4. Preserve one implementation contract
+- Stable IDs cover source/decision/unknown, behavior/data, interface and proof.
+- Every role reaches success, authorized denial, recovery, or explicit handoff.
+- Every action binds actor, precondition, authority, input, visible and domain
+  result, state/event/audit, failure/recovery and AC.
+- State transitions declare from/to, trigger, guard, owner, illegal path and
+  evidence; workflow scope has an E2E AC.
+- Every displayed metric defines population, formula, time/status/filter/dedup,
+  source/freshness, zero/null and format beside its view.
+- Views declare `primary`, `layout`, applicable `surfaces`, conditional
+  fields/actions/API/AC and stable prototype anchors.
+- L3 baselines declare acceptance owner, scope, pass rule, evidence and signers.
+- High-risk rules bind `SRC/DEC/ASSUMPTION`; AI and lineage contracts appear only
+  when those behaviors are actually in scope.
+- A Coding Agent implements one baselined ID slice without inventing business
+  decisions. Missing engineering baseline is a handoff GAP, not PRD failure.
 
-- Stable IDs cover `REQ/ROLE/FLOW/VIEW/REG/ACT/FLD/STM/STATE/RULE/API/EVT/INT/METRIC/REL/AC/TEST/DEF/EVD/CHG/REV`.
-- Every role reaches an authorized exit, denial, recovery, or explicit handoff.
-- Every action has precondition, authority, input, state/result, failure,
-  audit/event, and acceptance linkage.
-- Every P0 requirement has positive and negative acceptance, observable result,
-  test data/evidence, and reverse trace.
-- Prototypes preserve declared behavior with stable `data-testid`, `data-action`,
-  `data-state`, `data-field`, visible outcomes and explicit handlers.
-- Every displayed metric defines population, formula, time/status/filter/dedup
-  caliber, source, freshness, zero denominator and format beside its view.
-- Every list/form/composer declares columns, filters, controls, validation,
-  editability, pagination, import/export and modal chains or explicitly states
-  why a surface does not apply.
-- Every role task maps to a work surface and recovery. Counts do not replace a
-  `REL-*` child/bulk contract; external roles do not justify invented portals.
-- Every declared L3/L4 view has stable `FLD/ACT/AC`, an explicit API/data-flow
-  mapping, and a four-lens sign-off. A cross-module happy path cannot compensate
-  for a thin page.
-- Do not patch a duplicate-handler legacy prototype into apparent compliance.
-  Rebuild from a trusted interaction ledger when overrides, inline handlers or
-  cross-entity modal reuse make action ownership ambiguous.
-- A Coding Agent implements one `REQ-*` slice without inventing business decisions.
+For existing PRD/prototype work, complete Stage 0 before overwrite: locate and
+classify every view/action/state/role/object/field/handoff as `confirmed`,
+`inferred`, `unknown`, or `defect_candidate`. With a forward baseline, recovered
+items use `INV-*`, map to exact `REQ-*`, and inferred items enter owned `RBATCH-*`.
+Inventory is not target approval; reverse extraction cannot infer API/metric/
+permission/compliance truth.
 
-## 5. Use domain evidence honestly
+## Bound large work and learning
 
-Run `scripts/query_domain.py --domain <pack>` before a domain pack. Separate:
+Auto-round at >8 inputs, >500k parseable characters, ≥8 modules, ≥12 pages, or
+≥200 stable objects. Round 0 freezes sources/authority; later rounds use vertical
+role slices and checkpoints; the last round runs cross-module closure. A stage
+checkpoint is not final completion.
 
-- practice status: whether the method was used in a real delivery;
-- reusable-pack maturity: `knowledge_backed → contract_tested →
-  behavior_validated → expert_reviewed → audited`.
+Learning is off/local/no-network. Candidates follow
+`schemas/domain-candidate.schema.json`, default to `project_only`, and need
+approval plus maintainer gates before promotion.
 
-Use first principles to derive domain invariants, authoritative sources for
-binding rules, vendor documents for product behavior/patterns, cases for scenario
-seeds, and source code/SDKs only for their exact component/version. Open platform
-is not proof that a core product is open source. Never promote maturity from
-keywords, project complexity, simulation, or static PASS alone.
+Long work may project root/module `AGENTS.md` from
+`schemas/agent-handoff.schema.json`; packets bind one hash, owner, scope, AC and
+QA view and cannot modify requirement truth.
 
-## 6. Finish with the light gate
+## Finish with one light gate
 
 ```bash
-python scripts/ai_delivery_spec_cli.py gate --profile prd --prd requirements/PRD.md --level L2
-python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype prototype.html --level L2
-python scripts/ai_delivery_spec_cli.py gate --profile handoff --prd requirements/PRD.md --prototype admin.html --prototype h5.html --level L3
-python scripts/ai_delivery_spec_cli.py explain-finding PRD-STRUCTURE
-python scripts/ai_delivery_spec_cli.py resume --state delivery/evidence/execution-state.yaml
+python scripts/ai_delivery_spec_cli.py gate --profile prd --prd PRD.md --level auto
+python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app.html --level auto
+python scripts/ai_delivery_spec_cli.py gate --profile handoff --prd PRD.md --prototype admin.html --manifest handoff-manifest.yaml --level auto
 ```
 
-On failure, repair the bounded finding, then rerun the emitted RETRY command.
-The final gate is a zero-LLM, zero-subagent, single-read goalkeeper. It locates
-bounded violations but does not author or fix requirements. Static PASS never
-replaces domain-owner review, browser journeys, QA execution, or customer
-acceptance.
+The zero-LLM, zero-subagent, single-read gate only diagnoses. Repair its first
+finding and rerun RETRY. Static PASS never replaces review, browser/QA execution
+or customer acceptance. Return exactly one state: `PASS`,
+`REVIEW_COMPLETE_WITH_GAPS`, `BLOCKED_BY_P0_UNKNOWN`, or `BLOCKED`.
 
-Return one completion state:
-
-```text
-PASS
-REVIEW_COMPLETE_WITH_GAPS
-BLOCKED_BY_P0_UNKNOWN
-BLOCKED
-```
-
-`BLOCKED_BY_P0_UNKNOWN` is a discovery/specification decision; `BLOCKED` is a
-deterministic artifact-gate result. Neither is a synonym for “task was hard”.
-
-Do not call work complete when only files, headings, buttons, or schemas exist.
-For an authorized long task, continue through all requested artifacts and gates;
-pause only for a material user decision, external authority, or unsatisfied P0
-blocker.
+For authorized long tasks, continue through every requested artifact and gate;
+pause only for a material user decision, unavailable authority, or scoped P0
+unknown that blocks the current stage.

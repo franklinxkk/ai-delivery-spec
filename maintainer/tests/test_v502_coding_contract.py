@@ -7,6 +7,21 @@ validator = ROOT / "scripts/validators/validate_coding_agent_contract.py"
 complete = ROOT / "maintainer/tests/fixtures/coding-l2.md"
 thin = ROOT / "maintainer/tests/fixtures/coding-l2-thin.md"
 
+# Core validators must preserve the L0-L4 compatibility surface.
+for level in ("L0", "L1", "L2", "L3", "L4"):
+    for script, fixture in (
+        ("validate_prd_quality.py", "coding-l2.md"),
+        ("validate_ia_skeleton.py", "ia-l2.yaml"),
+        ("validate_coding_agent_contract.py", "coding-l2.md"),
+    ):
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts/validators" / script),
+             str(ROOT / "maintainer/tests/fixtures" / fixture), "--level", level],
+            cwd=ROOT, text=True, capture_output=True,
+        )
+        if result.returncode:
+            raise SystemExit(f"failed {script} {level}\n" + result.stdout + result.stderr)
+
 passed = subprocess.run(
     [sys.executable, str(validator), str(complete), "--level", "L2"],
     cwd=ROOT, text=True, capture_output=True,
@@ -21,5 +36,5 @@ rejected = subprocess.run(
 if rejected.returncode == 0:
     raise SystemExit("thin keyword-only handoff must fail")
 
-print("PASS: v5.1.0 accepts complete unified contracts and rejects thin keyword summaries "
+print("PASS: L0-L4 validators accept complete unified contracts and reject thin keyword summaries "
       f"({rejected.stdout.count('FAIL:')} missing-contract findings)")

@@ -1,4 +1,4 @@
-# Coding-Agent And Domestic Tool Adapters — v5.1
+# Coding-Agent And Domestic Tool Adapters — v5.3
 
 Load this reference only when a named Coding Agent or domestic model will
 consume a baselined requirement. The unified PRD remains the single review
@@ -6,11 +6,12 @@ baseline; tool instructions cannot add business behavior.
 
 ## Shared Handoff Contract
 
-Source order:
+Source order (tool rules are projections, not a new authority):
 
 ```text
-manifest/current baseline -> unified PRD -> optional Product Truth ID slice
--> approved CHG-* -> locked prototype -> acceptance -> repository constraints
+root/module AGENTS.md -> handoff manifest/current baseline -> unified PRD
+-> optional Product Truth ID slice -> approved CHG-* -> locked prototype
+-> acceptance -> engineering baseline/repository constraints
 ```
 
 - Implement one bounded vertical slice tied to
@@ -32,7 +33,7 @@ manifest/current baseline -> unified PRD -> optional Product Truth ID slice
 | Claude Code / Cursor | Pin source order and forbidden invention in project rules; retrieve optional Product Truth by stable ID rather than loading the graph. |
 | Trae | Author or implement one vertical slice per task; save the accepted checkpoint before changing slices. |
 | WorkBuddy | Put only `SKILL.md` plus the active PRD/Truth slice in workspace rules; validate one checkpoint per task. |
-| Qoder | Provide the exact repository baseline, requirement slice, AC IDs and evidence paths. |
+| Qoder | Keep `.qoder/rules` limited to Qoder file matching/tool permissions; business rules reference root/module `AGENTS.md` and PRD because Qoder may prioritize its own rules on conflict. |
 | CodeBuddy | Use the shared handoff contract and return ambiguity before code generation; do not convert UI guesses into requirements. |
 | GLM 5.2 | Use concise Chinese instructions and deterministic output schemas; preserve IDs verbatim and prevent context compression from dropping roles, permissions, states, exceptions or P0 AC. |
 | DeepSeek | Separate analysis from the final artifact; draft by required contract section and run deterministic gates after each accepted slice. |

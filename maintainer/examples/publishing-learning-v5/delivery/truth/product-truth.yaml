@@ -66,6 +66,14 @@ assertions:
 unknowns: []
 
 decisions:
+  - id: DEC-AUTHORITY-PUBLISHING-001
+    question: 复杂示例的结构化写入面和人类评审投影如何协同
+    decision: Product Truth 是结构化写入面，统一 PRD 是同一基线的人类评审投影；两者在同一变更中同步
+    rationale: 避免机器契约和人类 PRD 成为相互竞争的两套事实
+    source_refs: [SRC-PUBLISHING-REQ-001]
+    affected_refs: [REQ-CONTENT-PUBLISH-001, REQ-CHANNEL-AUTH-001, REQ-CODE-ACTIVATE-001, REQ-LEARNING-EVIDENCE-001]
+    owner: 项目产品经理
+    status: approved
   - id: DEC-CODE-BIND-001
     question: 学习码首次激活后能否转移给其他学员
     decision: 默认不可转移；客服仅能通过有原因、有审计的人工流程处理误绑

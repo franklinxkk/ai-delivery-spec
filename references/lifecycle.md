@@ -1,4 +1,4 @@
-# Requirement Management Kernel
+# Requirement Lifecycle And Role Ownership
 
 Use this reference to manage a requirement from intake to acceptance without
 turning AI Delivery Spec into a project-management or software-lifecycle tool.
@@ -177,3 +177,29 @@ form, permission, import/export and integration scenarios. A pattern contributes
 questions, behavior/exception contracts and AC blueprints only. It must be
 adapted to project evidence and bound to `REQ-*`; it never authorizes inferred
 roles, fields or rules.
+
+## 12. Role And Seniority Ownership
+
+Seniority changes autonomy, not decision authority. Junior product may inventory
+facts, register `REQ/REV`, and draft journeys/rules/AC; scope, value, source
+conflicts, regulated rules and unresolved P0 must be escalated. Mid/senior product
+owns intake, clarification, the unified PRD, baseline, change and traceability
+within delegated authority. Developers and Coding Agents implement a bounded,
+baselined slice and return missing business decisions as `REV-*`; they never
+invent role, permission, state, field, rule or acceptance semantics. Architects
+own the downstream engineering baseline and challenge irreversible/cross-system
+gaps, but do not redefine product scope or customer acceptance.
+
+| Lens | Owns in the requirement lifecycle | Cannot self-approve |
+|---|---|---|
+| sponsor/business | outcome, value, scope trade-off | legal/safety/customer authority outside delegation |
+| product | REQ/REV/CHG, journeys, one PRD, baseline and trace | unresolved source conflicts or P0 assumptions |
+| domain owner | vocabulary, invariants, source applicability | another authority's jurisdiction or contract |
+| UX/prototype | discoverable paths, visible states, parity and recovery | business policy absent from baseline |
+| engineering/architecture | feasibility, API/state/event semantics, recovery | product outcome and customer sign-off |
+| QA/acceptance | positive/negative AC, evidence and defect reverse trace | customer/domain acceptance on their behalf |
+| compliance/security | purpose, minimization, human gate, audit/retention | business acceptance outside its mandate |
+
+A formal handoff contains baseline version/hash, stable-ID scope, forbidden
+inventions, open external dependencies, owner and expected evidence. Chat or
+meeting clarification does not change the baseline until a `REV/CHG` is recorded.

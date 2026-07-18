@@ -19,7 +19,7 @@ CONFIG = ROOT / "examples/spec.config.example.yaml"
 
 
 def run(*args: str, expected: int = 0) -> subprocess.CompletedProcess[str]:
-    result = subprocess.run([sys.executable, str(MANAGER), *args], cwd=ROOT, text=True, capture_output=True)
+    result = subprocess.run([sys.executable, str(MANAGER), *args], cwd=ROOT, text=True, encoding="utf-8", capture_output=True)
     if result.returncode != expected:
         raise AssertionError(result.stdout + result.stderr)
     return result

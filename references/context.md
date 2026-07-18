@@ -1,4 +1,4 @@
-# Adaptive Context Planning
+# Context, Composition And Agent Handoff
 
 Use this reference when a task is unusually small, multi-module, regulated,
 brownfield, or close to the model context limit.
@@ -6,7 +6,7 @@ brownfield, or close to the model context limit.
 ## Two Different Budgets
 
 Repository budgets keep the skill maintainable. Runtime budgets decide what a
-specific task loads. Do not treat the 350-line SKILL ceiling or 500-line stage
+specific task loads. Do not treat the 130-line SKILL ceiling or 500-line stage
 reference ceiling as model token limits.
 
 Generate a Context Plan before loading large domain packs or Product Truth.
@@ -51,7 +51,7 @@ model's context window.
    `BLOCKED` with the missing evidence.
 6. Summaries are navigation aids. They do not replace authoritative source
    records or Product Truth objects.
-7. At `warn_at_ratio` (default 80%), select an explicit action: retrieve an ID
+7. At `warn_at_ratio` (recommended 70%), select an explicit action: retrieve an ID
    slice, write a compaction manifest, split the delivery, or block. A
    compaction manifest names preserved priorities and deferred IDs; it cannot
    silently discard behavior.
@@ -105,3 +105,47 @@ High-risk failure is `BLOCKED`. A declared validator outage may become an
 explicit human-reviewed gap only under configured low-risk policy; it is never
 silent PASS. Missing links, stale gates, scope downgrade or version drift block
 the affected baseline.
+
+## Composition And Cross-Cutting Ownership
+
+Compose the requirement kernel with only triggered capability/governance/domain
+knowledge. Generic words such as “approval”, “AI”, “customer”, or “report” do
+not select OA, AI-native, CRM, or data-product packs. When two packs share an
+object, lifecycle, event, permission, rule, metric or failure path, record the
+canonical owner, mapping, producer/consumer, precedence, retry/compensation and
+reconciliation. A pack may narrow permissions but cannot expand the owning
+business domain's authority.
+
+## Smart Large-Project Rounds
+
+Auto-round when inputs exceed 8 files or 500k parseable characters, or the
+inventory finds at least 8 modules, 12 pages, or 200 stable objects. Round 0
+creates the source/authority inventory; later rounds use end-to-end role slices,
+normally at most 3 large sources, 2 modules and 40 major IDs. Preserve a durable
+checkpoint after each round and finish with one cross-module gate. Do not split
+by frontend/backend, regenerate a giant Product Truth in one pass, or present a
+round checkpoint as final completion.
+
+## Agent Handoff Projection
+
+For long AI-coding work, generate only triggered packets against
+`schemas/agent-handoff.schema.json`:
+
+- root `AGENTS.md`: authority, stable global guards, routes, commands and change
+  protocol; it references the PRD and never copies all business rules;
+- `MOD-*`: one independently owned module slice with inputs/outputs, direct
+  dependencies, AC and an embedded `qa_projection`;
+- `XCT-*`: RBAC, tenancy, audit, lineage, AI runtime or another cross-cutting
+  rule affecting at least two modules;
+- `EDGE-*`: producer/consumer object or state handoff, mapping, retry,
+  reconciliation and AC;
+- `HANDOFF-*`: sender/receiver envelope recording acknowledged baseline and
+  returned questions/proposals.
+
+Every active packet binds the same requirement baseline version/hash, owner,
+scope and AC. `ready_for_implementation` also requires an
+`engineering_baseline_ref` maintained by engineering. A module Agent loads the
+root summary, one module packet, direct XCT/EDGE dependencies and tests—not the
+entire project. It may return `REV-*` or a change proposal but cannot mutate the
+business baseline directly. Tool-specific Qoder/Claude/Cursor/Codex rules are
+projections of this control plane and cannot duplicate divergent business IDs.

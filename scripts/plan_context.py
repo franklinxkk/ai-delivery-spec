@@ -19,20 +19,20 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "examples/spec.config.example.yaml"
 
 STAGE_REFERENCES = {
-    "intake": ["references/requirement-management.md"],
+    "intake": ["references/lifecycle.md"],
     "clarify": ["references/discover.md"],
-    "review": ["references/specify.md", "references/runtime/change.md"],
-    "baseline": ["references/runtime/ai-coding-completeness.md"],
-    "change": ["references/runtime/change.md"],
-    "acceptance": ["references/runtime/change.md"],
-    "closed": ["references/requirement-management.md"],
+    "review": ["references/specify.md", "references/change-acceptance.md"],
+    "baseline": ["references/specify.md"],
+    "change": ["references/change-acceptance.md"],
+    "acceptance": ["references/change-acceptance.md"],
+    "closed": ["references/lifecycle.md"],
     "discover": ["references/discover.md"],
     "specify": ["references/specify.md"],
-    "plan": ["references/runtime/ai-coding-completeness.md"],
-    "tasks": ["references/runtime/ai-coding-completeness.md"],
-    "build_verify": ["references/runtime/change.md"],
-    "launch": ["references/runtime/change.md"],
-    "learn_retire": ["references/requirement-management.md"],
+    "plan": ["references/specify.md"],
+    "tasks": ["references/specify.md"],
+    "build_verify": ["references/change-acceptance.md"],
+    "launch": ["references/change-acceptance.md"],
+    "learn_retire": ["references/lifecycle.md"],
 }
 
 DOMAIN_FILES = {
@@ -165,9 +165,9 @@ def build_plan(truth: dict[str, Any], config: dict[str, Any], seed_ids: list[str
     lifecycle = truth.get("delivery_context", {}).get("lifecycle_stage", "discover")
     stage_refs_all = list(STAGE_REFERENCES.get(lifecycle, ["references/discover.md"]))
     if truth.get("delivery_context", {}).get("domain_packs") or truth.get("delivery_context", {}).get("governance_profiles"):
-        stage_refs_all.append("references/runtime/composition.md")
-    if assurance == "regulated" and "references/runtime/change.md" not in stage_refs_all:
-        stage_refs_all.append("references/runtime/change.md")
+        stage_refs_all.append("references/context.md")
+    if assurance == "regulated" and "references/change-acceptance.md" not in stage_refs_all:
+        stage_refs_all.append("references/change-acceptance.md")
     max_refs = config["context"].get("max_stage_references", 3)
     stage_refs_all = list(dict.fromkeys(stage_refs_all))
     stage_refs = stage_refs_all[:max_refs]

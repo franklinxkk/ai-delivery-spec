@@ -153,7 +153,7 @@ scenarios:
       - detect current repository voice implementation before writing a new PRD
     dimensions: [clarification_quality, requirement_completeness, domain_accuracy]
     status: partial
-    evidence: [maintainer/evals/evidence/chatwoot-voice-requirement-score.yaml, maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
+    evidence: [maintainer/evals/runs/chatwoot-voice-requirement-v5.yaml, maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
 
   - id: EVAL-GITHUB-SALEOR-DESIGN-001
     project: saleor-channel-identifier
@@ -167,7 +167,7 @@ scenarios:
       - distinguish a user issue from an approved project roadmap
     dimensions: [requirement_completeness, change_safety, cross_artifact_consistency]
     status: partial
-    evidence: [maintainer/evals/evidence/saleor-channel-id-design-score.yaml, maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
+    evidence: [maintainer/evals/runs/saleor-channel-id-design-v5.yaml, maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
 
   - id: EVAL-GITHUB-OPENEDX-DESIGN-001
     project: openedx-reindex-upgrade
@@ -181,7 +181,7 @@ scenarios:
       - refuse to regenerate a stale feature request
     dimensions: [change_safety, no_guess_handoff, cross_artifact_consistency]
     status: partial
-    evidence: [maintainer/evals/evidence/openedx-reindex-design-score.yaml, maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
+    evidence: [maintainer/evals/runs/openedx-reindex-design-v5.yaml, maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
 
   - id: EVAL-GITHUB-ORANGEHRM-HANDOFF-001
     project: orangehrm-password-policy
@@ -195,7 +195,7 @@ scenarios:
       - produce vertical slices and tests without pretending code was executed
     dimensions: [no_guess_handoff, change_safety, cross_artifact_consistency]
     status: partial
-    evidence: [maintainer/evals/evidence/orangehrm-password-policy-handoff-score.yaml, maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
+    evidence: [maintainer/evals/runs/orangehrm-password-policy-handoff-v5.yaml, maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
 
   - id: EVAL-LIFECYCLE-FORWARD-001
     project: generic-lifecycle-forward-test

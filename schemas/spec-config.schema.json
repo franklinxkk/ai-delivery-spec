@@ -4,15 +4,43 @@
   "title": "AI Delivery Spec Project Configuration",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "context", "assurance", "execution", "evaluation"],
+  "required": ["schema_version"],
   "properties": {
-    "schema_version": { "const": "5.0.0" },
+    "schema_version": { "enum": ["5.0.0", "5.3.0"] },
+    "routing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "delivery_shape": { "enum": ["auto", "requirement_card", "unified_prd", "governed_truth"] },
+        "assurance_profile": { "enum": ["auto", "bounded", "standard", "high_risk", "safety_critical"] },
+        "expose_routing": { "type": "boolean" }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "canonical_authoring_surface": { "enum": ["unified_prd", "product_truth"] },
+        "decision_ref": { "type": "string", "pattern": "^DEC-[A-Z0-9-]+$" },
+        "projection_policy": { "enum": ["update_in_same_change", "manual_with_gate"] },
+        "source_conflict_resolution": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "strategy": { "const": "explicit_decision" },
+            "decision_prefix": { "const": "DEC-CONFLICT" },
+            "unresolved_status": { "const": "blocked_for_affected_scope" }
+          }
+        }
+      }
+    },
     "context": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["profile", "overflow_strategy", "never_truncate_priorities"],
+      "required": [],
       "properties": {
         "profile": { "enum": ["auto", "minimal", "standard", "regulated", "large_program"] },
+        "auto_round_large_input": { "type": "boolean" },
         "model_context_tokens": { "type": ["integer", "null"], "minimum": 4096 },
         "reserved_output_tokens": { "type": "integer", "minimum": 512, "default": 4096 },
         "system_overhead_tokens": { "type": "integer", "minimum": 512, "default": 4096 },
@@ -51,13 +79,30 @@
       "required": ["environment", "expected_skill_version", "dependency_policy", "high_risk_failure", "low_risk_failure", "audit_mode", "max_turns_per_stage"],
       "properties": {
         "environment": { "enum": ["development", "test", "staging", "production"] },
-        "expected_skill_version": { "enum": ["5.1.0", "5.1.1", "5.1.2", "5.1.3", "5.1.4", "5.1.5", "5.1.6", "5.1.7", "5.2.0"] },
+        "expected_skill_version": { "enum": ["5.1.0", "5.1.1", "5.1.2", "5.1.3", "5.1.4", "5.1.5", "5.1.6", "5.1.7", "5.2.0", "5.3.0"] },
         "dependency_policy": { "const": "strict" },
         "high_risk_failure": { "const": "block" },
         "low_risk_failure": { "enum": ["block", "human_review"] },
         "audit_mode": { "enum": ["hash_chain", "signed_external"] },
         "max_turns_per_stage": { "type": "integer", "minimum": 1, "maximum": 200 },
         "checkpoint_directory": { "type": "string", "minLength": 1 }
+      }
+    },
+    "learning": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "default_reuse_scope": { "enum": ["project_only", "organization", "public_candidate"] },
+        "network": { "enum": ["disabled", "explicit_only"] }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "diagnostics": { "enum": ["first", "summary", "full"] },
+        "level": { "enum": ["auto", "L0", "L1", "L2", "L3", "L4"] }
       }
     },
     "evaluation": {

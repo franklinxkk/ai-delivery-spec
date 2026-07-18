@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/domain-usage-log.schema.json",
+  "title": "Project-local Domain Candidate Usage Log",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "usage_id", "candidate_ref", "project_ref", "outcome", "evidence_refs", "recorded_by", "recorded_at"],
+  "properties": {
+    "schema_version": { "const": "5.3.0" },
+    "usage_id": { "type": "string", "pattern": "^USAGE-[A-Z0-9-]+$" },
+    "candidate_ref": { "type": "string", "pattern": "^CAND-[A-Z0-9-]+$" },
+    "project_ref": { "type": "string", "minLength": 1 },
+    "outcome": { "enum": ["adopted", "modified", "rejected", "invalidated", "not_observed"] },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } },
+    "notes": { "type": "string" },
+    "recorded_by": { "type": "string", "minLength": 1 },
+    "recorded_at": { "type": "string", "format": "date-time" }
+  }
+}

@@ -11,7 +11,7 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[3]
-VERSION = "5.2.0"
+VERSION = "5.3.0"
 PUBLIC_FILES = (
     "README.md",
     "maintainer/community.md",
@@ -70,7 +70,7 @@ def main() -> int:
         failures.append("README must put install inside the first 60-second entry")
     for marker in ("Ultra-Light", "smart-large-project", "examples/minimal-v5", "分片真相", "一份统一"):
         if marker not in readme:
-            failures.append(f"README misses v5.1.0 onboarding marker: {marker}")
+            failures.append(f"README misses required onboarding marker: {marker}")
     coverage = yaml.safe_load((ROOT / "references/domain-coverage.yaml").read_text(encoding="utf-8"))
     release_status = yaml.safe_load((ROOT / "maintainer/evals/evidence/release-status.yaml").read_text(encoding="utf-8"))
     matrix = yaml.safe_load((ROOT / "maintainer/evals/evidence/github-validation-matrix.yaml").read_text(encoding="utf-8"))
