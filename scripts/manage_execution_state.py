@@ -137,7 +137,7 @@ def version_tuple(value: str) -> tuple[int, ...]:
 
 def dependency_failures(versions: dict[str, str]) -> list[str]:
     failures: list[str] = []
-    constraints = {"PyYAML": ((6, 0), (7, 0)), "jsonschema": ((4, 23), (5, 0)), "python": ((3, 11), (4, 0))}
+    constraints = {"PyYAML": ((6, 0), (7, 0)), "jsonschema": ((4, 23), (5, 0)), "python": ((3, 10), (4, 0))}
     for name, (minimum, maximum) in constraints.items():
         current = version_tuple(versions.get(name, "missing"))
         if not current or current < minimum or current >= maximum:
