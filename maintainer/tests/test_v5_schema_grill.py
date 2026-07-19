@@ -32,6 +32,10 @@ def main() -> int:
                 "answer": "Import, search, and current-version evidence only.",
                 "decision_owner": "product owner",
                 "status": "answered",
+                "recommendation": "Limit the first slice to import, search, and current-version evidence.",
+                "recommendation_evidence_refs": ["meeting-001"],
+                "tradeoff": "Smaller first slice ships sooner; historical diff review is deferred.",
+                "affected_refs": ["UNK-SCOPE-001"],
                 "evidence_refs": ["meeting-001"],
             }
         ],

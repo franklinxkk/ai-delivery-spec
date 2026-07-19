@@ -1,5 +1,28 @@
 # Changelog
 
+## 5.3.1 - 2026-07-19
+
+- Replaced flat clarification with a dependency-aware decision tree: inspect
+  available evidence first, batch independent facts, traverse aesthetic/route/
+  conflict decisions serially, and attach a recommendation, evidence and
+  trade-off to every user-owned question.
+- Added explicit clarification exit conditions, P0/P1 follow-up bounds and an
+  unattended fallback that records owned assumptions, reversal paths and
+  `blocks_stage` instead of silently choosing defaults.
+- Added an aesthetic intent contract (`feeling + reference + taboo`) and a
+  one-screen direction confirmation loop using `DEC-AESTHETIC-*`/`UNK-*`.
+- Added L3/L4 region-anchor checks for complex, builder, portal and multi-view
+  prototypes, aligning the deterministic gate with the existing `REG-*` page
+  contract.
+- Reused existing `ARUN-*` acceptance records as the optional browser-evidence
+  input. L3/L4 prototypes without executed, evidenced `data-ac` coverage now
+  return `REVIEW_COMPLETE_WITH_GAPS` instead of appearing interaction-complete.
+- Documented exact-ID expansion, known dynamic-anchor heuristics and `--level
+  auto` semantics without adding model calls, subagents or a browser runtime to
+  the final gate.
+- Consolidated maintainer community copy into the lab README to preserve the
+  180-file repository budget and keep the runtime package below 100 files.
+
 ## 5.3.0 - 2026-07-18
 
 - Replaced the public mode maze with a silent two-axis route: delivery shape

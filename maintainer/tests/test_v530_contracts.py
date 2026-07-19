@@ -1,4 +1,4 @@
-"""v5.3 regression: authority, staged unknowns, Stage 0, packets and candidates."""
+"""v5.3.x regression: authority, clarification, prototype evidence and handoff."""
 
 from __future__ import annotations
 
@@ -18,6 +18,25 @@ GATE = ROOT / "scripts" / "quality_gate.py"
 CLI = ROOT / "scripts" / "ai_delivery_spec_cli.py"
 FIXTURE = ROOT / "maintainer" / "tests" / "fixtures" / "coding-l2.md"
 failures: list[str] = []
+
+for relative, markers in {
+    "references/lifecycle.md": (
+        "Decision-Tree Clarification", "self-check gate", "recommended answer",
+        "Only P0/P1 branches", "is unavailable",
+    ),
+    "references/prototype.md": (
+        "DEC-AESTHETIC-*", "explicit taboo", "--acceptance-run",
+        "browser_evidence_status", "region-REG-*",
+    ),
+    "references/troubleshooting.md": (
+        "Exact-ID And Dynamic-Anchor Migration", "${act}", "dataset.action",
+        "PROTO-BROWSER-EVIDENCE-MISSING",
+    ),
+}.items():
+    text = (ROOT / relative).read_text(encoding="utf-8")
+    for marker in markers:
+        if marker not in text:
+            failures.append(f"{relative} misses v5.3.1 contract marker: {marker}")
 
 
 def run_gate(*args: str) -> tuple[int, dict]:
@@ -90,6 +109,76 @@ document.querySelector('main').innerHTML=act('ACT-DEMO-RUN');
         failures.append(f"dynamic data-action construction escaped L2: {codes(payload)}")
     if payload.get("metrics", {}).get("prototype_dynamic_action_candidates") != 1:
         failures.append("dynamic ACT candidate was not included in prototype inventory metrics")
+
+    placeholder_prototype = temp / "placeholder-anchor.html"
+    placeholder_prototype.write_text(
+        '''<!doctype html><main data-testid="page-VIEW-DEMO"></main>
+<script>const template=(act)=>`<button data-action="${act}">运行</button>`;</script>''',
+        encoding="utf-8",
+    )
+    code, payload = run_gate("--profile", "prototype", "--prototype", str(placeholder_prototype), "--level", "L2")
+    if code != 2 or "PROTO-UNSTABLE-ACTION" not in codes(payload):
+        failures.append(f"template placeholder action escaped stable-ID gate: {codes(payload)}")
+
+    prototype_source = """<!doctype html>
+<!-- PAGE-CONTRACT: VIEW-DEMO; primary=form; layout=composite; surfaces=form,list -->
+<main data-testid="page-VIEW-DEMO">
+__REGION_OPEN__<button data-action="ACT-DEMO-SAVE" data-ac="AC-DEMO-SAVE">保存</button>
+<span data-state="idle">待保存</span>__REGION_CLOSE__</main>
+<script>
+const GlobalState={status:"idle"};
+const ActionRegistry={"ACT-DEMO-SAVE":function(){GlobalState.status="saved";document.querySelector("[data-state]").textContent="已保存";}};
+document.addEventListener("click",function(event){const target=event.target.closest("[data-action]");if(!target)return;ActionRegistry[target.dataset.action]();});
+</script>"""
+    regionless = temp / "regionless.html"
+    regionless.write_text(prototype_source.replace("__REGION_OPEN__", "").replace("__REGION_CLOSE__", ""), encoding="utf-8")
+    code, payload = run_gate("--profile", "prototype", "--prototype", str(regionless), "--level", "L3")
+    if code != 2 or "PROTO-NO-REGION-ANCHOR" not in codes(payload):
+        failures.append(f"complex L3 prototype without REG-* escaped: {payload['status']} {codes(payload)}")
+    if "PROTO-BROWSER-EVIDENCE-MISSING" not in codes(payload):
+        failures.append("L3 prototype without ARUN did not expose the browser evidence gap")
+
+    evidenced_prototype = temp / "evidenced.html"
+    evidenced_prototype.write_text(
+        prototype_source.replace(
+            "__REGION_OPEN__", '<section data-testid="region-REG-DEMO-FORM">'
+        ).replace("__REGION_CLOSE__", "</section>"),
+        encoding="utf-8",
+    )
+    code, payload = run_gate("--profile", "prototype", "--prototype", str(evidenced_prototype), "--level", "L3")
+    if code != 1 or payload["status"] != "REVIEW_COMPLETE_WITH_GAPS" or "PROTO-BROWSER-EVIDENCE-MISSING" not in codes(payload):
+        failures.append(f"static-only L3 prototype was presented as complete: {payload['status']} {codes(payload)}")
+
+    acceptance_run = temp / "ARUN-PROTOTYPE-001.yaml"
+    acceptance_run.write_text(yaml.safe_dump({
+        "schema_version": "5.1.0",
+        "run_id": "ARUN-PROTOTYPE-001",
+        "baseline_version": "1.0",
+        "environment": "Chrome 127 / Windows 11 / Playwright",
+        "executor": "qa-owner",
+        "executed_at": "2026-07-19T10:00:00+08:00",
+        "items": [{
+            "id": "ARITEM-PROTOTYPE-001", "acceptance_ref": "AC-DEMO-SAVE",
+            "requirement_refs": ["REQ-DEMO-SAVE"], "mandatory": True,
+            "result": "pass", "actual_result": "点击保存后状态区显示已保存",
+            "evidence_refs": ["EVD-PROTOTYPE-SAVE-001"], "defect_refs": [],
+        }],
+        "residual_issues": [], "conclusion": "accepted", "conditions": [],
+        "sign_offs": [{
+            "role": "qa", "actor": "qa-owner", "decision": "approve",
+            "at": "2026-07-19T10:05:00+08:00", "evidence_ref": "EVD-PROTOTYPE-SAVE-001",
+        }],
+    }, allow_unicode=True, sort_keys=False), encoding="utf-8")
+    code, payload = run_gate(
+        "--profile", "prototype", "--prototype", str(evidenced_prototype),
+        "--level", "L3", "--acceptance-run", str(acceptance_run),
+    )
+    if code != 0 or payload["status"] != "PASS":
+        failures.append(f"evidence-bound L3 prototype failed: {payload['status']} {codes(payload)}")
+    if payload.get("metrics", {}).get("prototype_browser_evidence") is not True:
+        failures.append("accepted browser ARUN was not reflected in gate metrics")
+    if not any("DEC-AESTHETIC" in item for item in payload.get("not_proven", [])):
+        failures.append("gate did not disclose the unproven aesthetic direction")
 
     conflict_prd = temp / "conflict.md"
     conflict_prd.write_text(
@@ -345,4 +434,4 @@ ACT-LEGACY-OPEN / AC-LEGACY-001；VIEW-LEGACY-NA → API-LEGACY-GET /api/legacy�
 
 if failures:
     raise SystemExit("\n".join(failures))
-print("PASS: v5.3 authority, staged P0, Stage 0, Agent packets and project-only learning are deterministic")
+print("PASS: v5.3.x authority, clarification, prototype evidence, Stage 0 and Agent handoff are deterministic")

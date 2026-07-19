@@ -56,6 +56,7 @@ from validators.validate_prd_quality import LEVELS, TERMS
 ROOT = SCRIPT_DIR.parent
 REGISTER_SCHEMA = ROOT / "schemas" / "requirement-register.schema.json"
 HANDOFF_SCHEMA = ROOT / "schemas" / "agent-handoff.schema.json"
+ACCEPTANCE_SCHEMA = ROOT / "schemas" / "acceptance-run.schema.json"
 MAIN_MARKERS = ("背景", "需求准入", "角色", "角色旅程", "业务流程", "功能总览", "分模块功能需求", "验收方案")
 ANNEX_MARKERS = ("字段字典", "规则与状态机", "api", "机器可读验收", "双向追溯", "禁止推断")
 STATUSES = {
@@ -79,6 +80,7 @@ STAGE_ORDER = {
 NOT_PROVEN_BY_STATIC_GATE = (
     "业务与领域规则已经客户或权威来源确认",
     "原型在真实浏览器中的交互、视觉、可访问性与多端适配",
+    "视觉与美学方向已经用户确认（DEC-AESTHETIC-* 或等效记录）",
     "代码实现、数据迁移、安全、性能、部署与运行稳定性",
     "验收用例已经实际执行并形成签认证据",
 )
@@ -128,6 +130,18 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
         "原型缺少可追溯、可测试的稳定页面标识。",
         "为每个页面根节点增加唯一 data-testid=\"page-VIEW-*\"。",
     ),
+    "PROTO-NO-REGION-ANCHOR": (
+        "复杂原型没有把页面布局拆成可追溯、可测试的业务区域。",
+        "为复合页、组装器、门户或多视图原型的关键区域增加唯一 data-testid=\"region-REG-*\"。",
+    ),
+    "PROTO-BROWSER-EVIDENCE-MISSING": (
+        "L3/L4 静态契约已检查，但缺少真实浏览器逐动作执行证据。",
+        "按原型内 data-ac 生成 ARUN-*，在真实浏览器执行后用 --acceptance-run 重新校验；缺证据时不得声明原型完成。",
+    ),
+    "PROTO-BROWSER-EVIDENCE-INCOMPLETE": (
+        "浏览器验收记录没有覆盖原型声明的全部 AC，或没有形成可接受结论。",
+        "补跑缺失 AC，填写 actual_result、evidence_refs、浏览器环境和签署结论，再重跑门禁。",
+    ),
     "PROTO-UNHANDLED-ACTION": (
         "原型动作没有可观察的分发路径。",
         "将 data-action 绑定到唯一处理器，并产生页面、弹窗、状态或数据结果。",
@@ -144,6 +158,7 @@ PREFIX_GUIDANCE: tuple[tuple[str, str, str], ...] = (
     ("AUTH-", "需求来源或写入面存在未裁决冲突。", "由解释责任人创建 DEC-CONFLICT-*，限定适用范围并重新投影受影响工件。"),
     ("HANDOFF-", "交接包与需求基线或其他投影不一致。", "对齐基线 hash、责任人、稳定 ID 和验收引用，不要在交接包中另造规则。"),
     ("AI-", "AI 产品能力缺少适用的运行时治理合同。", "补充输入输出、版本、权限、人工门、回退、评测和观测引用。"),
+    ("ACCEPTANCE-", "验收执行记录无效或与其结论矛盾。", "按 acceptance-run schema 修复执行环境、实际结果、证据、缺陷和签署结论。"),
     ("PROTO-CSS-", "CSS 污染可能隐藏或破坏交互状态。", "移除全局 !important 污染，并将可见性规则限制在所属组件和 data-state。"),
     ("PROTO-", "原型缺少可测试交互或状态合同。", "使用稳定 data-testid/data-action/data-state/data-field 和可见结果修复对应元素。"),
     ("PRD-", "PRD 缺少当前交付阶段所需的需求合同。", "按引用位置补齐经确认的规则、稳定 ID、异常和验收，不得发明值。"),
@@ -168,6 +183,8 @@ REPAIR_EXAMPLES: tuple[tuple[str, str], ...] = (
     ("PRD-P0-UNKNOWN", "unknowns: [{id: UNK-AUTH-001, priority: P0, status: open, blocks_stage: baseline, owner: 产品负责人, affected_refs: [REQ-AUTH-001]}]"),
     ("PRD-OPEN-P0", "先由 owner 关闭 UNK-*，同步 open_p0_unknown_ids，再重新申请基线门禁。"),
     ("PRD-NONEXACT-ID", "逐条写 AC-AUDIT-001、AC-AUDIT-002、AC-AUDIT-003；不要写 AC-AUDIT-001..003。"),
+    ("PROTO-NO-REGION-ANCHOR", "<section data-testid=\"region-REG-COURSE-FILTERS\">...</section>"),
+    ("PROTO-BROWSER-EVIDENCE", "python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app.html --level L3 --acceptance-run acceptance/ARUN-PROTOTYPE-001.yaml"),
     ("PROTO-DYNAMIC-ANCHOR", "在模板源码直接写 data-action=\"ACT-COURSE-SAVE\"，不要用 'data-' + 'action' 拼接。"),
     ("PROTO-UNHANDLED-ACTION", "actionRegistry['ACT-COURSE-SAVE'] = saveCourse，并让处理器更新 data-state 或页面数据。"),
     ("STAGE0-", "为反推项使用 INV-*，保留 source_ref/location；推断项绑定 review_batch_ref，由责任人批量确认。"),
@@ -217,6 +234,7 @@ class Gate:
         self.read_counts: Counter[str] = Counter()
         self.findings: list[Finding] = []
         self.metrics: dict[str, Any] = {}
+        self.prototype_acceptance_refs: set[str] = set()
 
     def read(self, path: Path) -> str:
         key = path.resolve()
@@ -1235,11 +1253,16 @@ class Gate:
         states = sorted(set(re.findall(r"\bdata-state\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
         fields = sorted(set(re.findall(r"\bdata-(?:field|bind)\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
         metrics = sorted(set(re.findall(r"\bdata-metric\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
+        acceptance_refs = sorted(set(re.findall(r"\bdata-ac\s*=\s*['\"](AC-[A-Z0-9-]+)['\"]", tag_source, re.I)))
         page_testids = [item for item in testids if item.lower().startswith("page-")]
+        region_testids = [item for item in testids if item.lower().startswith("region-")]
+        self.prototype_acceptance_refs.update(item.upper() for item in acceptance_refs)
         if not page_testids:
             self.add("BLOCK" if actions or level in {"L2", "L3", "L4"} else "GAP", "PROTO-NO-PAGE-ANCHOR", path, "no page-* data-testid root was found")
         for duplicate in sorted(item for item, count in Counter(testids).items() if count > 1 and item.lower().startswith("page-")):
             self.add("BLOCK", "PROTO-DUPLICATE-PAGE", path, "page data-testid must be unique", duplicate)
+        for duplicate in sorted(item for item, count in Counter(testids).items() if count > 1 and item.lower().startswith("region-")):
+            self.add("BLOCK", "PROTO-DUPLICATE-REGION", path, "region data-testid must be unique", duplicate)
         if level in {"L2", "L3", "L4"}:
             for action in actions:
                 if not re.fullmatch(r"ACT-[A-Z0-9-]+", action, re.I):
@@ -1247,6 +1270,23 @@ class Gate:
             for metric in metrics:
                 if not re.fullmatch(r"METRIC-[A-Z0-9-]+", metric, re.I):
                     self.add("BLOCK", "PROTO-UNSTABLE-METRIC", path, "data-metric must bind a stable METRIC-* ID", metric)
+        if level in {"L3", "L4"}:
+            for region in region_testids:
+                if not re.fullmatch(r"region-REG-[A-Z0-9-]+", region, re.I):
+                    self.add("BLOCK", "PROTO-UNSTABLE-REGION", path, "region data-testid must bind a stable REG-* ID", region)
+            page_contracts = self._page_contracts(raw)
+            complex_contract = any(
+                attrs.get("layout", "").lower() in {"composite", "builder", "portal"}
+                or len({item.strip().lower() for item in attrs.get("surfaces", "").split(",") if item.strip()}) > 1
+                for attrs, _block in page_contracts.values()
+            )
+            complex_markup = len(page_testids) > 1 or bool(re.search(r"<table\b", raw, re.I) and re.search(r"<(?:form|input|select|textarea)\b", raw, re.I))
+            if page_testids and (complex_contract or complex_markup) and not region_testids:
+                self.add(
+                    "BLOCK", "PROTO-NO-REGION-ANCHOR", path,
+                    "L3/L4 复合页、组装器、门户或多视图原型至少需要一个稳定 REG-* 区域锚点",
+                    affected_consumers=("product", "ux", "frontend", "qa", "coding_agent"),
+                )
         if not actions:
             self.add("GAP", "PROTO-NO-ACTIONS", path, "no data-action controls were found; confirm this is intentionally static")
 
@@ -1377,13 +1417,71 @@ class Gate:
             self.add("GAP", "PROTO-EXTERNAL-JS", path, "external scripts are outside this single-file static scan", ", ".join(external_scripts[:3]))
         self.metrics.update({
             "prototype_pages": len(page_testids),
+            "prototype_regions": len(region_testids),
             "prototype_actions": len(actions),
             "prototype_dynamic_action_candidates": len(script_action_candidates) if split_anchors else 0,
             "prototype_action_inventory_total": len(set(actions) | (set(script_action_candidates) if split_anchors else set())),
             "prototype_states": len(states),
             "prototype_fields": len(fields),
             "prototype_metrics": len(metrics),
+            "prototype_acceptance_refs": len(self.prototype_acceptance_refs),
         })
+
+    def check_acceptance_run(self, path: Path) -> tuple[set[str], bool, bool]:
+        """Validate one ARUN and return evidenced ACs, browser environment, conclusion."""
+        try:
+            raw = self.read(path)
+        except (OSError, UnicodeError) as exc:
+            self.add("BLOCK", "ACCEPTANCE-READ", path, f"验收记录无法读取：{exc}")
+            return set(), False, False
+        document, error = self._yaml_document(path, raw)
+        if error or document is None:
+            self.add("BLOCK", "ACCEPTANCE-PARSE", path, error or "验收记录无效")
+            return set(), False, False
+        schema = json.loads(ACCEPTANCE_SCHEMA.read_text(encoding="utf-8"))
+        schema_errors = sorted(
+            Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(document),
+            key=lambda item: tuple(str(part) for part in item.path),
+        )
+        for schema_error in schema_errors:
+            location = ".".join(str(part) for part in schema_error.path) or "<root>"
+            self.add("BLOCK", "ACCEPTANCE-SCHEMA", path, schema_error.message, location)
+
+        evidenced: set[str] = set()
+        mandatory_incomplete: list[str] = []
+        for item in document.get("items", []) or []:
+            if not isinstance(item, dict):
+                continue
+            item_id = str(item.get("id", "<unknown>"))
+            if item.get("mandatory") and item.get("result") != "pass":
+                mandatory_incomplete.append(item_id)
+            if item.get("result") != "pass":
+                continue
+            if not str(item.get("actual_result", "")).strip() or not item.get("evidence_refs"):
+                self.add("BLOCK", "ACCEPTANCE-PASS-NO-EVIDENCE", path, "pass 项必须填写实际结果和证据引用", item_id)
+                continue
+            acceptance_ref = str(item.get("acceptance_ref", "")).upper()
+            if acceptance_ref:
+                evidenced.add(acceptance_ref)
+
+        conclusion = str(document.get("conclusion", "pending"))
+        sign_offs = document.get("sign_offs", []) or []
+        if conclusion == "accepted" and mandatory_incomplete:
+            self.add("BLOCK", "ACCEPTANCE-INCOMPLETE-CONCLUSION", path, "accepted 仍包含未通过的 mandatory 项", ", ".join(mandatory_incomplete))
+        if conclusion == "accepted_with_conditions" and not document.get("conditions"):
+            self.add("BLOCK", "ACCEPTANCE-CONDITION-MISSING", path, "accepted_with_conditions 缺少条件、责任人和完成标准")
+        if conclusion in {"accepted", "accepted_with_conditions"} and not sign_offs:
+            self.add("BLOCK", "ACCEPTANCE-SIGNOFF-MISSING", path, "接受结论缺少签署记录")
+
+        environment = str(document.get("environment", "")).lower()
+        browser_markers = ("browser", "浏览器", "chrome", "edge", "firefox", "safari", "webkit", "playwright")
+        browser_environment = any(marker in environment for marker in browser_markers)
+        conclusive = conclusion in {"accepted", "accepted_with_conditions"} and not mandatory_incomplete and bool(sign_offs)
+        self.metrics.update({
+            "acceptance_run_items": self.metrics.get("acceptance_run_items", 0) + len(document.get("items", []) or []),
+            "acceptance_run_evidenced_acs": self.metrics.get("acceptance_run_evidenced_acs", 0) + len(evidenced),
+        })
+        return evidenced, browser_environment, conclusive
 
     def check_handoff(self, prd_path: Path, prototype_paths: list[Path], level: str) -> None:
         """Cross-check the one PRD baseline against one or more prototype projections."""
@@ -1572,6 +1670,7 @@ def main() -> int:
     parser.add_argument("--prototype", type=Path, action="append", help="HTML prototype; repeat for admin/H5/multi-surface handoff")
     parser.add_argument("--inventory", type=Path, help="Stage 0 brownfield inventory YAML")
     parser.add_argument("--manifest", type=Path, help="Agent handoff manifest YAML")
+    parser.add_argument("--acceptance-run", type=Path, action="append", help="Executed ARUN-* YAML; repeat when prototype AC evidence is split")
     parser.add_argument("--level", choices=["auto", *LEVELS], default="L2")
     parser.add_argument("--stage", choices=list(STAGE_ORDER), default="baseline")
     parser.add_argument("--scope-ref", action="append", default=[], help="Limit stage/P0 evaluation to one stable-ID scope; repeat as needed")
@@ -1590,6 +1689,7 @@ def main() -> int:
         "agent_handoff": ("manifest",),
     }[args.profile]
     gate = Gate()
+    prototype_level = "L2" if args.level == "auto" else args.level
     for name in required:
         value = getattr(args, name)
         values = value if name == "prototype" and isinstance(value, list) else [value]
@@ -1608,7 +1708,7 @@ def main() -> int:
             elif name == "manifest":
                 gate.check_agent_handoff(item)
             else:
-                gate.check_prototype(item, "L2" if args.level == "auto" else args.level)
+                gate.check_prototype(item, prototype_level)
     if args.manifest and "manifest" not in required:
         if not args.manifest.is_file():
             gate.add("BLOCK", "GATE-NOT-FILE", args.manifest, "input does not exist or is not a file", "manifest")
@@ -1622,9 +1722,42 @@ def main() -> int:
     valid_prd = args.prd if args.prd and args.prd.is_file() else None
     valid_prototypes = [path for path in (args.prototype or []) if path.is_file()]
     if args.profile in {"handoff", "full"} and valid_prd and valid_prototypes:
-        gate.check_handoff(valid_prd, valid_prototypes, "L2" if args.level == "auto" else args.level)
+        gate.check_handoff(valid_prd, valid_prototypes, prototype_level)
     if args.profile in {"handoff", "full"} and valid_prd and args.manifest and args.manifest.is_file():
         gate.check_manifest_prd_binding(valid_prd, args.manifest)
+    valid_acceptance_runs: list[Path] = []
+    evidenced_acs: set[str] = set()
+    browser_evidence = False
+    conclusive_evidence = False
+    for acceptance_run in args.acceptance_run or []:
+        if not acceptance_run.is_file():
+            gate.add("BLOCK", "GATE-NOT-FILE", acceptance_run, "input does not exist or is not a file", "acceptance-run")
+            continue
+        valid_acceptance_runs.append(acceptance_run)
+        passed, is_browser, is_conclusive = gate.check_acceptance_run(acceptance_run)
+        evidenced_acs.update(passed)
+        browser_evidence = browser_evidence or is_browser
+        conclusive_evidence = conclusive_evidence or is_conclusive
+    if valid_prototypes and prototype_level in {"L3", "L4"}:
+        if not valid_acceptance_runs:
+            gate.add(
+                "GAP", "PROTO-BROWSER-EVIDENCE-MISSING", valid_prototypes[0],
+                "L3/L4 原型只完成静态检查；未提供 ARUN-* 浏览器逐动作证据",
+                affected_consumers=("product", "ux", "frontend", "qa", "customer_acceptor"),
+            )
+        else:
+            missing_acs = sorted(gate.prototype_acceptance_refs - evidenced_acs)
+            if missing_acs:
+                gate.add(
+                    "GAP", "PROTO-BROWSER-EVIDENCE-INCOMPLETE", valid_acceptance_runs[0],
+                    f"浏览器验收缺少 {len(missing_acs)} 个原型 AC",
+                    ", ".join(missing_acs[:20]), related_refs=tuple(missing_acs[:100]),
+                )
+            if not browser_evidence:
+                gate.add("GAP", "PROTO-BROWSER-EVIDENCE-INCOMPLETE", valid_acceptance_runs[0], "ARUN environment 未声明真实浏览器/浏览器自动化环境", "environment")
+            if not conclusive_evidence:
+                gate.add("GAP", "PROTO-BROWSER-EVIDENCE-INCOMPLETE", valid_acceptance_runs[0], "ARUN 尚未形成 accepted/accepted_with_conditions 且有签署的结论", "conclusion/sign_offs")
+    gate.metrics["prototype_browser_evidence"] = bool(valid_acceptance_runs and browser_evidence and conclusive_evidence)
     custom_root = args.custom_root
     if custom_root is None and (Path.cwd() / "custom").is_dir():
         custom_root = Path.cwd() / "custom"

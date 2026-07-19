@@ -191,6 +191,13 @@ path per role. Assert that the opened page/modal belongs to the action's entity,
 that field controls match the Page Delivery Contract and that the durable result
 appears in the owning list/detail after close.
 
+Record the sweep as an `ARUN-*`: its environment names the real browser/device,
+each prototype `data-ac` has an executed item, and every pass has actual result
+plus screenshot/trace/audit evidence. Supply it to the gate with
+`--acceptance-run`. If no browser capability is available, create a pending
+ARUN and an exact action checklist, return `REVIEW_COMPLETE_WITH_GAPS`, and do
+not describe the interactive prototype as complete.
+
 Automated writes use mock, shadow, or disposable test data. Never pollute live
 customer data or production metrics without explicit authorization and a safe
 test plan.
@@ -216,12 +223,19 @@ blocker; do not explain the intended route during the test.
 - Print/export views preserve required fields, pagination, signatures, version,
   and archive metadata when they are acceptance evidence.
 
-When the user requests visual redesign, first choose and record a design-system
-baseline (for example Ant Design 5 tokens/components) and, when useful, apply a
-specialized frontend-design skill for art direction. The design skill improves
-hierarchy and craft; the enterprise component system preserves predictable
-forms, tables and states. Capture full-page screenshots at desktop and one
-narrow width and perform a visual critique before completion.
+Before a visual redesign, clarify three user-owned direction inputs: intended
+feeling, reference product/artifact, and explicit taboo. Record the decision as
+`DEC-AESTHETIC-*`; if unavailable, create a P1 `UNK-*` with
+`blocks_stage: baseline` instead of silently choosing a style. For competing
+directions, show no more than one screen or one direction card
+(`style + feeling keywords + reference + taboo`) and confirm it before applying
+the direction to every page.
+
+Then record one design-system baseline (for example Ant Design 5 tokens and
+components) and, when useful, apply one specialized design skill. Do not claim
+that an uninstalled skill was executed; call a public-rule imitation a method
+reference. Capture full-page screenshots at desktop and one narrow width and
+perform a visual critique before completion.
 
 Visual fidelity does not excuse missing interaction or business behavior.
 
@@ -237,6 +251,8 @@ region_count=
 action_count=
 state_count=
 role_paths=
+browser_evidence_status=pending|passed|blocked
+aesthetic_decision_ref=DEC-AESTHETIC-*|UNK-*
 gaps=
 evidence_location=
 ```
@@ -248,6 +264,7 @@ Prototype completion requires:
 - applicable empty/error/permission/state-conflict paths work;
 - no unapproved parity loss;
 - browser evidence exists for required ACs;
+- complex L3 views expose stable `REG-*` region anchors;
 - unresolved gaps have owner and completion state.
 Before accepting an HTML prototype, run:
 
@@ -299,6 +316,11 @@ anchors and applicable API/AC trace. Then add conditional contracts:
 - preview: per-file controls, conversion failure and authorization/watermark;
 - composer: hierarchy, allowed source/target, insertion/order, invalid drop,
   persistence, undo/recovery, concurrency and keyboard/mobile alternative.
+
+At L3/L4, a composite, builder, portal, multi-view artifact, or a page combining
+table and form controls must expose stable `region-REG-*` roots for its meaningful
+layout regions. A complex prototype with `region_count=0` is not a complete
+page contract; a bounded single-surface page may remain regionless.
 
 When the user requests high-fidelity, branding, visual redesign, or a
 production-grade prototype, freeze the UI requirement contract first. Prefer a

@@ -1,14 +1,17 @@
 interface:
   display_name: "AI Delivery Spec"
-  version: "5.3.0"
+  version: "5.3.1"
   short_description: "Requirement management from intake and clarification through change, traceability, and acceptance."
   default_prompt: >
     Use $ai-delivery-spec as a requirement-management kernel. Silently classify
-    delivery shape and assurance, then clarify, specify, review and baseline. By
+    delivery shape and assurance, self-check evidence, batch independent facts,
+    and clarify direction decisions one at a time with a recommendation. Then
+    specify, review and baseline. By
     default produce one human-readable PRD with engineering and AI-coding
     appendices instead of separate competing PRDs. Preserve stable requirement
     IDs, bidirectional traceability, change impact, executable acceptance and
     evidence. For brownfield work, complete Stage 0 inventory before rewriting.
+    For L3 prototypes, require stable regions and browser acceptance evidence.
     Treat implementation, release and operations as external systems.
 
 inputs:

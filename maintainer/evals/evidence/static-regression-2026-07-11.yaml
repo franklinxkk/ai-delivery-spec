@@ -29,6 +29,19 @@ scenarios:
     proven: proposed regulatory change is structured and not falsely verified
     not_proven: rule applicability, implementation, or accountable domain review
 historical_regressions:
+  - evidence_id: EVD-V531-CLARIFY-PROTOTYPE-20260719
+    input: private publishing/authorization/learning, CRM, SaaS knowledge-base and data-report samples; project artifacts not shipped
+    observed_failure: direction questions could be silently defaulted; a complex zero-region prototype could pass static L3; static PASS could be mistaken for browser-complete behavior
+    resolved_by: dependency-aware decision-tree clarification; DEC-AESTHETIC/UNK direction contract; REG-* complex-page gate; ARUN-* browser-evidence binding and explicit gap results
+    regression_commands:
+      - py -3 maintainer/tests/test_v530_contracts.py
+      - py -3 scripts/ai_delivery_spec_cli.py check --keep-going
+      - py -3 maintainer/tools/validators/validate_v5_architecture.py
+      - py -3 maintainer/tools/validators/validate_release_claims.py
+    result: passed
+    proven: 43 repository assurance commands pass; deterministic regressions cover clarification contracts, zero-region blocking, missing/incomplete ARUN gaps and complete ARUN evidence closure
+    sample_boundary: old sample findings remain project debt; expected v5.3.1 additions are limited to L3 region/browser evidence findings, while L2 behavior remains compatible
+    not_proven: visual direction approval, browser execution itself, project business correctness, coding implementation, customer decisions or acceptance
   - evidence_id: EVD-ANJIA-14-LENS-20260718
     input: private publishing/authorization/learning PRD v3.3 RC1, prototype v3.2 and 14-agent simulation; project artifacts not shipped
     observed_failure: L2 static prototype gate missed concatenated data-action anchors; manual REV entries bypassed structured P0 unknowns; reverse requirements used a competing REQ namespace

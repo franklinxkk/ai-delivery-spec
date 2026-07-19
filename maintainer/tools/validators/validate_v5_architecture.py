@@ -45,7 +45,6 @@ REQUIRED_FILES = (
     "references/troubleshooting.md",
     "references/tool-adapters.md",
     "maintainer/README.md",
-    "maintainer/community.md",
     "maintainer/templates/domain-module-template.md",
     "references/domain-coverage.yaml",
     "references/domains/domain-sources.yaml",

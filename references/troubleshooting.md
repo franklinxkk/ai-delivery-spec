@@ -32,8 +32,10 @@ of silently continuing.
 | REQ-PARSE / REQ-SCHEMA | malformed YAML or missing lifecycle field | repair the exact schema path using the requirement-register template |
 | PRD-STRUCTURE / PRD-TOO-THIN | headings exist without implementable local contracts | complete the relevant narrative and engineering annex; do not add empty headings |
 | PROTO-NO-PAGE-ANCHOR | page cannot be traced to VIEW-* | add one unique data-testid="page-VIEW-*" root |
+| PROTO-NO-REGION-ANCHOR | L3 complex page has no testable layout regions | add stable `data-testid="region-REG-*"` roots for meaningful regions |
 | PROTO-UNHANDLED-ACTION | button has no dispatch or visible outcome | bind one data-action handler and expose success/failure/state result |
 | PROTO-DYNAMIC-ANCHOR-CONSTRUCTION | data-* 名称由字符串拼接，静态门禁无法枚举真实动作 | 在模板源码直接写稳定锚点；再用浏览器证据证明动态控件 |
+| PROTO-BROWSER-EVIDENCE-MISSING | L3/L4 只有静态 PASS，没有逐动作运行证据 | 在浏览器执行原型 `data-ac`，记录 ARUN-*，用 `--acceptance-run` 重跑 |
 | PRD-P0-UNKNOWN-NOT-STRUCTURED | open ID 只有 REV/自由文本，没有 owner/阶段/影响范围 | 使用 `UNK-*` 结构化登记并同步 open_p0_unknown_ids |
 | PROTO-CSS-* | global or !important rules corrupt visibility/state | scope CSS to the owning component and explicit data-state |
 | HANDOFF-* | PRD and one or more prototypes drift | repair the single PRD baseline and every affected surface using the same stable ID |
@@ -42,6 +44,26 @@ of silently continuing.
 
 JSON output includes Chinese cause/fix/repair example, retry command and
 `not_proven`, so IDE/Coding Agent need not parse prose or误读静态 PASS。
+
+## Exact-ID And Dynamic-Anchor Migration
+
+`PRD-NONEXACT-ID` means a range, wildcard or grouped token cannot be traced to
+one exact object. Expand `AC-AUDIT-001..003`, `ACT-USER-*` or
+`REQ-ORDER-001/002` into individual IDs, update their forward/reverse trace
+rows, then rerun the gate. Do not invent missing IDs: unresolved members become
+owned `UNK-*` records.
+
+The dynamic-anchor scan intentionally covers known deterministic patterns:
+
+- split names such as `'data-' + 'action'` or `data-'+'action`;
+- template placeholders such as `${act}` that hide the rendered action set;
+- runtime retrofits through `setAttribute('data-action', ...)` or
+  `dataset.action = ...`.
+
+This is heuristic source inspection, not full JavaScript semantics. A new
+construction pattern needs an issue plus a minimal regression fixture. Generated
+controls still require an inspectable static registry and browser `ARUN-*`;
+passing the known-pattern scan never proves runtime interaction closure.
 
 ## Product Truth Without Long-Run Deadlock
 
@@ -65,6 +87,11 @@ weaken schemas. Preserve UNK/REV items until the responsible person decides.
 **Does PASS mean the requirement is correct?** No. It proves bounded static
 contracts only. Domain owners, browser journeys, QA execution, and customer
 acceptance remain accountable evidence.
+
+**Why does an L3 prototype return gaps after static checks pass?** Interactive
+completion needs browser evidence. Supply an accepted `ARUN-*` whose environment
+names the browser and whose items cover the prototype `data-ac` values. Without
+it the correct result is `REVIEW_COMPLETE_WITH_GAPS`.
 
 **Should I fix every warning automatically?** No. Gates locate gaps and never
 make business decisions. Mechanical formatting may be automated; roles, rules,

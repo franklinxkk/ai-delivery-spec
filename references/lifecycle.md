@@ -61,9 +61,14 @@ Return one decision:
 Multi-requirement intake also records iteration, dependencies and ordering. It
 is a light requirement pool, not a backlog/sprint manager.
 
-## 4. Guided Clarification
+## 4. Decision-Tree Clarification
 
-Close questions in batches that do not depend on one another:
+Run a self-check gate before asking: inspect supplied artifacts, repository and
+the exact domain section. Record answerable facts as evidence-bound `inferred`
+items with a recommended confirmation; spend questions only on user-owned
+preferences, expectations, prohibitions, authority and conflict decisions.
+
+Batch independent fact nodes by dependency layer:
 
 1. outcome, users, trigger and success;
 2. scope, source precedence and forbidden behavior;
@@ -72,9 +77,21 @@ Close questions in batches that do not depend on one another:
 5. rules, fields, exceptions, failure/recovery and integrations;
 6. acceptance thresholds, evidence, sign-off and out-of-scope items.
 
-Use `REV-*` for review findings. Each item has severity, requirement reference,
-question/finding, owner, disposition, resolution and evidence. A review meeting
-is not closed while its P0/P1 items are merely copied into meeting notes.
+Traverse direction nodes serially. Aesthetic direction, technical route and
+source-conflict decisions use one question at a time; the next question must
+cite the previous answer and follow its branch. Every question includes the
+Agent's recommended answer, evidence, trade-off and affected IDs. User approval
+promotes the bounded inference to `confirmed`; disagreement creates or updates
+`REV-*`, `UNK-*` or `DEC-*` instead of silently changing scope.
+
+Only P0/P1 branches justify persistent follow-up. P2 and lower use an explicit
+recommended default or owned `UNK-*`, so clarification can converge. If the user
+is unavailable, declare the assumption, owner, `blocks_stage` and reversal path;
+never apply a silent default.
+
+Clarification exits only when every P0/P1 item is either confirmed or an owned,
+scoped `UNK-*` with `blocks_stage`. A review meeting is not closed while its
+P0/P1 items are merely copied into notes.
 
 Ambiguity indicators include vague quantities/times, undefined defaults,
 unnamed actors, hidden approval, undefined failure handling, unrestricted data

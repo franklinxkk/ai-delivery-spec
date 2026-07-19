@@ -490,7 +490,7 @@ def quality_gate(args: argparse.Namespace) -> int:
         values.extend(["--scope-ref", scope_ref])
     if args.custom_root:
         values.extend(["--custom-root", str(args.custom_root)])
-    for name in ("requirement", "prd", "prototype", "inventory", "manifest"):
+    for name in ("requirement", "prd", "prototype", "inventory", "manifest", "acceptance_run"):
         value = getattr(args, name)
         if isinstance(value, list):
             for item in value:
@@ -611,6 +611,7 @@ def main() -> int:
     gate.add_argument("--prototype", type=Path, action="append", help="Repeat for admin/H5/multi-surface prototypes")
     gate.add_argument("--inventory", type=Path, help="Stage 0 brownfield inventory YAML")
     gate.add_argument("--manifest", type=Path, help="Agent handoff manifest YAML")
+    gate.add_argument("--acceptance-run", type=Path, action="append", help="已执行的 ARUN-*；L3/L4 原型据此闭合浏览器证据")
     gate.add_argument("--level", choices=["auto", "L0", "L1", "L2", "L3", "L4"], default="auto")
     gate.add_argument("--stage", choices=["inventory", "clarify", "specify", "review", "baseline", "prototype", "implementation", "acceptance", "closed"], default="baseline")
     gate.add_argument("--scope-ref", action="append", default=[])

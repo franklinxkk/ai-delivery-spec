@@ -30,6 +30,13 @@ unknowns:
     question: "{material question}"
     impact: scope
     priority: P0
+    question_kind: direction
     owner: "{decision owner}"
+    affected_refs: [SRC-PROJECT-001]
+    blocks_stage: specify
+    recommendation: "{agent recommendation, bounded by evidence}"
+    recommendation_evidence_refs: [SRC-PROJECT-001]
+    tradeoff: "{benefit, cost, and rejected alternative}"
+    reversal_path: "{how to revisit safely if the recommendation is rejected}"
     status: open
 discovery_decision: BLOCKED_BY_P0_UNKNOWN

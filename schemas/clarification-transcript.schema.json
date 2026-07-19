@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["schema_version", "transcript_id", "project_id", "turns"],
   "properties": {
-    "schema_version": { "const": "5.0.0" },
+    "schema_version": { "enum": ["5.0.0", "5.3.1"] },
     "transcript_id": { "type": "string", "pattern": "^TRN-[A-Z0-9-]+$" },
     "project_id": { "type": "string", "minLength": 1 },
     "turns": {
@@ -22,7 +22,23 @@
           "answer": { "type": "string", "minLength": 1 },
           "decision_owner": { "type": "string", "minLength": 1 },
           "status": { "enum": ["answered", "accepted_risk"] },
-          "evidence_refs": { "type": "array", "items": { "type": "string" } }
+          "evidence_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "question_kind": { "enum": ["fact", "direction"] },
+          "recommendation": { "type": "string", "minLength": 1 },
+          "recommendation_evidence_refs": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "tradeoff": { "type": "string", "minLength": 1 },
+          "affected_refs": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "blocks_stage": { "enum": ["clarify", "specify", "review", "baseline", "implementation", "acceptance"] },
+          "reversal_path": { "type": "string", "minLength": 1 },
+          "branch_ref": { "type": "string", "pattern": "^TURN-[A-Z0-9-]+$" }
         }
       }
     }

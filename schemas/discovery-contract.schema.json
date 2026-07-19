@@ -68,7 +68,28 @@
           "priority": { "enum": ["P0", "P1", "P2"] },
           "owner": { "type": "string", "minLength": 1 },
           "status": { "enum": ["open", "answered", "blocked", "accepted_risk"] },
-          "answer": { "type": "string" }
+          "answer": { "type": "string" },
+          "question_kind": { "enum": ["fact", "direction"] },
+          "affected_refs": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "blocks_stage": { "enum": ["clarify", "specify", "review", "baseline", "implementation", "acceptance"] },
+          "recommendation": { "type": "string", "minLength": 1 },
+          "recommendation_evidence_refs": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "tradeoff": { "type": "string", "minLength": 1 },
+          "reversal_path": { "type": "string", "minLength": 1 },
+          "evidence_refs": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "branch_ref": { "type": "string", "pattern": "^(TURN|DEC|UNK)-[A-Z0-9-]+$" }
         }
       }
     },
