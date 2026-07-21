@@ -515,6 +515,21 @@ def check(gate_id: str, state: dict[str, Any], args: argparse.Namespace) -> list
                 if item.get("priority") == "P0" and item.get("status") in {"open", "blocked"}
             ]
             add("p0_unknowns", not open_p0, "open P0 unknowns: " + (", ".join(open_p0) or "none"))
+            material_open = [
+                item for item in discovery.get("unknowns", [])
+                if item.get("priority") in {"P0", "P1"} and item.get("status") in {"open", "blocked"}
+            ]
+            unowned = [
+                item.get("id", "<unknown>") for item in material_open
+                if not item.get("owner") or not item.get("affected_refs") or not item.get("blocks_stage") or not item.get("reversal_path")
+            ]
+            blocking = [
+                item.get("id", "<unknown>") for item in material_open
+                if {"clarify", "specify"}.intersection(
+                    set(item.get("blocks_stage", []) if isinstance(item.get("blocks_stage"), list) else [item.get("blocks_stage")])
+                )
+            ]
+            add("clarification_contract", not unowned and not blocking, "unowned/scoped or current-stage P0/P1 unknowns: " + (", ".join(unowned + blocking) or "none"))
             ready = discovery.get("discovery_decision") in {
                 "READY_FOR_LIGHT_SPEC", "READY_FOR_UNIFIED_PRD", "READY_FOR_PRODUCT_TRUTH", "READY_FOR_CHANGE_PACKAGE"
             }

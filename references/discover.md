@@ -60,17 +60,25 @@ depth follows risk, not a fixed questionnaire.
 
 Record material questions:
 
+The current decision contract treats these fields as durable evidence, not optional prose:
+
 ```yaml
 unknown:
   id: UNK-001
   question:
   priority: P0 | P1 | P2
   impact: scope | role | state | data | compliance | acceptance | commercial | risk
+  question_kind: fact | direction
   owner:
   affected_refs: []
   blocks_stage: clarify | specify | review | baseline | implementation | acceptance
+  recommendation:
+  recommendation_evidence_refs: []
+  tradeoff:
+  reversal_path:
   due_date:
   status: open | answered | blocked | accepted_risk
+  evidence_refs: []
 ```
 
 P0 unknowns change scope, legality, safety, data authority, commercial promise,
@@ -93,9 +101,12 @@ caps are three batches for L1, six for L2 and eight for L3/L4. At the cap, retur
 the unresolved `UNK-*`; never manufacture closure or continue an unbounded loop.
 
 After every answer batch, bind each answer to its original `UNK-*` and create or
-update the affected `DEC/REQ/RULE/AC` entries. Report confirmed facts, remaining
-unknowns and the consequence of leaving them open. A numbered answer without
-question-to-ID binding is not durable requirement evidence.
+update the affected `DEC/REQ/RULE/AC` entries. Every turn records the Agent
+recommendation, recommendation evidence, trade-off, affected IDs and answer
+evidence. Direction turns are serial: a later direction turn carries `branch_ref`
+to the previous direction turn. Report confirmed facts, remaining unknowns and
+the consequence of leaving them open. A numbered answer without question-to-ID
+binding is not durable requirement evidence.
 
 For a ToC behavior-change idea, explicitly test target behavior, trigger moment,
 failure/recovery, safety/privacy, anti-manipulation boundary, pilot evidence and
@@ -225,13 +236,18 @@ or conflict that made the question necessary; do not send a generic checklist.
 
 After each answer, record a
 `schemas/clarification-transcript.schema.json` turn with `turn_id`,
-`unknown_id`, question, answer, decision owner, status and evidence references.
-Compile only structured, owner-attributed answers. Free-form chat remains source
-evidence; a deterministic compiler does not pretend to understand it.
+`unknown_id`, question, answer, decision owner, status, question kind,
+recommendation, recommendation evidence, trade-off, affected IDs and evidence
+references. Direction turns also cite the previous direction turn with
+`branch_ref`. Compile only structured, owner-attributed answers. Free-form chat
+remains source evidence; a deterministic compiler does not pretend to understand
+it.
 
-Stop when all P0 unknowns are answered or explicitly accepted by an accountable
-owner, or when the configured stage-turn limit is reached. At the limit, return
-the unresolved IDs instead of continuing a propose/reject loop.
+Stop when every P0/P1 item is answered/accepted by an accountable owner, or is
+an owned, scoped `UNK-*` with `blocks_stage` and a reversal path. An open P0/P1
+that blocks `clarify` or `specify` cannot produce a ready decision; a later-stage
+unknown may be returned as `REVIEW_COMPLETE_WITH_GAPS`. At the configured
+stage-turn limit, return the unresolved IDs instead of continuing a propose/reject loop.
 
 ```bash
 python scripts/compile_clarification_transcript.py --contract discovery.yaml --transcript transcript.yaml --decision READY_FOR_PRODUCT_TRUTH --output discovery-next.yaml

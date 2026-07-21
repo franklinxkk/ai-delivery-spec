@@ -21,7 +21,7 @@ def main() -> int:
     contract["sources"][0].update({"id": "SRC-GRILL-001", "path": "test input"})
     contract["unknowns"][0].update({"id": "UNK-SCOPE-001", "owner": "product owner"})
     transcript = {
-        "schema_version": "5.0.0",
+        "schema_version": "5.3.1",
         "transcript_id": "TRN-GRILL-001",
         "project_id": "grill-test",
         "turns": [
@@ -32,10 +32,13 @@ def main() -> int:
                 "answer": "Import, search, and current-version evidence only.",
                 "decision_owner": "product owner",
                 "status": "answered",
+                "question_kind": "direction",
                 "recommendation": "Limit the first slice to import, search, and current-version evidence.",
                 "recommendation_evidence_refs": ["meeting-001"],
                 "tradeoff": "Smaller first slice ships sooner; historical diff review is deferred.",
                 "affected_refs": ["UNK-SCOPE-001"],
+                "blocks_stage": "specify",
+                "reversal_path": "Reopen scope through a CHG record at review.",
                 "evidence_refs": ["meeting-001"],
             }
         ],
@@ -54,6 +57,20 @@ def main() -> int:
         compiled = yaml.safe_load(output.read_text(encoding="utf-8"))
         if compiled["unknowns"][0]["status"] != "answered" or compiled["discovery_decision"] != "READY_FOR_PRODUCT_TRUTH":
             raise AssertionError("structured clarification did not produce a checkpoint-ready contract")
+        bad_contract = yaml.safe_load(contract_path.read_text(encoding="utf-8"))
+        bad_contract["unknowns"].append({
+            "id": "UNK-RISK-001", "question": "Which data authority applies?", "impact": "data",
+            "priority": "P1", "owner": "", "status": "open",
+        })
+        bad_contract_path = work / "bad-contract.yaml"
+        bad_output = work / "bad-next.yaml"
+        bad_contract_path.write_text(yaml.safe_dump(bad_contract, sort_keys=False), encoding="utf-8")
+        blocked = subprocess.run(
+            [sys.executable, str(COMPILER), "--contract", str(bad_contract_path), "--transcript", str(transcript_path), "--decision", "READY_FOR_PRODUCT_TRUTH", "--output", str(bad_output)],
+            cwd=ROOT, text=True, capture_output=True,
+        )
+        if blocked.returncode == 0 or "not owned/scoped" not in blocked.stdout:
+            raise AssertionError("open P1 without ownership/scope escaped the ready decision gate")
     print("PASS: schema-driven grill compiles owner-attributed answers without free-form invention")
     return 0
 
