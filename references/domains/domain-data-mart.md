@@ -463,6 +463,13 @@ data_agent_contract:
 | model feedback flywheel | accepted failure slices create a new dataset version; old data and held-out benchmark are not silently mutated |
 | value verification | product usage, public/operational outcome, cost/revenue and attribution limits support renew/stop decisions |
 
+## Cross-Domain Requirement Patterns
+
+- `PAT-METRIC-CALIBER-001`: dashboards, reports, semantic metrics and value verification must share one reproducible caliber and version.
+- `PAT-LONG-RUNNING-JOB-001`: ingestion, backfill, index rebuild, export and dataset build need observable, idempotent and resumable task semantics.
+- `PAT-VERSION-COMPATIBILITY-001`: schema, metric, semantic model, label policy and dataset releases must preserve historical/in-flight interpretation.
+- `PAT-FEDERATED-RECONCILIATION-001`: use when registered, operated and source platforms retain overlapping authoritative attributes.
+
 ## Evaluation Profile
 
 Domain knowledge is not execution evidence. Register coverage and maturity in

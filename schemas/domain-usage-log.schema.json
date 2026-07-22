@@ -11,7 +11,7 @@
     "candidate_ref": { "type": "string", "pattern": "^CAND-[A-Z0-9-]+$" },
     "project_ref": { "type": "string", "minLength": 1 },
     "outcome": { "enum": ["adopted", "modified", "rejected", "invalidated", "not_observed"] },
-    "evidence_refs": { "type": "array", "items": { "type": "string" } },
+    "evidence_refs": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
     "notes": { "type": "string" },
     "recorded_by": { "type": "string", "minLength": 1 },
     "recorded_at": { "type": "string", "format": "date-time" }

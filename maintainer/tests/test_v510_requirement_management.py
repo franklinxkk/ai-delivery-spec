@@ -187,7 +187,7 @@ with tempfile.TemporaryDirectory(prefix="ads-v510-") as temp:
 
 if failures:
     raise SystemExit("\n".join(failures))
-print("PASS: v5.1.0 10/10 intake, focused workspace, change, traceability and acceptance are closed")
+print("PASS: requirement-management compatibility suite closes intake, workspace, change, traceability and acceptance")
 
 # Role/seniority ownership is part of the lifecycle reference, not a second runtime file.
 lifecycle = (ROOT / "references/lifecycle.md").read_text(encoding="utf-8")

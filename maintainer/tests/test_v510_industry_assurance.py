@@ -1,4 +1,4 @@
-"""Contract regression for the v5.1.0 cross-industry assurance portfolio.
+"""Compatibility regression for the cross-industry assurance portfolio.
 
 This test proves structural coverage only. It intentionally does not claim that
 the scenario fixtures were executed by experts or accepted by customers.
@@ -157,7 +157,7 @@ if failures:
     raise SystemExit("\n".join(failures))
 
 print(
-    "PASS: v5.1.0 industry assurance covers "
+    "PASS: cross-industry compatibility assurance covers "
     f"{len(scenarios)} sectors, {len(stages)} stages, {len(roles)} role lenses, "
     f"{len(physics_union)} requirement-physics signals, and a zero-agent runtime goalkeeper"
 )

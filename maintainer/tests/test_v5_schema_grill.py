@@ -21,7 +21,7 @@ def main() -> int:
     contract["sources"][0].update({"id": "SRC-GRILL-001", "path": "test input"})
     contract["unknowns"][0].update({"id": "UNK-SCOPE-001", "owner": "product owner"})
     transcript = {
-        "schema_version": "5.3.2",
+        "schema_version": "5.3.3",
         "transcript_id": "TRN-GRILL-001",
         "project_id": "grill-test",
         "turns": [

@@ -1,55 +1,49 @@
-# Coding-Agent And Domestic Tool Adapters — v5.3
+# Coding Agent 与国产工具适配 / Tool Adapters — v5.3
 
-Load this reference only when a named Coding Agent or domestic model will
-consume a baselined requirement. The unified PRD remains the single review
-baseline; tool instructions cannot add business behavior.
+只有明确指定 Coding Agent 或国产模型消费已固化需求时才加载本文件。统一 PRD 始终是唯一
+评审基线；工具规则只能投影约束，不能新增业务行为。
 
-## Shared Handoff Contract
+## 共用交接合同
 
-Source order (tool rules are projections, not a new authority):
+来源顺序如下，工具规则不是新的权威来源；Stable ID（稳定 ID）在所有投影中保持不变：
 
 ```text
-root/module AGENTS.md -> handoff manifest/current baseline -> unified PRD
--> optional Product Truth ID slice -> approved CHG-* -> locked prototype
--> acceptance -> engineering baseline/repository constraints
+根/模块 AGENTS.md → handoff manifest/当前基线 → 统一 PRD
+→ 可选 Product Truth ID 切片 → 已批准 CHG-* → 锁定原型
+→ 验收记录 → 工程基线/仓库约束
 ```
 
-- Implement one bounded vertical slice tied to
-  `REQ/MOD/FLOW/VIEW/REG/ACT/FLD/STM/STATE/METRIC/REL/API/AC` IDs.
-- Report conflicts or missing business decisions as `REV-*`/`CFL-*`; never
-  invent roles, fields, states, permissions, formulas, defaults or events.
-- Enforce state, tenant, permission and high-risk guards on the backend.
-- Treat repository paths, framework choices and technical architecture as
-  downstream engineering facts, not additions to product scope.
-- Link tests and implementation evidence back to `AC-*` and `REQ-*`.
-- For large work, load one PRD/Truth slice and checkpoint it; never ask one
-  model or subagent to regenerate a giant Product Truth monolith.
+- 一次只实现绑定 `REQ/MOD/FLOW/VIEW/REG/ACT/FLD/STM/STATE/METRIC/REL/API/AC` 的一个纵切。
+- 冲突或缺失业务决策返回 `REV-*`/`CFL-*`；不得编造角色、字段、状态、权限、公式、默认值或事件。
+- 状态、多租户、权限和高风险守卫以后端为准。
+- 仓库路径、框架和技术架构属于下游工程事实，不能反向扩大产品范围。
+- 测试和实现证据必须回链到 `AC-*` 与 `REQ-*`。
+- 大任务只加载一个 PRD/Truth 切片并保存检查点，禁止让一个模型重写巨型事实源。
 
-## Tool Routes
+## 工具路由
 
-| Tool/model | Adapter rule |
+| 工具/模型 | 适配规则 |
 |---|---|
-| Codex | Read the repository after the approved requirement slice; preserve stable IDs in UI attributes and tests; run applicable repository checks and return evidence. |
-| Claude Code / Cursor | Pin source order and forbidden invention in project rules; retrieve optional Product Truth by stable ID rather than loading the graph. |
-| Trae | Author or implement one vertical slice per task; save the accepted checkpoint before changing slices. |
-| WorkBuddy | Put only `SKILL.md` plus the active PRD/Truth slice in workspace rules; validate one checkpoint per task. |
-| Qoder | Keep `.qoder/rules` limited to Qoder file matching/tool permissions; business rules reference root/module `AGENTS.md` and PRD because Qoder may prioritize its own rules on conflict. |
-| CodeBuddy | Use the shared handoff contract and return ambiguity before code generation; do not convert UI guesses into requirements. |
-| GLM 5.2 | Use concise Chinese instructions and deterministic output schemas; preserve IDs verbatim and prevent context compression from dropping roles, permissions, states, exceptions or P0 AC. |
-| DeepSeek | Separate analysis from the final artifact; draft by required contract section and run deterministic gates after each accepted slice. |
-| Qwen | Generate a Context Plan for long Chinese ToB/ToG input, then write one unified-PRD module/flow slice per turn. |
-| Kimi | Use long context for source inventory, then freeze the ID index and continue with small module checkpoints. |
+| Codex | 先读批准的需求切片再检查仓库；在 UI 锚点和测试中保留稳定 ID；运行适用仓库检查并返回证据。 |
+| Claude Code / Cursor | 在项目规则中固定来源顺序和禁止推断；按稳定 ID 检索可选 Product Truth，不加载整张图。 |
+| Trae | 每个任务只编写或实现一个纵切；切换前保存已接受检查点。 |
+| WorkBuddy | 工作区规则只放 `SKILL.md` 和当前 PRD/Truth 切片；每个事项验证一个检查点。 |
+| Qoder | `.qoder/rules` 只保留文件匹配和工具权限；业务规则引用根/模块 `AGENTS.md` 与 PRD，避免工具规则优先级造成漂移。 |
+| CodeBuddy | 使用共用交接合同，编码前返回歧义；不得把 UI 猜测升级为需求。 |
+| GLM 5.2 | 使用简洁中文和确定性输出结构；稳定 ID 原样保留，压缩上下文时不能丢角色、权限、状态、异常和 P0 AC。 |
+| DeepSeek | 分离分析与最终工件；按合同章节起草，每个接受切片后运行确定性门禁。 |
+| Qwen | 长中文 ToB/ToG 输入先生成 Context Plan，再按模块/流程切片写入同一 PRD。 |
+| Kimi | 长上下文用于来源盘点，随后冻结 ID 索引并切换到小模块检查点。 |
 
-## Direct Coding Entry
+## 直接编码入口
 
-Direct implementation starts only when the handoff contains:
+只有交接包同时具备以下内容才允许进入实现：
 
-1. approved baseline version and stable-ID slice;
-2. open external dependencies and forbidden inventions;
-3. applicable API/business semantics, states, errors and recovery;
-4. positive and negative acceptance with observable evidence;
-5. repository architecture constraints supplied by engineering.
+1. 已批准的基线版本和稳定 ID 切片；
+2. 开放外部依赖和禁止推断清单；
+3. 适用 API/业务语义、状态、错误与恢复；
+4. 正向和反向验收及可观察证据；
+5. 工程团队提供的仓库与架构约束。
 
-Validate the unified requirement first. Validate Product Truth only when that
-optional artifact exists. A validator PASS is readiness evidence, not customer
-or domain-owner acceptance.
+先校验统一需求；只有可选 Product Truth 实际存在时才校验它。验证器 PASS 是就绪证据，
+不是客户或领域负责人的接受结论。

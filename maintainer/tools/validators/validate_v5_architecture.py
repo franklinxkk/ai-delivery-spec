@@ -121,19 +121,20 @@ def main() -> int:
         failures.append(f"SKILL.md exceeds {SKILL_LINE_BUDGET} lines")
     if len(skill) > SKILL_CHAR_BUDGET:
         failures.append(f"SKILL.md exceeds {SKILL_CHAR_BUDGET} characters")
-    for marker in (
-        "ToB/ToG",
-        "Requirement Management Kernel",
-        "Product Truth",
-        "one human-readable",
-        "both directions",
-        "Start with intake",
-        "scripts/query_domain.py",
-        "schemas/agent-handoff.schema.json",
-        "schemas/domain-candidate.schema.json",
-    ):
-        if marker.lower() not in skill.lower():
-            failures.append(f"SKILL.md missing v5 marker: {marker}")
+    marker_groups = (
+        ("ToB/ToG",),
+        ("Requirement Management Kernel", "需求管理内核"),
+        ("Product Truth", "结构化事实源"),
+        ("one human-readable", "一份人类可读"),
+        ("both directions", "双向追溯"),
+        ("Start with intake", "需求准入"),
+        ("scripts/query_domain.py",),
+        ("schemas/agent-handoff.schema.json",),
+        ("schemas/domain-candidate.schema.json",),
+    )
+    for aliases in marker_groups:
+        if not any(marker.lower() in skill.lower() for marker in aliases):
+            failures.append(f"SKILL.md missing v5 marker: {' / '.join(aliases)}")
 
     for relative in REQUIRED_FILES:
         path = ROOT / relative

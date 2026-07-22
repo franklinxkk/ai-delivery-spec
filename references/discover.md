@@ -1,66 +1,56 @@
-# Discover And Clarify
+# 发现与澄清 / Discover And Clarify
 
-Use this reference when the input is ambiguous, idea-only, a customer request,
-a meeting note, an old system, a prototype, or a domain without a dedicated
-pack. First complete requirement intake. Stop when outcome, scope, evidence,
-authority and P0 unknowns are explicit enough for the selected requirement
-artifact.
+输入是一句话想法、客户要求、会议纪要、旧系统、原型，或缺少专用领域包时加载。先完成准入；
+当目标、范围、证据、权威和 P0 未知项足以决定交付形态时停止，不把发现阶段无限延长。
 
-## Contents
+## 目录 / Contents
 
-- Evidence before questions
-- Risk-adaptive clarification
-- One-sentence and competitive discovery tracks
-- Brownfield triangulation
-- ToB / ToG context
-- Project Domain Capsule
-- Discovery completion
+- 先取证再提问
+- 风险自适应澄清
+- 一句话与竞品路径
+- 存量系统三角盘点
+- ToB/ToG 上下文和项目领域胶囊
+- 澄清完成与定向追问
 
-## Evidence Before Questions
+## 先取证再提问 / Evidence Before Questions
 
-Inventory supplied artifacts before asking what they already answer. Register
-each source with `SRC-*`, binding type (`binding`, `supporting`, `contextual`,
-`historical`, `untrusted`), status, scope, interpretation owner and location.
-If more than one source claims canonical authority for the same scope, stop and
-record `DEC-CONFLICT-*`; never select by filename, timestamp or apparent detail.
+先盘点用户已经提供的材料。每个来源登记为 `SRC-*`，并声明：binding、supporting、
+contextual、historical 或 untrusted；同时记录状态、范围、解释责任人和位置。若同一范围有多个
+canonical 候选，停止并创建 `DEC-CONFLICT-*`，不能按文件名、时间或详细程度擅自选择。
 
-Extract when present:
+尽可能提取：
 
-- roles, organizations, tenants, partners, customers, and data scopes;
-- business objects, fields, dictionaries, states, actions, and events;
-- pages, regions, modals, handlers, reports, imports, exports, and integrations;
-- contract, policy, standard, acceptance, migration, and operational evidence;
-- contradictions, stale claims, silent omissions, and unresolved decisions.
+- 角色、组织、租户、合作方、客户和数据范围；
+- 业务对象、字段、字典、状态、动作与事件；
+- 页面、区域、弹窗、处理器、报表、导入导出和集成；
+- 合同、政策、标准、验收、迁移和运行证据；
+- 矛盾、过期主张、隐式遗漏和未裁决问题。
 
-Assertion status is independent of source disposition:
+来源处置与断言状态相互独立，断言使用：
 
 ```text
 verified | inferred | proposed | unknown | conflict
 ```
 
-Do not ask the user to repeat facts already visible in a supplied source.
+材料已经回答的问题不要再让用户重复回答。
 
-## Risk-Adaptive Clarification
+## 风险自适应澄清 / Risk-Adaptive Clarification
 
-Ask dependent questions in order. Batch independent questions by outcome,
-role/permission, flow/state, data/integration and acceptance so the user does
-not endure unnecessary one-by-one interrogation. A context dump or best-guess
-mode may batch assumptions when the user explicitly prefers speed. Question
-depth follows risk, not a fixed questionnaire.
+有依赖的问题按顺序问；互不依赖的问题按目标、角色权限、流程状态、数据集成和验收成批问。
+用户明确偏好速度时，可以接收 context dump 或 best guess，但所有假设仍要有边界和责任人。
+追问深度由风险决定，不使用固定问卷。
 
-| Signal | Mandatory Clarification |
+| 信号 | 必须澄清 |
 |---|---|
-| raw idea | target role, painful moment, desired outcome, current workaround |
-| proposed feature | underlying problem, success measure, simpler alternative, must-not-do |
-| multiple roles/modules | ownership, cross-module flow, state owner, exception owner |
-| money/safety/medical/compliance | accountable human, authority source, prohibited automation, rollback |
-| existing prototype/system | preserve, change, remove, migration, acceptance baseline |
-| external data/integration | authoritative source, freshness, failure, reconciliation, data owner |
-| AI write/read | context permission, freshness, write scope, eval, fallback, human gate |
+| 原始想法 | 目标角色、痛苦时刻、期望结果、当前替代方式 |
+| 已提出功能 | 根问题、成功指标、更小方案、禁止行为 |
+| 多角色/模块 | 责任归属、跨模块流程、状态/异常责任人 |
+| 金钱/安全/医疗/合规 | 责任人、权威来源、禁止自动化、回退 |
+| 存量原型/系统 | 保留、改变、移除、迁移和验收基线 |
+| 外部数据/集成 | 权威源、时效、失败、对账、数据责任人 |
+| AI读写 | 上下文权限、时效、写入范围、评测、回退、人工闸 |
 
-Record material questions:
-
-The current decision contract treats these fields as durable evidence, not optional prose:
+关键未知项使用可追溯结构，而不是自由文本：
 
 ```yaml
 unknown:
@@ -81,116 +71,75 @@ unknown:
   evidence_refs: []
 ```
 
-P0 unknowns change scope, legality, safety, data authority, commercial promise,
-or acceptance. Do not silently default them.
+改变范围、合法性、安全、数据权威、商业承诺或验收的未知项属于 P0，禁止静默默认。
 
-### One-Sentence Requirement Track
+### 一句话需求路径 / One-Sentence Requirement Track
 
-Do not expand a slogan directly into features. Progress one dependency layer at
-a time, batching only questions whose answers do not depend on one another:
+不要把口号直接扩成页面。按依赖层推进：
 
-1. evidence, target role, painful moment, current workaround and desired outcome;
-2. candidate solution options, smallest proof and explicit must-not-do;
-3. role ownership, main/denied/recovery journeys and cross-role handoffs;
-4. state, data authority, integration, migration, compliance and acceptance;
-5. page/field/action detail only after the product decision is stable.
+1. 证据、目标角色、痛苦时刻、现有替代和期望结果；
+2. 候选方案、最小验证和明确禁止项；
+3. 角色责任、主/拒绝/恢复旅程和跨角色交接；
+4. 状态、数据权威、集成、迁移、合规和验收；
+5. 产品决策稳定后才进入页面/字段/动作细节。
 
-By the third batch, offer two or three materially different options with tradeoffs
-instead of forcing the requester to invent the solution alone. Default clarification
-caps are three batches for L1, six for L2 and eight for L3/L4. At the cap, return
-the unresolved `UNK-*`; never manufacture closure or continue an unbounded loop.
+最迟第三批提供2—3个有实质差异的方案和取舍，不把方案设计全部推回给提出者。默认上限：
+L1三批、L2六批、L3/L4八批；到达上限后返回剩余 `UNK-*`，不能制造闭合或无限追问。
 
-After every answer batch, bind each answer to its original `UNK-*` and create or
-update the affected `DEC/REQ/RULE/AC` entries. Every turn records the Agent
-recommendation, recommendation evidence, trade-off, affected IDs and answer
-evidence. Direction turns are serial: a later direction turn carries `branch_ref`
-to the previous direction turn. Report confirmed facts, remaining unknowns and
-the consequence of leaving them open. A numbered answer without question-to-ID
-binding is not durable requirement evidence.
+每批答案必须回绑原 `UNK-*`，并更新受影响的 `DEC/REQ/RULE/AC`。每轮记录推荐、推荐证据、
+取舍、受影响 ID 和答案证据。方向问题串行处理，后续轮通过 `branch_ref` 指向前一方向轮。
+仅有“1、2、3”回答而没有问题到 ID 的绑定，不构成长期需求证据。
 
-For a ToC behavior-change idea, explicitly test target behavior, trigger moment,
-failure/recovery, safety/privacy, anti-manipulation boundary, pilot evidence and
-stop condition. Do not import enterprise governance that the risk does not require.
+ToC行为改变型想法还要检查目标行为、触发时刻、失败恢复、安全隐私、反操纵边界、试点证据和
+停止条件；没有对应风险时不要套入企业级重治理。
 
-### Competitive Evidence And Differentiation Track
+### 竞品证据与差异化路径 / Competitive Evidence And Differentiation Track
 
-Treat competitor material as evidence, not a backlog:
+竞品材料是证据，不是待办清单：
 
-1. register the exact page, version/date and observed behavior as `SRC-*`;
-2. separate fact, inference, reusable pattern, hypothesis and prohibited copying;
-3. compare user outcome, workflow cost, switching constraint, trust/risk and
-   business fit—not feature count alone;
-4. produce two or three positioning/solution options and a smallest proof;
-5. freeze the chosen positioning as an accountable `DEC-*` before user stories,
-   information architecture, page contracts or prototypes;
-6. trace every claimed differentiator to evidence, a deliberate decision and a
-   measurable acceptance/experiment; remove ornamental differentiation.
+1. 将准确页面、版本/日期和观察行为登记为 `SRC-*`；
+2. 分开事实、推断、可复用模式、假设和禁止照搬项；
+3. 比较用户结果、工作流成本、切换约束、信任风险与业务适配，不按功能数量排名；
+4. 形成2—3个定位/方案选项和最小验证；
+5. 先由责任人把定位固化为 `DEC-*`，再写故事、IA、页面合同和原型；
+6. 每项差异化都要追到证据、主动决策和可测验收/实验，删除装饰性差异。
 
-Official whitepapers, cases, SDKs and open-platform samples can validate the
-behavior they actually document. They do not prove a vendor's full implementation,
-market result, legal applicability or that the core product is open source.
+白皮书、案例、SDK和开放平台示例只能证明其明确描述的行为，不能证明完整实现、市场效果、
+法律适用性或核心产品开源。
 
-## Brownfield Triangulation
+## 存量系统三角盘点 / Brownfield Triangulation
 
-For an existing product, triangulate three evidence classes before declaring a
-current baseline:
+声明当前基线前，交叉比对三类证据：已批准需求/变更、可观察原型/系统/数据、工程/QA/运营
+实际使用的澄清。历史上能开发出来不等于符合当前合同；口头补充应转为 `SRC/DEC/REV`。
 
-- written requirements and accepted change records;
-- observable prototype/system behavior and data;
-- live clarification used by engineers, QA or operators.
+覆盖原工件前，Stage 0 对每个视图、动作/处理器、状态、角色、对象、字段/指标和外部交接建立
+记录，至少含 `id`、`type`、`source_ref`、`source_location` 和 classification：
+`confirmed`、`inferred`、`unknown` 或 `defect_candidate`。核心未知项绑定 P0 `UNK-*`、owner
+和 `blocks_stage`；缺陷候选没有 `DEC/CHG` 不能进入目标范围。
 
-Historical buildability is useful evidence but is not current-contract conformity.
-Convert verbal clarifications into `SRC/DEC/REV`, preserve a mapping from legacy
-actions/states/terms to stable IDs, and record contradictions instead of picking the
-most convenient artifact. A feature implemented only because an engineer asked the
-requester in person is a missing requirement contract, not proof that no contract is
-needed. Conversely, a legacy artifact that lacks new IDs must not be dismissed when
-its behavior is richer than a newly generated projection.
+已有正向 PRD 时，反推观察只使用 `INV-*`，不得另造第二组 `REQ-*`。声明
+`baseline_requirement_refs`，为 confirmed/inferred 记录 `mapping_status` 和准确 `target_refs`。
+未映射核心行为转为 `UNK-*`；推断项按责任人归入 `RBATCH-*`，在 `baseline_ready` 前批量确认、
+否决或转未知。反推结果只能是可审计交互草稿和缺口账本。
 
-Before any overwrite, create a Stage 0 inventory with one record for every view,
-action/handler, state, role, object, field/metric and external handoff. Each record
-must include `id`, `type`, `source_ref`, `source_location` and `classification`:
-`confirmed`, `inferred`, `unknown` or `defect_candidate`. A core unknown includes
-owned P0 `UNK-*` and `blocks_stage`; a defect candidate cannot become target scope
-without `DEC/CHG`. Multiple candidate baselines require `DEC-CONFLICT-*`.
-
-When a forward PRD baseline already exists, reverse-engineered observations use
-`INV-*`, never a second set of `REQ-*`. Declare `baseline_requirement_refs`; each
-confirmed/inferred observation records `mapping_status` and exact `target_refs`.
-An unmapped core behavior becomes an owned `UNK-*`, not an invented requirement.
-Group inferred observations into `RBATCH-*` with `owner`; batch-confirm, reject or
-convert them before `target_status: baseline_ready`. This makes reverse output an
-auditable interaction draft and gap ledger, not a competing baseline.
-
-`inventory_complete` means every observed item has a source and classification;
-it does not approve inferred behavior or prove the target design. Validate it with:
+`inventory_complete` 只证明所有观察项有来源和分类，不批准推断行为，也不证明目标设计：
 
 ```bash
 python scripts/ai_delivery_spec_cli.py gate --profile stage0 --inventory stage0.yaml
 ```
 
-## ToB / ToG Context
+## ToB / ToG 项目上下文
 
-For enterprise or public-sector requirements, record the external business,
-customer, engineering and governance context only where it constrains scope,
-authority, acceptance or evidence. Do not manage those lifecycles here.
+仅记录会约束范围、权威、验收或证据的商业、客户、工程和治理上下文，不接管这些外部流程。
+政企/国企项目按需把立项、采购、合同、试运行、正式验收和审计登记为来源、约束或验收里程碑。
 
-For ToG or state-owned delivery, capture project establishment, procurement,
-contract, trial operation, formal acceptance and audit as sources, constraints,
-approvals or acceptance milestones when applicable.
+最低上下文包括：购买方、发起人、最终用户、付款方、验收/运营责任人；组织/部门/租户/
+代理商/接入商层级；合同范围和试点成功；存量系统、迁移、培训/SLA及退出责任；辖区、监管、
+安全、隐私、档案和审计边界。
 
-Minimum enterprise context:
+## 项目领域胶囊 / Project Domain Capsule
 
-- buyer, sponsor, end user, payer, acceptance owner, operations owner;
-- organization, department, tenant, partner/agent/integrator hierarchy;
-- contract scope, pilot success, requirement baseline, acceptance evidence;
-- legacy system, data migration, training/SLA constraints and exit obligations;
-- jurisdiction, regulation, security, privacy, records, and audit boundary.
-
-## Project Domain Capsule
-
-Missing a dedicated domain pack never blocks delivery. Build a project-scoped
-capsule from evidence and accountable decisions:
+没有专用领域包不阻断交付。用证据和责任人决策建立项目级胶囊：
 
 ```yaml
 project_domain_capsule:
@@ -204,50 +153,32 @@ project_domain_capsule:
   scenario_fixtures: []
 ```
 
-Use generic questions to discover object, owner, lifecycle, workflow, data,
-high-risk behavior, and acceptance. Mark unsupported professional conclusions
-`inferred` or `unknown`. A project capsule becomes a public domain pack only
-after multi-project reuse, sourced knowledge, behavioral evaluation, and
-accountable expert review.
+无来源的专业判断标为 inferred 或 unknown。只有经过多项目复用、来源验证、行为评测和独立专家
+审查，项目胶囊才可能晋升为公共领域包。
 
-## Clarification Completion
+## 澄清完成条件 / Clarification Completion
 
-Return one decision:
-
-| Decision | Meaning |
+| 决策 | 含义 |
 |---|---|
-| `READY_FOR_LIGHT_SPEC` | accepted bounded requirement; enough for a requirement card |
-| `READY_FOR_PRODUCT_TRUTH` | compatibility name for `governed_truth`: controlled projections, repeated cross-module change, lineage or strong audit justify independent truth |
-| `READY_FOR_UNIFIED_PRD` | accepted requirement; enough for the unified PRD baseline |
-| `READY_FOR_CHANGE_PACKAGE` | an existing baseline and requested change are understood |
-| `REVIEW_COMPLETE_WITH_GAPS` | useful output is possible but named unknowns remain |
-| `BLOCKED_BY_P0_UNKNOWN` | proceeding would invent a material business or risk decision |
+| `READY_FOR_LIGHT_SPEC` | 有界需求已准入，可以写需求卡 |
+| `READY_FOR_UNIFIED_PRD` | 信息足以形成统一 PRD 基线 |
+| `READY_FOR_PRODUCT_TRUTH` | 兼容名；多投影/反复变更/血缘/强审计需要 governed truth |
+| `READY_FOR_CHANGE_PACKAGE` | 已理解现有基线和变更 |
+| `REVIEW_COMPLETE_WITH_GAPS` | 可形成有用结果，但仍有具名未知项 |
+| `BLOCKED_BY_P0_UNKNOWN` | 继续会编造实质业务或风险决策 |
 
-Clarification is complete only when the intake decision, outcome, users, scope,
-evidence, authority, risk, next artifact and decision owners are explicit.
+准入结论、目标用户、范围、证据、权威、风险、下一工件和决策人都明确后，澄清才完成。
 
-## Schema-Driven Targeted Clarification
+## Schema 驱动的定向澄清 / Schema-Driven Targeted Clarification
 
-When material unknowns remain after evidence inventory, choose the
-highest-impact open `UNK-*` and ask the smallest question that can close or
-split it. Typical targets are outcome, scope, role authority, state boundary,
-data authority, compliance, commercial promise and acceptance. Cite the source
-or conflict that made the question necessary; do not send a generic checklist.
+取证后仍有未知项时，选择影响最大的开放 `UNK-*`，只问能关闭或拆分它的最小问题，并引用
+导致提问的来源或冲突。每个回答写入 `schemas/clarification-transcript.schema.json`：包含
+turn_id、unknown_id、问答、责任人、状态、问题类型、推荐及证据、取舍、受影响 ID 和证据；
+方向轮还要用 `branch_ref` 指向前一轮。
 
-After each answer, record a
-`schemas/clarification-transcript.schema.json` turn with `turn_id`,
-`unknown_id`, question, answer, decision owner, status, question kind,
-recommendation, recommendation evidence, trade-off, affected IDs and evidence
-references. Direction turns also cite the previous direction turn with
-`branch_ref`. Compile only structured, owner-attributed answers. Free-form chat
-remains source evidence; a deterministic compiler does not pretend to understand
-it.
-
-Stop when every P0/P1 item is answered/accepted by an accountable owner, or is
-an owned, scoped `UNK-*` with `blocks_stage` and a reversal path. An open P0/P1
-that blocks `clarify` or `specify` cannot produce a ready decision; a later-stage
-unknown may be returned as `REVIEW_COMPLETE_WITH_GAPS`. At the configured
-stage-turn limit, return the unresolved IDs instead of continuing a propose/reject loop.
+只编译结构化且有责任人归属的答案；自由对话仍只是来源证据，确定性脚本不能假装理解它。
+全部 P0/P1 得到回答/接受，或成为有责任人、范围、阻断阶段和回退路径的 `UNK-*` 后停止。
+超过阶段轮次限制时返回未解决 ID，不能继续 propose/reject 死循环。
 
 ```bash
 python scripts/compile_clarification_transcript.py --contract discovery.yaml --transcript transcript.yaml --decision READY_FOR_PRODUCT_TRUTH --output discovery-next.yaml

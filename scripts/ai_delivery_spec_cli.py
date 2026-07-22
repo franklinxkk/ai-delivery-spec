@@ -9,6 +9,7 @@ import re
 import shutil
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 try:
@@ -87,15 +88,26 @@ def merge_markdown_template(base: str, overlay: str) -> str:
 def init_custom(args: argparse.Namespace) -> int:
     """Create a private-by-default, declarative local extension workspace."""
     target = args.output.resolve()
-    for rel in ("domains", "templates", "validators"):
+    for rel in (
+        "domains", "templates", "validators", "learning/candidates/project-local",
+        "learning/candidates/review", "learning/usage",
+    ):
         (target / rel).mkdir(parents=True, exist_ok=True)
+    sharing = getattr(args, "sharing", "local")
+    ignore_rules = (
+        "*\n!.gitignore\n" if sharing == "local"
+        else "learning/evidence/\nlearning/candidates/project-local/\n*.secret.*\n.env\n"
+    )
+    privacy = "local_only" if sharing == "local" else "private_repository"
     files = {
-        target / ".gitignore": "*\n!.gitignore\n",
+        target / ".gitignore": ignore_rules,
         target / "config.yaml": (
-            "schema_version: 5.3.0\nprivacy: local_only\n"
+            f"schema_version: 5.3.0\nprivacy: {privacy}\n"
             "conflict_policy: binding_conflicts_require_DEC-CONFLICT\n"
             "domains:\n  - domain_id: my-team\n    knowledge_file: domains/my-team.md\n"
             "    maturity: local\n    owner: 待指定\n"
+            "learning:\n  enabled: false\n  default_reuse_scope: project_only\n"
+            "  promotion: manual_review_only\n  public_auto_promotion: false\n"
         ),
         target / "domains" / "my-team.md": "# my-team 私有领域包\n\n## 适用范围\n\n待补充。\n\n## 绑定规则\n\n待补充；与官方规则冲突时登记 DEC-CONFLICT-*。\n",
         target / "templates" / "my-team.md": "<!-- extends: unified-requirement-prd-template.md -->\n\n## 项目私有补充\n\n待补充团队特有的评审或审计要求。\n",
@@ -103,11 +115,24 @@ def init_custom(args: argparse.Namespace) -> int:
             "rules:\n  - id: CUST-EXAMPLE-001\n    artifact: prd\n    assertion: must_match\n"
             "    severity: GAP\n    pattern: '项目私有补充'\n    message: PRD 缺少团队私有补充章节\n"
         ),
+        target / "learning" / "candidates" / "project-local" / "CAND-EXAMPLE.yaml": (
+            "schema_version: 5.3.0\ncandidate_id: CAND-MY-TEAM-001\ndomain: my-team\n"
+            "statement: 待确认的团队业务不变量，不得包含客户敏感原文\n"
+            "candidate_type: invariant\nstatus: proposed\nreuse_scope: project_only\n"
+            "submitted_by: 待指定\ndecision_owner: 待指定\nreuse_approver: null\n"
+            "source_refs: [SRC-MY-TEAM-001]\nevidence_refs: [EVD-MY-TEAM-001]\n"
+            "applicability: [当前项目]\nexclusions: []\njurisdiction: null\n"
+            "regulatory_version: null\nsensitive_data: false\n"
+            "created_at: 2026-01-01T00:00:00+08:00\nexpires_at: null\n"
+        ),
     }
     for path, content in files.items():
         if not path.exists() or args.force:
             path.write_text(content, encoding="utf-8", newline="\n")
-    print(f"PASS: 已创建本地私有扩展目录 {target}；默认被 custom/.gitignore 阻止提交")
+    if sharing == "local":
+        print(f"PASS: 已创建本地私有扩展目录 {target}；默认被 custom/.gitignore 阻止提交")
+    else:
+        print(f"PASS: 已创建团队私域扩展目录 {target}；只应提交到受控私有仓库，敏感证据仍被忽略")
     return 0
 
 
@@ -430,7 +455,7 @@ def status_report(args: argparse.Namespace) -> int:
         },
         "known_limitations": [
             "five domain methods have owner-attested production practice; all built-in packs pass deterministic contract checks but fresh-agent/expert maturity remains separate",
-            "GitHub runs are exploratory and have zero release-passed cells",
+            "GitHub 45 stage cells now have exploratory evidence, but every cell remains partial and zero cells are release-passed because independent repetitions, token measurements and real coding acceptance are absent",
             "domain expert, customer, production, legal, safety, and financial correctness are not proven",
             "lifecycle simulations and private brownfield calibration expose method gaps but do not prove implementation or customer acceptance",
         ],
@@ -490,13 +515,21 @@ def quality_gate(args: argparse.Namespace) -> int:
         values.extend(["--scope-ref", scope_ref])
     if args.custom_root:
         values.extend(["--custom-root", str(args.custom_root)])
-    for name in ("requirement", "prd", "prototype", "inventory", "manifest", "acceptance_run"):
+    option_names = {
+        "requirement": "--requirement",
+        "prd": "--prd",
+        "prototype": "--prototype",
+        "inventory": "--inventory",
+        "manifest": "--manifest",
+        "acceptance_run": "--acceptance-run",
+    }
+    for name, option in option_names.items():
         value = getattr(args, name)
         if isinstance(value, list):
             for item in value:
-                values.extend([f"--{name}", str(item)])
+                values.extend([option, str(item)])
         elif value:
-            values.extend([f"--{name}", str(value)])
+            values.extend([option, str(value)])
     return run_script("quality_gate.py", values)
 
 
@@ -538,6 +571,153 @@ def validate_candidate(args: argparse.Namespace) -> int:
             print(f"BLOCK: CANDIDATE-INVALID: {failure}")
         return 2
     print(f"PASS: 候选知识结构有效，范围={document.get('reuse_scope')}，未执行自动晋升")
+    return 0
+
+
+def load_yaml_object(path: Path, label: str) -> tuple[dict | None, list[str]]:
+    try:
+        value = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, yaml.YAMLError) as exc:
+        return None, [f"{label}无法读取：{exc}"]
+    if not isinstance(value, dict):
+        return None, [f"{label}必须是 YAML/JSON 对象"]
+    return value, []
+
+
+def schema_failures(document: dict, schema_name: str) -> list[str]:
+    schema = json.loads((ROOT / "schemas" / schema_name).read_text(encoding="utf-8"))
+    return [
+        f"{'.'.join(map(str, error.path)) or '<root>'}: {error.message}"
+        for error in sorted(
+            Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(document),
+            key=lambda error: tuple(str(part) for part in error.path),
+        )
+    ]
+
+
+def record_candidate_usage(args: argparse.Namespace) -> int:
+    candidate, failures = load_yaml_object(args.candidate, "候选知识")
+    if candidate is not None:
+        failures.extend(schema_failures(candidate, "domain-candidate.schema.json"))
+    if failures:
+        for failure in failures:
+            print(f"BLOCK: CANDIDATE-USAGE-INVALID: {failure}")
+        return 2
+    payload = {
+        "schema_version": "5.3.0",
+        "usage_id": args.usage_id,
+        "candidate_ref": candidate["candidate_id"],
+        "project_ref": args.project,
+        "outcome": args.outcome,
+        "evidence_refs": args.evidence,
+        "notes": args.notes or "",
+        "recorded_by": args.recorded_by,
+        "recorded_at": args.recorded_at or datetime.now(timezone.utc).isoformat(),
+    }
+    failures = schema_failures(payload, "domain-usage-log.schema.json")
+    if failures:
+        for failure in failures:
+            print(f"BLOCK: CANDIDATE-USAGE-INVALID: {failure}")
+        return 2
+    if args.output.exists() and not args.force:
+        print(f"BLOCKED: 使用记录已存在：{args.output}；如需明确覆盖请使用 --force")
+        return 2
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(yaml.safe_dump(payload, allow_unicode=True, sort_keys=False), encoding="utf-8", newline="\n")
+    print(f"PASS: 已记录 {payload['usage_id']}；候选仍未自动晋升")
+    return 0
+
+
+def assess_candidate(args: argparse.Namespace) -> int:
+    candidate, failures = load_yaml_object(args.candidate, "候选知识")
+    if candidate is not None:
+        failures.extend(schema_failures(candidate, "domain-candidate.schema.json"))
+    usage_paths: list[Path] = []
+    for value in args.usage:
+        if value.is_dir():
+            usage_paths.extend(sorted(value.glob("*.yaml")))
+        else:
+            usage_paths.append(value)
+    usages: list[dict] = []
+    for path in usage_paths:
+        usage, read_failures = load_yaml_object(path, f"使用记录 {path}")
+        failures.extend(read_failures)
+        if usage is None:
+            continue
+        failures.extend(f"{path}: {item}" for item in schema_failures(usage, "domain-usage-log.schema.json"))
+        if candidate is not None and usage.get("candidate_ref") != candidate.get("candidate_id"):
+            failures.append(f"{path}: candidate_ref 与候选知识不一致")
+        usages.append(usage)
+    if not usage_paths:
+        failures.append("至少提供一份 --usage 文件或目录")
+    if failures:
+        for failure in failures:
+            print(f"BLOCK: CANDIDATE-ASSESSMENT-INVALID: {failure}")
+        return 2
+
+    outcomes = {name: 0 for name in ("adopted", "modified", "rejected", "invalidated", "not_observed")}
+    for usage in usages:
+        outcomes[usage["outcome"]] += 1
+    projects = sorted({usage["project_ref"] for usage in usages})
+    supportive = outcomes["adopted"] + outcomes["modified"]
+    negative = outcomes["rejected"] + outcomes["invalidated"]
+    expired = False
+    if candidate.get("expires_at"):
+        expires_at = datetime.fromisoformat(str(candidate["expires_at"]).replace("Z", "+00:00"))
+        expired = expires_at <= datetime.now(timezone.utc)
+
+    if expired or outcomes["invalidated"]:
+        recommendation = "deprecate_or_revise"
+        rationale = "候选已过期或存在失效证据，必须先修订来源、适用边界和回归用例"
+    elif negative:
+        recommendation = "keep_project_only"
+        rationale = "存在拒绝复用证据，必须先完成负迁移分析"
+    elif candidate["reuse_scope"] == "project_only" and len(projects) >= 2 and supportive >= 2:
+        recommendation = "eligible_for_organization_review"
+        rationale = "至少两个独立项目形成支持性使用记录，可提交组织级人工评审"
+    elif (
+        candidate["reuse_scope"] == "organization"
+        and candidate.get("status") in {"corroborated", "confirmed"}
+        and len(projects) >= 3
+        and outcomes["adopted"] >= 2
+        and candidate.get("reuse_approver")
+        and not candidate.get("sensitive_data")
+    ):
+        recommendation = "eligible_for_public_review"
+        rationale = "已具备跨项目采用和独立审批证据，可提交公共候选评审"
+    else:
+        recommendation = "collect_more_evidence"
+        rationale = "独立项目数量、采用结果或审批证据尚不足"
+
+    result = {
+        "schema_version": "5.3.0",
+        "candidate_id": candidate["candidate_id"],
+        "current_scope": candidate["reuse_scope"],
+        "projects": projects,
+        "outcomes": outcomes,
+        "expired": expired,
+        "recommendation": recommendation,
+        "rationale": rationale,
+        "auto_promoted": False,
+        "next_action": "由独立责任人评审；脱敏后移入 candidates/review，修改状态与范围并执行受影响领域回归",
+    }
+    if args.format == "json":
+        rendered = json.dumps(result, ensure_ascii=False, indent=2) + "\n"
+    elif args.format == "yaml":
+        rendered = yaml.safe_dump(result, allow_unicode=True, sort_keys=False)
+    else:
+        rendered = (
+            f"# 候选知识复用评估\n\n- 候选：`{result['candidate_id']}`\n"
+            f"- 当前范围：`{result['current_scope']}`\n- 独立项目：`{len(projects)}`\n"
+            f"- 结果：`{recommendation}`\n- 依据：{rationale}\n"
+            "- 自动晋升：否；必须由独立责任人评审并执行回归。\n"
+        )
+    if args.output:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(rendered, encoding="utf-8", newline="\n")
+        print(f"PASS: 已写入候选知识评估 {args.output}")
+    else:
+        print(rendered, end="")
     return 0
 
 
@@ -596,6 +776,10 @@ def main() -> int:
 
     custom = sub.add_parser("init-custom", help="创建默认不提交的本地领域包、模板和声明式校验规则")
     custom.add_argument("--output", type=Path, default=Path("custom"))
+    custom.add_argument(
+        "--sharing", choices=["local", "team"], default="local",
+        help="local=仅本机且整目录默认忽略；team=可进入受控私有仓库，但继续忽略敏感证据",
+    )
     custom.add_argument("--force", action="store_true")
     custom.set_defaults(func=init_custom)
 
@@ -657,6 +841,28 @@ def main() -> int:
     candidate_validate = candidate_sub.add_parser("validate")
     candidate_validate.add_argument("--input", type=Path, required=True)
     candidate_validate.set_defaults(func=validate_candidate)
+
+    candidate_record = candidate_sub.add_parser("record-usage", help="记录一次候选知识的项目使用结果")
+    candidate_record.add_argument("--candidate", type=Path, required=True)
+    candidate_record.add_argument("--usage-id", required=True)
+    candidate_record.add_argument("--project", required=True)
+    candidate_record.add_argument(
+        "--outcome", choices=["adopted", "modified", "rejected", "invalidated", "not_observed"], required=True,
+    )
+    candidate_record.add_argument("--evidence", action="append", required=True)
+    candidate_record.add_argument("--recorded-by", required=True)
+    candidate_record.add_argument("--recorded-at")
+    candidate_record.add_argument("--notes")
+    candidate_record.add_argument("--output", type=Path, required=True)
+    candidate_record.add_argument("--force", action="store_true")
+    candidate_record.set_defaults(func=record_candidate_usage)
+
+    candidate_assess = candidate_sub.add_parser("assess", help="基于跨项目使用证据给出人工晋级建议")
+    candidate_assess.add_argument("--candidate", type=Path, required=True)
+    candidate_assess.add_argument("--usage", type=Path, action="append", required=True)
+    candidate_assess.add_argument("--format", choices=["markdown", "yaml", "json"], default="markdown")
+    candidate_assess.add_argument("--output", type=Path)
+    candidate_assess.set_defaults(func=assess_candidate)
 
     triage = sub.add_parser("triage", help="Recommend requirement intake decision, priority, mode and tier")
     triage.add_argument("--input", type=Path, required=True)

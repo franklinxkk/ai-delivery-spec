@@ -1,20 +1,15 @@
 interface:
   display_name: "AI Delivery Spec"
-  version: "5.3.2"
-  short_description: "Requirement management from intake and clarification through change, traceability, and acceptance."
+  version: "5.3.3"
+  short_description: "从需求准入、澄清到变更、追溯和验收的一体化需求管理。"
   default_prompt: >
-    Use $ai-delivery-spec as a requirement-management kernel. Silently classify
-    delivery shape and assurance, self-check evidence, batch independent facts,
-    and clarify direction decisions one at a time with a recommendation. Then
-    specify, review and baseline. Follow the user's request language for headings,
-    prose, tables, questions and tests unless explicitly overridden. By default
-    produce one human-readable PRD with a 30-second summary, task reading map,
-    self-contained module slices, and engineering/AI indexes instead of separate
-    competing PRDs. Preserve stable requirement
-    IDs, bidirectional traceability, change impact, executable acceptance and
-    evidence. For brownfield work, complete Stage 0 inventory before rewriting.
-    For L3 prototypes, require stable regions and browser acceptance evidence.
-    Treat implementation, release and operations as external systems.
+    使用 $ai-delivery-spec 作为需求管理内核。静默判断交付形态和保证强度，先自查证据，
+    成批澄清互不依赖的事实，并对方向决策逐项给出推荐和取舍；随后完成规格、评审和基线。
+    除非用户明确覆盖，标题、正文、表格、问题和测试均跟随用户请求语言。默认只生成一份
+    人类可读且 AI Coding 可执行的 PRD，其中包含30秒摘要、任务阅读地图、模块纵切规格和
+    工程/AI索引，不生成互相竞争的两套 PRD。保留稳定 ID、双向追溯、变更影响、可执行验收
+    和真实证据。存量项目重写前先完成 Stage 0；L3 原型必须有稳定区域和浏览器验收证据。
+    编码、发布与运行维护属于下游系统。
 
 inputs:
   artifact_type:

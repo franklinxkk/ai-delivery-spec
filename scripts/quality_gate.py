@@ -20,6 +20,7 @@ from collections import Counter
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
+from urllib.parse import unquote, urlsplit
 
 try:
     import yaml
@@ -44,6 +45,7 @@ if str(VALIDATOR_DIR) not in sys.path:
 
 from scan_prototype_css import scan as scan_prototype_css
 from prd_structure import analyze as analyze_prd_structure
+from validate_acceptance_run import validate_evidence_refs
 from validators.validate_coding_agent_contract import (
     BASE_AREAS,
     ID_RULES,
@@ -101,6 +103,18 @@ NOT_PROVEN_BY_STATIC_GATE = (
 )
 
 
+def not_proven_for(gate: "Gate") -> list[str]:
+    """Keep static-gate boundaries honest while closing claims backed by valid ARUN evidence."""
+    items = list(NOT_PROVEN_BY_STATIC_GATE)
+    if gate.metrics.get("prototype_browser_evidence"):
+        items.remove("原型在真实浏览器中的交互、视觉、可访问性与多端适配")
+        items.append("浏览器 ARUN 已证明其记录范围内的交互结果；未覆盖的视觉、可访问性与多端适配仍未证明")
+    if gate.metrics.get("acceptance_run_conclusive"):
+        items.remove("验收用例已经实际执行并形成签认证据")
+        items.append("已提供的 ARUN 已执行并形成可解析签认证据；未纳入该记录的验收范围仍未证明")
+    return items
+
+
 @dataclass(frozen=True)
 class Finding:
     severity: str
@@ -132,6 +146,10 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "REQ-SCHEMA": (
         "需求登记文件不符合 JSON Schema。",
         "按 finding.ref 定位字段，并参考 requirement-register-template.yaml 修复结构。",
+    ),
+    "STAGE0-LEGACY-INVENTORY": (
+        "Stage 0 台账仍是旧版按 roles/views/actions 等分栏保存的结构，缺少当前逐项审计合同。",
+        "将旧分栏逐项迁入 items；每项补齐 type、source_ref、source_location、classification，推断项再绑定有 owner 的 RBATCH-*。",
     ),
     "PRD-STRUCTURE": (
         "文档虽然包含标题或关键词，但没有可验证的统一 PRD 结构。",
@@ -351,6 +369,34 @@ class Gate:
     @staticmethod
     def _tag_source(raw: str) -> str:
         return "\n".join(re.findall(r"<[A-Za-z][^>]*>", raw, re.S))
+
+    def _prototype_dependency(self, prototype: Path, uri: str, kind: str) -> Path | None:
+        """Resolve a local prototype dependency without leaving the prototype directory."""
+        parsed = urlsplit(uri)
+        if parsed.scheme in {"http", "https"} and parsed.netloc:
+            self.add(
+                "GAP", "PROTO-REMOTE-DEPENDENCY", prototype,
+                f"远程 {kind} 依赖不在本地静态检查范围内", uri,
+            )
+            return None
+        if parsed.scheme or parsed.netloc:
+            self.add("BLOCK", "PROTO-DEPENDENCY-URI", prototype, f"不支持的 {kind} 依赖 URI", uri)
+            return None
+        relative = Path(unquote(parsed.path))
+        if relative.is_absolute():
+            self.add("BLOCK", "PROTO-DEPENDENCY-ABSOLUTE", prototype, f"{kind} 依赖必须使用原型目录内的相对路径", uri)
+            return None
+        root = prototype.parent.resolve()
+        candidate = (root / relative).resolve()
+        try:
+            candidate.relative_to(root)
+        except ValueError:
+            self.add("BLOCK", "PROTO-DEPENDENCY-ESCAPE", prototype, f"{kind} 依赖越过原型根目录", uri)
+            return None
+        if not candidate.is_file():
+            self.add("BLOCK", "PROTO-DEPENDENCY-MISSING", prototype, f"本地 {kind} 依赖文件不存在", uri)
+            return None
+        return candidate
 
     @staticmethod
     def _page_contracts(raw: str) -> dict[str, tuple[dict[str, str], str]]:
@@ -1223,7 +1269,21 @@ class Gate:
             return
         items = document.get("items") or []
         if not isinstance(items, list) or not items:
-            self.add("BLOCK", "STAGE0-NO-INVENTORY", path, "Stage 0 台账必须包含非空 items")
+            legacy_sections = [
+                key for key in (
+                    "roles", "views", "actions", "states", "objects", "fields",
+                    "metrics", "handoffs", "defect_candidates", "unknowns",
+                )
+                if isinstance(document.get(key), list) and document.get(key)
+            ]
+            if legacy_sections:
+                self.add(
+                    "BLOCK", "STAGE0-LEGACY-INVENTORY", path,
+                    "检测到旧版分栏台账；不能静默升级为当前事实。请迁移为逐项 items 后重跑",
+                    ",".join(legacy_sections),
+                )
+            else:
+                self.add("BLOCK", "STAGE0-NO-INVENTORY", path, "Stage 0 台账必须包含非空 items")
             return
         allowed = {"confirmed", "inferred", "unknown", "defect_candidate"}
         baseline_refs_raw = document.get("baseline_requirement_refs") or []
@@ -1417,8 +1477,24 @@ class Gate:
             if not any(str(ref) in packet_raw for ref in packet.get("acceptance_refs", []) or []):
                 self.add("BLOCK", "HANDOFF-PACKET-AC-MISSING", path, "工作包正文没有任何 acceptance_refs", packet_id)
             kind = str(packet.get("kind", "")).lower()
+            expected_prefix = {"mod": "MOD-", "xct": "XCT-", "edge": "EDGE-"}.get(kind)
+            if expected_prefix and not packet_id.startswith(expected_prefix):
+                self.add("BLOCK", "HANDOFF-PACKET-KIND-MISMATCH", path, "工作包 ID 前缀与 kind 不一致", packet_id)
             if kind == "mod" and "qa_projection" not in packet_raw.lower() and "qa 投影" not in packet_raw.lower():
                 self.add("BLOCK", "HANDOFF-MOD-NO-QA-PROJECTION", path, "MOD 工作包缺少 qa_projection", packet_id)
+            if kind == "xct":
+                lowered_packet = packet_raw.lower()
+                affected_modules = set(re.findall(r"\bMOD-[A-Z0-9-]+\b", packet_raw, re.I))
+                if len(affected_modules) < 2:
+                    self.add("BLOCK", "HANDOFF-XCT-INCOMPLETE", path, "XCT 工作包必须明确影响至少两个 MOD-* 模块", packet_id)
+                for label, terms in {
+                    "影响模块": ("影响模块", "affected modules", "module scope"),
+                    "全局不变量": ("全局不变量", "invariant"),
+                    "执行点": ("执行点", "生效点", "enforcement point"),
+                    "例外与失败处理": ("例外", "异常", "失败", "exception", "failure"),
+                }.items():
+                    if not any(term in lowered_packet for term in terms):
+                        self.add("BLOCK", "HANDOFF-XCT-INCOMPLETE", path, f"XCT 工作包缺少 {label}", packet_id)
             if kind == "edge":
                 lowered_packet = packet_raw.lower()
                 for label, terms in {
@@ -1511,11 +1587,22 @@ class Gate:
 
         script_blocks = []
         module_script = False
+        local_dependencies: set[str] = set()
         for attrs, body in re.findall(r"<script\b([^>]*)>(.*?)</script>", raw, re.I | re.S):
             type_match = re.search(r"\btype\s*=\s*['\"]([^'\"]+)['\"]", attrs, re.I)
             script_type = type_match.group(1).lower() if type_match else "text/javascript"
             if script_type in {"text/javascript", "application/javascript", "module"}:
-                script_blocks.append(body)
+                src_match = re.search(r"\bsrc\s*=\s*['\"]([^'\"]+)['\"]", attrs, re.I)
+                if src_match:
+                    dependency = self._prototype_dependency(path, src_match.group(1), "JavaScript")
+                    if dependency is not None:
+                        try:
+                            script_blocks.append(self.read(dependency))
+                            local_dependencies.add(str(dependency.resolve()))
+                        except (OSError, UnicodeError) as exc:
+                            self.add("BLOCK", "PROTO-DEPENDENCY-READ", path, f"本地 JavaScript 依赖无法读取：{exc}", src_match.group(1))
+                else:
+                    script_blocks.append(body)
                 module_script = module_script or script_type == "module"
         scripts = "\n".join(script_blocks)
         split_anchor_pattern = re.compile(
@@ -1604,7 +1691,24 @@ class Gate:
         if actions and level in {"L2", "L3", "L4"} and not state_result:
             self.add("GAP", "PROTO-NO-DOMAIN-STATE", path, "static scan found no explicit data-state/domain-state mutation; bind core actions to a durable domain result or prove them in browser evidence")
 
-        for css_finding in scan_prototype_css(raw):
+        external_css: list[str] = []
+        for tag in re.findall(r"<link\b[^>]*>", raw, re.I | re.S):
+            if not re.search(r"\brel\s*=\s*['\"][^'\"]*stylesheet[^'\"]*['\"]", tag, re.I):
+                continue
+            href = re.search(r"\bhref\s*=\s*['\"]([^'\"]+)['\"]", tag, re.I)
+            if not href:
+                continue
+            dependency = self._prototype_dependency(path, href.group(1), "CSS")
+            if dependency is not None:
+                try:
+                    external_css.append(self.read(dependency))
+                    local_dependencies.add(str(dependency.resolve()))
+                except (OSError, UnicodeError) as exc:
+                    self.add("BLOCK", "PROTO-DEPENDENCY-READ", path, f"本地 CSS 依赖无法读取：{exc}", href.group(1))
+        css_scan_source = raw
+        if external_css:
+            css_scan_source += "\n<style>\n" + "\n".join(external_css) + "\n</style>"
+        for css_finding in scan_prototype_css(css_scan_source):
             self.add("BLOCK", "PROTO-CSS-" + css_finding["kind"].upper(), path, css_finding["detail"], css_finding["selector"])
 
         if scripts.strip():
@@ -1631,9 +1735,6 @@ class Gate:
                 self.add("BLOCK", "PROTO-JS-DELIMITERS", path, "JavaScript has unbalanced delimiters")
             else:
                 self.add("GAP", "PROTO-JS-CHECK-LIMITED", path, "Node.js is unavailable; only delimiter syntax was checked")
-        external_scripts = re.findall(r"<script\b[^>]*\bsrc\s*=\s*['\"]([^'\"]+)['\"]", raw, re.I)
-        if external_scripts:
-            self.add("GAP", "PROTO-EXTERNAL-JS", path, "external scripts are outside this single-file static scan", ", ".join(external_scripts[:3]))
         self.metrics.update({
             "prototype_pages": len(page_testids),
             "prototype_regions": len(region_testids),
@@ -1644,6 +1745,7 @@ class Gate:
             "prototype_fields": len(fields),
             "prototype_metrics": len(metrics),
             "prototype_acceptance_refs": len(self.prototype_acceptance_refs),
+            "prototype_local_dependencies": len(local_dependencies),
         })
 
     def check_acceptance_run(self, path: Path) -> tuple[set[str], bool, bool]:
@@ -1666,6 +1768,10 @@ class Gate:
             location = ".".join(str(part) for part in schema_error.path) or "<root>"
             self.add("BLOCK", "ACCEPTANCE-SCHEMA", path, schema_error.message, location)
 
+        evidence_failures = validate_evidence_refs(document, path)
+        for failure in evidence_failures:
+            self.add("BLOCK", "ACCEPTANCE-EVIDENCE-INVALID", path, failure)
+
         evidenced: set[str] = set()
         mandatory_incomplete: list[str] = []
         for item in document.get("items", []) or []:
@@ -1680,7 +1786,7 @@ class Gate:
                 self.add("BLOCK", "ACCEPTANCE-PASS-NO-EVIDENCE", path, "pass 项必须填写实际结果和证据引用", item_id)
                 continue
             acceptance_ref = str(item.get("acceptance_ref", "")).upper()
-            if acceptance_ref:
+            if acceptance_ref and not evidence_failures:
                 evidenced.add(acceptance_ref)
 
         conclusion = str(document.get("conclusion", "pending"))
@@ -1691,11 +1797,42 @@ class Gate:
             self.add("BLOCK", "ACCEPTANCE-CONDITION-MISSING", path, "accepted_with_conditions 缺少条件、责任人和完成标准")
         if conclusion in {"accepted", "accepted_with_conditions"} and not sign_offs:
             self.add("BLOCK", "ACCEPTANCE-SIGNOFF-MISSING", path, "接受结论缺少签署记录")
+        elif conclusion in {"accepted", "accepted_with_conditions"}:
+            missing_signoff_evidence = [
+                str(item.get("actor", "<unknown>"))
+                for item in sign_offs
+                if isinstance(item, dict) and not str(item.get("evidence_ref", "")).strip()
+            ]
+            if missing_signoff_evidence:
+                self.add(
+                    "BLOCK", "ACCEPTANCE-SIGNOFF-NO-EVIDENCE", path,
+                    "接受结论的每条签署记录都必须绑定可解析证据",
+                    ", ".join(missing_signoff_evidence),
+                )
+            rejecting_signers = [
+                str(item.get("actor", "<unknown>"))
+                for item in sign_offs
+                if isinstance(item, dict) and item.get("decision") == "reject"
+            ]
+            if rejecting_signers:
+                self.add(
+                    "BLOCK", "ACCEPTANCE-SIGNOFF-CONFLICT", path,
+                    "接受结论与拒绝签署相冲突",
+                    ", ".join(rejecting_signers),
+                )
 
         environment = str(document.get("environment", "")).lower()
         browser_markers = ("browser", "浏览器", "chrome", "edge", "firefox", "safari", "webkit", "playwright")
         browser_environment = any(marker in environment for marker in browser_markers)
-        conclusive = conclusion in {"accepted", "accepted_with_conditions"} and not mandatory_incomplete and bool(sign_offs)
+        conclusive = (
+            conclusion in {"accepted", "accepted_with_conditions"}
+            and not mandatory_incomplete
+            and bool(sign_offs)
+            and not schema_errors
+            and not evidence_failures
+            and all(str(item.get("evidence_ref", "")).strip() for item in sign_offs if isinstance(item, dict))
+            and not any(item.get("decision") == "reject" for item in sign_offs if isinstance(item, dict))
+        )
         self.metrics.update({
             "acceptance_run_items": self.metrics.get("acceptance_run_items", 0) + len(document.get("items", []) or []),
             "acceptance_run_evidenced_acs": self.metrics.get("acceptance_run_evidenced_acs", 0) + len(evidenced),
@@ -1868,12 +2005,16 @@ def result_payload(gate: Gate, profile: str, retry_command: str = "") -> dict[st
             "repair_example_zh": item.repair_example,
         })
         rendered_findings.append(record)
+    consumed_browser_evidence = bool(gate.metrics.get("prototype_browser_evidence"))
+    coverage = "确定性静态门禁；不调用浏览器、LLM 或子 Agent"
+    if consumed_browser_evidence:
+        coverage += "；已校验外部真实浏览器 ARUN 的结构、证据与签署"
     return {
         "status": STATUSES[code],
         "profile": profile,
         "summary": {"blockers": blocks, "p0_unknowns": p0_unknowns, "gaps": gaps, "findings": len(gate.findings)},
-        "coverage": "确定性静态门禁；不调用浏览器、LLM 或子 Agent",
-        "not_proven": list(NOT_PROVEN_BY_STATIC_GATE),
+        "coverage": coverage,
+        "not_proven": not_proven_for(gate),
         "retry_command": retry_command,
         "metrics": {**gate.metrics, "input_read_counts": dict(gate.read_counts)},
         "findings": rendered_findings,
@@ -1977,6 +2118,7 @@ def main() -> int:
             if not conclusive_evidence:
                 gate.add("GAP", "PROTO-BROWSER-EVIDENCE-INCOMPLETE", valid_acceptance_runs[0], "ARUN 尚未形成 accepted/accepted_with_conditions 且有签署的结论", "conclusion/sign_offs")
     gate.metrics["prototype_browser_evidence"] = bool(valid_acceptance_runs and browser_evidence and conclusive_evidence)
+    gate.metrics["acceptance_run_conclusive"] = bool(valid_acceptance_runs and conclusive_evidence)
     custom_root = args.custom_root
     if custom_root is None and (Path.cwd() / "custom").is_dir():
         custom_root = Path.cwd() / "custom"

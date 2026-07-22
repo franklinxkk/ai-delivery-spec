@@ -4,6 +4,8 @@ baseline_version: "1.0"
 environment: "{acceptance environment}"
 executor: "{executor}"
 executed_at: "2026-01-01T00:00:00Z"
+evidence_catalog: []
+# pass 时先登记：{id: EVD-CORE-001, uri: evidence/AC-CORE-001.png, sha256: 可选}
 items:
   - id: ARITEM-CORE-001
     acceptance_ref: AC-CORE-001
@@ -17,3 +19,4 @@ residual_issues: []
 conclusion: pending
 conditions: []
 sign_offs: []
+# accepted 时每条签署必须填写 evidence_ref，并能解析到 evidence_catalog 或本地相对路径。

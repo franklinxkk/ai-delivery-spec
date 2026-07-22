@@ -363,6 +363,12 @@ Mobile rules:
 | OA-010 | Browser test submits a real approval path | request uses shadow/test mode; no production workflow/seal/payment side effect remains |
 | OA-011 | Submitter recalls while parallel approvers are processing, then resubmits | recall uses a configured state guard; stale approvals are rejected; new run/version, opinions and prior audit remain traceable |
 
+## Cross-Domain Requirement Patterns
+
+- `PAT-VERSION-COMPATIBILITY-001`: workflow definitions, forms, document templates and authorization policies keep snapshots for in-flight and historical instances.
+- `PAT-FEDERATED-RECONCILIATION-001`: organization, personnel and document metadata synchronized across independent suites need explicit per-field authority and conflict handling.
+- `PAT-LONG-RUNNING-JOB-001`: archive transfer, full-text indexing, bulk reminder and large export require observable and recoverable task contracts.
+
 ## Evaluation Profile
 
 Domain knowledge is not execution evidence. Register coverage and maturity in

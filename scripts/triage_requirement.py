@@ -20,9 +20,21 @@ if hasattr(sys.stderr, "reconfigure"):
 
 
 def load(path: Path) -> dict[str, Any]:
-    value = yaml.safe_load(path.read_text(encoding="utf-8"))
+    try:
+        raw = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        raise ValueError(f"无法读取分诊输入：{exc}") from exc
+    try:
+        value = yaml.safe_load(raw)
+    except yaml.YAMLError as exc:
+        raise ValueError(
+            "分诊输入必须是 UTF-8 YAML/JSON 对象；Markdown 需求说明属于来源材料，"
+            "请先执行 init-requirements 并把已知事实写入 requirements/intake.yaml"
+        ) from exc
     if not isinstance(value, dict):
-        raise ValueError("intake input must be a YAML/JSON object")
+        raise ValueError(
+            "分诊输入必须是 YAML/JSON 对象；请使用 init-requirements 生成的 requirements/intake.yaml"
+        )
     return value
 
 
@@ -257,7 +269,11 @@ def main() -> int:
     parser.add_argument("--format", choices=["markdown", "yaml", "json"], default="markdown")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
-    result = recommend(load(args.input))
+    try:
+        result = recommend(load(args.input))
+    except ValueError as exc:
+        print(f"BLOCKED TRIAGE-INPUT-INVALID: {exc}", file=sys.stderr)
+        return 2
     if args.format == "json":
         rendered = json.dumps(result, ensure_ascii=False, indent=2) + "\n"
     elif args.format == "yaml":

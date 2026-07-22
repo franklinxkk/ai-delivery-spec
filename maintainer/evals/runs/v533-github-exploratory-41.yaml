@@ -1,0 +1,4230 @@
+{
+  "batch_schema_version": "5.3.3",
+  "batch_id": "BATCH-GITHUB-EXPLORATORY-41-20260722",
+  "claim_boundary": "One current-session exploratory run per formerly not_run cell; no release pass is claimed.",
+  "source_snapshot": {
+    "cases": 15,
+    "declared_files": 45,
+    "bytes": 799843,
+    "aggregate_sha256": "5dbdcff8a8932cae08f9abc7bf7053dfd526cda9feed1e8392878451a5577b91"
+  },
+  "method": [
+    "verify pinned local source paths",
+    "project each formerly not_run cell into requirement, design, or coding handoff contract",
+    "keep customer decisions and unobserved repository behavior explicit",
+    "record one current-session exploratory repetition only",
+    "do not promote domains or claim release pass"
+  ],
+  "summary": {
+    "executed_cells": 41,
+    "status": "partial",
+    "release_passed": 0
+  },
+  "evidence_cells": [
+    {
+      "case_id": "GH-CHATWOOT-VOICE",
+      "stage": "design",
+      "source": {
+        "repository": "chatwoot/chatwoot",
+        "pinned_ref": "98154bbeab2f5ea888dcb61bfd3a35a109ebb9a0",
+        "source_paths": [
+          "enterprise/app/services/voice/provider/twilio/token_service.rb",
+          "enterprise/app/services/voice/provider/twilio/recording_attachment_service.rb",
+          "spec/enterprise/models/channel/twilio_sms_voice_spec.rb"
+        ]
+      },
+      "captured_outcome": "Add a first Twilio-backed voice channel so agents can initiate outbound calls and receive or accept inbound calls with minimal account setup.",
+      "artifact_projection": "unified PRD vertical module slice",
+      "risk_signals": [
+        "realtime",
+        "external_provider",
+        "tenant_isolation",
+        "privacy"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-CW-DES-STATE",
+          "result": "partial",
+          "required_contract": "Model provider and conversation call states with webhook idempotency and reconciliation."
+        },
+        {
+          "id": "OBL-CW-DES-TENANT",
+          "result": "partial",
+          "required_contract": "Scope credentials, phone numbers, calls, media, and agent permissions to the owning account."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-FEDERATED-RECONCILIATION-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-CHATWOOT-VOICE",
+      "stage": "coding_delivery",
+      "source": {
+        "repository": "chatwoot/chatwoot",
+        "pinned_ref": "98154bbeab2f5ea888dcb61bfd3a35a109ebb9a0",
+        "source_paths": [
+          "enterprise/app/services/voice/provider/twilio/token_service.rb",
+          "enterprise/app/services/voice/provider/twilio/recording_attachment_service.rb",
+          "spec/enterprise/models/channel/twilio_sms_voice_spec.rb"
+        ]
+      },
+      "captured_outcome": "Add a first Twilio-backed voice channel so agents can initiate outbound calls and receive or accept inbound calls with minimal account setup.",
+      "artifact_projection": "Agent handoff source probe and test projection",
+      "risk_signals": [
+        "realtime",
+        "external_provider",
+        "tenant_isolation",
+        "privacy"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-CW-CODE-BASELINE",
+          "result": "partial",
+          "required_contract": "Probe the pinned voice services, migration, channel model, and existing specs before naming files or changes."
+        },
+        {
+          "id": "OBL-CW-CODE-TEST",
+          "result": "partial",
+          "required_contract": "Bind implementation tests to inbound, outbound, provider failure, duplicate webhook, and cross-account denial paths."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-FEDERATED-RECONCILIATION-001"
+      ],
+      "not_proven": [
+        "complete repository build",
+        "implemented slice",
+        "executed and accepted AC",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-SALEOR-CHANNEL-ID",
+      "stage": "requirement",
+      "source": {
+        "repository": "saleor/saleor",
+        "pinned_ref": "697b9ec6ffb93199f62f783e7bf6c550cd3bcf7e",
+        "source_paths": [
+          "saleor/graphql/channel/types.py",
+          "saleor/graphql/product/types/products.py",
+          "saleor/graphql/product/schema.py"
+        ]
+      },
+      "captured_outcome": "Let API clients query channel-related objects by immutable channel ID while retaining an explicit slug path and a safe compatibility plan for the mutable legacy channel argument.",
+      "artifact_projection": "unified_prd: intake/clarification slice",
+      "risk_signals": [
+        "api_compatibility",
+        "multi_channel",
+        "app_permissions"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-SAL-REQ-ID",
+          "result": "partial",
+          "required_contract": "Specify immutable ID and explicit slug query behavior without changing channel visibility rules."
+        },
+        {
+          "id": "OBL-SAL-REQ-COMPAT",
+          "result": "partial",
+          "required_contract": "Define legacy channel argument deprecation, coexistence, and client migration behavior."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-VERSION-COMPATIBILITY-001",
+        "PAT-FEDERATED-RECONCILIATION-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-SALEOR-CHANNEL-ID",
+      "stage": "coding_delivery",
+      "source": {
+        "repository": "saleor/saleor",
+        "pinned_ref": "697b9ec6ffb93199f62f783e7bf6c550cd3bcf7e",
+        "source_paths": [
+          "saleor/graphql/channel/types.py",
+          "saleor/graphql/product/types/products.py",
+          "saleor/graphql/product/schema.py"
+        ]
+      },
+      "captured_outcome": "Let API clients query channel-related objects by immutable channel ID while retaining an explicit slug path and a safe compatibility plan for the mutable legacy channel argument.",
+      "artifact_projection": "Agent handoff source probe and test projection",
+      "risk_signals": [
+        "api_compatibility",
+        "multi_channel",
+        "app_permissions"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-SAL-CODE-PROBE",
+          "result": "partial",
+          "required_contract": "Probe pinned product schema, channel types, resolvers, dataloaders, and tests before producing a task slice."
+        },
+        {
+          "id": "OBL-SAL-CODE-CONTRACT",
+          "result": "partial",
+          "required_contract": "Require GraphQL schema snapshots and backward-compatibility tests for old and new arguments."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-VERSION-COMPATIBILITY-001",
+        "PAT-FEDERATED-RECONCILIATION-001"
+      ],
+      "not_proven": [
+        "complete repository build",
+        "implemented slice",
+        "executed and accepted AC",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-OPENEDX-REINDEX",
+      "stage": "requirement",
+      "source": {
+        "repository": "openedx/openedx-platform",
+        "pinned_ref": "264ced21b08ac56906d233abf86a1db7d661b0c8",
+        "source_paths": [
+          "openedx/core/djangoapps/content/search/management/commands/reindex_studio.py",
+          "openedx/core/djangoapps/content/search/api.py",
+          "openedx/core/djangoapps/content/search/tests/test_reindex_cmd.py"
+        ]
+      },
+      "captured_outcome": "Make Studio search-index upgrades safe for both small and very large installations by supporting resumable incremental population, an initial usable empty index, and explicit operational completion.",
+      "artifact_projection": "unified_prd: intake/clarification slice",
+      "risk_signals": [
+        "long_running_job",
+        "upgrade",
+        "partial_availability",
+        "rollback"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-EDX-REQ-LARGE",
+          "result": "partial",
+          "required_contract": "Distinguish small and large installations without blocking an upgrade for hours."
+        },
+        {
+          "id": "OBL-EDX-REQ-RESUME",
+          "result": "partial",
+          "required_contract": "Define resumable incremental indexing and the user-visible meaning of incomplete results."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-VERSION-COMPATIBILITY-001",
+        "PAT-LONG-RUNNING-JOB-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-OPENEDX-REINDEX",
+      "stage": "coding_delivery",
+      "source": {
+        "repository": "openedx/openedx-platform",
+        "pinned_ref": "264ced21b08ac56906d233abf86a1db7d661b0c8",
+        "source_paths": [
+          "openedx/core/djangoapps/content/search/management/commands/reindex_studio.py",
+          "openedx/core/djangoapps/content/search/api.py",
+          "openedx/core/djangoapps/content/search/tests/test_reindex_cmd.py"
+        ]
+      },
+      "captured_outcome": "Make Studio search-index upgrades safe for both small and very large installations by supporting resumable incremental population, an initial usable empty index, and explicit operational completion.",
+      "artifact_projection": "Agent handoff source probe and test projection",
+      "risk_signals": [
+        "long_running_job",
+        "upgrade",
+        "partial_availability",
+        "rollback"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-EDX-CODE-PROBE",
+          "result": "partial",
+          "required_contract": "Read the pinned command, search API, and command tests before selecting migration or asynchronous implementation seams."
+        },
+        {
+          "id": "OBL-EDX-CODE-TEST",
+          "result": "partial",
+          "required_contract": "Test initial-only, incremental resume, interruption, large-instance behavior, and existing command compatibility."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-VERSION-COMPATIBILITY-001",
+        "PAT-LONG-RUNNING-JOB-001"
+      ],
+      "not_proven": [
+        "complete repository build",
+        "implemented slice",
+        "executed and accepted AC",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-TRACCAR-TOKEN-REVOCATION",
+      "stage": "requirement",
+      "source": {
+        "repository": "traccar/traccar",
+        "pinned_ref": "8d082fbbcb59536cb54bfe4e4e533832b1e44bbf",
+        "source_paths": [
+          "src/main/java/org/traccar/api/BaseObjectResource.java",
+          "src/main/java/org/traccar/api/resource/OidcResource.java"
+        ]
+      },
+      "captured_outcome": "Track issued user tokens and allow authorized invalidation so leaked or annually rotated school-bus tracking links can be revoked without deleting and recreating user accounts.",
+      "artifact_projection": "unified_prd: intake/clarification slice",
+      "risk_signals": [
+        "security",
+        "shared_link",
+        "privacy",
+        "backward_compatibility"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-TRK-REQ-REVOKE",
+          "result": "partial",
+          "required_contract": "Define who can list and revoke which tokens and the immediate observable effect."
+        },
+        {
+          "id": "OBL-TRK-REQ-EXISTING",
+          "result": "partial",
+          "required_contract": "Define compatibility and migration behavior for tokens issued before persistence exists."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-VERSION-COMPATIBILITY-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-TRACCAR-TOKEN-REVOCATION",
+      "stage": "design",
+      "source": {
+        "repository": "traccar/traccar",
+        "pinned_ref": "8d082fbbcb59536cb54bfe4e4e533832b1e44bbf",
+        "source_paths": [
+          "src/main/java/org/traccar/api/BaseObjectResource.java",
+          "src/main/java/org/traccar/api/resource/OidcResource.java"
+        ]
+      },
+      "captured_outcome": "Track issued user tokens and allow authorized invalidation so leaked or annually rotated school-bus tracking links can be revoked without deleting and recreating user accounts.",
+      "artifact_projection": "unified PRD vertical module slice",
+      "risk_signals": [
+        "security",
+        "shared_link",
+        "privacy",
+        "backward_compatibility"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-TRK-DES-LIFECYCLE",
+          "result": "partial",
+          "required_contract": "Model token issue, active, revoked, expired, rotated, and unknown-legacy states without storing plaintext secrets."
+        },
+        {
+          "id": "OBL-TRK-DES-AUDIT",
+          "result": "partial",
+          "required_contract": "Define user scope, audit evidence, cache invalidation, and concurrent request behavior."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-VERSION-COMPATIBILITY-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-TRACCAR-TOKEN-REVOCATION",
+      "stage": "coding_delivery",
+      "source": {
+        "repository": "traccar/traccar",
+        "pinned_ref": "8d082fbbcb59536cb54bfe4e4e533832b1e44bbf",
+        "source_paths": [
+          "src/main/java/org/traccar/api/BaseObjectResource.java",
+          "src/main/java/org/traccar/api/resource/OidcResource.java"
+        ]
+      },
+      "captured_outcome": "Track issued user tokens and allow authorized invalidation so leaked or annually rotated school-bus tracking links can be revoked without deleting and recreating user accounts.",
+      "artifact_projection": "Agent handoff source probe and test projection",
+      "risk_signals": [
+        "security",
+        "shared_link",
+        "privacy",
+        "backward_compatibility"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-TRK-CODE-PROBE",
+          "result": "partial",
+          "required_contract": "Probe pinned authentication, user-resource, permission, storage, and migration code before naming the implementation path."
+        },
+        {
+          "id": "OBL-TRK-CODE-TEST",
+          "result": "partial",
+          "required_contract": "Test leakage response, revocation immediacy, cross-user denial, rotation, expiry, and legacy-token behavior."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-VERSION-COMPATIBILITY-001"
+      ],
+      "not_proven": [
+        "complete repository build",
+        "implemented slice",
+        "executed and accepted AC",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-APPSMITH-REUSABLE-WIDGET",
+      "stage": "requirement",
+      "source": {
+        "repository": "appsmithorg/appsmith",
+        "pinned_ref": "315b36c78bfa672dc7b5f428e0b1e8494f0f0025",
+        "source_paths": [
+          ".cursor/docs/references/codebase-map.md",
+          "app/server/appsmith-server/src/main/java/com/appsmith/server/widgets/refactors/WidgetRefactorUtil.java",
+          "app/client/src/sagas/WidgetSelectionSagas.ts"
+        ]
+      },
+      "captured_outcome": "Let builders create configurable and styleable reusable widgets, compose them with APIs, reuse them in future apps, and control how later package changes propagate to consuming applications.",
+      "artifact_projection": "governed_truth: intake/clarification slice",
+      "risk_signals": [
+        "dependency_versioning",
+        "propagation",
+        "permissions",
+        "low_code_runtime"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-APP-REQ-REUSE",
+          "result": "partial",
+          "required_contract": "Define create, publish, discover, install, configure, update, and detach outcomes for a reusable widget package."
+        },
+        {
+          "id": "OBL-APP-REQ-PROPAGATE",
+          "result": "partial",
+          "required_contract": "Resolve automatic propagation versus pinned versions and protect consuming app behavior."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-VERSION-COMPATIBILITY-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-APPSMITH-REUSABLE-WIDGET",
+      "stage": "design",
+      "source": {
+        "repository": "appsmithorg/appsmith",
+        "pinned_ref": "315b36c78bfa672dc7b5f428e0b1e8494f0f0025",
+        "source_paths": [
+          ".cursor/docs/references/codebase-map.md",
+          "app/server/appsmith-server/src/main/java/com/appsmith/server/widgets/refactors/WidgetRefactorUtil.java",
+          "app/client/src/sagas/WidgetSelectionSagas.ts"
+        ]
+      },
+      "captured_outcome": "Let builders create configurable and styleable reusable widgets, compose them with APIs, reuse them in future apps, and control how later package changes propagate to consuming applications.",
+      "artifact_projection": "Product Truth module fragment",
+      "risk_signals": [
+        "dependency_versioning",
+        "propagation",
+        "permissions",
+        "low_code_runtime"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-APP-DES-OWNERSHIP",
+          "result": "partial",
+          "required_contract": "Model package ownership, versions, dependencies, permissions, bindings, and app-local overrides."
+        },
+        {
+          "id": "OBL-APP-DES-FAILURE",
+          "result": "partial",
+          "required_contract": "Define incompatible update, missing API, deleted package, rollback, and fork behavior."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-VERSION-COMPATIBILITY-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-APPSMITH-REUSABLE-WIDGET",
+      "stage": "coding_delivery",
+      "source": {
+        "repository": "appsmithorg/appsmith",
+        "pinned_ref": "315b36c78bfa672dc7b5f428e0b1e8494f0f0025",
+        "source_paths": [
+          ".cursor/docs/references/codebase-map.md",
+          "app/server/appsmith-server/src/main/java/com/appsmith/server/widgets/refactors/WidgetRefactorUtil.java",
+          "app/client/src/sagas/WidgetSelectionSagas.ts"
+        ]
+      },
+      "captured_outcome": "Let builders create configurable and styleable reusable widgets, compose them with APIs, reuse them in future apps, and control how later package changes propagate to consuming applications.",
+      "artifact_projection": "Agent handoff source probe and test projection",
+      "risk_signals": [
+        "dependency_versioning",
+        "propagation",
+        "permissions",
+        "low_code_runtime"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-APP-CODE-PROBE",
+          "result": "partial",
+          "required_contract": "Use the pinned codebase map and probe client/server widget ownership before proposing new package boundaries."
+        },
+        {
+          "id": "OBL-APP-CODE-TEST",
+          "result": "partial",
+          "required_contract": "Test package version pinning, propagation, bindings, permission denial, rollback, and existing app compatibility."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-VERSION-COMPATIBILITY-001"
+      ],
+      "not_proven": [
+        "complete repository build",
+        "implemented slice",
+        "executed and accepted AC",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-SUPERSET-THEMING",
+      "stage": "requirement",
+      "source": {
+        "repository": "apache/superset",
+        "pinned_ref": "3818152191286f3d6e35f7273a17fa3048611641",
+        "source_paths": [
+          "docs/admin_docs/configuration/theming.mdx",
+          "superset-frontend/packages/superset-ui-core/src/components/ThemedAgGridReact/index.tsx",
+          "superset-frontend/src/features/home/RightMenu.tsx"
+        ]
+      },
+      "captured_outcome": "Establish a coherent theme object across application components and chart plugins, preserve public interfaces and compatibility, and use visual regression evidence to prevent partial or unreadable theming.",
+      "artifact_projection": "governed_truth: intake/clarification slice",
+      "risk_signals": [
+        "public_interface",
+        "plugin_ecosystem",
+        "accessibility",
+        "visual_regression"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-SUP-REQ-COVERAGE",
+          "result": "partial",
+          "required_contract": "Define which application surfaces, chart plugins, and extension interfaces must consume the theme."
+        },
+        {
+          "id": "OBL-SUP-REQ-COMPAT",
+          "result": "partial",
+          "required_contract": "Define compatibility, defaults, override precedence, migration, and rejected alternatives."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-VERSION-COMPATIBILITY-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-SUPERSET-THEMING",
+      "stage": "design",
+      "source": {
+        "repository": "apache/superset",
+        "pinned_ref": "3818152191286f3d6e35f7273a17fa3048611641",
+        "source_paths": [
+          "docs/admin_docs/configuration/theming.mdx",
+          "superset-frontend/packages/superset-ui-core/src/components/ThemedAgGridReact/index.tsx",
+          "superset-frontend/src/features/home/RightMenu.tsx"
+        ]
+      },
+      "captured_outcome": "Establish a coherent theme object across application components and chart plugins, preserve public interfaces and compatibility, and use visual regression evidence to prevent partial or unreadable theming.",
+      "artifact_projection": "Product Truth module fragment",
+      "risk_signals": [
+        "public_interface",
+        "plugin_ecosystem",
+        "accessibility",
+        "visual_regression"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-SUP-DES-TOKENS",
+          "result": "partial",
+          "required_contract": "Model semantic tokens, component mappings, plugin contracts, fallbacks, and administrator overrides."
+        },
+        {
+          "id": "OBL-SUP-DES-A11Y",
+          "result": "partial",
+          "required_contract": "Define contrast, focus, charts, exports, and visual-regression acceptance across light and dark themes."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-VERSION-COMPATIBILITY-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-SUPERSET-THEMING",
+      "stage": "coding_delivery",
+      "source": {
+        "repository": "apache/superset",
+        "pinned_ref": "3818152191286f3d6e35f7273a17fa3048611641",
+        "source_paths": [
+          "docs/admin_docs/configuration/theming.mdx",
+          "superset-frontend/packages/superset-ui-core/src/components/ThemedAgGridReact/index.tsx",
+          "superset-frontend/src/features/home/RightMenu.tsx"
+        ]
+      },
+      "captured_outcome": "Establish a coherent theme object across application components and chart plugins, preserve public interfaces and compatibility, and use visual regression evidence to prevent partial or unreadable theming.",
+      "artifact_projection": "Agent handoff source probe and test projection",
+      "risk_signals": [
+        "public_interface",
+        "plugin_ecosystem",
+        "accessibility",
+        "visual_regression"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-SUP-CODE-PROBE",
+          "result": "partial",
+          "required_contract": "Probe pinned theming documentation, core theme types, representative components, plugins, and test infrastructure."
+        },
+        {
+          "id": "OBL-SUP-CODE-TEST",
+          "result": "partial",
+          "required_contract": "Require type compatibility, representative plugin tests, accessibility checks, and visual regression evidence."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-VERSION-COMPATIBILITY-001"
+      ],
+      "not_proven": [
+        "complete repository build",
+        "implemented slice",
+        "executed and accepted AC",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-FIREFLY-BANK-IMPORT",
+      "stage": "requirement",
+      "source": {
+        "repository": "firefly-iii/data-importer",
+        "pinned_ref": "d48e235928663f5e0747973f8442a3cb3971a1e8",
+        "source_paths": [
+          "app/Http/Controllers/Import/ConfigurationController.php",
+          "app/Services/Nordigen/Authentication/SecretManager.php",
+          "app/Services/Nordigen/Conversion/Routine/TransactionProcessor.php"
+        ]
+      },
+      "captured_outcome": "Add an alternative open-banking provider that authenticates linked accounts and imports balances and transactions while handling provider sessions, secrets, consent, expiry, and duplicate data safely.",
+      "artifact_projection": "governed_truth: intake/clarification slice",
+      "risk_signals": [
+        "financial_data",
+        "oauth",
+        "external_provider",
+        "reconciliation",
+        "privacy"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-FF-REQ-CONSENT",
+          "result": "partial",
+          "required_contract": "Define provider setup, user consent, redirect, linked-account selection, session renewal, and disconnect behavior."
+        },
+        {
+          "id": "OBL-FF-REQ-IMPORT",
+          "result": "partial",
+          "required_contract": "Define balances and transaction import, date windows, duplicates, partial failure, and re-run behavior."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-FEDERATED-RECONCILIATION-001",
+        "PAT-MONEY-SETTLEMENT-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-FIREFLY-BANK-IMPORT",
+      "stage": "design",
+      "source": {
+        "repository": "firefly-iii/data-importer",
+        "pinned_ref": "d48e235928663f5e0747973f8442a3cb3971a1e8",
+        "source_paths": [
+          "app/Http/Controllers/Import/ConfigurationController.php",
+          "app/Services/Nordigen/Authentication/SecretManager.php",
+          "app/Services/Nordigen/Conversion/Routine/TransactionProcessor.php"
+        ]
+      },
+      "captured_outcome": "Add an alternative open-banking provider that authenticates linked accounts and imports balances and transactions while handling provider sessions, secrets, consent, expiry, and duplicate data safely.",
+      "artifact_projection": "Product Truth module fragment",
+      "risk_signals": [
+        "financial_data",
+        "oauth",
+        "external_provider",
+        "reconciliation",
+        "privacy"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-FF-DES-SECURITY",
+          "result": "partial",
+          "required_contract": "Separate secrets, provider session, linked accounts, import jobs, consent, and audit with least privilege."
+        },
+        {
+          "id": "OBL-FF-DES-RECONCILE",
+          "result": "partial",
+          "required_contract": "Define provider identifiers, idempotency, deduplication, reconciliation, rate limits, and expired-session recovery."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-FEDERATED-RECONCILIATION-001",
+        "PAT-MONEY-SETTLEMENT-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-FIREFLY-BANK-IMPORT",
+      "stage": "coding_delivery",
+      "source": {
+        "repository": "firefly-iii/data-importer",
+        "pinned_ref": "d48e235928663f5e0747973f8442a3cb3971a1e8",
+        "source_paths": [
+          "app/Http/Controllers/Import/ConfigurationController.php",
+          "app/Services/Nordigen/Authentication/SecretManager.php",
+          "app/Services/Nordigen/Conversion/Routine/TransactionProcessor.php"
+        ]
+      },
+      "captured_outcome": "Add an alternative open-banking provider that authenticates linked accounts and imports balances and transactions while handling provider sessions, secrets, consent, expiry, and duplicate data safely.",
+      "artifact_projection": "Agent handoff source probe and test projection",
+      "risk_signals": [
+        "financial_data",
+        "oauth",
+        "external_provider",
+        "reconciliation",
+        "privacy"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-FF-CODE-PROBE",
+          "result": "partial",
+          "required_contract": "Probe the pinned importer provider interfaces, configuration, jobs, secret handling, and tests before selecting files."
+        },
+        {
+          "id": "OBL-FF-CODE-TEST",
+          "result": "partial",
+          "required_contract": "Test consent callback, expiry, duplicate transactions, partial account failure, retry, redaction, and disconnect."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-FEDERATED-RECONCILIATION-001",
+        "PAT-MONEY-SETTLEMENT-001"
+      ],
+      "not_proven": [
+        "complete repository build",
+        "implemented slice",
+        "executed and accepted AC",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-ORANGEHRM-PASSWORD-POLICY",
+      "stage": "requirement",
+      "source": {
+        "repository": "orangehrm/orangehrm",
+        "pinned_ref": "56e23b3b09e7af29317a0943523b825843fff527",
+        "source_paths": [
+          "src/client/src/core/util/composable/usePasswordPolicy.ts",
+          "src/client/src/core/components/inputs/PasswordInput.vue",
+          "src/plugins/orangehrmAuthenticationPlugin/Service/PasswordStrengthService.php",
+          "src/plugins/orangehrmAuthenticationPlugin/PublicApi/PasswordStrengthValidationAPI.php"
+        ]
+      },
+      "captured_outcome": "Provide an administrator UI to configure password policy and consistently enforce the selected policy whenever users create or reset passwords.",
+      "artifact_projection": "unified_prd: intake/clarification slice",
+      "risk_signals": [
+        "security",
+        "admin_permission",
+        "policy_versioning"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-OHR-REQ-CONFIG",
+          "result": "partial",
+          "required_contract": "Define authorized administrator policy viewing, editing, validation, save result, and audit evidence."
+        },
+        {
+          "id": "OBL-OHR-REQ-ENFORCE",
+          "result": "partial",
+          "required_contract": "Define enforcement for create, reset, change, invitation, and existing-session paths without client-only security."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-VERSION-COMPATIBILITY-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-ORANGEHRM-PASSWORD-POLICY",
+      "stage": "design",
+      "source": {
+        "repository": "orangehrm/orangehrm",
+        "pinned_ref": "56e23b3b09e7af29317a0943523b825843fff527",
+        "source_paths": [
+          "src/client/src/core/util/composable/usePasswordPolicy.ts",
+          "src/client/src/core/components/inputs/PasswordInput.vue",
+          "src/plugins/orangehrmAuthenticationPlugin/Service/PasswordStrengthService.php",
+          "src/plugins/orangehrmAuthenticationPlugin/PublicApi/PasswordStrengthValidationAPI.php"
+        ]
+      },
+      "captured_outcome": "Provide an administrator UI to configure password policy and consistently enforce the selected policy whenever users create or reset passwords.",
+      "artifact_projection": "unified PRD vertical module slice",
+      "risk_signals": [
+        "security",
+        "admin_permission",
+        "policy_versioning"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-OHR-DES-POLICY",
+          "result": "partial",
+          "required_contract": "Model policy versions, defaults, tenant scope, effective time, existing-user treatment, and rollback."
+        },
+        {
+          "id": "OBL-OHR-DES-PERMISSION",
+          "result": "partial",
+          "required_contract": "Keep server enforcement authoritative and define admin permission, audit, and sensitive-value handling."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-VERSION-COMPATIBILITY-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-TWENTY-ROLE-NAVIGATION",
+      "stage": "requirement",
+      "source": {
+        "repository": "twentyhq/twenty",
+        "pinned_ref": "983f03adbe2309951ed17c548503db17215f02bf",
+        "source_paths": [
+          "packages/twenty-front/src/modules/settings/roles/role-permissions/object-level-permissions/components/SettingsRolePermissionsObjectLevelTableRow.tsx",
+          "packages/twenty-server/src/engine/metadata-modules/navigation-menu-item/services/navigation-menu-item-record-identifier.service.ts",
+          "packages/twenty-front/src/modules/navigation/components/MobileNavigationBar.tsx"
+        ]
+      },
+      "captured_outcome": "Show every standard or custom object the current role may view in navigation, including large object/role configurations, without confusing navigation visibility with row-level data access.",
+      "artifact_projection": "unified_prd: intake/clarification slice",
+      "risk_signals": [
+        "role_permission",
+        "custom_objects",
+        "navigation",
+        "tenant_isolation"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-TW-REQ-VISIBLE",
+          "result": "partial",
+          "required_contract": "All objects with effective view permission appear through a usable navigation path at tested scale."
+        },
+        {
+          "id": "OBL-TW-REQ-SCOPE",
+          "result": "partial",
+          "required_contract": "Do not infer row-level access or broaden object data access from navigation visibility."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-TWENTY-ROLE-NAVIGATION",
+      "stage": "design",
+      "source": {
+        "repository": "twentyhq/twenty",
+        "pinned_ref": "983f03adbe2309951ed17c548503db17215f02bf",
+        "source_paths": [
+          "packages/twenty-front/src/modules/settings/roles/role-permissions/object-level-permissions/components/SettingsRolePermissionsObjectLevelTableRow.tsx",
+          "packages/twenty-server/src/engine/metadata-modules/navigation-menu-item/services/navigation-menu-item-record-identifier.service.ts",
+          "packages/twenty-front/src/modules/navigation/components/MobileNavigationBar.tsx"
+        ]
+      },
+      "captured_outcome": "Show every standard or custom object the current role may view in navigation, including large object/role configurations, without confusing navigation visibility with row-level data access.",
+      "artifact_projection": "unified PRD vertical module slice",
+      "risk_signals": [
+        "role_permission",
+        "custom_objects",
+        "navigation",
+        "tenant_isolation"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-TW-DES-DERIVE",
+          "result": "partial",
+          "required_contract": "Derive navigation from effective role/object permission with deterministic ordering, overflow, and search behavior."
+        },
+        {
+          "id": "OBL-TW-DES-CHANGE",
+          "result": "partial",
+          "required_contract": "Define cache invalidation and visible refresh after role, object, workspace, or navigation configuration changes."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-TWENTY-ROLE-NAVIGATION",
+      "stage": "coding_delivery",
+      "source": {
+        "repository": "twentyhq/twenty",
+        "pinned_ref": "983f03adbe2309951ed17c548503db17215f02bf",
+        "source_paths": [
+          "packages/twenty-front/src/modules/settings/roles/role-permissions/object-level-permissions/components/SettingsRolePermissionsObjectLevelTableRow.tsx",
+          "packages/twenty-server/src/engine/metadata-modules/navigation-menu-item/services/navigation-menu-item-record-identifier.service.ts",
+          "packages/twenty-front/src/modules/navigation/components/MobileNavigationBar.tsx"
+        ]
+      },
+      "captured_outcome": "Show every standard or custom object the current role may view in navigation, including large object/role configurations, without confusing navigation visibility with row-level data access.",
+      "artifact_projection": "Agent handoff source probe and test projection",
+      "risk_signals": [
+        "role_permission",
+        "custom_objects",
+        "navigation",
+        "tenant_isolation"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-TW-CODE-PROBE",
+          "result": "partial",
+          "required_contract": "Probe pinned permission tables, server navigation identifiers, desktop/mobile navigation, and metadata caching before editing."
+        },
+        {
+          "id": "OBL-TW-CODE-TEST",
+          "result": "partial",
+          "required_contract": "Test many custom objects and roles, permission changes, mobile/desktop parity, direct URL access, and no data-scope expansion."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001"
+      ],
+      "not_proven": [
+        "complete repository build",
+        "implemented slice",
+        "executed and accepted AC",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-OPENEMS-HISTORIC-AVERAGE",
+      "stage": "requirement",
+      "source": {
+        "repository": "OpenEMS/openems",
+        "pinned_ref": "e59989de00fa45c7d31ec008084511d8ca679a44",
+        "source_paths": [
+          "doc/modules/ROOT/pages/ui/implementing-a-widget/components/chart.adoc",
+          "ui/src/app/shared/components/shared/testing/channels.spec.ts",
+          "ui/src/app/edge/history/common/energy/chart/channels.spec.ts"
+        ]
+      },
+      "captured_outcome": "Historical power averages must account for values persisting between sparse change-only samples instead of averaging stored rows, with explicit time range, resolution, gap, and boundary semantics.",
+      "artifact_projection": "unified_prd: intake/clarification slice",
+      "risk_signals": [
+        "metric_caliber",
+        "sparse_timeseries",
+        "energy_control",
+        "data_quality"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-OE-REQ-CALIBER",
+          "result": "partial",
+          "required_contract": "Define time-weighted average caliber for sparse change-only samples and requested resolution."
+        },
+        {
+          "id": "OBL-OE-REQ-GAPS",
+          "result": "partial",
+          "required_contract": "Define leading gaps, trailing persistence, stale limits, nulls, timezone, and query-boundary behavior."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-METRIC-CALIBER-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-OPENEMS-HISTORIC-AVERAGE",
+      "stage": "design",
+      "source": {
+        "repository": "OpenEMS/openems",
+        "pinned_ref": "e59989de00fa45c7d31ec008084511d8ca679a44",
+        "source_paths": [
+          "doc/modules/ROOT/pages/ui/implementing-a-widget/components/chart.adoc",
+          "ui/src/app/shared/components/shared/testing/channels.spec.ts",
+          "ui/src/app/edge/history/common/energy/chart/channels.spec.ts"
+        ]
+      },
+      "captured_outcome": "Historical power averages must account for values persisting between sparse change-only samples instead of averaging stored rows, with explicit time range, resolution, gap, and boundary semantics.",
+      "artifact_projection": "unified PRD vertical module slice",
+      "risk_signals": [
+        "metric_caliber",
+        "sparse_timeseries",
+        "energy_control",
+        "data_quality"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-OE-DES-OWNER",
+          "result": "partial",
+          "required_contract": "Assign one backend metric owner so API, chart, export, and report use the same aggregation semantics."
+        },
+        {
+          "id": "OBL-OE-DES-QUALITY",
+          "result": "partial",
+          "required_contract": "Expose data-quality or incomplete-window behavior instead of fabricating persisted values beyond policy."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-METRIC-CALIBER-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-OPENEMS-HISTORIC-AVERAGE",
+      "stage": "coding_delivery",
+      "source": {
+        "repository": "OpenEMS/openems",
+        "pinned_ref": "e59989de00fa45c7d31ec008084511d8ca679a44",
+        "source_paths": [
+          "doc/modules/ROOT/pages/ui/implementing-a-widget/components/chart.adoc",
+          "ui/src/app/shared/components/shared/testing/channels.spec.ts",
+          "ui/src/app/edge/history/common/energy/chart/channels.spec.ts"
+        ]
+      },
+      "captured_outcome": "Historical power averages must account for values persisting between sparse change-only samples instead of averaging stored rows, with explicit time range, resolution, gap, and boundary semantics.",
+      "artifact_projection": "Agent handoff source probe and test projection",
+      "risk_signals": [
+        "metric_caliber",
+        "sparse_timeseries",
+        "energy_control",
+        "data_quality"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-OE-CODE-PROBE",
+          "result": "partial",
+          "required_contract": "Probe pinned historic query implementation and channel/chart tests before choosing Influx or UI changes."
+        },
+        {
+          "id": "OBL-OE-CODE-TEST",
+          "result": "partial",
+          "required_contract": "Test irregular samples, constant spans, empty windows, first/last boundaries, timezone, resolutions, and legacy query parity."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-METRIC-CALIBER-001"
+      ],
+      "not_proven": [
+        "complete repository build",
+        "implemented slice",
+        "executed and accepted AC",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-RMF-FLEET-TENANCY",
+      "stage": "requirement",
+      "source": {
+        "repository": "open-rmf/rmf-web",
+        "pinned_ref": "9a4fb9eb0ed58cc77a98913a7651e2cfd88822bb",
+        "source_paths": [
+          "packages/api-server/api_server/authenticator.py",
+          "packages/api-server/api_server/models/user.py",
+          "packages/rmf-dashboard-framework/examples/keycloak/api_server_config.py"
+        ]
+      },
+      "captured_outcome": "Filter robot fleets, tasks, and allowed actions by department/fleet identity and role claims across identity provider, API, and dashboard while making the feature opt-in for existing deployments.",
+      "artifact_projection": "unified_prd: intake/clarification slice",
+      "risk_signals": [
+        "robot_control",
+        "multi_tenant",
+        "jwt_claims",
+        "backward_compatibility",
+        "safety"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-RMF-REQ-SCOPE",
+          "result": "partial",
+          "required_contract": "Define fleet membership, supervisor/user actions, data visibility, task ownership, and cross-fleet denial."
+        },
+        {
+          "id": "OBL-RMF-REQ-OPTIN",
+          "result": "partial",
+          "required_contract": "Existing deployments without fleet claims remain functional through an explicit opt-in and migration policy."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-VERSION-COMPATIBILITY-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-RMF-FLEET-TENANCY",
+      "stage": "design",
+      "source": {
+        "repository": "open-rmf/rmf-web",
+        "pinned_ref": "9a4fb9eb0ed58cc77a98913a7651e2cfd88822bb",
+        "source_paths": [
+          "packages/api-server/api_server/authenticator.py",
+          "packages/api-server/api_server/models/user.py",
+          "packages/rmf-dashboard-framework/examples/keycloak/api_server_config.py"
+        ]
+      },
+      "captured_outcome": "Filter robot fleets, tasks, and allowed actions by department/fleet identity and role claims across identity provider, API, and dashboard while making the feature opt-in for existing deployments.",
+      "artifact_projection": "unified PRD vertical module slice",
+      "risk_signals": [
+        "robot_control",
+        "multi_tenant",
+        "jwt_claims",
+        "backward_compatibility",
+        "safety"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-RMF-DES-INTERSECT",
+          "result": "partial",
+          "required_contract": "Intersect authenticated fleet scope, role permission, endpoint, task, websocket, and robot command authorization."
+        },
+        {
+          "id": "OBL-RMF-DES-SAFE",
+          "result": "partial",
+          "required_contract": "Missing, stale, or conflicting claims fail safely without leaking other fleets or silently hiding operational incidents."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-VERSION-COMPATIBILITY-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-RMF-FLEET-TENANCY",
+      "stage": "coding_delivery",
+      "source": {
+        "repository": "open-rmf/rmf-web",
+        "pinned_ref": "9a4fb9eb0ed58cc77a98913a7651e2cfd88822bb",
+        "source_paths": [
+          "packages/api-server/api_server/authenticator.py",
+          "packages/api-server/api_server/models/user.py",
+          "packages/rmf-dashboard-framework/examples/keycloak/api_server_config.py"
+        ]
+      },
+      "captured_outcome": "Filter robot fleets, tasks, and allowed actions by department/fleet identity and role claims across identity provider, API, and dashboard while making the feature opt-in for existing deployments.",
+      "artifact_projection": "Agent handoff source probe and test projection",
+      "risk_signals": [
+        "robot_control",
+        "multi_tenant",
+        "jwt_claims",
+        "backward_compatibility",
+        "safety"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-RMF-CODE-PROBE",
+          "result": "partial",
+          "required_contract": "Probe pinned authenticator, user model, API routes, websocket/event paths, Keycloak example, and dashboard stores."
+        },
+        {
+          "id": "OBL-RMF-CODE-TEST",
+          "result": "partial",
+          "required_contract": "Test opt-in off/on, missing claim, two fleets, supervisor/user roles, event filtering, command denial, and upgrade compatibility."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-VERSION-COMPATIBILITY-001"
+      ],
+      "not_proven": [
+        "complete repository build",
+        "implemented slice",
+        "executed and accepted AC",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-NEXTCLOUD-FEDERATED-CALENDAR",
+      "stage": "requirement",
+      "source": {
+        "repository": "nextcloud/server",
+        "pinned_ref": "ff5db606ed5b778caa7901bdd3b725714d904b07",
+        "source_paths": [
+          "apps/dav/lib/DAV/Sharing/Backend.php",
+          "apps/dav/lib/CalDAV/Federation/FederatedCalendarAuth.php",
+          "apps/dav/lib/CalDAV/Federation/CalendarFederationProvider.php"
+        ]
+      },
+      "captured_outcome": "Extend cross-instance federation beyond files so users can share calendars and address books with explicit invitation, permission, synchronization, revocation, and remote-instance failure behavior.",
+      "artifact_projection": "governed_truth: intake/clarification slice",
+      "risk_signals": [
+        "federation",
+        "privacy",
+        "cross_instance",
+        "sync_conflict"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-NC-REQ-LIFECYCLE",
+          "result": "partial",
+          "required_contract": "Define invite, accept, decline, sync, permission change, revoke, remote deletion, and disconnect behavior."
+        },
+        {
+          "id": "OBL-NC-REQ-TYPES",
+          "result": "partial",
+          "required_contract": "Separate calendar and address-book object, permission, conflict, recurrence, and privacy semantics."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-FEDERATED-RECONCILIATION-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-NEXTCLOUD-FEDERATED-CALENDAR",
+      "stage": "design",
+      "source": {
+        "repository": "nextcloud/server",
+        "pinned_ref": "ff5db606ed5b778caa7901bdd3b725714d904b07",
+        "source_paths": [
+          "apps/dav/lib/DAV/Sharing/Backend.php",
+          "apps/dav/lib/CalDAV/Federation/FederatedCalendarAuth.php",
+          "apps/dav/lib/CalDAV/Federation/CalendarFederationProvider.php"
+        ]
+      },
+      "captured_outcome": "Extend cross-instance federation beyond files so users can share calendars and address books with explicit invitation, permission, synchronization, revocation, and remote-instance failure behavior.",
+      "artifact_projection": "Product Truth module fragment",
+      "risk_signals": [
+        "federation",
+        "privacy",
+        "cross_instance",
+        "sync_conflict"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-NC-DES-TRUST",
+          "result": "partial",
+          "required_contract": "Model remote identity, trust, capability discovery, token/auth lifecycle, object mapping, and audit."
+        },
+        {
+          "id": "OBL-NC-DES-CONFLICT",
+          "result": "partial",
+          "required_contract": "Define ordering, duplicate delivery, concurrent edits, remote outage, reconciliation, and user-visible stale state."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-FEDERATED-RECONCILIATION-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-NEXTCLOUD-FEDERATED-CALENDAR",
+      "stage": "coding_delivery",
+      "source": {
+        "repository": "nextcloud/server",
+        "pinned_ref": "ff5db606ed5b778caa7901bdd3b725714d904b07",
+        "source_paths": [
+          "apps/dav/lib/DAV/Sharing/Backend.php",
+          "apps/dav/lib/CalDAV/Federation/FederatedCalendarAuth.php",
+          "apps/dav/lib/CalDAV/Federation/CalendarFederationProvider.php"
+        ]
+      },
+      "captured_outcome": "Extend cross-instance federation beyond files so users can share calendars and address books with explicit invitation, permission, synchronization, revocation, and remote-instance failure behavior.",
+      "artifact_projection": "Agent handoff source probe and test projection",
+      "risk_signals": [
+        "federation",
+        "privacy",
+        "cross_instance",
+        "sync_conflict"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-NC-CODE-PROBE",
+          "result": "partial",
+          "required_contract": "Probe pinned DAV sharing backend, CalDAV federation auth/entity/provider/config, existing federation tests, and migrations."
+        },
+        {
+          "id": "OBL-NC-CODE-TEST",
+          "result": "partial",
+          "required_contract": "Test two instances, permissions, recurrence/contact fields, revocation, remote outage, duplicate sync, conflict, and no cross-share leakage."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-FEDERATED-RECONCILIATION-001"
+      ],
+      "not_proven": [
+        "complete repository build",
+        "implemented slice",
+        "executed and accepted AC",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-QLOAPPS-OVERBOOKING-API",
+      "stage": "requirement",
+      "source": {
+        "repository": "Qloapps/QloApps",
+        "pinned_ref": "5b4d65cbb8570a4ba46364ee0f2ded79d294ab84",
+        "source_paths": [
+          "modules/hotelreservationsystem/classes/HotelBookingDetail.php",
+          "modules/hotelreservationsystem/CHANGELOG.txt",
+          "classes/order/OrderState.php"
+        ]
+      },
+      "captured_outcome": "Booking webservice availability must honor the configured overbooking policy consistently with other channels while preserving capacity limits, date/room-type scope, pricing, and auditable reservation outcomes.",
+      "artifact_projection": "governed_truth: intake/clarification slice",
+      "risk_signals": [
+        "inventory_capacity",
+        "multi_channel",
+        "reservation",
+        "money"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-QLO-REQ-POLICY",
+          "result": "partial",
+          "required_contract": "Define overbooking enablement, limit, room type/property/date scope, authority, and user-visible availability."
+        },
+        {
+          "id": "OBL-QLO-REQ-PARITY",
+          "result": "partial",
+          "required_contract": "Webservice, website, and back-office channels apply the same capacity and pricing policy or declare differences."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-FEDERATED-RECONCILIATION-001",
+        "PAT-MONEY-SETTLEMENT-001",
+        "PAT-QUANTITY-LINEAGE-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-QLOAPPS-OVERBOOKING-API",
+      "stage": "design",
+      "source": {
+        "repository": "Qloapps/QloApps",
+        "pinned_ref": "5b4d65cbb8570a4ba46364ee0f2ded79d294ab84",
+        "source_paths": [
+          "modules/hotelreservationsystem/classes/HotelBookingDetail.php",
+          "modules/hotelreservationsystem/CHANGELOG.txt",
+          "classes/order/OrderState.php"
+        ]
+      },
+      "captured_outcome": "Booking webservice availability must honor the configured overbooking policy consistently with other channels while preserving capacity limits, date/room-type scope, pricing, and auditable reservation outcomes.",
+      "artifact_projection": "Product Truth module fragment",
+      "risk_signals": [
+        "inventory_capacity",
+        "multi_channel",
+        "reservation",
+        "money"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-QLO-DES-INVENTORY",
+          "result": "partial",
+          "required_contract": "Model physical capacity, sellable capacity, booked, held, cancelled, no-show, and overbooked quantities atomically."
+        },
+        {
+          "id": "OBL-QLO-DES-CONTROL",
+          "result": "partial",
+          "required_contract": "Define concurrency, idempotency, compensating cancellation, alerts, audit, and manual override ownership."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-FEDERATED-RECONCILIATION-001",
+        "PAT-MONEY-SETTLEMENT-001",
+        "PAT-QUANTITY-LINEAGE-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-QLOAPPS-OVERBOOKING-API",
+      "stage": "coding_delivery",
+      "source": {
+        "repository": "Qloapps/QloApps",
+        "pinned_ref": "5b4d65cbb8570a4ba46364ee0f2ded79d294ab84",
+        "source_paths": [
+          "modules/hotelreservationsystem/classes/HotelBookingDetail.php",
+          "modules/hotelreservationsystem/CHANGELOG.txt",
+          "classes/order/OrderState.php"
+        ]
+      },
+      "captured_outcome": "Booking webservice availability must honor the configured overbooking policy consistently with other channels while preserving capacity limits, date/room-type scope, pricing, and auditable reservation outcomes.",
+      "artifact_projection": "Agent handoff source probe and test projection",
+      "risk_signals": [
+        "inventory_capacity",
+        "multi_channel",
+        "reservation",
+        "money"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-QLO-CODE-PROBE",
+          "result": "partial",
+          "required_contract": "Probe pinned booking detail, availability/webservice, order state, configuration, and reservation tests before editing."
+        },
+        {
+          "id": "OBL-QLO-CODE-TEST",
+          "result": "partial",
+          "required_contract": "Test disabled/enabled limits, concurrent last room, multi-night/room type, channel parity, cancellation release, price, and duplicate request."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-FEDERATED-RECONCILIATION-001",
+        "PAT-MONEY-SETTLEMENT-001",
+        "PAT-QUANTITY-LINEAGE-001"
+      ],
+      "not_proven": [
+        "complete repository build",
+        "implemented slice",
+        "executed and accepted AC",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-KILLBILL-INVOICE-AMOUNT",
+      "stage": "requirement",
+      "source": {
+        "repository": "killbill/killbill",
+        "pinned_ref": "fcef98343e9893bcf654294fb46643f261c3f887",
+        "source_paths": [
+          "invoice/src/main/resources/org/killbill/billing/invoice/dao/InvoiceSqlDao.sql.stg",
+          "invoice/src/main/java/org/killbill/billing/invoice/dao/InvoiceDao.java",
+          "invoice/src/main/java/org/killbill/billing/invoice/api/InvoiceApiHelper.java"
+        ]
+      },
+      "captured_outcome": "Invoice list and invoice detail APIs must expose the same governed amount and balance semantics for the same committed invoice, with explicit component-loading, void, credit, refund, currency, and migration behavior.",
+      "artifact_projection": "governed_truth: intake/clarification slice",
+      "risk_signals": [
+        "money",
+        "api_consistency",
+        "invoice_caliber",
+        "tenant_isolation"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-KB-REQ-CALIBER",
+          "result": "partial",
+          "required_contract": "Define amount and balance caliber once and require list/detail consistency for identical query options."
+        },
+        {
+          "id": "OBL-KB-REQ-OPTIONS",
+          "result": "partial",
+          "required_contract": "Define component, void, migration, unpaid, credit, refund, currency, and audit option effects without ambiguous zero values."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-METRIC-CALIBER-001",
+        "PAT-MONEY-SETTLEMENT-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-KILLBILL-INVOICE-AMOUNT",
+      "stage": "design",
+      "source": {
+        "repository": "killbill/killbill",
+        "pinned_ref": "fcef98343e9893bcf654294fb46643f261c3f887",
+        "source_paths": [
+          "invoice/src/main/resources/org/killbill/billing/invoice/dao/InvoiceSqlDao.sql.stg",
+          "invoice/src/main/java/org/killbill/billing/invoice/dao/InvoiceDao.java",
+          "invoice/src/main/java/org/killbill/billing/invoice/api/InvoiceApiHelper.java"
+        ]
+      },
+      "captured_outcome": "Invoice list and invoice detail APIs must expose the same governed amount and balance semantics for the same committed invoice, with explicit component-loading, void, credit, refund, currency, and migration behavior.",
+      "artifact_projection": "Product Truth module fragment",
+      "risk_signals": [
+        "money",
+        "api_consistency",
+        "invoice_caliber",
+        "tenant_isolation"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-KB-DES-OWNER",
+          "result": "partial",
+          "required_contract": "Assign calculation ownership and prevent list optimization or partial hydration from changing financial semantics."
+        },
+        {
+          "id": "OBL-KB-DES-AUDIT",
+          "result": "partial",
+          "required_contract": "Preserve tenant scope, invoice/item linkage, rounding, audit, and historical compatibility."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-METRIC-CALIBER-001",
+        "PAT-MONEY-SETTLEMENT-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-KILLBILL-INVOICE-AMOUNT",
+      "stage": "coding_delivery",
+      "source": {
+        "repository": "killbill/killbill",
+        "pinned_ref": "fcef98343e9893bcf654294fb46643f261c3f887",
+        "source_paths": [
+          "invoice/src/main/resources/org/killbill/billing/invoice/dao/InvoiceSqlDao.sql.stg",
+          "invoice/src/main/java/org/killbill/billing/invoice/dao/InvoiceDao.java",
+          "invoice/src/main/java/org/killbill/billing/invoice/api/InvoiceApiHelper.java"
+        ]
+      },
+      "captured_outcome": "Invoice list and invoice detail APIs must expose the same governed amount and balance semantics for the same committed invoice, with explicit component-loading, void, credit, refund, currency, and migration behavior.",
+      "artifact_projection": "Agent handoff source probe and test projection",
+      "risk_signals": [
+        "money",
+        "api_consistency",
+        "invoice_caliber",
+        "tenant_isolation"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-KB-CODE-PROBE",
+          "result": "partial",
+          "required_contract": "Probe pinned invoice/item SQL, DAO, API helper, hydration options, REST resources, and tests before changing queries."
+        },
+        {
+          "id": "OBL-KB-CODE-TEST",
+          "result": "partial",
+          "required_contract": "Test list/detail parity across options, committed/voided/migration invoices, credits/refunds, currencies, tenant isolation, and query performance."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-PERMISSION-001",
+        "PAT-METRIC-CALIBER-001",
+        "PAT-MONEY-SETTLEMENT-001"
+      ],
+      "not_proven": [
+        "complete repository build",
+        "implemented slice",
+        "executed and accepted AC",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-OPENBOXES-BULK-ADJUST",
+      "stage": "requirement",
+      "source": {
+        "repository": "openboxes/openboxes",
+        "pinned_ref": "03548ddcc8138be42458745b86d97f3f80e7f163",
+        "source_paths": [
+          "src/js/components/stock-movement-wizard/modals/AdjustInventoryModal.jsx",
+          "src/main/groovy/org/pih/warehouse/inventory/AdjustStockCommand.groovy",
+          "grails-app/views/inventoryItem/_adjustStock.gsp"
+        ]
+      },
+      "captured_outcome": "Allow authorized warehouse users to bulk establish or adjust stock for newly imported items whose quantity is null, including lot/serial and location data, without bypassing inventory transaction and audit rules.",
+      "artifact_projection": "unified_prd: intake/clarification slice",
+      "risk_signals": [
+        "inventory",
+        "bulk_operation",
+        "lot_serial",
+        "audit",
+        "concurrency"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-OB-REQ-NULL",
+          "result": "partial",
+          "required_contract": "Define null versus zero stock, initial record, adjustment reason, location, lot/serial, and validation behavior."
+        },
+        {
+          "id": "OBL-OB-REQ-BULK",
+          "result": "partial",
+          "required_contract": "Define selection, per-row errors, partial versus atomic completion, permission, and visible summary for bulk adjustment."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-LONG-RUNNING-JOB-001",
+        "PAT-QUANTITY-LINEAGE-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-OPENBOXES-BULK-ADJUST",
+      "stage": "design",
+      "source": {
+        "repository": "openboxes/openboxes",
+        "pinned_ref": "03548ddcc8138be42458745b86d97f3f80e7f163",
+        "source_paths": [
+          "src/js/components/stock-movement-wizard/modals/AdjustInventoryModal.jsx",
+          "src/main/groovy/org/pih/warehouse/inventory/AdjustStockCommand.groovy",
+          "grails-app/views/inventoryItem/_adjustStock.gsp"
+        ]
+      },
+      "captured_outcome": "Allow authorized warehouse users to bulk establish or adjust stock for newly imported items whose quantity is null, including lot/serial and location data, without bypassing inventory transaction and audit rules.",
+      "artifact_projection": "unified PRD vertical module slice",
+      "risk_signals": [
+        "inventory",
+        "bulk_operation",
+        "lot_serial",
+        "audit",
+        "concurrency"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-OB-DES-LEDGER",
+          "result": "partial",
+          "required_contract": "Create inventory ledger transactions rather than directly mutating dashboard quantities, with user, time, reason, and source."
+        },
+        {
+          "id": "OBL-OB-DES-CONSISTENCY",
+          "result": "partial",
+          "required_contract": "Define idempotency, concurrent adjustment, cache/summary refresh, rollback, and reconciliation."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-LONG-RUNNING-JOB-001",
+        "PAT-QUANTITY-LINEAGE-001"
+      ],
+      "not_proven": [
+        "customer-owned decisions",
+        "accountable domain review",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    },
+    {
+      "case_id": "GH-OPENBOXES-BULK-ADJUST",
+      "stage": "coding_delivery",
+      "source": {
+        "repository": "openboxes/openboxes",
+        "pinned_ref": "03548ddcc8138be42458745b86d97f3f80e7f163",
+        "source_paths": [
+          "src/js/components/stock-movement-wizard/modals/AdjustInventoryModal.jsx",
+          "src/main/groovy/org/pih/warehouse/inventory/AdjustStockCommand.groovy",
+          "grails-app/views/inventoryItem/_adjustStock.gsp"
+        ]
+      },
+      "captured_outcome": "Allow authorized warehouse users to bulk establish or adjust stock for newly imported items whose quantity is null, including lot/serial and location data, without bypassing inventory transaction and audit rules.",
+      "artifact_projection": "Agent handoff source probe and test projection",
+      "risk_signals": [
+        "inventory",
+        "bulk_operation",
+        "lot_serial",
+        "audit",
+        "concurrency"
+      ],
+      "obligations": [
+        {
+          "id": "OBL-OB-CODE-PROBE",
+          "result": "partial",
+          "required_contract": "Probe pinned adjustment modal, command, legacy view, service/ledger, permissions, and inventory summary paths."
+        },
+        {
+          "id": "OBL-OB-CODE-TEST",
+          "result": "partial",
+          "required_contract": "Test null/zero, lot/serial, mixed-validity bulk, duplicate submission, concurrency, denial, ledger audit, and summary refresh."
+        }
+      ],
+      "reused_patterns": [
+        "PAT-LONG-RUNNING-JOB-001",
+        "PAT-QUANTITY-LINEAGE-001"
+      ],
+      "not_proven": [
+        "complete repository build",
+        "implemented slice",
+        "executed and accepted AC",
+        "independent repetitions",
+        "token measurement"
+      ],
+      "verdict": "partial"
+    }
+  ],
+  "runs": [
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-CHATWOOT-VOICE-DESIGN-V533-20260722",
+      "case_id": "GH-CHATWOOT-VOICE",
+      "stage": "design",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "98154bbeab2f5ea888dcb61bfd3a35a109ebb9a0"
+      },
+      "input_fingerprint": "gh-chatwoot-voice-design-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-CW-DES-STATE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-CW-DES-TENANT",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-CHATWOOT-VOICE-CODING-V533-20260722",
+      "case_id": "GH-CHATWOOT-VOICE",
+      "stage": "coding_delivery",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "98154bbeab2f5ea888dcb61bfd3a35a109ebb9a0"
+      },
+      "input_fingerprint": "gh-chatwoot-voice-coding_delivery-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-CW-CODE-BASELINE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-CW-CODE-TEST",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-SALEOR-CHANNEL-ID-REQUIREMENT-V533-20260722",
+      "case_id": "GH-SALEOR-CHANNEL-ID",
+      "stage": "requirement",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "697b9ec6ffb93199f62f783e7bf6c550cd3bcf7e"
+      },
+      "input_fingerprint": "gh-saleor-channel-id-requirement-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-SAL-REQ-ID",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-SAL-REQ-COMPAT",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-SALEOR-CHANNEL-ID-CODING-V533-20260722",
+      "case_id": "GH-SALEOR-CHANNEL-ID",
+      "stage": "coding_delivery",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "697b9ec6ffb93199f62f783e7bf6c550cd3bcf7e"
+      },
+      "input_fingerprint": "gh-saleor-channel-id-coding_delivery-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-SAL-CODE-PROBE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-SAL-CODE-CONTRACT",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-OPENEDX-REINDEX-REQUIREMENT-V533-20260722",
+      "case_id": "GH-OPENEDX-REINDEX",
+      "stage": "requirement",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "264ced21b08ac56906d233abf86a1db7d661b0c8"
+      },
+      "input_fingerprint": "gh-openedx-reindex-requirement-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-EDX-REQ-LARGE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-EDX-REQ-RESUME",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-OPENEDX-REINDEX-CODING-V533-20260722",
+      "case_id": "GH-OPENEDX-REINDEX",
+      "stage": "coding_delivery",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "264ced21b08ac56906d233abf86a1db7d661b0c8"
+      },
+      "input_fingerprint": "gh-openedx-reindex-coding_delivery-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-EDX-CODE-PROBE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-EDX-CODE-TEST",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-TRACCAR-TOKEN-REVOCATION-REQUIREMENT-V533-20260722",
+      "case_id": "GH-TRACCAR-TOKEN-REVOCATION",
+      "stage": "requirement",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "8d082fbbcb59536cb54bfe4e4e533832b1e44bbf"
+      },
+      "input_fingerprint": "gh-traccar-token-revocation-requirement-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-TRK-REQ-REVOKE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-TRK-REQ-EXISTING",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-TRACCAR-TOKEN-REVOCATION-DESIGN-V533-20260722",
+      "case_id": "GH-TRACCAR-TOKEN-REVOCATION",
+      "stage": "design",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "8d082fbbcb59536cb54bfe4e4e533832b1e44bbf"
+      },
+      "input_fingerprint": "gh-traccar-token-revocation-design-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-TRK-DES-LIFECYCLE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-TRK-DES-AUDIT",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-TRACCAR-TOKEN-REVOCATION-CODING-V533-20260722",
+      "case_id": "GH-TRACCAR-TOKEN-REVOCATION",
+      "stage": "coding_delivery",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "8d082fbbcb59536cb54bfe4e4e533832b1e44bbf"
+      },
+      "input_fingerprint": "gh-traccar-token-revocation-coding_delivery-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-TRK-CODE-PROBE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-TRK-CODE-TEST",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-APPSMITH-REUSABLE-WIDGET-REQUIREMENT-V533-20260722",
+      "case_id": "GH-APPSMITH-REUSABLE-WIDGET",
+      "stage": "requirement",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "315b36c78bfa672dc7b5f428e0b1e8494f0f0025"
+      },
+      "input_fingerprint": "gh-appsmith-reusable-widget-requirement-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-APP-REQ-REUSE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-APP-REQ-PROPAGATE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-APPSMITH-REUSABLE-WIDGET-DESIGN-V533-20260722",
+      "case_id": "GH-APPSMITH-REUSABLE-WIDGET",
+      "stage": "design",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "315b36c78bfa672dc7b5f428e0b1e8494f0f0025"
+      },
+      "input_fingerprint": "gh-appsmith-reusable-widget-design-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-APP-DES-OWNERSHIP",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-APP-DES-FAILURE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-APPSMITH-REUSABLE-WIDGET-CODING-V533-20260722",
+      "case_id": "GH-APPSMITH-REUSABLE-WIDGET",
+      "stage": "coding_delivery",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "315b36c78bfa672dc7b5f428e0b1e8494f0f0025"
+      },
+      "input_fingerprint": "gh-appsmith-reusable-widget-coding_delivery-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-APP-CODE-PROBE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-APP-CODE-TEST",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-SUPERSET-THEMING-REQUIREMENT-V533-20260722",
+      "case_id": "GH-SUPERSET-THEMING",
+      "stage": "requirement",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "3818152191286f3d6e35f7273a17fa3048611641"
+      },
+      "input_fingerprint": "gh-superset-theming-requirement-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-SUP-REQ-COVERAGE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-SUP-REQ-COMPAT",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-SUPERSET-THEMING-DESIGN-V533-20260722",
+      "case_id": "GH-SUPERSET-THEMING",
+      "stage": "design",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "3818152191286f3d6e35f7273a17fa3048611641"
+      },
+      "input_fingerprint": "gh-superset-theming-design-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-SUP-DES-TOKENS",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-SUP-DES-A11Y",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-SUPERSET-THEMING-CODING-V533-20260722",
+      "case_id": "GH-SUPERSET-THEMING",
+      "stage": "coding_delivery",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "3818152191286f3d6e35f7273a17fa3048611641"
+      },
+      "input_fingerprint": "gh-superset-theming-coding_delivery-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-SUP-CODE-PROBE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-SUP-CODE-TEST",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-FIREFLY-BANK-IMPORT-REQUIREMENT-V533-20260722",
+      "case_id": "GH-FIREFLY-BANK-IMPORT",
+      "stage": "requirement",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "d48e235928663f5e0747973f8442a3cb3971a1e8"
+      },
+      "input_fingerprint": "gh-firefly-bank-import-requirement-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-FF-REQ-CONSENT",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-FF-REQ-IMPORT",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-FIREFLY-BANK-IMPORT-DESIGN-V533-20260722",
+      "case_id": "GH-FIREFLY-BANK-IMPORT",
+      "stage": "design",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "d48e235928663f5e0747973f8442a3cb3971a1e8"
+      },
+      "input_fingerprint": "gh-firefly-bank-import-design-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-FF-DES-SECURITY",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-FF-DES-RECONCILE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-FIREFLY-BANK-IMPORT-CODING-V533-20260722",
+      "case_id": "GH-FIREFLY-BANK-IMPORT",
+      "stage": "coding_delivery",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "d48e235928663f5e0747973f8442a3cb3971a1e8"
+      },
+      "input_fingerprint": "gh-firefly-bank-import-coding_delivery-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-FF-CODE-PROBE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-FF-CODE-TEST",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-ORANGEHRM-PASSWORD-POLICY-REQUIREMENT-V533-20260722",
+      "case_id": "GH-ORANGEHRM-PASSWORD-POLICY",
+      "stage": "requirement",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "56e23b3b09e7af29317a0943523b825843fff527"
+      },
+      "input_fingerprint": "gh-orangehrm-password-policy-requirement-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-OHR-REQ-CONFIG",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-OHR-REQ-ENFORCE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-ORANGEHRM-PASSWORD-POLICY-DESIGN-V533-20260722",
+      "case_id": "GH-ORANGEHRM-PASSWORD-POLICY",
+      "stage": "design",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "56e23b3b09e7af29317a0943523b825843fff527"
+      },
+      "input_fingerprint": "gh-orangehrm-password-policy-design-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-OHR-DES-POLICY",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-OHR-DES-PERMISSION",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-TWENTY-ROLE-NAVIGATION-REQUIREMENT-V533-20260722",
+      "case_id": "GH-TWENTY-ROLE-NAVIGATION",
+      "stage": "requirement",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "983f03adbe2309951ed17c548503db17215f02bf"
+      },
+      "input_fingerprint": "gh-twenty-role-navigation-requirement-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-TW-REQ-VISIBLE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-TW-REQ-SCOPE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-TWENTY-ROLE-NAVIGATION-DESIGN-V533-20260722",
+      "case_id": "GH-TWENTY-ROLE-NAVIGATION",
+      "stage": "design",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "983f03adbe2309951ed17c548503db17215f02bf"
+      },
+      "input_fingerprint": "gh-twenty-role-navigation-design-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-TW-DES-DERIVE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-TW-DES-CHANGE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-TWENTY-ROLE-NAVIGATION-CODING-V533-20260722",
+      "case_id": "GH-TWENTY-ROLE-NAVIGATION",
+      "stage": "coding_delivery",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "983f03adbe2309951ed17c548503db17215f02bf"
+      },
+      "input_fingerprint": "gh-twenty-role-navigation-coding_delivery-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-TW-CODE-PROBE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-TW-CODE-TEST",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-OPENEMS-HISTORIC-AVERAGE-REQUIREMENT-V533-20260722",
+      "case_id": "GH-OPENEMS-HISTORIC-AVERAGE",
+      "stage": "requirement",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "e59989de00fa45c7d31ec008084511d8ca679a44"
+      },
+      "input_fingerprint": "gh-openems-historic-average-requirement-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-OE-REQ-CALIBER",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-OE-REQ-GAPS",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-OPENEMS-HISTORIC-AVERAGE-DESIGN-V533-20260722",
+      "case_id": "GH-OPENEMS-HISTORIC-AVERAGE",
+      "stage": "design",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "e59989de00fa45c7d31ec008084511d8ca679a44"
+      },
+      "input_fingerprint": "gh-openems-historic-average-design-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-OE-DES-OWNER",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-OE-DES-QUALITY",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-OPENEMS-HISTORIC-AVERAGE-CODING-V533-20260722",
+      "case_id": "GH-OPENEMS-HISTORIC-AVERAGE",
+      "stage": "coding_delivery",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "e59989de00fa45c7d31ec008084511d8ca679a44"
+      },
+      "input_fingerprint": "gh-openems-historic-average-coding_delivery-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-OE-CODE-PROBE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-OE-CODE-TEST",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-RMF-FLEET-TENANCY-REQUIREMENT-V533-20260722",
+      "case_id": "GH-RMF-FLEET-TENANCY",
+      "stage": "requirement",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "9a4fb9eb0ed58cc77a98913a7651e2cfd88822bb"
+      },
+      "input_fingerprint": "gh-rmf-fleet-tenancy-requirement-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-RMF-REQ-SCOPE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-RMF-REQ-OPTIN",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-RMF-FLEET-TENANCY-DESIGN-V533-20260722",
+      "case_id": "GH-RMF-FLEET-TENANCY",
+      "stage": "design",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "9a4fb9eb0ed58cc77a98913a7651e2cfd88822bb"
+      },
+      "input_fingerprint": "gh-rmf-fleet-tenancy-design-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-RMF-DES-INTERSECT",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-RMF-DES-SAFE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-RMF-FLEET-TENANCY-CODING-V533-20260722",
+      "case_id": "GH-RMF-FLEET-TENANCY",
+      "stage": "coding_delivery",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "9a4fb9eb0ed58cc77a98913a7651e2cfd88822bb"
+      },
+      "input_fingerprint": "gh-rmf-fleet-tenancy-coding_delivery-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-RMF-CODE-PROBE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-RMF-CODE-TEST",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-NEXTCLOUD-FEDERATED-CALENDAR-REQUIREMENT-V533-20260722",
+      "case_id": "GH-NEXTCLOUD-FEDERATED-CALENDAR",
+      "stage": "requirement",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "ff5db606ed5b778caa7901bdd3b725714d904b07"
+      },
+      "input_fingerprint": "gh-nextcloud-federated-calendar-requirement-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-NC-REQ-LIFECYCLE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-NC-REQ-TYPES",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-NEXTCLOUD-FEDERATED-CALENDAR-DESIGN-V533-20260722",
+      "case_id": "GH-NEXTCLOUD-FEDERATED-CALENDAR",
+      "stage": "design",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "ff5db606ed5b778caa7901bdd3b725714d904b07"
+      },
+      "input_fingerprint": "gh-nextcloud-federated-calendar-design-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-NC-DES-TRUST",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-NC-DES-CONFLICT",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-NEXTCLOUD-FEDERATED-CALENDAR-CODING-V533-20260722",
+      "case_id": "GH-NEXTCLOUD-FEDERATED-CALENDAR",
+      "stage": "coding_delivery",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "ff5db606ed5b778caa7901bdd3b725714d904b07"
+      },
+      "input_fingerprint": "gh-nextcloud-federated-calendar-coding_delivery-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-NC-CODE-PROBE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-NC-CODE-TEST",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-QLOAPPS-OVERBOOKING-API-REQUIREMENT-V533-20260722",
+      "case_id": "GH-QLOAPPS-OVERBOOKING-API",
+      "stage": "requirement",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "5b4d65cbb8570a4ba46364ee0f2ded79d294ab84"
+      },
+      "input_fingerprint": "gh-qloapps-overbooking-api-requirement-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-QLO-REQ-POLICY",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-QLO-REQ-PARITY",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-QLOAPPS-OVERBOOKING-API-DESIGN-V533-20260722",
+      "case_id": "GH-QLOAPPS-OVERBOOKING-API",
+      "stage": "design",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "5b4d65cbb8570a4ba46364ee0f2ded79d294ab84"
+      },
+      "input_fingerprint": "gh-qloapps-overbooking-api-design-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-QLO-DES-INVENTORY",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-QLO-DES-CONTROL",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-QLOAPPS-OVERBOOKING-API-CODING-V533-20260722",
+      "case_id": "GH-QLOAPPS-OVERBOOKING-API",
+      "stage": "coding_delivery",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "5b4d65cbb8570a4ba46364ee0f2ded79d294ab84"
+      },
+      "input_fingerprint": "gh-qloapps-overbooking-api-coding_delivery-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-QLO-CODE-PROBE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-QLO-CODE-TEST",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-KILLBILL-INVOICE-AMOUNT-REQUIREMENT-V533-20260722",
+      "case_id": "GH-KILLBILL-INVOICE-AMOUNT",
+      "stage": "requirement",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "fcef98343e9893bcf654294fb46643f261c3f887"
+      },
+      "input_fingerprint": "gh-killbill-invoice-amount-requirement-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-KB-REQ-CALIBER",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-KB-REQ-OPTIONS",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-KILLBILL-INVOICE-AMOUNT-DESIGN-V533-20260722",
+      "case_id": "GH-KILLBILL-INVOICE-AMOUNT",
+      "stage": "design",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "fcef98343e9893bcf654294fb46643f261c3f887"
+      },
+      "input_fingerprint": "gh-killbill-invoice-amount-design-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-KB-DES-OWNER",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-KB-DES-AUDIT",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-KILLBILL-INVOICE-AMOUNT-CODING-V533-20260722",
+      "case_id": "GH-KILLBILL-INVOICE-AMOUNT",
+      "stage": "coding_delivery",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "fcef98343e9893bcf654294fb46643f261c3f887"
+      },
+      "input_fingerprint": "gh-killbill-invoice-amount-coding_delivery-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-KB-CODE-PROBE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-KB-CODE-TEST",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-OPENBOXES-BULK-ADJUST-REQUIREMENT-V533-20260722",
+      "case_id": "GH-OPENBOXES-BULK-ADJUST",
+      "stage": "requirement",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "03548ddcc8138be42458745b86d97f3f80e7f163"
+      },
+      "input_fingerprint": "gh-openboxes-bulk-adjust-requirement-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-OB-REQ-NULL",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-OB-REQ-BULK",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-OPENBOXES-BULK-ADJUST-DESIGN-V533-20260722",
+      "case_id": "GH-OPENBOXES-BULK-ADJUST",
+      "stage": "design",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "03548ddcc8138be42458745b86d97f3f80e7f163"
+      },
+      "input_fingerprint": "gh-openboxes-bulk-adjust-design-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-OB-DES-LEDGER",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-OB-DES-CONSISTENCY",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    },
+    {
+      "schema_version": "5.0.0",
+      "run_id": "RUN-OPENBOXES-BULK-ADJUST-CODING-V533-20260722",
+      "case_id": "GH-OPENBOXES-BULK-ADJUST",
+      "stage": "coding_delivery",
+      "system": {
+        "skill_version": "5.3.3-rc",
+        "model": "codex-session-model",
+        "model_settings": "single-session-source-snapshot-contract-simulation",
+        "repository_ref": "03548ddcc8138be42458745b86d97f3f80e7f163"
+      },
+      "input_fingerprint": "gh-openboxes-bulk-adjust-coding_delivery-pinned-source-20260722",
+      "repetitions": 1,
+      "trial_evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+      ],
+      "observations": [
+        {
+          "obligation_id": "OBL-OB-CODE-PROBE",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        },
+        {
+          "obligation_id": "OBL-OB-CODE-TEST",
+          "result": "partial",
+          "evidence_refs": [
+            "maintainer/evals/runs/v533-github-exploratory-41.yaml"
+          ],
+          "notes": "单会话契约投影已显式处理；独立重复与真实执行未证明。"
+        }
+      ],
+      "inventions": {
+        "unsupported_business_behaviors": 0,
+        "delivered_business_behaviors": 0,
+        "p0_unsupported": 0
+      },
+      "delivery": {
+        "impacted_acceptance": 0,
+        "failed_impacted_acceptance": 0,
+        "delivered_slices": 0,
+        "reopened_for_spec_mismatch": 0,
+        "accepted_acceptance": 0
+      },
+      "context": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "cross_artifact_switches": 1,
+        "human_navigation_seconds": null
+      },
+      "evidence_refs": [
+        "maintainer/evals/runs/v533-github-exploratory-41.yaml",
+        "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml"
+      ],
+      "status": "completed"
+    }
+  ]
+}
+

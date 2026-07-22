@@ -20,11 +20,15 @@ def build() -> dict[str, Any]:
     catalog = yaml.safe_load((ROOT / "maintainer/evals/github-cases.yaml").read_text(encoding="utf-8"))
     run_map: dict[tuple[str, str], dict[str, Any]] = {}
     for path in sorted((ROOT / "maintainer/evals/runs").glob("*.yaml")):
-        run = yaml.safe_load(path.read_text(encoding="utf-8"))
-        if validate_run(run):
-            continue
-        key = (run["case_id"], run["stage"])
-        run_map[key] = {"path": str(path.relative_to(ROOT)).replace("\\", "/"), "run": run}
+        document = yaml.safe_load(path.read_text(encoding="utf-8"))
+        runs = document.get("runs", []) if isinstance(document, dict) and "runs" in document else [document]
+        for run in runs:
+            if validate_run(run):
+                continue
+            key = (run["case_id"], run["stage"])
+            if key in run_map:
+                raise ValueError(f"duplicate evaluation run for {key[0]}/{key[1]}")
+            run_map[key] = {"path": str(path.relative_to(ROOT)).replace("\\", "/"), "run": run}
 
     rows: list[dict[str, Any]] = []
     counts = {"not_run": 0, "partial": 0, "passed": 0}

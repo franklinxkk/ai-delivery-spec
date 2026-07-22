@@ -50,4 +50,4 @@ with tempfile.TemporaryDirectory(prefix="ads-css-") as temp:
 
 if failures:
     raise SystemExit("\n".join(failures))
-print("PASS: v5.1.0 unified PRD is human-readable, AI-coding complete, and prototype CSS-safe")
+print("PASS: unified PRD compatibility contract is human-readable, AI-coding complete, and prototype CSS-safe")

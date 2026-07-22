@@ -60,4 +60,4 @@ if graph.get("REQ-DEMO-001") != {"ACT-DEMO-001"} or graph.get("AC-DEMO-001") != 
 
 if failures:
     raise SystemExit("\n".join(failures))
-print("PASS: v5.1.0 rejects keyword shells, exposes structural clarification gaps, and traverses trace ledgers")
+print("PASS: semantic compatibility guards reject keyword shells, expose clarification gaps, and traverse trace ledgers")

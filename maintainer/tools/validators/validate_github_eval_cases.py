@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -16,6 +18,12 @@ SOURCE_EVIDENCE = ROOT / "maintainer/evals/evidence/github-source-verification-2
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--snapshot-root", type=Path,
+        help="可选：校验本地按 gh-<case> 命名的固定源码快照，并输出内容指纹",
+    )
+    args = parser.parse_args()
     catalog = yaml.safe_load(CASES.read_text(encoding="utf-8"))
     schema = json.loads((ROOT / "maintainer/schemas/eval-case.schema.json").read_text(encoding="utf-8"))
     failures: list[str] = []
@@ -28,6 +36,9 @@ def main() -> int:
     obligation_ids: set[str] = set()
     domains: set[str] = set()
     shapes: set[str] = set()
+    local_files = 0
+    local_bytes = 0
+    local_digest = hashlib.sha256()
     for case in catalog.get("cases", []):
         case_id = case.get("id")
         if case_id in case_ids:
@@ -44,6 +55,23 @@ def main() -> int:
                 failures.append(f"{case_id} source_paths must be repository-relative: {path}")
             if not path.strip():
                 failures.append(f"{case_id} contains an empty source path")
+            if args.snapshot_root:
+                case_root = (args.snapshot_root / str(case_id).lower()).resolve()
+                source = (case_root / path).resolve()
+                try:
+                    source.relative_to(case_root)
+                except ValueError:
+                    failures.append(f"{case_id} local source escapes its snapshot root: {path}")
+                    continue
+                if not source.is_file():
+                    failures.append(f"{case_id} local source is missing: {path}")
+                    continue
+                payload = source.read_bytes()
+                local_files += 1
+                local_bytes += len(payload)
+                local_digest.update(case_id.encode("utf-8"))
+                local_digest.update(path.encode("utf-8"))
+                local_digest.update(hashlib.sha256(payload).digest())
         for stage, obligations in case.get("stages", {}).items():
             priorities = {item.get("priority") for item in obligations}
             if "P0" not in priorities:
@@ -81,6 +109,11 @@ def main() -> int:
         f"PASS: {len(case_ids)} pinned GitHub cases cover {len(domains)} domains "
         f"and {len(obligation_ids)} requirement/design/coding obligations"
     )
+    if args.snapshot_root:
+        print(
+            f"PASS: local snapshots contain {local_files} declared source files / {local_bytes} bytes; "
+            f"aggregate_sha256={local_digest.hexdigest()}"
+        )
     return 0
 
 

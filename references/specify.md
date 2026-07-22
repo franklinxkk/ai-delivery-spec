@@ -1,193 +1,143 @@
-# Specify The Requirement Baseline
+# 固化需求基线 / Specify The Requirement Baseline
 
-Use this reference to turn accepted and clarified requirements into one
-baseline. The default authority is one unified PRD with an embedded stable-ID
-index. Add independent Product Truth only for scale, repeated change, multiple
-controlled exports or strong audit needs.
+已完成准入和澄清后加载。默认权威是一份统一 PRD 及其稳定 ID 索引；只有规模、反复变更、
+受控多投影或强审计需要时才增加独立 Product Truth。
 
-## Output Language And Reading Contract
+## 输出语言与阅读合同 / Output Language And Reading Contract
 
-The dominant language of the user's current request is the default document
-language. An explicit language request overrides it. Headings, prose, table
-headers, clarification questions and test narratives stay in that language;
-stable IDs, code, API/field names and proper nouns remain unchanged. Source
-titles may remain original, but their meaning is summarized in the document
-language. Generate bilingual content only when explicitly requested. Declare
-`document_language`, `language_source` and `bilingual` in frontmatter.
+文档语言默认跟随用户当前请求，明确语言要求优先。标题、正文、表头、澄清和测试叙述统一；
+稳定 ID、代码、API/字段名和专有名词不翻译。来源标题可保留原文，但要用文档语言解释其含义。
+只有用户明确要求才生成双语。frontmatter 声明 `document_language`、`language_source` 和 `bilingual`。
 
-One PRD uses progressive disclosure: a 30-second summary and task reading map;
-business context and journeys; self-contained vertical module slices; cross-cutting
-contracts; then exact indexes/machine projections. Annexes point to the same IDs
-instead of restating business meaning. A frontend engineer, backend engineer, QA
-or Coding Agent should complete one module by reading its slice plus named indexes,
-without assembling rules from unrelated chapters or asking for missing behavior.
+一份 PRD 采用渐进阅读：30秒摘要与任务阅读地图 → 业务背景与旅程 → 模块完整纵切 → 横切合同
+→ 精确索引/机器投影。附录引用相同 ID，不重复改写业务含义。前端、后端、QA或 Coding Agent
+应能通过一个模块纵切和具名索引完成工作，不必跨章拼规则或再次询问缺失行为。
 
-## Requirement Card Escalation
+## 需求卡升级规则 / Requirement Card Escalation
 
-A card is only for one reversible, role-local change. Keep common outcome, scope,
-story, flow/recovery, rules/permissions, AC and unknowns, then activate only the
-applicable facets: `ui`, `stateful`, `data_submission`, `integration`, `batch_io`,
-or `high_risk`. Each activated facet must be fully specified or explicitly owned
-as unknown; unused facets impose no token cost.
+需求卡只适用于单角色、可逆、局部变化。保留目标、范围、故事、主/恢复流程、规则权限、AC和
+未知项，再按需启用 `ui`、`stateful`、`data_submission`、`integration`、`batch_io`、`high_risk`。
+已启用切面必须完整规格化或登记责任未知项，未启用切面不增加 Token 成本。
 
-Escalate to one unified PRD for any cross-role handoff, cross-module/system edge,
-material state machine, data reporting/submission or metric-caliber behavior,
-batch import/export, approval/audit, external integration, money/privacy/regulation,
-irreversible write, migration or version compatibility. A data-submission request
-is L2 by default because source mapping, validation, submission state, retry,
-idempotency, audit, freshness and reconciliation affect several roles. A trivial
-local label/copy/display change can remain a card.
+出现任一情况即升级为统一 PRD：跨角色交接、跨模块/系统边、实质状态机、数据上报/统计口径、
+批量导入导出、审批审计、外部集成、金钱/隐私/监管、不可逆写入、迁移或版本兼容。
+数据上报默认至少 L2，因为来源映射、校验、提交状态、重试、幂等、审计、时效和对账涉及多角色。
 
-## Source Model
+## 来源模型 / Source Model
 
-`REQ-*` is the scope and traceability authority. When Product Truth is used,
-`schemas/product-truth.schema.json` is its machine contract; the unified PRD is
-the human reading path and approved baseline projection.
-
-Required identity graph:
+`REQ-*` 是范围和追溯权威。启用 Product Truth 时，schema 是机器合同，统一 PRD 仍是人类阅读
+和批准的基线投影。
 
 ```text
-SRC -> REQ -> MOD/FLOW -> VIEW/REG -> ACT/FLD/RULE/STATE/API
-          |                                      |
-          +---------------------> AC -> TEST/ARUN -> EVD
-          ^                                      |
-          +---------------- CHG / DEFECT <--------+
+SRC → REQ → MOD/FLOW → VIEW/REG → ACT/FLD/RULE/STATE/API
+          │                                      │
+          └────────────────────→ AC → TEST/ARUN → EVD
+          ↑                                      │
+          └──────────────── CHG / DEFECT ←────────┘
 ```
 
-Stable prefixes:
-
-| Object | Prefix |
+| 对象 | 前缀 |
 |---|---|
-| source / assertion / decision / unknown / conflict | `SRC` / `AST` / `DEC` / `UNK` / `CFL` |
-| requirement / feature / review | `REQ` / `FEAT` / `REV` |
-| role / module / entity / field | `ROLE` / `MOD` / `ENT` / `FLD` |
-| flow / view / region / action | `FLOW` / `VIEW` / `REG` / `ACT` |
-| state machine / concrete state / rule / event / integration/API | `STM` / `STATE` / `RULE` / `EVT` / `INT` / `API` |
-| acceptance / test / run / defect / evidence / change | `AC` / `TEST` / `ARUN` / `DEFECT` / `EVD` / `CHG` |
+| 来源/断言/决策/未知/冲突 | `SRC/AST/DEC/UNK/CFL` |
+| 需求/能力/评审 | `REQ/FEAT/REV` |
+| 角色/模块/实体/字段 | `ROLE/MOD/ENT/FLD` |
+| 流程/页面/区域/动作 | `FLOW/VIEW/REG/ACT` |
+| 状态机/状态/规则/事件/集成/API | `STM/STATE/RULE/EVT/INT/API` |
+| 验收/测试/执行/缺陷/证据/变更 | `AC/TEST/ARUN/DEFECT/EVD/CHG` |
 
-IDs are permanent. Rename without changing semantic identity. For split,
-merge, deprecation, or removal, preserve history in a Change Package with
-`deprecated_ids` and `replacement_map`.
+ID 永久稳定。语义未变只改名称时不换 ID；拆分、合并、弃用或移除通过 Change Package 保存
+`deprecated_ids` 和 `replacement_map`。每个已基线 `REQ-*` 绑定来源、目标、行为、验收、责任人、
+优先级、阶段和版本。`FEAT-*` 可用于兼容分组，但不能代替需求记录。延期、拒绝、被替代、未知、
+不适用和范围外均显式保留。
 
-Each baselined `REQ-*` binds source, outcome, behavior, acceptance, owner,
-priority, stage and version. `FEAT-*` may remain as a compatibility or capability
-grouping but cannot replace the requirement record. Deferred, rejected,
-superseded, unknown, not-applicable and out-of-scope items remain explicit.
+## 模块交付纵切 / Module Delivery Slice
 
-## Module Delivery Slice
+按用户/领域结果分模块，不按前端/后端/数据库分层。每个范围内模块就近包含：
 
-Specify by a user/domain result, not by frontend/backend/database layers. Every
-in-scope module needs:
+1. 目标、角色、入口和成功出口；
+2. 主流程和异常流程；
+3. 页面/区域和数据展示；
+4. 字段、字典、来源、可编辑性和敏感性；
+5. 动作、守卫、可见结果、命令/领域结果和失败结果；
+6. 状态机、规则、事件、权限、审计和补偿；
+7. 集成、时效、幂等、对账和依赖责任人；
+8. 验收路径、证据、模块指标/数据质量和未知项。
 
-1. outcome, roles, entry, and success exit;
-2. core and exception flows;
-3. pages/regions and data presentation;
-4. fields, dictionaries, source, editability, and sensitivity;
-5. actions, guards, visible effect, command/domain effect, failure effect;
-6. state machine, rules, events, permissions, audit, and compensation;
-7. integrations, freshness, idempotency, reconciliation, and dependency owner;
-8. acceptance paths and required evidence.
+横切章节只放真正共享的合同；附录只是精确索引。统一 PRD、工程附录和可选 Product Truth
+不得互相矛盾，也不得发明基线不存在的行为。
 
-Also record module-local metric caliber and data-quality behavior, plus owned
-unknowns/review items. The slice must bind outcome, story, main/exception path,
-UI/data, rules/permission, state/event/integration, metric, recovery and acceptance
-in one reading neighborhood. Cross-cutting chapters define only truly shared
-contracts; appendices are exact indexes, not a second narrative.
+## 页面合同 / Page Contract
 
-The unified PRD main body may organize the same IDs for readability. Its
-engineering annexes and optional Product Truth cannot contradict or invent
-behavior absent from the approved requirement baseline.
+每个实施相关页面必须声明：
 
-## Page Contract
+- `VIEW-*`、所属模块、可见角色和页面 `surfaces`；
+- `REG-*` 区域、重复记录规则、字段、动作和查询来源；
+- default、empty、loading、error、no_permission、partial/stale、success 状态；
+- 弹窗/抽屉链，长数据、窄屏、打印/导出行为（适用时）；
+- 流程、动作、状态、API和 AC 链接。
 
-Every implementation-relevant view defines:
+只写“见原型”或只有组件清单均不合格。
 
-- `VIEW-*`, owning module, surfaces, and visible roles;
-- `REG-*` regions, repeated-record rules, fields, actions, and query source;
-- default, empty, loading, error, no-permission, partial, and success states;
-- modal/drawer chain, long-data behavior, responsive/print behavior when in scope;
-- links to flows, actions, states, and acceptance.
+## 动作合同 / Action Contract
 
-A bare “see prototype” fails. A bare component inventory also fails.
+每个实质 `ACT-*` 至少包含：
 
-## Action Contract
+- 触发器、允许角色/状态、守卫和二次确认；
+- 执行反馈和持久可见结果；
+- 适用的命令/API；
+- 领域结果、下一状态、事件、审计和幂等；
+- 校验、权限、依赖、重复、超时、陈旧写入的失败及恢复；
+- `AC-*` 引用。
 
-Every material `ACT-*` records:
+状态变化型核心命令不能只显示 Toast。
 
-- trigger and allowed role/state;
-- guard/confirmation;
-- frontend feedback and durable visible result;
-- command/API when the implementation boundary is in scope;
-- domain result, next state, event, audit, and idempotency;
-- validation, permission, dependency, duplicate, timeout, and stale-write failure;
-- acceptance references.
+## 流程合同 / Flow Contract
 
-Toast-only completion fails for a state-changing core command.
+每个 `FLOW-*` 声明角色、模块、起始条件、顺序步骤、每步可见/领域结果、异常分支、补偿、
+最终证据和 AC。跨模块流程还要声明源/目标对象、字段映射、状态责任人、生产者/消费者、重试和对账。
 
-## Flow Contract
+## 状态、权限与数据 / State, Permission, And Data
 
-Every `FLOW-*` identifies actors, modules, start condition, ordered steps,
-visible and domain result per step, exception branch, compensation, final
-evidence, and acceptance. Cross-module flows must name source/target object,
-field mapping, state owner, producer/consumer, retry, and reconciliation.
+- 聚合或所属系统是状态权威；后端守卫业务状态，UI隐藏不等于授权；
+- 数据范围按需精确到租户、组织、部门、所有者、合作方、记录、字段、目的和时间；
+- 金钱、安全、监管、敏感导出和有后果的 AI 写回必须有责任人和审计；
+- 数据源声明所有者、时效、质量、权限、保留/删除/导出及失败行为。
 
-## State, Permission, And Data
+## 非功能要求档案 / NFR Profiles
 
-- The owning aggregate or system is the state authority.
-- Backend guards business state; UI visibility is not authorization.
-- Data scope is explicit by tenant, organization, department, owner, partner,
-  record, field, purpose, and time where relevant.
-- Money, safety, regulated decisions, sensitive export, and consequential AI
-  writeback require accountable human ownership and audit.
-- Data sources record ownership, freshness, quality, permission, retention,
-  deletion/export, and failure behavior.
+只加载适用档案，不强行填写任意数字。
 
-## NFR Profiles
-
-Load only applicable profiles. Do not force arbitrary numbers.
-
-| Profile | Minimum Concerns |
+| 档案 | 最低关注点 |
 |---|---|
-| standard enterprise | availability, performance, audit, backup, support |
-| multi-tenant SaaS | isolation, quotas, export, tenant lifecycle, noisy neighbor |
-| realtime | latency, ordering, reconnect, duplicate, clock, degraded mode |
-| data product | freshness, lineage, quality, cost, backfill, semantic consistency |
-| AI core | eval, safety, context, tool scope, fallback, rollback, observability |
-| regulated/high risk | authority, human gate, immutable evidence, recovery, incident owner |
+| standard enterprise | 可用性、性能、审计、备份、支持 |
+| multi-tenant SaaS | 隔离、配额、导出、租户生命周期、资源争用 |
+| realtime | 延迟、顺序、重连、重复、时钟、降级 |
+| data product | 时效、血缘、质量、成本、回填、语义一致 |
+| AI core | 评测、安全、上下文、工具范围、回退、回滚、可观测 |
+| regulated/high risk | 权威、人工闸、不可变证据、恢复、事故责任人 |
 
-## Baseline Gate
+## 基线门禁 / Baseline Gate
 
-The requirement baseline is not complete when:
+以下任一情况存在时不能声明需求基线完成：
 
-- a primary role cannot finish its task;
-- an action lacks visible or domain result;
-- a state transition has no owner/guard/event;
-- a cross-module handoff lacks failure and reconciliation;
-- a field lacks source/meaning/editability;
-- a P0 assertion is inferred without owner review;
-- a released module, flow, view, action, field, rule, API or AC has no REQ binding;
-- an acceptance path cannot produce the required evidence.
+- 主要角色无法走完任务；
+- 动作没有可见结果或领域结果；
+- 状态转换没有责任人、守卫或事件；
+- 跨模块交接没有失败和对账；
+- 字段没有来源、含义或可编辑性；
+- P0 断言仍为无责任人确认的推断；
+- 已发布的模块/流程/页面/动作/字段/规则/API/AC 没有绑定 REQ；
+- 验收路径无法产生要求的证据。
 
-## AI-Coding Handoff Without A Second PRD
+## 不新增第二份 PRD 的 AI Coding 交接
 
-The unified PRD is both the human review path and the business implementation
-contract. Machine-oriented tables and YAML are annexes/projections of the same
-baseline, not independent authority. At L2+ the receiver must be able to derive:
+统一 PRD 同时是人类评审路径和业务实施合同；机器表格/YAML只是同一基线的投影。L2以上接收方
+必须能推导：角色与数据范围、主/异常流程和恢复；页面区域、字段/控件/校验和可见状态；动作守卫、
+领域结果、状态/事件/审计/幂等；业务 API/事件输入输出、错误、兼容和对账；正反 AC、夹具/证据、
+反向追溯；禁止推断和开放决策清单。
 
-- exact roles/data scope, flow branches and recovery;
-- page regions, fields/controls/validation and visible states;
-- action guards, domain result, state transition, event/audit and idempotency;
-- business API/event inputs, outputs, errors, compatibility and reconciliation;
-- positive/negative AC, fixtures/evidence and reverse trace;
-- explicit forbidden-invention and open-decision lists.
+框架、数据库 DDL、仓库结构和部署拓扑仍由工程团队决定，除非互操作、合规或验收让其成为业务合同。
+缺少工程基线时，模块规格可以完成，但整体只能报告 handoff GAP，不能宣称开发就绪 PASS。
 
-Technical framework, database DDL, repository layout and deployment topology
-remain engineering decisions unless interoperability, compliance or acceptance
-makes them a business contract. A module can be implementation-ready while the
-project lacks an engineering baseline only if the result is reported as a
-handoff GAP, never as full development-readiness PASS.
-
-High-risk `RULE-*` lines bind an authoritative `SRC-*`, approved `DEC-*`, or
-explicit `ASSUMPTION-*` owner. AI behavior additionally declares input/output,
-model/prompt/tool versions, human gate, fallback, evaluation and observability.
-Data lineage behavior declares source, transformation, owner and change impact.
+高风险 `RULE-*` 绑定权威 `SRC-*`、已批 `DEC-*` 或具名 `ASSUMPTION-*`。AI行为还声明输入输出、
+模型/Prompt/工具版本、人工闸、回退、评测和可观测；血缘行为声明来源、转换、责任人和变更影响。

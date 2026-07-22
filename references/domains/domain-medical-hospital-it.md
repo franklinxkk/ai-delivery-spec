@@ -330,6 +330,13 @@ Mobile/field rules:
 | MED-011 | Two patient identities are confirmed as the same person | merge requires accountable approval; surviving identity, source provenance, access history, correction and rollback evidence remain traceable |
 | MED-012 | Clinician cancels a submitted or verified clinical order | role and state guard are checked; downstream execution or billing impact is reconciled; reason and immutable audit remain visible |
 
+## Cross-Domain Requirement Patterns
+
+- `PAT-VERSION-COMPATIBILITY-001`: order sets, forms, clinical policies, consent and AI configurations preserve signed/historical and in-flight versions.
+- `PAT-LONG-RUNNING-JOB-001`: imaging processing, research export, record indexing and batch quality checks expose progress, cancellation, retry and accountable failure handling.
+- `PAT-METRIC-CALIBER-001`: quality, critical-value, infection, operations and research metrics declare denominator, cutoff, freshness and privacy threshold.
+- `PAT-FEDERATED-RECONCILIATION-001`: patient identity and cross-system clinical metadata conflicts require source-aware, accountable reconciliation rather than silent overwrite.
+
 ## Evaluation Profile
 
 Domain knowledge is not execution evidence. Register coverage and maturity in

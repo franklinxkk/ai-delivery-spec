@@ -353,6 +353,12 @@ Common categories:
 | AI policy Q&A stale source | teacher/student | policy knowledge has old and new versions | ask question -> answer cites source | answer uses effective version or refuses with update warning |
 | dashboard privacy threshold | school leader | small sample group exists | drill into sensitive student indicator | aggregate shown; student-level detail hidden without authority |
 
+## Cross-Domain Requirement Patterns
+
+- `PAT-VERSION-COMPATIBILITY-001`: training plans, courses, assessment templates and published evidence bind immutable versions; current learners and historical results do not silently switch.
+- `PAT-LONG-RUNNING-JOB-001`: media conversion, bulk enrollment, course export and learning-index rebuild expose real progress, retry and partial-result rules.
+- `PAT-METRIC-CALIBER-001`: credits, learning time, achievement rates and completion indicators remain reproducible across pages, exports and acceptance.
+
 ## Evaluation Profile
 
 Domain knowledge is not execution evidence. Register coverage and maturity in

@@ -16,7 +16,7 @@ if len(skill.splitlines()) > 180:
     failures.append("SKILL.md exceeds 180 lines")
 if len(skill) > 8500:
     failures.append("SKILL.md exceeds 8,500 characters")
-if "Load one stage reference" not in skill:
+if not any(marker in skill for marker in ("Load one stage reference", "每次只加载一个有效切片")):
     failures.append("SKILL lost progressive-disclosure instruction")
 if "scripts/query_domain.py --domain <pack>" not in skill:
     failures.append("SKILL loads full domain coverage instead of one compact record")

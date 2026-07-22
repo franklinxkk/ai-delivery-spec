@@ -1,5 +1,5 @@
 schema_version: 5.3.0
-skill_version: 5.3.2
+skill_version: 5.3.3
 runtime: pure_v5
 domain_packs:
   count: 7
@@ -20,12 +20,12 @@ evaluation_assets:
   github_matrix:
     cases: 15
     stage_cells: 45
-    not_run: 41
-    partial: 4
+    not_run: 0
+    partial: 45
     passed: 0
 known_limitations:
 - five domain methods have owner-attested production practice; all built-in packs pass deterministic contract checks but fresh-agent/expert maturity remains separate
-- GitHub runs are exploratory and have zero release-passed cells
+- GitHub 45 stage cells now have exploratory evidence, but every cell remains partial and zero cells are release-passed because independent repetitions, token measurements and real coding acceptance are absent
 - domain expert, customer, production, legal, safety, and financial correctness are
   not proven
 - lifecycle simulations and private brownfield calibration expose method gaps but do not prove implementation or customer acceptance

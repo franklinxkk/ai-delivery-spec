@@ -235,6 +235,13 @@ Demand: new -> reviewed -> scheduled -> released | rejected
 | ticket to demand loop | service/product | repeated product issue | convert ticket to demand | DemandCreatedFromTicket traceable |
 | lead to collected revenue | sales/finance | qualified lead exists | convert -> win opportunity -> sign contract -> invoice -> register payment | lead, opportunity, customer, contract, invoice, and payment retain source IDs, state owners, permissions, and audit |
 
+## Cross-Domain Requirement Patterns
+
+- `PAT-CROSS-MODULE-CONVERSION-001`: ticket→demand, lead→opportunity/customer and opportunity→contract preserve stable source/target references and a reachable next owner action.
+- `PAT-PERMISSION-001`: navigation visibility, object permission, row scope and field masking are separate contracts; a visible menu never expands data access.
+- `PAT-VERSION-COMPATIBILITY-001`: sales stages, SLA, quote policy and approval configuration preserve in-flight and historical interpretation.
+- `PAT-METRIC-CALIBER-001`: funnel, win rate, response SLA, revenue and collection metrics share one state, time and dedup caliber across cockpit/export/API.
+
 ## Evaluation Profile
 
 Domain knowledge is not execution evidence. Register coverage and maturity in

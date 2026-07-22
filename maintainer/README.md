@@ -7,6 +7,9 @@ Use this reference when changing the Skill, a shared template, a domain pack,
 or a validator. The lab is a **release-hardening activity**. It is not a new
 mandatory stage for every customer project.
 
+v5.3 系列的设计决策、模拟缺口和版本处置统一收纳在
+[`v5.3-design-record.md`](v5.3-design-record.md)；不再为每个补丁版本新增平铺设计稿。
+
 ## 1. Two Deliberately Separate Loops
 
 ```text
@@ -214,6 +217,26 @@ python maintainer/tools/validators/validate_domain_coverage.py
 
 Never batch-promote all domains from one scenario. Promote one pack and one
 evidence boundary at a time.
+
+## Private Knowledge Promotion Test
+
+The runtime `custom/` loop is deliberately smaller than a learning platform:
+
+```text
+project-local candidate -> usage evidence across projects -> assess
+-> independent human review -> organization/public review candidate -> regression
+```
+
+`candidate assess` may recommend review but never moves files, changes scope,
+publishes data or calls a network service. `adopted` evidence alone is
+insufficient: modified, rejected and invalidated uses remain first-class records.
+Sensitive project-local candidates are excluded even from the shared private
+package until an accountable owner redacts and moves them into the review area.
+
+The 15-repository GitHub matrix is a method stress test, not domain promotion.
+Its consolidated v5.3.3 exploratory evidence fills previously unexecuted cells
+without inflating repository file count; a single-session cell remains partial
+until repetitions, token measurements, real coding delivery and accepted ACs exist.
 
 ## Reviewer Contract
 

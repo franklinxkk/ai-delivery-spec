@@ -1,60 +1,52 @@
-# Page, Prototype And Testability Contract
+# 页面、原型与可测试性合同 / Page, Prototype And Testability Contract
 
-Use when creating, reverse-engineering, reviewing, or repairing an interactive
-prototype. The prototype is a projection of Product Truth, not an independent
-source of scope or business behavior.
+创建、反推、评审或修复交互原型时加载。原型是需求基线的可操作投影，不是独立的范围或业务权威。
+大型工程原型允许拆分本地 HTML/CSS/JavaScript，但所有依赖和锚点必须能从同一根目录枚举。
 
-## 1. Input Contract
+## 1. 输入合同 / Input Contract
 
-Before UI work, obtain or recover:
+开始 UI 工作前取得或恢复：
 
-- `MOD/FLOW/VIEW/REG/ACT/FLD/STATE/AC` graph;
-- role and data-scope variants;
-- default, empty, loading, error, no-permission, partial, and success states;
-- visible and domain result of every primary action;
-- representative data, dictionaries, long-data and large-list behavior;
-- modal/drawer chains, responsive surfaces, print/export when in scope.
-- the declared page whitelist and the complete Page Delivery Contract for each
-  view, including metrics, columns, filters, controls, limits and pagination.
+- `MOD/FLOW/VIEW/REG/ACT/FLD/STATE/AC` 图；
+- 角色和数据范围差异；
+- default、empty、loading、error、no_permission、partial、success 状态；
+- 每个主要动作的可见结果和领域结果；
+- 代表性数据、字典、长文本和大列表行为；
+- 弹窗/抽屉链，以及适用的响应式、打印、导出；
+- 页面白名单和每页的指标、列、筛选、控件、限制、分页合同。
 
-If the input is an existing prototype, first run:
+存量原型先执行交互盘点：
 
 ```powershell
 py -3 scripts/extract_interaction_ledger.py --input app.html --output interaction-ledger.json
 ```
 
-Register views, actions, handlers, fields, states, modals, role paths, data
-sets, and gaps before changing the prototype.
+修改前登记视图、动作、处理器、字段、状态、弹窗、角色路径、数据集和缺口。
 
-## 2. Stable Runtime Annotations
+## 2. 稳定运行时锚点 / Stable Runtime Annotations
 
-| Product Truth | Prototype Contract |
+| 需求对象 | 原型锚点 |
 |---|---|
-| `VIEW-*` | page/modal/drawer root `data-testid="page-{view_id}"` |
-| `REG-*` | container `data-testid="region-{region_id}"` |
-| `ACT-*` | interactive control `data-action="{ACT-*}"` |
-| `FLD-*` | field/value `data-field="{FLD-*}"` or `data-bind` |
-| `METRIC-*` | displayed KPI root `data-metric="{METRIC-*}"` |
-| state enum | `data-state="{concrete-state}"` |
-| role scope | `data-visible-role` where useful for tests |
-| command/API | `data-api` and `data-method` only when known |
-| `AC-*` | stable test anchor and scenario reference |
+| `VIEW-*` | 页面/弹窗/抽屉根 `data-testid="page-{view_id}"` |
+| `REG-*` | 区域 `data-testid="region-{region_id}"` |
+| `ACT-*` | 控件 `data-action="{ACT-*}"` |
+| `FLD-*` | 字段/值 `data-field` 或 `data-bind` |
+| `METRIC-*` | 指标根 `data-metric="{METRIC-*}"` |
+| 状态枚举 | `data-state="{concrete-state}"` |
+| 角色范围 | 测试需要时使用 `data-visible-role` |
+| 命令/API | 已知时才使用 `data-api`、`data-method` |
+| `AC-*` | 控件或场景的 `data-ac` 验收锚点 |
 
-Every important interactive/testable element has a stable anchor. Every displayed
-statistic/KPI has `data-metric` and resolves to the PRD's page-local caliber;
-the label and sample number alone are not a metric contract. Do not expose
-unresolved template strings such as `data-state="${state}"` in rendered DOM.
-Write these anchors in the source markup/template itself. A runtime pass that
-retrofits generic `ACT-UI-*` identifiers onto unrelated legacy commands does
-not establish traceability. Never hide an anchor name with string concatenation
-such as `data-'+'action`; a static PASS is allowed only when the gate can enumerate
-the authored anchors. Generated controls must still expose a statically inspectable
-template/registry and must be proven separately by browser acceptance evidence.
+每个重要交互/可测试元素都要有稳定锚点。每项展示指标必须用 `data-metric` 对应 PRD 中的页面
+局部口径，标签和模拟数字本身不构成指标合同。渲染 DOM 不得残留 `${state}` 等模板字符串。
 
-## 3. State-Driven UI
+锚点应直接写在源模板中。运行时批量补 `ACT-UI-*`、通过 `data-'+'action` 隐藏名称，或用
+`${act}` 使动作集合不可枚举，都不能建立追溯。动态控件仍需可静态检查的模板/注册表，并由浏览器
+ARUN 证明实际交互。
 
-Business state lives in an explicit state model, not in CSS classes, button
-labels, or inferred DOM text.
+## 3. 状态驱动 UI / State-Driven UI
+
+业务状态必须进入显式状态模型，不能只藏在 CSS类、按钮文案或 DOM 文本中：
 
 ```javascript
 const GlobalState = {
@@ -65,183 +57,124 @@ const GlobalState = {
 };
 
 function transition(ownerId, actionId, payload) {
-  // validate role, permission, current state, guard, and idempotency
-  // persist mock/domain result
-  // emit event/audit evidence
-  // render visible result
+  // 校验角色、权限、当前状态、守卫和幂等
+  // 写入 mock/领域结果，记录事件/审计，渲染可见结果
 }
 ```
 
-For lightweight static prototypes, the implementation may be smaller, but the
-same action must still lead to the Product Truth state and result.
+轻量静态原型可以简化实现，但动作仍要到达需求声明的状态和结果。
 
-## 4. Interaction Closure
+## 4. 交互闭环 / Interaction Closure
 
-Every `data-action` needs:
+每个 `data-action` 必须具备：事件处理器、允许角色/状态与守卫、执行反馈、持久可见结果、
+原型领域/状态结果、失败恢复，以及 `ACT-*` 和 `AC-*` 追溯。核心状态命令只有 Toast 不算完成。
+优先让所属列表、卡片、详情或状态直接体现变化。
 
-1. event handler;
-2. allowed role/state and guard;
-3. visible feedback during execution;
-4. visible completion result;
-5. domain/state result in prototype state;
-6. failure and recovery behavior;
-7. trace to `ACT-*` and `AC-*`.
+不同实体不能共用一个不识别实体 schema 的通用“编辑/详情”弹窗。题目编辑打开资源详情，即使
+按钮都有 handler，也属于阻断缺陷。
 
-Toast-only completion fails for a core state-changing action. Prefer list/card/
-detail/state changes that let users see what was created or changed.
-
-Do not use one generic “edit/detail” modal across different entities unless its
-schema and handler are explicitly entity-aware. A question edit action opening
-a resource detail surface is a blocker even when both controls technically have
-handlers.
-
-Parent click handlers must ignore nested interactive/editable targets:
+父级点击处理器必须忽略嵌套可编辑/交互目标：
 
 ```javascript
 if (event.target.closest("button,input,textarea,select,a,[contenteditable]")) return;
 ```
 
-Prefer event delegation with `data-*` values over inline `onclick` strings.
-For L3 handoff, inline `onclick` and generic alert-only fallbacks are prohibited.
-Use one explicit action registry whose keys are the static `ACT-*` values.
+优先用事件委托和 `data-*`，避免内联 `onclick` 引号链。L3交接禁止内联 handler 和通用 alert
+兜底，应使用键为静态 `ACT-*` 的显式 Action Registry。
 
-## 5. Required UI States
+## 5. 必备 UI 状态 / Required UI States
 
-For each view, implement applicable states:
-
-| State | Visible Requirement |
+| 状态 | 可见要求 |
 |---|---|
-| default | normal data and primary task |
-| empty | reason, next action, no fake records |
-| loading | scope of loading and disabled duplicate action |
-| error | reason, retry/manual path, preserved input where safe |
-| no_permission | clear boundary without leaking hidden data |
-| partial/stale | freshness warning and restricted consequential action |
-| success | durable result and next action |
+| default | 正常数据和主要任务 |
+| empty | 原因、下一动作，不伪造数据 |
+| loading | 加载范围并禁用重复提交 |
+| error | 原因、重试/人工路径，安全保留输入 |
+| no_permission | 清楚说明边界且不泄露隐藏数据 |
+| partial/stale | 时效警告并限制有后果动作 |
+| success | 持久结果和下一动作 |
 
-Use representative data volume: long names, null fields, multiple statuses,
-pagination/scroll, narrow screen, and restricted records when relevant.
+代表性数据至少覆盖长名称、空值、多状态、分页/滚动、窄屏和受限记录（适用时）。
 
-## 6. Complex Interaction Patterns
+## 6. 复杂交互模式 / Complex Interaction Patterns
 
-### Modal And Drawer Chains
+### 弹窗与抽屉链 / Modal And Drawer Chains
 
-Define trigger, content, fields, confirmation, cancel, close behavior, loading,
-success, failure, and the visible/domain result after closing. Every modal or
-drawer must be reachable from a declared view/action.
+定义触发、内容、字段、确认、取消、关闭、加载、成功、失败，以及关闭后所属页面可见/领域结果。
+每个弹窗/抽屉必须从声明的页面和动作可到达。
 
-### Forms And Cascades
+### 表单与级联 / Forms And Cascades
 
-Cover default, required, dictionary, dependency, async validation, dynamic row,
-calculation, attachment, draft, submit, duplicate, and recovery behavior.
-Backend rules remain authoritative even in a prototype contract.
+覆盖默认、必填、字典、依赖、异步校验、动态行、计算、附件、草稿、提交、重复和恢复；
+后端业务规则仍是权威。
 
-### Batch And Drag Operations
+### 批量与拖拽 / Batch And Drag Operations
 
-Define selection eligibility, mixed-state behavior, confirmation, partial
-failure, retry, undo/compensation, ordering, and audit. Drag behavior covers
-start, allowed target, hover cue, drop result, invalid drop, and keyboard/mobile
-alternative where required.
+批量操作定义可选资格、混合状态、确认、部分失败、重试、撤销/补偿、顺序和审计。拖拽定义开始、
+允许目标、悬停提示、释放结果、非法释放，以及需要时的键盘/移动端替代方案。
 
-### Async, Realtime, And Weak Network
+### 异步、实时与弱网 / Async, Realtime, And Weak Network
 
-Use `references/patterns/realtime-contract.md` for SSE/WebSocket/countdown/push. Show
-reconnect, stale state, duplicate, offline queue, conflict, retry, and manual
-reconciliation behavior when applicable.
+SSE/WebSocket/倒计时/推送按需加载 `references/patterns/realtime-contract.md`，呈现重连、陈旧、
+重复、离线队列、冲突、重试和人工对账。
 
-## 7. Prototype Iteration Parity
+## 7. 原型迭代等价性 / Prototype Iteration Parity
 
-When revising an existing prototype, compare before/after:
+修改存量原型前后比较：路由/视图、动作/处理器、字段/字典、状态/转换、弹窗/抽屉、角色路径/
+数据范围、代表性数据量、关键流程和验收锚点。移除行为必须有已批 `CHG-*` 或明确缩减范围；
+视觉更干净但行为丢失仍然失败。
 
-- views/routes;
-- actions and handlers;
-- fields and dictionaries;
-- states and transitions;
-- modals/drawers;
-- role paths and data scope;
-- representative data volume;
-- critical workflows and acceptance anchors.
+出现重复函数、层叠覆盖、内联 handler 引号问题、运行时补动作 ID、实体动作路由到错误弹窗时，
+停止继续打补丁。保留交互台账和样本数据，以一个状态仓、每页一个 renderer、一个动作注册表重建。
+状态变化尽量只改需要的 class/attribute/content，避免重建 DOM 导致焦点、光标、滚动和引用丢失。
 
-Removal requires an approved `CHG-*` or explicit de-scope. A visually cleaner
-prototype that loses behavior fails parity.
+## 8. 安全验证闭环 / Safe Verification Loop
 
-If the existing artifact contains duplicate function declarations, stacked
-override layers, inline-handler quoting, runtime action-ID retrofits, or entity
-actions routed to the wrong modal, stop patching. Preserve the interaction
-ledger and representative data, then rebuild a clean projection with one state
-store, one renderer per view and one action registry.
+1. 检查 HTML/JavaScript 语法；
+2. 在真实浏览器加载；
+3. 不依赖设计讲解，按主要角色逐动作执行；
+4. 覆盖适用的默认、失败、权限和状态冲突；
+5. 对照需求确认可见结果和领域结果；
+6. 检查运行时锚点具体、唯一；
+7. 按 AC 捕获截图、trace或审计证据；
+8. 修复后重跑等价性。
 
-State changes should update only necessary classes/attributes/content when
-possible; unnecessary DOM reconstruction can lose focus, cursor, scroll, and
-element references.
+L3必须遍历所有声明页面的可见动作，而不是每角色只走一条 happy path；确认动作打开的是所属实体
+页面/弹窗、字段控件与页面合同一致、关闭后持久结果回到所属列表/详情。
 
-## 8. Safe Verification Loop
+将执行记录写为 `ARUN-*`：environment 指明真实浏览器/设备，每个 `data-ac` 有执行项，每个 pass
+有 actual_result 和截图/trace/审计证据。通过 `--acceptance-run` 传给门禁。没有浏览器能力时，
+创建 pending ARUN 和准确动作清单，返回 `REVIEW_COMPLETE_WITH_GAPS`，不得宣称交互原型完成。
 
-1. Check HTML/JavaScript syntax.
-2. Load in a real browser.
-3. Verify each primary role/task one action at a time without design hints.
-4. Exercise default and applicable failure/permission/state paths.
-5. Confirm visible and domain result against Product Truth.
-6. Confirm all runtime annotations are concrete and unique where required.
-7. Capture screenshot/trace/audit evidence by AC ID.
-8. Re-run parity after fixes.
+工程原型可拆成本地多文件。相对 JS/CSS 会与 HTML 一起进入动作、状态、语法和 CSS 污染扫描；
+缺失、绝对路径、越过原型目录会阻断，远程依赖保留为 GAP。不得为过门禁打包成不可维护巨型 HTML。
 
-At L3, sweep every visible action on every declared page, not only one happy
-path per role. Assert that the opened page/modal belongs to the action's entity,
-that field controls match the Page Delivery Contract and that the durable result
-appears in the owning list/detail after close.
+自动写操作只能使用 mock、shadow 或可丢弃测试数据，未经明确授权和安全计划不得污染生产数据/指标。
 
-Record the sweep as an `ARUN-*`: its environment names the real browser/device,
-each prototype `data-ac` has an executed item, and every pass has actual result
-plus screenshot/trace/audit evidence. Supply it to the gate with
-`--acceptance-run`. If no browser capability is available, create a pending
-ARUN and an exact action checklist, return `REVIEW_COMPLETE_WITH_GAPS`, and do
-not describe the interactive prototype as complete.
-
-Automated writes use mock, shadow, or disposable test data. Never pollute live
-customer data or production metrics without explicit authorization and a safe
-test plan.
-
-Minimum walkthrough record:
-
-| Step | Visible Cue | User Action | Visible Result | Domain Result | Blocker / Assumption | AC |
+| 步骤 | 可见线索 | 用户动作 | 可见结果 | 领域结果 | 阻断/假设 | AC |
 |---|---|---|---|---|---|---|
 
-If the next step cannot be inferred from visible cues, stop and record the
-blocker; do not explain the intended route during the test.
+用户无法从界面推断下一步时停止并记录阻断，测试过程中不要口头提示“设计意图”。
 
-## 9. Visual And Accessibility Baseline
+## 9. 视觉与可访问性基线 / Visual And Accessibility Baseline
 
-- Use a coherent design system: spacing, typography, color, components, icons.
-- Preserve hierarchy and task focus; avoid dense dashboard decoration without
-  product meaning.
-- Do not use color alone for state.
-- Provide keyboard/focus behavior, labels, contrast, error association, and
-  reduced-motion behavior appropriate to scope.
-- Define responsive priority: what reflows, collapses, becomes read-only, or
-  moves to another surface.
-- Print/export views preserve required fields, pagination, signatures, version,
-  and archive metadata when they are acceptance evidence.
+- 使用一致的间距、字体、颜色、组件和图标体系；
+- 保持信息层级和任务聚焦，不堆无业务意义的驾驶舱装饰；
+- 状态不能只靠颜色；
+- 按范围提供键盘/焦点、标签、对比度、错误关联和减少动效；
+- 声明响应式优先级：哪些重排、折叠、只读或迁移到其他表面；
+- 作为验收证据的打印/导出保留字段、分页、签署、版本和归档元数据。
 
-Before a visual redesign, clarify three user-owned direction inputs: intended
-feeling, reference product/artifact, and explicit taboo. Record the decision as
-`DEC-AESTHETIC-*`; if unavailable, create a P1 `UNK-*` with
-`blocks_stage: baseline` instead of silently choosing a style. For competing
-directions, show no more than one screen or one direction card
-(`style + feeling keywords + reference + taboo`) and confirm it before applying
-the direction to every page.
+视觉重设计前确认 feeling、reference、explicit taboo 三项用户方向，登记为 `DEC-AESTHETIC-*`；
+无法确认时创建 P1 `UNK-*` 且 `blocks_stage: baseline`，不能私自选择风格。多个方向最多先做一个
+屏幕或方向卡（style + feeling关键词 + reference + taboo），确认后再扩展全站。
 
-Then record one design-system baseline (for example Ant Design 5 tokens and
-components) and, when useful, apply one specialized design skill. Do not claim
-that an uninstalled skill was executed; call a public-rule imitation a method
-reference. Capture full-page screenshots at desktop and one narrow width and
-perform a visual critique before completion.
+随后固定一个设计系统基线（如 Ant Design 5 tokens/components）；确有需要时只引入一个专门设计
+Skill，不能声称执行了未安装 Skill。桌面和窄屏分别截全页图并视觉复核。高保真不能补偿缺失交互。
 
-Visual fidelity does not excuse missing interaction or business behavior.
+## 10. 锁定与验收 / Lock And Acceptance
 
-## 10. Lock And Acceptance
-
-When complete, record:
+完成时记录：
 
 ```text
 [PROTOTYPE LOCK]
@@ -257,92 +190,56 @@ gaps=
 evidence_location=
 ```
 
-Prototype completion requires:
+锁定前要求：全部范围内视图/动作可追到基线；主要角色旅程闭合；适用空值/错误/权限/冲突路径可用；
+无未批准行为损失；强制 AC 有浏览器证据；L3复杂页有稳定 `REG-*`；遗留缺口有责任人和状态。
 
-- all in-scope views/actions trace to Product Truth;
-- primary role journeys are demo-closed;
-- applicable empty/error/permission/state-conflict paths work;
-- no unapproved parity loss;
-- browser evidence exists for required ACs;
-- complex L3 views expose stable `REG-*` region anchors;
-- unresolved gaps have owner and completion state.
-Before accepting an HTML prototype, run:
+CSS扫描：
 
 ```bash
 python scripts/scan_prototype_css.py prototype.html
 ```
 
-The scanner requires a single isolated `.hidden { display: none ... }` utility
-when the class is used and rejects `!important` outside that utility. Duplicate
-or combined `.hidden` selectors are treated as cascade pollution because they
-commonly make modal/view state impossible to reason about.
+使用 `.hidden` 时只能有一条隔离的 `.hidden { display: none ... }`；该工具外禁止 `!important`。
+重复/组合 `.hidden` 会污染层叠。`.active/.open/.selected/.disabled/.loading/.error/.success/.failed`
+必须限定到组件，如 `.status.active`、`.tab.active`、`.page.active`，不能全局组合业务状态色。
 
-Generic behavior/state classes must also be component-scoped. Do not group a
-global `.active`, `.open`, `.selected`, `.disabled`, `.loading`, `.error`,
-`.success` or `.failed` selector with business status colors: it can recolor or
-hide the active page, navigation or tab. Use separate selectors such as
-`.status.active`, `.tab.active` and `.page.active`.
+## 页面类型与条件表面 / Page Profiles And Conditional Surfaces
 
-## Page Profiles And Conditional Surfaces
-
-Each implementation view starts with a machine-readable marker:
+每个实施页面先声明：
 
 ```markdown
 <!-- PAGE-CONTRACT: VIEW-RESOURCE; primary=list; layout=composite; surfaces=metrics,list,drawer_form,preview -->
 ```
 
-`layout` is `single`, `composite`, `builder`, or `portal`. `surfaces` are composed
-from `metrics`, `list`, `form`, `drawer_form`, `detail`, `workflow`, `composer`,
-`resource_pool`, `hierarchy`, `assessment_insert`, `import`, `export`, and
-`preview`. Do not create industry-specific page profiles. A composite view has
-at least two real surfaces; a builder declares composer, resource pool and
-hierarchy. Mobile/H5 capabilities are separate (`scan`, `camera`,
-`weak_network`, `offline_draft`, `push`) and are never inferred.
+`layout` 为 `single/composite/builder/portal`。`surfaces` 可由 metrics、list、form、drawer_form、
+detail、workflow、composer、resource_pool、hierarchy、assessment_insert、import、export、preview
+组合。不要创建行业专用页面 profile。composite 至少两个真实表面；builder 必须含 composer、
+resource_pool、hierarchy。移动/H5 的 scan、camera、weak_network、offline_draft、push 单独声明。
 
-Only activated surfaces are mandatory. For each view specify purpose/entry,
-regions/layout, role and data scope, default/empty/loading/error/no-permission/
-stale/success states, modal/drawer chains, pagination/bulk behavior, prototype
-anchors and applicable API/AC trace. Then add conditional contracts:
+只要求实际启用的表面。每页共同声明用途/入口、区域布局、角色/数据范围、七类 UI状态、弹窗链、
+分页/批量、原型锚点和 API/AC，再按条件补充：
 
-- metrics: population, numerator/denominator, window/timezone, status/filter,
-  deduplication, source/freshness, zero/null and format;
-- list/tree: filters, columns, format/width/null/sort, selection and page size;
-- form/upload: control, required/default, type/length, dictionary, validation,
-  editability, extension/MIME, count/size, preflight, conversion and recovery;
-- action/workflow: guard, confirmation, visible/domain result, state/event/audit,
-  permission, idempotency, failure/compensation and AC;
-- import/export: template/version, scope, partial failure, async threshold,
-  file expiry, masking and audit;
-- preview: per-file controls, conversion failure and authorization/watermark;
-- composer: hierarchy, allowed source/target, insertion/order, invalid drop,
-  persistence, undo/recovery, concurrency and keyboard/mobile alternative.
+- metrics：统计对象、分子分母、窗口/时区、状态/过滤、去重、来源/时效、零值/空值、格式；
+- list/tree：筛选、列、格式/宽度/空值/排序、选择、页大小；
+- form/upload：控件、必填/默认、类型/长度、字典、校验、可编辑性、扩展名/MIME、数量/大小、
+  预检、转码和恢复；
+- action/workflow：守卫、确认、可见/领域结果、状态/事件/审计、权限、幂等、失败/补偿和AC；
+- import/export：模板/版本、范围、部分失败、异步阈值、文件过期、脱敏和审计；
+- preview：按文件类型的控件、转码失败、授权/水印；
+- composer：层级、允许源/目标、插入顺序、非法拖放、持久化、撤销/恢复、并发和替代操作。
 
-At L3/L4, a composite, builder, portal, multi-view artifact, or a page combining
-table and form controls must expose stable `region-REG-*` roots for its meaningful
-layout regions. A complex prototype with `region_count=0` is not a complete
-page contract; a bounded single-surface page may remain regionless.
+L3/L4 的 composite、builder、portal、多视图或表格+表单页面必须有稳定 `region-REG-*` 根；
+复杂页 `region_count=0` 不能完成，单表面有界页面可不设区域。
 
-When the user requests high-fidelity, branding, visual redesign, or a
-production-grade prototype, freeze the UI requirement contract first. Prefer a
-design-system-oriented UI/UX skill for complex enterprise back offices and a
-frontend art-direction skill for brand/H5 differentiation; never let two tools
-create competing design systems. Visual quality does not replace interaction
-closure or business truth.
+要求高保真、品牌化或生产级原型时，先冻结 UI 需求合同。复杂后台优先设计系统型 UI/UX Skill，
+品牌/H5差异化优先前端艺术指导型 Skill；不能让两个工具生成竞争设计系统。
 
-## Stage 0 For Existing Prototypes
+## 存量原型 Stage 0 / Stage 0 For Existing Prototypes
 
-Before rewriting an existing artifact, inventory every view, action, handler,
-state, role, object, field/metric and external handoff with `source_ref`, source
-location and classification: `confirmed`, `inferred`, `unknown`, or
-`defect_candidate`. Core unknowns become `UNK-*` with priority, owner and
-`blocks_stage`; defects cannot silently become target requirements. Multiple
-candidate baselines require a scoped `DEC-CONFLICT-*`. Only a fully classified,
-source-located inventory may declare `inventory_complete`; that proves inventory
-coverage, not business approval.
+重写前对每个视图、动作、处理器、状态、角色、对象、字段/指标和外部交接登记来源位置和
+classification：confirmed、inferred、unknown、defect_candidate。核心未知绑定 `UNK-*`、优先级、
+责任人和 `blocks_stage`；缺陷不能静默变目标需求；多个候选基线由 `DEC-CONFLICT-*` 裁决。
 
-If a PRD baseline exists, use `INV-*` for recovered prototype observations and
-map them to declared `baseline_requirement_refs` with `mapping_status` plus exact
-`target_refs`. Put every inferred item into an owned `RBATCH-*`; do not declare
-`baseline_ready` until those batches are confirmed, rejected or converted to
-owned unknowns. Reverse extraction can recover interaction evidence, but cannot
-infer API semantics, metric caliber, permission authority, compliance or AC truth.
+已有 PRD 时，恢复观察使用 `INV-*`，并通过 `baseline_requirement_refs`、`mapping_status`、准确
+`target_refs` 映射。所有推断项进入有责任人的 `RBATCH-*`；未确认、否决或转未知前不得声明
+`baseline_ready`。反推能恢复交互证据，不能推断 API语义、指标口径、权限权威、合规或 AC 真相。

@@ -423,6 +423,13 @@ Scenic/tourism passenger transport should normally stay inside this traffic doma
 | old customer migration baseline | product / customer success | old usage, module depth, ARR/renewal risk, and upgrade target are frozen before rollout |
 | standards applicability conflict | regulator / legal reviewer | GB/industry/local/group/customer rule conflict is recorded with owner decision before activation |
 
+## Cross-Domain Requirement Patterns
+
+- `PAT-PERMISSION-001`: jurisdiction, enterprise, fleet, personnel and shared-link access remain server-authoritative across UI/API/export.
+- `PAT-VERSION-COMPATIBILITY-001`: regulation, checklist, training, token and workflow versions preserve historical and in-progress interpretation.
+- `PAT-FEDERATED-RECONCILIATION-001`: regulator and enterprise platforms compare overlapping person/vehicle/enterprise records by field or credential, never by silent whole-object overwrite.
+- `PAT-METRIC-CALIBER-001`: supervision, learning-time, risk and closure indicators expose source, cutoff, state filter and reproducible formula.
+
 ## Evaluation Profile
 
 Domain knowledge is not execution evidence. Register coverage and maturity in

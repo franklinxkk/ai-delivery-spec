@@ -1,0 +1,35 @@
+title: 制度列表增加仅看当前有效筛选
+outcome: 员工可一键排除已失效制度，减少误用旧制度
+owner: 产品负责人
+document_language: zh-CN
+source_refs: [SRC-MINIMAL-001]
+value: medium
+value_evidence:
+  - 已确认的内部用户反馈：列表中混有已失效制度
+roles: [ROLE-EMPLOYEE]
+modules: [MOD-POLICY-LIST]
+integrations: []
+states: []
+cross_role_handoffs: []
+data_submission: false
+data_reporting: false
+metric_caliber: false
+batch_io: false
+approval: false
+audit_required: false
+irreversible_write: false
+version_compatibility: false
+reversible: true
+cross_module_state: false
+sensitive_data: false
+compliance: false
+migration: false
+customer_acceptance: false
+ai_behavior: false
+ai_centrality: none
+ai_write_scope: none
+ai_reversible: true
+ai_human_gate: true
+urgent: false
+blocked_dependency: false
+ambiguity: low

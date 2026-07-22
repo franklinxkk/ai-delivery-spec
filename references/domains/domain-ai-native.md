@@ -258,6 +258,12 @@ Rules:
 | delegated tool denial | risk reviewer | a denied tool/action remains denied through agent delegation, memory and prompt content; denial is audited |
 | repeated propose-reject loop | accountable user | loop stops at configured limit and hands control to a human/manual path |
 
+## Cross-Domain Requirement Patterns
+
+- `PAT-VERSION-COMPATIBILITY-001`: model, prompt, tool schema, retrieval corpus and policy versions bind every consequential run and remain replayable.
+- `PAT-LONG-RUNNING-JOB-001`: indexing, evaluation, batch inference and multi-agent jobs expose bounded progress, retry, cancellation and human takeover.
+- `PAT-METRIC-CALIBER-001`: quality, safety, cost and latency metrics declare datasets, thresholds, aggregation windows, versions and accountable interpretation.
+
 ## Evaluation Profile
 
 Domain knowledge is not execution evidence. Register coverage and maturity in
