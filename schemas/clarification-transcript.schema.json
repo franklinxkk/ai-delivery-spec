@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["schema_version", "transcript_id", "project_id", "turns"],
   "properties": {
-    "schema_version": { "enum": ["5.0.0", "5.3.1"] },
+    "schema_version": { "enum": ["5.0.0", "5.3.1", "5.3.2"] },
     "transcript_id": { "type": "string", "pattern": "^TRN-[A-Z0-9-]+$" },
     "project_id": { "type": "string", "minLength": 1 },
     "turns": {

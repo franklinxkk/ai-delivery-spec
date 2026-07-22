@@ -2,6 +2,10 @@
 delivery_level: L2
 delivery_shape: governed_truth
 assurance_profile: standard
+document_language: zh-CN
+language_source: user_request
+bilingual: false
+activated_facets: [ui, stateful, integration, high_risk]
 open_p0_unknown_ids: []
 governance:
   canonical_authoring_surface: product_truth
@@ -19,6 +23,17 @@ governance:
 
 基线版本 `1.0`，状态 `baselined`。批准材料优先于方案和原型。任何修改必须建立
 `CHG-*` 并完成影响、diff、审批、同步和回归。
+
+### 0.1 任务式阅读导航
+
+客户先读摘要、范围、角色旅程与验收；前端、后端和测试按 `MOD-*` 读取模块纵向切片，
+再通过附录定位字段、状态、API 和 AC；Coding Agent 只实现指定 ID，不跳过正文猜业务。
+
+### 0.2 30 秒摘要
+
+内容管理员发布不可变课程版本并授权渠道；渠道在额度内交付学习码；学员激活后获得
+唯一权益并形成学习证据。发布、授权、激活和学习任一步失败都不得伪造下游成功状态，
+最终由 ROLE-QA-ACCEPTOR 按 AC 和审计证据验收。本期不含支付结算和法定证书签发。
 
 ## 1. 背景、目标与成功指标
 
@@ -74,20 +89,40 @@ ROLE-CHANNEL-ADMIN 取得额度后向
 
 ## 7. 分模块功能需求
 
-### 7.1 内容编排与发布
+### 7.1 内容编排与发布 MOD-CONTENT-001
 
 资源、知识点和题目组成课程；发布前检查完整性。发布成功显示版本和快照摘要，
 形成 EVT-COURSE-PUBLISHED。失败时课程保持草稿并显示缺失项。
+模块目标是发布不可变课程，边界是不负责授权和学习；ROLE-CONTENT-ADMIN 从
+VIEW-COURSE-EDITOR 入口进入，前置为草稿完整，成功结果为版本快照。主路径执行
+FLOW-PUBLISH-001 / ACT-COURSE-PUBLISH；异常时保留输入并恢复到草稿重试。
+FLD-COURSE-NAME 数据来源为内容管理员，权限仅限草稿期；RULE-COURSE-COMPLETE-001
+与 STM-COURSE-001 守卫发布并产生 EVT-COURSE-PUBLISHED。模块指标不适用，
+数据质量以快照字段完整且版本唯一核对。AC-PUBLISH-001 验收；无未决项。
 
-### 7.2 授权与学习码
+### 7.2 授权与学习码 MOD-AUTH-001
 
 授权校验组织、范围和剩余额度。超额时 AC-AUTH-OVERLIMIT-001 要求授权记录和余额
 均不变化。成功产生 EVT-AUTH-GRANTED。
+模块目标是在额度内授权，边界是不负责线下分发；ROLE-CONTENT-ADMIN 从
+VIEW-AUTH-CONSOLE 入口进入，前置为组织有效且额度充足，成功结果为授权和余额同步更新。
+主路径执行 FLOW-AUTH-001 / ACT-AUTH-GRANT；异常时零写入并返回台账恢复重试。
+FLD-AUTH-QUOTA 来源为授权台账，权限由服务端守卫；RULE-AUTH-SCOPE-001 与
+STM-AUTH-001 产生 EVT-AUTH-GRANTED，并通过 INT-ORG-MASTER-001 对账。模块指标不适用，
+数据质量以余额非负和授权事务一致核对。AC-AUTH-001 验收；无未决项。
 
-### 7.3 激活、学习与证据
+### 7.3 激活、学习与证据 MOD-LEARNING-001
 
 码必须有效、未使用且授权链有效。重复激活保留首次绑定，不生成第二份权益。
 弱网重试按学员、任务和完成版本幂等处理。
+模块目标是让 ROLE-LEARNER 从 VIEW-CODE-ACTIVATE 入口激活并在 VIEW-LEARNING-HOME
+完成学习；边界是不签发法定证书，前置为码与授权有效，成功结果为唯一权益和学习证据。
+主路径执行 FLOW-ACTIVATE-001 / FLOW-LEARN-001、ACT-CODE-ACTIVATE 与
+ACT-LEARNING-COMPLETE；失效、重复或弱网异常返回明确原因并按幂等键恢复。
+FLD-CODE-VALUE 和 FLD-LEARNING-PROGRESS 分别来自码服务和事件汇总，权限仅限本人；
+RULE-CODE-VALID-001、STM-CODE-001 和 STM-LEARNING-001 产生 EVT-CODE-ACTIVATED、
+EVT-LEARNING-UPDATED。METRIC-ACTIVATION-001 按唯一激活请求去重并每日刷新，数据质量
+通过权益与事件对账。AC-ACTIVATE-001、AC-LEARN-001 验收；无未决项。
 
 ### 7.4 关键动作合同
 

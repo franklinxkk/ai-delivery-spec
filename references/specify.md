@@ -5,6 +5,39 @@ baseline. The default authority is one unified PRD with an embedded stable-ID
 index. Add independent Product Truth only for scale, repeated change, multiple
 controlled exports or strong audit needs.
 
+## Output Language And Reading Contract
+
+The dominant language of the user's current request is the default document
+language. An explicit language request overrides it. Headings, prose, table
+headers, clarification questions and test narratives stay in that language;
+stable IDs, code, API/field names and proper nouns remain unchanged. Source
+titles may remain original, but their meaning is summarized in the document
+language. Generate bilingual content only when explicitly requested. Declare
+`document_language`, `language_source` and `bilingual` in frontmatter.
+
+One PRD uses progressive disclosure: a 30-second summary and task reading map;
+business context and journeys; self-contained vertical module slices; cross-cutting
+contracts; then exact indexes/machine projections. Annexes point to the same IDs
+instead of restating business meaning. A frontend engineer, backend engineer, QA
+or Coding Agent should complete one module by reading its slice plus named indexes,
+without assembling rules from unrelated chapters or asking for missing behavior.
+
+## Requirement Card Escalation
+
+A card is only for one reversible, role-local change. Keep common outcome, scope,
+story, flow/recovery, rules/permissions, AC and unknowns, then activate only the
+applicable facets: `ui`, `stateful`, `data_submission`, `integration`, `batch_io`,
+or `high_risk`. Each activated facet must be fully specified or explicitly owned
+as unknown; unused facets impose no token cost.
+
+Escalate to one unified PRD for any cross-role handoff, cross-module/system edge,
+material state machine, data reporting/submission or metric-caliber behavior,
+batch import/export, approval/audit, external integration, money/privacy/regulation,
+irreversible write, migration or version compatibility. A data-submission request
+is L2 by default because source mapping, validation, submission state, retry,
+idempotency, audit, freshness and reconciliation affect several roles. A trivial
+local label/copy/display change can remain a card.
+
 ## Source Model
 
 `REQ-*` is the scope and traceability authority. When Product Truth is used,
@@ -54,6 +87,12 @@ in-scope module needs:
 6. state machine, rules, events, permissions, audit, and compensation;
 7. integrations, freshness, idempotency, reconciliation, and dependency owner;
 8. acceptance paths and required evidence.
+
+Also record module-local metric caliber and data-quality behavior, plus owned
+unknowns/review items. The slice must bind outcome, story, main/exception path,
+UI/data, rules/permission, state/event/integration, metric, recovery and acceptance
+in one reading neighborhood. Cross-cutting chapters define only truly shared
+contracts; appendices are exact indexes, not a second narrative.
 
 The unified PRD main body may organize the same IDs for readability. Its
 engineering annexes and optional Product Truth cannot contradict or invent

@@ -192,7 +192,7 @@ def main() -> int:
 
         old_skill = temp / "SKILL.md"
         old_skill.write_text(
-            (ROOT / "SKILL.md").read_text(encoding="utf-8").replace("AI Delivery Spec 5.3.1", "AI Delivery Spec 4.9.15", 1),
+            (ROOT / "SKILL.md").read_text(encoding="utf-8").replace("AI Delivery Spec 5.3.2", "AI Delivery Spec 4.9.15", 1),
             encoding="utf-8",
         )
         blocked = temp / "blocked.yaml"

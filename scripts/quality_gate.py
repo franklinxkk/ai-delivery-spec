@@ -57,8 +57,23 @@ ROOT = SCRIPT_DIR.parent
 REGISTER_SCHEMA = ROOT / "schemas" / "requirement-register.schema.json"
 HANDOFF_SCHEMA = ROOT / "schemas" / "agent-handoff.schema.json"
 ACCEPTANCE_SCHEMA = ROOT / "schemas" / "acceptance-run.schema.json"
-MAIN_MARKERS = ("背景", "需求准入", "角色", "角色旅程", "业务流程", "功能总览", "分模块功能需求", "验收方案")
-ANNEX_MARKERS = ("字段字典", "规则与状态机", "api", "机器可读验收", "双向追溯", "禁止推断")
+MAIN_SECTION_ALIASES = (
+    ("背景/目标", (r"背景", r"目标", r"background", r"problem.+goal", r"objective")),
+    ("准入/范围", (r"需求准入", r"准入.*范围", r"intake.+scope", r"scope")),
+    ("角色", (r"角色", r"roles?", r"actors?")),
+    ("角色旅程", (r"角色旅程", r"用户旅程", r"role journey", r"user journey")),
+    ("业务流程/状态", (r"业务流程", r"状态机", r"business flow", r"workflow.+state")),
+    ("模块规格", (r"分模块功能需求", r"模块规格", r"module requirements?", r"module specification")),
+    ("验收", (r"验收方案", r"验收", r"acceptance plan", r"acceptance")),
+)
+ANNEX_SECTION_ALIASES = (
+    ("字段字典", (r"字段字典", r"field dictionary")),
+    ("规则/状态", (r"规则与状态机", r"rules?.+state")),
+    ("API/事件", (r"api", r"接口", r"event.+integration")),
+    ("机器验收", (r"机器可读验收", r"machine-readable acceptance", r"structured acceptance")),
+    ("双向追溯", (r"双向追溯", r"bidirectional trace")),
+    ("禁止推断", (r"禁止推断", r"forbidden invention", r"do not infer")),
+)
 STATUSES = {
     0: "PASS",
     1: "REVIEW_COMPLETE_WITH_GAPS",
@@ -126,6 +141,14 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
         "当前交付等级所需的页面、规则或验收细节不足。",
         "补齐适用合同，不要用空标题或关键词填充。",
     ),
+    "PRD-LANGUAGE-DRIFT": (
+        "文档结构语言与声明的用户语言不一致，会直接降低评审与开发可读性。",
+        "按 frontmatter document_language 统一 H1/H2/H3、正文、表头与测试叙述；ID、代码、API/字段名和专名保持原样。",
+    ),
+    "PRD-MODULE-SLICE-INCOMPLETE": (
+        "模块规格被拆散或缺少实现/测试所需的本地闭环。",
+        "在对应 MOD-* 章节就近补齐目标、主/异常路径、页面动作、字段权限、规则状态、指标、恢复、验收和未知项。",
+    ),
     "PROTO-NO-PAGE-ANCHOR": (
         "原型缺少可追溯、可测试的稳定页面标识。",
         "为每个页面根节点增加唯一 data-testid=\"page-VIEW-*\"。",
@@ -180,6 +203,9 @@ def guidance_for(code: str) -> tuple[str, str]:
 
 
 REPAIR_EXAMPLES: tuple[tuple[str, str], ...] = (
+    ("PRD-LANGUAGE", "document_language: zh-CN；将英文结构标题改为中文，保留 REQ/API/字段名原样。"),
+    ("PRD-MODULE-SLICE", "### 7.1 授权管理 MOD-AUTH-001；就近写目标、路径、VIEW/FLD/ACT、RULE/STM、METRIC、恢复、AC 与 UNK。"),
+    ("PRD-DATA-SUBMISSION", "activated_facets: [data_submission]；补来源映射、校验、提交状态、重试/幂等、审计、口径/时效和对账。"),
     ("PRD-P0-UNKNOWN", "unknowns: [{id: UNK-AUTH-001, priority: P0, status: open, blocks_stage: baseline, owner: 产品负责人, affected_refs: [REQ-AUTH-001]}]"),
     ("PRD-OPEN-P0", "先由 owner 关闭 UNK-*，同步 open_p0_unknown_ids，再重新申请基线门禁。"),
     ("PRD-NONEXACT-ID", "逐条写 AC-AUDIT-001、AC-AUDIT-002、AC-AUDIT-003；不要写 AC-AUDIT-001..003。"),
@@ -226,6 +252,47 @@ def _heading_position(raw: str, patterns: tuple[str, ...], *, last: bool = False
     if not matches:
         return -1
     return max(matches) if last else min(matches)
+
+
+def _has_heading(raw: str, patterns: tuple[str, ...]) -> bool:
+    return any(
+        any(re.search(pattern, title, re.I) for pattern in patterns)
+        for _level, title, _position in markdown_headings(raw)
+    )
+
+
+def _heading_language(title: str) -> str:
+    cleaned = re.sub(r"`[^`]+`", " ", title)
+    cleaned = re.sub(r"\b(?:GET|POST|PUT|PATCH|DELETE|API|SDK|AI|SQL|JSON|YAML)\b", " ", cleaned, flags=re.I)
+    cleaned = re.sub(
+        r"\b(?:REQ|ROLE|MOD|FLOW|VIEW|REG|ACT|FLD|STM|STATE|RULE|API|EVT|INT|AC|TEST|EVD|UNK)-[A-Z0-9-]+\b",
+        " ", cleaned, flags=re.I,
+    )
+    cjk = len(re.findall(r"[\u4e00-\u9fff]", cleaned))
+    latin_words = len(re.findall(r"\b[A-Za-z]{2,}\b", cleaned))
+    if cjk >= 2 and latin_words >= 2:
+        return "mixed"
+    if cjk >= 2:
+        return "zh"
+    if latin_words >= 2:
+        return "en"
+    return "neutral"
+
+
+def _module_slices(raw: str) -> dict[str, str]:
+    headings = markdown_headings(raw)
+    slices: dict[str, str] = {}
+    for index, (level, title, start) in enumerate(headings):
+        module_match = re.search(r"\bMOD-[A-Z0-9-]+\b", title, re.I)
+        if not module_match:
+            continue
+        end = len(raw)
+        for next_level, _next_title, next_start in headings[index + 1:]:
+            if next_level <= level:
+                end = next_start
+                break
+        slices[module_match.group(0).upper()] = raw[start:end]
+    return slices
 
 
 class Gate:
@@ -669,6 +736,101 @@ class Gate:
                     affected_consumers=("product", "qa", "coding_agent"),
                 )
 
+    def _check_module_slices_and_facets(
+        self, path: Path, raw: str, frontmatter: dict[str, Any], level: str
+    ) -> None:
+        if level not in {"L2", "L3", "L4"}:
+            return
+        document_lowered = raw.lower()
+        appendix_pos = _heading_position(
+            raw, (r"^第四部分", r"^附录\s*A(?:\b|[：:])", r"engineering.+annex")
+        )
+        main = raw[:appendix_pos] if appendix_pos >= 0 else raw
+        module_ids = {item.upper() for item in re.findall(r"\bMOD-[A-Z0-9-]+\b", main, re.I)}
+        slices = _module_slices(main)
+        self.metrics["module_ids"] = len(module_ids)
+        self.metrics["module_slices"] = len(slices)
+        for module_id in sorted(module_ids - set(slices)):
+            self.add(
+                "BLOCK", "PRD-MODULE-SLICE-MISSING", path,
+                "模块 ID 没有独立纵向规格章节", module_id,
+                affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                related_refs=(module_id,),
+            )
+        for module_id, block in slices.items():
+            lowered = block.lower()
+            groups = {
+                "目标/边界/入口/结果": (
+                    ("目标", "outcome", "goal"), ("边界", "不负责", "scope", "non-goal"),
+                    ("入口", "前置", "entry", "precondition"), ("结果", "出口", "success result"),
+                ),
+                "主路径/异常/恢复": (
+                    ("主路径", "用户故事", "journey", "main path"),
+                    ("异常", "失败", "exception", "failure"), ("恢复", "重试", "recovery", "retry"),
+                ),
+                "页面/动作": (
+                    ("view-", "页面", "screen", "ui 不适用", "ui not applicable"),
+                    ("act-", "动作", "action"),
+                ),
+                "字段/数据/权限": (
+                    ("fld-", "字段", "field"), ("数据", "来源", "data", "source"),
+                    ("权限", "角色", "permission", "role"),
+                ),
+                "规则/状态/事件": (
+                    ("rule-", "规则", "rule"),
+                    ("stm-", "state-", "状态", "无状态", "stateless"),
+                    ("evt-", "api-", "事件", "集成", "无外部集成", "event", "integration", "no external integration"),
+                ),
+                "指标/数据质量": (
+                    ("metric-", "指标口径", "指标不适用", "metric", "no metric"),
+                    ("公式", "去重", "刷新", "数据质量", "不展示指标", "formula", "dedup", "freshness", "data quality"),
+                ),
+                "验收/未决项": (
+                    ("ac-", "验收", "acceptance"),
+                    ("unk-", "rev-", "未决", "未知项", "无未决项", "unknown", "open issue", "no open issue"),
+                ),
+            }
+            missing = [
+                label for label, requirements in groups.items()
+                if any(not any(term in lowered for term in alternatives) for alternatives in requirements)
+            ]
+            if missing:
+                self.add(
+                    "BLOCK", "PRD-MODULE-SLICE-INCOMPLETE", path,
+                    "模块纵向切片缺少 " + "、".join(missing), module_id,
+                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    related_refs=(module_id,),
+                )
+
+        facets = frontmatter.get("activated_facets", []) or []
+        if not isinstance(facets, list):
+            self.add("BLOCK", "PRD-BAD-ACTIVATED-FACETS", path, "activated_facets 必须是数组", "frontmatter.activated_facets")
+            return
+        facets = {str(item).lower() for item in facets}
+        allowed = {"ui", "stateful", "data_submission", "integration", "batch_io", "high_risk"}
+        unknown = sorted(facets - allowed)
+        if unknown:
+            self.add("BLOCK", "PRD-BAD-ACTIVATED-FACETS", path, "未知条件规格: " + ", ".join(unknown))
+        if "data_submission" in facets:
+            required = {
+                "来源与映射": ("来源映射", "字段映射", "source mapping", "mapping"),
+                "校验": ("校验", "validation"),
+                "提交状态": ("提交状态", "上报状态", "submission state", "reporting state"),
+                "重试与幂等": ("重试", "retry"),
+                "幂等": ("幂等", "idempotency"),
+                "审计": ("审计", "audit"),
+                "口径与时效": ("指标口径", "计算口径", "metric caliber", "formula"),
+                "刷新/时效": ("刷新", "时效", "延迟", "freshness", "latency"),
+                "对账/更正": ("对账", "更正", "reconciliation", "correction"),
+            }
+            missing = [label for label, terms in required.items() if not any(term in document_lowered for term in terms)]
+            if missing:
+                self.add(
+                    "BLOCK", "PRD-DATA-SUBMISSION-CONTRACT-INCOMPLETE", path,
+                    "数据上报/统计口径规格缺少 " + "、".join(missing), "activated_facets.data_submission",
+                    affected_consumers=("product", "backend", "qa", "coding_agent"),
+                )
+
     def check_prd(
         self,
         path: Path,
@@ -690,22 +852,69 @@ class Gate:
             self.metrics["resolved_level"] = level
             self.metrics["level_source"] = "frontmatter" if declared_level in LEVELS else "fallback_L2"
 
-        # Human-first unified baseline contract (reuses validate_unified_prd rules).
+        # Human-first language and reading contract.
         h1_count = len(re.findall(r"(?m)^#\s+[^#\n]", raw))
         if h1_count != 1:
             self.add("BLOCK", "PRD-ONE-H1", path, f"unified PRD needs exactly one H1 title; found {h1_count}")
-        for marker in MAIN_MARKERS:
-            if marker.lower() not in lowered:
-                self.add("BLOCK", "PRD-HUMAN-PATH", path, f"human reading path misses {marker}", marker)
-        for marker in ANNEX_MARKERS:
-            if marker.lower() not in lowered:
-                self.add("BLOCK", "PRD-ENGINEERING-ANNEX", path, f"engineering annex misses {marker}", marker)
+        declared_language = str(frontmatter.get("document_language", "")).strip()
+        if not declared_language:
+            self.add(
+                "BLOCK", "PRD-LANGUAGE-NOT-DECLARED", path,
+                "frontmatter 必须声明 document_language，并与用户当前请求语言一致",
+                "frontmatter.document_language",
+                affected_consumers=("business", "product", "engineering", "qa", "coding_agent"),
+            )
+        elif frontmatter.get("bilingual") is not True:
+            expected = "zh" if declared_language.lower().startswith("zh") else "en"
+            structural = [(level, title) for level, title, _pos in markdown_headings(raw) if level <= 3]
+            drifted = [title for _level, title in structural if _heading_language(title) not in {expected, "neutral", "mixed"}]
+            h1_drift = bool(structural and structural[0][0] == 1 and structural[0][1] in drifted)
+            self.metrics["document_language"] = declared_language
+            self.metrics["heading_language_drift"] = len(drifted)
+            if h1_drift or len(drifted) >= 2:
+                self.add(
+                    "BLOCK", "PRD-LANGUAGE-DRIFT", path,
+                    f"声明 {declared_language}，但关键标题出现 {len(drifted)} 处语言漂移",
+                    "; ".join(drifted[:4]),
+                    affected_consumers=("business", "product", "engineering", "qa", "coding_agent"),
+                )
+            elif drifted:
+                self.add(
+                    "GAP", "PRD-LANGUAGE-DRIFT", path,
+                    f"声明 {declared_language}，仍有 1 处标题语言漂移",
+                    drifted[0],
+                    affected_consumers=("business", "product"),
+                )
+
+        if level in {"L2", "L3", "L4"}:
+            section_contract = MAIN_SECTION_ALIASES
+        elif level == "L1":
+            section_contract = (
+                ("目标/范围", (r"目标", r"范围", r"goal", r"scope")),
+                ("角色/用户故事", (r"角色", r"用户故事", r"role", r"user stor")),
+                ("流程/异常", (r"流程", r"异常", r"flow", r"exception")),
+                ("验收", (r"验收", r"acceptance")),
+            )
+        else:
+            section_contract = (
+                ("目标/范围", (r"目标", r"范围", r"goal", r"scope")),
+                ("验收", (r"验收", r"acceptance")),
+            )
+        for label, aliases in section_contract:
+            if not _has_heading(raw, aliases):
+                self.add("BLOCK", "PRD-HUMAN-PATH", path, f"human reading path misses {label}", label)
+
+        # L0/L1 cards stay compact; L2+ use one unified PRD with exact annexes.
+        if level in {"L2", "L3", "L4"}:
+            for label, aliases in ANNEX_SECTION_ALIASES:
+                if not _has_heading(raw, aliases):
+                    self.add("BLOCK", "PRD-ENGINEERING-ANNEX", path, f"engineering annex misses {label}", label)
         appendix_pos = _heading_position(
             raw,
-            (r"^第四部分", r"^附录\s*A(?:\b|[：:])", r"工程与\s*AI\s*Coding\s*附录"),
+            (r"^第四部分", r"^附录\s*A(?:\b|[：:])", r"工程与\s*AI\s*Coding\s*附录", r"engineering.+ai.+annex"),
         )
         journey_pos = _heading_position(raw, (r"角色旅程", r"用户旅程", r"role journey"))
-        if appendix_pos < 0 or journey_pos < 0 or appendix_pos <= journey_pos:
+        if level in {"L2", "L3", "L4"} and (appendix_pos < 0 or journey_pos < 0 or appendix_pos <= journey_pos):
             self.add("BLOCK", "PRD-READING-ORDER", path, "engineering annex must follow role journeys and module narrative")
         main = raw[:appendix_pos] if appendix_pos >= 0 else raw
         nonblank = [line for line in main.splitlines() if line.strip()]
@@ -716,12 +925,21 @@ class Gate:
         trace_pos = _heading_position(raw, (r"双向追溯", r"bidirectional trace"), last=True)
         trace_text = raw[trace_pos:] if trace_pos >= 0 else ""
         traced = set(re.findall(r"\bREQ-[A-Z0-9-]+\b", trace_text, re.I))
-        for req_id in sorted(requirement_ids - traced):
-            self.add("BLOCK", "PRD-UNTRACED-REQ", path, "requirement is absent from the trace annex", req_id)
-        if trace_text and (not re.search(r"\bAC-[A-Z0-9-]+\b", trace_text, re.I) or "反向" not in trace_text):
+        if level in {"L2", "L3", "L4"}:
+            for req_id in sorted(requirement_ids - traced):
+                self.add("BLOCK", "PRD-UNTRACED-REQ", path, "requirement is absent from the trace annex", req_id)
+        if level in {"L2", "L3", "L4"} and trace_text and (
+            not re.search(r"\bAC-[A-Z0-9-]+\b", trace_text, re.I)
+            or not re.search(r"反向|reverse", trace_text, re.I)
+        ):
             self.add("BLOCK", "PRD-NO-REVERSE-TRACE", path, "trace annex must bind AC IDs and declare reverse lookup")
-        if "两套 prd" not in lowered and "一份" not in lowered:
+        if level in {"L2", "L3", "L4"} and not has_any(lowered, ("两套 prd", "一份", "one prd", "one baseline")):
             self.add("BLOCK", "PRD-NO-ONE-BASELINE", path, "document does not declare one-baseline semantics")
+        if level in {"L2", "L3", "L4"}:
+            if not has_any(lowered, ("30 秒摘要", "30秒摘要", "30-second summary", "executive summary")):
+                self.add("BLOCK", "PRD-NO-QUICK-SUMMARY", path, "统一 PRD 缺少 30 秒摘要")
+            if not has_any(lowered, ("任务式阅读导航", "任务阅读导航", "reading map", "reader task map")):
+                self.add("BLOCK", "PRD-NO-READING-MAP", path, "统一 PRD 缺少按角色/任务定位的阅读导航")
 
         # Requirement quality contract (reuses validate_prd_quality vocabulary).
         for key in LEVELS[level]:
@@ -776,6 +994,7 @@ class Gate:
         self._check_unknowns(path, raw, frontmatter, stage=stage, scope_refs=scope_refs)
         self._check_triggered_contracts(path, raw, frontmatter, level)
         self._check_testability(path, raw, frontmatter, level)
+        self._check_module_slices_and_facets(path, raw, frontmatter, level)
 
         if level in {"L3", "L4"}:
             if STAGE_ORDER.get(stage, STAGE_ORDER["baseline"]) >= STAGE_ORDER["baseline"]:

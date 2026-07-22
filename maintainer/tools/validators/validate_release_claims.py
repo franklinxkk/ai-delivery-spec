@@ -11,7 +11,7 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[3]
-VERSION = "5.3.1"
+VERSION = "5.3.2"
 PUBLIC_FILES = (
     "README.md",
     "maintainer/README.md",

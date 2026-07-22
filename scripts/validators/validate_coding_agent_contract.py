@@ -19,10 +19,10 @@ BASE_AREAS = {
     "role journeys and flow closure": ("角色旅程", "端到端", "flow-", "跨角色"),
     "IA, page and region layout": ("信息架构", "页面与布局", "page layout", "view contract"),
     "fields and data flow": ("全局字段字典", "字段字典", "field dictionary", "数据流转"),
-    "states, rules and recovery": ("状态机", "规则与状态机", "异常与边界", "failure / recovery"),
+    "states, rules and recovery": ("状态机", "规则与状态机", "state machine", "rules and states", "异常与边界", "failure / recovery"),
     "API/integration business contract": ("api、事件与集成", "请求字段", "request fields", "集成业务契约"),
-    "security, privacy and NFR": ("非功能与合规", "nfr", "安全", "隐私"),
-    "machine-readable acceptance": ("机器可读验收", "ac_structured", "evidence_required"),
+    "security, privacy and NFR": ("非功能与合规", "non-functional", "security", "privacy", "nfr", "安全", "隐私"),
+    "machine-readable acceptance": ("机器可读验收", "machine-readable acceptance", "structured acceptance", "ac_structured", "evidence_required"),
     "bidirectional traceability": ("双向追溯", "反向索引", "traceability"),
     "forbidden invention": ("禁止推断", "禁止发明", "forbidden invention"),
 }

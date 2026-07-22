@@ -1,124 +1,88 @@
-# L1 Light Requirement Contract Template
+---
+artifact: requirement_card
+baseline_version: 0.1-draft
+delivery_level: L1
+delivery_shape: requirement_card
+document_language: zh-CN
+language_source: user_request
+bilingual: false
+activated_facets: []
+status: draft
+---
 
-Use for internal alignment, simple CRUD/workflow, or feature explanation before full development handoff.
+# {需求名称}需求卡
 
-## Contents
+> 默认跟随用户当前请求的主要语言。除非用户明确要求双语，否则标题、正文、表头、
+> 澄清问题和验收用例统一使用 `document_language`；稳定 ID、代码、API/字段名和专名不翻译。
 
-- 1. Version
-- 2. Intake And Background
-- 3. Goal And Non-Goal
-- 4. Users And Roles
-- 5. Scope
-- 6. User Stories
-- 7. Core Flow
-- 8. State And Actions
-- 9. Prototype / Screen Notes
-- 10. Risks And Open Questions
-- 11. Acceptance
+## 0. 文档控制与 30 秒摘要
 
-## 1. Version
-
-| Field | Value |
+| 项目 | 内容 |
 |---|---|
-| Feature / Module | |
-| Version | v0.1 |
-| Owner | |
-| Date | |
-| Reviewers | PM / Dev / QA / Sponsor |
+| REQ ID / 版本 | `REQ-LIGHT-001` / `v0.1` |
+| 负责人 / 确认人 | `{owner}` / `{approver}` |
+| 准入结论 | accept / clarify / defer / reject |
+| 一句话结果 | `{谁在什么场景完成什么结果}` |
+| 成功信号 | `{可观察、可验收的结果}` |
 
-## 2. Intake And Background
+## 1. 来源、问题与价值
 
-| REQ ID | Intake decision | Value evidence | Complexity | Priority | Owner | Dependency |
-|---|---|---|---|---|---|---|
-| REQ-LIGHT-001 | accept / clarify / defer / reject | | S / M | P0-P3 | | |
+现状与证据：
 
-Current situation:
+用户/业务问题：
 
-User / business problem:
+为什么现在做：
 
-Why now:
+## 2. 目标、范围与非目标
 
-## 3. Goal And Non-Goal
+- 目标：
+- 本期范围：
+- 明确不做：
+- 约束与依赖：
 
-Goal:
+## 3. 角色、用户故事与权限
 
-Success signal:
-
-Out of scope:
-
-- 
-- 
-- 
-
-## 4. Users And Roles
-
-| Role | Scenario | Pain / Need | Permission Boundary |
+| ROLE/REQ | 场景 | 用户故事（角色—动作—价值） | 数据/权限边界 |
 |---|---|---|---|
-| | | | |
+| ROLE-PRIMARY / REQ-LIGHT-001 | | 作为…，我希望…，从而… | |
 
-## 5. Scope
-
-In scope:
-
-- 
-
-Not included in this version:
-
-- 
-
-## 6. User Stories
-
-| Story ID / REQ | Role | User Story | Acceptance Criteria | Test Case |
-|---|---|---|---|---|
-| US-001 | | As a ..., I want ..., so that ... | Given / When / Then + visible result + domain result | TC-001 |
-
-## 7. Core Flow
+## 4. 用户旅程、主流程、异常与状态
 
 ```text
-entry -> action -> visible result -> domain result -> next action
+入口 → 动作 → 可见结果 → 领域结果 → 下一步/完成
+               └→ 失败原因 → 保留内容/重试/退出
 ```
 
-Fill-in sentence:
+| FLOW/ACT | 前置与输入 | 可见结果 | 领域/状态结果 | 失败与恢复 | AC |
+|---|---|---|---|---|---|
+| FLOW-LIGHT-001 / ACT-LIGHT-001 | | | | | AC-LIGHT-001 |
 
-```text
-The user enters from [入口/Entry], triggers [动作/Action], the system returns
-[可见结果/Visible Result], and writes or updates [领域对象/Domain Object].
-```
+## 5. 规则、字段与条件规格
 
-Example:
+先填写所有需求共有的规则、权限和异常；再只展开 `activated_facets` 中被触发的规格：
 
-| Step | Flow Sentence | Notes |
-|---|---|---|
-| 1 | The regulator enters from the hidden-danger list, clicks `Issue Notice`, the system shows a confirmation modal, and creates a `HiddenDangerNotice` in `issued` state. | Every step must include both visible result and domain result. |
+| 条件 Facet | 触发时必须补齐 |
+|---|---|
+| `ui` | 页面入口/布局、字段控件/必填/长度/校验、动作、空/错/无权状态 |
+| `stateful` | 状态、允许转换、角色/守卫、非法路径、撤销/重试 |
+| `data_submission` | 来源/映射/校验、提交状态、重试/幂等、审计、口径/时效/对账 |
+| `integration` | API/事件语义、权限、请求/响应、业务错误、幂等/补偿 |
+| `batch_io` | 文件格式/大小/数量、预检、部分失败、导出范围/脱敏 |
+| `high_risk` | 权威来源、责任人、人工门、禁止自动化、回退与证据 |
 
-## 8. State And Actions
+不适用项写“`不适用 + 业务原因`”，不得删除被触发项或用“按需/灵活/支持”代替规则。
 
-| Object | State | Visible Actions | Forbidden Actions | Domain Result |
-|---|---|---|---|---|
-| | | | | |
+## 6. 验收与测试
 
-## 9. Prototype / Screen Notes
+| AC/TEST | Given 前置/角色 | When 操作/输入 | Then 可见结果 | And 领域结果 | 反例/证据 |
+|---|---|---|---|---|---|
+| AC-LIGHT-001 / TEST-LIGHT-001 | | | | | |
 
-Prototype path:
+## 7. 未知项与升级判断
 
-Primary actions:
+| UNK/REV | 问题 | 优先级/阻断阶段 | 负责人 | 建议/取舍 | 关闭证据 |
+|---|---|---|---|---|---|
 
-| Screen | data-testid | data-action | Expected Result |
-|---|---|---|---|
-| | | | |
-
-## 10. Risks And Open Questions
-
-| Item | Type | Owner | Decision Needed |
-|---|---|---|---|
-| | risk / question | | |
-
-## 11. Acceptance
-
-- [ ] Role path can be walked through.
-- [ ] Every primary action has visible result.
-- [ ] Every state-changing action has domain result.
-- [ ] Known gaps are listed.
-- [ ] AC/test can reverse-trace to `REQ-LIGHT-001`.
-- [ ] If scope expands, upgrade this file to the unified PRD; add Product Truth
-      only when scale, repeated change, multiple exports or audit triggers it.
+出现以下任一项时升级为统一 PRD：跨角色交接、跨模块/跨系统、关键状态机、数据上报/
+统计口径、批量导入导出、审批审计、外部集成、资金/隐私/监管、不可逆写入、迁移或版本兼容。
+升级是补足同一 `REQ-*` 的规格，不得另造互相冲突的第二份需求。

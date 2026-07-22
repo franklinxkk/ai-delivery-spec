@@ -61,6 +61,13 @@ Return one decision:
 Multi-requirement intake also records iteration, dependencies and ordering. It
 is a light requirement pool, not a backlog/sprint manager.
 
+The triage also activates conditional specification facets. A reversible,
+single-role local change may use a requirement card. Cross-role/module/system
+work, material state, data submission/reporting or metric caliber, batch I/O,
+approval/audit, integration, high-risk decisions, irreversible writes, migration
+or version compatibility require the unified PRD. This is a contract-complexity
+decision, not a document-length preference.
+
 ## 4. Decision-Tree Clarification
 
 Run a self-check gate before asking: inspect supplied artifacts, repository and
@@ -103,6 +110,13 @@ without a decision rule.
 Default to one unified PRD. Its main body is the shared reading path; its
 engineering appendices are part of the same baseline. Do not maintain a
 traditional PRD and an AI Coding PRD as independent sources of truth.
+
+The document language follows the user's current request unless explicitly
+overridden. One PRD opens with a 30-second summary and task reading map, then
+business journeys, self-contained module slices, cross-cutting contracts and
+engineering/AI indexes. A module slice co-locates outcome, UI/data, rules,
+permissions, states/events, metrics, recovery, AC and unknowns; appendices must
+not silently rewrite those facts.
 
 A baseline requires:
 

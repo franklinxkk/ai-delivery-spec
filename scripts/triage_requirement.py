@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -33,8 +34,18 @@ def size(value: Any) -> int:
     return 0
 
 
+def document_language(doc: dict[str, Any]) -> str:
+    explicit = str(doc.get("document_language", "")).strip()
+    if explicit:
+        return explicit
+    sample = " ".join(str(doc.get(key, "")) for key in ("title", "outcome"))
+    return "zh-CN" if re.search(r"[\u4e00-\u9fff]", sample) else "en"
+
+
 def recommend(doc: dict[str, Any]) -> dict[str, Any]:
     reasons: list[str] = []
+    language = document_language(doc)
+    zh = language.lower().startswith("zh")
     missing = [key for key in ("title", "outcome", "owner") if not str(doc.get(key, "")).strip()]
     sources = doc.get("source_refs", [])
     value_evidence = doc.get("value_evidence", [])
@@ -46,6 +57,8 @@ def recommend(doc: dict[str, Any]) -> dict[str, Any]:
     roles = size(doc.get("roles"))
     modules = size(doc.get("modules"))
     integrations = size(doc.get("integrations"))
+    states = size(doc.get("states"))
+    handoffs = size(doc.get("cross_role_handoffs"))
     ai_behavior = bool(doc.get("ai_behavior"))
     ai_centrality = str(doc.get("ai_centrality", "unknown")).lower()
     ai_write_scope = str(doc.get("ai_write_scope", "unknown")).lower()
@@ -65,19 +78,27 @@ def recommend(doc: dict[str, Any]) -> dict[str, Any]:
         dimensions.append("multi_module")
     if integrations:
         dimensions.append("integration")
+    for key in ("data_submission", "data_reporting", "metric_caliber", "batch_io", "approval", "audit_required", "irreversible_write", "version_compatibility"):
+        if doc.get(key):
+            dimensions.append(key)
+    if states > 3:
+        dimensions.append("material_state")
+    if handoffs:
+        dimensions.append("cross_role_handoff")
 
     if doc.get("out_of_product_boundary") or doc.get("duplicate_of"):
         decision = "reject"
-        reasons.append("需求超出产品边界或已被现有需求覆盖")
+        reasons.append("需求超出产品边界或已被现有需求覆盖" if zh else "The request is outside the product boundary or duplicates an existing requirement")
     elif doc.get("blocked_dependency") or (doc.get("value") == "low" and not doc.get("urgent")):
         decision = "defer"
-        reasons.append("依赖未解除或当前价值不足以进入本期设计")
+        reasons.append("依赖未解除或当前价值不足以进入本期设计" if zh else "A dependency is blocked or current value does not justify this iteration")
     elif missing or doc.get("ambiguity") == "high":
         decision = "clarify"
-        reasons.append("缺少会改变范围或结果的准入信息: " + ", ".join(sorted(set(missing))))
+        prefix = "缺少会改变范围或结果的准入信息: " if zh else "Missing intake facts that can change scope or outcome: "
+        reasons.append(prefix + ", ".join(sorted(set(missing))))
     else:
         decision = "accept"
-        reasons.append("目标、责任人与价值证据足以进入需求设计")
+        reasons.append("目标、责任人与价值证据足以进入需求设计" if zh else "Outcome, owner and value evidence are sufficient to enter specification")
 
     complexity_score = roles + modules * 2 + integrations * 2 + len(dimensions) * 2
     if complexity_score <= 3:
@@ -136,10 +157,18 @@ def recommend(doc: dict[str, Any]) -> dict[str, Any]:
         or bool(coupling_signals["data_lineage"] and coupling_signals["strong_audit"])
         or bool(doc.get("governed_truth_requested"))
     )
+    unified_triggers = {
+        "multi_role", "multi_module", "integration", "cross_module_state",
+        "data_submission", "data_reporting", "metric_caliber", "batch_io",
+        "approval", "audit_required", "irreversible_write", "version_compatibility",
+        "material_state", "cross_role_handoff", "migration", "compliance", "sensitive_data",
+    }
     if ultra:
         delivery_shape = "requirement_card"
     elif governed_trigger:
         delivery_shape = "governed_truth"
+    elif unified_triggers.intersection(dimensions):
+        delivery_shape = "unified_prd"
     else:
         delivery_shape = "unified_prd"
 
@@ -156,8 +185,23 @@ def recommend(doc: dict[str, Any]) -> dict[str, Any]:
     else:
         priority = "P2"
 
+    facets = []
+    if doc.get("ui", True):
+        facets.append("ui")
+    if states or doc.get("cross_module_state"):
+        facets.append("stateful")
+    if any(doc.get(key) for key in ("data_submission", "data_reporting", "metric_caliber")):
+        facets.append("data_submission")
+    if integrations:
+        facets.append("integration")
+    if doc.get("batch_io"):
+        facets.append("batch_io")
+    if assurance_profile in {"high_risk", "safety_critical"}:
+        facets.append("high_risk")
+
     return {
         "schema_version": "5.3.0",
+        "document_language": language,
         "decision": decision,
         "priority": priority,
         "complexity": {"band": band, "dimensions": sorted(set(dimensions))},
@@ -167,21 +211,40 @@ def recommend(doc: dict[str, Any]) -> dict[str, Any]:
         "delivery_shape": delivery_shape,
         "assurance_profile": assurance_profile,
         "routing_signals": coupling_signals,
+        "activated_facets": facets,
         "missing_for_intake": sorted(set(missing)),
         "reasons": reasons,
-        "estimate_boundary": "complexity band only; engineering effort/cost requires accountable engineering confirmation",
+        "estimate_boundary": (
+            "当前只判断复杂度；工期/成本由有权工程负责人确认"
+            if zh else "Complexity band only; effort and cost require accountable engineering confirmation"
+        ),
     }
 
 
 def render_markdown(result: dict[str, Any]) -> str:
+    zh = str(result.get("document_language", "")).lower().startswith("zh")
+    if zh:
+        return (
+            "# 需求准入与分诊建议\n\n"
+            f"- 准入结论：`{result['decision']}`\n"
+            f"- 优先级：`{result['priority']}`\n"
+            f"- 复杂度：`{result['complexity']['band']}`（{', '.join(result['complexity']['dimensions']) or '边界内'}）\n"
+            f"- 不确定性：`{result['uncertainty']}`\n"
+            f"- 模式/等级：`{result['recommended_mode']} / {result['recommended_tier']}`\n"
+            f"- 交付形态/保证强度：`{result['delivery_shape']} / {result['assurance_profile']}`\n"
+            f"- 激活规格：`{', '.join(result['activated_facets']) or '无'} `\n"
+            f"- 待补信息：`{', '.join(result['missing_for_intake']) or '无'}`\n\n"
+            + "".join(f"- 判断依据：{item}\n" for item in result["reasons"])
+            + "- 估算边界：当前只判断复杂度；工期/成本由有权工程负责人确认。\n"
+        )
     return (
-        "# Requirement Intake Recommendation\n\n"
-        f"- Decision: `{result['decision']}`\n"
-        f"- Priority: `{result['priority']}`\n"
+        "# Requirement Intake And Triage Recommendation\n\n"
+        f"- Decision: `{result['decision']}`\n- Priority: `{result['priority']}`\n"
         f"- Complexity: `{result['complexity']['band']}` ({', '.join(result['complexity']['dimensions']) or 'bounded'})\n"
         f"- Uncertainty: `{result['uncertainty']}`\n"
         f"- Mode/Tier: `{result['recommended_mode']} / {result['recommended_tier']}`\n"
         f"- Delivery/Assurance: `{result['delivery_shape']} / {result['assurance_profile']}`\n"
+        f"- Activated facets: `{', '.join(result['activated_facets']) or 'none'}`\n"
         f"- Missing: `{', '.join(result['missing_for_intake']) or 'none'}`\n\n"
         + "".join(f"- Rationale: {item}\n" for item in result["reasons"])
         + f"- Estimate boundary: {result['estimate_boundary']}\n"

@@ -15,7 +15,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 from ai_delivery_spec_cli import init_requirements  # noqa: E402
-from triage_requirement import recommend  # noqa: E402
+from triage_requirement import recommend, render_markdown  # noqa: E402
 
 
 def run(*parts: str) -> subprocess.CompletedProcess[str]:
@@ -93,6 +93,21 @@ governed = recommend({
 })
 if governed["delivery_shape"] != "governed_truth":
     failures.append("controlled multi-projection work did not trigger governed truth")
+
+data_submission = recommend({
+    "title": "经营数据上报", "outcome": "主管部门收到可对账的数据", "owner": "产品负责人",
+    "source_refs": ["SRC-REPORT"], "value_evidence": ["已确认上报要求"],
+    "roles": ["ROLE-REPORTER"], "modules": ["MOD-REPORT"], "reversible": True,
+    "data_submission": True, "states": ["draft", "validating", "submitted", "rejected"],
+})
+if data_submission["document_language"] != "zh-CN":
+    failures.append("Chinese intake did not preserve the user's language")
+if data_submission["delivery_shape"] != "unified_prd" or data_submission["recommended_tier"] != "L2":
+    failures.append(f"data submission was under-routed: {data_submission}")
+if "data_submission" not in data_submission["activated_facets"]:
+    failures.append("data submission did not activate its conditional contract")
+if not render_markdown(data_submission).startswith("# 需求准入与分诊建议"):
+    failures.append("Chinese intake rendered an English recommendation")
 
 with tempfile.TemporaryDirectory(prefix="ads-v510-") as temp:
     workspace = Path(temp) / "requirements"

@@ -1,6 +1,7 @@
 title: "{requirement title}"
 outcome: "{observable customer or business result}"
 owner: "{accountable product owner}"
+document_language: zh-CN # 默认跟随用户当前请求；显式要求可覆盖
 source_refs: [SRC-REQ-001]
 value: medium
 value_evidence:
@@ -8,6 +9,16 @@ value_evidence:
 roles: [ROLE-PRIMARY]
 modules: [MOD-PRIMARY]
 integrations: []
+states: []
+cross_role_handoffs: []
+data_submission: false
+data_reporting: false
+metric_caliber: false
+batch_io: false
+approval: false
+audit_required: false
+irreversible_write: false
+version_compatibility: false
 reversible: false
 cross_module_state: false
 sensitive_data: false
