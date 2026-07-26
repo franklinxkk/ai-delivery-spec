@@ -6,12 +6,52 @@
   "additionalProperties": false,
   "required": ["schema_version", "review_id", "baseline_version", "review_type", "status", "reviewers", "findings"],
   "properties": {
-    "schema_version": { "const": "5.1.0" },
+    "schema_version": { "enum": ["5.1.0", "5.4.0"] },
     "review_id": { "type": "string", "pattern": "^REVIEW-[A-Z0-9-]+$" },
     "baseline_version": { "type": "string", "minLength": 1 },
-    "review_type": { "enum": ["intake", "business", "product", "engineering", "qa", "customer", "compliance"] },
+    "requirement_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^REQ-[A-Z0-9-]+$" }
+    },
+    "reviewed_artifact_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "review_type": { "enum": ["intake", "business", "product", "architecture", "engineering", "delivery", "qa", "customer", "compliance", "cross_functional"] },
     "status": { "enum": ["scheduled", "in_review", "changes_requested", "completed", "cancelled"] },
-    "reviewers": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "reviewers": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "required_review_types": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["intake", "business", "product", "architecture", "engineering", "delivery", "qa", "customer", "compliance"] }
+    },
+    "sign_offs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["review_type", "actor", "decision", "at", "evidence_refs"],
+        "properties": {
+          "review_type": { "enum": ["intake", "business", "product", "architecture", "engineering", "delivery", "qa", "customer", "compliance"] },
+          "actor": { "type": "string", "minLength": 1 },
+          "decision": { "enum": ["approve", "approve_with_conditions", "reject"] },
+          "at": { "type": "string", "format": "date-time" },
+          "evidence_refs": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+          "conditions": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "decision": { "const": "approve_with_conditions" } }, "required": ["decision"] },
+            "then": { "required": ["conditions"], "properties": { "conditions": { "minItems": 1 } } }
+          }
+        ]
+      }
+    },
     "reviewed_at": { "type": "string", "format": "date-time" },
     "findings": {
       "type": "array",
@@ -34,5 +74,18 @@
       }
     },
     "conclusion": { "type": "string" }
-  }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "schema_version": { "const": "5.4.0" } }, "required": ["schema_version"] },
+      "then": { "required": ["requirement_refs", "reviewed_artifact_refs", "required_review_types", "sign_offs"] }
+    },
+    {
+      "if": { "properties": { "status": { "const": "completed" } }, "required": ["status"] },
+      "then": {
+        "required": ["reviewed_at", "required_review_types", "sign_offs"],
+        "properties": { "sign_offs": { "minItems": 1 } }
+      }
+    }
+  ]
 }

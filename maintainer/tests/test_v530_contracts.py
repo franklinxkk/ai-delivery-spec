@@ -288,23 +288,23 @@ with tempfile.TemporaryDirectory(prefix="ads-v530-") as temp_name:
 
     card_cases = [
         {
-            "code": "ANJIA-RESOURCE-FORMAT", "project": "安驾融合出版与服务平台",
+            "code": "PUBLISHING-RESOURCE-FORMAT", "project": "出版学习与授权平台",
             "title": "资源列表增加文件格式筛选", "outcome": "内容制作人员可按视频、音频、文档或图片快速缩小资源范围",
             "scene": "资源管理列表查找素材", "story": "按已有文件格式筛选当前资源列表",
-            "role": "ROLE-ANJIA-CONTENT", "role_name": "内容制作人员", "mod": "MOD-ANJIA-RESOURCE",
-            "view": "VIEW-ANJIA-RESOURCE-LIST", "field": "FLD-ANJIA-FILE-FORMAT", "control": "单选下拉", "default": "全部格式",
-            "visible_result": "列表只显示所选格式资源并展示当前条件", "src": "SRC-ANJIA-PROTO-RESOURCE",
+            "role": "ROLE-PUBLISHING-CONTENT", "role_name": "内容制作人员", "mod": "MOD-PUBLISHING-RESOURCE",
+            "view": "VIEW-PUBLISHING-RESOURCE-LIST", "field": "FLD-PUBLISHING-FILE-FORMAT", "control": "单选下拉", "default": "全部格式",
+            "visible_result": "列表只显示所选格式资源并展示当前条件", "src": "SRC-PUBLISHING-PROTO-RESOURCE",
         },
         {
-            "code": "ANJIA-COURSE-MINE", "project": "安驾融合出版与服务平台",
+            "code": "PUBLISHING-COURSE-MINE", "project": "出版学习与授权平台",
             "title": "课程列表增加仅看我创建", "outcome": "课程编辑可一键只查看本人创建且原本有权访问的课程",
             "scene": "课程管理列表定位本人课程", "story": "使用仅看我创建开关减少翻页查找",
-            "role": "ROLE-ANJIA-EDITOR", "role_name": "课程编辑", "mod": "MOD-ANJIA-COURSE",
-            "view": "VIEW-ANJIA-COURSE-LIST", "field": "FLD-ANJIA-COURSE-MINE", "control": "布尔开关", "default": "关闭",
-            "visible_result": "开启后只显示createdBy为当前用户的有权课程", "src": "SRC-ANJIA-PROTO-COURSE", "changed": True,
+            "role": "ROLE-PUBLISHING-EDITOR", "role_name": "课程编辑", "mod": "MOD-PUBLISHING-COURSE",
+            "view": "VIEW-PUBLISHING-COURSE-LIST", "field": "FLD-PUBLISHING-COURSE-MINE", "control": "布尔开关", "default": "关闭",
+            "visible_result": "开启后只显示createdBy为当前用户的有权课程", "src": "SRC-PUBLISHING-PROTO-COURSE", "changed": True,
         },
         {
-            "code": "CRM-LEAD-SOURCE", "project": "神通CRM经营响应中台",
+            "code": "CRM-LEAD-SOURCE", "project": "CRM经营响应平台",
             "title": "线索列表增加来源筛选", "outcome": "销售可按现有线索来源字典筛选自己有权查看的线索",
             "scene": "线索列表按来源查找", "story": "选择来源后只查看对应渠道线索",
             "role": "ROLE-CRM-SALES", "role_name": "销售", "mod": "MOD-CRM-LEAD",
@@ -312,7 +312,7 @@ with tempfile.TemporaryDirectory(prefix="ads-v530-") as temp_name:
             "visible_result": "列表和结果数按所选来源刷新", "src": "SRC-CRM-PROTO-LEAD",
         },
         {
-            "code": "CRM-TICKET-OVERDUE", "project": "神通CRM经营响应中台",
+            "code": "CRM-TICKET-OVERDUE", "project": "CRM经营响应平台",
             "title": "工单列表增加仅看超期", "outcome": "客服可快速查看截止时间已过且未关闭的有权工单",
             "scene": "工单列表处理超期待办", "story": "使用仅看超期筛选定位需要优先响应的工单",
             "role": "ROLE-CRM-SERVICE", "role_name": "客服", "mod": "MOD-CRM-TICKET",

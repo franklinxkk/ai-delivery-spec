@@ -123,7 +123,7 @@ def init_custom(args: argparse.Namespace) -> int:
             "source_refs: [SRC-MY-TEAM-001]\nevidence_refs: [EVD-MY-TEAM-001]\n"
             "applicability: [当前项目]\nexclusions: []\njurisdiction: null\n"
             "regulatory_version: null\nsensitive_data: false\n"
-            "created_at: 2026-01-01T00:00:00+08:00\nexpires_at: null\n"
+            'created_at: "2026-01-01T00:00:00+08:00"\nexpires_at: null\n'
         ),
     }
     for path, content in files.items():
@@ -278,6 +278,8 @@ def run_check(args: argparse.Namespace) -> int:
         [sys.executable, "maintainer/tests/test_v515_page_delivery_contract.py"],
         [sys.executable, "maintainer/tests/test_v516_ai_applicability.py"],
         [sys.executable, "maintainer/tests/test_v530_contracts.py"],
+        [sys.executable, "maintainer/tests/test_v540_stage_contracts.py"],
+        [sys.executable, "maintainer/tests/test_v540_readme_commands.py"],
         [sys.executable, "scripts/validators/validate_requirement_patterns.py", "references/patterns/common-requirement-patterns.yaml"],
         [
             sys.executable,
@@ -506,6 +508,25 @@ def compile_truth(args: argparse.Namespace) -> int:
 
 
 def quality_gate(args: argparse.Namespace) -> int:
+    if args.profile in {"frame", "explore", "clarify"}:
+        values = [
+            "gate", "--profile", args.profile, "--format", args.format,
+            "--diagnostics", args.diagnostics, "--max-findings", str(args.max_findings),
+        ]
+        for artifact in args.artifact:
+            values.extend(["--artifact", str(artifact)])
+        return run_script("stage_contract.py", values)
+    if (
+        args.profile == "requirement"
+        and args.requirement
+        and args.requirement.suffix.casefold() in {".md", ".markdown"}
+    ):
+        print(
+            "BLOCKED: --profile requirement 只校验 YAML 需求登记册；"
+            "Markdown 需求卡或 PRD 请改用："
+            f"python scripts/ai_delivery_spec_cli.py gate --profile prd --prd \"{args.requirement}\""
+        )
+        return 2
     values = [
         "--profile", args.profile, "--level", args.level, "--stage", args.stage,
         "--format", args.format, "--diagnostics", args.diagnostics,
@@ -531,6 +552,13 @@ def quality_gate(args: argparse.Namespace) -> int:
         elif value:
             values.extend([option, str(value)])
     return run_script("quality_gate.py", values)
+
+
+def route_stage(args: argparse.Namespace) -> int:
+    values = ["route", "--target", args.target, "--format", args.format]
+    for artifact in args.artifact:
+        values.extend(["--artifact", str(artifact)])
+    return run_script("stage_contract.py", values)
 
 
 def query_domain(args: argparse.Namespace) -> int:
@@ -789,7 +817,8 @@ def main() -> int:
     check.set_defaults(func=run_check)
 
     gate = sub.add_parser("gate", help="Run the token-free final requirement/PRD/prototype goalkeeper")
-    gate.add_argument("--profile", choices=["requirement", "prd", "prototype", "handoff", "full", "stage0", "agent_handoff"], required=True)
+    gate.add_argument("--profile", choices=["frame", "explore", "clarify", "requirement", "prd", "prototype", "handoff", "full", "stage0", "agent_handoff"], required=True)
+    gate.add_argument("--artifact", type=Path, action="append", default=[], help="frame/explore/clarify 主产物；可重复提供侧车产物")
     gate.add_argument("--requirement", type=Path)
     gate.add_argument("--prd", type=Path)
     gate.add_argument("--prototype", type=Path, action="append", help="Repeat for admin/H5/multi-surface prototypes")
@@ -804,6 +833,12 @@ def main() -> int:
     gate.add_argument("--max-findings", type=int, default=20)
     gate.add_argument("--custom-root", type=Path, help="本地私有扩展目录；省略时门禁自动发现当前目录 custom/")
     gate.set_defaults(func=quality_gate)
+
+    route = sub.add_parser("route-stage", help="检查显式目标阶段、已有产物和断点；不使用关键词推断意图")
+    route.add_argument("--target", choices=["frame", "explore", "intake", "clarify", "specify", "review", "baseline", "change", "acceptance"], required=True)
+    route.add_argument("--artifact", type=Path, action="append", default=[])
+    route.add_argument("--format", choices=["concise", "json"], default="concise")
+    route.set_defaults(func=route_stage)
 
     explain = sub.add_parser("explain-finding", help="Explain one gate code and show a bounded repair direction")
     explain.add_argument("code")

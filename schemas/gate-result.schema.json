@@ -13,7 +13,7 @@
       "required": ["status", "profile", "summary", "coverage", "not_proven", "retry_command", "metrics", "findings"],
       "properties": {
         "status": { "enum": ["PASS", "REVIEW_COMPLETE_WITH_GAPS", "BLOCKED", "BLOCKED_BY_P0_UNKNOWN"] },
-        "profile": { "enum": ["requirement", "prd", "prototype", "handoff", "full", "stage0", "agent_handoff"] },
+        "profile": { "enum": ["frame", "explore", "clarify", "requirement", "prd", "prototype", "handoff", "full", "stage0", "agent_handoff"] },
         "summary": {
           "type": "object",
           "additionalProperties": false,

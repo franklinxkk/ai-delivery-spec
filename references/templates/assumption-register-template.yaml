@@ -1,0 +1,24 @@
+schema_version: 5.4.0
+artifact: assumption_register
+stage: explore
+register_id: ASM-REGISTER-001
+project_id: PROJECT-EXAMPLE
+version: "0.1"
+status: draft
+assumptions:
+  - id: ASM-001
+    statement: "{可证伪假设}"
+    category: desirability
+    option_refs: [OPT-001]
+    evidence_refs: []
+    validation_method: "{最小验证}"
+    success_threshold: "{继续阈值}"
+    failure_action: "{回退、改选项或停止}"
+    owner: "{责任人}"
+    status: untested
+    due_at: null
+resume_context:
+  completed_stages: [frame]
+  prior_artifacts: []
+  open_threads: [ASM-001]
+  next_stage_options: [intake, explore]

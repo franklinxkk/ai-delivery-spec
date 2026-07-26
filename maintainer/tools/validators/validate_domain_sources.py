@@ -48,6 +48,8 @@ VENDOR_HOST_SUFFIXES = (
 OFFICIAL_GITHUB_PREFIXES = (
     "/open-dingtalk",
     "/larksuite",
+    "/openai/codex",
+    "/qwenlm/qwen-code",
 )
 VENDOR_AUTHORITY_TYPES = {
     "vendor_whitepaper",

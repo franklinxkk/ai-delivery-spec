@@ -523,6 +523,35 @@ sources:
     product_mapping: collection source, documented provenance, permitted uses, dataset maintenance and cross-jurisdiction questions
     last_verified_at: 2026-07-16
     refresh_days: 180
+  - id: KS-AI-CODEX-AGENT-LIVENESS
+    domains: [ai-native]
+    title: Codex parent-child agent liveness and wait semantics issue
+    issuer: OpenAI Codex project
+    authority_type: vendor_open_source
+    url: https://github.com/openai/codex/issues/16900
+    status: current_as_verified
+    jurisdiction: exact public issue and repository behavior
+    applicability: multi-agent orchestration where a parent delegates long-running work to child agents
+    product_mapping: child running/waiting/completed states, progress visibility, duplicate-execution prevention, context and token isolation
+    evidence_role: scenario_seed_and_product_behavior_evidence
+    claim_limit: public issue and source do not prove a universal agent design, production fix, current roadmap commitment, or customer requirement
+    last_verified_at: 2026-07-26
+    refresh_days: 90
+  - id: KS-AI-QWEN-SUBAGENT
+    domains: [ai-native]
+    title: Qwen Code sub-agent support issue
+    issuer: Qwen Code project
+    authority_type: vendor_open_source
+    url: https://github.com/QwenLM/qwen-code/issues/344
+    status: current_as_verified
+    jurisdiction: exact public issue and repository behavior
+    applicability: coding-agent delegation, isolated context and bounded sub-agent execution
+    product_mapping: delegation contract, tool and context isolation, parent result handoff, permissions and failure recovery
+    evidence_role: scenario_seed_and_product_behavior_evidence
+    claim_limit: public issue and source do not prove every Qwen model or client version behaves identically, nor a universal product requirement
+    last_verified_at: 2026-07-26
+    refresh_days: 90
+
   - id: KS-AI-ISO-42001
     domains: [ai-native]
     title: ISO/IEC 42001:2023 AI management systems

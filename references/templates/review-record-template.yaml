@@ -1,10 +1,14 @@
-schema_version: 5.1.0
+schema_version: 5.4.0
 review_id: REVIEW-CORE-001
 baseline_version: "0.1-draft"
-review_type: product
+requirement_refs: [REQ-CORE-001]
+reviewed_artifact_refs: [requirements/PRD.md]
+review_type: cross_functional
 status: in_review
-reviewers: ["{reviewer}"]
-reviewed_at: "2026-01-01T00:00:00Z"
+reviewers: [产品负责人, 架构负责人, 研发负责人, 测试负责人]
+# 依据需求风险裁剪；跨系统/NFR/迁移保留 architecture，多团队交付再加入 delivery。
+required_review_types: [product, architecture, engineering, qa]
+sign_offs: []
 findings:
   - id: REV-CORE-001
     severity: P1
@@ -15,4 +19,4 @@ findings:
     disposition: clarify
     resolution: ""
     evidence_refs: []
-conclusion: "P0/P1 findings must close before baseline"
+conclusion: "P0/P1 findings and every required role sign-off must close before baseline"
