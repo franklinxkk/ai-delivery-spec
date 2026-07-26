@@ -42,7 +42,7 @@ historical_regressions:
     proven: 43 repository assurance commands pass; deterministic regressions cover clarification contracts, zero-region blocking, missing/incomplete ARUN gaps and complete ARUN evidence closure
     sample_boundary: old sample findings remain project debt; expected v5.3.1 additions are limited to L3 region/browser evidence findings, while L2 behavior remains compatible
     not_proven: visual direction approval, browser execution itself, project business correctness, coding implementation, customer decisions or acceptance
-  - evidence_id: EVD-ANJIA-14-LENS-20260718
+  - evidence_id: EVD-PUBLISHING-14-LENS-20260718
     input: private publishing/authorization/learning PRD v3.3 RC1, prototype v3.2 and 14-agent simulation; project artifacts not shipped
     observed_failure: L2 static prototype gate missed concatenated data-action anchors; manual REV entries bypassed structured P0 unknowns; reverse requirements used a competing REQ namespace
     resolved_by: dynamic-anchor blocking and candidate inventory; structured UNK enforcement; INV-to-REQ mapping and owned review batches; explicit not_proven output

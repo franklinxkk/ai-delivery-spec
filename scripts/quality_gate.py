@@ -141,7 +141,8 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     ),
     "REQ-PARSE": (
         "需求登记文件不是可读的 UTF-8 YAML。",
-        "修复 YAML 缩进、引号或编码后重新校验。",
+        "该 profile 只接收 YAML 需求登记册：修复 YAML 缩进、引号或编码；"
+        "若输入是 Markdown 需求卡/PRD，请改用 --profile prd --prd <文件>。",
     ),
     "REQ-SCHEMA": (
         "需求登记文件不符合 JSON Schema。",

@@ -88,6 +88,7 @@ role_lenses:
   ROLE-LENS-DOMAIN: 领域负责人
   ROLE-LENS-UX: UX 与原型负责人
   ROLE-LENS-ENGINEERING: 研发与架构负责人
+  ROLE-LENS-DELIVERY: 需求交付与技术负责人
   ROLE-LENS-QA: 测试与验收负责人
   ROLE-LENS-COMPLIANCE: 合规与安全负责人
   ROLE-LENS-CUSTOMER: 客户验收代表
@@ -95,13 +96,14 @@ role_lenses:
 stages:
   - id: intake
     gate_question: 需求是否有证据、有负责人、有边界并值得进入正式设计？
-    mandatory_roles: &all_roles [ROLE-LENS-SPONSOR, ROLE-LENS-PRODUCT, ROLE-LENS-DOMAIN, ROLE-LENS-UX, ROLE-LENS-ENGINEERING, ROLE-LENS-QA, ROLE-LENS-COMPLIANCE, ROLE-LENS-CUSTOMER]
+    mandatory_roles: &all_roles [ROLE-LENS-SPONSOR, ROLE-LENS-PRODUCT, ROLE-LENS-DOMAIN, ROLE-LENS-UX, ROLE-LENS-ENGINEERING, ROLE-LENS-DELIVERY, ROLE-LENS-QA, ROLE-LENS-COMPLIANCE, ROLE-LENS-CUSTOMER]
     minimum_output:
       ROLE-LENS-SPONSOR: [可观察结果, 价值证据, 决策权限, 目标迭代]
       ROLE-LENS-PRODUCT: [REQ登记, 来源优先级, 范围, 依赖, 准入结论和层级]
       ROLE-LENS-DOMAIN: [核心对象, 生命周期风险, 适用来源, 高影响未知]
       ROLE-LENS-UX: [主角色任务, 入口假设, 是否需要原型, 可见成功结果]
       ROLE-LENS-ENGINEERING: [影响维度, 集成和存量信号, 复杂度带, 不可逆性]
+      ROLE-LENS-DELIVERY: [需求池排序证据, 复杂度和依赖聚合, 工程容量约束, 外部交接目标]
       ROLE-LENS-QA: [可验收结果, 关键反例, 证据可得性, 测试阻断项]
       ROLE-LENS-COMPLIANCE: [敏感数据, 责任决策, 审计触发, 禁止行为]
       ROLE-LENS-CUSTOMER: [购买或使用结果, 验收主体, 外部约束, 不接受边界]
@@ -114,6 +116,7 @@ stages:
       ROLE-LENS-DOMAIN: [术语字典, 状态所有者, 不变量, 来源适用性和冲突]
       ROLE-LENS-UX: [角色路径, 页面状态, 交接提示, 失败恢复, 可访问性风险]
       ROLE-LENS-ENGINEERING: [接口语义, 幂等并发, 兼容迁移, 补偿对账未知]
+      ROLE-LENS-DELIVERY: [跨团队责任边界, 依赖责任人, 决策升级路径, 交付阻断]
       ROLE-LENS-QA: [前置和反例, 可观察结果, 测试数据, 证据类型]
       ROLE-LENS-COMPLIANCE: [合法权限, 最小数据, 人工责任, 留存撤销和审计]
       ROLE-LENS-CUSTOMER: [现场操作路径, 组织边界, 验收口径, 条件通过规则]
@@ -126,6 +129,7 @@ stages:
       ROLE-LENS-DOMAIN: [实体关系, 生命周期, 领域结果, 规则优先级和异常]
       ROLE-LENS-UX: [布局入口, data注解, 全状态, 可见结果, 角色旅程]
       ROLE-LENS-ENGINEERING: [业务级API事件, 权限幂等, 失败补偿, 禁止推断]
+      ROLE-LENS-DELIVERY: [工程就绪清单, 必需评审角色, 版本交接范围, 外部里程碑映射]
       ROLE-LENS-QA: [可执行AC, 负例, 数据集, 证据锚点, 回归范围]
       ROLE-LENS-COMPLIANCE: [数据分类, 授权守卫, 审计事件, 人工复核和禁止自动化]
       ROLE-LENS-CUSTOMER: [业务可读性, 操作闭环, 报表或凭证, 验收映射]
@@ -138,6 +142,7 @@ stages:
       ROLE-LENS-DOMAIN: [规则冲突, 生命周期断点, 适用性缺口, 责任归属]
       ROLE-LENS-UX: [不可发现路径, 状态或反馈缺失, 原型偏差, 修复验收]
       ROLE-LENS-ENGINEERING: [不可实现歧义, 一致性风险, 外部失败, 历史兼容]
+      ROLE-LENS-DELIVERY: [required_review_types, 结构化签署, 跨团队阻断, 基线建议]
       ROLE-LENS-QA: [不可判定AC, 漏测分支, 证据缺口, 缺陷分类]
       ROLE-LENS-COMPLIANCE: [越权或泄露, 不可审计决策, 留存冲突, blocker]
       ROLE-LENS-CUSTOMER: [现场不可用点, 交付口径冲突, 验收意见, 签署条件]
@@ -150,6 +155,7 @@ stages:
       ROLE-LENS-DOMAIN: [领域规则版本, 适用范围, 偏差, 未验证声明]
       ROLE-LENS-UX: [原型锁, 视图动作数量, 已知差距, PRD版本绑定]
       ROLE-LENS-ENGINEERING: [交接版本, 禁止推断清单, 外部依赖, 技术待设计边界]
+      ROLE-LENS-DELIVERY: [需求池汇总, 基线和消费方, 工程就绪结论, 外部系统引用]
       ROLE-LENS-QA: [AC基线, 必过项, 测试映射, 未执行项]
       ROLE-LENS-COMPLIANCE: [授权批准, 数据范围基线, 审计基线, 风险接受人]
       ROLE-LENS-CUSTOMER: [验收版本, 场景范围, 条件或排除项, 确认记录]
@@ -162,6 +168,7 @@ stages:
       ROLE-LENS-DOMAIN: [规则和状态影响, 历史语义, 领域兼容, 新异常]
       ROLE-LENS-UX: [页面动作差异, 角色路径差异, parity, 恢复或撤销交互]
       ROLE-LENS-ENGINEERING: [API事件数据影响, 幂等, 迁移回滚, 对账和回归]
+      ROLE-LENS-DELIVERY: [需求池影响, 版本容量影响, 同步责任, 紧急变更补审]
       ROLE-LENS-QA: [受影响AC, 回归集, 新反例, 旧证据有效性]
       ROLE-LENS-COMPLIANCE: [授权变化, 数据再处理, 审计连续性, 风险重批]
       ROLE-LENS-CUSTOMER: [现场流程差异, 存量处理, 新验收项, 版本确认]
@@ -174,6 +181,7 @@ stages:
       ROLE-LENS-DOMAIN: [领域结果核对, 关键不变量, 异常证据, 偏差处置]
       ROLE-LENS-UX: [逐角色走查, 可见结果, 错误恢复, 浏览器证据]
       ROLE-LENS-ENGINEERING: [集成和数据结果证据, 对账, 可恢复性, 残余限制]
+      ROLE-LENS-DELIVERY: [验收结论交接, 外部发布引用, 遗留责任, 反馈回流入口]
       ROLE-LENS-QA: [逐AC执行结果, actual, evidence, defects, reverse trace]
       ROLE-LENS-COMPLIANCE: [权限证据, 审计证据, 人工签署, 隐私安全遗留]
       ROLE-LENS-CUSTOMER: [业务验收记录, 条件和负责人, 签署, 拒绝原因]
@@ -440,7 +448,7 @@ existing_domain_bridges:
 
 release_acceptance:
   required:
-    - seven requirement stages are present and each requires all eight role lenses
+    - seven requirement stages are present and each requires all nine role lenses
     - at least six new high-relevance sectors have distinct requirement physics
     - every scenario exercises a unified PRD, interactive prototype and machine acceptance contract
     - traffic, CRM, education, data-product and AI-native are bridged without maturity promotion

@@ -14,7 +14,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "domain", "repository", "default_branch", "pinned_ref", "source_issue", "captured_requirement", "source_paths", "shape", "risk_signals", "stages"],
+        "required": ["id", "domain", "repository", "default_branch", "pinned_ref", "source_issue", "captured_requirement", "lifecycle_probe", "source_paths", "shape", "risk_signals", "stages"],
         "properties": {
           "id": { "type": "string", "pattern": "^GH-[A-Z0-9-]+$" },
           "domain": { "type": "string", "minLength": 1 },
@@ -33,6 +33,19 @@
             }
           },
           "captured_requirement": { "type": "string", "minLength": 20 },
+          "lifecycle_probe": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["input_shape", "entry_stage", "target_stage", "expected_output", "expected_behavior", "must_not"],
+            "properties": {
+              "input_shape": { "const": "one_line_requirement" },
+              "entry_stage": { "enum": ["frame", "explore", "intake", "clarify", "specify", "review", "baseline", "change", "acceptance"] },
+              "target_stage": { "enum": ["frame", "explore", "intake", "clarify", "specify", "review", "baseline", "change", "acceptance"] },
+              "expected_output": { "enum": ["problem_brief", "solution_sketch", "requirement_intake", "requirement_brief", "unified_prd_draft", "prerequisite_gap"] },
+              "expected_behavior": { "enum": ["produce_minimum_artifact", "produce_draft_with_unknowns", "block_missing_prerequisite"] },
+              "must_not": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 5 }, "uniqueItems": true }
+            }
+          },
           "source_paths": {
             "type": "array",
             "minItems": 1,

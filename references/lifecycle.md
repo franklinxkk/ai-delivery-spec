@@ -1,7 +1,8 @@
 # 需求生命周期与角色责任 / Requirement Lifecycle And Role Ownership
 
-仅在管理需求阶段、责任或基线时加载。本文件只覆盖需求从准入到验收关闭，不扩张为项目管理
-或软件研发全生命周期工具。
+仅在管理正式需求阶段、责任或基线时加载。本文件覆盖 intake 到验收关闭，不扩张为项目管理
+或软件研发全生命周期工具。问题定义与方案探索属于准入前工作区，规则见 `references/stages.md`；
+它们可以直接进入本生命周期，但在准入前不创建 `REQ-*`，也不把 `ASM-*` 当成已确认需求。
 
 ## 1. 能力边界 / Boundary
 
@@ -131,7 +132,7 @@ development/test/deployed 等实现状态只是可选外部里程碑，不能驱
 ## 10. 完成门禁 / Completion Gate
 
 返回 PASS 前检查准入证据、P0关闭、规格可读、基线稳定、追溯闭合、变更一致和真实验收证据；
-否则返回 `REVIEW_COMPLETE_WITH_GAPS` 或 `BLOCKED_BY_P0_UNKNOWN`，并列出 ID 与责任人。
+否则返回 `REVIEW_COMPLETE_WITH_GAPS` 或 `BLOCKED_BY_P0_UNKNOWN`，并列出 ID 与责任人。验收结果只作为外部发布工具的输入；上线/监控不进入本 Skill，线上反馈以新 `SRC-*` 回到 intake 或 `CHG-*`。
 
 ## 11. 可复用模式 / Reusable Patterns
 
@@ -139,7 +140,7 @@ development/test/deployed 等实现状态只是可选外部里程碑，不能驱
 `references/patterns/common-requirement-patterns.yaml`。模式只提供问题、异常合同和 AC 蓝图，
 必须结合项目证据绑定 `REQ-*`，不能授权推断角色、字段或规则。
 
-## 12. 角色与职级责任 / Role And Seniority Ownership
+## 12. Skill 使用者角色与职级责任 / Practitioner Role And Seniority Ownership
 
 职级只改变自主程度，不改变决策权：
 
@@ -148,6 +149,7 @@ development/test/deployed 等实现状态只是可选外部里程碑，不能驱
 - Mid/senior product：在授权内负责准入、澄清、统一 PRD、基线、变更与追溯；
 - Developers and Coding Agents：实现一个已固化切片，缺失业务决定返回 `REV-*`，不得编造；
 - Architects：维护下游工程基线并挑战不可逆/跨系统缺口，不重新定义产品范围或客户验收。
+- Requirement delivery / technical leads：汇总优先级、复杂度带、依赖、迭代归属和工程就绪证据；向外部研发管理工具交接，但不在本 Skill 内分配 Sprint、人员或工期。
 
 | Lens | 负责内容 | 不能自行批准 |
 |---|---|---|
@@ -155,9 +157,11 @@ development/test/deployed 等实现状态只是可选外部里程碑，不能驱
 | product | REQ/REV/CHG、旅程、PRD、基线、追溯 | 来源冲突或 P0 假设 |
 | domain owner | 术语、不变量、来源适用性 | 其他权威的辖区或合同 |
 | UX/prototype | 可发现路径、可见状态、等价性和恢复 | 基线缺失的业务政策 |
-| engineering/architecture | 可行性、API/状态/事件语义、恢复 | 产品目标和客户签署 |
+| architecture | 跨系统、NFR、迁移、不可逆性和失败语义 | 产品范围、业务优先级和客户验收 |
+| engineering | 可行性、API/状态/事件语义、恢复 | 产品目标和客户签署 |
+| delivery/technical lead | 需求池聚合、依赖、工程就绪和外部交接 | Sprint、人员、工期或业务优先级 |
 | QA/acceptance | 正反 AC、证据、缺陷反向追溯 | 代替客户/领域负责人接受 |
 | compliance/security | 目的、最小化、人工闸、审计/留存 | 职责外的业务接受 |
 
-正式交接必须包含 baseline version/hash、稳定 ID 范围、禁止推断、外部依赖、责任人和证据要求。
+这里的 Skill 使用者角色不同于产品规格中的 `ROLE-*` 业务角色。正式交接必须包含 baseline version/hash、稳定 ID 范围、禁止推断、外部依赖、责任人和证据要求。
 口头澄清只有登记为 `REV/CHG` 后才能改变基线。

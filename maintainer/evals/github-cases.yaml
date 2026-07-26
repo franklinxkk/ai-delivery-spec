@@ -18,6 +18,14 @@ cases:
     captured_requirement: >-
       Add a first Twilio-backed voice channel so agents can initiate outbound
       calls and receive or accept inbound calls with minimal account setup.
+    lifecycle_probe:
+      input_shape: one_line_requirement
+      entry_stage: frame
+      target_stage: frame
+      expected_output: problem_brief
+      expected_behavior: produce_minimum_artifact
+      must_not:
+        - 不得从语音诉求直接推断录音同意、转写或保留规则
     source_paths:
       - enterprise/app/services/voice/provider/twilio/token_service.rb
       - enterprise/app/services/voice/provider/twilio/recording_attachment_service.rb
@@ -50,6 +58,14 @@ cases:
       Let API clients query channel-related objects by immutable channel ID
       while retaining an explicit slug path and a safe compatibility plan for
       the mutable legacy channel argument.
+    lifecycle_probe:
+      input_shape: one_line_requirement
+      entry_stage: explore
+      target_stage: explore
+      expected_output: solution_sketch
+      expected_behavior: produce_minimum_artifact
+      must_not:
+        - 不得未比较兼容路径就直接替换旧参数
     source_paths:
       - saleor/graphql/channel/types.py
       - saleor/graphql/product/types/products.py
@@ -81,6 +97,14 @@ cases:
       Make Studio search-index upgrades safe for both small and very large
       installations by supporting resumable incremental population, an initial
       usable empty index, and explicit operational completion.
+    lifecycle_probe:
+      input_shape: one_line_requirement
+      entry_stage: intake
+      target_stage: intake
+      expected_output: requirement_intake
+      expected_behavior: produce_minimum_artifact
+      must_not:
+        - 不得缺少责任人、规模边界和升级影响就准入
     source_paths:
       - openedx/core/djangoapps/content/search/management/commands/reindex_studio.py
       - openedx/core/djangoapps/content/search/api.py
@@ -112,6 +136,14 @@ cases:
       Track issued user tokens and allow authorized invalidation so leaked or
       annually rotated school-bus tracking links can be revoked without
       deleting and recreating user accounts.
+    lifecycle_probe:
+      input_shape: one_line_requirement
+      entry_stage: clarify
+      target_stage: clarify
+      expected_output: requirement_brief
+      expected_behavior: produce_minimum_artifact
+      must_not:
+        - 不得编造撤销范围、旧令牌兼容和审计规则
     source_paths:
       - src/main/java/org/traccar/api/BaseObjectResource.java
       - src/main/java/org/traccar/api/resource/OidcResource.java
@@ -142,6 +174,14 @@ cases:
       Let builders create configurable and styleable reusable widgets, compose
       them with APIs, reuse them in future apps, and control how later package
       changes propagate to consuming applications.
+    lifecycle_probe:
+      input_shape: one_line_requirement
+      entry_stage: specify
+      target_stage: specify
+      expected_output: unified_prd_draft
+      expected_behavior: produce_draft_with_unknowns
+      must_not:
+        - 不得把含 P0 未知项的草稿宣称为已基线规格
     source_paths:
       - .cursor/docs/references/codebase-map.md
       - app/server/appsmith-server/src/main/java/com/appsmith/server/widgets/refactors/WidgetRefactorUtil.java
@@ -173,6 +213,14 @@ cases:
       Establish a coherent theme object across application components and chart
       plugins, preserve public interfaces and compatibility, and use visual
       regression evidence to prevent partial or unreadable theming.
+    lifecycle_probe:
+      input_shape: one_line_requirement
+      entry_stage: review
+      target_stage: review
+      expected_output: prerequisite_gap
+      expected_behavior: block_missing_prerequisite
+      must_not:
+        - 不得只凭一句话伪造对 PRD、原型或视觉证据的评审结论
     source_paths:
       - docs/admin_docs/configuration/theming.mdx
       - superset-frontend/packages/superset-ui-core/src/components/ThemedAgGridReact/index.tsx
@@ -204,6 +252,14 @@ cases:
       Add an alternative open-banking provider that authenticates linked
       accounts and imports balances and transactions while handling provider
       sessions, secrets, consent, expiry, and duplicate data safely.
+    lifecycle_probe:
+      input_shape: one_line_requirement
+      entry_stage: baseline
+      target_stage: baseline
+      expected_output: prerequisite_gap
+      expected_behavior: block_missing_prerequisite
+      must_not:
+        - 不得缺少已评审规格和批准记录就建立基线
     source_paths:
       - app/Http/Controllers/Import/ConfigurationController.php
       - app/Services/Nordigen/Authentication/SecretManager.php
@@ -234,6 +290,14 @@ cases:
     captured_requirement: >-
       Provide an administrator UI to configure password policy and consistently
       enforce the selected policy whenever users create or reset passwords.
+    lifecycle_probe:
+      input_shape: one_line_requirement
+      entry_stage: change
+      target_stage: change
+      expected_output: prerequisite_gap
+      expected_behavior: block_missing_prerequisite
+      must_not:
+        - 不得缺少现有基线和变更前后差异就生成变更结论
     source_paths:
       - src/client/src/core/util/composable/usePasswordPolicy.ts
       - src/client/src/core/components/inputs/PasswordInput.vue
@@ -266,6 +330,14 @@ cases:
       Show every standard or custom object the current role may view in navigation,
       including large object/role configurations, without confusing navigation
       visibility with row-level data access.
+    lifecycle_probe:
+      input_shape: one_line_requirement
+      entry_stage: acceptance
+      target_stage: acceptance
+      expected_output: prerequisite_gap
+      expected_behavior: block_missing_prerequisite
+      must_not:
+        - 不得缺少可执行系统、AC 和真实证据就宣称验收通过
     source_paths:
       - packages/twenty-front/src/modules/settings/roles/role-permissions/object-level-permissions/components/SettingsRolePermissionsObjectLevelTableRow.tsx
       - packages/twenty-server/src/engine/metadata-modules/navigation-menu-item/services/navigation-menu-item-record-identifier.service.ts
@@ -297,6 +369,14 @@ cases:
       Historical power averages must account for values persisting between sparse
       change-only samples instead of averaging stored rows, with explicit time
       range, resolution, gap, and boundary semantics.
+    lifecycle_probe:
+      input_shape: one_line_requirement
+      entry_stage: frame
+      target_stage: frame
+      expected_output: problem_brief
+      expected_behavior: produce_minimum_artifact
+      must_not:
+        - 不得从平均值诉求直接发明统计口径和稀疏数据规则
     source_paths:
       - doc/modules/ROOT/pages/ui/implementing-a-widget/components/chart.adoc
       - ui/src/app/shared/components/shared/testing/channels.spec.ts
@@ -328,6 +408,14 @@ cases:
       Filter robot fleets, tasks, and allowed actions by department/fleet identity
       and role claims across identity provider, API, and dashboard while making
       the feature opt-in for existing deployments.
+    lifecycle_probe:
+      input_shape: one_line_requirement
+      entry_stage: explore
+      target_stage: explore
+      expected_output: solution_sketch
+      expected_behavior: produce_minimum_artifact
+      must_not:
+        - 不得忽略安全边界、租户隔离和人工接管备选方案
     source_paths:
       - packages/api-server/api_server/authenticator.py
       - packages/api-server/api_server/models/user.py
@@ -359,6 +447,14 @@ cases:
       Extend cross-instance federation beyond files so users can share calendars
       and address books with explicit invitation, permission, synchronization,
       revocation, and remote-instance failure behavior.
+    lifecycle_probe:
+      input_shape: one_line_requirement
+      entry_stage: intake
+      target_stage: intake
+      expected_output: requirement_intake
+      expected_behavior: produce_minimum_artifact
+      must_not:
+        - 不得缺少跨组织权限、隐私和冲突风险就准入
     source_paths:
       - apps/dav/lib/DAV/Sharing/Backend.php
       - apps/dav/lib/CalDAV/Federation/FederatedCalendarAuth.php
@@ -390,6 +486,14 @@ cases:
       Booking webservice availability must honor the configured overbooking
       policy consistently with other channels while preserving capacity limits,
       date/room-type scope, pricing, and auditable reservation outcomes.
+    lifecycle_probe:
+      input_shape: one_line_requirement
+      entry_stage: clarify
+      target_stage: clarify
+      expected_output: requirement_brief
+      expected_behavior: produce_minimum_artifact
+      must_not:
+        - 不得编造库存、超售、金额和并发优先级
     source_paths:
       - modules/hotelreservationsystem/classes/HotelBookingDetail.php
       - modules/hotelreservationsystem/CHANGELOG.txt
@@ -421,6 +525,14 @@ cases:
       Invoice list and invoice detail APIs must expose the same governed amount
       and balance semantics for the same committed invoice, with explicit
       component-loading, void, credit, refund, currency, and migration behavior.
+    lifecycle_probe:
+      input_shape: one_line_requirement
+      entry_stage: specify
+      target_stage: specify
+      expected_output: unified_prd_draft
+      expected_behavior: produce_draft_with_unknowns
+      must_not:
+        - 不得把未确认的金额口径、历史兼容和租户规则交给开发猜测
     source_paths:
       - invoice/src/main/resources/org/killbill/billing/invoice/dao/InvoiceSqlDao.sql.stg
       - invoice/src/main/java/org/killbill/billing/invoice/dao/InvoiceDao.java
@@ -452,6 +564,14 @@ cases:
       Allow authorized warehouse users to bulk establish or adjust stock for
       newly imported items whose quantity is null, including lot/serial and
       location data, without bypassing inventory transaction and audit rules.
+    lifecycle_probe:
+      input_shape: one_line_requirement
+      entry_stage: review
+      target_stage: review
+      expected_output: prerequisite_gap
+      expected_behavior: block_missing_prerequisite
+      must_not:
+        - 不得只凭一句话伪造批量原子性、权限和审计评审结论
     source_paths:
       - src/js/components/stock-movement-wizard/modals/AdjustInventoryModal.jsx
       - src/main/groovy/org/pih/warehouse/inventory/AdjustStockCommand.groovy

@@ -36,6 +36,10 @@ def main() -> int:
     obligation_ids: set[str] = set()
     domains: set[str] = set()
     shapes: set[str] = set()
+    lifecycle_stages = {"frame", "explore", "intake", "clarify", "specify", "review", "baseline", "change", "acceptance"}
+    probed_entry_stages: set[str] = set()
+    probed_target_stages: set[str] = set()
+    probe_count = 0
     local_files = 0
     local_bytes = 0
     local_digest = hashlib.sha256()
@@ -46,6 +50,25 @@ def main() -> int:
         case_ids.add(case_id)
         domains.add(case.get("domain", ""))
         shapes.add(case.get("shape", ""))
+        probe = case.get("lifecycle_probe", {})
+        if probe:
+            probe_count += 1
+            entry_stage = probe.get("entry_stage", "")
+            target_stage = probe.get("target_stage", "")
+            probed_entry_stages.add(entry_stage)
+            probed_target_stages.add(target_stage)
+            if entry_stage != target_stage:
+                failures.append(f"{case_id} one-line probe must enter and stop at the same stage")
+            if entry_stage in {"review", "baseline", "change", "acceptance"}:
+                if probe.get("expected_behavior") != "block_missing_prerequisite":
+                    failures.append(f"{case_id}/{entry_stage} must block one-line input without predecessor evidence")
+                if probe.get("expected_output") != "prerequisite_gap":
+                    failures.append(f"{case_id}/{entry_stage} must return a prerequisite gap")
+            elif entry_stage == "specify":
+                if probe.get("expected_behavior") != "produce_draft_with_unknowns":
+                    failures.append(f"{case_id}/specify must preserve unknowns in a draft")
+            elif probe.get("expected_behavior") != "produce_minimum_artifact":
+                failures.append(f"{case_id}/{entry_stage} must produce the stage minimum artifact")
         issue_url = case.get("source_issue", {}).get("url", "")
         if not issue_url.startswith("https://github.com/") or "/issues/" not in issue_url:
             failures.append(f"{case_id} source issue is not a GitHub issue URL")
@@ -88,6 +111,12 @@ def main() -> int:
         failures.append("GitHub cases must cover at least six distinct domains")
     if "brownfield" not in shapes:
         failures.append("GitHub cases must exercise brownfield delivery")
+    if probed_entry_stages != lifecycle_stages or probed_target_stages != lifecycle_stages:
+        failures.append(
+            "one-line lifecycle probes must cover every entry/target stage; "
+            f"entry_missing={sorted(lifecycle_stages - probed_entry_stages)}, "
+            f"target_missing={sorted(lifecycle_stages - probed_target_stages)}"
+        )
 
     if not SOURCE_EVIDENCE.exists():
         failures.append("missing online GitHub source verification evidence")
@@ -106,7 +135,8 @@ def main() -> int:
             print(f"FAIL: {item}")
         return 1
     print(
-        f"PASS: {len(case_ids)} pinned GitHub cases cover {len(domains)} domains "
+        f"PASS: {len(case_ids)} pinned GitHub cases cover {len(domains)} domains, "
+        f"{probe_count} one-line probes / {len(probed_entry_stages)} lifecycle stages, "
         f"and {len(obligation_ids)} requirement/design/coding obligations"
     )
     if args.snapshot_root:

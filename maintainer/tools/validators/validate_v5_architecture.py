@@ -21,6 +21,7 @@ REQUIRED_FILES = (
     "maintainer/schemas/domain-pack.schema.json",
     "schemas/change-package.schema.json",
     "schemas/requirement-register.schema.json",
+    "schemas/requirement-intake.schema.json",
     "schemas/traceability-ledger.schema.json",
     "schemas/acceptance-run.schema.json",
     "schemas/review-record.schema.json",
@@ -33,6 +34,7 @@ REQUIRED_FILES = (
     "schemas/agent-handoff.schema.json",
     "schemas/domain-candidate.schema.json",
     "schemas/domain-usage-log.schema.json",
+    "schemas/assumption-register.schema.json",
     "maintainer/schemas/assurance-evidence.schema.json",
     "maintainer/schemas/eval-case.schema.json",
     "maintainer/schemas/evaluation-run.schema.json",
@@ -44,6 +46,7 @@ REQUIRED_FILES = (
     "references/change-acceptance.md",
     "references/troubleshooting.md",
     "references/tool-adapters.md",
+    "references/stages.md",
     "maintainer/README.md",
     "maintainer/templates/domain-module-template.md",
     "references/domain-coverage.yaml",
@@ -75,6 +78,9 @@ REQUIRED_FILES = (
     "scripts/scan_requirement_ambiguity.py",
     "scripts/scan_prototype_css.py",
     "scripts/render_mermaid_flow.py",
+    "scripts/stage_contract.py",
+    "maintainer/tests/test_v540_stage_contracts.py",
+    "maintainer/tests/test_v540_readme_commands.py",
     "maintainer/tests/test_v502_coding_contract.py",
     "maintainer/tests/test_v502_progressive_truth.py",
     "maintainer/tests/test_v510_requirement_management.py",
@@ -100,6 +106,11 @@ REQUIRED_FILES = (
     "references/templates/change-request-template.yaml",
     "references/templates/acceptance-run-template.yaml",
     "references/templates/review-record-template.yaml",
+    "references/templates/problem-brief-template.md",
+    "references/templates/solution-sketch-template.md",
+    "references/templates/assumption-register-template.yaml",
+    "references/templates/requirement-brief-template.md",
+    "references/templates/decision-record-template.md",
     "references/templates/agent-handoff-manifest-template.yaml",
     "references/patterns/common-requirement-patterns.yaml",
 )
@@ -107,7 +118,7 @@ REQUIRED_FILES = (
 STAGE_REFERENCE_BUDGET = 500
 SKILL_LINE_BUDGET = 130
 SKILL_CHAR_BUDGET = 6500
-REPOSITORY_FILE_BUDGET = 180
+REPOSITORY_FILE_BUDGET = 199
 
 
 def line_count(path: Path) -> int:
@@ -153,6 +164,7 @@ def main() -> int:
         "maintainer/schemas/domain-pack.schema.json",
         "schemas/change-package.schema.json",
         "schemas/requirement-register.schema.json",
+    "schemas/requirement-intake.schema.json",
         "schemas/traceability-ledger.schema.json",
         "schemas/acceptance-run.schema.json",
         "schemas/review-record.schema.json",
@@ -165,6 +177,7 @@ def main() -> int:
         "schemas/agent-handoff.schema.json",
         "schemas/domain-candidate.schema.json",
         "schemas/domain-usage-log.schema.json",
+        "schemas/assumption-register.schema.json",
         "maintainer/schemas/assurance-evidence.schema.json",
         "maintainer/schemas/eval-case.schema.json",
         "maintainer/schemas/evaluation-run.schema.json",
@@ -216,7 +229,7 @@ def main() -> int:
     expected_reference_files = {
         "discover.md", "lifecycle.md", "specify.md", "prototype.md",
         "context.md", "change-acceptance.md", "troubleshooting.md",
-        "tool-adapters.md", "domain-coverage.yaml",
+        "tool-adapters.md", "stages.md", "domain-coverage.yaml",
     }
     if reference_files != expected_reference_files:
         failures.append(f"references root is not reduced to requirement runtime entries plus domain index: {sorted(reference_files)}")

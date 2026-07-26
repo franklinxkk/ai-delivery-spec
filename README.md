@@ -1,4 +1,4 @@
-# AI Delivery Spec 5.3.3 — Requirements Humans Can Read, Coding Agents Can Execute
+# AI Delivery Spec 5.4.0 — Enter at Any Requirement Stage, Leave with a Usable Artifact
 
 > 需求一来就写 PRD，低价值需求也进入重型设计？
 >
@@ -6,7 +6,7 @@
 >
 > 需求一变，页面、字段、接口、测试和验收漏改，最后无法审计？
 
-**One Requirement Baseline. Human-Readable. AI-Coding-Ready. Traceable to Acceptance.**
+**Any Stage In. Right-Sized Artifact Out. One Traceable Requirement Baseline.**
 **AI Delivery Spec 是面向 ToB/ToG、兼顾 ToC 的需求管理 Skill。**它不接管研发项目管理，而是把从
 需求准入、澄清、定稿、变更、追溯到验收的事实，统一成业务可确认、产研可执行、Coding Agent 不必猜的契约。
 
@@ -14,31 +14,33 @@
 正文让客户、产品和传统开发顺序读懂，同文档工程附录让测试与 AI Coding 精确执行。
 只有大项目、持续变更、多投影或强审计场景才启用分片 Product Truth。
 
-[![Version](https://img.shields.io/badge/version-5.3.3-0052A4.svg)]()
+[![Version](https://img.shields.io/badge/version-5.4.0-0052A4.svg)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 
-<!-- CLAIM: CLM-ADOPTION-20260722; as_of=2026-07-22; evidence=public-platform-links-below -->
-**公开采用信号 / Public Adoption Signals（截至 2026-07-22）**：
-[ClawHub 941 次下载](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec) · [skills.sh 26 次安装](https://www.skills.sh/franklinxkk/ai-delivery-spec) ·
-[SkillHub TRACE 4.7/5](https://skillhub.cn/skills/ai-delivery-spec)，双安全扫描均为安全、无风险。
-这是第三方动态快照，不替代项目适用性判断；领域成熟度见 [release-status.yaml](maintainer/evals/evidence/release-status.yaml) 和 [domain-coverage.yaml](references/domain-coverage.yaml)。
+<!-- CLAIM: CLM-ADOPTION-20260726; as_of=2026-07-26; evidence=author-checked-public-platform-links-below -->
+**公开采用信号 / Public Adoption Signals（截至 2026-07-26）**：
+[ClawHub 1100+ 次下载](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec) · [skills.sh 安装页](https://www.skills.sh/franklinxkk/ai-delivery-spec) ·
+[SkillHub TRACE 4.7/5](https://skillhub.cn/skills/ai-delivery-spec)，平台安全扫描未发现 P0/P1 风险。
+动态数字是作者核对的公开快照，不替代项目适用性判断；领域证据边界见 [release-status.yaml](maintainer/evals/evidence/release-status.yaml)。
 
-### 30 秒术语速览 / 30-Second Glossary
+## 你现在在哪，就从哪里开始 / Start Where You Are
 
-- **Stable ID｜稳定 ID**：需求、动作、字段、规则和验收的长期编号，改文案也不丢追溯。
-- **Product Truth｜结构化事实源**：仅复杂多投影/强审计项目按需启用；普通需求不生成。
-- **Gate｜门禁**：零模型静态检查结构、锚点和追溯；L3 原型还需浏览器 `ARUN-*`，静态 PASS 不等于业务或客户验收通过。
+不必先学阶段名、模式或 L0—L4。告诉 Agent **你的角色、已有材料、本次想拿到什么**，Skill 选择最小必要路径：
 
-## 它直接帮助谁 / Who It Helps
+| 你现在的工作 | 常见角色 | 本次直接得到 |
+|---|---|---|
+| 只有一句想法、访谈或客户痛点 | 业务、客户、产品 | 问题简报：用户、痛点时刻、证据、成功信号和未知项 |
+| 正在比较竞品、方案或交互方向 | 产品、设计、架构师 | 方案草图：至少两个方案、不做选项、取舍和最小验证 |
+| 要判断需求是否值得做、放哪个版本 | 产品负责人、需求交付/技术负责人 | 准入结论与需求池聚合：价值、优先级、复杂度档位、依赖和交付形态 |
+| 需求还模糊，需要把规则问清楚 | 业务、产品、领域专家 | 澄清简报：范围、决策、业务规则、异常、责任人与待确认项 |
+| 要交付开发可实现的需求 | 产品、设计、前后端、架构师、测试 | 一份传统开发可读、Coding Agent 可执行的统一 PRD；按需配工程原型 |
+| 已有 PRD/原型，要确认能否开工 | 设计、前后端、架构师、需求交付负责人、测试、合规 | 评审记录：必需评审类型逐项签署，页面、字段、状态、数据流、指标、接口、异常和 AC 缺口闭合 |
+| 评审已完成，要锁定唯一开工版本 | 产品负责人、客户、研发、测试、Coding Agent | 需求基线：统一 PRD/需求卡、权威来源、版本与 Hash、开放项和交接范围 |
+| 需求已经变化 | 产品、研发、测试、客户 | 变更包：差异、影响范围、审批、同步、回归和新基线 |
+| 准备测试或客户验收 | 测试、实施、业务、客户 | 验收记录：正反用例、证据、缺陷、遗留条件和签署结论；发布状态交给外部工具，线上反馈回流新需求/变更 |
 
-| 使用者 | 直接获得的帮助 |
-|---|---|
-| 客户、业务与项目负责人 | 在投入设计前确认价值、范围、优先级、责任和验收边界 |
-| 初中高级产品与设计 | 分批澄清，形成一份可读 PRD，并把角色旅程、页面、字段、状态和异常闭环 |
-| 前后端与架构师 | 获得可施工的页面合同、关系台账、指标口径、数据流、接口语义和禁止推断边界 |
-| 测试、实施与验收人员 | 从 `AC-*` 生成正反用例、证据要求，并把缺陷反向追到原需求 |
-| Codex、Trae、Cursor、Qoder 等 Coding Agent | 按稳定 ID 切片实现，不再猜角色、字段、业务规则或成功标准 |
+**核心承诺：Any Stage In, Right-Sized Artifact Out。**只做当前需要的产物；只有用户明确要求端到端交付时，才继续跑完整闭环。
 
 ## 60 秒上手 / Start in 60 Seconds
 
@@ -52,11 +54,20 @@ npx skills add franklinxkk/ai-delivery-spec
 openclaw skills install @franklinxkk/ai-delivery-spec
 ```
 
-运行本地校验需 Python 3.10+：先执行 `python -m pip install -r scripts/requirements.txt`；
-Windows 的 `python` 若是商店占位符，请改用已安装解释器的完整路径或 `py -3`。
+只用 Agent 完成需求工作，无需先安装 Python。需要运行零模型本地门禁时，再准备 Python 3.10+、PyYAML 与 jsonschema 两个本地依赖：执行 `python -m pip install -r scripts/requirements.txt`；Windows 的 `python` 若是商店占位符，请改用已安装解释器的完整路径或 `py -3`。
 
-安装后复制下面一条指令；拿不准时从 **Standard L2** 开始，Skill 会先分诊，不会把
-小需求强行升级成重交付。
+安装后不必填写参数，直接用自然语言说明当前位置：
+
+```text
+使用 AI Delivery Spec。我是<角色>，已有<材料/系统/原型>，本次只要<目标产物或停止点>。
+先复用已确认事实，批量询问互不依赖的关键缺口；未经确认不得猜，完成目标产物并自检后停止。
+
+例：我是后端，已有 PRD，本次只做研发评审；不要重写产品背景。
+例：我是产品，只有客户一句话需求，先澄清并交付需求卡；不要直接扩成大型 PRD。
+例：我是测试，已有 PRD 和原型，只生成可执行验收项、反例、证据要求和缺口清单。
+```
+
+明确说“不要写 PRD，只做澄清”就会停在澄清；显式目标和否定约束高于关键词。需要检查旧产物能否续接时，再运行 `python scripts/ai_delivery_spec_cli.py route-stage --target <阶段> --artifact <产物>`。
 
 ### 一个可逆小改动 / ToC Idea（兼容名：Ultra-Light）
 
@@ -76,13 +87,6 @@ Windows 的 `python` 若是商店占位符，请改用已安装解释器的完�
 使用 AI Delivery Spec Full L3 smart-large-project：先完成需求准入和全量 REQ/角色/流程/页面/字段/验收索引，再按切片持续写入同一份统一 PRD；仅在多文档、持续变更或强审计需要时生成分片 Product Truth。domain=traffic
 ```
 
-一句话 Idea 或竞品参考场景，可在上述指令后补充：
-
-```text
-先按依赖层分批澄清；第三批前给出2—3个有取舍的方案。竞品只作为带版本和边界的 SRC 证据，先确认定位 DEC，再写用户故事、页面、原型和 PRD。
-```
-
-首选修正：`delivery_shape=requirement_card|unified_prd|governed_truth assurance_profile=bounded|standard|high_risk|safety_critical domain=<pack>`；旧 `mode/tier` 仍兼容。`--level auto` 对 PRD 读取 frontmatter，对原型/handoff 默认 L2；需要逐动作交付时显式使用 L3。
 黄金入门示例见 [examples/minimal-v5](examples/minimal-v5/README.md)。
 
 ## 第一次使用，你会拿到什么 / What You Get
@@ -91,6 +95,8 @@ Windows 的 `python` 若是商店占位符，请改用已安装解释器的完�
 - **One Shared Baseline｜一份基线**：旅程、页面、字段、规则、状态、异常、接口和验收用稳定 ID 绑定。
 - **Prototype When Needed｜按需原型**：存量先做 Stage 0；L3 复杂页有 `REG-*`，每个动作以浏览器 `ARUN-*` 闭环。
 - **Lightweight Gate｜轻门禁**：区分已静态证明与仍需领域、浏览器或客户证明的内容。
+
+第一次只需知道三个词：**Stable ID** 是跨文档不变的需求编号；**Product Truth** 是复杂项目按需启用的事实账本；**Gate** 是零模型静态检查，不等于业务、实现或客户验收通过。
 
 ## 常见的第一次疑问
 
@@ -128,28 +134,17 @@ Windows 的 `python` 若是商店占位符，请改用已安装解释器的完�
 研发排期、Sprint/任务、代码、CI/CD、部署执行、监控和运营属于下游系统。
 本项目只记录它们与需求/验收有关的外部引用，不接管流程。
 
-## 5.3.3 — Evidence-Consistent Engineering Handoff
+## 5.4.0 — Requirement Lifecycle Workstations｜需求全生命周期工作站
 
-5.3.3 继续保持轻量内核，重点修复正式 CLI、验收证据真实性、多文件工程原型、XCT 横切交接和中文入口的一致性。
+5.4.0 把需求工作改为九个可进入、可停止、可续接的工作站，同时保持一个正式生命周期和一套门禁状态。阶段产物用 `artifact/stage` 和语言无关 `ADS:*` 锚点声明语义，跨会话才携带 `resume_context`；不要求每次运行脚本路由。
 
-因此本版不是增加一套模式，而是收敛成以下合同：
+你会感受到五个变化：
 
-1. **Silent Dual-Axis Triage｜静默双轴分诊**：内部选择需求卡/统一 PRD/受治理真相和风险强度，用户不必先学模式名。
-2. **Product Truth on Demand｜严格按需**：受控多投影、反复跨模块变更、血缘或强审计才启用；数量大不是充分条件。
-3. **Brownfield Stage 0｜存量反向盘点**：现有 PRD/原型先逐项标记来源与 `confirmed/inferred/unknown/defect_candidate`，再允许覆盖式重写。
-4. **Composable Page Contract｜复合页面合同**：按 `primary + layout + surfaces` 组合指标、列表、表单、预览、组装器，只校验适用表面。
-5. **Stage-Aware P0 Blocking｜分阶段 P0 阻断**：只阻断已到达阶段和受影响切片，门禁返回独立退出码 3。
-6. **Agent Handoff Projection｜Agent 交接投影**：`MOD/XCT/EDGE/HANDOFF` 绑定基线 hash、责任人和 AC；XCT 必须列出影响模块、不变量、执行点和失败处理。
-7. **Governed Learning｜受治理知识回流**：默认关闭、本地、无网络、`project_only`；公共晋升必须独立审批。
-8. **Zero-LLM Quality Gate｜轻量门禁内核**：零模型、单遍读取；正式 CLI 与底层门禁同测，本地多文件 HTML/CSS/JS 作为一个工程原型扫描。
-9. **Honest Static PASS｜诚实通过边界**：门禁始终输出 `not_proven`；动态拼接 `data-'+'action`、运行时补挂动作锚点会阻断，不能再用不可枚举交互换取假 PASS。
-10. **Reverse Mapping｜反推不再另造基线**：已有正向 PRD 时，原型观察使用 `INV-*` 映射 `REQ-*`；推断项进入有责任人的 `RBATCH-*` 后批量确认。
-11. **Local Private Extensions｜本地私有扩展**：`custom/` 默认不提交，可叠加团队领域包、继承式 PRD 模板和声明式校验；绑定规则冲突必须 `DEC-CONFLICT-*`，禁止静默覆盖。
-12. **Decision-Tree Clarification｜决策树澄清**：事实问题按依赖批量，审美/路线/冲突逐项确认；每问给推荐、证据和取舍，无人场不得静默默认。
-13. **Evidence-Bound Prototype｜证据化原型**：L3 复杂页强制 `REG-*`；ARUN 的本地证据必须存在，`EVD-*` 可经 `evidence_catalog` 与 SHA-256 校验。
-14. **User-Language Contract｜用户语言契约**：标题、正文、表头、澄清和测试默认跟随当前请求语言；稳定 ID、代码与 API 名保持不变。
-15. **Module-Complete Slices｜模块纵切闭环**：目标、旅程、页面/数据、规则/状态、指标、恢复和验收在模块内就近闭环，附录只做索引与精确投影。
-16. **Risk-Aware Card Escalation｜需求卡自动升档**：数据上报/统计、批量、审批审计、集成和跨角色流程自动进入统一 PRD；未触发的规格不加载。
+1. **Start Anywhere｜随时进入**：有一句话、会议纪要、原型、旧 PRD 或变更单，都从现状开始，不补跑无关流程。
+2. **Stop with a Usable Artifact｜拿到即走**：只交付当前角色需要的问题简报、方案草图、需求卡、统一 PRD、评审、变更或验收记录。
+3. **One Shared Baseline｜一份共同基线**：人类正文与机器契约在同一 PRD 中，Product Truth 只在持续变更、多投影或强审计时启用。
+4. **Resume without Rework｜安全续接**：跨会话用版本、相对路径和 SHA-256 检查漂移，不让 Agent 从头重写；普通小需求不承担该成本。
+5. **Verify without Pretending｜诚实验证**：轻门禁发现结构、追溯和输入问题，同时明确哪些仍需领域专家、浏览器、实现和客户证明。
 
 ## 5 分钟接入自己的项目 / Team Setup in 5 Minutes
 
@@ -211,8 +206,9 @@ UX/原型、研发架构、测试验收、合规安全、客户验收八个镜�
 
 ```bash
 python scripts/ai_delivery_spec_cli.py init-requirements --output requirements --with-product-truth
+python scripts/ai_delivery_spec_cli.py compile-truth --index requirements/truth/index.yaml
 python scripts/ai_delivery_spec_cli.py trace --truth requirements/truth/compiled/product-truth.yaml --output requirements/traceability.yaml --baseline-version 1.0
-python scripts/ai_delivery_spec_cli.py impact --truth requirements/truth/compiled/product-truth.yaml --change requirements/changes/CHG-001.yaml
+python scripts/ai_delivery_spec_cli.py impact --truth requirements/truth/compiled/product-truth.yaml --change requirements/changes/CHG-CORE-001.yaml
 ```
 
 ## 一份统一 PRD / One PRD, One Baseline
@@ -227,7 +223,7 @@ python scripts/ai_delivery_spec_cli.py impact --truth requirements/truth/compile
 
 独立 YAML/JSON 是按工具需要导出的视图，不是第二份权威 PRD。
 
-## 各级产品、开发和架构师如何协同
+## 各级产品、研发与需求交付负责人如何协同
 
 | 使用者 | 独立完成 | 必须升级/交接 |
 |---|---|---|
@@ -235,10 +231,13 @@ python scripts/ai_delivery_spec_cli.py impact --truth requirements/truth/compile
 | 中高级产品 | 准入、澄清、统一 PRD、基线、变更和追溯 | 超出授权的客户、法律、安全和合同决策 |
 | 初中级开发/Coding Agent | 实现已基线的稳定 ID 切片并回报歧义 | 缺失角色、状态、权限、规则或接口语义，不得自行发明 |
 | 高级开发/架构师 | 可实现性、跨系统状态、接口事件、迁移、恢复和 NFR 设计 | 产品范围、客户验收和领域权威仍由责任人决定 |
+| 需求交付/技术负责人 | 汇总优先级、复杂度带、依赖、迭代归属、工程就绪和评审签署 | Skill 不替代 Sprint、人员、工期与容量决策；仅向外部工具交接 |
 | 测试/领域/客户 | 反例、领域结果、执行证据和签署 | 静态 PASS 或开发自测不能替代其责任 |
 
 多角色或正式交接时才读取
-[生命周期与角色责任](references/lifecycle.md)，普通单角色小改动不加载。
+[生命周期与角色责任](references/lifecycle.md)，普通单角色小改动不加载。需求交付负责人可用
+`python scripts/validators/validate_requirement_register.py requirements/register.yaml --summary`
+得到零模型需求池视图；它不做自动排期。
 
 ## 领域实践与知识包保证分开
 
@@ -264,7 +263,7 @@ python scripts/ai_delivery_spec_cli.py impact --truth requirements/truth/compile
 | 位置 | 工具类型 | 责任 |
 |---|---|---|
 | 上游 | 产品发现、调研、工作坊 | 发现机会、证据和策略假设 |
-| **需求管理内核** | **AI Delivery Spec 5.3.3** | 准入 → 澄清 → 基线 → 变更 → 追溯 → 验收 |
+| **需求管理内核** | **AI Delivery Spec 5.4.0** | 问题/方案 → 准入 → 澄清 → 基线 → 变更 → 验收 |
 | 下游 | Spec Kit、项目/研发管理工具 | 技术方案、任务、排期和依赖执行 |
 | 下游 | Codex、Trae、Cursor、Qoder 等 | 依据已基线需求编码、测试和修改 |
 | 外部证据 | CI、测试、发布、监控平台 | 向需求验收回传可引用证据 |
@@ -284,7 +283,7 @@ maintainer/   发布保障实验室：tests/evals/evidence/tools/examples/schema
 ```
 
 普通需求运行不得加载 `maintainer/`。维护者资产集中在一个目录，整个 GitHub
-仓库同时受 180 文件硬预算约束；第三方平台使用 allowlist 运行包，不携带维护实验室。
+仓库同时受少于 200 个发布文件的硬预算约束；第三方平台使用 allowlist 运行包，不携带维护实验室。
 
 ## 维护与验证
 

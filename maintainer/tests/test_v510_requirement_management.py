@@ -129,12 +129,63 @@ with tempfile.TemporaryDirectory(prefix="ads-v510-") as temp:
         if result.returncode:
             failures.append(f"template validator failed {rel}: {result.stdout}{result.stderr}")
 
+    legacy_review_value = yaml.safe_load((workspace / "reviews/REVIEW-CORE-001.yaml").read_text(encoding="utf-8"))
+    legacy_review_value["schema_version"] = "5.1.0"
+    legacy_review_value.pop("required_review_types", None)
+    legacy_review_value.pop("sign_offs", None)
+    legacy_review = workspace / "reviews/legacy-in-review.yaml"
+    legacy_review.write_text(yaml.safe_dump(legacy_review_value, allow_unicode=True, sort_keys=False), encoding="utf-8")
+    if run("scripts/validators/validate_review_record.py", str(legacy_review)).returncode != 0:
+        failures.append("legacy 5.1 in-review record must remain readable before completion")
+
+    unbound_review_value = yaml.safe_load((workspace / "reviews/REVIEW-CORE-001.yaml").read_text(encoding="utf-8"))
+    unbound_review_value.pop("requirement_refs", None)
+    unbound_review_value.pop("reviewed_artifact_refs", None)
+    unbound_review = workspace / "reviews/unbound-in-review.yaml"
+    unbound_review.write_text(yaml.safe_dump(unbound_review_value, allow_unicode=True, sort_keys=False), encoding="utf-8")
+    if run("scripts/validators/validate_review_record.py", str(unbound_review)).returncode == 0:
+        failures.append("v5.4 review must bind requirement and reviewed artifact refs before sign-off")
+
+    summary_result = run("scripts/validators/validate_requirement_register.py", str(workspace / "register.yaml"), "--summary")
+    if summary_result.returncode != 0 or "requirement_portfolio_summary:" not in summary_result.stdout or "decision_boundary:" not in summary_result.stdout:
+        failures.append("delivery-lead requirement portfolio summary is unavailable")
+
     bad_review_value = yaml.safe_load((workspace / "reviews/REVIEW-CORE-001.yaml").read_text(encoding="utf-8"))
     bad_review_value["status"] = "completed"
     bad_review = workspace / "reviews/bad.yaml"
     bad_review.write_text(yaml.safe_dump(bad_review_value, allow_unicode=True, sort_keys=False), encoding="utf-8")
     if run("scripts/validators/validate_review_record.py", str(bad_review)).returncode == 0:
         failures.append("completed review with open P1 finding must fail")
+
+    no_signoff_value = yaml.safe_load((workspace / "reviews/REVIEW-CORE-001.yaml").read_text(encoding="utf-8"))
+    no_signoff_value["status"] = "completed"
+    no_signoff_value["findings"][0].update({
+        "status": "resolved", "disposition": "no_change",
+        "resolution": "reviewed and accepted", "evidence_refs": ["EVD-REV-001"],
+    })
+    no_signoff = workspace / "reviews/no-signoff.yaml"
+    no_signoff.write_text(yaml.safe_dump(no_signoff_value, allow_unicode=True, sort_keys=False), encoding="utf-8")
+    if run("scripts/validators/validate_review_record.py", str(no_signoff)).returncode == 0:
+        failures.append("completed review without required-role sign-offs must fail")
+
+    complete_review_value = dict(no_signoff_value)
+    complete_review_value["reviewed_at"] = "2026-01-01T00:00:00Z"
+    complete_review_value["sign_offs"] = [
+        {
+            "review_type": review_type, "actor": actor, "decision": "approve",
+            "at": "2026-01-01T00:00:00Z", "evidence_refs": [f"EVD-SIGNOFF-{review_type.upper()}"],
+        }
+        for review_type, actor in (
+            ("product", "产品负责人"),
+            ("architecture", "架构负责人"),
+            ("engineering", "研发负责人"),
+            ("qa", "测试负责人"),
+        )
+    ]
+    complete_review = workspace / "reviews/complete.yaml"
+    complete_review.write_text(yaml.safe_dump(complete_review_value, allow_unicode=True, sort_keys=False), encoding="utf-8")
+    if run("scripts/validators/validate_review_record.py", str(complete_review)).returncode != 0:
+        failures.append("completed review with all required-role sign-offs must pass")
 
     bad_change_value = yaml.safe_load((workspace / "changes/CHG-CORE-001.yaml").read_text(encoding="utf-8"))
     bad_change_value["status"] = "approved"
@@ -194,7 +245,7 @@ lifecycle = (ROOT / "references/lifecycle.md").read_text(encoding="utf-8")
 skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
 for marker in (
     "Junior product", "Mid/senior product", "Developers and Coding Agents", "Architects",
-    "sponsor/business", "domain owner", "UX/prototype", "engineering/architecture",
+    "sponsor/business", "domain owner", "UX/prototype", "architecture", "engineering", "delivery/technical lead",
     "QA/acceptance", "compliance/security", "baseline version/hash", "REV/CHG",
 ):
     if marker not in lifecycle:

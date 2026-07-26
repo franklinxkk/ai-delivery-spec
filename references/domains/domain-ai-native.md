@@ -120,6 +120,10 @@ events:
     payload: { run_id, target_object, reason, policy_version }
   EvalRegressionDetected:
     payload: { eval_set_id, agent_id, threshold, failed_cases }
+  ChildAgentProgressObserved:
+    payload: { parent_run_id, child_run_id, lifecycle_state, last_progress_at, progress_evidence_ref }
+  DuplicateExecutionBlocked:
+    payload: { parent_run_id, child_run_id, task_ref, reason, fallback_owner }
 ```
 
 ## State Machines
@@ -130,6 +134,7 @@ AgentDefinition: draft -> test_ready -> approved -> active -> deprecated | suspe
 PromptVersion: draft -> candidate -> evaluated -> active -> rolled_back | archived
 AgentRun: created -> retrieving_context -> reasoning -> tool_pending -> human_review -> completed
 AgentRun: reasoning | tool_pending -> refused | failed | fallback
+ChildAgent: queued -> running -> waiting_on_tool | progress_visible -> completed | failed | cancelled
 HumanReview: pending -> approved | edited_and_approved | rejected | escalated
 ```
 
@@ -203,6 +208,9 @@ Rules:
    check -> regression triage -> prompt/model/tool update -> release decision.
 6. Operations loop: trace/feedback/incident -> classify failure -> fallback or
    rollback -> fix -> post-launch review.
+7. Delegation loop: freeze task/authority/budget -> start child -> observe explicit
+   liveness/progress -> wait or cancel -> accept one terminal result -> prevent
+   parent duplicate execution -> merge evidence into the parent trace.
 
 ## Role Path Patterns
 
@@ -257,6 +265,8 @@ Rules:
 | adversarial prompt injection | risk reviewer | tool call blocked and event logged |
 | delegated tool denial | risk reviewer | a denied tool/action remains denied through agent delegation, memory and prompt content; denial is audited |
 | repeated propose-reject loop | accountable user | loop stops at configured limit and hands control to a human/manual path |
+| healthy long-running child is quiet | parent agent | explicit liveness distinguishes running from stalled; parent does not duplicate the task or token spend |
+| cross-model regression run | QA / AI engineer | evidence records provider, runtime model ID, client version, settings and date; an unverified marketing version is rejected |
 
 ## Cross-Domain Requirement Patterns
 
@@ -293,5 +303,7 @@ Mocked matrices and simulated reviewers cannot satisfy expert review or audit.
       retrieval, tool, schema, or context changes.
 - [ ] Refusal, fallback, rollback, incident, and post-launch review paths are defined.
 - [ ] High-impact decisions keep authorized human accountability.
+- [ ] Delegated work has explicit lifecycle, liveness, cancellation, duplicate-execution prevention and one terminal result owner.
+- [ ] Cross-model evidence records the runtime provider/model/client/settings instead of relying on an assumed model name.
 - [ ] Coding-agent handoff includes `ai_contract_lite` or `ai_runtime_contract`
       only at the necessary depth.

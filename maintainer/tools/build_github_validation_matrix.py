@@ -69,13 +69,75 @@ def build() -> dict[str, Any]:
     }
 
 
+def build_prompt_pack() -> dict[str, Any]:
+    catalog = yaml.safe_load((ROOT / "maintainer/evals/github-cases.yaml").read_text(encoding="utf-8"))
+    prompts: list[dict[str, Any]] = []
+    for case in catalog["cases"]:
+        probe = case["lifecycle_probe"]
+        prompt = (
+            "使用 AI Delivery Spec 5.4.0。你只有下面这一句话需求，不得假设还有其他已批准材料：\n"
+            f"{case['captured_requirement']}\n\n"
+            f"当前从 {probe['entry_stage']} 阶段进入，本次只到 {probe['target_stage']} 阶段。"
+            "生成该阶段最小合格产物；如果该阶段必须依赖前序规格、批准基线、可执行系统或真实证据，"
+            "请明确阻断并列出最小前置材料，不得伪造。输出语言为中文，Stable ID 与代码标识保持原样。\n"
+            "执行边界：先读 SKILL.md；不要读取 README、maintainer/、无关示例或全量领域包；"
+            "只加载目标阶段切片及其明确引用的模板、Schema 和门禁；只生成该阶段合同要求的产物。"
+            "除非当前阶段确需时效性证据，否则不要外部调研；目标门禁得出结论后立即停止，"
+            "不要输出长篇工作日志。"
+        )
+        prompts.append({
+            "prompt_id": f"LCP-{case['id']}",
+            "case_id": case["id"],
+            "domain": case["domain"],
+            "repository": case["repository"],
+            "entry_stage": probe["entry_stage"],
+            "target_stage": probe["target_stage"],
+            "prompt": prompt,
+            "expected_output": probe["expected_output"],
+            "expected_behavior": probe["expected_behavior"],
+            "must_not": probe["must_not"],
+        })
+    return {
+        "schema_version": "5.4.0",
+        "pack_type": "cross_model_one_line_lifecycle_probe",
+        "prompt_count": len(prompts),
+        "required_run_metadata": [
+            "provider", "model_id", "client_name", "client_version",
+            "context_window", "temperature", "run_at", "duration_seconds",
+            "artifact_count", "gate_result", "output_ref",
+        ],
+        "execution_contract": {
+            "load": "SKILL.md + target-stage slice + explicitly referenced template/schema/gate only",
+            "exclude": ["README", "maintainer/", "unrelated examples", "full domain packs"],
+            "research": "only when the target stage requires current or external evidence",
+            "stop": "after the target gate result or explicit prerequisite block",
+            "claim": "score behavioral correctness and execution cost separately",
+        },
+        "prompts": prompts,
+        "claim_boundary": (
+            "This pack is a portable behavioral input. A generated file is not a pass; "
+            "score actual outputs, preserve gaps, and never use shared or leaked credentials."
+        ),
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path)
     parser.add_argument("--check", type=Path)
+    parser.add_argument("--prompt-pack", type=Path)
     args = parser.parse_args()
-    if bool(args.output) == bool(args.check):
-        parser.error("provide exactly one of --output or --check")
+    selected = sum(bool(item) for item in (args.output, args.check, args.prompt_pack))
+    if selected != 1:
+        parser.error("provide exactly one of --output, --check, or --prompt-pack")
+    if args.prompt_pack:
+        document = build_prompt_pack()
+        rendered = yaml.safe_dump(document, allow_unicode=True, sort_keys=False)
+        args.prompt_pack.parent.mkdir(parents=True, exist_ok=True)
+        args.prompt_pack.write_text(rendered, encoding="utf-8", newline="\n")
+        stages = {item["entry_stage"] for item in document["prompts"]}
+        print(f"PASS: wrote {document['prompt_count']} cross-model prompts covering {len(stages)} lifecycle stages to {args.prompt_pack}")
+        return 0
     document = build()
     rendered = yaml.safe_dump(document, allow_unicode=True, sort_keys=False)
     target = args.output or args.check
