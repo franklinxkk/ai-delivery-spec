@@ -172,6 +172,25 @@ L3必须遍历所有声明页面的可见动作，而不是每角色只走一条
 随后固定一个设计系统基线（如 Ant Design 5 tokens/components）；确有需要时只引入一个专门设计
 Skill，不能声称执行了未安装 Skill。桌面和窄屏分别截全页图并视觉复核。高保真不能补偿缺失交互。
 
+## 美学方向确认 / Aesthetic Direction Confirmation
+
+高保真工程原型开工前，必须有用户确认的 `DEC-AESTHETIC-*` 决策记录；格式遵循
+`references/templates/decision-record-template.md`，至少登记：
+
+| 字段 | 内容 |
+|---|---|
+| 视觉方向 | feeling 关键词与整体取向（如克制工具型 / 品牌化） |
+| 参考产品 | 1—3 个明确参照及其被借鉴的具体方面 |
+| 禁止出现的风格 | explicit taboo，写明不得出现的风格与元素 |
+| 字号层级 | 各级文本字号，主文本不得小于 11px |
+| 按钮体系 | 主 / 次 / 幽灵 / 危险按钮的样式与使用边界 |
+| 页面密度 | 信息密度取向与留白规则 |
+| 组件与布局规范 | 设计系统基线、栅格、导航与页面骨架 |
+
+未确认前只能做低保真结构原型：验证信息架构、流程和状态，不投入视觉细化。无法确认时创建
+P1 `UNK-*` 且 `blocks_stage: baseline`，不能私自选择风格；确认后不得在无新 `DEC-*` 的情况下
+推翻方向重做。
+
 ## 10. 锁定与验收 / Lock And Acceptance
 
 完成时记录：
@@ -243,3 +262,28 @@ classification：confirmed、inferred、unknown、defect_candidate。核心未�
 已有 PRD 时，恢复观察使用 `INV-*`，并通过 `baseline_requirement_refs`、`mapping_status`、准确
 `target_refs` 映射。所有推断项进入有责任人的 `RBATCH-*`；未确认、否决或转未知前不得声明
 `baseline_ready`。反推能恢复交互证据，不能推断 API语义、指标口径、权限权威、合规或 AC 真相。
+
+## 存量资产处置 / Legacy Asset Disposition
+
+Stage 0 盘点恢复"有什么"，处置决定"怎么对待"。5.4.1 起，每个 view 类盘点条目建议用
+`disposition` 字段登记处置方式（见 `schemas/stage0-inventory.schema.json` 与
+`references/templates/stage0-inventory-template.yaml`），五选一：
+
+| 处置 | 定义 | 何时选择 |
+|---|---|---|
+| `adopt_page` | 整页直接采用，行为与视觉均不重做 | 页面已满足目标合同，仅需补锚点和状态 |
+| `inherit_layout` | 保留布局与信息架构，重做视觉层 | 结构合理但视觉不达标，已确认 `DEC-AESTHETIC-*` |
+| `rebuild_interaction` | 保留业务流程，重做交互与状态模型 | 流程正确但交互断裂、状态隐式或锚点不可枚举 |
+| `reuse_component` | 仅复用局部组件，页面其余部分重画 | 只有个别表格、表单等组件达到复用标准 |
+| `discard` | 废弃重画，不作为新页面基础 | 行为或结构与目标合同冲突，或属重复/死页面 |
+
+规则：
+
+- `disposition` 不替代 classification 和 `mapping_status`；条目仍需先完成来源、分类和基线映射。
+- 未登记 `disposition` 的条目按未定处置对待，不得默认整页采用。
+- `discard` 或任何移除存量行为的处置，仍需已批 `CHG-*` 或明确缩减范围；缺陷候选未经
+  `DEC/CHG` 不得借处置名义升级为目标需求。
+- `inherit_layout` 与涉及视觉重做的处置，先完成美学方向确认；`rebuild_interaction` 重画部分
+  按本文件全部交互合同执行。
+- 处置结论是原型迭代等价性比较（第 7 节）的基线：声明保留的布局、流程或组件必须出现在
+  等价性核对范围内。

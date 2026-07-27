@@ -22,12 +22,40 @@ def _nonempty_cells(line: str) -> list[str]:
     return [cell.strip() for cell in line.strip().strip("|").split("|") if cell.strip()]
 
 
+def _headings(raw: str) -> list[tuple[int, str, int, int]]:
+    """Return (level, title, line_start, line_end) for headings, skipping fenced code."""
+    headings: list[tuple[int, str, int, int]] = []
+    in_fence = False
+    offset = 0
+    for line in raw.splitlines(keepends=True):
+        stripped = line.lstrip()
+        if stripped.startswith("```") or stripped.startswith("~~~"):
+            in_fence = not in_fence
+        elif not in_fence:
+            match = re.match(r"^(#{1,4})[ \t]+(.+?)\s*$", line.rstrip("\r\n"))
+            if match:
+                headings.append((len(match.group(1)), match.group(2).strip(), offset, offset + len(line)))
+        offset += len(line)
+    return headings
+
+
 def _section_bodies(raw: str) -> list[tuple[str, str]]:
-    matches = list(HEADING.finditer(raw))
+    """Split raw into (title, body) pairs per heading.
+
+    A section's body runs until the next heading of the same or a higher
+    level, so an H2 body includes its full H3/H4 subtree while sibling H3
+    sections still split individually.
+    """
+    headings = _headings(raw)
     bodies: list[tuple[str, str]] = []
-    for index, match in enumerate(matches):
-        end = matches[index + 1].start() if index + 1 < len(matches) else len(raw)
-        bodies.append((match.group(2).strip(), raw[match.end():end].strip()))
+    for index, (level, title, _start, line_end) in enumerate(headings):
+        end = len(raw)
+        for next_level, _next_title, next_start, _next_end in headings[index + 1:]:
+            if next_level <= level:
+                end = next_start
+                break
+        if 2 <= level <= 4:
+            bodies.append((title, raw[line_end:end].strip()))
     return bodies
 
 

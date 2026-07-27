@@ -1,4 +1,4 @@
-# AI Delivery Spec 5.4.0 — Enter at Any Requirement Stage, Leave with a Usable Artifact
+# AI Delivery Spec 5.4.1 — Enter at Any Requirement Stage, Leave with a Usable Artifact
 
 > 需求一来就写 PRD，低价值需求也进入重型设计？
 >
@@ -14,13 +14,13 @@
 正文让客户、产品和传统开发顺序读懂，同文档工程附录让测试与 AI Coding 精确执行。
 只有大项目、持续变更、多投影或强审计场景才启用分片 Product Truth。
 
-[![Version](https://img.shields.io/badge/version-5.4.0-0052A4.svg)]()
+[![Version](https://img.shields.io/badge/version-5.4.1-0052A4.svg)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 
-<!-- CLAIM: CLM-ADOPTION-20260726; as_of=2026-07-26; evidence=author-checked-public-platform-links-below -->
-**公开采用信号 / Public Adoption Signals（截至 2026-07-26）**：
-[ClawHub 1100+ 次下载](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec) · [skills.sh 安装页](https://www.skills.sh/franklinxkk/ai-delivery-spec) ·
+<!-- CLAIM: CLM-ADOPTION-20260727; as_of=2026-07-27; evidence=author-checked-public-platform-links-below -->
+**公开采用信号 / Public Adoption Signals（截至 2026-07-27）**：
+[ClawHub 1200+ 次下载](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec) · [skills.sh 安装页](https://www.skills.sh/franklinxkk/ai-delivery-spec) ·
 [SkillHub TRACE 4.7/5](https://skillhub.cn/skills/ai-delivery-spec)，平台安全扫描未发现 P0/P1 风险。
 动态数字是作者核对的公开快照，不替代项目适用性判断；领域证据边界见 [release-status.yaml](maintainer/evals/evidence/release-status.yaml)。
 
@@ -134,9 +134,9 @@ openclaw skills install @franklinxkk/ai-delivery-spec
 研发排期、Sprint/任务、代码、CI/CD、部署执行、监控和运营属于下游系统。
 本项目只记录它们与需求/验收有关的外部引用，不接管流程。
 
-## 5.4.0 — Requirement Lifecycle Workstations｜需求全生命周期工作站
+## 5.4.1 — Requirement Lifecycle Workstations + Human-First Gates｜需求全生命周期工作站与可读性门禁
 
-5.4.0 把需求工作改为九个可进入、可停止、可续接的工作站，同时保持一个正式生命周期和一套门禁状态。阶段产物用 `artifact/stage` 和语言无关 `ADS:*` 锚点声明语义，跨会话才携带 `resume_context`；不要求每次运行脚本路由。
+5.4 把需求工作改为九个可进入、可停止、可续接的工作站，同时保持一个正式生命周期和一套门禁状态。5.4.1 把门禁从"结构齐全"扩展到"可读、可用、可闭环"：UI 动作与业务动作分层（`UIACT-*`/`ACT-*`）、演示脚手架与 iframe 套壳拦截、CSS 类生效与字号下限、绑定词跨端一致、状态机语义纯净、intake 工件按自身 schema 校验。单产物 PASS 不等于交付闭环：宣称最终完成前必须通过 `gate --profile full` 组合门禁。阶段产物用 `artifact/stage` 和语言无关 `ADS:*` 锚点声明语义，跨会话才携带 `resume_context`；不要求每次运行脚本路由。
 
 你会感受到五个变化：
 
@@ -263,7 +263,7 @@ python scripts/ai_delivery_spec_cli.py impact --truth requirements/truth/compile
 | 位置 | 工具类型 | 责任 |
 |---|---|---|
 | 上游 | 产品发现、调研、工作坊 | 发现机会、证据和策略假设 |
-| **需求管理内核** | **AI Delivery Spec 5.4.0** | 问题/方案 → 准入 → 澄清 → 基线 → 变更 → 验收 |
+| **需求管理内核** | **AI Delivery Spec 5.4.1** | 问题/方案 → 准入 → 澄清 → 基线 → 变更 → 验收 |
 | 下游 | Spec Kit、项目/研发管理工具 | 技术方案、任务、排期和依赖执行 |
 | 下游 | Codex、Trae、Cursor、Qoder 等 | 依据已基线需求编码、测试和修改 |
 | 外部证据 | CI、测试、发布、监控平台 | 向需求验收回传可引用证据 |

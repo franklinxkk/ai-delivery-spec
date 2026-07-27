@@ -1,0 +1,57 @@
+# Stage 0 存量盘点台账 / Stage 0 Brownfield Inventory
+# schema: schemas/stage0-inventory.schema.json
+schema_version: 5.4.1
+inventory_id: INV-PROJECT-001
+inventory_status: in_progress   # in_progress | inventory_complete；complete 只证明来源与分类齐全
+target_status: draft            # 全部 inferred 项闭合前不得声明 baseline_ready
+
+# 已有正向 PRD 时声明基线；此后反推观察项只用 INV-*，不得另造 REQ-*
+baseline_requirement_refs: []
+
+# 推断项按责任人归入确认批次，在 baseline_ready 前批量确认、否决或转未知
+review_batches:
+  - id: RBATCH-CHECKOUT-001
+    owner: "{责任人}"
+    scope: "{批次范围}"
+    status: open
+
+items:
+  - id: INV-VIEW-ORDER-LIST
+    type: view                # view / action / handler / state / role / object / field / metric / handoff
+    source_ref: SRC-LEGACY-APP-001
+    source_location: "app/order/list.html"
+    classification: confirmed # confirmed | inferred | unknown | defect_candidate
+    core_behavior: true
+    # 存量页面处置方式（5.4.1 起建议 view 类条目必填）：
+    #   adopt_page          整页直接采用
+    #   inherit_layout      保留布局重做视觉
+    #   rebuild_interaction 保留业务流程重做交互
+    #   reuse_component     仅复用局部组件
+    #   discard             废弃重画（移除行为须有已批 CHG-* 或明确缩减范围）
+    disposition: inherit_layout
+    # 已有基线时 confirmed/inferred 项必须声明映射：
+    mapping_status: not_applicable   # mapped | unmapped | not_applicable
+    target_refs: []                  # mapped 时必须指向 baseline_requirement_refs 中的 REQ-*
+  - id: INV-ACT-ORDER-EXPORT
+    type: action
+    source_ref: SRC-LEGACY-APP-001
+    source_location: "app/order/list.html#export"
+    classification: inferred
+    disposition: rebuild_interaction
+    review_batch_ref: RBATCH-CHECKOUT-001   # inferred 项必须可归入确认批次
+  - id: INV-STATE-ORDER-ARCHIVED
+    type: state
+    source_ref: SRC-LEGACY-APP-001
+    source_location: "app/order/store.js"
+    classification: unknown
+    core_behavior: true
+    # 核心未知项必须登记 P0 UNK-*、owner 和 blocks_stage
+    unknown:
+      id: UNK-ORDER-ARCHIVED-001
+      priority: P0
+      owner: "{责任人}"
+      blocks_stage: baseline
+
+# 多版本 PRD/原型候选基线；超过一个时由 DEC-CONFLICT-* 裁决
+canonical_candidates: []
+# conflict_decision_ref: DEC-CONFLICT-XXX   # 候选基线超过一个时必填

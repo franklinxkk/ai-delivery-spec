@@ -3,7 +3,7 @@ name: ai-delivery-spec
 description: 将一句话想法、客户材料、存量系统或 ToC/ToB/ToG 需求，按使用者指定的进入阶段和停止阶段，转化为可评审、可实施、可追溯、可验收的人类与 Coding Agent 共用需求产物。支持问题定义、方案探索、需求准入、澄清、统一 PRD、工程原型、评审基线、变更影响和验收证据；不负责排期、编码、CI/CD、部署和运营。
 ---
 
-# AI Delivery Spec 5.4.0 — Requirement Lifecycle Workstations｜需求全生命周期工作站
+# AI Delivery Spec 5.4.1 — Requirement Lifecycle Workstations｜需求全生命周期工作站
 
 本 Skill 是 Requirement Management Kernel：让业务、产品、设计、前后端、架构、需求交付/技术负责人、测试、合规和 Coding Agent 在需求任一阶段进入，得到当前需要的最小合格产物后离开；也可在用户明确要求时持续完成端到端闭环。
 
@@ -74,7 +74,7 @@ python scripts/ai_delivery_spec_cli.py gate --profile explore --artifact solutio
 python scripts/ai_delivery_spec_cli.py gate --profile clarify --artifact requirement-brief.md
 ```
 
-正式规格沿用 `gate --profile requirement|prd|prototype|handoff|full`。静态门禁必须输出 `not_proven`，不能把结构通过宣传为领域正确、真实运行或客户签收。
+正式规格沿用 `gate --profile requirement|prd|prototype|handoff|full`。静态门禁必须输出 `not_proven`，不能把结构通过宣传为领域正确、真实运行或客户签收。单产物 PASS 不等于交付闭环；宣称最终完成前必须 `gate --profile full`（或 handoff）组合门禁通过。
 
 5.4 模板用语言无关的 `<!-- ADS:* -->` 锚点，标题可按团队语言/模板改变。`resume_context` 记录相对路径、阶段和 SHA-256；漂移、缺失和路径越界必须阻断。大项目仍用执行检查点和 ID Slice，产物断点不能替代执行状态。
 

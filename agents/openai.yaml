@@ -1,6 +1,6 @@
 interface:
   display_name: "AI Delivery Spec"
-  version: "5.4.0"
+  version: "5.4.1"
   short_description: "需求任一阶段进入，按目标交付可读、可实现、可追溯的最小合格产物。"
   default_prompt: >
     使用 $ai-delivery-spec 作为需求管理内核。先从用户语义和已有产物识别 entry_stage 与 target_stage；

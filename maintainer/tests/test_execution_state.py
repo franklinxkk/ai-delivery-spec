@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+import re
 import tempfile
 import json
 import yaml
@@ -191,10 +192,11 @@ def main() -> int:
             raise AssertionError("approved low-risk validator outage was not recorded explicitly")
 
         old_skill = temp / "SKILL.md"
-        old_skill.write_text(
-            (ROOT / "SKILL.md").read_text(encoding="utf-8").replace("AI Delivery Spec 5.4.0", "AI Delivery Spec 4.9.15", 1),
-            encoding="utf-8",
-        )
+        skill_text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        drifted, count = re.subn(r"AI Delivery Spec \d+\.\d+\.\d+", "AI Delivery Spec 4.9.15", skill_text, count=1)
+        if count != 1:
+            raise AssertionError("SKILL.md title does not carry a semantic version")
+        old_skill.write_text(drifted, encoding="utf-8")
         blocked = temp / "blocked.yaml"
         result = run(
             "create", "--truth", str(TRUTH), "--config", str(CONFIG),

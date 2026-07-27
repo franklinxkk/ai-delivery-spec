@@ -1,5 +1,22 @@
 # Changelog
 
+## 5.4.1 - 2026-07-27
+
+- 修复首跑断裂：`gate --profile requirement` 按 `artifact: requirement_intake` 识别单需求准入卡并改用独立 intake schema 校验，不再把扁平 intake.yaml 误判为需求登记册；修复提示指向正确模板。
+- UI 动作与业务动作分层：纯界面动作使用 `UIACT-*`，豁免业务验收锚点与 PRD 动作回链；`ACT-*` 业务动作合同不变，handoff 不再把导航/关闭/页签切换当作业务缺口。
+- 原型门禁拦截演示脚手架与套壳：可见 UI 出现验收场景/体验身份/E2E 控制台/继承预览等演示元素报 `PROTO-DEMO-SCAFFOLDING-VISIBLE`；iframe 嵌入本地产品页报 `PROTO-NESTED-PRODUCT-IFRAME`。
+- CSS 扫描升级：HTML 交互元素类无样式定义报 `unstyled-control-class`，主文本字号低于 11px 报 `unreadable-type-scale`，并识别按钮无主次层级与同页双导航。
+- PRD 语义纯净检查：状态机状态列混入 API/字段/动作 ID 报 `PRD-STATE-SEMANTIC-POLLUTION`（"状态机 / API"等工程映射列不误判）；同一主题同时登记为已确认决策和开放未知项报 `PRD-CONFIRMED-OPEN-UNKNOWN-CONFLICT`；稳定 ID 内含 TODO 子串不再误判为未跟踪未知项。
+- 跨端绑定词一致性：PRD frontmatter `binding_terms`（法定名词、领域术语）必须同时出现在 PRD 正文与原型可见文本，缺失报 `HANDOFF-BINDING-TERM-MISSING`。
+- 美学方向前置：handoff/full 组合门禁要求高保真原型具备 `DEC-AESTHETIC-*` 美学决策记录（视觉方向、参考产品、禁止风格、字号层级、按钮体系、密度），未确认报 `HANDOFF-AESTHETIC-UNDECIDED`。
+- 存量资产处置契约：Stage 0 盘点条目支持 `disposition`（adopt_page/inherit_layout/rebuild_interaction/reuse_component/discard），整页采用、局部继承、重构、废弃成为正式处置方式。
+- Human-First 模板重构：统一 PRD 模板显式分层——正文面向业务/产品/开发/测试阅读（角色阅读入口、一事一处、密度控制），工程附录面向机器（稳定 ID、字段、API、机器验收）；ADS 锚点保持兼容。
+- 出口条件明确：单产物 PASS 不等于交付闭环，宣称最终完成前必须 `gate --profile full`（或 handoff）组合门禁通过；`not_proven` 边界声明不变。
+- quality_gate.py 按职责拆分为 PRD/原型/交接三个 mixin 模块，单文件回到行数预算内，`from quality_gate import Gate` 兼容不变。
+- 新 finding code 全部配备具体修复原因与示例，`explain-finding` 不再要求读源码猜合同。
+- H2 章节结构分析包含完整 H3/H4 子树，角色旅程等嵌套内容不再被截断。
+- `examples/minimal-v5/intake.yaml` 补齐 intake 必填字段，入门示例自身通过 `gate --profile requirement`。
+
 ## 5.4.0 - 2026-07-25
 
 - 新增九个可进入、可停止、可续接的需求工作站；`frame/explore` 明确为准入前工作区，正式 `REQ-*` 生命周期仍从 intake 开始。

@@ -1,9 +1,19 @@
+schema_version: 5.4.0
+artifact: requirement_intake
+stage: intake
+requirement_id: REQ-MINIMAL-001
 title: 制度列表增加仅看当前有效筛选
 outcome: 员工可一键排除已失效制度，减少误用旧制度
 owner: 产品负责人
 document_language: zh-CN
 source_refs: [SRC-MINIMAL-001]
 value: medium
+priority: P2
+complexity:
+  band: S
+  dimensions: []
+target_iteration: null
+dependencies: []
 value_evidence:
   - 已确认的内部用户反馈：列表中混有已失效制度
 roles: [ROLE-EMPLOYEE]
