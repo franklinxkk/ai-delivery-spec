@@ -15,6 +15,12 @@ dimensions:
   - change_safety
   - human_usability
   - context_efficiency
+  - trigger_recall
+  - convergence_speed
+  - overinterpretation_control
+  - visual_consistency
+  - validation_efficiency
+  - user_satisfaction
 
 scenarios:
   - id: EVAL-NEWCOMER-SAAS-001
@@ -126,89 +132,67 @@ scenarios:
     status: not_run
     evidence: []
 
-  - id: EVAL-CROSS-INDUSTRY-ASSURANCE-001
-    project: cross-industry-assurance
-    lifecycle: review
-    shape: hybrid
-    perspective: multi_role_assurance
-    input: maintainer/evals/industry-assurance-portfolio.yaml
-    expected:
-      - seven sectors traverse intake, clarify, specify, review, baseline, change and acceptance
-      - business, product, domain, UX, engineering, QA, compliance and customer lenses expose distinct P0/P1 gaps
-      - method gaps are fixed or explicitly bounded while missing project facts remain blocked
-      - final runtime gate remains zero-LLM, single-read and non-generative
-    dimensions: [clarification_quality, requirement_completeness, no_guess_handoff, change_safety, domain_accuracy, human_usability, context_efficiency]
-    status: partial
-    evidence: [maintainer/evals/evidence/v510-cross-industry-multi-agent-simulation-2026-07-14.yaml]
-
-  - id: EVAL-GITHUB-CHATWOOT-REQ-001
-    project: chatwoot-voice-channel
-    lifecycle: discover
-    shape: brownfield
-    perspective: product_owner
-    input: maintainer/evals/github-cases.yaml#GH-CHATWOOT-VOICE
-    expected:
-      - expand inbound and outbound call behavior without inventing v2 scope
-      - preserve recording, consent, routing, and retention as explicit unknowns
-      - detect current repository voice implementation before writing a new PRD
-    dimensions: [clarification_quality, requirement_completeness, domain_accuracy]
-    status: partial
-    evidence: [maintainer/evals/runs/chatwoot-voice-requirement-v5.yaml, maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
-
-  - id: EVAL-GITHUB-SALEOR-DESIGN-001
-    project: saleor-channel-identifier
+  - id: EVAL-V542-CLEAR-SMALL-001
+    project: enterprise-talk-status-filter
     lifecycle: specify
     shape: brownfield
-    perspective: product_engineering
-    input: maintainer/evals/github-cases.yaml#GH-SALEOR-CHANNEL-ID
+    perspective: product_owner
+    input: 在现有企业约谈列表增加按约谈状态筛选，状态为待发起、待反馈、已完成，产出可开发需求说明和验收标准。
     expected:
-      - define ID, slug, and legacy selector compatibility and conflict behavior
-      - preserve permissions, visibility, pagination, and filtering semantics
-      - distinguish a user issue from an approved project roadmap
-    dimensions: [requirement_completeness, change_safety, cross_artifact_consistency]
+      - invoke the skill even though the feature is small and clear
+      - provide a directly usable requirement slice without prerequisite artifacts
+      - ask zero questions about facts already supplied
+      - expose no YAML, stable IDs or workstation terminology in live dialogue
+    dimensions: [trigger_recall, convergence_speed, overinterpretation_control, human_usability]
     status: partial
-    evidence: [maintainer/evals/runs/saleor-channel-id-design-v5.yaml, maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
+    evidence:
+    - maintainer/v5.4.0-design-record.md
 
-  - id: EVAL-GITHUB-OPENEDX-DESIGN-001
-    project: openedx-reindex-upgrade
-    lifecycle: change
+  - id: EVAL-V542-AMBIGUOUS-001
+    project: enterprise-risk-early-idea
+    lifecycle: discover
+    shape: greenfield
+    perspective: product_owner
+    input: 我想让运智管家能提前发现高风险企业，先帮我把需求想清楚。
+    expected:
+      - provide two or three materially different directions plus a no-build option
+      - recommend one direction with reasons and tradeoffs
+      - deepen the selected business loop before asking
+      - ask at most one highest-impact question in the first response
+      - avoid premature pages, YAML, stable IDs and governance jargon
+    dimensions: [trigger_recall, clarification_quality, convergence_speed, overinterpretation_control, human_usability]
+    status: partial
+    evidence:
+    - maintainer/v5.4.0-design-record.md
+
+  - id: EVAL-V542-BROWNFIELD-PROTOTYPE-001
+    project: enterprise-talk-prototype-iteration
+    lifecycle: specify
+    shape: brownfield
+    perspective: ux_frontend
+    input: 基于三份现有企业约谈 HTML 做小迭代，列表增加行业筛选，保持现有布局和组件风格，不要大改。
+    expected:
+      - inspect existing views, actions, handlers and visible style before changing
+      - treat existing shell, density, tokens and component variants as visual authority
+      - do not ask for an aesthetic direction or replace the design system
+      - preserve interaction coverage and produce a project-wide visual lock
+    dimensions: [trigger_recall, overinterpretation_control, visual_consistency, change_safety, human_usability]
+    status: partial
+    evidence:
+    - maintainer/v5.4.0-design-record.md
+
+  - id: EVAL-V542-GATE-ROOTS-001
+    project: enterprise-talk-prd-review
+    lifecycle: review
     shape: brownfield
     perspective: product_engineering
-    input: maintainer/evals/github-cases.yaml#GH-OPENEDX-REINDEX
+    input: 运智管家_企业约谈_PRD_v1.0.md
     expected:
-      - detect that async incremental indexing already exists in the pinned baseline
-      - separate verified current state from remaining operations gaps
-      - refuse to regenerate a stale feature request
-    dimensions: [change_safety, no_guess_handoff, cross_artifact_consistency]
+      - preserve every machine-readable finding in JSON
+      - show every unique finding code once in default concise diagnostics
+      - compact repeated findings and avoid one-finding-per-rerun repair loops
+      - report the static gate claim boundary
+    dimensions: [validation_efficiency, human_usability, context_efficiency]
     status: partial
-    evidence: [maintainer/evals/runs/openedx-reindex-design-v5.yaml, maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
-
-  - id: EVAL-GITHUB-ORANGEHRM-HANDOFF-001
-    project: orangehrm-password-policy
-    lifecycle: build_verify
-    shape: brownfield
-    perspective: coding_agent
-    input: maintainer/evals/github-cases.yaml#GH-ORANGEHRM-PASSWORD-POLICY
-    expected:
-      - inspect frontend and backend password enforcement before selecting files
-      - keep server enforcement authoritative across every password write path
-      - produce vertical slices and tests without pretending code was executed
-    dimensions: [no_guess_handoff, change_safety, cross_artifact_consistency]
-    status: partial
-    evidence: [maintainer/evals/runs/orangehrm-password-policy-handoff-v5.yaml, maintainer/evals/evidence/github-source-verification-2026-07-11.yaml]
-
-  - id: EVAL-LIFECYCLE-FORWARD-001
-    project: generic-lifecycle-forward-test
-    lifecycle: discover_to_acceptance_definition
-    shape: greenfield_and_brownfield
-    perspective: multi_role_assurance
-    input: private artifact calibration plus synthetic one-line and competitive scenarios
-    expected:
-      - batch answers remain bound to their unknowns and affected contracts
-      - competitor facts do not silently become product rules
-      - every cross-module hop and generated object's next action is explicit
-      - one PRD and all supplied prototypes remain ID-closed without a generative runtime gate
-      - simulations do not claim implementation, expert review or customer acceptance
-    dimensions: [clarification_quality, requirement_completeness, no_guess_handoff, cross_artifact_consistency, human_usability, context_efficiency]
-    status: partial
-    evidence: [maintainer/evals/evidence/v517-lifecycle-forward-test-2026-07-15.yaml]
+    evidence:
+    - maintainer/v5.4.0-design-record.md

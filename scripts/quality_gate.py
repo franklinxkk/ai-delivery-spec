@@ -101,7 +101,7 @@ STAGE_ORDER = {
 NOT_PROVEN_BY_STATIC_GATE = (
     "业务与领域规则已经客户或权威来源确认",
     "原型在真实浏览器中的交互、视觉、可访问性与多端适配",
-    "视觉与美学方向已经用户确认（DEC-AESTHETIC-* 或等效记录）",
+    "视觉权威与视觉锁已经确认（存量基线、绿地默认或 DEC-AESTHETIC-*）",
     "代码实现、数据迁移、安全、性能、部署与运行稳定性",
     "验收用例已经实际执行并形成签认证据",
 )
@@ -178,8 +178,8 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
         "二选一：关闭对应 UNK-* 并同步 open_p0_unknown_ids，或撤回该决策条目并重新登记为开放未知项。",
     ),
     "HANDOFF-AESTHETIC-UNDECIDED": (
-        "L3/L4 交接没有声明任何 DEC-AESTHETIC-* 美学方向决策，视觉方向仍未定。",
-        "在交接前记录 DEC-AESTHETIC-*（frontmatter aesthetic_decision_refs 或正文引用），明确已确认的美学方向。",
+        "L3/L4 交接没有声明视觉权威与视觉锁，跨页面风格可能漂移。",
+        "存量小迭代记录 visual_authority=existing；绿地记录 greenfield_default；品牌化方案可引用 DEC-AESTHETIC-*，并提供 design_lock_ref。",
     ),
     "STAGE0-DISPOSITION-MISSING": (
         "Stage 0 台账的页面类条目缺少 disposition，存量页面处置方式未定。",
@@ -265,7 +265,7 @@ REPAIR_EXAMPLES: tuple[tuple[str, str], ...] = (
     ("PRD-STATE-SEMANTIC-POLLUTION", "| 待处理 | 复检 | 复检中 | —— 下一状态列写业务状态名；API-RISK-RECHECK 移入“动作/接口”列。"),
     ("HANDOFF-BINDING-TERM-MISSING", "PRD 正文写“上传道路运输经营许可证后进入审核”，原型对应区域可见文案同样写“道路运输经营许可证”。"),
     ("PRD-CONFIRMED-OPEN-UNKNOWN-CONFLICT", "关闭冲突项：unknowns 中该 key 的 status 改为 closed 并从 open_p0_unknown_ids 移除；或删除 decisions 中同 key 条目改登 UNK-*。"),
-    ("HANDOFF-AESTHETIC-UNDECIDED", "frontmatter 增加 aesthetic_decision_refs: [DEC-AESTHETIC-001]，并在正文引用 DEC-AESTHETIC-001 描述已确认的配色/密度/风格方向。"),
+    ("HANDOFF-AESTHETIC-UNDECIDED", "存量小迭代写 visual_authority: existing 与 design_lock_ref: prototype.html#design-lock；绿地可写 greenfield_default；品牌化方案再引用 DEC-AESTHETIC-*。"),
     ("STAGE0-DISPOSITION-MISSING", "为 type: view 的条目补 disposition: inherit_layout（或 adopt_page/rebuild_interaction/reuse_component/discard）。"),
     ("PRD-LANGUAGE", "document_language: zh-CN；将英文结构标题改为中文，保留 REQ/API/字段名原样。"),
     ("PRD-MODULE-SLICE", "### 7.1 授权管理 MOD-AUTH-001；就近写目标、路径、VIEW/FLD/ACT、RULE/STM、METRIC、恢复、AC 与 UNK。"),
@@ -531,6 +531,20 @@ def result_payload(gate: Gate, profile: str, retry_command: str = "") -> dict[st
     }
 
 
+def diagnostic_roots(findings: list[Finding], limit: int) -> tuple[list[tuple[Finding, int]], int]:
+    """Compact repeated findings by stable root-cause code, preserving first-seen order."""
+    first: dict[str, Finding] = {}
+    counts: dict[str, int] = {}
+    order: list[str] = []
+    for item in findings:
+        if item.code not in first:
+            first[item.code] = item
+            order.append(item.code)
+        counts[item.code] = counts.get(item.code, 0) + 1
+    selected = order[:max(limit, 0)]
+    return [(first[code], counts[code]) for code in selected], len(order)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Lightweight, non-generative final quality gate")
     parser.add_argument("--profile", choices=["requirement", "prd", "prototype", "handoff", "full", "stage0", "agent_handoff"], required=True)
@@ -544,7 +558,7 @@ def main() -> int:
     parser.add_argument("--stage", choices=list(STAGE_ORDER), default="baseline")
     parser.add_argument("--scope-ref", action="append", default=[], help="Limit stage/P0 evaluation to one stable-ID scope; repeat as needed")
     parser.add_argument("--format", choices=["concise", "json"], default="concise")
-    parser.add_argument("--diagnostics", choices=["first", "summary", "full"], default="full")
+    parser.add_argument("--diagnostics", choices=["first", "roots", "summary", "full"], default="roots")
     parser.add_argument("--max-findings", type=int, default=20)
     parser.add_argument("--custom-root", type=Path, help="项目本地私有扩展目录；默认自动发现当前目录 custom/")
     args = parser.parse_args()
@@ -653,22 +667,34 @@ def main() -> int:
             f"p0_unknowns={summary['p0_unknowns']} gaps={summary['gaps']}"
         )
         print("NOT_PROVEN: " + "；".join(payload["not_proven"]))
-        if args.diagnostics == "first":
-            limit = 1
-        elif args.diagnostics == "summary":
-            limit = min(max(args.max_findings, 0), 12)
+        if args.diagnostics == "roots":
+            roots, unique_count = diagnostic_roots(gate.findings, args.max_findings)
+            for item, count in roots:
+                ref = f" [{item.ref}]" if item.ref else ""
+                localized = item.message if re.search(r"[\u4e00-\u9fff]", item.message) else f"{item.cause} 技术明细：{item.message}"
+                print(f"{item.severity} {item.code} x{count}{ref}: {localized}")
+                print(f"  原因: {item.cause}")
+                print(f"  修复: {item.how_to_fix}")
+                print(f"  示例: {item.repair_example}")
+            print(
+                f"ROOT_GROUPS shown={len(roots)} unique={unique_count} "
+                f"repeated_findings_compacted={len(gate.findings) - len(roots)}"
+            )
+            hidden_groups = unique_count - len(roots)
+            if hidden_groups > 0:
+                print(f"... {hidden_groups} additional root groups; rerun with --format json")
         else:
-            limit = max(args.max_findings, 0)
-        for item in gate.findings[:limit]:
-            ref = f" [{item.ref}]" if item.ref else ""
-            localized = item.message if re.search(r"[\u4e00-\u9fff]", item.message) else f"{item.cause} 技术明细：{item.message}"
-            print(f"{item.severity} {item.code}{ref}: {localized}")
-            print(f"  原因: {item.cause}")
-            print(f"  修复: {item.how_to_fix}")
-            print(f"  示例: {item.repair_example}")
-        hidden = len(gate.findings) - limit
-        if hidden > 0:
-            print(f"... {hidden} additional findings; rerun with --format json")
+            limit = 1 if args.diagnostics == "first" else min(max(args.max_findings, 0), 12) if args.diagnostics == "summary" else max(args.max_findings, 0)
+            for item in gate.findings[:limit]:
+                ref = f" [{item.ref}]" if item.ref else ""
+                localized = item.message if re.search(r"[\u4e00-\u9fff]", item.message) else f"{item.cause} 技术明细：{item.message}"
+                print(f"{item.severity} {item.code}{ref}: {localized}")
+                print(f"  原因: {item.cause}")
+                print(f"  修复: {item.how_to_fix}")
+                print(f"  示例: {item.repair_example}")
+            hidden = len(gate.findings) - limit
+            if hidden > 0:
+                print(f"... {hidden} additional findings; rerun with --format json")
         if gate.findings:
             print(f"RETRY: {payload['retry_command']}")
     return int(payload["exit_code"])

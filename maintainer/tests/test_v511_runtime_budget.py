@@ -3,7 +3,6 @@
 import os
 import subprocess
 import sys
-import tempfile
 import zipfile
 from pathlib import Path
 
@@ -22,12 +21,30 @@ if not any(marker in skill for marker in ("Load one stage reference", "每次只
     failures.append("SKILL lost progressive-disclosure instruction")
 if "scripts/query_domain.py --domain <pack>" not in skill:
     failures.append("SKILL loads full domain coverage instead of one compact record")
+maintainer_files = [
+    path for path in (ROOT / "maintainer").rglob("*")
+    if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc"
+]
+maintainer_bytes = sum(path.stat().st_size for path in maintainer_files)
+if len(maintainer_files) > 56:
+    failures.append(f"maintainer lab contains {len(maintainer_files)} files; expected <=56")
+if maintainer_bytes > 450_000:
+    failures.append(f"maintainer lab contains {maintainer_bytes} bytes; expected <=450000")
+cli = (ROOT / "scripts/ai_delivery_spec_cli.py").read_text(encoding="utf-8")
+fast_slice = cli.split("fast_commands: list[list[str]] = [", 1)[-1].split(
+    "release_only_commands: list[list[str]] = [", 1
+)[0]
+fast_command_count = fast_slice.count("[sys.executable")
+if fast_command_count > 12:
+    failures.append(f"default fast check runs {fast_command_count} commands; expected <=12")
+
 
 probe = subprocess.run(
     [sys.executable, str(ROOT / "scripts/query_domain.py"), "--domain", "oa"],
     cwd=ROOT,
     text=True,
     encoding="utf-8",
+    errors="replace",
     capture_output=True,
     check=False,
     env={**os.environ, "PYTHONIOENCODING": "cp1252"},
@@ -43,14 +60,15 @@ for marker in (
     if marker not in probe.stdout:
         failures.append(f"OA compact-domain query misses {marker!r}")
 
-with tempfile.TemporaryDirectory(prefix="ads-runtime-budget-") as temp_name:
-    archive_path = Path(temp_name) / "runtime.zip"
+archive_path = ROOT.parent / f".ads-runtime-budget-{os.getpid()}.zip"
+archive_path.unlink(missing_ok=True)
+try:
     package = subprocess.run(
         [
             sys.executable, str(ROOT / "maintainer/tools/build_runtime_package.py"),
             "--output", str(archive_path), "--check",
         ],
-        cwd=ROOT, text=True, encoding="utf-8", capture_output=True, check=False,
+        cwd=ROOT, text=True, encoding="utf-8", errors="replace", capture_output=True, check=False,
     )
     if package.returncode != 0:
         failures.append("runtime package build failed: " + package.stdout + package.stderr)
@@ -65,7 +83,12 @@ with tempfile.TemporaryDirectory(prefix="ads-runtime-budget-") as temp_name:
         runtime_budget = yaml.safe_load((ROOT / "maintainer/runtime-package.yaml").read_text(encoding="utf-8"))["max_files"]
         if len(names) > runtime_budget + 1:  # configured source budget + generated manifest
             failures.append(f"runtime zip contains {len(names)} entries; expected <={runtime_budget + 1}")
+finally:
+    archive_path.unlink(missing_ok=True)
 
 if failures:
     raise SystemExit("\n".join(failures))
-print(f"PASS: SKILL stays within {len(skill.splitlines())} lines/{len(skill)} chars and domain retrieval is selective")
+print(
+    f"PASS: SKILL={len(skill.splitlines())} lines/{len(skill)} chars; "
+    f"maintainer={len(maintainer_files)} files/{maintainer_bytes} bytes; fast_check={fast_command_count} commands"
+)

@@ -1,11 +1,11 @@
 ---
 name: ai-delivery-spec
-description: 将一句话想法、客户材料、存量系统或 ToC/ToB/ToG 需求，按使用者指定的进入阶段和停止阶段，转化为可评审、可实施、可追溯、可验收的人类与 Coding Agent 共用需求产物。支持问题定义、方案探索、需求准入、澄清、统一 PRD、工程原型、评审基线、变更影响和验收证据；不负责排期、编码、CI/CD、部署和运营。
+description: 用于任何新增、修改、评审、反推或验收需求、PRD、原型、竞品材料与存量系统，包括写/改一个小功能、加字段/列/页签/下拉、在旧 HTML 或系统上小改、直接生成 PRD 或原型。无论规模和清晰度，命中这些需求工作时都必须先调用，不得以“功能简单”“需求明确”或“直接改更快”跳过；调用后按目标阶段交付最小但完整、可评审、可实施、可追溯、可验收的人类与 Coding Agent 共用产物。支持问题定义、方案探索、需求准入、澄清、统一 PRD、工程原型、评审基线、变更影响和验收证据；不负责排期、编码、CI/CD、部署和运营。
 ---
 
-# AI Delivery Spec 5.4.1 — Requirement Lifecycle Workstations｜需求全生命周期工作站
+# AI Delivery Spec 5.4.2 — Fast Convergence Workstations｜精准收敛的需求工作站
 
-本 Skill 是 Requirement Management Kernel：让业务、产品、设计、前后端、架构、需求交付/技术负责人、测试、合规和 Coding Agent 在需求任一阶段进入，得到当前需要的最小合格产物后离开；也可在用户明确要求时持续完成端到端闭环。
+本 Skill 是适用于 ToC/ToB/ToG 的 Requirement Management Kernel：让业务、产品、设计、前后端、架构、需求交付/技术负责人、测试、合规和 Coding Agent 在需求任一阶段进入，得到当前需要的最小合格产物后离开；也可在用户明确要求时持续完成端到端闭环。
 
 默认跟随用户当前语言生成标题、正文、表格、问题与测试；稳定 ID、代码、API/字段名和专有名词保持原样。双语必须由用户明确要求。
 只使用 Agent 完成需求工作不要求安装 Python；运行本地零模型门禁时需要 Python 3.10+：`python -m pip install -r scripts/requirements.txt`。Stable ID 是长期不变的需求编号；Gate 是静态结构门禁，不等于业务、浏览器、实现或客户验收。
@@ -19,7 +19,7 @@ description: 将一句话想法、客户材料、存量系统或 ToC/ToB/ToG 需
 
 工作站为 `frame → explore → intake → clarify → specify → review → baseline`，基线可进入 `change` 或 `acceptance`，变更须重新基线。`frame/explore` 是准入前工作区；正式 `REQ-*` 生命周期从 intake 开始。用户可从任意有证据的阶段进入，不强迫补跑无关前序。
 
-显式目标最高优先；“不要写 PRD，只做澄清”等否定约束高于关键词。目标未明时选择能解决当前问题的最小产物，并继续可逆工作；只有产物选择会实质改变范围时才提问。单次任务到目标即停，明确端到端任务则持续到目标且不得把中间模板或静态 PASS 当成完成。
+阶段是路由地图，不是执行清单。显式目标最高优先；“不要写 PRD，只做澄清”等否定约束高于关键词。目标清楚时直接进入目标阶段，不补做前序文件；目标模糊时先在一轮内完成“发散选项 → 推荐聚焦 → 深化关键链路”，再只问会改变范围的决策。单次任务到目标即停，明确端到端任务则持续到目标且不得把中间模板或静态 PASS 当成完成。
 
 需要跨会话或检查旧产物时才运行确定性路由；它不解析自然语言：
 
@@ -45,6 +45,8 @@ description: 将一句话想法、客户材料、存量系统或 ToC/ToB/ToG 需
 
 ## 默认最小产物，不为阶段机械建文件
 
+实时对话先交付可用判断，不展示内部 YAML、稳定 ID 或工作站术语；只有需要保存、跨会话、跨角色交接、审计或工具校验时才结构化落盘。
+
 - frame：一份 `problem-brief.md`，说清用户、痛点时刻、成功信号、事实/假设和下一步。
 - explore：一份 `solution-sketch.md`，至少两个选项和不做选项，包含可证伪 `ASM-*`、最小验证与停止条件。
 - intake：复用 triage 结果与 requirement register；Start with intake for formal governed requirements。
@@ -54,6 +56,14 @@ description: 将一句话想法、客户材料、存量系统或 ToC/ToB/ToG 需
 - change/acceptance：现有 `CHG-*` 与 `ARUN-*` 回链当前基线。
 
 假设寄存器仅在跨会话、跨角色复用或治理时单独导出。YAML/JSON 是工具投影，不是另一份 PRD。
+
+## 小迭代先最小改动，再补必要合同
+
+- 用户只要求分析/评审时，给结论、最小范围、阻断未知和核心验收，不擅自产出整套 PRD、治理台账或新平台能力。
+- 用户要求修改存量产物时，先完成可比较的目标产物；Stage 0、ID 和检查账本默认留在工作过程，最终只报告影响决策的差异。
+- 未经证据或用户授权，不新增角色、页面、实体、审批、审计、版本、并发、指标或状态机。必要的安全/合规约束单列为阻断，不混入本期范围。
+- “示例子集”不能替代“修改/替换存量原型”。除非用户明确批准缩减范围，必须保留未变更的视图、字段、动作、状态、角色路径和代表性数据量；不能完整保留时返回 `BLOCKED`，不得包装成完成。
+- 外部数据集成先写清 `权威源 → 汇聚/转换方 → 消费方`、读写方向、触发、失败与纠错责任，再设计按钮、队列和自动化；反向同步不得进入正向上报队列。
 
 ## 需求闭环与禁止推断
 
@@ -74,7 +84,7 @@ python scripts/ai_delivery_spec_cli.py gate --profile explore --artifact solutio
 python scripts/ai_delivery_spec_cli.py gate --profile clarify --artifact requirement-brief.md
 ```
 
-正式规格沿用 `gate --profile requirement|prd|prototype|handoff|full`。静态门禁必须输出 `not_proven`，不能把结构通过宣传为领域正确、真实运行或客户签收。单产物 PASS 不等于交付闭环；宣称最终完成前必须 `gate --profile full`（或 handoff）组合门禁通过。
+正式规格沿用 `gate --profile requirement|prd|prototype|handoff|full`。静态门禁只在目标里程碑运行一次；修复后重跑，不在每个经过的工作站重复执行。默认按根因分组输出诊断，JSON 保留全部明细。门禁必须输出 `not_proven`，不能把结构通过宣传为领域正确、真实运行或客户签收。单产物 PASS 不等于交付闭环；宣称最终完成前必须 `gate --profile full`（或 handoff）组合门禁通过。
 
 5.4 模板用语言无关的 `<!-- ADS:* -->` 锚点，标题可按团队语言/模板改变。`resume_context` 记录相对路径、阶段和 SHA-256；漂移、缺失和路径越界必须阻断。大项目仍用执行检查点和 ID Slice，产物断点不能替代执行状态。
 

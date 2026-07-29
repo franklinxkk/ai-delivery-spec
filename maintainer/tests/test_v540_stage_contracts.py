@@ -17,7 +17,6 @@ from jsonschema import Draft202012Validator
 ROOT = Path(__file__).resolve().parents[2]
 CLI = ROOT / "scripts" / "ai_delivery_spec_cli.py"
 STAGE = ROOT / "scripts" / "stage_contract.py"
-GITHUB_MATRIX_BUILDER = ROOT / "maintainer" / "tools" / "build_github_validation_matrix.py"
 failures: list[str] = []
 
 
@@ -385,36 +384,6 @@ UNK-001 已关闭。
         result = run("gate", "--profile", "clarify", "--artifact", str(sector_path), "--format", "json")
         if result.returncode != 0:
             failures.append(f"generic clarify contract regressed in {sector}: " + result.stdout + result.stderr)
-
-    prompt_pack = temp / "cross-model-probes.yaml"
-    prompt_result = subprocess.run(
-        [sys.executable, str(GITHUB_MATRIX_BUILDER), "--prompt-pack", str(prompt_pack)],
-        cwd=ROOT, text=True, encoding="utf-8", capture_output=True,
-    )
-    if prompt_result.returncode != 0:
-        failures.append("cross-model prompt pack did not build: " + prompt_result.stdout + prompt_result.stderr)
-    else:
-        prompt_document = yaml.safe_load(prompt_pack.read_text(encoding="utf-8"))
-        covered_stages = {item["entry_stage"] for item in prompt_document.get("prompts", [])}
-        required_metadata = set(prompt_document.get("required_run_metadata", []))
-        execution_contract = prompt_document.get("execution_contract", {})
-        if prompt_document.get("prompt_count") != 15 or len(covered_stages) != 9:
-            failures.append("cross-model prompt pack must cover 15 cases and all 9 lifecycle stages")
-        if not {
-            "provider", "model_id", "client_version", "duration_seconds",
-            "artifact_count", "gate_result", "output_ref",
-        }.issubset(required_metadata):
-            failures.append("cross-model prompt pack misses reproducibility metadata")
-        if "shared or leaked credentials" not in prompt_document.get("claim_boundary", ""):
-            failures.append("cross-model prompt pack misses credential safety boundary")
-        if execution_contract.get("stop") != "after the target gate result or explicit prerequisite block":
-            failures.append("cross-model prompt pack misses bounded stop contract")
-        if any(
-            "不要读取 README" not in item.get("prompt", "")
-            or "目标门禁得出结论后立即停止" not in item.get("prompt", "")
-            for item in prompt_document.get("prompts", [])
-        ):
-            failures.append("cross-model prompts do not enforce minimal loading and bounded stop")
 
 
 gate_schema = json.loads((ROOT / "schemas" / "gate-result.schema.json").read_text(encoding="utf-8"))

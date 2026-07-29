@@ -12,7 +12,7 @@ claim_boundary: >-
 commands:
   - py -3 scripts/validators/validate_product_truth.py maintainer/examples/publishing-learning-v5/delivery/truth/product-truth.yaml
   - py -3 scripts/validators/validate_projection_consistency.py --truth maintainer/examples/publishing-learning-v5/delivery/truth/product-truth.yaml --projection maintainer/examples/publishing-learning-v5/delivery/projections/unified-prd.md
-  - py -3 maintainer/tests/test_v5_change_drift.py
+  - py -3 maintainer/tests/test_runtime_resilience.py
   - py -3 scripts/validators/validate_project_domain_capsule.py maintainer/examples/generic-energy-capsule-v5/project-domain-capsule.yaml
   - py -3 scripts/validators/validate_change_package.py maintainer/examples/traffic-regulatory-change-v5/change-package.yaml
 scenarios:

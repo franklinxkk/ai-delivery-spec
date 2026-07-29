@@ -1,4 +1,4 @@
-# AI Delivery Spec 5.4.1 — Enter at Any Requirement Stage, Leave with a Usable Artifact
+# AI Delivery Spec 5.4.2 — Trigger Reliably, Converge Fast, Deliver a Usable Artifact
 
 > 需求一来就写 PRD，低价值需求也进入重型设计？
 >
@@ -14,7 +14,7 @@
 正文让客户、产品和传统开发顺序读懂，同文档工程附录让测试与 AI Coding 精确执行。
 只有大项目、持续变更、多投影或强审计场景才启用分片 Product Truth。
 
-[![Version](https://img.shields.io/badge/version-5.4.1-0052A4.svg)]()
+[![Version](https://img.shields.io/badge/version-5.4.2-0052A4.svg)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 
@@ -134,9 +134,9 @@ openclaw skills install @franklinxkk/ai-delivery-spec
 研发排期、Sprint/任务、代码、CI/CD、部署执行、监控和运营属于下游系统。
 本项目只记录它们与需求/验收有关的外部引用，不接管流程。
 
-## 5.4.1 — Requirement Lifecycle Workstations + Human-First Gates｜需求全生命周期工作站与可读性门禁
+## 5.4.2 — Reliable Trigger + Fast Convergence + Visual Lock｜稳定触发、快速收敛与视觉锁
 
-5.4 把需求工作改为九个可进入、可停止、可续接的工作站，同时保持一个正式生命周期和一套门禁状态。5.4.1 把门禁从"结构齐全"扩展到"可读、可用、可闭环"：UI 动作与业务动作分层（`UIACT-*`/`ACT-*`）、演示脚手架与 iframe 套壳拦截、CSS 类生效与字号下限、绑定词跨端一致、状态机语义纯净、intake 工件按自身 schema 校验。单产物 PASS 不等于交付闭环：宣称最终完成前必须通过 `gate --profile full` 组合门禁。阶段产物用 `artifact/stage` 和语言无关 `ADS:*` 锚点声明语义，跨会话才携带 `resume_context`；不要求每次运行脚本路由。
+5.4.2 保留 5.4.1 的 Human-First 门禁与九工作站能力，修复四类体验回归：小功能也必须先触发 Skill；明确需求直达结果，模糊需求在首答完成发散、推荐聚焦和关键链深化；存量原型把既有页面作为视觉权威并冻结跨页视觉锁；门禁默认按根因分组，一次显示全部唯一问题码，JSON 仍保留完整明细。阶段是路由地图而非待办清单，实时对话不展示内部 YAML/ID，门禁只在目标里程碑运行；持久化阶段产物仍用 `artifact/stage`、`ADS:*` 和跨会话 `resume_context` 保持兼容。
 
 你会感受到五个变化：
 
@@ -263,7 +263,7 @@ python scripts/ai_delivery_spec_cli.py impact --truth requirements/truth/compile
 | 位置 | 工具类型 | 责任 |
 |---|---|---|
 | 上游 | 产品发现、调研、工作坊 | 发现机会、证据和策略假设 |
-| **需求管理内核** | **AI Delivery Spec 5.4.1** | 问题/方案 → 准入 → 澄清 → 基线 → 变更 → 验收 |
+| **需求管理内核** | **AI Delivery Spec 5.4.2** | 问题/方案 → 准入 → 澄清 → 基线 → 变更 → 验收 |
 | 下游 | Spec Kit、项目/研发管理工具 | 技术方案、任务、排期和依赖执行 |
 | 下游 | Codex、Trae、Cursor、Qoder 等 | 依据已基线需求编码、测试和修改 |
 | 外部证据 | CI、测试、发布、监控平台 | 向需求验收回传可引用证据 |
@@ -282,13 +282,14 @@ scripts/      用户 CLI、编译、分析和轻量门禁
 maintainer/   发布保障实验室：tests/evals/evidence/tools/examples/schemas
 ```
 
-普通需求运行不得加载 `maintainer/`。维护者资产集中在一个目录，整个 GitHub
-仓库同时受少于 200 个发布文件的硬预算约束；第三方平台使用 allowlist 运行包，不携带维护实验室。
+普通需求运行不得加载 `maintainer/`。维护实验室同时受 ≤56 文件、≤450 KB 和默认快速检查 ≤12 条命令约束；
+完整发布检查只在候选版本运行。第三方平台使用 allowlist 运行包，不携带维护实验室。
 
 ## 维护与验证
 
 ```bash
-python scripts/ai_delivery_spec_cli.py check --keep-going
+python scripts/ai_delivery_spec_cli.py check
+python scripts/ai_delivery_spec_cli.py check --profile release --keep-going
 python scripts/render_mermaid_flow.py --truth product-truth.yaml --output flow.mmd
 ```
 
