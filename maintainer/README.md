@@ -7,8 +7,7 @@ Use this reference when changing the Skill, a shared template, a domain pack,
 or a validator. The lab is a **release-hardening activity**. It is not a new
 mandatory stage for every customer project.
 
-v5.3 系列的设计决策、模拟缺口和版本处置统一收纳在
-[`v5.3-design-record.md`](v5.3-design-record.md)；不再为每个补丁版本新增平铺设计稿。
+历史探索记录保留在 Git 历史中；当前版本只维护仍能约束发布结论的设计记录、夹具与门禁，不再为每个补丁版本新增平铺材料。
 
 ## 1. Two Deliberately Separate Loops
 
@@ -233,10 +232,6 @@ insufficient: modified, rejected and invalidated uses remain first-class records
 Sensitive project-local candidates are excluded even from the shared private
 package until an accountable owner redacts and moves them into the review area.
 
-The 15-repository GitHub matrix is a method stress test, not domain promotion.
-Its consolidated v5.3.3 exploratory evidence fills previously unexecuted cells
-without inflating repository file count; a single-session cell remains partial
-until repetitions, token measurements, real coding delivery and accepted ACs exist.
 
 ## Reviewer Contract
 
@@ -252,8 +247,16 @@ Open P0/P1 cannot be hidden in notes. Finish with scoped `PASS`,
 `REVIEW_COMPLETE_WITH_GAPS` or `BLOCKED`, citing exact IDs and evidence.
 
 ## Directory Policy
+The assurance lab is subordinate to the runtime skill. Budgets are enforced by
+`test_v511_runtime_budget.py`: at most 56 maintainer files, 450 KB, and 12 commands
+in the default fast check. Historical exploratory matrices and one-file-per-run
+evidence belong in Git history or an external evidence store, not the active tree.
 
-- `evals/`: catalogs, runs and immutable evidence ledgers.
+`check` defaults to fast release-risk checks. Only release candidates run
+`check --profile release`; ordinary Skill use never loads this directory.
+
+
+- `evals/`: compact catalogs, current metrics and active evidence only.
 - `tests/`: deterministic regression and fixtures.
 - `examples/`: non-runtime reference projects used by regression.
 - `tools/`: release/evaluation utilities; user-facing commands stay in `scripts/`.

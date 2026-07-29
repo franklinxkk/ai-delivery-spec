@@ -376,10 +376,22 @@ class HandoffChecks:
                     )
         if level in {"L3", "L4"}:
             aesthetic_refs = frontmatter.get("aesthetic_decision_refs") or []
-            if not aesthetic_refs and not re.search(r"\bDEC-AESTHETIC-[A-Z0-9-]+", prd, re.I):
+            visual_authority = str(frontmatter.get("visual_authority", "")).strip()
+            design_lock_ref = str(frontmatter.get("design_lock_ref", "")).strip()
+            persisted_visual_lock = bool(visual_authority and design_lock_ref)
+            prototype_visual_lock = any(
+                re.search(
+                    r"visual_authority\s*=\s*(?:existing|greenfield_default|DEC-AESTHETIC-[A-Z0-9-]+)",
+                    raw,
+                    re.I,
+                )
+                and re.search(r"design_lock_ref\s*=\s*\S+", raw, re.I)
+                for _path, raw in prototype_raw
+            )
+            if not aesthetic_refs and not persisted_visual_lock and not prototype_visual_lock and not re.search(r"\bDEC-AESTHETIC-[A-Z0-9-]+", prd, re.I):
                 self.add(
                     "GAP", "HANDOFF-AESTHETIC-UNDECIDED", prd_path,
-                    "L3/L4 交接未声明 DEC-AESTHETIC-* 美学方向决策，视觉方向仍未确认",
+                    "L3/L4 交接未声明视觉权威与视觉锁，无法证明跨页面样式一致",
                     affected_consumers=("product", "ux", "frontend"),
                 )
         self.metrics.update({

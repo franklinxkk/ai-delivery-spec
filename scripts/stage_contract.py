@@ -514,6 +514,21 @@ def result(profile: str, findings: list[dict[str, Any]], artifacts: list[Artifac
     }
 
 
+def diagnostic_roots(findings: list[dict[str, Any]], limit: int) -> tuple[list[tuple[dict[str, Any], int]], int]:
+    """Compact repeated findings by stable root-cause code, preserving first-seen order."""
+    first: dict[str, dict[str, Any]] = {}
+    counts: dict[str, int] = {}
+    order: list[str] = []
+    for item in findings:
+        code = str(item["code"])
+        if code not in first:
+            first[code] = item
+            order.append(code)
+        counts[code] = counts.get(code, 0) + 1
+    selected = order[:max(limit, 0)]
+    return [(first[code], counts[code]) for code in selected], len(order)
+
+
 def run_gate(args: argparse.Namespace) -> int:
     findings: list[dict[str, Any]] = []
     artifacts: list[Artifact] = []
@@ -553,10 +568,22 @@ def run_gate(args: argparse.Namespace) -> int:
         summary = payload["summary"]
         print(f"{payload['status']} profile={args.profile} blockers={summary['blockers']} p0_unknowns={summary['p0_unknowns']} gaps={summary['gaps']}")
         print("NOT_PROVEN: " + ("; " if english else "；").join(payload["not_proven"]))
-        limit = 1 if args.diagnostics == "first" else 12 if args.diagnostics == "summary" else args.max_findings
         fix_label = "Fix" if english else "修复"
-        for item in findings[:max(limit, 0)]:
-            print(f"{item['severity']} {item['code']}: {item['message']}\n  {fix_label}: {item['how_to_fix']}")
+        if args.diagnostics == "roots":
+            roots, unique_count = diagnostic_roots(findings, args.max_findings)
+            for item, count in roots:
+                print(f"{item['severity']} {item['code']} x{count}: {item['message']}\n  {fix_label}: {item['how_to_fix']}")
+            print(
+                f"ROOT_GROUPS shown={len(roots)} unique={unique_count} "
+                f"repeated_findings_compacted={len(findings) - len(roots)}"
+            )
+            hidden_groups = unique_count - len(roots)
+            if hidden_groups > 0:
+                print(f"... {hidden_groups} additional root groups; rerun with --format json")
+        else:
+            limit = 1 if args.diagnostics == "first" else 12 if args.diagnostics == "summary" else args.max_findings
+            for item in findings[:max(limit, 0)]:
+                print(f"{item['severity']} {item['code']}: {item['message']}\n  {fix_label}: {item['how_to_fix']}")
         if findings:
             print("RETRY: " + payload["retry_command"])
     return code
@@ -637,7 +664,7 @@ def main() -> int:
     gate.add_argument("--profile", choices=EARLY_PROFILES, required=True)
     gate.add_argument("--artifact", type=Path, action="append", default=[])
     gate.add_argument("--format", choices=("concise", "json"), default="concise")
-    gate.add_argument("--diagnostics", choices=("first", "summary", "full"), default="first")
+    gate.add_argument("--diagnostics", choices=("first", "roots", "summary", "full"), default="roots")
     gate.add_argument("--max-findings", type=int, default=20)
     gate.set_defaults(func=run_gate)
     route = sub.add_parser("route")

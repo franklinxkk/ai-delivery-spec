@@ -11,7 +11,7 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[3]
-VERSION = "5.4.1"
+VERSION = "5.4.2"
 PUBLIC_FILES = (
     "README.md",
     "maintainer/README.md",
@@ -53,7 +53,7 @@ def main() -> int:
     required_version_files = (
         ROOT / "SKILL.md",
         ROOT / "README.md",
-        ROOT / "agents/openai.yaml",
+        ROOT / "maintainer/evals/evidence/release-status.yaml",
     )
     for path in required_version_files:
         if VERSION not in path.read_text(encoding="utf-8"):
@@ -73,13 +73,10 @@ def main() -> int:
             failures.append(f"README misses required onboarding marker: {marker}")
     coverage = yaml.safe_load((ROOT / "references/domain-coverage.yaml").read_text(encoding="utf-8"))
     release_status = yaml.safe_load((ROOT / "maintainer/evals/evidence/release-status.yaml").read_text(encoding="utf-8"))
-    matrix = yaml.safe_load((ROOT / "maintainer/evals/evidence/github-validation-matrix.yaml").read_text(encoding="utf-8"))
     if release_status.get("runtime") != "pure_v5":
         failures.append("release status does not declare pure_v5 runtime")
     if release_status.get("domain_packs", {}).get("count") != len(coverage.get("domains", [])):
         failures.append("release status domain count is stale")
-    if release_status.get("evaluation_assets", {}).get("github_matrix") != matrix.get("summary"):
-        failures.append("release status GitHub matrix is stale")
     for domain in coverage.get("domains", []):
         if domain["domain_id"] not in readme:
             failures.append(f"README omits domain pack: {domain['domain_id']}")
@@ -108,7 +105,7 @@ def main() -> int:
         for marker in LEGACY_RUNTIME_MARKERS:
             if marker in lowered:
                 failures.append(f"legacy runtime marker {marker!r} in {path.relative_to(ROOT)}")
-        if ".github" not in path.parts and re.search(r"\bv4(?:\.\d+)?\b|\b4\.x\b", lowered):
+        if ".github" not in path.parts and re.search(r"\bv4(?:\.\d+)?\b|(?<![\d.])4\.x\b", lowered):
             failures.append(f"release-specific legacy version marker in {path.relative_to(ROOT)}")
 
     git_files = subprocess.run(

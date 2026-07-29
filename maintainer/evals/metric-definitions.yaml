@@ -3,8 +3,58 @@ measurement_policy:
   - Compare any baseline and candidate only with the same input fingerprint, repository ref, model, settings, and repetition count.
   - A missing P0 obligation, P0 invention, or silent compliance truncation blocks release regardless of aggregate score.
   - Token reduction is measured per accepted acceptance path, not per document.
+  - Experience timing starts at the user request and includes clarification, artifact generation, gate diagnosis and repair; CLI runtime alone is not end-to-end speed.
+  - Human rating claims require real user feedback tied to a version, task shape and evidence reference; agent self-rating is not user feedback.
   - Exploratory single runs may guide iteration but cannot support a general improvement claim.
 metrics:
+  skill_trigger_recall:
+    formula: matched requirement tasks that invoke the skill / all matched requirement tasks
+    direction: higher_is_better
+    release_threshold: 1.0
+  skill_trigger_precision:
+    formula: correctly invoked requirement tasks / all skill invocations
+    direction: higher_is_better
+    release_threshold: 1.0
+  first_response_value_rate:
+    formula: trials whose first response provides a useful result before asking / all trials
+    direction: higher_is_better
+    release_threshold: 1.0
+  time_to_first_usable_result_seconds:
+    formula: seconds from request receipt to the first user-usable decision, specification slice or prototype change
+    direction: lower_is_better
+    release_threshold: baseline_relative
+  clarification_decision_turns:
+    formula: assistant clarification turns before the target direction is decided
+    direction: lower_is_better
+    release_threshold: clear_at_most_1_ambiguous_at_most_2_high_risk_at_most_4
+  unnecessary_stage_rate:
+    formula: executed workstations not required by the explicit target / all executed workstations
+    direction: lower_is_better
+    release_threshold: 0.0
+  overinterpretation_rate:
+    formula: unsupported scope, redesign or governance additions / delivered decisions and behaviors
+    direction: lower_is_better
+    release_threshold: 0.0
+  visual_lock_consistency_rate:
+    formula: sampled pages matching the frozen tokens, shell, density and component variants / sampled pages
+    direction: higher_is_better
+    release_threshold: 1.0
+  gate_root_cause_coverage_rate:
+    formula: unique finding codes shown in default concise diagnostics / all unique finding codes
+    direction: higher_is_better
+    release_threshold: 1.0
+  gate_diagnostic_compaction_ratio:
+    formula: total findings / root-cause groups shown in the default concise diagnostics
+    direction: higher_is_better
+    release_threshold: baseline_relative
+  gate_repair_cycles:
+    formula: gate executions from first failure to passing target milestone
+    direction: lower_is_better
+    release_threshold: baseline_relative
+  task_satisfaction_rate:
+    formula: real users rating the result satisfied or very satisfied / users providing a rating
+    direction: higher_is_better
+    release_threshold: baseline_relative
   contract_adherence_rate:
     formula: satisfied obligation weight / total executed obligation weight
     direction: higher_is_better
@@ -41,6 +91,18 @@ release_requirements:
   minimum_repetitions: 3
   required_stages: [requirement, design, coding_delivery]
   required_shapes: [greenfield, brownfield]
+  required_experience_shapes:
+    - clear_small_requirement
+    - ambiguous_early_idea
+    - brownfield_prototype_iteration
+    - regulated_complex_requirement
+  required_experience_evidence:
+    - trigger_decision
+    - time_to_first_usable_result_seconds
+    - clarification_decision_turns
+    - unnecessary_stage_count
+    - unsupported_scope_or_redesign_count
+    - target_completion_result
   critical_rules:
     p0_missing: 0
     p0_unsupported_inventions: 0

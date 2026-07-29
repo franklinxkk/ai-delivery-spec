@@ -1,7 +1,7 @@
 # 页面、原型与可测试性合同 / Page, Prototype And Testability Contract
 
 创建、反推、评审或修复交互原型时加载。原型是需求基线的可操作投影，不是独立的范围或业务权威。
-大型工程原型允许拆分本地 HTML/CSS/JavaScript，但所有依赖和锚点必须能从同一根目录枚举。
+用户指定单 HTML 时就用一个 HTML；大型工程原型可拆分本地 HTML/CSS/JavaScript，但所有依赖和锚点必须能从同一根目录枚举。存量小迭代默认把现有页面作为布局、密度、组件和视觉语言的权威，不因“改进设计”而擅自重画。
 
 ## 1. 输入合同 / Input Contract
 
@@ -124,6 +124,25 @@ SSE/WebSocket/倒计时/推送按需加载 `references/patterns/realtime-contrac
 数据范围、代表性数据量、关键流程和验收锚点。移除行为必须有已批 `CHG-*` 或明确缩减范围；
 视觉更干净但行为丢失仍然失败。
 
+用户要求“修改、升级、融合、替换”存量原型时，等价性是硬完成条件：未授权变化之外的
+view/action/handler/field/state/role path 和代表性数据量不得减少。只实现代表性字段或样本只能标为
+`demo_slice`，不能作为目标原型交付；用户未批准缩减时状态必须是 `BLOCKED`。至少记录修改前后计数、
+丢失集合、批准的移除引用和 `parity_status=pass|blocked`。
+
+集成类页面先在原型状态仓中声明：
+
+```text
+authority_source -> aggregator/transformer -> consumer
+read_direction=
+write_target=
+trigger=manual|scheduled|event
+failure_owner=
+correction_owner=
+queue=
+```
+
+正向上报、反向同步和纠错申请必须使用不同命令/队列；共用一个入口时也要分别呈现授权、进度和结果。
+
 出现重复函数、层叠覆盖、内联 handler 引号问题、运行时补动作 ID、实体动作路由到错误弹窗时，
 停止继续打补丁。保留交互台账和样本数据，以一个状态仓、每页一个 renderer、一个动作注册表重建。
 状态变化尽量只改需要的 class/attribute/content，避免重建 DOM 导致焦点、光标、滚动和引用丢失。
@@ -156,40 +175,31 @@ L3必须遍历所有声明页面的可见动作，而不是每角色只走一条
 
 用户无法从界面推断下一步时停止并记录阻断，测试过程中不要口头提示“设计意图”。
 
-## 9. 视觉与可访问性基线 / Visual And Accessibility Baseline
+## 9. 视觉锁与可访问性基线 / Visual Lock And Accessibility Baseline
 
-- 使用一致的间距、字体、颜色、组件和图标体系；
-- 保持信息层级和任务聚焦，不堆无业务意义的驾驶舱装饰；
-- 状态不能只靠颜色；
-- 按范围提供键盘/焦点、标签、对比度、错误关联和减少动效；
-- 声明响应式优先级：哪些重排、折叠、只读或迁移到其他表面；
-- 作为验收证据的打印/导出保留字段、分页、签署、版本和归档元数据。
+先判断视觉权威：
 
-视觉重设计前确认 feeling、reference、explicit taboo 三项用户方向，登记为 `DEC-AESTHETIC-*`；
-无法确认时创建 P1 `UNK-*` 且 `blocks_stage: baseline`，不能私自选择风格。多个方向最多先做一个
-屏幕或方向卡（style + feeling关键词 + reference + taboo），确认后再扩展全站。
+- 存量小迭代：现有 HTML、截图和已批准页面是默认视觉权威。继承页面骨架、信息密度、字号、颜色、间距、控件高度、圆角、表格、表单、弹窗和按钮用法；除非用户明确要求重设计，不询问美学方向，不换设计系统。
+- 同一项目多页面：先从权威页面提取一份紧凑视觉锁，随后所有页面复用；不得逐页重新发挥。
+- 绿地内部工具：用户未给视觉方向时，选择一个克制、可逆、以任务为中心的默认方案直接推进；不因缺少审美决策阻断原型。
+- 品牌化、外部客户展示或多个方向会显著改变交付时：才确认 feeling、reference、explicit taboo，必要时登记 `DEC-AESTHETIC-*`，先做一个代表屏再扩展。
 
-随后固定一个设计系统基线（如 Ant Design 5 tokens/components）；确有需要时只引入一个专门设计
-Skill，不能声称执行了未安装 Skill。桌面和窄屏分别截全页图并视觉复核。高保真不能补偿缺失交互。
+视觉锁至少固定：
 
-## 美学方向确认 / Aesthetic Direction Confirmation
-
-高保真工程原型开工前，必须有用户确认的 `DEC-AESTHETIC-*` 决策记录；格式遵循
-`references/templates/decision-record-template.md`，至少登记：
-
-| 字段 | 内容 |
+| 项 | 必须固定的内容 |
 |---|---|
-| 视觉方向 | feeling 关键词与整体取向（如克制工具型 / 品牌化） |
-| 参考产品 | 1—3 个明确参照及其被借鉴的具体方面 |
-| 禁止出现的风格 | explicit taboo，写明不得出现的风格与元素 |
-| 字号层级 | 各级文本字号，主文本不得小于 11px |
-| 按钮体系 | 主 / 次 / 幽灵 / 危险按钮的样式与使用边界 |
-| 页面密度 | 信息密度取向与留白规则 |
-| 组件与布局规范 | 设计系统基线、栅格、导航与页面骨架 |
+| tokens | 主/辅/状态色、背景、边框、阴影、圆角、间距阶梯、控件高度 |
+| typography | 字体、字号层级、字重、行高；主文本不得小于 11px |
+| shell | 导航、页头、内容宽度、栅格、固定/滚动区和响应式优先级 |
+| components | 主/次/幽灵/危险按钮、输入、选择、表格、标签、卡片、弹窗的唯一变体与使用边界 |
+| density | 列表行高、表单间距、留白和信息密度 |
+| taboos | 禁止的装饰、渐变、驾驶舱堆叠或与权威页面冲突的风格 |
 
-未确认前只能做低保真结构原型：验证信息架构、流程和状态，不投入视觉细化。无法确认时创建
-P1 `UNK-*` 且 `blocks_stage: baseline`，不能私自选择风格；确认后不得在无新 `DEC-*` 的情况下
-推翻方向重做。
+单 HTML 用一个 CSS token 区和一套组件类；多文件用同一 token/组件入口。新增页面只能复用视觉锁或通过明确变更更新它。视觉复核至少检查 token 漂移、同名组件变体、页面骨架漂移、字号/控件高度漂移和信息密度突变。
+
+同时满足：状态不能只靠颜色；保持信息层级和任务聚焦，不堆无业务意义的驾驶舱装饰；按范围提供键盘/焦点、标签、对比度、错误关联和减少动效；打印/导出保留字段、分页、签署、版本和归档元数据。桌面和适用窄屏分别截全页图复核。高保真不能补偿缺失交互。
+
+确有需要时只引入一个专门设计 Skill，不能声称执行未安装 Skill，也不能让两个工具生成竞争设计系统。
 
 ## 10. 锁定与验收 / Lock And Acceptance
 
@@ -203,8 +213,13 @@ region_count=
 action_count=
 state_count=
 role_paths=
+baseline_ref=
+parity_status=pass|blocked|not_applicable
+preserved_counts=
+approved_removals=
 browser_evidence_status=pending|passed|blocked
-aesthetic_decision_ref=DEC-AESTHETIC-*|UNK-*
+visual_authority=existing|greenfield_default|DEC-AESTHETIC-*
+design_lock_ref=inline|file|DEC-AESTHETIC-*
 gaps=
 evidence_location=
 ```

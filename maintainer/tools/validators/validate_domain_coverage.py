@@ -14,16 +14,6 @@ ROOT = Path(__file__).resolve().parents[3]
 COVERAGE_PATH = ROOT / "references" / "domain-coverage.yaml"
 SCHEMA_PATH = ROOT / "maintainer" / "schemas" / "domain-pack.schema.json"
 FIXTURE_PATH = ROOT / "maintainer" / "evals" / "domain-fixtures.yaml"
-GITHUB_CASES_PATH = ROOT / "maintainer" / "evals" / "github-cases.yaml"
-GITHUB_DOMAIN_ALIASES = {
-    "traffic": {"transport"},
-    "crm": {"crm-customer", "customer-service"},
-    "education-it": {"education"},
-    "oa": {"enterprise-office"},
-    "medical-hospital-it": set(),
-    "data-product": {"data-product"},
-    "ai-native": set(),
-}
 
 
 def main() -> int:
@@ -32,9 +22,7 @@ def main() -> int:
     validator = Draft202012Validator(schema, format_checker=FormatChecker())
     failures: list[str] = []
     fixture_catalog = yaml.safe_load(FIXTURE_PATH.read_text(encoding="utf-8"))
-    github_catalog = yaml.safe_load(GITHUB_CASES_PATH.read_text(encoding="utf-8"))
     fixtures = fixture_catalog.get("fixtures", [])
-    github_cases = github_catalog.get("cases", [])
     fixture_ids: set[str] = set()
     for fixture in fixtures:
         fixture_id = fixture.get("id", "<missing>")
@@ -133,15 +121,8 @@ def main() -> int:
             failures.append(f"{domain_id} audited maturity lacks passing independent audit evidence")
 
         fixture_count = sum(1 for fixture in fixtures if fixture.get("domain") == domain_id)
-        aliases = GITHUB_DOMAIN_ALIASES.get(domain_id, set())
-        github_count = sum(1 for case in github_cases if case.get("domain") in aliases)
-        if fixture_count + github_count < 2:
-            failures.append(
-                f"{domain_id} has fewer than two eval assets: "
-                f"fixtures={fixture_count}, github_cases={github_count}"
-            )
-        if fixture_count == 0:
-            failures.append(f"{domain_id} has no domain-targeted fixture")
+        if fixture_count < 2:
+            failures.append(f"{domain_id} has fewer than two domain-targeted fixtures: {fixture_count}")
 
     fallback = catalog.get("fallback", {})
     required = {
@@ -164,7 +145,7 @@ def main() -> int:
         return 1
 
     maturity = {item["domain_id"]: item["maturity"] for item in domains}
-    print(f"PASS: {len(domains)} domain packs have evidence-bounded maturity and >=2 eval assets: {maturity}")
+    print(f"PASS: {len(domains)} domain packs have evidence-bounded maturity and >=2 domain fixtures: {maturity}")
     return 0
 
 

@@ -36,8 +36,6 @@ REQUIRED_FILES = (
     "schemas/domain-usage-log.schema.json",
     "schemas/assumption-register.schema.json",
     "maintainer/schemas/assurance-evidence.schema.json",
-    "maintainer/schemas/eval-case.schema.json",
-    "maintainer/schemas/evaluation-run.schema.json",
     "references/discover.md",
     "references/lifecycle.md",
     "references/specify.md",
@@ -53,10 +51,7 @@ REQUIRED_FILES = (
     "references/domains/domain-sources.yaml",
     "maintainer/evals/eval-catalog.yaml",
     "maintainer/evals/domain-fixtures.yaml",
-    "maintainer/evals/github-cases.yaml",
     "maintainer/evals/metric-definitions.yaml",
-    "maintainer/evals/evidence/github-source-verification-2026-07-11.yaml",
-    "maintainer/evals/evidence/github-validation-matrix.yaml",
     "maintainer/evals/evidence/static-regression-2026-07-11.yaml",
     "maintainer/evals/evidence/production-practice-attestation-2026-07-12.yaml",
     "maintainer/evals/evidence/release-status.yaml",
@@ -81,20 +76,16 @@ REQUIRED_FILES = (
     "scripts/stage_contract.py",
     "maintainer/tests/test_v540_stage_contracts.py",
     "maintainer/tests/test_v540_readme_commands.py",
-    "maintainer/tests/test_v502_coding_contract.py",
+    "maintainer/tests/test_product_experience.py",
     "maintainer/tests/test_v502_progressive_truth.py",
     "maintainer/tests/test_v510_requirement_management.py",
     "maintainer/tests/test_v510_unified_prd.py",
     "maintainer/tests/test_v511_runtime_budget.py",
     "maintainer/tests/test_v511_domain_assurance.py",
+    "maintainer/tests/test_runtime_resilience.py",
     "scripts/compile_product_truth.py",
     "scripts/compile_clarification_transcript.py",
     "scripts/validators/validate_capsule_composition.py",
-    "maintainer/tests/test_v5_agent_deadlock.py",
-    "maintainer/tests/test_v5_capsule_pollution.py",
-    "maintainer/tests/test_v5_change_drift.py",
-    "maintainer/tests/test_v5_schema_grill.py",
-    "maintainer/tests/test_v5_status.py",
     "examples/spec.config.example.yaml",
     "references/templates/product-truth-template.yaml",
     "references/templates/product-truth-index-template.yaml",
@@ -179,8 +170,6 @@ def main() -> int:
         "schemas/domain-usage-log.schema.json",
         "schemas/assumption-register.schema.json",
         "maintainer/schemas/assurance-evidence.schema.json",
-        "maintainer/schemas/eval-case.schema.json",
-        "maintainer/schemas/evaluation-run.schema.json",
     ):
         try:
             json.loads((ROOT / relative).read_text(encoding="utf-8"))
@@ -193,7 +182,6 @@ def main() -> int:
         yaml.safe_load((ROOT / "references/domains/domain-sources.yaml").read_text(encoding="utf-8"))
         yaml.safe_load((ROOT / "maintainer/evals/eval-catalog.yaml").read_text(encoding="utf-8"))
         yaml.safe_load((ROOT / "maintainer/evals/domain-fixtures.yaml").read_text(encoding="utf-8"))
-        yaml.safe_load((ROOT / "maintainer/evals/github-cases.yaml").read_text(encoding="utf-8"))
         yaml.safe_load((ROOT / "maintainer/evals/metric-definitions.yaml").read_text(encoding="utf-8"))
         yaml.safe_load((ROOT / "examples/spec.config.example.yaml").read_text(encoding="utf-8"))
     except Exception as exc:  # noqa: BLE001
@@ -211,8 +199,11 @@ def main() -> int:
         ".gitattributes", ".gitignore", "CHANGELOG.md", "LICENSE", "README.md", "SKILL.md"
     }
     allowed_root_dirs = {".github", "agents", "examples", "maintainer", "references", "schemas", "scripts"}
+    ignored_root_dirs = {
+        ".pytest_cache", ".mypy_cache", ".ruff_cache", "htmlcov", "dist", "build", "custom",
+    }
     actual_root_files = {path.name for path in ROOT.iterdir() if path.is_file()}
-    actual_root_dirs = {path.name for path in ROOT.iterdir() if path.is_dir() and path.name != ".git"}
+    actual_root_dirs = {path.name for path in ROOT.iterdir() if path.is_dir() and path.name not in ignored_root_dirs | {".git"}}
     if actual_root_files != allowed_root_files:
         failures.append(f"root files are not minimal: {sorted(actual_root_files)}")
     if actual_root_dirs != allowed_root_dirs:
