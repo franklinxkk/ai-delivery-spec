@@ -21,8 +21,7 @@
 <!-- CLAIM: CLM-ADOPTION-20260730; as_of=2026-07-30; evidence=public-platform-pages-checked -->
 **公开采用信号 / Public Adoption Signals（截至 2026-07-30）**：
 [ClawHub 约 1.4k 次下载](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec) · [skills.sh 安装页](https://www.skills.sh/franklinxkk/ai-delivery-spec) ·
-[SkillHub 696 次下载、AI 评分 4.8/5.0](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)。SkillHub 两条安全测评均显示“安全，无风险”；ClawHub 当前安全审计为 `Review`，请结合各平台报告人工复核。
-动态数字和评分是作者提供/核对的公开快照，不代表质量排名或项目适用性判断；领域证据边界见 [release-status.yaml](maintainer/evals/evidence/release-status.yaml)。
+[SkillHub 696 次下载、AI 评分 4.8/5.0](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)。
 
 ## 你现在在哪，就从哪里开始 / Start Where You Are
 
