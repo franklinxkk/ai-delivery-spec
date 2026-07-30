@@ -3,7 +3,7 @@ name: ai-delivery-spec
 description: 用于任何新增、修改、评审、反推或验收需求、PRD、原型、竞品材料与存量系统，包括写/改一个小功能、加字段/列/页签/下拉、在旧 HTML 或系统上小改、直接生成 PRD 或原型。无论规模和清晰度，命中这些需求工作时都必须先调用，不得以“功能简单”“需求明确”或“直接改更快”跳过；调用后按目标阶段交付最小但完整、可评审、可实施、可追溯、可验收的人类与 Coding Agent 共用产物。支持问题定义、方案探索、需求准入、澄清、统一 PRD、工程原型、评审基线、变更影响和验收证据；不负责排期、编码、CI/CD、部署和运营。
 ---
 
-# AI Delivery Spec 5.4.2 — Fast Convergence Workstations｜精准收敛的需求工作站
+# AI Delivery Spec 5.4.3 — Fast Convergence Workstations｜精准收敛的需求工作站
 
 本 Skill 是适用于 ToC/ToB/ToG 的 Requirement Management Kernel：让业务、产品、设计、前后端、架构、需求交付/技术负责人、测试、合规和 Coding Agent 在需求任一阶段进入，得到当前需要的最小合格产物后离开；也可在用户明确要求时持续完成端到端闭环。
 

@@ -64,7 +64,7 @@ def test_trigger_and_minimum_change_contract() -> None:
     require(discover, "生产者/权威源 → 汇聚或转换方 → 消费方", "integration direction")
     require(prototype, "parity_status=pass|blocked", "brownfield parity status")
     require(prototype, "正向上报、反向同步和纠错申请必须使用不同命令/队列", "queue separation")
-    if 'version: "5.4.2"' in agent:
+    if 'version: "5.4.3"' in agent:
         raise AssertionError("agents/openai.yaml contains unsupported interface.version")
 
 
