@@ -1,4 +1,4 @@
-# AI Delivery Spec 5.4.2 — Trigger Reliably, Converge Fast, Deliver a Usable Artifact
+# AI Delivery Spec 5.4.3 — Trigger Reliably, Converge Fast, Deliver a Usable Artifact
 
 > 需求一来就写 PRD，低价值需求也进入重型设计？
 >
@@ -14,15 +14,15 @@
 正文让客户、产品和传统开发顺序读懂，同文档工程附录让测试与 AI Coding 精确执行。
 只有大项目、持续变更、多投影或强审计场景才启用分片 Product Truth。
 
-[![Version](https://img.shields.io/badge/version-5.4.2-0052A4.svg)]()
+[![Version](https://img.shields.io/badge/version-5.4.3-0052A4.svg)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 
-<!-- CLAIM: CLM-ADOPTION-20260727; as_of=2026-07-27; evidence=author-checked-public-platform-links-below -->
-**公开采用信号 / Public Adoption Signals（截至 2026-07-27）**：
-[ClawHub 1200+ 次下载](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec) · [skills.sh 安装页](https://www.skills.sh/franklinxkk/ai-delivery-spec) ·
-[SkillHub TRACE 4.7/5](https://skillhub.cn/skills/ai-delivery-spec)，平台安全扫描未发现 P0/P1 风险。
-动态数字是作者核对的公开快照，不替代项目适用性判断；领域证据边界见 [release-status.yaml](maintainer/evals/evidence/release-status.yaml)。
+<!-- CLAIM: CLM-ADOPTION-20260730; as_of=2026-07-30; evidence=public-platform-pages-checked -->
+**公开采用信号 / Public Adoption Signals（截至 2026-07-30）**：
+[ClawHub 约 1.4k 次下载](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec) · [skills.sh 安装页](https://www.skills.sh/franklinxkk/ai-delivery-spec) ·
+[SkillHub 696 次下载、AI 评分 4.8/5.0](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)。SkillHub 两条安全测评均显示“安全，无风险”；ClawHub 当前安全审计为 `Review`，请结合各平台报告人工复核。
+动态数字和评分是作者提供/核对的公开快照，不代表质量排名或项目适用性判断；领域证据边界见 [release-status.yaml](maintainer/evals/evidence/release-status.yaml)。
 
 ## 你现在在哪，就从哪里开始 / Start Where You Are
 
@@ -134,9 +134,9 @@ openclaw skills install @franklinxkk/ai-delivery-spec
 研发排期、Sprint/任务、代码、CI/CD、部署执行、监控和运营属于下游系统。
 本项目只记录它们与需求/验收有关的外部引用，不接管流程。
 
-## 5.4.2 — Reliable Trigger + Fast Convergence + Visual Lock｜稳定触发、快速收敛与视觉锁
+## 5.4.3 — Reliable Trigger + Fast Convergence + Visual Lock｜稳定触发、快速收敛与视觉锁
 
-5.4.2 保留 5.4.1 的 Human-First 门禁与九工作站能力，修复四类体验回归：小功能也必须先触发 Skill；明确需求直达结果，模糊需求在首答完成发散、推荐聚焦和关键链深化；存量原型把既有页面作为视觉权威并冻结跨页视觉锁；门禁默认按根因分组，一次显示全部唯一问题码，JSON 仍保留完整明细。阶段是路由地图而非待办清单，实时对话不展示内部 YAML/ID，门禁只在目标里程碑运行；持久化阶段产物仍用 `artifact/stage`、`ADS:*` 和跨会话 `resume_context` 保持兼容。
+5.4.3 保留 5.4.1 的 Human-First 门禁与九工作站能力，并固化真实项目验证后的四类体验修复：小功能也必须先触发 Skill；明确需求直达结果，模糊需求在首答完成发散、推荐聚焦和关键链深化；存量原型把既有页面作为视觉权威并冻结跨页视觉锁；门禁默认按根因分组，一次显示全部唯一问题码，JSON 仍保留完整明细。阶段是路由地图而非待办清单，实时对话不展示内部 YAML/ID，门禁只在目标里程碑运行；持久化阶段产物仍用 `artifact/stage`、`ADS:*` 和跨会话 `resume_context` 保持兼容。
 
 你会感受到五个变化：
 
@@ -263,7 +263,7 @@ python scripts/ai_delivery_spec_cli.py impact --truth requirements/truth/compile
 | 位置 | 工具类型 | 责任 |
 |---|---|---|
 | 上游 | 产品发现、调研、工作坊 | 发现机会、证据和策略假设 |
-| **需求管理内核** | **AI Delivery Spec 5.4.2** | 问题/方案 → 准入 → 澄清 → 基线 → 变更 → 验收 |
+| **需求管理内核** | **AI Delivery Spec 5.4.3** | 问题/方案 → 准入 → 澄清 → 基线 → 变更 → 验收 |
 | 下游 | Spec Kit、项目/研发管理工具 | 技术方案、任务、排期和依赖执行 |
 | 下游 | Codex、Trae、Cursor、Qoder 等 | 依据已基线需求编码、测试和修改 |
 | 外部证据 | CI、测试、发布、监控平台 | 向需求验收回传可引用证据 |

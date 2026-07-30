@@ -413,7 +413,7 @@ def status_report(args: argparse.Namespace) -> int:
         },
         "known_limitations": [
             "five domain methods have owner-attested production practice; all built-in packs pass deterministic contract checks but fresh-agent/expert maturity remains separate",
-            "v5.4.2 experience probes are partial; matched cross-model repetitions and versioned user feedback remain not_run",
+            "v5.4.3 experience probes are partial; matched cross-model repetitions and versioned user feedback remain not_run",
             "domain expert, customer, production, legal, safety, and financial correctness are not proven",
             "deterministic fixtures and private brownfield calibration expose method gaps but do not prove implementation or customer acceptance",
         ],
