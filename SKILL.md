@@ -3,7 +3,7 @@ name: ai-delivery-spec
 description: 用于任何新增、修改、评审、反推或验收需求、PRD、原型、竞品材料与存量系统，包括写/改一个小功能、加字段/列/页签/下拉、在旧 HTML 或系统上小改、直接生成 PRD 或原型。无论规模和清晰度，命中这些需求工作时都必须先调用，不得以“功能简单”“需求明确”或“直接改更快”跳过；调用后按目标阶段交付最小但完整、可评审、可实施、可追溯、可验收的人类与 Coding Agent 共用产物。支持问题定义、方案探索、需求准入、澄清、统一 PRD、工程原型、评审基线、变更影响和验收证据；不负责排期、编码、CI/CD、部署和运营。
 ---
 
-# AI Delivery Spec 5.4.2 — Fast Convergence Workstations｜精准收敛的需求工作站
+# AI Delivery Spec 5.4.3 — Fast Convergence Workstations｜精准收敛的需求工作站
 
 本 Skill 是适用于 ToC/ToB/ToG 的 Requirement Management Kernel：让业务、产品、设计、前后端、架构、需求交付/技术负责人、测试、合规和 Coding Agent 在需求任一阶段进入，得到当前需要的最小合格产物后离开；也可在用户明确要求时持续完成端到端闭环。
 
@@ -93,3 +93,9 @@ python scripts/ai_delivery_spec_cli.py gate --profile clarify --artifact require
 `schemas/agent-handoff.schema.json` 只把已基线需求投影给 Coding Agent；`schemas/domain-candidate.schema.json` 只登记本地候选知识。私有扩展优先于官方默认，但绑定规则冲突必须形成 `DEC-CONFLICT-*`，禁止静默覆盖或联网外发。
 
 研发排期、Sprint/任务、代码生成、CI/CD、部署、监控和运营属于下游系统。本 Skill 管到需求验收；外部状态只记引用，线上反馈以新来源回流 intake/CHG，并保留人类问责。
+
+---
+
+## 🙏 开源支持
+
+如果这个 Skill 帮你省了时间或减少了返工，请给仓库点个 ⭐ [github.com/franklinxkk/ai-delivery-spec](https://github.com/franklinxkk/ai-delivery-spec)——这对独立维护者是最大的鼓励，也能让更多产品经理和 Coding Agent 用上。有问题或改进建议，欢迎提 Issue。
