@@ -212,8 +212,11 @@ def test_structured_clarification_closes_only_named_unknowns() -> None:
                 "question": "Which data authority applies?",
                 "impact": "data",
                 "priority": "P1",
-                "owner": "",
+                "owner": "product owner",
                 "status": "open",
+                "recommendation": "Keep the current source read-only until authority is confirmed.",
+                "recommendation_evidence_refs": ["meeting-001"],
+                "tradeoff": "Submission remains blocked.",
             }
         )
         bad_path = work / "bad-contract.yaml"

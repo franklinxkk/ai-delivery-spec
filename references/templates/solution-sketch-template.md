@@ -8,6 +8,10 @@ document_language: zh-CN
 project_id: PROJECT-EXAMPLE
 resume_context:
   completed_stages: [frame]
+  # 续跑对象示例（全新任务保持空数组）：
+  # - path: prior/problem-brief.md
+  #   sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  #   stage: frame
   prior_artifacts: []
   open_threads: []
   next_stage_options: [intake, frame]
@@ -49,7 +53,7 @@ resume_context:
 
 | ID | 假设 | 影响选项 | 验证方法 | 责任人 | 状态 |
 |---|---|---|---|---|---|
-| `ASM-001` | {假设} | OPT-001 | {验证} | {责任人} | untested |
+| `ASM-001` | {假设} | OPT-001 | {验证} | {责任人} | 未验证（`untested`） |
 
 <!-- ADS:recommendation -->
 ## 推荐与取舍

@@ -1,14 +1,16 @@
 ---
 name: ai-delivery-spec
-description: 用于任何新增、修改、评审、反推或验收需求、PRD、原型、竞品材料与存量系统，包括写/改一个小功能、加字段/列/页签/下拉、在旧 HTML 或系统上小改、直接生成 PRD 或原型。无论规模和清晰度，命中这些需求工作时都必须先调用，不得以“功能简单”“需求明确”或“直接改更快”跳过；调用后按目标阶段交付最小但完整、可评审、可实施、可追溯、可验收的人类与 Coding Agent 共用产物。支持问题定义、方案探索、需求准入、澄清、统一 PRD、工程原型、评审基线、变更影响和验收证据；不负责排期、编码、CI/CD、部署和运营。
+description: Use for creating, changing, reviewing, reverse-engineering or accepting requirements, PRDs, prototypes, competitor material or existing systems, including any small UI/field/column/tab/dropdown/legacy-HTML change and direct PRD/prototype generation. Always invoke regardless of size or clarity. Deliver the smallest complete, reviewable, implementable, traceable and testable artifact at the target stage. Covers framing through acceptance; excludes scheduling, coding, CI/CD, deployment and operations. 中文：用于任何新增、修改、评审、反推或验收需求、PRD、原型、竞品或存量系统；写/改一个小功能、加字段/列/页签/下拉、旧 HTML 小改、直接生成 PRD/原型也必须调用。按目标阶段交付最小完整、可评审实施追溯验收的产物；不负责排期、编码、CI/CD、部署和运营。
 ---
 
-# AI Delivery Spec 5.4.3 — Fast Convergence Workstations｜精准收敛的需求工作站
+# AI Delivery Spec 5.4.4 — Requirements to Delivery｜需求到交付
 
 本 Skill 是适用于 ToC/ToB/ToG 的 Requirement Management Kernel：让业务、产品、设计、前后端、架构、需求交付/技术负责人、测试、合规和 Coding Agent 在需求任一阶段进入，得到当前需要的最小合格产物后离开；也可在用户明确要求时持续完成端到端闭环。
 
-默认跟随用户当前语言生成标题、正文、表格、问题与测试；稳定 ID、代码、API/字段名和专有名词保持原样。双语必须由用户明确要求。
+默认锁定用户明确指定的语言；未指定时取任务起始时的主要语言，并从 frame 继承到 acceptance；“继续/下一步”不重置，只有用户明确切换才更新。标题、正文、表格、问题、测试叙述、图节点和人类可见状态必须同语。全英文交付不得泄露中文模板标题、表头、提示或诊断；中文交付不得把 Given/When/Then、draft、pending → resolved、lastCursor 等英文裸露为正文。混合输入跟随用户指定语言，否则取主要语言；双语必须明确要求。人类可见状态/字段/事件/队列先写该语言含义，研发核对时括号保留机器原值，如“草稿（`draft`）”或 “Draft (`draft`)”；稳定 ID、代码、API/字段名、Schema 关键字、公式和隐藏机器合同保持原样。YAML/JSON 侧车可保留键名与枚举，但阶段交付须附同语言人类摘要；运行门禁时传 `--language auto|zh-CN|en-US`，`auto` 优先读取 `document_language` 或 HTML `lang`。
 只使用 Agent 完成需求工作不要求安装 Python；运行本地零模型门禁时需要 Python 3.10+：`python -m pip install -r scripts/requirements.txt`。Stable ID 是长期不变的需求编号；Gate 是静态结构门禁，不等于业务、浏览器、实现或客户验收。
+
+早期产物和统一 PRD 以带 frontmatter 的 Markdown 为权威；DOCX/PDF 仅为分发副本，不得作为基线。
 
 ## 先确定进入点和停止点
 
@@ -19,7 +21,7 @@ description: 用于任何新增、修改、评审、反推或验收需求、PRD�
 
 工作站为 `frame → explore → intake → clarify → specify → review → baseline`，基线可进入 `change` 或 `acceptance`，变更须重新基线。`frame/explore` 是准入前工作区；正式 `REQ-*` 生命周期从 intake 开始。用户可从任意有证据的阶段进入，不强迫补跑无关前序。
 
-阶段是路由地图，不是执行清单。显式目标最高优先；“不要写 PRD，只做澄清”等否定约束高于关键词。目标清楚时直接进入目标阶段，不补做前序文件；目标模糊时先在一轮内完成“发散选项 → 推荐聚焦 → 深化关键链路”，再只问会改变范围的决策。单次任务到目标即停，明确端到端任务则持续到目标且不得把中间模板或静态 PASS 当成完成。
+阶段是路由地图，不是执行清单。显式目标最高优先；“不要写 PRD，只做澄清”等否定约束高于关键词。目标清楚时直接进入目标阶段，不补做前序文件；目标模糊时先在一轮内完成“发散选项 → 推荐聚焦 → 深化关键链路”，再只问会改变范围的决策。一句话请求已明确要求原型时，澄清 P0/P1 范围决策并列出详细需求只是通往原型的必要工作，不是新的停止点；除非用户改变目标，必须继续到可操作产品原型。单次任务到目标即停，明确端到端任务则持续到目标且不得把中间模板或静态 PASS 当成完成。
 
 需要跨会话或检查旧产物时才运行确定性路由；它不解析自然语言：
 
@@ -49,21 +51,29 @@ description: 用于任何新增、修改、评审、反推或验收需求、PRD�
 
 - frame：一份 `problem-brief.md`，说清用户、痛点时刻、成功信号、事实/假设和下一步。
 - explore：一份 `solution-sketch.md`，至少两个选项和不做选项，包含可证伪 `ASM-*`、最小验证与停止条件。
-- intake：复用 triage 结果与 requirement register；Start with intake for formal governed requirements。
+- intake：复用准入分流结果与需求登记表；正式需求从需求准入开始。
 - clarify：一份 `requirement-brief.md`，内嵌 `DEC-*`、规则、开放 `UNK-*` 和退路；多决策人/审计才拆侧车。
-- specify：一份需求卡或 one human-readable 统一 PRD；Product Truth 只在受控多投影、反复跨模块变更、血缘或强审计时按需启用。
+- specify：一份人类可读的需求卡或统一 PRD；Product Truth 只在受控多投影、反复跨模块变更、血缘或强审计时按需启用。
 - review/baseline：复用同一规格；`required_review_types` 全部结构化签署后绑定权威来源、版本/hash 和消费方。
 - change/acceptance：现有 `CHG-*` 与 `ARUN-*` 回链当前基线。
 
 假设寄存器仅在跨会话、跨角色复用或治理时单独导出。YAML/JSON 是工具投影，不是另一份 PRD。
+
+客户演示或客户确认阶段默认产品模式。只有用户明确要求“评审版/评审模式/编号标注/评审抽屉”才直接生成可见研发投影；“交开发/给前后端测试看/开需求评审会”只说明消费方，必须询问一次，未确认时继续产品模式。一句话需求首次进入原型且偏好未表达时也只问一次是否追加评审版；不阻断产品模式，明确“我要评审版”即已确认，拒绝后同一需求基线内不重复追问。review 工作站是多角色签署与缺口关闭，不等于原型评审模式。评审模式坚持“机器全量覆盖、人类克制投影”：全量合同进入 handoff；改变数据、状态、指标、责任方或系统边界的步骤形成 `STEP-*`，人类编号只保留关键共识、未知、口径和边界，一个编号可覆盖一个区域。角色镜头、来源、实施卡、核心流程图/状态转换图/数据流血缘图的完整合同见 `references/prototype.md`；Coding Agent 不把评审文案当机器合同。
+
+L2/L3 PRD须用统一模板过门禁；评审投影不得替代。P0未知应阻断，结构不全不得称可开发。
+
+来源超过 100KB、涉及三个以上重型 HTML/Axure 页面或横跨多视图时，同时加载 `references/context.md` 与 `references/prototype.md`，先建来源/页面/动作清单再按稳定 ID 切片。评审模式已确认且有三个以上重型页面时才使用单页懒加载评审容器；材料重不自动加评审壳。
 
 ## 小迭代先最小改动，再补必要合同
 
 - 用户只要求分析/评审时，给结论、最小范围、阻断未知和核心验收，不擅自产出整套 PRD、治理台账或新平台能力。
 - 用户要求修改存量产物时，先完成可比较的目标产物；Stage 0、ID 和检查账本默认留在工作过程，最终只报告影响决策的差异。
 - 未经证据或用户授权，不新增角色、页面、实体、审批、审计、版本、并发、指标或状态机。必要的安全/合规约束单列为阻断，不混入本期范围。
+- 用户要求“完整系统”“客户全生命周期”或点名端到端主链时，先按声明范围逐模块核对页面、动作、状态、角色、溯源字段、事件和正反验收；单个页面或代表链路必须标为 `demo_slice`，不得包装成完整系统。CRM 至少分别核对线索→商机→合同→开票/回款与客户→工单→需求→迭代两条链，以及客户 360 的聚合回显。
 - “示例子集”不能替代“修改/替换存量原型”。除非用户明确批准缩减范围，必须保留未变更的视图、字段、动作、状态、角色路径和代表性数据量；不能完整保留时返回 `BLOCKED`，不得包装成完成。
 - 外部数据集成先写清 `权威源 → 汇聚/转换方 → 消费方`、读写方向、触发、失败与纠错责任，再设计按钮、队列和自动化；反向同步不得进入正向上报队列。
+- 权限先分层：无页面入口权限时菜单/路由入口不可见，直接链接与 API 仍由服务端拒绝；有页面权限但数据范围为空使用空态；有页面但无动作/字段权限才按合同隐藏、禁用、只读或脱敏。不得把这三类都画成页面内“无权限”提醒。
 
 ## 需求闭环与禁止推断
 
@@ -93,3 +103,8 @@ python scripts/ai_delivery_spec_cli.py gate --profile clarify --artifact require
 `schemas/agent-handoff.schema.json` 只把已基线需求投影给 Coding Agent；`schemas/domain-candidate.schema.json` 只登记本地候选知识。私有扩展优先于官方默认，但绑定规则冲突必须形成 `DEC-CONFLICT-*`，禁止静默覆盖或联网外发。
 
 研发排期、Sprint/任务、代码生成、CI/CD、部署、监控和运营属于下游系统。本 Skill 管到需求验收；外部状态只记引用，线上反馈以新来源回流 intake/CHG，并保留人类问责。
+
+---
+
+## 🙏 开源支持
+如果本 Skill 帮你减少返工，欢迎为 [GitHub 仓库点 Star ⭐](https://github.com/franklinxkk/ai-delivery-spec) 或提交 Issue。

@@ -14,6 +14,7 @@
       "properties": {
         "status": { "enum": ["PASS", "REVIEW_COMPLETE_WITH_GAPS", "BLOCKED", "BLOCKED_BY_P0_UNKNOWN"] },
         "profile": { "enum": ["frame", "explore", "clarify", "requirement", "prd", "prototype", "handoff", "full", "stage0", "agent_handoff"] },
+        "output_language": { "enum": ["zh-CN", "en-US"] },
         "summary": {
           "type": "object",
           "additionalProperties": false,
@@ -35,7 +36,7 @@
             "type": "object",
             "required": ["severity", "code", "artifact", "message_zh", "cause_zh", "fix_zh", "repair_example_zh", "affected_consumers", "related_refs", "binding_source_refs"],
             "properties": {
-              "severity": { "enum": ["BLOCK", "P0_UNKNOWN", "GAP", "INFO"] },
+              "severity": { "enum": ["BLOCK", "P0_UNKNOWN", "GAP", "WARN", "INFO"] },
               "code": { "type": "string" },
               "artifact": { "type": "string" },
               "ref": { "type": "string" },
@@ -47,6 +48,10 @@
               "cause_zh": { "type": "string" },
               "fix_zh": { "type": "string" },
               "repair_example_zh": { "type": "string" },
+              "message_en": { "type": "string" },
+              "cause_en": { "type": "string" },
+              "fix_en": { "type": "string" },
+              "repair_example_en": { "type": "string" },
               "affected_consumers": { "type": "array", "items": { "type": "string" } },
               "related_refs": { "type": "array", "items": { "type": "string" } },
               "binding_source_refs": { "type": "array", "items": { "type": "string" } }

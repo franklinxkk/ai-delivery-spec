@@ -25,6 +25,10 @@ def main() -> int:
         f"schema {'.'.join(str(part) for part in error.path) or '<root>'}: {error.message}"
         for error in Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(document)
     ]
+    if failures:
+        for item in failures:
+            print(f"FAIL: {item}")
+        return 1
 
     status = document.get("status")
     result = document.get("verification", {}).get("result")
@@ -57,7 +61,7 @@ def main() -> int:
         for group, items in document.get("impacts", {}).items()
         if isinstance(items, list)
         for item in items
-        if item.get("change_type") == "remove"
+        if isinstance(item, dict) and item.get("change_type") == "remove"
     ]
     replacements = document.get("compatibility", {}).get("replacement_map", {})
     missing_replacement = [item for item in removed if item not in replacements]

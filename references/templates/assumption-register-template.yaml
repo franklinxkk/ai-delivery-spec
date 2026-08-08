@@ -19,6 +19,10 @@ assumptions:
     due_at: null
 resume_context:
   completed_stages: [frame]
+  # 续跑对象示例（全新任务保持空数组）：
+  # - path: prior/problem-brief.md
+  #   sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  #   stage: frame
   prior_artifacts: []
   open_threads: [ASM-001]
   next_stage_options: [intake, explore]

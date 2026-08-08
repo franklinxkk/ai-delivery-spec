@@ -27,6 +27,10 @@ def main() -> int:
         f"schema {'.'.join(str(part) for part in error.path) or '<root>'}: {error.message}"
         for error in Draft202012Validator(schema).iter_errors(document)
     ]
+    if failures:
+        for item in failures:
+            print(f"FAIL: {item}")
+        return 1
 
     source_ids = {item["id"] for item in document.get("sources", [])}
     entity_ids = {item["id"] for item in document.get("entities", [])}

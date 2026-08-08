@@ -23,13 +23,19 @@
 1. 用户明确指定的目标产物/停止点最高优先；“不要写 PRD，只做澄清”等否定约束高于“PRD”关键词。
 2. 已有产物决定可续接位置，但不能强迫用户重跑已完成阶段；先核对版本、来源和 hash 漂移。
 3. 未明确目标时，先用一轮“发散选项 → 推荐聚焦 → 深化关键链路”交付可用判断，再只询问会实质改变范围的决策；不要让用户先回答整套问卷。
-4. 单次明确任务在目标阶段停止；用户明确要求端到端交付时持续到目标，不把中间模板或一次静态 PASS 当成完成。
+4. 单次明确任务在目标阶段停止；用户明确要求端到端交付时持续到目标，不把中间模板或一次静态 PASS 当成完成。一句话请求已把原型列为目标时，需求澄清和详细需求清单属于中间工作，不得提前停止。
 5. `route-stage` 只检查显式目标、已有产物和确定性前置条件，绝不解析自然语言关键词：
 
 ```bash
 python scripts/ai_delivery_spec_cli.py route-stage --target clarify --artifact requirements/problem-brief.md
 ```
 
+文档语言在任务起始时按用户明确要求或主要交流语言锁定，并由后续工作站继承；“继续”“下一步”不重置
+语言，只有用户明确切换时才更新。标题、正文、提问、表格、图、页面文案、评审说明和验收摘要均使用
+该语言；双语必须显式要求。机器 YAML/JSON、代码、稳定 ID、API/字段和枚举保持原值，但 intake、
+review、change、acceptance 等默认最小产物为机器文件的工作站，在对用户交付时还必须附同语言的人类
+可读摘要，不能只返回机器键值。全英文任务的标题、问题、表头、图节点、测试、评审说明和门禁诊断均
+不得泄露中文模板；全中文任务不得泄露裸英文工作站/BDD 标签。混合输入未指定时取主要交流语言。
 ## 3. 九个工作站与最小产物
 
 | 工作站 | 适用问题 | 默认最小产物 | 出口条件 | 对应轻门禁 |
@@ -45,6 +51,18 @@ python scripts/ai_delivery_spec_cli.py route-stage --target clarify --artifact r
 | acceptance | 需求结果是否真的被执行验证 | `ARUN-*.yaml` | 正反用例、证据、遗留问题、条件和签署回链 | acceptance validator / gate |
 
 实时脑暴、比较和澄清不是必须持久化的产物。只有跨会话、跨角色复用或需要治理时才拆 `assumption-register.yaml`；多决策人、审计或跨需求复用时才拆决策侧车。不要为“九阶段”机械生成九个文件，也不要在到达目标前逐站运行门禁。
+
+原型用于探索、售前、客户演示或客户确认时默认产品模式。只有用户明确要求“评审版”“评审模式”“编号
+标注”或“评审抽屉”等可见研发投影时才直接生成；“交开发”“给前后端/测试看”“开需求评审会”只说明
+消费方，必须先询问一次是否生成评审模式，未确认时继续产品模式。一句话需求经澄清/规格/基线首次
+进入原型且评审偏好尚未表达时，也询问一次是否同时生成评审版；问题不阻断产品模式，未回复时继续
+产品模式。显式“我要评审版”已经构成确认；明确拒绝或延后后，同一需求基线内不重复询问。正式生命周期
+的 review 工作站负责签署与缺口关闭，不等于可见的原型评审模式；“评审现有原型”本身不授权修改页面
+或生成评审模式。评审模式是同一原型的精简人类投影，Coding Agent 使用结构化 handoff；跨模块流程、受守卫状态机和跨系统数据流按 `references/prototype.md` 条件化配图。
+
+英文意图等价：`review version / review mode / numbered annotations / review drawer` 可直接确认评审投影；
+`hand this to engineering / frontend, backend and QA will use it / requirement review meeting` 只说明消费方，
+仍需确认一次。`customer demo / sales demo / product prototype` 默认产品模式。确认问题必须使用当前任务语言。
 
 ## 4. Skill 使用者角色在各工作站如何进入和离开
 
@@ -76,7 +94,7 @@ frame/explore 的未证实假设通常是 GAP，不是 P0 阻断；澄清必须�
 
 ## 6. 断点与按需加载
 
-5.4 模板的 `resume_context.prior_artifacts` 每项使用相对路径、阶段和 SHA-256。`stage_contract.py` 会拒绝目录越界、缺失文件和 hash 漂移。大项目仍使用 `manage_execution_state.py` 保存 ID 切片、读取预算和检查点；产物级 resume 与执行级 checkpoint 互补，不能互相替代。
+5.4 模板的 `resume_context.prior_artifacts` 每项使用相对路径、阶段和 SHA-256。相对路径以声明它的产物文件所在目录为根解析，且解析结果不得越出该目录；`stage_contract.py` 会拒绝目录越界、缺失文件和 hash 漂移。大项目仍使用 `manage_execution_state.py` 保存 ID 切片、读取预算和检查点；产物级 resume 与执行级 checkpoint 互补，不能互相替代。
 
 - frame/explore：通常不加载领域包；只有法规、安全或行业物理约束会改变选项时加载一个精确章节。
 - intake 以后：只加载当前阶段参考 + 一个精确领域章节 + 当前 ID 切片。

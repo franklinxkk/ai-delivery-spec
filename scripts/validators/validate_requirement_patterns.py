@@ -25,6 +25,10 @@ def main() -> int:
         f"schema {'.'.join(str(part) for part in error.path) or '<root>'}: {error.message}"
         for error in Draft202012Validator(schema).iter_errors(doc)
     ]
+    if failures:
+        for item in failures:
+            print(f"FAIL: {item}")
+        return 1
     ids = [item.get("id") for item in doc.get("patterns", [])] if isinstance(doc, dict) else []
     if len(ids) != len(set(ids)):
         failures.append("duplicate pattern IDs")

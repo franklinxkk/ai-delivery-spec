@@ -25,6 +25,10 @@ def main() -> int:
         f"schema {'.'.join(str(part) for part in error.path) or '<root>'}: {error.message}"
         for error in Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(doc)
     ]
+    if failures:
+        for item in failures:
+            print(f"FAIL: {item}")
+        return 1
     forward = doc.get("forward_index", {}) if isinstance(doc, dict) else {}
     reverse = doc.get("reverse_index", {}) if isinstance(doc, dict) else {}
     for edge in doc.get("edges", []) if isinstance(doc, dict) else []:

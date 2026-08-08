@@ -144,7 +144,15 @@ def main() -> int:
             knowledge_text = knowledge_path.read_text(encoding="utf-8")
             selected, missing = select_sections(knowledge_text, args.section)
             if missing:
-                print(f"FAIL: {domain_id} unknown section(s): {', '.join(missing)}")
+                available_headings = [
+                    match.group(1).strip()
+                    for match in re.finditer(r"^#{2,3}\s+(.+?)\s*$", knowledge_text, re.M)
+                ]
+                available = "; ".join(available_headings[:30]) or "<none>"
+                print(
+                    f"FAIL: {domain_id} unknown section(s): {', '.join(missing)}; "
+                    f"available headings: {available}"
+                )
                 return 1
             record["selected_sections"] = selected
         records.append(record)

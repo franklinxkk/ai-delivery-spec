@@ -66,6 +66,10 @@ def main() -> int:
         f"schema {'.'.join(str(part) for part in error.path) or '<root>'}: {error.message}"
         for error in Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(doc)
     ]
+    if failures:
+        for item in failures:
+            print(f"FAIL: {item}")
+        return 1
     requirements = doc.get("requirements", []) if isinstance(doc, dict) else []
     ids = [item.get("id") for item in requirements]
     duplicates = sorted(item for item, count in Counter(ids).items() if item and count > 1)

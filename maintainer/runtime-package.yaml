@@ -1,11 +1,14 @@
 schema_version: 5.3.0
-max_files: 110
+# Two user-facing SVGs are intentionally packaged so marketplace README pages keep
+# the real demo and lifecycle boundary instead of falling back to text-only docs.
+max_files: 112
 include:
   - SKILL.md
   - README.md
   - CHANGELOG.md
   - LICENSE
   - agents/openai.yaml
+  - .github/assets/**
   - examples/**
   - references/**
   - schemas/**

@@ -1,0 +1,15 @@
+# 项目级原型演示脚手架词表扩展（可选）。
+#
+# schema:
+#   terms: 字符串数组。原型“可见文本”（剔除 script/style/注释/标签后）包含任一
+#          词（子串、不区分大小写）即报 BLOCK PROTO-DEMO-SCAFFOLDING-VISIBLE。
+#          与 scripts/validators/gate_prototype_checks.py 的 DEMO_SCAFFOLDING_TERMS
+#          内置词表合并，去重保序。
+#
+# 注意：
+# - 词按子串匹配，避免过短或常见业务词（如“测试”会误伤“测试环境”）。
+# - “Mock 场景”是合法用法（如场景切换器），不在默认词表内；项目若确认禁用
+#   Mock 文案，可在此启用项目级扩展，例如：
+#   terms:
+#     - Mock 场景
+terms: []

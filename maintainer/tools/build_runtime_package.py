@@ -48,6 +48,16 @@ def file_record(path: Path) -> dict[str, object]:
     }
 
 
+def source_revision() -> tuple[str, bool]:
+    commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True, capture_output=True,
+    ).stdout.strip() or "uncommitted"
+    dirty = bool(subprocess.run(
+        ["git", "status", "--porcelain"], cwd=ROOT, text=True, capture_output=True,
+    ).stdout.strip())
+    return (f"{commit}-dirty" if dirty and commit != "uncommitted" else commit), dirty
+
+
 def self_check(root: Path) -> list[str]:
     failures: list[str] = []
     commands = (
@@ -95,9 +105,11 @@ def main() -> int:
     version = skill_heading.removeprefix("# AI Delivery Spec ").split(" ", 1)[0]
     if not version:
         failures.append("SKILL.md does not declare a release version in its H1 heading")
+    source_commit, source_worktree_dirty = source_revision()
     manifest = {
         "schema_version": "5.3.0", "skill_version": version,
-        "source_commit": subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True, capture_output=True).stdout.strip() or "uncommitted",
+        "source_commit": source_commit,
+        "source_worktree_dirty": source_worktree_dirty,
         "files": [file_record(path) for path in files],
     }
     temp = ROOT / "build" / f"runtime-package-{os.getpid()}"

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="330" viewBox="0 0 1280 330" role="img" aria-labelledby="title desc">
+  <title id="title">AI Delivery Spec 与代码实现工具的职责桥接</title>
+  <desc id="desc">AI Delivery Spec 覆盖问题、准入、澄清、规格、评审基线、变更与需求验收，然后把已基线切片交给 Spec Kit、OpenSpec 或 Coding Agent 实现。</desc>
+  <rect width="1280" height="330" rx="26" fill="#f4f8fc"/>
+  <text x="42" y="50" fill="#102a43" font-family="Microsoft YaHei,sans-serif" font-size="23" font-weight="700">从“该不该做、到底怎么判定”到“可以开始实现”</text>
+  <g font-family="Microsoft YaHei,sans-serif" font-size="15" text-anchor="middle">
+    <g fill="#e7f0ff" stroke="#8ab4f8">
+      <rect x="42" y="89" width="130" height="64" rx="14"/><rect x="187" y="89" width="130" height="64" rx="14"/>
+      <rect x="332" y="89" width="130" height="64" rx="14"/><rect x="477" y="89" width="130" height="64" rx="14"/>
+      <rect x="622" y="89" width="130" height="64" rx="14"/><rect x="767" y="89" width="130" height="64" rx="14"/>
+      <rect x="912" y="89" width="130" height="64" rx="14"/>
+    </g>
+    <g fill="#17324d">
+      <text x="107" y="116">问题 / 机会</text><text x="107" y="138">Frame</text>
+      <text x="252" y="116">方案探索</text><text x="252" y="138">Explore</text>
+      <text x="397" y="116">需求准入</text><text x="397" y="138">Intake</text>
+      <text x="542" y="116">澄清收敛</text><text x="542" y="138">Clarify</text>
+      <text x="687" y="116">PRD / 原型</text><text x="687" y="138">Specify</text>
+      <text x="832" y="116">评审 / 基线</text><text x="832" y="138">Baseline</text>
+      <text x="977" y="116">变更 / 验收</text><text x="977" y="138">Accept</text>
+    </g>
+  </g>
+  <path d="M172 121h15M317 121h15M462 121h15M607 121h15M752 121h15M897 121h15" stroke="#5b8def" stroke-width="3"/>
+  <rect x="42" y="194" width="1000" height="82" rx="18" fill="#102f52"/>
+  <text x="70" y="227" fill="#8bc0ff" font-family="Microsoft YaHei,sans-serif" font-size="15" font-weight="700">AI DELIVERY SPEC · PM / BUSINESS REQUIREMENT LIFECYCLE</text>
+  <text x="70" y="255" fill="#eaf3ff" font-family="Microsoft YaHei,sans-serif" font-size="16">价值、范围、角色、规则、权威源、状态、验收与变更保持同一条可追溯基线</text>
+  <path d="M1042 235h54" stroke="#155eef" stroke-width="5" stroke-linecap="round"/><path d="M1086 224l13 11-13 11" fill="none" stroke="#155eef" stroke-width="5" stroke-linecap="round"/>
+  <rect x="1100" y="184" width="138" height="102" rx="18" fill="#dff8eb" stroke="#52b788"/>
+  <text x="1169" y="218" text-anchor="middle" fill="#17623a" font-family="Microsoft YaHei,sans-serif" font-size="14" font-weight="700">DOWNSTREAM</text>
+  <text x="1169" y="243" text-anchor="middle" fill="#234c3b" font-family="Microsoft YaHei,sans-serif" font-size="14">Spec Kit / OpenSpec</text>
+  <text x="1169" y="265" text-anchor="middle" fill="#234c3b" font-family="Microsoft YaHei,sans-serif" font-size="14">Coding Agent</text>
+</svg>
