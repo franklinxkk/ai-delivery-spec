@@ -76,7 +76,7 @@ interface = (agent or {}).get("interface", {})
 if "AI Delivery Spec" not in str(interface.get("display_name", "")) or "需求" not in str(interface.get("display_name", "")):
     failures.append("host display_name is not bilingual")
 short_description = str(interface.get("short_description", ""))
-if not (25 <= len(short_description) <= 64) or "Requirements" not in short_description or "需求" not in short_description:
+if not (25 <= len(short_description) <= 64) or "Requirement" not in short_description or "需求" not in short_description:
     failures.append(f"host short_description is not concise bilingual metadata: {short_description!r}")
 default_prompt = str(interface.get("default_prompt", ""))
 for marker in ("$ai-delivery-spec", "follow the user's language", "使用"):
@@ -90,7 +90,7 @@ if any(marker in read("agents/openai.yaml") for marker in ("闇€", "浠讳", "
 require(
     "README.md",
     (
-        "Requirements to Delivery｜需求到交付",
+        "Requirement Management for Human & AI｜人机共用需求管理",
         "English works end to end",
         "Use $ai-delivery-spec",
         "--language auto|en-US|zh-CN",

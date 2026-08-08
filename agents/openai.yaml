@@ -1,12 +1,12 @@
 interface:
-  display_name: "AI Delivery Spec｜需求交付规范"
-  short_description: "Requirements to delivery｜需求到交付"
+  display_name: "AI Delivery Spec｜需求管理内核"
+  short_description: "Requirement management for human & AI｜人机共用需求管理"
   default_prompt: >
-    Use $ai-delivery-spec for this requirement or prototype task, follow the
-    user's language, enter at the current stage, deliver only the smallest
-    complete requested artifact, mark unknowns, and stop at the target. / 使用
-    $ai-delivery-spec 处理本次需求或原型任务，跟随用户语言，从当前阶段进入，
-    只交付最小完整的目标产物，标明未知项并在目标处停止。
+    Use $ai-delivery-spec to enter this requirement task at its current stage,
+    whether it starts from an idea, problem, artifact, change, or acceptance;
+    follow the user's language, deliver the smallest complete target, mark
+    unknowns, and stop there. / 使用 $ai-delivery-spec 从想法、问题、现有产物、
+    变更或验收的当前阶段进入，跟随用户语言，交付最小完整目标，标明未知项并停止。
 
 inputs:
   entry_stage:

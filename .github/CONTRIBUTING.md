@@ -60,6 +60,9 @@ independent audit evidence.
 
 - Never submit secrets, credentials, personal data, private customer documents,
   or insufficiently anonymized screenshots/data.
+- Public README demos and assets must be synthetic and domain-neutral: do not
+  reuse customer nouns, workflows, metrics, screenshots, or recognizable project
+  combinations, and do not let one brownfield scenario define the whole Skill.
 - Do not copy protected standards or paid research in full. Store citation,
   applicability, version, and the minimal product implication.
 - Generated or inferred professional claims must be marked as such.
