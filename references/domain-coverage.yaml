@@ -55,9 +55,9 @@ domains:
         status: passed
         owner: domain maintainer
     known_gaps:
-      - Official source URLs and applicability records are not yet complete.
+      - National source coverage was refreshed through 2026-08-09; provincial/local implementation, project procurement and customer source-system rules remain project-specific.
       - Nine-industry depth has not been behaviorally evaluated.
-    last_verified_at: "2026-07-14T00:00:00+08:00"
+    last_verified_at: "2026-08-09T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -97,8 +97,8 @@ domains:
         owner: domain maintainer
     known_gaps:
       - CPQ, complex account hierarchy, customer success, and partner conflict need deeper evaluation.
-      - Current fixtures are evaluation inputs, not production evidence.
-    last_verified_at: "2026-07-14T00:00:00+08:00"
+      - Current fixtures are evaluation inputs, not production evidence; Microsoft, Salesforce and HubSpot sources are vendor product patterns, not independent outcome proof.
+    last_verified_at: "2026-08-09T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -139,7 +139,8 @@ domains:
     known_gaps:
       - Current knowledge is higher-education heavy.
       - Vocational education, enterprise training, one-book-one-code, channel authorization, and content rights require deeper coverage.
-    last_verified_at: "2026-07-14T00:00:00+08:00"
+      - The exact national term “AI教育三进战略” was not verified from a primary source and must remain an unknown until its issuer/document is supplied.
+    last_verified_at: "2026-08-09T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -196,7 +197,8 @@ domains:
       - Vendor whitepapers and cases are product/scenario evidence, not independent outcome proof or project truth.
       - DingTalk and Feishu public repositories validate exact SDK/demo/integration components only, not core-product open-source status.
       - OA pack still needs fresh-agent behavioral runs and accountable OA practitioner review before behavior_validated or expert_reviewed promotion.
-    last_verified_at: "2026-07-14T00:00:00+08:00"
+      - The 2026 archive standard project guide is change-watch evidence, not a published standard.
+    last_verified_at: "2026-08-09T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -232,7 +234,8 @@ domains:
     known_gaps:
       - High-risk clinical, legal, interoperability, privacy, and local-policy assertions require accountable review.
       - No production claim is allowed from simulated scenarios.
-    last_verified_at: "2026-07-14T00:00:00+08:00"
+      - A consolidated “数智医院” evaluation transition has not been verified in a publicly accessible NHC replacement standard; preserve it as change watch only.
+    last_verified_at: "2026-08-09T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -274,7 +277,8 @@ domains:
       - Formal provenance, digital-contract and OpenLineage mappings need executable examples.
       - Regional implementation details, sector rules, price/settlement, accounting judgment and cross-border applicability remain project evidence.
       - Fresh-agent behavior, data-domain expert review and production correctness are not proven by the expanded knowledge or static contracts.
-    last_verified_at: "2026-07-16T00:00:00+08:00"
+      - Official platform, typical-case and sandbox evidence describes implementation patterns, not universal architecture or outcome proof.
+    last_verified_at: "2026-08-09T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -313,8 +317,9 @@ domains:
         status: passed
         owner: domain maintainer
     known_gaps:
-      - Agent delegation, identity, memory governance, prompt injection, red-team, and regulatory mappings need executable evaluations.
-    last_verified_at: "2026-07-14T00:00:00+08:00"
+      - Agent delegation, identity, memory governance, prompt injection, red-team, GB/Z 185 profiles and MCP 2026-07-28 migration need executable evaluations.
+      - NIST initiatives and China agent-security standard projects are change-watch sources, not final binding standards.
+    last_verified_at: "2026-08-09T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 

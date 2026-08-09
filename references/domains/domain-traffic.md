@@ -37,6 +37,23 @@ Use this replaceable domain module for 运管、交通监管、道路运输企�
 - AI may optimize: document extraction, certificate recognition, checklist matching, rule verification, risk hints, task generation, evidence completeness checks, training/course matching, rectification summary, management briefing, and customer migration analysis.
 - AI must not autonomously decide: punishment, license restriction, final major-hazard classification, final safety responsibility conclusion, forced service suspension, transport qualification revocation, or other binding regulated actions.
 
+### Current Baseline and Change Watch (verified 2026-08-09)
+
+| Evidence class | Current signal | Requirement effect |
+|---|---|---|
+| binding_baseline | `KS-TRAFFIC-SAFETY-MANAGERS-2024`, `KS-TRAFFIC-DANGEROUS-SAFETY-2025`, existing 2025 inspection and 2026 practitioner/operation rules | resolve enterprise industry, regulated object, jurisdiction, effective date and local implementation before deriving checks, staffing, certificates, warnings or acceptance |
+| product_pattern | `KS-TRAFFIC-SMART-PILOTS-2026` | learn regional coordination, infrastructure and scenario patterns; never infer that every transport product needs the same cockpit, data scope or integration |
+| change_watch | ministry/local rules, inspection-code practices and pilot outputs continue to evolve | re-verify before each regulated baseline; local procurement/news evidence cannot override national rules or customer source systems |
+
+### AI Transformation Horizon
+
+| Axis | From -> toward | Non-negotiable product guard |
+|---|---|---|
+| work interface | menus/checklists -> role-specific daily safety missions and exception inboxes | every task still links to enterprise/person/vehicle/trip, source time, rule version and accountable owner |
+| safety context | fragmented records -> governed person-vehicle-enterprise-operation risk graph | missing/stale/outage data is visible; no fabricated compliance conclusion |
+| action | recognition/reminders -> bounded evidence collection, task routing, reconciliation and report drafting | AI may prepare/route; release-to-duty, major-hazard, enforcement and punishment remain authorized human decisions |
+| learning loop | alert volume -> false-positive slices, closure quality, recurrence and front-line burden | optimize verified risk closure and adoption, not dashboard activity or notification count |
+
 ## First-Principles Domain Lens
 
 Traffic and road transport safety products start from accountable risk closure and operational adoption, not from dashboards alone.

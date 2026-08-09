@@ -10,7 +10,11 @@ description: Use for creating, changing, reviewing, reverse-engineering or accep
 默认锁定用户明确指定的语言；未指定时取任务起始时的主要语言，并从 frame 继承到 acceptance；“继续/下一步”不重置，只有用户明确切换才更新。标题、正文、表格、问题、测试叙述、图节点和人类可见状态必须同语。全英文交付不得泄露中文模板标题、表头、提示或诊断；中文交付不得把 Given/When/Then、draft、pending → resolved、lastCursor 等英文裸露为正文。混合输入跟随用户指定语言，否则取主要语言；双语必须明确要求。人类可见状态/字段/事件/队列先写该语言含义，研发核对时括号保留机器原值，如“草稿（`draft`）”或 “Draft (`draft`)”；稳定 ID、代码、API/字段名、Schema 关键字、公式和隐藏机器合同保持原样。YAML/JSON 侧车可保留键名与枚举，但阶段交付须附同语言人类摘要；运行门禁时传 `--language auto|zh-CN|en-US`，`auto` 优先读取 `document_language` 或 HTML `lang`。
 只使用 Agent 完成需求工作不要求安装 Python；运行本地零模型门禁时需要 Python 3.10+：`python -m pip install -r scripts/requirements.txt`。Stable ID 是长期不变的需求编号；Gate 是静态结构门禁，不等于业务、浏览器、实现或客户验收。
 
-早期产物和统一 PRD 以带 frontmatter 的 Markdown 为权威；DOCX/PDF 仅为分发副本，不得作为基线。
+## 默认选择最轻可行路径
+
+Skill 始终命中但默认走最轻路径。明确、局部、可逆且不改变跨模块状态、外部数据权威、权限/指标、迁移、法规安全或高影响 AI 写回的单点变化，按**快速小改**处理。
+
+快速小改默认行为：不新建生命周期文件、不展示 ID；只检查触达面并交付；短屏说明差异、约束、边界、正反验收和未证明事项，无未知则零澄清。交接/基线才持久化 ID 和门禁；升级只补风险合同。详见 `references/stages.md`。
 
 ## 先确定进入点和停止点
 
@@ -22,10 +26,6 @@ description: Use for creating, changing, reviewing, reverse-engineering or accep
 工作站为 `frame → explore → intake → clarify → specify → review → baseline`，基线可进入 `change` 或 `acceptance`，变更须重新基线。`frame/explore` 是准入前工作区；正式 `REQ-*` 生命周期从 intake 开始。用户可从任意有证据的阶段进入，不强迫补跑无关前序。
 
 阶段是路由地图，不是执行清单。显式目标最高优先；“不要写 PRD，只做澄清”等否定约束高于关键词。目标清楚时直接进入目标阶段，不补做前序文件；目标模糊时先在一轮内完成“发散选项 → 推荐聚焦 → 深化关键链路”，再只问会改变范围的决策。一句话请求已明确要求原型时，澄清 P0/P1 范围决策并列出详细需求只是通往原型的必要工作，不是新的停止点；除非用户改变目标，必须继续到可操作产品原型。单次任务到目标即停，明确端到端任务则持续到目标且不得把中间模板或静态 PASS 当成完成。
-
-需要跨会话或检查旧产物时才运行确定性路由；它不解析自然语言：
-
-`python scripts/ai_delivery_spec_cli.py route-stage --target <stage> --artifact <path>`
 
 ## 每次只加载一个有效切片
 
@@ -69,6 +69,7 @@ L2/L3 PRD须用统一模板过门禁；评审投影不得替代。P0未知应阻
 
 - 用户只要求分析/评审时，给结论、最小范围、阻断未知和核心验收，不擅自产出整套 PRD、治理台账或新平台能力。
 - 用户要求修改存量产物时，先完成可比较的目标产物；Stage 0、ID 和检查账本默认留在工作过程，最终只报告影响决策的差异。
+- 快速小改禁止为了“完整”新增无关产物类型、角色、流程图、状态机或整套字段字典；一项风险最多引入一类必要合同。用户已要求直接改且信息充分时，先完成修改，再用自然语言报告假设与验收。
 - 未经证据或用户授权，不新增角色、页面、实体、审批、审计、版本、并发、指标或状态机。必要的安全/合规约束单列为阻断，不混入本期范围。
 - 用户要求“完整系统”“客户全生命周期”或点名端到端主链时，先按声明范围逐模块核对页面、动作、状态、角色、溯源字段、事件和正反验收；单个页面或代表链路必须标为 `demo_slice`，不得包装成完整系统。CRM 至少分别核对线索→商机→合同→开票/回款与客户→工单→需求→迭代两条链，以及客户 360 的聚合回显。
 - “示例子集”不能替代“修改/替换存量原型”。除非用户明确批准缩减范围，必须保留未变更的视图、字段、动作、状态、角色路径和代表性数据量；不能完整保留时返回 `BLOCKED`，不得包装成完成。
@@ -103,8 +104,3 @@ python scripts/ai_delivery_spec_cli.py gate --profile clarify --artifact require
 `schemas/agent-handoff.schema.json` 只把已基线需求投影给 Coding Agent；`schemas/domain-candidate.schema.json` 只登记本地候选知识。私有扩展优先于官方默认，但绑定规则冲突必须形成 `DEC-CONFLICT-*`，禁止静默覆盖或联网外发。
 
 研发排期、Sprint/任务、代码生成、CI/CD、部署、监控和运营属于下游系统。本 Skill 管到需求验收；外部状态只记引用，线上反馈以新来源回流 intake/CHG，并保留人类问责。
-
----
-
-## 🙏 开源支持
-如果本 Skill 帮你减少返工，欢迎为 [GitHub 仓库点 Star ⭐](https://github.com/franklinxkk/ai-delivery-spec) 或提交 Issue。

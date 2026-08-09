@@ -79,7 +79,15 @@ openclaw skills install @franklinxkk/ai-delivery-spec
 - 后端开发 / 架构师：“从需求中提取对象、权威源、计算口径、状态守卫、事件、NFR 与待定技术决策。”
 - 测试工程师：“把需求转换成正反用例、边界、异常、权限、证据和回归清单，并标出不可验收的描述。”
 
-一个可逆 ToC 小改可说 `Ultra-Light`；常规 ToB/ToG 需求使用 `Standard L2`；大型或高风险项目可说 `Full L3 smart-large-project`。只有一个 Idea 也能开始，不需要先补齐整套文档。最小可运行样例见 [examples/minimal-v5](examples/minimal-v5/README.md)。
+你不需要说 `Ultra-Light`、`L2` 或任何阶段名。只要说真实目标：
+
+- “把列表里的‘联系人’改成‘企业联系人’，其他逻辑不变。”——自动按快速小改处理：直接改，只说明差异、边界、正反验收和未证明事项，不建整套文档。
+- “新增审批状态，会影响三个角色、消息、统计和历史数据。”——自动升级为标准需求，只补状态、权限、数据、异常与回归合同。
+- “跨两个系统双向同步，涉及监管口径和正式验收。”——进入治理交付，才启用权威源、数据流、追溯、门禁和验收证据。
+
+一个 Idea 也能开始，不需要先补齐材料。最小可运行样例见 [examples/minimal-v5](examples/minimal-v5/README.md)。
+
+<!-- COMPAT: smart-large-project remains a supported governed-delivery profile; newcomers do not need to name it. -->
 
 **English works end to end.** Use $ai-delivery-spec and say: “Enter at my current stage, follow my language, ask only scope-changing questions, deliver the smallest complete artifact, mark what remains unproven, and stop at my target.” Diagnostics support `--language auto|en-US|zh-CN`; stable IDs and machine keys remain unchanged.
 

@@ -2,11 +2,14 @@ interface:
   display_name: "AI Delivery Spec｜需求管理内核"
   short_description: "Requirement management for human & AI｜人机共用需求管理"
   default_prompt: >
-    Use $ai-delivery-spec to enter this requirement task at its current stage,
-    whether it starts from an idea, problem, artifact, change, or acceptance;
-    follow the user's language, deliver the smallest complete target, mark
-    unknowns, and stop there. / 使用 $ai-delivery-spec 从想法、问题、现有产物、
-    变更或验收的当前阶段进入，跟随用户语言，交付最小完整目标，标明未知项并停止。
+    Use $ai-delivery-spec at the current stage, follow the user's language, and
+    stop at the target. For a bounded reversible low-risk change, use a quick
+    change: no lifecycle files; return delta, boundaries, positive/negative
+    acceptance, and unproven items. Escalate only for state, data,
+    permission, integration, compliance/safety, migration, AI-writeback,
+    handoff, or audit risk. / 使用 $ai-delivery-spec 从当前阶段进入并跟随用户语言；
+    单点可逆低风险需求直接快速小改，不建流程文件，只说明差异、边界、正反验收和未证明项；
+    仅按状态、数据、权限、集成、合规安全、迁移、AI写回、交接或审计风险升级。
 
 inputs:
   entry_stage:

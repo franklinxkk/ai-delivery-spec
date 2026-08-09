@@ -43,6 +43,23 @@ This file validates that the domain module contract can migrate beyond traffic s
 - Keep shared CRM fields canonical as `FLD-*`; projections show only relevant
   scenario, state, rule, permission, exception, and acceptance differences.
 
+### Current Baseline and Change Watch (verified 2026-08-09)
+
+| Evidence class | Current signal | Requirement effect |
+|---|---|---|
+| design_guidance | `KS-CRM-COMPLAINT-10002` | complaint intake, response, escalation, closure and learning need accountable ownership and evidence when this standard is adopted |
+| product_pattern | `KS-CRM-MICROSOFT-ACTION-2026`, `KS-CRM-SALESFORCE-CONTACT-CENTER-2026`, `KS-CRM-HUBSPOT-SMART-CRM` | current leaders are shifting from passive records to action-centric CRM with unified context, governed agents and explicit AI-to-human handoff |
+| change_watch | vendor roadmaps and AI claims change faster than customer lifecycle physics | never copy a vendor module list or claim “best practice” without project evidence; customer truth, state ownership and human commitments remain primary |
+
+### AI Transformation Horizon
+
+| Axis | From -> toward | Non-negotiable product guard |
+|---|---|---|
+| CRM role | passive system of record -> customer/revenue/service system of action | every AI action resolves to a customer object, lifecycle state, owner, deadline and observable result |
+| context | scattered notes -> permissioned longitudinal customer memory | distinguish recorded facts, inferred intent, stale data and external signals; preserve source links |
+| execution | next-best-action text -> bounded research, follow-up drafting, routing, renewal/service playbooks and exception escalation | discount, contract, payment, customer commitment and final issue closure retain accountable human gates |
+| learning loop | activity count -> conversion, response, retention, service resolution and override evidence | do not optimize spammy outreach or hide agent failure behind generated activity |
+
 ## First-Principles Domain Lens
 
 First-Principles CRM Product Logic: CRM product judgment starts from customer
