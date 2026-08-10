@@ -60,7 +60,8 @@ JSON 输出包含中文原因、修复、示例、RETRY 命令和 `not_proven`�
 
 这是启发式源码检查，不是完整 JavaScript 语义。发现新模式时应增加最小回归样例。
 动态生成控件仍需可检查的静态注册表和浏览器 `ARUN-*`；通过已知模式扫描并不能证明
-运行时交互闭环。
+运行时交互闭环。可静态解析的 `act/add/confirmAction` 字面量动作只用于消除重复的
+`PROTO-ORPHAN-HANDLER`，不会让 `PROTO-DYNAMIC-ANCHOR-CONSTRUCTION` 自动通过。
 
 ## Product Truth 长任务避免死锁
 

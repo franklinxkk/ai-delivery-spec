@@ -1,3 +1,13 @@
+---
+delivery_level: L2
+document_language: en-US
+language_source: test_fixture
+bilingual: false
+activated_facets: [ui, stateful]
+open_p0_unknown_ids: []
+unknowns: []
+---
+
 # Placeholder PRD
 This is one requirement baseline.
 ## Background and Goal

@@ -106,8 +106,11 @@ def recommend(doc: dict[str, Any]) -> dict[str, Any]:
         reasons.append("依赖未解除或当前价值不足以进入本期设计" if zh else "A dependency is blocked or current value does not justify this iteration")
     elif missing or doc.get("ambiguity") == "high":
         decision = "clarify"
-        prefix = "缺少会改变范围或结果的准入信息: " if zh else "Missing intake facts that can change scope or outcome: "
-        reasons.append(prefix + ", ".join(sorted(set(missing))))
+        if missing:
+            prefix = "缺少会改变范围或结果的准入信息: " if zh else "Missing intake facts that can change scope or outcome: "
+            reasons.append(prefix + ", ".join(sorted(set(missing))))
+        else:
+            reasons.append("现有信息存在会改变范围或结果的高不确定性" if zh else "The current intake has high uncertainty that can change scope or outcome")
     else:
         decision = "accept"
         reasons.append("目标、责任人与价值证据足以进入需求设计" if zh else "Outcome, owner and value evidence are sufficient to enter specification")
@@ -235,6 +238,18 @@ def recommend(doc: dict[str, Any]) -> dict[str, Any]:
 
 def render_markdown(result: dict[str, Any]) -> str:
     zh = str(result.get("document_language", "")).lower().startswith("zh")
+    missing = [str(item) for item in result.get("missing_for_intake", []) if str(item).strip()]
+    reasons = [str(item) for item in result.get("reasons", []) if str(item).strip()]
+    if not reasons:
+        if missing:
+            prefix = "仍需补齐会改变范围或结果的信息：" if zh else "Scope- or outcome-changing facts are still missing: "
+            reasons = [prefix + ", ".join(missing)]
+        else:
+            reasons = [
+                "现有输入未提供额外反对依据；该结论仅覆盖当前准入信息"
+                if zh else
+                "No contrary evidence is present in the current intake; this decision covers only the supplied facts"
+            ]
     if zh:
         return (
             "# 需求准入与分诊建议\n\n"
@@ -245,8 +260,8 @@ def render_markdown(result: dict[str, Any]) -> str:
             f"- 模式/等级：`{result['recommended_mode']} / {result['recommended_tier']}`\n"
             f"- 交付形态/保证强度：`{result['delivery_shape']} / {result['assurance_profile']}`\n"
             f"- 激活规格：`{', '.join(result['activated_facets']) or '无'} `\n"
-            f"- 待补信息：`{', '.join(result['missing_for_intake']) or '无'}`\n\n"
-            + "".join(f"- 判断依据：{item}\n" for item in result["reasons"])
+            f"- 待补信息：`{', '.join(missing) or '无'}`\n\n"
+            + "".join(f"- 判断依据：{item}\n" for item in reasons)
             + "- 估算边界：当前只判断复杂度；工期/成本由有权工程负责人确认。\n"
         )
     return (
@@ -257,8 +272,8 @@ def render_markdown(result: dict[str, Any]) -> str:
         f"- Mode/Tier: `{result['recommended_mode']} / {result['recommended_tier']}`\n"
         f"- Delivery/Assurance: `{result['delivery_shape']} / {result['assurance_profile']}`\n"
         f"- Activated facets: `{', '.join(result['activated_facets']) or 'none'}`\n"
-        f"- Missing: `{', '.join(result['missing_for_intake']) or 'none'}`\n\n"
-        + "".join(f"- Rationale: {item}\n" for item in result["reasons"])
+        f"- Missing: `{', '.join(missing) or 'none'}`\n\n"
+        + "".join(f"- Rationale: {item}\n" for item in reasons)
         + f"- Estimate boundary: {result['estimate_boundary']}\n"
     )
 

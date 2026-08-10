@@ -24,6 +24,8 @@ def validate(document: dict) -> list[str]:
         f"{'.'.join(str(part) for part in error.path) or '<root>'}: {error.message}"
         for error in errors
     ]
+    if failures:
+        return failures
     context = document.get("context", {}) if isinstance(document, dict) else {}
     model_tokens = context.get("model_context_tokens")
     if model_tokens and (

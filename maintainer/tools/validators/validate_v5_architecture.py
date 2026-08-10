@@ -76,6 +76,7 @@ REQUIRED_FILES = (
     "scripts/stage_contract.py",
     "maintainer/tests/test_v540_stage_contracts.py",
     "maintainer/tests/test_v540_readme_commands.py",
+    "maintainer/tests/test_v544_human_review_contracts.py",
     "maintainer/tests/test_product_experience.py",
     "maintainer/tests/test_v502_progressive_truth.py",
     "maintainer/tests/test_v510_requirement_management.py",
@@ -202,7 +203,8 @@ def main() -> int:
     ignored_root_dirs = {
         ".pytest_cache", ".mypy_cache", ".ruff_cache", "htmlcov", "dist", "build", "custom",
     }
-    actual_root_files = {path.name for path in ROOT.iterdir() if path.is_file()}
+    # Git worktrees expose `.git` as a pointer file instead of a directory.
+    actual_root_files = {path.name for path in ROOT.iterdir() if path.is_file() and path.name != ".git"}
     actual_root_dirs = {path.name for path in ROOT.iterdir() if path.is_dir() and path.name not in ignored_root_dirs | {".git"}}
     if actual_root_files != allowed_root_files:
         failures.append(f"root files are not minimal: {sorted(actual_root_files)}")
@@ -220,7 +222,7 @@ def main() -> int:
     expected_reference_files = {
         "discover.md", "lifecycle.md", "specify.md", "prototype.md",
         "context.md", "change-acceptance.md", "troubleshooting.md",
-        "tool-adapters.md", "stages.md", "domain-coverage.yaml",
+        "tool-adapters.md", "stages.md", "domain-coverage.yaml", "scaffolding-terms.yaml",
     }
     if reference_files != expected_reference_files:
         failures.append(f"references root is not reduced to requirement runtime entries plus domain index: {sorted(reference_files)}")

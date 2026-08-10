@@ -211,10 +211,23 @@ class HandoffChecks:
         ready = str(document.get("status", "draft")) == "ready_for_implementation"
         requirement_ref = str(baseline.get("requirement_ref", "")) if isinstance(baseline, dict) else ""
         requirement_path = path.parent / requirement_ref
+        requirement_raw = ""
+        requirement_steps: set[str] = set()
+        requirement_step_sections: dict[str, str] = {}
         if requirement_ref and requirement_path.is_file():
             requirement_raw = self.read(requirement_path)
             if baseline_hash != self._sha256(requirement_raw):
                 self.add("BLOCK", "HANDOFF-REQUIREMENT-HASH-DRIFT", path, "需求基线文件与 baseline.hash 不一致", requirement_ref)
+            step_matches = list(re.finditer(
+                r"(?m)^#{2,6}\s+(STEP-[A-Z0-9-]+)\b[^\n]*$",
+                requirement_raw,
+                re.I,
+            ))
+            for index, match in enumerate(step_matches):
+                end = step_matches[index + 1].start() if index + 1 < len(step_matches) else len(requirement_raw)
+                step_id = match.group(1).upper()
+                requirement_steps.add(step_id)
+                requirement_step_sections[step_id] = requirement_raw[match.start():end]
         elif ready:
             self.add("BLOCK", "HANDOFF-REQUIREMENT-NOT-LOCAL", path, "开发交接的需求基线文件不可访问", requirement_ref or "baseline.requirement_ref")
         elif requirement_ref:
@@ -229,6 +242,7 @@ class HandoffChecks:
         elif engineering_ref and not (path.parent / engineering_ref).is_file():
             self.add("GAP", "HANDOFF-ENGINEERING-BASELINE-NOT-LOCAL", path, "工程基线引用不在当前交接目录，接收方需确认可访问", engineering_ref)
         packet_ids: set[str] = set()
+        referenced_steps: set[str] = set()
         for packet in document.get("packets", []) or []:
             if not isinstance(packet, dict):
                 continue
@@ -250,6 +264,27 @@ class HandoffChecks:
                 self.add("BLOCK", "HANDOFF-PACKET-SCOPE-MISSING", path, "工作包正文没有任何声明的 scope_refs", packet_id)
             if not any(str(ref) in packet_raw for ref in packet.get("acceptance_refs", []) or []):
                 self.add("BLOCK", "HANDOFF-PACKET-AC-MISSING", path, "工作包正文没有任何 acceptance_refs", packet_id)
+            packet_steps = {
+                str(ref).upper()
+                for ref in packet.get("implementation_step_refs", []) or []
+                if str(ref).strip()
+            }
+            referenced_steps.update(packet_steps)
+            for step_id in sorted(packet_steps - requirement_steps):
+                self.add(
+                    "BLOCK", "HANDOFF-STEP-NOT-IN-PRD", path,
+                    "implementation_step_refs 引用了 PRD 中不存在的实施步骤",
+                    step_id,
+                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                )
+            for step_id in sorted(packet_steps):
+                if step_id not in packet_raw:
+                    self.add(
+                        "BLOCK", "HANDOFF-PACKET-STEP-MISSING", path,
+                        "工作包正文未包含声明的实施步骤引用",
+                        f"{packet_id}->{step_id}",
+                        affected_consumers=("frontend", "backend", "qa", "coding_agent"),
+                    )
             kind = str(packet.get("kind", "")).lower()
             expected_prefix = {"mod": "MOD-", "xct": "XCT-", "edge": "EDGE-"}.get(kind)
             if expected_prefix and not packet_id.startswith(expected_prefix):
@@ -279,6 +314,46 @@ class HandoffChecks:
                 }.items():
                     if not any(term in lowered_packet for term in terms):
                         self.add("BLOCK", "HANDOFF-EDGE-INCOMPLETE", path, f"EDGE 工作包缺少 {label}", packet_id)
+        step_facets = {
+            "入口与责任": (r"入口与责任", r"entry.{0,40}(?:responsib|role|owner)"),
+            "输入与权威源": (r"输入与权威源", r"input.{0,60}(?:authorit|source of truth)"),
+            "处理与口径": (r"处理与口径", r"process.{0,50}(?:caliber|logic|rule|formula)"),
+            "守卫与状态": (r"守卫与状态", r"guard.{0,40}state"),
+            "双结果": (r"双结果", r"visible result.{0,80}(?:domain|persistent) result"),
+            "事件与责任交接": (r"事件与(?:责任)?交接", r"event.{0,50}handoff"),
+            "失败与恢复": (r"失败(?:与)?恢复", r"failure.{0,50}(?:recovery|retry|compensation)"),
+            "追溯与验收": (r"追溯(?:与验收)?", r"traceab.{0,40}(?:accept|evidence)"),
+        }
+        for step_id in sorted(referenced_steps & requirement_steps):
+            section = requirement_step_sections.get(step_id, "")
+            missing_facets = [
+                label
+                for label, patterns in step_facets.items()
+                if not any(re.search(pattern, section, re.I | re.S) for pattern in patterns)
+            ]
+            if missing_facets:
+                self.add(
+                    "BLOCK", "HANDOFF-STEP-INCOMPLETE", requirement_path,
+                    "实施步骤卡缺少可独立实现和验收的必要字段：" + "、".join(missing_facets),
+                    step_id,
+                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                )
+        if ready and requirement_steps:
+            for packet in document.get("packets", []) or []:
+                if isinstance(packet, dict) and not packet.get("implementation_step_refs"):
+                    self.add(
+                        "BLOCK", "HANDOFF-STEP-CONTRACT-MISSING", path,
+                        "ready_for_implementation 工作包必须声明 implementation_step_refs",
+                        str(packet.get("id", "<unknown>")),
+                        affected_consumers=("frontend", "backend", "qa", "coding_agent"),
+                    )
+            for step_id in sorted(requirement_steps - referenced_steps):
+                self.add(
+                    "BLOCK", "HANDOFF-PRD-STEP-NOT-PACKETED", path,
+                    "PRD 实施步骤未被任何工作包接收",
+                    step_id,
+                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                )
         for envelope in document.get("handoffs", []) or []:
             if not isinstance(envelope, dict):
                 continue
@@ -288,7 +363,12 @@ class HandoffChecks:
                 self.add("BLOCK", "HANDOFF-ENVELOPE-ORPHAN-PACKET", path, "HANDOFF 引用不存在的工作包", ", ".join(missing))
             if envelope.get("intent") in {"proposal", "request"} and envelope.get("ack_status") == "applied" and not envelope.get("decision_refs"):
                 self.add("BLOCK", "HANDOFF-UNAPPROVED-PROPOSAL", path, "proposal/request 未绑定 DEC/CHG 不得标记 applied", str(envelope.get("handoff_id", "")))
-        self.metrics.update({"handoff_packets": len(packet_ids), "handoff_envelopes": len(document.get("handoffs", []) or [])})
+        self.metrics.update({
+            "handoff_packets": len(packet_ids),
+            "handoff_envelopes": len(document.get("handoffs", []) or []),
+            "handoff_prd_steps": len(requirement_steps),
+            "handoff_referenced_steps": len(referenced_steps),
+        })
 
     def check_manifest_prd_binding(self, prd_path: Path, manifest_path: Path) -> None:
         """Ensure a combined handoff does not pair a manifest with another PRD."""
@@ -466,4 +546,3 @@ class HandoffChecks:
                                 affected_consumers=tuple(str(item) for item in rule.get("affected_consumers", []) or []),
                             )
         self.metrics["custom_validator_rules"] = loaded_rules
-

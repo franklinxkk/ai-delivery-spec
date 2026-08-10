@@ -13,7 +13,7 @@ import re
 
 HEADING = re.compile(r"(?m)^(#{2,4})\s+(.+?)\s*$")
 TABLE_SEPARATOR = re.compile(r"^\s*\|?(?:\s*:?-{3,}:?\s*\|)+\s*$")
-PLACEHOLDER = re.compile(r"\b(?:placeholder|tbd|todo|lorem ipsum)\b|待补充|待完善|占位(?:内容|文本)", re.I)
+PLACEHOLDER = re.compile(r"(?<![A-Za-z0-9-])(?:placeholder|tbd|todo|lorem ipsum)(?![A-Za-z0-9-])|待补充|待完善|占位(?:内容|文本)", re.I)
 
 
 def _nonempty_cells(line: str) -> list[str]:

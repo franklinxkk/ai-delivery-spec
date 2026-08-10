@@ -64,6 +64,24 @@ as mandatory features for every project.
 | model-data-scene flywheel | dataset delivery becomes continuous supply and evaluation | model/evaluation/app feedback creates traceable dataset changes without polluting held-out tests |
 | asset and value management | registration, accounting, valuation and financing become connected but separate workflows | no credential or appraisal automatically becomes accounting recognition, ownership judgment, or guaranteed value |
 
+### Current Baseline and Change Watch (verified 2026-08-09)
+
+| Evidence class | Current signal | Requirement effect |
+|---|---|---|
+| binding_baseline | `KS-DATA-CIRCULATION-SERVICES-2026` extends the current data-resource, trusted-space, authorized-operation and high-quality-dataset policy chain | identify provider/operator/user roles, data/right/purpose proof, product/service disclosure, safety, evaluation and exit before designing circulation or agent services |
+| product_pattern | `KS-DATASET-PLATFORM-2026`, `KS-DATA-SECURITY-CASES-2026`, `KS-DATA-COMPLIANCE-SANDBOX-2026` | learn dataset cards, participant identity, digital contracts, usage control, audit, bounded experiments and exit; cases do not prove a universal architecture |
+| change_watch | sector rules, regional exchange mechanics, price/settlement, accounting and cross-border scope remain project-specific | register jurisdiction and accountable-source gaps; never let a dataset card, sandbox or registration credential silently prove rights, quality, value or lawful use |
+
+### AI Transformation Horizon
+
+| Axis | From -> toward | Non-negotiable product guard |
+|---|---|---|
+| platform role | warehouse/BI backend -> governed context, semantic and action substrate for people and agents | source/right/purpose, lineage, quality, freshness and permission travel with every consumption path |
+| interface | dashboard/query builder -> conversational analysis plus inspectable semantic/query plan | resolve metrics/objects first; cite source/caliber and keep deterministic query/export paths |
+| operation | manual catalog/quality work -> bounded data engineering, governance and quality agents | production writes, grants, schema/metric changes and destructive repair keep review, audit and rollback |
+| supply loop | one-off dataset delivery -> model/application feedback driving versioned data products | protect evaluation isolation; no automatic ingestion of conversations, feedback or synthetic derivatives |
+| value | data volume/asset labels -> measurable decision, model, public-service or commercial outcomes | registration, valuation, accounting, rights and fitness remain separate accountable claims |
+
 ## First-Principles Domain Lens
 
 AI+Data product judgment starts from trusted decision flow, not from a report,

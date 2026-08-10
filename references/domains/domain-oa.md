@@ -62,6 +62,31 @@ domain-neutral.
 - Keep organization, user, workflow-node, document, and archive fields canonical
   as `FLD-*`; projections add only relevant differences.
 
+### Current Baseline and Change Watch (verified 2026-08-09)
+
+| Evidence class | Current signal | Requirement effect |
+|---|---|---|
+| binding_baseline | existing e-signature, official-document and electronic-archive rules remain the authority for signatures, issuance, integrity, transfer and preservation | preserve document authority, version, signer, hash, timestamp, correction and archive evidence across workflow changes |
+| design_guidance | `KS-OA-ARCHIVE-PLAN-2026` | prepare for more complete digital archive resources, governance, services and security without treating planning language as a feature mandate |
+| product_pattern | existing OA vendor and open-component evidence | learn object-centric low-code work, automation, AI assistance and collaborative views; vendor capability is not outcome or open-core proof |
+| change_watch | `KS-OA-ARCHIVE-STANDARD-GUIDE-2026` names single-copy archives, long-term preservation, data governance and AI topics | create a re-verification item for future standards; a project guide is not a final standard and cannot block delivery by itself |
+
+### AI Transformation Horizon
+
+Durable judgment: AI office is becoming the organization's **system of action**; OA does not disappear. It becomes the permission, transaction, evidence and archive control plane that makes agent action trustworthy.
+
+| Axis | From -> toward | Product implication |
+|---|---|---|
+| entry | menu/search/form-first -> intent entry plus artifact canvas and exception inbox | deterministic menus/forms remain for discoverability, bulk work and high-risk confirmation |
+| work unit | chat answer -> inspectable task plan, tool execution and accepted deliverable | every step exposes object, source, actor, tool, state, result and recovery |
+| context | document/IM silos -> permissioned business context and durable organizational memory | inherit source ACL, freshness, confidentiality, retention and citation rules before retrieval |
+| execution | fixed workflow only -> bounded agents over workflow/document/meeting/data tools | workflow engine remains the transaction guard; agents may propose/route/execute only within declared side effects |
+| organization | one assistant -> role experts, reusable skills and multi-agent teams | identity, registry, owner, version, evaluation, cost and retirement are first-class assets |
+| runtime | foreground session -> local/cloud managed runtimes for long tasks and event triggers | sandbox, secret isolation, checkpoints, trace, cancellation, retry and human takeover are required |
+| business model | OA seats/modules -> seats + governed compute + skill/connector ecosystem + measurable work outcomes | avoid lock-in by keeping portable work objects, APIs/protocols, evidence and export/exit paths |
+
+`KS-OA-WORKBUDDY-WMA-2026`, `KS-OA-QWEN-WORK-2026` and `KS-OA-FEISHU-DOUBAO-2026` support this product-pattern direction. They do not prove organizational merger, universal superiority or customer outcome.
+
 ## First-Principles Domain Lens
 
 OA product judgment starts from accountable work closure, not from a catalog of

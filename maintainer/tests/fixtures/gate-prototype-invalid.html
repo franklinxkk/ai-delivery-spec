@@ -1,8 +1,21 @@
 <!doctype html>
 <html lang="zh-CN">
 <head><style>.hidden,.modal { display: none !important; } .button { color: red !important; }</style></head>
-<body>
+<body class="review-mode">
   <button class="button" data-action="save">保存</button>
-  <script>const broken = ;</script>
+  <button data-action="ACT-REVIEW-TOGGLE">切换评审</button>
+  <div class="sev sev-这是被错误拼接进样式类的超长业务说明文本会破坏选择器并导致页面样式与语义污染需要被确定性门禁直接识别和阻断">高</div>
+  <aside data-testid="drawer-VIEW-REVIEW" class="drawer hidden">评审抽屉</aside>
+  <script>
+    const actionRegistry = {
+      'ACT-REVIEW-TOGGLE': () => document.body.classList.toggle('review-mode'),
+      'ACT-ORPHAN-SAVE': () => document.body.classList.add('saved')
+    };
+    document.addEventListener('click', (event) => {
+      const control = event.target.closest('[data-action]');
+      if (control) actionRegistry[control.dataset.action]?.();
+    });
+    const broken = ;
+  </script>
 </body>
 </html>

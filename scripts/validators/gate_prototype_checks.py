@@ -11,6 +11,8 @@ from collections import Counter
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
+import yaml
+
 SCRIPT_DIR = Path(__file__).resolve().parent.parent
 for _candidate in (SCRIPT_DIR, SCRIPT_DIR / "validators"):
     if str(_candidate) not in sys.path:
@@ -19,6 +21,7 @@ for _candidate in (SCRIPT_DIR, SCRIPT_DIR / "validators"):
 from jsonschema import Draft202012Validator, FormatChecker
 
 from scan_prototype_css import scan as scan_prototype_css
+from extract_interaction_ledger import extract_dynamic_anchor_actions, extract_handler_actions
 from validate_acceptance_run import validate_evidence_refs
 
 # Visible-text markers of acceptance/demo scaffolding that must never ship in a
@@ -31,7 +34,36 @@ DEMO_SCAFFOLDING_TERMS: tuple[str, ...] = (
     "INHERITANCE",
     "继承预览",
     "下游继承预览",
+    "lorem",
+    "占位",
+    "示例数据",
+    "测试数据",
+    "敬请期待",
+    "xxx",
 )
+
+SCAFFOLDING_TERMS_FILE = SCRIPT_DIR.parent / "references" / "scaffolding-terms.yaml"
+_scaffolding_terms_cache: tuple[str, ...] | None = None
+
+
+def scaffolding_terms() -> tuple[str, ...]:
+    """Merge the built-in visible-demo terms with the optional project list."""
+    global _scaffolding_terms_cache
+    if _scaffolding_terms_cache is not None:
+        return _scaffolding_terms_cache
+    terms = list(DEMO_SCAFFOLDING_TERMS)
+    if SCAFFOLDING_TERMS_FILE.is_file():
+        try:
+            data = yaml.safe_load(SCAFFOLDING_TERMS_FILE.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, yaml.YAMLError):
+            data = None
+        extras = data.get("terms", []) if isinstance(data, dict) else []
+        for item in extras if isinstance(extras, list) else []:
+            text = str(item).strip()
+            if text and text.casefold() not in {term.casefold() for term in terms}:
+                terms.append(text)
+    _scaffolding_terms_cache = tuple(terms)
+    return _scaffolding_terms_cache
 
 
 def _visible_text(raw: str) -> str:
@@ -40,6 +72,79 @@ def _visible_text(raw: str) -> str:
     text = re.sub(r"<style\b.*?</style>", " ", text, flags=re.I | re.S)
     text = re.sub(r"<!--.*?-->", " ", text, flags=re.S)
     return re.sub(r"<[^>]+>", " ", text)
+
+
+def _handler_actions(scripts: str) -> set[str]:
+    """Extract action IDs from the shared interaction-ledger parser."""
+    return set(extract_handler_actions(scripts))
+
+
+def _unreachable_hidden_surfaces(tag_source: str, scripts: str) -> list[str]:
+    """Return explicitly hidden page/modal/drawer roots with no static route."""
+    targets = {
+        item.casefold()
+        for item in re.findall(r"\bdata-(?:view|target)\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)
+    }
+    for pattern in (
+        r"(?:showPage|showView|navigate|openSurface|openModal|openDrawer)\s*\(\s*['\"]([^'\"]+)['\"]",
+        r"(?:targetView|viewId|pageId|modalId|drawerId)\s*[:=]\s*['\"]([^'\"]+)['\"]",
+    ):
+        targets.update(item.casefold() for item in re.findall(pattern, scripts, re.I))
+    for _variable, target in re.findall(
+        r"\bconst\s+([A-Za-z_$][\w$]*)\s*=\s*\$\(\s*['\"]#([^'\"]+)['\"]\s*\)"
+        r"[\s\S]{0,600}?\b\1\.hidden\s*=\s*(?:false|!\s*\1\.hidden)",
+        scripts,
+        re.I,
+    ):
+        targets.add(target.casefold())
+    targets.update(
+        item.casefold()
+        for item in re.findall(
+            r"\$\(\s*['\"]#([^'\"]+)['\"]\s*\)\.hidden\s*=\s*false",
+            scripts,
+            re.I,
+        )
+    )
+    targets.update(item.lstrip("#.") for item in list(targets))
+
+    unreachable: list[str] = []
+    for tag in re.findall(r"<[A-Za-z][^>]*>", tag_source, re.S):
+        testid_match = re.search(r"\bdata-testid\s*=\s*['\"]([^'\"]+)['\"]", tag, re.I)
+        id_match = re.search(r"\bid\s*=\s*['\"]([^'\"]+)['\"]", tag, re.I)
+        view_match = re.search(r"\bdata-view\s*=\s*['\"]([^'\"]+)['\"]", tag, re.I)
+        class_match = re.search(r"\bclass\s*=\s*['\"]([^'\"]*)['\"]", tag, re.I)
+        testid = testid_match.group(1) if testid_match else ""
+        classes = class_match.group(1) if class_match else ""
+        class_tokens = {item.casefold() for item in re.split(r"\s+", classes) if item}
+        is_surface = (
+            testid.casefold().startswith(("page-", "modal-", "drawer-"))
+            or bool(class_tokens & {"page", "modal", "drawer", "dialog", "sheet"})
+        )
+        if not is_surface:
+            continue
+        explicitly_hidden = bool(re.search(r"\shidden(?:\s|=|>)", tag, re.I)) or "hidden" in class_tokens
+        initially_visible = bool(class_tokens & {"active", "open", "show", "visible", "is-visible"})
+        if not explicitly_hidden or initially_visible:
+            continue
+        keys = {
+            value.casefold()
+            for value in (
+                testid,
+                id_match.group(1) if id_match else "",
+                view_match.group(1) if view_match else "",
+            )
+            if value
+        }
+        aliases = set(keys)
+        for key in list(keys):
+            aliases.update({
+                re.sub(r"^(?:page|modal|drawer)-", "", key),
+                key.replace("view-", ""),
+                re.sub(r"^(?:(?:page|modal|drawer|view)-)+", "", key),
+            })
+        if not aliases & targets:
+            unreachable.append(testid or (id_match.group(1) if id_match else "<anonymous>"))
+    return sorted(set(unreachable))
 
 
 class PrototypeChecks:
@@ -99,8 +204,20 @@ class PrototypeChecks:
         # regex over the whole document also matches JavaScript selectors such
         # as `[data-testid="page-X"]` and falsely reports duplicate pages.
         tag_source = self._tag_source(raw)
+        polluted_classes = []
+        for class_value in re.findall(r"\bclass\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I):
+            for token in re.split(r"\s+", class_value):
+                if re.match(r"(?:sev|priority|status)-", token, re.I) and len(token) > 32:
+                    polluted_classes.append(token)
+        for token in polluted_classes[:10]:
+            self.add(
+                "BLOCK", "PROTO-DYNAMIC-CLASS-POLLUTION", path,
+                "业务描述被插入语义 class，可能破坏 CSS、选择器和 DOM 安全边界",
+                token[:160],
+                affected_consumers=("frontend", "qa", "coding_agent"),
+            )
         visible_lowered = _visible_text(raw).lower()
-        for term in DEMO_SCAFFOLDING_TERMS:
+        for term in scaffolding_terms():
             if term.lower() in visible_lowered:
                 self.add(
                     "BLOCK", "PROTO-DEMO-SCAFFOLDING-VISIBLE", path,
@@ -122,7 +239,9 @@ class PrototypeChecks:
                     affected_consumers=("frontend", "qa", "coding_agent"),
                 )
         testids = re.findall(r"\bdata-testid\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)
-        actions = sorted(set(re.findall(r"\bdata-action\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
+        action_values = set(re.findall(r"\bdata-action\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I))
+        unstable_action_values = sorted(item for item in action_values if re.search(r"\$\{|\{\{|<%", item))
+        actions = sorted(action_values - set(unstable_action_values))
         states = sorted(set(re.findall(r"\bdata-state\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
         fields = sorted(set(re.findall(r"\bdata-(?:field|bind)\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
         metrics = sorted(set(re.findall(r"\bdata-metric\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
@@ -142,6 +261,13 @@ class PrototypeChecks:
                 # they stay exempt from business AC binding but keep handler checks.
                 if not re.fullmatch(r"(?:ACT|UIACT)-[A-Z0-9-]+", action, re.I):
                     self.add("BLOCK", "PROTO-UNSTABLE-ACTION", path, "data-action must bind a stable ACT-* or UIACT-* ID", action)
+                if action.upper().startswith("ACT-REVIEW-") and re.search(r"review-mode|region-REVIEW|评审抽屉|评审模式", raw, re.I):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-UIACTION-NAMESPACE", path,
+                        "评审叠加的纯界面动作必须使用 UIACT-REVIEW-*，不能污染业务 ACT-*",
+                        action,
+                        affected_consumers=("product", "frontend", "qa", "coding_agent"),
+                    )
             for metric in metrics:
                 if not re.fullmatch(r"METRIC-[A-Z0-9-]+", metric, re.I):
                     self.add("BLOCK", "PROTO-UNSTABLE-METRIC", path, "data-metric must bind a stable METRIC-* ID", metric)
@@ -162,7 +288,7 @@ class PrototypeChecks:
                     "L3/L4 复合页、组装器、门户或多视图原型至少需要一个稳定 REG-* 区域锚点",
                     affected_consumers=("product", "ux", "frontend", "qa", "coding_agent"),
                 )
-        if not actions:
+        if not actions and not unstable_action_values:
             self.add("GAP", "PROTO-NO-ACTIONS", path, "no data-action controls were found; confirm this is intentionally static")
 
         script_blocks = []
@@ -185,13 +311,39 @@ class PrototypeChecks:
                     script_blocks.append(body)
                 module_script = module_script or script_type == "module"
         scripts = "\n".join(script_blocks)
+        handler_actions = _handler_actions(scripts)
+        dynamic_anchor_actions = set(extract_dynamic_anchor_actions(scripts))
+        for placeholder in unstable_action_values:
+            related = tuple(sorted(dynamic_anchor_actions or handler_actions)[:50])
+            self.add(
+                "BLOCK", "PROTO-UNSTABLE-ACTION", path,
+                "data-action 模板值无法静态解析为唯一稳定动作",
+                related[0] if related else "data-action template",
+                related_refs=related,
+            )
+        orphan_handler_actions = sorted(handler_actions - {item.upper() for item in actions} - dynamic_anchor_actions)
+        for action in orphan_handler_actions:
+            self.add(
+                "BLOCK", "PROTO-ORPHAN-HANDLER", path,
+                "动作注册表存在处理器，但源模板没有对应 data-action；可能是入口丢失、死代码或未批准删减",
+                action,
+                affected_consumers=("product", "frontend", "qa", "coding_agent"),
+            )
+        unreachable_surfaces = _unreachable_hidden_surfaces(tag_source, scripts)
+        for surface in unreachable_surfaces:
+            self.add(
+                "BLOCK", "PROTO-UNREACHABLE-VIEW", path,
+                "页面/弹窗/抽屉被显式隐藏且没有可静态发现的入口或路由",
+                surface,
+                affected_consumers=("product", "frontend", "qa", "coding_agent"),
+            )
         split_anchor_pattern = re.compile(
             r"(?:data-\s*['\"]\s*\+\s*['\"](?:action|testid|state|field|metric)|"
             r"['\"]data-['\"]\s*\+\s*['\"](?:action|testid|state|field|metric)['\"])",
             re.I,
         )
         split_anchors = split_anchor_pattern.findall(scripts)
-        script_action_candidates = sorted(set(re.findall(r"\bACT-[A-Z0-9-]+\b", scripts, re.I)) - set(actions))
+        script_action_candidates = sorted(dynamic_anchor_actions - {item.upper() for item in actions})
         if split_anchors:
             severity = "BLOCK" if level in {"L2", "L3", "L4"} else "GAP"
             self.add(
@@ -322,13 +474,18 @@ class PrototypeChecks:
             "prototype_pages": len(page_testids),
             "prototype_regions": len(region_testids),
             "prototype_actions": len(actions),
-            "prototype_dynamic_action_candidates": len(script_action_candidates) if split_anchors else 0,
-            "prototype_action_inventory_total": len(set(actions) | (set(script_action_candidates) if split_anchors else set())),
+            "prototype_dynamic_action_candidates": len(script_action_candidates),
+            "prototype_action_inventory_total": len({item.upper() for item in actions} | dynamic_anchor_actions),
             "prototype_states": len(states),
             "prototype_fields": len(fields),
             "prototype_metrics": len(metrics),
             "prototype_acceptance_refs": len(self.prototype_acceptance_refs),
             "prototype_local_dependencies": len(local_dependencies),
+            "prototype_handler_actions": len(handler_actions),
+            "prototype_dynamic_anchor_actions": len(dynamic_anchor_actions),
+            "prototype_orphan_handler_actions": len(orphan_handler_actions),
+            "prototype_unreachable_surfaces": len(unreachable_surfaces),
+            "prototype_dynamic_class_pollution": len(polluted_classes),
         })
 
     def check_acceptance_run(self, path: Path) -> tuple[set[str], bool, bool]:
@@ -447,4 +604,3 @@ def _balanced_javascript(source: str) -> bool:
             if not stack or stack.pop() != pairs[char]:
                 return False
     return not quote and not stack
-

@@ -180,6 +180,10 @@ def validate(path: Path) -> int:
         f"schema {'.'.join(str(part) for part in error.path) or '<root>'}: {error.message}"
         for error in schema_errors
     ]
+    if failures:
+        for item in failures:
+            print(f"FAIL: {item}")
+        return 1
     if isinstance(document, dict):
         failures.extend(semantic_failures(document))
     else:

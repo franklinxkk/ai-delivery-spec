@@ -172,6 +172,13 @@ def main() -> int:
     parser.add_argument("document", type=Path)
     parser.add_argument("--format", choices=["text", "json"], default="text")
     args = parser.parse_args()
+    if not args.document.is_file():
+        message = f"input document not found: {args.document}"
+        if args.format == "json":
+            print(json.dumps({"status": "BLOCKED", "error": message, "findings": []}, ensure_ascii=False, indent=2))
+        else:
+            print(f"FAIL: {message}")
+        return 2
     findings = scan(args.document.read_text(encoding="utf-8"))
     if args.format == "json":
         print(json.dumps({"findings": findings}, ensure_ascii=False, indent=2))

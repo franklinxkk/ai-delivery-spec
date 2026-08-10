@@ -5,10 +5,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 import yaml
 from jsonschema import Draft202012Validator
+
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,10 +40,18 @@ def main() -> int:
     parser.add_argument("--decision", choices=[*sorted(READY), "REVIEW_COMPLETE_WITH_GAPS", "BLOCKED_BY_P0_UNKNOWN"], required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    contract = yaml.safe_load(args.contract.read_text(encoding="utf-8"))
-    transcript = yaml.safe_load(args.transcript.read_text(encoding="utf-8"))
+    try:
+        contract = yaml.safe_load(args.contract.read_text(encoding="utf-8"))
+        transcript = yaml.safe_load(args.transcript.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, yaml.YAMLError) as exc:
+        print(f"FAIL: clarification input cannot be read: {exc}")
+        return 2
     failures = errors(contract, "discovery-contract.schema.json")
     failures += errors(transcript, "clarification-transcript.schema.json")
+    if failures:
+        for failure in failures:
+            print(f"FAIL: {failure}")
+        return 1
     if transcript.get("project_id") != contract.get("project_id"):
         failures.append("transcript project_id does not match Discovery Contract")
     by_id = {item["id"]: item for item in contract.get("unknowns", [])}

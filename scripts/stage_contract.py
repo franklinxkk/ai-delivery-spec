@@ -15,10 +15,12 @@ from typing import Any
 try:
     import yaml
 except ModuleNotFoundError as exc:  # pragma: no cover - clean-machine path
-    print(
-        "缺少运行依赖 PyYAML。请执行：python -m pip install -r scripts/requirements.txt",
-        file=sys.stderr,
+    message = (
+        "Missing runtime dependency PyYAML. Run: python -m pip install -r scripts/requirements.txt"
+        if any(value == "en-US" for value in sys.argv) else
+        "缺少运行依赖 PyYAML。请执行：python -m pip install -r scripts/requirements.txt"
     )
+    print(message, file=sys.stderr)
     raise SystemExit(4) from exc
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -33,8 +35,15 @@ STAGE_INDEX = {name: index for index, name in enumerate(STAGES)}
 GOVERNED_ORDER = ("frame", "explore", "intake", "clarify", "specify", "review", "baseline", "implementation", "change", "acceptance", "closed")
 GOVERNED_INDEX = {name: index for index, name in enumerate(GOVERNED_ORDER)}
 MAX_ARTIFACT_BYTES = 8 * 1024 * 1024
+TEXT_ARTIFACT_SUFFIXES = {".md", ".markdown", ".yaml", ".yml", ".json"}
+FRONTMATTER_REQUIRED_MESSAGE = (
+    "输入不含 YAML frontmatter，无法执行门禁校验。本产物未经任何自动校验，"
+    "导出为 docx/PDF 将永久失去机器可校验性。请在 markdown + frontmatter 形态下完成基线，再导出分发格式。"
+)
+FRONTMATTER_REQUIRED_FIX = "使用对应 5.4 模板在 markdown + frontmatter 形态下完成基线；docx/PDF 仅在基线后导出为分发副本。"
 EN_GUIDANCE = {
     "GATE-NOT-FILE": ("The artifact cannot be read.", "Check the path, UTF-8 encoding, binary content and size."),
+    "STAGE-NO-FRONTMATTER": ("The artifact is not Markdown with YAML front matter; machine checkability is lost.", "Baseline in Markdown + front matter first; export docx/PDF only as distribution copies."),
     "GATE-MISSING-INPUT": ("The selected profile has no artifact.", "Provide the main artifact for this stage."),
     "STAGE-ARTIFACT-TYPE": ("The artifact type does not match this stage.", "Start from the corresponding v5.4 template and keep artifact/stage metadata."),
     "STAGE-ANCHOR-MISSING": ("A required ADS semantic anchor is missing.", "Add the named ADS anchor and real content; headings may stay in the document language."),
@@ -206,8 +215,20 @@ def require_anchors(artifact: Artifact, names: tuple[str, ...], findings: list[d
             ))
 
 
+_PLACEHOLDER_BUSINESS_PHRASES = ("资料待补充", "数据待补充", "待补充完整")
+
+
 def has_placeholder(text: str) -> bool:
-    return bool(re.search(r"\{[^{}]+\}|待补充|TBD|TODO|待确认内容", text, re.I))
+    if re.search(
+        r"\{[^{}]+\}|(?<![A-Za-z0-9-])(?:TBD|TODO)(?![A-Za-z0-9-])|待确认内容",
+        text,
+        re.I,
+    ):
+        return True
+    scrubbed = text
+    for phrase in _PLACEHOLDER_BUSINESS_PHRASES:
+        scrubbed = scrubbed.replace(phrase, "")
+    return bool(re.search(r"待补充\s*[:：]|待补充[ \t]*$", scrubbed, re.M))
 
 
 def anchor_body(text: str, name: str) -> str:
@@ -505,10 +526,11 @@ def result(profile: str, findings: list[dict[str, Any]], artifacts: list[Artifac
     return code, {
         "status": statuses[code],
         "profile": profile,
+        "output_language": "en-US" if english else "zh-CN",
         "summary": {"blockers": blocks, "p0_unknowns": p0, "gaps": gaps, "findings": len(findings)},
         "coverage": ("Deterministic stage structure, ADS anchors and checkpoint hashes; not business correctness or approval" if english else "确定性阶段产物结构、稳定锚点和断点哈希；不判断业务正确性，不替代责任人评审"),
         "not_proven": (["customer/domain correctness", "solution value", "implementation/runtime behavior", "real acceptance"] if english else ["客户/领域正确性", "方案价值", "实现与运行时行为", "真实验收"]),
-        "retry_command": "python scripts/ai_delivery_spec_cli.py gate --profile " + profile + " " + " ".join(f"--artifact {item.path}" for item in artifacts),
+        "retry_command": "python scripts/ai_delivery_spec_cli.py gate --profile " + profile + " --language " + ("en-US" if english else "zh-CN") + " " + " ".join(f"--artifact {item.path}" for item in artifacts),
         "metrics": {"artifact_count": len(artifacts), "artifact_kinds": [item.kind for item in artifacts]},
         "findings": findings,
     }
@@ -533,15 +555,21 @@ def run_gate(args: argparse.Namespace) -> int:
     findings: list[dict[str, Any]] = []
     artifacts: list[Artifact] = []
     for path in args.artifact:
+        if path.is_file() and path.suffix.casefold() not in TEXT_ARTIFACT_SUFFIXES:
+            findings.append(finding("BLOCK", "STAGE-NO-FRONTMATTER", path, FRONTMATTER_REQUIRED_MESSAGE, FRONTMATTER_REQUIRED_FIX))
+            continue
         try:
             artifacts.append(load_artifact(path))
         except (OSError, UnicodeError, ValueError) as exc:
             findings.append(finding("BLOCK", "GATE-NOT-FILE", path, f"无法读取产物：{exc}", "检查路径、UTF-8 编码、二进制内容和文件大小。"))
     if not artifacts:
-        findings.append(finding("BLOCK", "GATE-MISSING-INPUT", Path("<artifact>"), f"profile={args.profile} 至少需要一个 --artifact", "提供该阶段的主产物。"))
+        if not findings:
+            findings.append(finding("BLOCK", "GATE-MISSING-INPUT", Path("<artifact>"), f"profile={args.profile} 至少需要一个 --artifact", "提供该阶段的主产物。"))
     else:
         primary = next((item for item in artifacts if item.stage == args.profile), artifacts[0])
-        if args.profile == "frame":
+        if primary.path.suffix.casefold() in {".md", ".markdown"} and not primary.metadata:
+            findings.append(finding("BLOCK", "STAGE-NO-FRONTMATTER", primary.path, FRONTMATTER_REQUIRED_MESSAGE, FRONTMATTER_REQUIRED_FIX))
+        elif args.profile == "frame":
             findings.extend(gate_frame(primary))
         elif args.profile == "explore":
             findings.extend(gate_explore(primary))
@@ -559,7 +587,9 @@ def run_gate(args: argparse.Namespace) -> int:
                 or (args.profile == "clarify" and item.kind == "decision_record")
             ):
                 findings.extend(validate_resume(item))
-    language = str(primary.metadata.get("document_language", "zh-CN")) if artifacts else "zh-CN"
+    language = args.language
+    if language == "auto":
+        language = str(primary.metadata.get("document_language", "zh-CN")) if artifacts else "zh-CN"
     code, payload = result(args.profile, findings, artifacts, language)
     english = language.casefold().startswith("en")
     if args.format == "json":
@@ -664,6 +694,7 @@ def main() -> int:
     gate.add_argument("--profile", choices=EARLY_PROFILES, required=True)
     gate.add_argument("--artifact", type=Path, action="append", default=[])
     gate.add_argument("--format", choices=("concise", "json"), default="concise")
+    gate.add_argument("--language", choices=("auto", "zh-CN", "en-US"), default="auto")
     gate.add_argument("--diagnostics", choices=("first", "roots", "summary", "full"), default="roots")
     gate.add_argument("--max-findings", type=int, default=20)
     gate.set_defaults(func=run_gate)

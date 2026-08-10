@@ -6,7 +6,7 @@
 ## 1. 变更申请 / Change Request
 
 建立 `CHG-*` 并记录：提出人、来源/权威、原因/紧迫性、原基线版本、种子 ID、前后行为、
-受影响用户/角色、目标基线、审批规则和必要评审人。无法追溯的口头变化返回 clarify，不能直接改 PRD。
+受影响用户/角色、目标基线、审批规则和必要评审人。无法追溯的口头变化返回澄清（`clarify`），不能直接改 PRD。
 
 `urgency: emergency` 只允许先执行最小可逆止损，不允许绕过需求留痕：必须记录临时授权人、止损范围、回滚触发条件、受影响 ID 和最晚补审时间；止损后补齐影响遍历、结构化签署、同步和回归。缺少临时授权或回滚路径时保持阻断，不能把“紧急”当作永久免审。
 
@@ -19,8 +19,8 @@ REQ, SRC, ROLE, FLOW, VIEW, REG, ACT, FLD, ENT, RULE, STATE,
 API/EVT/INT, AC, TEST, DEFECT, ARUN, EVD, CHG, projection
 ```
 
-将影响标为 direct、transitive、regression-only 或 no-impact-with-reason。权限/数据范围、历史数据、
-兼容、迁移、报表/口径、对账和客户合同分别判断。
+将影响标为直接（`direct`）、传递（`transitive`）、仅回归（`regression-only`）或有理由判定无影响
+（`no-impact-with-reason`）。权限/数据范围、历史数据、兼容、迁移、报表/口径、对账和客户合同分别判断。
 
 ```bash
 python scripts/analyze_change_impact.py \
@@ -31,7 +31,7 @@ python scripts/analyze_change_impact.py \
 
 ## 3. 差异与版本 / Diff And Version
 
-机器合同记录字段级 before/after，评审者同时获得可读行为差异。旧基线永久保留；已接受变更增加
+机器合同记录字段级变更前/变更后（`before/after`），评审者同时获得可读行为差异。旧基线永久保留；已接受变更增加
 需求基线版本并链接被替代版本，禁止覆盖历史。
 
 ## 4. 审批与同步 / Approval And Synchronization
@@ -54,8 +54,8 @@ python scripts/analyze_change_impact.py \
 
 ## 6. 评审关闭 / Review Closure
 
-每个 finding 绑定 `REV-*` 和至少一个 `REQ-*`/行为 ID，记录严重度、责任人、处置、结果和证据。
-P0/P1必须解决、由有权责任人明确延期，或在基线前报告为 blocker。评审至少覆盖目标/来源/范围、
+每个评审发现绑定 `REV-*` 和至少一个 `REQ-*`/行为 ID，记录严重度、责任人、处置、结果和证据。
+P0/P1必须解决、由有权责任人明确延期，或在基线前报告为阻断项（`blocker`）。评审至少覆盖目标/来源/范围、
 角色和模块交接、权限/数据/状态/规则、字段/集成/对账、可读性、验收可执行性和追溯。
 
 评审计划先声明 `required_review_types`；跨系统/NFR/迁移必须含 `architecture`，多团队交付可加入 `delivery`，数据/安全/监管触发时加入 `compliance`。完成态的每个必需类型必须在 `sign_offs` 记录评审类型、签署人、决定、时间和证据；拒绝、缺席或有条件批准但无条件项都不能关闭。`reviewers` 名单本身不等于签署。
@@ -65,20 +65,20 @@ P0/P1必须解决、由有权责任人明确延期，或在基线前报告为 bl
 可执行 `AC-*` 声明需求/行为引用、前置条件、角色/数据范围、步骤/输入、预期可见/领域结果、
 反向/异常行为和强制证据。
 
-L3/L4基线前，frontmatter 的 `acceptance_plan` 声明责任人、准确范围/规则、通过规则、证据类型和
-签署角色。它只是计划，不能冒充已执行。静态 Gate PASS 必须列出未证明项，只有 `ARUN-*` 加真实
+L3/L4基线前，文档头机器元数据（frontmatter）的 `acceptance_plan` 声明责任人、准确范围/规则、
+通过规则、证据类型和签署角色。它只是计划，不能冒充已执行。静态门禁通过（Gate PASS）必须列出未证明项，只有 `ARUN-*` 加真实
 证据才能证明执行。
 
 `schemas/acceptance-run.schema.json` 中每个 ARUN 记录基线、环境、执行人、实际结果、证据、缺陷、
-残余问题和签署。item 结果为 pass/fail/blocked/not_run；结论为 accepted、
-accepted_with_conditions、rejected 或 pending；有条件接受要写条件、责任人和完成标准。
+残余问题和签署。验收项结果为通过/失败/阻断/未执行（`pass/fail/blocked/not_run`）；结论为接受
+/有条件接受/拒绝/待定（`accepted/accepted_with_conditions/rejected/pending`）；有条件接受要写条件、责任人和完成标准。
 
 证据引用不能只是任意字符串：
 
 - 本地文件使用 ARUN 所在目录内的相对路径，必须存在且不能目录逃逸；
 - 稳定 `EVD-*` 在同一文件的 `evidence_catalog` 中绑定相对路径或 http(s) URL；
 - 可选 SHA-256 用于检测证据漂移；
-- pass 项和接受结论的每条签署都必须有可解析证据；
+- 通过项（`pass`）和接受结论的每条签署都必须有可解析证据；
 - 路径越界、缺文件、哈希漂移、未登记 EVD 或拒绝签署与接受结论冲突都会阻断。
 
 ## 8. 反向追溯与证据诚实性 / Reverse Trace And Evidence Honesty
@@ -93,4 +93,4 @@ ARUN item / DEFECT → AC → behavior ID → REQ → SRC / CHG
 内嵌 PASS 文本不能证明执行。记录工具/人员、时间、环境、位置和结果；执行或外部签署未完成时
 保持 `REVIEW_COMPLETE_WITH_GAPS`。
 
-验收 accepted 只证明需求验收闭合，不证明已经发布。外部发布/运维系统可以把版本、环境和状态写回 requirement register 的 `external_milestones`；线上数据或反馈如需改变需求，登记为新 `SRC-*` 并进入 intake，或对既有基线创建 `CHG-*`。
+验收接受（`accepted`）只证明需求验收闭合，不证明已经发布。外部发布/运维系统可以把版本、环境和状态写回需求登记表的 `external_milestones`；线上数据或反馈如需改变需求，登记为新 `SRC-*` 并进入准入（`intake`），或对既有基线创建 `CHG-*`。

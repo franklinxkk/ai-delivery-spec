@@ -40,8 +40,10 @@ for marker in ("route-stage", "ADS:*", "resume_context", "两个本地依赖"):
     if marker not in README:
         failures.append(f"README misses progressive-disclosure marker: {marker}")
 
+badge_match = re.search(r"version-([0-9]+\.[0-9]+\.[0-9]+)-", README)
+expected_version = badge_match.group(1) if badge_match else None
 version = run("version")
-if version.returncode != 0 or version.stdout.strip() != "5.4.2":
+if not expected_version or version.returncode != 0 or version.stdout.strip() != expected_version:
     failures.append("README public version path failed: " + version.stdout + version.stderr)
 
 with tempfile.TemporaryDirectory(prefix="ads-readme-") as temp_name:

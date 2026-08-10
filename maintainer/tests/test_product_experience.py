@@ -49,7 +49,8 @@ def test_trigger_and_minimum_change_contract() -> None:
     for needle in (
         "写/改一个小功能",
         "加字段/列/页签/下拉",
-        "直接改更快",
+        "Always invoke regardless of size or clarity",
+        "也必须调用",
         "小迭代先最小改动",
         "示例子集",
         "反向同步不得进入正向上报队列",
@@ -57,8 +58,9 @@ def test_trigger_and_minimum_change_contract() -> None:
         require(skill, needle, "trigger/minimum-change contract")
     require(agent, "policy:", "implicit invocation policy")
     require(agent, "allow_implicit_invocation: true", "implicit invocation enabled")
-    require(agent, "$ai-delivery-spec；写/改小功能", "host-facing trigger examples")
-    require(agent, "不能用示例子集冒充替换", "host-facing parity contract")
+    require(agent, "Use $ai-delivery-spec", "English host-facing invocation")
+    require(agent, "使用", "Chinese host-facing invocation")
+    require(agent, "user's language", "host-facing language contract")
     require(discover, "最小改动模式", "minimum-change routing")
     require(discover, "不超过一个短屏", "human-first output budget")
     require(discover, "生产者/权威源 → 汇聚或转换方 → 消费方", "integration direction")
@@ -103,6 +105,14 @@ def test_root_diagnostics_compact_repetition() -> None:
     roots, unique = quality_roots(findings, 20)
     assert unique == 2
     assert [(item.code, count) for item, count in roots] == [("CODE-A", 2), ("CODE-B", 1)]
+    representative, _ = quality_roots(
+        [
+            Finding("BLOCK", "CODE-C", "demo.html", "template", "${act}"),
+            Finding("BLOCK", "CODE-C", "demo.html", "real", "ACT-DEMO-SAVE"),
+        ],
+        20,
+    )
+    assert representative[0][0].ref == "ACT-DEMO-SAVE"
     stage, stage_unique = stage_roots(
         [{"code": "CODE-A"}, {"code": "CODE-A"}, {"code": "CODE-B"}],
         20,

@@ -11,6 +11,10 @@ assumption_refs: []
 assumption_resolutions: []
 resume_context:
   completed_stages: [intake]
+  # 续跑对象示例（全新任务保持空数组）：
+  # - path: prior/intake.yaml
+  #   sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  #   stage: intake
   prior_artifacts: []
   open_threads: []
   next_stage_options: [specify, intake]
@@ -56,25 +60,28 @@ resume_context:
 
 | ID | 决策 | 选项与取舍 | 依据/来源 | 决策人 | 状态 |
 |---|---|---|---|---|---|
-| `DEC-001` | {决策} | {选择及未选原因} | `SRC-*` | {责任人} | confirmed |
+| `DEC-001` | {决策} | {选择及未选原因} | `SRC-*` | {责任人} | 已确认（`confirmed`） |
 
 <!-- ADS:rules -->
 ## 业务规则、流程与异常
 
 | ID | 触发/前置 | 系统行为与数据变化 | 可见结果 | 失败/恢复 | 验收方向 |
 |---|---|---|---|---|---|
-| `BR-001` | {When/While/If} | {shall；写明覆盖/追加/幂等/权限} | {结果} | {错误、重试、回退} | `AC-*` |
+| `BR-001` | {触发条件：当/期间/如果} | {必须；写明覆盖/追加/幂等/权限} | {结果} | {错误、重试、回退} | `AC-*` |
 
 <!-- ADS:unknowns -->
 ## 未知项、风险与禁止推断
 
-| ID | 优先级 | 内容 | 责任人 | blocks_stage | 回退/缩范围路径 | 状态 |
+| ID | 优先级 | 内容 | 责任人 | 阻断阶段（`blocks_stage`） | 回退/缩范围路径 | 状态 |
 |---|---|---|---|---|---|---|
-| `UNK-001` | P1 | {尚未确认内容} | {责任人} | baseline | {安全退路} | open |
+| `UNK-001` | P1 | {尚未确认内容} | {责任人} | 需求基线（`baseline`） | {安全退路} | 待关闭（`open`） |
 
 <!-- ADS:next_step -->
 ## 出口判断与下一步
 
-- 结论：READY_FOR_LIGHT_SPEC / READY_FOR_UNIFIED_PRD / READY_FOR_PRODUCT_TRUTH / BLOCKED_BY_P0_UNKNOWN
+- 结论：
+  - 可进入轻量规格（`READY_FOR_LIGHT_SPEC`）/可进入统一 PRD（`READY_FOR_UNIFIED_PRD`）；
+  - 可进入受治理需求真相（`READY_FOR_PRODUCT_TRUTH`）；
+  - 被 P0 未知项阻断（`BLOCKED_BY_P0_UNKNOWN`）。
 - 下一交付：{需求卡/统一PRD/受治理真相/返回准入}
 - 必须携带：`DEC-*`、开放`UNK-*`、适用来源、禁止推断项和责任人。

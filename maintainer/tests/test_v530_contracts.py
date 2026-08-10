@@ -25,22 +25,27 @@ card_lifecycle_results: list[str] = []
 
 for relative, markers in {
     "references/lifecycle.md": (
-        "Decision-Tree Clarification", "self-check gate", "recommended answer",
-        "Only P0/P1 branches", "is unavailable",
+        ("Decision-Tree Clarification", "决策树澄清"),
+        ("self-check gate", "自查闸"),
+        ("recommended answer", "推荐答案"),
+        ("Only P0/P1 branches", "只有 P0/P1 分支"),
+        ("is unavailable", "用户暂不可用"),
     ),
     "references/prototype.md": (
-        "DEC-AESTHETIC-*", "explicit taboo", "--acceptance-run",
-        "browser_evidence_status", "region-REG-*",
+        ("DEC-AESTHETIC-*",), ("explicit taboo",), ("--acceptance-run",),
+        ("browser_evidence_status",), ("region-REG-*",),
     ),
     "references/troubleshooting.md": (
-        "Exact-ID And Dynamic-Anchor Migration", "${act}", "dataset.action",
-        "PROTO-BROWSER-EVIDENCE-MISSING",
+        ("Exact-ID And Dynamic-Anchor Migration",), ("${act}",), ("dataset.action",),
+        ("PROTO-BROWSER-EVIDENCE-MISSING",),
     ),
 }.items():
     text = (ROOT / relative).read_text(encoding="utf-8")
-    for marker in markers:
-        if marker not in text:
-            failures.append(f"{relative} misses the current v5.3.x contract marker: {marker}")
+    for aliases in markers:
+        if not any(marker in text for marker in aliases):
+            failures.append(
+                f"{relative} misses the current v5.3.x contract marker: {' / '.join(aliases)}"
+            )
 
 
 def run_gate(*args: str) -> tuple[int, dict]:
@@ -607,8 +612,11 @@ AC-LIGHT-001：给定有权用户，打开列表后显示归属地；越权用�
     dynamic_prototype.write_text(
         """<!doctype html><main data-testid="page-VIEW-DEMO"></main>
 <script>
+const actionHandlers={};
 const act=(id)=>'<button data-'+'action="'+id+'">run</button>';
 document.querySelector('main').innerHTML=act('ACT-DEMO-RUN');
+actionHandlers['ACT-DEMO-RUN']=()=>{};
+actionHandlers['ACT-DEMO-DEAD']=()=>{};
 </script>""",
         encoding="utf-8",
     )
@@ -617,6 +625,11 @@ document.querySelector('main').innerHTML=act('ACT-DEMO-RUN');
         failures.append(f"dynamic data-action construction escaped L2: {codes(payload)}")
     if payload.get("metrics", {}).get("prototype_dynamic_action_candidates") != 1:
         failures.append("dynamic ACT candidate was not included in prototype inventory metrics")
+    orphan_refs = {item.get("ref") for item in payload["findings"] if item["code"] == "PROTO-ORPHAN-HANDLER"}
+    if "ACT-DEMO-RUN" in orphan_refs:
+        failures.append("dynamic action is orphan")
+    if "ACT-DEMO-DEAD" not in orphan_refs:
+        failures.append("orphan suppressed")
 
     placeholder_prototype = temp / "placeholder-anchor.html"
     placeholder_prototype.write_text(

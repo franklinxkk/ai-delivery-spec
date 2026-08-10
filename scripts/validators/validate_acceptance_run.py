@@ -105,6 +105,10 @@ def main() -> int:
         f"schema {'.'.join(str(part) for part in error.path) or '<root>'}: {error.message}"
         for error in Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(doc)
     ]
+    if failures:
+        for item in failures:
+            print(f"FAIL: {item}")
+        return 1
     items = doc.get("items", []) if isinstance(doc, dict) else []
     if isinstance(doc, dict):
         failures.extend(validate_evidence_refs(doc, args.document))

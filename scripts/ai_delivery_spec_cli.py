@@ -17,10 +17,12 @@ try:
     from jsonschema import Draft202012Validator, FormatChecker
 except ModuleNotFoundError as exc:  # pragma: no cover - clean-machine path
     missing = getattr(exc, "name", "PyYAML/jsonschema")
-    print(
-        f"缺少运行依赖 {missing}。请先执行：python -m pip install -r scripts/requirements.txt",
-        file=sys.stderr,
+    message = (
+        f"Missing runtime dependency {missing}. Run: python -m pip install -r scripts/requirements.txt"
+        if any(value == "en-US" for value in sys.argv) else
+        f"缺少运行依赖 {missing}。请先执行：python -m pip install -r scripts/requirements.txt"
     )
+    print(message, file=sys.stderr)
     raise SystemExit(4) from exc
 
 
@@ -31,6 +33,7 @@ if hasattr(sys.stderr, "reconfigure"):
 
 
 ROOT = Path(__file__).resolve().parents[1]
+MAINTAINER_DIR = ROOT / "maintainer"
 
 
 DELIVERY_DIRS = (
@@ -257,6 +260,9 @@ def init_requirements(args: argparse.Namespace) -> int:
 
 
 def run_check(args: argparse.Namespace) -> int:
+    if not MAINTAINER_DIR.is_dir():
+        print("[SKIP] maintainer-only assurance suite is not shipped in the runtime package")
+        return 0
     fast_commands: list[list[str]] = [
         [sys.executable, "maintainer/tools/validators/validate_v5_architecture.py"],
         [sys.executable, "scripts/validators/validate_spec_config.py", "examples/spec.config.example.yaml"],
@@ -282,6 +288,7 @@ def run_check(args: argparse.Namespace) -> int:
         [sys.executable, "maintainer/tests/test_v530_contracts.py"],
         [sys.executable, "maintainer/tests/test_v540_stage_contracts.py"],
         [sys.executable, "scripts/validators/validate_requirement_patterns.py", "references/patterns/common-requirement-patterns.yaml"],
+        [sys.executable, "maintainer/tests/test_v544_human_review_contracts.py"],
         [sys.executable, "maintainer/tests/test_context_planning.py"],
         [sys.executable, "maintainer/tests/test_execution_state.py"],
         [sys.executable, "maintainer/tests/test_cli_init.py"],
@@ -381,6 +388,11 @@ def build_trace(args: argparse.Namespace) -> int:
 
 
 def status_report(args: argparse.Namespace) -> int:
+    evals_dir = MAINTAINER_DIR / "evals"
+    if not evals_dir.is_dir():
+        print("[SKIP] maintainer evaluation assets are not shipped in the runtime package")
+        print(f"runtime skill version: {current_version()}")
+        return 0
     coverage = yaml.safe_load((ROOT / "references/domain-coverage.yaml").read_text(encoding="utf-8"))
     fixtures = yaml.safe_load((ROOT / "maintainer/evals/domain-fixtures.yaml").read_text(encoding="utf-8"))
     catalog = yaml.safe_load((ROOT / "maintainer/evals/eval-catalog.yaml").read_text(encoding="utf-8"))
@@ -413,7 +425,7 @@ def status_report(args: argparse.Namespace) -> int:
         },
         "known_limitations": [
             "five domain methods have owner-attested production practice; all built-in packs pass deterministic contract checks but fresh-agent/expert maturity remains separate",
-            "v5.4.2 experience probes are partial; matched cross-model repetitions and versioned user feedback remain not_run",
+            "v5.4.4 human-review probes are partial; isolated no-skill comparison, fresh-agent repetitions and versioned user feedback remain separate evidence",
             "domain expert, customer, production, legal, safety, and financial correctness are not proven",
             "deterministic fixtures and private brownfield calibration expose method gaps but do not prove implementation or customer acceptance",
         ],
@@ -464,6 +476,7 @@ def quality_gate(args: argparse.Namespace) -> int:
         values = [
             "gate", "--profile", args.profile, "--format", args.format,
             "--diagnostics", args.diagnostics, "--max-findings", str(args.max_findings),
+            "--language", args.language,
         ]
         for artifact in args.artifact:
             values.extend(["--artifact", str(artifact)])
@@ -473,16 +486,28 @@ def quality_gate(args: argparse.Namespace) -> int:
         and args.requirement
         and args.requirement.suffix.casefold() in {".md", ".markdown"}
     ):
-        print(
-            "BLOCKED: --profile requirement 只校验 YAML 需求登记册；"
-            "Markdown 需求卡或 PRD 请改用："
-            f"python scripts/ai_delivery_spec_cli.py gate --profile prd --prd \"{args.requirement}\""
-        )
+        language = args.language
+        if language == "auto" and args.requirement.is_file():
+            sample = args.requirement.read_text(encoding="utf-8", errors="ignore")[:4000]
+            match = re.search(r"^document_language:\s*([^\s#]+)", sample, re.M)
+            language = "en-US" if match and match.group(1).casefold().startswith("en") else "zh-CN"
+        if language == "en-US":
+            print(
+                "BLOCKED: --profile requirement validates YAML requirement registers only. "
+                "For a Markdown requirement card or PRD, use: "
+                f"python scripts/ai_delivery_spec_cli.py gate --profile prd --prd \"{args.requirement}\" --language en-US"
+            )
+        else:
+            print(
+                "BLOCKED: --profile requirement 只校验 YAML 需求登记册；"
+                "Markdown 需求卡或 PRD 请改用："
+                f"python scripts/ai_delivery_spec_cli.py gate --profile prd --prd \"{args.requirement}\" --language zh-CN"
+            )
         return 2
     values = [
         "--profile", args.profile, "--level", args.level, "--stage", args.stage,
         "--format", args.format, "--diagnostics", args.diagnostics,
-        "--max-findings", str(args.max_findings),
+        "--max-findings", str(args.max_findings), "--language", args.language,
     ]
     for scope_ref in args.scope_ref:
         values.extend(["--scope-ref", scope_ref])
@@ -492,9 +517,11 @@ def quality_gate(args: argparse.Namespace) -> int:
         "requirement": "--requirement",
         "prd": "--prd",
         "prototype": "--prototype",
+        "prototype_baseline": "--prototype-baseline",
         "inventory": "--inventory",
         "manifest": "--manifest",
         "acceptance_run": "--acceptance-run",
+        "review_record": "--review-record",
     }
     for name, option in option_names.items():
         value = getattr(args, name)
@@ -503,6 +530,9 @@ def quality_gate(args: argparse.Namespace) -> int:
                 values.extend([option, str(item)])
         elif value:
             values.extend([option, str(value)])
+    if args.profile == "requirement":
+        for artifact in args.artifact:
+            values.extend(["--register", str(artifact)])
     return run_script("quality_gate.py", values)
 
 
@@ -702,15 +732,30 @@ def assess_candidate(args: argparse.Namespace) -> int:
 
 
 def explain_finding(args: argparse.Namespace) -> int:
-    from quality_gate import guidance_for, repair_example_for
+    from quality_gate import english_guidance_for, english_repair_example_for, guidance_for, repair_example_for
 
-    cause, how_to_fix = guidance_for(args.code)
-    example = repair_example_for(args.code)
-    payload = {"code": args.code, "cause": cause, "how_to_fix": how_to_fix, "repair_example": example}
+    cause_zh, fix_zh = guidance_for(args.code)
+    example_zh = repair_example_for(args.code)
+    cause_en, fix_en = english_guidance_for(args.code)
+    example_en = english_repair_example_for(args.code)
+    english = args.language == "en-US"
+    payload = {
+        "code": args.code,
+        "output_language": "en-US" if english else "zh-CN",
+        "cause": cause_en if english else cause_zh,
+        "how_to_fix": fix_en if english else fix_zh,
+        "repair_example": example_en if english else example_zh,
+        "cause_zh": cause_zh, "fix_zh": fix_zh, "repair_example_zh": example_zh,
+        "cause_en": cause_en, "fix_en": fix_en, "repair_example_en": example_en,
+    }
     if args.format == "json":
         print(json.dumps(payload, ensure_ascii=False, indent=2))
     else:
-        print(f"{args.code}\n原因: {cause}\n修复: {how_to_fix}\n示例: {example}")
+        labels = ("Cause", "Fix", "Example") if english else ("原因", "修复", "示例")
+        print(
+            f"{args.code}\n{labels[0]}: {payload['cause']}\n"
+            f"{labels[1]}: {payload['how_to_fix']}\n{labels[2]}: {payload['repair_example']}"
+        )
     return 0
 
 
@@ -730,10 +775,16 @@ def resume_execution(args: argparse.Namespace) -> int:
             return 2
         state = max(set(candidates), key=lambda path: path.stat().st_mtime)
         print(f"INFO: 自动选择最近快照 {state}")
+    if not state.is_file():
+        print(f"BLOCKED: 执行快照不存在或不是文件：{state}")
+        return 2
     return run_script("manage_execution_state.py", ["resume", "--state", str(state)])
 
 
 def main() -> int:
+    help_language = next((sys.argv[index + 1] for index, value in enumerate(sys.argv[:-1]) if value == "--language"), "zh-CN")
+    english_help = help_language == "en-US"
+    gate_help = lambda en, zh: en if english_help else zh
     parser = argparse.ArgumentParser(prog="ai_delivery_spec_cli.py")
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -771,20 +822,23 @@ def main() -> int:
 
     gate = sub.add_parser("gate", help="Run the token-free final requirement/PRD/prototype goalkeeper")
     gate.add_argument("--profile", choices=["frame", "explore", "clarify", "requirement", "prd", "prototype", "handoff", "full", "stage0", "agent_handoff"], required=True)
-    gate.add_argument("--artifact", type=Path, action="append", default=[], help="frame/explore/clarify 主产物；可重复提供侧车产物")
+    gate.add_argument("--artifact", type=Path, action="append", default=[], help=gate_help("Main frame/explore/clarify artifact; for profile=requirement repeat it for requirement-register sidecars", "frame/explore/clarify 主产物；profile=requirement 时可重复提供需求登记册侧车"))
     gate.add_argument("--requirement", type=Path)
     gate.add_argument("--prd", type=Path)
     gate.add_argument("--prototype", type=Path, action="append", help="Repeat for admin/H5/multi-surface prototypes")
+    gate.add_argument("--prototype-baseline", type=Path, help=gate_help("Existing HTML baseline; inherited issues become GAP while new regressions still block", "存量 HTML 基线；相同旧问题降为 GAP，本次新增回归仍阻断"))
     gate.add_argument("--inventory", type=Path, help="Stage 0 brownfield inventory YAML")
     gate.add_argument("--manifest", type=Path, help="Agent handoff manifest YAML")
-    gate.add_argument("--acceptance-run", type=Path, action="append", help="已执行的 ARUN-*；L3/L4 原型据此闭合浏览器证据")
+    gate.add_argument("--acceptance-run", type=Path, action="append", help=gate_help("Executed ARUN-*; repeat to close L3/L4 browser evidence", "已执行的 ARUN-*；L3/L4 原型据此闭合浏览器证据"))
+    gate.add_argument("--review-record", type=Path, help=gate_help("Optional review record YAML; validates sign-off closure", "可选评审记录 YAML；用于校验签署闭环"))
     gate.add_argument("--level", choices=["auto", "L0", "L1", "L2", "L3", "L4"], default="auto")
     gate.add_argument("--stage", choices=["inventory", "clarify", "specify", "review", "baseline", "prototype", "implementation", "acceptance", "closed"], default="baseline")
     gate.add_argument("--scope-ref", action="append", default=[])
     gate.add_argument("--format", choices=["concise", "json"], default="concise")
+    gate.add_argument("--language", choices=["auto", "zh-CN", "en-US"], default="auto", help="Human-readable diagnostics; auto follows artifact language")
     gate.add_argument("--diagnostics", choices=["first", "roots", "summary", "full"], default="roots")
     gate.add_argument("--max-findings", type=int, default=20)
-    gate.add_argument("--custom-root", type=Path, help="本地私有扩展目录；省略时门禁自动发现当前目录 custom/")
+    gate.add_argument("--custom-root", type=Path, help=gate_help("Project-local private extension directory; auto-discovers ./custom when omitted", "本地私有扩展目录；省略时门禁自动发现当前目录 custom/"))
     gate.set_defaults(func=quality_gate)
 
     route = sub.add_parser("route-stage", help="检查显式目标阶段、已有产物和断点；不使用关键词推断意图")
@@ -796,6 +850,7 @@ def main() -> int:
     explain = sub.add_parser("explain-finding", help="Explain one gate code and show a bounded repair direction")
     explain.add_argument("code")
     explain.add_argument("--format", choices=["concise", "json"], default="concise")
+    explain.add_argument("--language", choices=["zh-CN", "en-US"], default="zh-CN")
     explain.set_defaults(func=explain_finding)
 
     resume = sub.add_parser("resume", help="Verify and resume from the last valid large-project checkpoint")

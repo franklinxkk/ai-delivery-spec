@@ -19,6 +19,10 @@ except ModuleNotFoundError as exc:  # pragma: no cover - clean-machine path
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "references" / "domain-coverage.yaml"
 SOURCE_CATALOG = ROOT / "references" / "domains" / "domain-sources.yaml"
+VENDOR_AUTHORITY_TYPES = {
+    "vendor_whitepaper", "vendor_product_docs", "vendor_case_library", "vendor_open_source",
+}
+EFFECT_CLASSES = {"binding_baseline", "design_guidance", "product_pattern", "change_watch"}
 
 
 def stale(last_verified_at: object, refresh_days: object) -> bool:
@@ -27,6 +31,25 @@ def stale(last_verified_at: object, refresh_days: object) -> bool:
         return (date.today() - checked).days > int(refresh_days)
     except (TypeError, ValueError):
         return True
+
+
+def effect_class(source: dict[str, object]) -> str:
+    declared = str(source.get("effect_class", "")).strip()
+    if declared:
+        return declared if declared in EFFECT_CLASSES else "change_watch"
+    status = str(source.get("status", "")).casefold()
+    if source.get("authority_type") in VENDOR_AUTHORITY_TYPES:
+        return "product_pattern"
+    if any(token in status for token in ("draft", "watch", "proposed", "unverified")):
+        return "change_watch"
+    return "authoritative_reference"
+
+
+def binding_use(source: dict[str, object]) -> str:
+    classification = effect_class(source)
+    if classification in {"product_pattern", "change_watch"}:
+        return "prohibited"
+    return "verify_applicability"
 
 
 def select_sections(raw: str, requested: list[str]) -> tuple[list[str], list[str]]:
@@ -64,6 +87,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--domain", required=True)
     parser.add_argument("--format", choices=["yaml", "markdown"], default="yaml")
+    parser.add_argument("--source-detail", choices=["compact", "full"], default="compact")
     parser.add_argument("--section", action="append", default=[], help="Load only an exact ##/### heading; repeat as needed")
     parser.add_argument("--custom-root", type=Path, default=Path("custom"), help="本地私有扩展目录")
     args = parser.parse_args()
@@ -85,6 +109,7 @@ def main() -> int:
     for domain_id in [item.strip() for item in args.domain.split("+") if item.strip()]:
         item = official.get(domain_id)
         if item is not None:
+            domain_sources = [source for source in sources.get("sources", []) if domain_id in source.get("domains", [])]
             record: dict[str, object] = {
                 "domain_id": item["domain_id"],
                 "origin": "official",
@@ -95,18 +120,35 @@ def main() -> int:
                 "practice_status": item["practice_status"],
                 "coverage": item["coverage"],
                 "evidence_refs": list(dict.fromkeys(evidence["location"] for evidence in item.get("evidence", []))),
-                "source_refs": [
-                    {
-                        "id": source["id"], "type": source["authority_type"], "title": source["title"],
-                        "last_verified_at": source.get("last_verified_at"), "refresh_days": source.get("refresh_days"),
-                        "stale": stale(source.get("last_verified_at"), source.get("refresh_days")),
-                    }
-                    for source in sources.get("sources", []) if domain_id in source.get("domains", [])
-                ],
                 "known_gaps": item.get("known_gaps", []),
                 "production_claim": item.get("production_claim", "prohibited"),
                 "last_verified_at": item.get("last_verified_at"),
             }
+            if args.source_detail == "full":
+                record["source_refs"] = [
+                    {
+                        "id": source["id"], "title": source["title"],
+                        "effect_class": effect_class(source), "binding_use": binding_use(source),
+                        "last_verified_at": source.get("last_verified_at"), "refresh_days": source.get("refresh_days"),
+                        "stale": stale(source.get("last_verified_at"), source.get("refresh_days")),
+                        **({"claim_limit": source["claim_limit"]} if source.get("claim_limit") else {}),
+                    }
+                    for source in domain_sources
+                ]
+            else:
+                record["source_refs"] = [source["id"] for source in domain_sources]
+                record["source_effects"] = {
+                    kind: [source["id"] for source in domain_sources if effect_class(source) == kind]
+                    for kind in ("binding_baseline", "design_guidance", "product_pattern", "change_watch")
+                    if any(effect_class(source) == kind for source in domain_sources)
+                }
+                record["stale_source_refs"] = [
+                    source["id"] for source in domain_sources
+                    if stale(source.get("last_verified_at"), source.get("refresh_days"))
+                ]
+                limits = {source["id"]: source["claim_limit"] for source in domain_sources if source.get("claim_limit")}
+                if limits:
+                    record["source_claim_limits"] = limits
             knowledge_path = ROOT / str(record["knowledge_file"])
         else:
             item = custom_domains.get(domain_id)
@@ -138,13 +180,27 @@ def main() -> int:
                 return 1
         record["source_refresh_warning"] = (
             "存在超过刷新周期或缺少日期的来源；使用其作约束前必须重新核验"
-            if any(source.get("stale") for source in record.get("source_refs", []) if isinstance(source, dict)) else None
+            if record.get("stale_source_refs") or any(
+                source.get("stale") for source in record.get("source_refs", []) if isinstance(source, dict)
+            ) else None
+        )
+        record["source_usage_rule"] = (
+            "product_pattern/change_watch 只能启发方案或触发复核，不能生成硬要求；"
+            "其他来源仍须核验项目辖区、适用对象、合同引用与生效状态"
         )
         if args.section:
             knowledge_text = knowledge_path.read_text(encoding="utf-8")
             selected, missing = select_sections(knowledge_text, args.section)
             if missing:
-                print(f"FAIL: {domain_id} unknown section(s): {', '.join(missing)}")
+                available_headings = [
+                    match.group(1).strip()
+                    for match in re.finditer(r"^#{2,3}\s+(.+?)\s*$", knowledge_text, re.M)
+                ]
+                available = "; ".join(available_headings[:30]) or "<none>"
+                print(
+                    f"FAIL: {domain_id} unknown section(s): {', '.join(missing)}; "
+                    f"available headings: {available}"
+                )
                 return 1
             record["selected_sections"] = selected
         records.append(record)

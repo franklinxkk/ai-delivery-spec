@@ -446,7 +446,15 @@ def verify_state(args: argparse.Namespace) -> int:
 def resume_state(args: argparse.Namespace) -> int:
     """Show the last valid checkpoint and the bounded next action without mutation."""
     state_path = args.state.resolve()
-    state = load(state_path)
+    try:
+        state = load(state_path)
+    except (OSError, UnicodeError, json.JSONDecodeError, yaml.YAMLError) as exc:
+        print(f"BLOCKED: checkpoint cannot be read -> {state_path}")
+        print(f"- {exc}")
+        return 2
+    if not isinstance(state, dict):
+        print(f"BLOCKED: checkpoint root must be an object -> {state_path}")
+        return 2
     failures = verify_state_value(state)
     if failures:
         print(f"BLOCKED: checkpoint cannot resume -> {state_path}")

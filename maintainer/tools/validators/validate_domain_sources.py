@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate authoritative-source registry freshness and safe claim semantics."""
+"""Validate domain sources."""
 
 from __future__ import annotations
 
@@ -37,6 +37,8 @@ TRUSTED_HOST_SUFFIXES = (
     "sc.gov.cn",
     "europa.eu",
     "oecd.org",
+    "unesco.org",
+    "modelcontextprotocol.io",
 )
 VENDOR_HOST_SUFFIXES = (
     "weaver.com.cn",
@@ -44,6 +46,10 @@ VENDOR_HOST_SUFFIXES = (
     "landray.com.cn",
     "open.feishu.cn",
     "open.dingtalk.com",
+    "microsoft.com",
+    "salesforce.com",
+    "hubspot.com",
+    "tencent.com.cn", "qwenwork.cn", "feishu.cn",
 )
 OFFICIAL_GITHUB_PREFIXES = (
     "/open-dingtalk",
@@ -65,7 +71,6 @@ def main() -> int:
     seen_ids: set[str] = set()
     seen_urls: set[str] = set()
     today = date.today()
-
     for source in registry.get("sources", []):
         source_id = source.get("id")
         if not source_id or source_id in seen_ids:
@@ -131,7 +136,7 @@ def main() -> int:
         for item in failures:
             print(f"FAIL: {item}")
         return 1
-    print(f"PASS: {len(seen_ids)} authoritative sources have valid URLs, applicability, and fresh verification metadata")
+    print(f"PASS: {len(seen_ids)} sources")
     return 0
 
 

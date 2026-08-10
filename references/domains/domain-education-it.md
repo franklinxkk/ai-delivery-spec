@@ -35,6 +35,24 @@ This module is distilled from multi-year higher-education informationization mat
 - AI must not decide automatically: student disciplinary action, scholarship/aid final result, psychological crisis classification, final grades, graduation eligibility, teacher performance conclusion, official evaluation result, or any legally/accountably binding school decision.
 - Representative system families to abstract from: academic affairs suites such as training-plan, course, scheduling, selection, exam, score, graduation-audit, and textbook management; learning/teaching platforms with course resources, classroom interaction, homework, analytics, and AI classroom signals; student-affairs platforms covering one-stop community, counselor workbench, aid/award/sanction/dorm/safety/employment; research management platforms covering project, fund, contract, output, IP, ethics/integrity, and achievement transformation; university data platforms covering standards, master data, indicators, reports, and dashboards.
 
+### Current Baseline and Change Watch (verified 2026-08-09)
+
+| Evidence class | Current signal | Requirement effect |
+|---|---|---|
+| binding_baseline | `KS-EDU-AI-PLUS-2026` adds an all-stage “AI+education” policy baseline; existing education data and classification rules still apply | every AI education PRD must state learner/teacher value, age/stage, human responsibility, data/content/model safety and evidence; the action plan is not a universal feature checklist |
+| design_guidance | `KS-EDU-AI-GUIDANCE-2025`, `KS-EDU-UNESCO-AI-COMP-2026` | design age-appropriate student use and progressive teacher competency, while keeping institutional/local rules authoritative |
+| product_pattern | `KS-EDU-DIGITAL-CASES-2026` and the National Smart Education Platform 2.0 AI direction | compare platform, classroom, teacher-support, inclusion and governance patterns; verify transferability before adoption |
+| change_watch | no national primary source was found for the exact term “AI education three-entry strategy / AI教育三进战略” | treat that phrase as `UNK` until the issuer and document are supplied; do not present it as an active national mandate |
+
+### AI Transformation Horizon
+
+| Axis | From -> toward | Non-negotiable product guard |
+|---|---|---|
+| learning | uniform content delivery -> teacher-governed adaptive tutoring, practice and feedback | age/stage suitability, learner agency, accessibility and clear AI identity are explicit |
+| teaching | isolated content generation -> lesson/course/assessment copilot grounded in curriculum and evidence | teachers own pedagogy, final assessment and publication; generated material keeps source/version review |
+| governance | lagging reports -> evidence-linked diagnosis and bounded service agents | grades, graduation, aid, discipline, mental health and official evaluation never become autonomous AI decisions |
+| learning loop | clicks/time-on-task -> mastery, transfer, teacher workload, equity and harmful-error slices | AI engagement is not educational outcome; preserve appeal, correction and non-AI paths |
+
 ## First-Principles Domain Lens
 
 Education IT product judgment starts from accountable learning, teaching,

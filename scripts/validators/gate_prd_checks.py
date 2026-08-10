@@ -492,6 +492,14 @@ class PRDChecks:
         scope_refs: tuple[str, ...] = (),
     ) -> None:
         from quality_gate import MAIN_SECTION_ALIASES, ANNEX_SECTION_ALIASES, STAGE_ORDER, markdown_headings, _heading_position, _has_heading, _heading_language  # deferred: avoids circular import
+        if path.suffix.casefold() not in {".md", ".markdown"}:
+            self.add(
+                "BLOCK", "PRD-NO-FRONTMATTER", path,
+                "输入不含 YAML frontmatter，无法执行门禁校验。本产物未经任何自动校验，"
+                "导出为 docx/PDF 将永久失去机器可校验性。请在 markdown + frontmatter 形态下完成基线，再导出分发格式。",
+                path.suffix or "<无后缀>",
+            )
+            return
         try:
             raw = self.read(path)
         except (OSError, UnicodeError) as exc:
@@ -499,6 +507,14 @@ class PRDChecks:
             return
         lowered = raw.lower()
         frontmatter = self._frontmatter(raw)
+        if not frontmatter:
+            self.add(
+                "BLOCK", "PRD-NO-FRONTMATTER", path,
+                "输入不含 YAML frontmatter，无法执行门禁校验。本产物未经任何自动校验，"
+                "导出为 docx/PDF 将永久失去机器可校验性。请在 markdown + frontmatter 形态下完成基线，再导出分发格式。",
+                "frontmatter",
+            )
+            return
         if level == "auto":
             declared_level = str(frontmatter.get("delivery_level", frontmatter.get("level", "L2"))).upper()
             level = declared_level if declared_level in LEVELS else "L2"
@@ -648,6 +664,7 @@ class PRDChecks:
         self._check_triggered_contracts(path, raw, frontmatter, level)
         self._check_testability(path, raw, frontmatter, level)
         self._check_module_slices_and_facets(path, raw, frontmatter, level)
+        self._check_semantics(path, raw)
 
         if level in {"L3", "L4"}:
             if STAGE_ORDER.get(stage, STAGE_ORDER["baseline"]) >= STAGE_ORDER["baseline"]:
@@ -863,4 +880,3 @@ class PRDChecks:
                         self.add("BLOCK", "PRD-INCOMPLETE-MANAGED-RELATION", path, f"managed relation contract misses {label}", view)
             self.metrics["prd_page_contracts"] = len(blocks)
         self.metrics.update({"prd_headings": len(re.findall(r"(?m)^#{1,4}\s+\S", raw)), "prd_requirement_ids": len(requirement_ids)})
-

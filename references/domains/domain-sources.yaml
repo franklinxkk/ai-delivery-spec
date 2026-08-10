@@ -1,12 +1,20 @@
-schema_version: 5.1.1
-last_catalog_review: 2026-07-16
+schema_version: 5.4.4
+last_catalog_review: 2026-08-09
 policy:
   primary_sources_only_for_binding_claims: true
   model_memory_is_authority: false
   copy_full_protected_standard: false
   draft_can_create_hard_stop_rule: false
+  product_pattern_can_create_requirement: false
+  change_watch_can_create_hard_stop_rule: false
+  project_applicability_must_be_rechecked: true
   refresh_high_risk_days: 90
   refresh_normal_days: 180
+  effect_classes:
+    binding_baseline: Current law, effective rule, standard, or official policy that may constrain a project after jurisdiction and applicability are verified.
+    design_guidance: Authoritative guidance or standard that improves design but is not automatically mandatory for every project.
+    product_pattern: Official product, project, case, or vendor evidence used only to discover options and implementation patterns.
+    change_watch: Draft, roadmap, market signal, inaccessible internal reference, or announced transition that triggers re-verification but never a hard requirement.
 
 sources:
   - id: KS-COMMON-REQ-29148
@@ -661,3 +669,401 @@ sources:
     product_mapping: event identity, source, type, time, subject and data envelope
     last_verified_at: 2026-07-11
     refresh_days: 90
+
+  # 2026-08-09 systematic refresh: transport
+  - id: KS-TRAFFIC-SAFETY-MANAGERS-2024
+    domains: [traffic]
+    title: 道路运输企业主要负责人和安全生产管理人员安全考核管理办法（交运规〔2024〕8号）
+    issuer: 中华人民共和国交通运输部
+    authority_type: ministry_normative_document
+    effect_class: binding_baseline
+    url: https://xxgk.mot.gov.cn/xzgfxwj/202410/t20241009_4157562.html
+    status: active_as_verified
+    jurisdiction: China
+    applicability: road transport enterprise principal and safety manager assessment governance
+    product_mapping: personnel role, assessment proof, validity, responsible enterprise, query and warning rules
+    claim_limit: Apply only after enterprise type, role, local implementation and effective-state checks.
+    last_verified_at: 2026-08-09
+    refresh_days: 90
+  - id: KS-TRAFFIC-DANGEROUS-SAFETY-2025
+    domains: [traffic]
+    title: 危险货物道路运输企业安全生产管理规范（交运规〔2025〕6号）
+    issuer: 中华人民共和国交通运输部
+    authority_type: ministry_normative_document
+    effect_class: binding_baseline
+    url: https://xxgk.mot.gov.cn/xzgfxwj/202510/t20251029_4178955.html
+    status: active_as_verified
+    jurisdiction: China
+    applicability: dangerous-goods road transport enterprise safety management
+    product_mapping: organization, personnel, vehicle, operation, training, inspection, hazard and emergency controls
+    claim_limit: Do not copy an item into every transport industry; verify dangerous-goods scope and local rules.
+    last_verified_at: 2026-08-09
+    refresh_days: 90
+  - id: KS-TRAFFIC-SMART-PILOTS-2026
+    domains: [traffic]
+    title: 第二批公路水路交通基础设施数字化转型升级示范区域名单
+    issuer: 中华人民共和国交通运输部
+    authority_type: government_program
+    effect_class: product_pattern
+    url: https://xxgk.mot.gov.cn/jigou/kjs/202604/t20260403_4203001.html
+    status: published_as_verified
+    jurisdiction: China
+    applicability: public-sector smart transport program and project pattern research
+    product_mapping: regional data coordination, digital infrastructure, operational monitoring and scenario pilots
+    claim_limit: Program evidence reveals investment and scenario direction; it does not prove a universal product requirement or project outcome.
+    last_verified_at: 2026-08-09
+    refresh_days: 180
+
+  # 2026-08-09 systematic refresh: CRM
+  - id: KS-CRM-MICROSOFT-ACTION-2026
+    domains: [crm]
+    title: Dynamics 365 Sales 2026 release plan
+    issuer: Microsoft
+    authority_type: vendor_product_docs
+    effect_class: product_pattern
+    url: https://learn.microsoft.com/en-us/dynamics365/release-plan/2026wave1/sales/dynamics365-sales/
+    status: current_vendor_roadmap_as_verified
+    jurisdiction: global
+    applicability: enterprise sales automation and agent-assisted CRM pattern research
+    product_mapping: system-of-action, unified context, seller agents, governed automation and human handoff
+    evidence_role: official vendor roadmap and product-pattern evidence
+    claim_limit: Roadmap content may change and does not prove customer outcome, independent superiority, or mandatory scope.
+    last_verified_at: 2026-08-09
+    refresh_days: 90
+  - id: KS-CRM-SALESFORCE-CONTACT-CENTER-2026
+    domains: [crm]
+    title: Agentforce Contact Center announcement
+    issuer: Salesforce
+    authority_type: vendor_product_docs
+    effect_class: product_pattern
+    url: https://www.salesforce.com/news/stories/agentforce-contact-center-announcement/the-worlds-first-end-to-end-agentic-contact-center-is-here_-delivering-the-first-agentic-solution-unifying-ai-voice-and-crm-3/
+    status: vendor_announcement_as_verified
+    jurisdiction: global
+    applicability: customer-service, channel, AI-agent and human-handoff pattern research
+    product_mapping: unified customer context, voice/channel orchestration, agent-to-human transfer and service accountability
+    evidence_role: official vendor product-announcement evidence
+    claim_limit: Vendor claims are not independent performance proof and cannot create acceptance criteria without project evidence.
+    last_verified_at: 2026-08-09
+    refresh_days: 90
+  - id: KS-CRM-HUBSPOT-SMART-CRM
+    domains: [crm]
+    title: HubSpot Smart CRM
+    issuer: HubSpot
+    authority_type: vendor_product_docs
+    effect_class: product_pattern
+    url: https://www.hubspot.com/products/crm/ai-crm
+    status: current_product_page_as_verified
+    jurisdiction: global
+    applicability: unified customer platform and AI-assisted CRM pattern research
+    product_mapping: customer context, lifecycle automation, embedded AI and approachable user experience
+    evidence_role: official vendor product-pattern evidence
+    claim_limit: Product-page claims do not prove implementation quality, suitability, or business outcomes for another project.
+    last_verified_at: 2026-08-09
+    refresh_days: 90
+
+  # 2026-08-09 systematic refresh: education
+  - id: KS-EDU-AI-PLUS-2026
+    domains: [education-it]
+    title: “人工智能+教育”行动计划（教科信〔2026〕1号）
+    issuer: 中华人民共和国教育部等五部门
+    authority_type: national_action_plan
+    effect_class: binding_baseline
+    url: https://www.moe.gov.cn/srcsite/A16/s3342/202604/t20260410_1433240.html
+    status: active_as_verified
+    jurisdiction: China
+    applicability: education digitalization and artificial-intelligence planning across education stages and governance
+    product_mapping: AI literacy, teacher capability, education scenarios, platform capacity, model review, data and safety governance
+    claim_limit: It is a national policy baseline, not a universal feature checklist; project level, institution type and local implementation still control scope.
+    last_verified_at: 2026-08-09
+    refresh_days: 90
+  - id: KS-EDU-AI-GUIDANCE-2025
+    domains: [education-it]
+    title: 国家智慧教育平台2.0智能版及2025年人工智能教育应用指南综述
+    issuer: 中华人民共和国教育部
+    authority_type: official_policy_and_program_summary
+    effect_class: design_guidance
+    url: https://www.moe.gov.cn/jyb_xwfb/xw_zt/moe_357/2026/2026_zt03/lhjy/lhsy/202603/t20260303_1429844.html
+    status: published_as_verified
+    jurisdiction: China
+    applicability: K-12, vocational and teacher generative-AI application planning
+    product_mapping: age-appropriate use, teacher responsibility, content review, privacy, safety and platform-assisted learning
+    claim_limit: Use the referenced guideline set only after retrieving the exact applicable text; this summary page is not a substitute for project source review.
+    last_verified_at: 2026-08-09
+    refresh_days: 90
+  - id: KS-EDU-DIGITAL-CASES-2026
+    domains: [education-it]
+    title: 世界数字教育创新十大案例（2026）
+    issuer: 中华人民共和国教育部
+    authority_type: official_case_collection
+    effect_class: product_pattern
+    url: https://www.moe.gov.cn/jyb_xwfb/xw_zt/moe_357/2026/2026_zt05/cgfb/202605/t20260514_1436513.html
+    status: published_as_verified
+    jurisdiction: global_cases_published_in_China
+    applicability: education product and project pattern research
+    product_mapping: AI-enabled learning, teacher support, digital inclusion, platform governance and evidence-led scaling
+    claim_limit: Selected cases reveal options and context; they do not prove transferability or require feature copying.
+    last_verified_at: 2026-08-09
+    refresh_days: 180
+  - id: KS-EDU-UNESCO-AI-COMP-2026
+    domains: [education-it]
+    title: AI competency framework for teachers
+    issuer: UNESCO
+    authority_type: international_guidance
+    effect_class: design_guidance
+    url: https://www.unesco.org/en/articles/ai-competency-framework-teachers
+    status: current_page_updated_2026_as_verified
+    jurisdiction: global
+    applicability: teacher AI competency, professional learning and responsible AI education design
+    product_mapping: human-centred mindset, ethics, AI foundations/applications, pedagogy and professional development across progression levels
+    claim_limit: Guidance supports competency and evaluation design but is not automatically binding in a national or institutional project.
+    last_verified_at: 2026-08-09
+    refresh_days: 180
+
+  # 2026-08-09 systematic refresh: OA and collaborative work
+  - id: KS-OA-ARCHIVE-STANDARD-GUIDE-2026
+    domains: [oa]
+    title: 2026年度国家档案标准制修订项目立项指南
+    issuer: 国家档案局
+    authority_type: official_standard_program_guide
+    effect_class: change_watch
+    url: https://www.saac.gov.cn/daj/tzgg/202603/0a5646f9bd5a4fafb5b46e87ef72d04b.shtml
+    status: program_guide_not_final_standard
+    jurisdiction: China
+    applicability: archive standards roadmap and future-proofing for OA projects
+    product_mapping: single-copy electronic archives, long-term preservation, data governance and AI-assisted archive management
+    claim_limit: A project guide announces standardization direction; it is not a published standard and cannot create a hard requirement.
+    last_verified_at: 2026-08-09
+    refresh_days: 90
+  - id: KS-OA-ARCHIVE-PLAN-2026
+    domains: [oa]
+    title: “十五五”全国档案事业发展规划
+    issuer: 国家档案局
+    authority_type: national_plan
+    effect_class: design_guidance
+    url: https://www.saac.gov.cn/daj/yaow/202606/c75591cb82564d669635c859041512cf.shtml
+    status: published_as_verified
+    jurisdiction: China
+    applicability: medium-term archive digitalization and governance planning
+    product_mapping: digital archives, resource governance, service capability, security and long-term preservation
+    claim_limit: Planning direction becomes a project requirement only through applicable law, standard, procurement, policy or approved scope.
+    last_verified_at: 2026-08-09
+    refresh_days: 180
+  # 2026-08-09 systematic refresh: medical and hospital IT
+  - id: KS-MEDICAL-AI-PLUS-2025
+    domains: [medical-hospital-it]
+    title: 关于促进和规范“人工智能+医疗卫生”应用发展的实施意见（国卫办规划发〔2025〕30号）
+    issuer: 国家卫生健康委等部门
+    authority_type: national_implementation_opinion
+    effect_class: binding_baseline
+    url: https://www.nhc.gov.cn/guihuaxxs/c100133/202511/d1a42ae835c743b9b3e83ac0253c3e9f.shtml
+    status: active_as_verified
+    jurisdiction: China
+    applicability: AI application, data, safety and governance in healthcare and health services
+    product_mapping: prevention, diagnosis support, rehabilitation, health management, high-quality data, model safety and accountable deployment
+    claim_limit: It sets national direction and safeguards; diagnosis, treatment and institution-specific implementation remain under applicable clinical and local rules.
+    last_verified_at: 2026-08-09
+    refresh_days: 90
+  - id: KS-MEDICAL-MUTUAL-RECOGNITION-2024
+    domains: [medical-hospital-it]
+    title: 关于进一步推进医疗机构检查检验结果互认的指导意见（国卫医政发〔2024〕37号）
+    issuer: 国家卫生健康委等部门
+    authority_type: national_guidance
+    effect_class: binding_baseline
+    url: https://www.nhc.gov.cn/yzygj/c100068/202411/e26dde958ae74bf5b8f4fe97d83253c7.shtml
+    status: active_as_verified
+    jurisdiction: China
+    applicability: medical examination and laboratory result mutual recognition
+    product_mapping: recognized-item list, negative list, result quality, regional exchange, clinical judgment, trace and exception
+    claim_limit: Mutual recognition is conditional; clinician judgment, excluded scenarios, quality and regional readiness must remain visible.
+    last_verified_at: 2026-08-09
+    refresh_days: 90
+  - id: KS-MEDICAL-TERTIARY-EVAL-2025
+    domains: [medical-hospital-it]
+    title: 三级医院评审标准（2025年版）
+    issuer: 国家卫生健康委
+    authority_type: national_evaluation_standard
+    effect_class: binding_baseline
+    url: https://www.nhc.gov.cn/yzygj/c100067/202506/0795d62eece44307915d639486263a39.shtml
+    status: current_as_verified
+    jurisdiction: China
+    applicability: tertiary hospital evaluation within the stated scope
+    product_mapping: data-based monitoring, quality, safety, management and evidence traceability
+    claim_limit: Verify hospital class, local implementation and evaluation cycle; do not transform every evaluation point into software scope.
+    last_verified_at: 2026-08-09
+    refresh_days: 90
+  - id: KS-MEDICAL-THREE-IN-ONE-2025
+    domains: [medical-hospital-it]
+    title: 国家卫生健康委关于“三位一体”智慧医院建设有关建议的公开答复
+    issuer: 国家卫生健康委
+    authority_type: official_public_response
+    effect_class: design_guidance
+    url: https://www.nhc.gov.cn/wjw/jiany/202508/b9a23ad761124c71a1111545580dd756.shtml
+    status: current_public_position_as_verified
+    jurisdiction: China
+    applicability: public understanding of smart medical service, smart clinical care and smart hospital management tracks
+    product_mapping: maintain track-specific evidence while supporting cross-system data and service coordination
+    claim_limit: A public response explains current policy position; it is not a replacement evaluation standard.
+    last_verified_at: 2026-08-09
+    refresh_days: 90
+  # 2026-08-09 systematic refresh: data products
+  - id: KS-DATA-CIRCULATION-SERVICES-2026
+    domains: [data-product]
+    title: 关于培育数据流通服务机构 加快推进数据要素市场化价值化的意见
+    issuer: 国家数据局等部门
+    authority_type: national_policy
+    effect_class: binding_baseline
+    url: https://www.nda.gov.cn/sjj/zwgk/zcfb/0205/20260205185635251370340_pc.html
+    status: active_as_verified
+    jurisdiction: China
+    applicability: data circulation services and data-element market development
+    product_mapping: datasets, analysis products, agents, service disclosure, evaluation, safety and accountable market roles
+    claim_limit: Verify institution role, data category, sector rule and project authorization before converting policy direction into scope.
+    last_verified_at: 2026-08-09
+    refresh_days: 90
+  - id: KS-DATASET-PLATFORM-2026
+    domains: [data-product]
+    title: 国家数据集管理平台上线
+    issuer: 国家数据局
+    authority_type: government_platform_announcement
+    effect_class: product_pattern
+    url: https://www.nda.gov.cn/sjj/zhuanti/ztszzh/0429/20260429223349173144038_pc.html
+    status: launched_as_verified
+    jurisdiction: China
+    applicability: dataset registration, discovery, governance and ecosystem pattern research
+    product_mapping: dataset cards, catalog, supply-demand connection, lifecycle and quality signals
+    claim_limit: Platform existence reveals a national pattern; it does not mandate integration or prove dataset quality for a project.
+    last_verified_at: 2026-08-09
+    refresh_days: 90
+  - id: KS-DATA-SECURITY-CASES-2026
+    domains: [data-product]
+    title: 2026年数据安全治理典型案例
+    issuer: 国家数据局
+    authority_type: official_case_collection
+    effect_class: product_pattern
+    url: https://www.nda.gov.cn/sjj/ywpd/zcgh/0614/20260614185459455376719_pc.html
+    status: published_as_verified
+    jurisdiction: China
+    applicability: data-space and data-circulation security implementation pattern research
+    product_mapping: participant onboarding, identity, classification, digital contract, usage control, audit and traceability
+    claim_limit: Typical cases provide implementation options, not universal architecture or independent proof of every claimed outcome.
+    last_verified_at: 2026-08-09
+    refresh_days: 180
+  - id: KS-DATA-COMPLIANCE-SANDBOX-2026
+    domains: [data-product]
+    title: 公共数据合规利用监管沙盒实践
+    issuer: 国家数据局
+    authority_type: official_case_collection
+    effect_class: product_pattern
+    url: https://www.nda.gov.cn/sjj/ywpd/zcgh/0615/20260615215039028848883_pc.html
+    status: published_as_verified
+    jurisdiction: China
+    applicability: controlled public-data innovation and compliance experiment pattern research
+    product_mapping: bounded participant, purpose, environment, rule, evidence, monitoring, exit and accountability
+    claim_limit: A sandbox is a bounded governance mechanism, not a waiver of law or a default requirement for every data product.
+    last_verified_at: 2026-08-09
+    refresh_days: 180
+
+  # 2026-08-09 systematic refresh: AI-native and agent systems
+  - id: KS-AI-GBZ185-SERIES-2026
+    domains: [ai-native]
+    title: GB/Z 185.1—185.7—2026 人工智能 智能体互联系列国家标准化指导性技术文件
+    issuer: 国家市场监督管理总局、国家标准化管理委员会
+    authority_type: national_guidance_standard_series
+    effect_class: design_guidance
+    url: https://std.samr.gov.cn/gb/search/gbDetailed?id=52A05F8113453761E06397BE0A0AFEB5
+    status: current_series_as_verified
+    jurisdiction: China
+    applicability: agent architecture, identity code/management, description, discovery, interaction and tool calling
+    product_mapping: agent identity, capability metadata, discovery, protocol interaction, tool registration/calling and interoperability tests
+    claim_limit: GB/Z is guiding technical documentation; verify the exact part, adopted profile and contract/procurement applicability before making it mandatory.
+    last_verified_at: 2026-08-09
+    refresh_days: 90
+  - id: KS-AI-MCP-2026-07-28
+    domains: [ai-native]
+    title: Model Context Protocol specification release 2026-07-28
+    issuer: Model Context Protocol project
+    authority_type: protocol_specification_release
+    effect_class: design_guidance
+    url: https://blog.modelcontextprotocol.io/posts/2026-07-28/
+    status: released_as_verified
+    jurisdiction: global_protocol_ecosystem
+    applicability: MCP implementations adopting or migrating to the 2026-07-28 specification
+    product_mapping: stateless core, self-describing requests, discovery, routing headers, input-required results, cacheable lists, hardened authorization, extensions and tasks
+    claim_limit: Do not silently apply the new protocol to legacy clients; declare supported versions, deprecated features, migration window and compatibility tests.
+    last_verified_at: 2026-08-09
+    refresh_days: 30
+  - id: KS-AI-NIST-AGENT-STANDARDS-2026
+    domains: [ai-native]
+    title: NIST AI Agent Standards Initiative
+    issuer: National Institute of Standards and Technology
+    authority_type: government_standards_initiative
+    effect_class: change_watch
+    url: https://www.nist.gov/artificial-intelligence/ai-agent-standards-initiative
+    status: active_initiative_not_final_standard
+    jurisdiction: United_States_and_global_standards_ecosystem
+    applicability: agent interoperability, identity, authority and security standards monitoring
+    product_mapping: track emerging identity, authorization, interoperability, evaluation and security profiles
+    claim_limit: An initiative signals direction and work items; it is not a final standard or binding control by itself.
+    last_verified_at: 2026-08-09
+    refresh_days: 90
+  - id: KS-AI-AGENT-SECURITY-DRAFT-2026
+    domains: [ai-native]
+    title: 智能体应用安全基本要求国家标准项目（20263116-Q-252）
+    issuer: 国家市场监督管理总局、国家标准化管理委员会
+    authority_type: mandatory_standard_project
+    effect_class: change_watch
+    url: https://std.samr.gov.cn/gb/search/gbDetailed?id=4C5277928DA2411EE06397BE0A0AE436
+    status: draft_project_not_published_standard
+    jurisdiction: China
+    applicability: future agent application security standard monitoring
+    product_mapping: identity, permission, tools, data, high-risk human intervention, input/output safety, logs, blocking and shutdown
+    claim_limit: This is a project/draft signal only; it cannot create a compliance hard stop until a published standard and applicability are verified.
+    last_verified_at: 2026-08-09
+    refresh_days: 30
+
+  # 2026-08-09 AI-native office refresh
+  - id: KS-OA-WORKBUDDY-WMA-2026
+    domains: [oa, ai-native]
+    title: WorkBuddy Enterprise and Managed Agents product documentation
+    issuer: Tencent Cloud
+    authority_type: vendor_product_docs
+    effect_class: product_pattern
+    url: https://cloud.tencent.com.cn/document/product/1831/134407
+    status: current_vendor_docs_as_verified
+    jurisdiction: China_and_global_product
+    applicability: enterprise AI workbench, managed-agent runtime and governance pattern research
+    product_mapping: natural-language work delegation, cloud sandbox, durable session, identity, permission, trace, evaluation and agent lifecycle
+    evidence_role: official vendor product and architecture evidence
+    claim_limit: Documentation proves described product direction only; some cloud-side capabilities are marked upcoming and no independent business outcome or universal architecture is proven.
+    last_verified_at: 2026-08-09
+    refresh_days: 30
+  - id: KS-OA-QWEN-WORK-2026
+    domains: [oa, ai-native]
+    title: 千问办公产品介绍
+    issuer: 阿里巴巴千问办公
+    authority_type: vendor_product_docs
+    effect_class: product_pattern
+    url: https://qwenwork.cn/docs/product-introduction
+    status: current_vendor_docs_as_verified
+    jurisdiction: China_product
+    applicability: one-stop AI office, enterprise collaboration and skill-market pattern research
+    product_mapping: conversation-to-deliverable, Office artifacts, multimodal creation, connectors, DingTalk workflow, enterprise permissions and usage control
+    evidence_role: official vendor product-pattern evidence
+    claim_limit: Product claims do not prove output quality, governance completeness, ecosystem lock-in value or suitability for another organization.
+    last_verified_at: 2026-08-09
+    refresh_days: 30
+  - id: KS-OA-FEISHU-DOUBAO-2026
+    domains: [oa, ai-native]
+    title: 飞书与豆包能力深度融合的官方产品说明
+    issuer: 飞书
+    authority_type: vendor_product_docs
+    effect_class: product_pattern
+    url: https://www.feishu.cn/content/article/7602950574425803975
+    status: current_vendor_content_as_verified
+    jurisdiction: China_product
+    applicability: embedded enterprise AI across meetings, knowledge, documents, tables and IM
+    product_mapping: model capability embedded into work objects, meeting data assets, knowledge retrieval, AI fields and collaborative content
+    evidence_role: official vendor integration-pattern evidence
+    claim_limit: The source supports deep product integration, not a verified organizational merger, independent superiority or universal migration requirement.
+    last_verified_at: 2026-08-09
+    refresh_days: 30

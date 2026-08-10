@@ -26,6 +26,10 @@ def main() -> int:
         f"schema {'.'.join(str(part) for part in error.path) or '<root>'}: {error.message}"
         for error in Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(doc)
     ]
+    if failures:
+        for item in failures:
+            print(f"FAIL: {item}")
+        return 1
     if not isinstance(doc, dict):
         failures.append("评审记录必须是 YAML/JSON 对象")
         doc = {}

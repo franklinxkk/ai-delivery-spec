@@ -39,6 +39,11 @@
           },
           "input_refs": { "type": "array", "items": { "type": "string" } },
           "output_refs": { "type": "array", "items": { "type": "string" } },
+          "implementation_step_refs": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "pattern": "^STEP-[A-Z0-9-]+$" }
+          },
           "acceptance_refs": {
             "type": "array",
             "minItems": 1,

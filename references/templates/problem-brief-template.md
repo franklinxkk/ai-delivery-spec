@@ -8,6 +8,10 @@ document_language: zh-CN
 project_id: PROJECT-EXAMPLE
 resume_context:
   completed_stages: []
+  # 续跑对象示例（全新任务保持空数组）：
+  # - path: prior/problem-brief.md
+  #   sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+  #   stage: frame
   prior_artifacts: []
   open_threads: []
   next_stage_options: [explore, intake]
@@ -46,7 +50,7 @@ resume_context:
 
 | ID | 未知内容 | 责任人 | 最晚确认点 | 不确认时的安全退路 |
 |---|---|---|---|---|
-| `UNK-FRAME-001` | {未知} | {责任人} | explore/intake | {缩范围/不做/人工处理} |
+| `UNK-FRAME-001` | {未知} | {责任人} | 方案探索（`explore`）/需求准入（`intake`） | {缩范围/不做/人工处理} |
 
 <!-- ADS:next_step -->
 ## 下一步

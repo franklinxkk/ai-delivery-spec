@@ -59,6 +59,23 @@ before PRD signoff.
   pharmaceutical manufacturing, insurance claim adjudication independent of
   hospital workflow, and public-health command systems outside hospital IT.
 
+### Current Baseline and Change Watch (verified 2026-08-09)
+
+| Evidence class | Current signal | Requirement effect |
+|---|---|---|
+| binding_baseline | `KS-MEDICAL-AI-PLUS-2025`, `KS-MEDICAL-MUTUAL-RECOGNITION-2024`, `KS-MEDICAL-TERTIARY-EVAL-2025` | declare clinical owner, applicable institution/scope, data quality, negative/exception list, human judgment, AI safety, trace and local implementation before deriving scope or acceptance |
+| design_guidance | `KS-MEDICAL-THREE-IN-ONE-2025` and the published smart-service/clinical/management evaluation tracks | retain track-specific evidence and cross-system data lineage; do not collapse evaluation semantics without an official replacement |
+| change_watch | market discussion reports a possible “digital-intelligent hospital” consolidated evaluation transition but cites no publicly accessible replacement standard | for 2026-2027 projects, preserve adaptable evidence mapping and re-check NHC sources; “four-in-one is mandatory” is prohibited until a primary source is verified |
+
+### AI Transformation Horizon
+
+| Axis | From -> toward | Non-negotiable product guard |
+|---|---|---|
+| clinical work | isolated model output -> longitudinal, multimodal clinical copilot embedded in encounter workflow | patient/encounter identity, source provenance, indication, uncertainty and clinician sign-off are explicit |
+| patient service | generic Q&A -> navigation, preparation, follow-up and chronic-care support agents | emergency/escalation path, consent, accessibility and human service fallback remain visible |
+| hospital operation | retrospective reports -> bounded quality, capacity, supply and mutual-recognition orchestration | AI cannot silently change orders, reports, charges or clinical responsibility; integration is reversible and audited |
+| evidence loop | aggregate accuracy -> clinical utility, harmful-error slices, override, drift and patient outcome evidence | simulated/static PASS never proves clinical safety, device status or regulatory acceptance |
+
 ## First-Principles Domain Lens
 
 Medical/hospital IT product judgment starts from patient safety, accountable

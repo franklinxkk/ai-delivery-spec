@@ -108,6 +108,12 @@ if "data_submission" not in data_submission["activated_facets"]:
     failures.append("data submission did not activate its conditional contract")
 if not render_markdown(data_submission).startswith("# 需求准入与分诊建议"):
     failures.append("Chinese intake rendered an English recommendation")
+triage_fallback = render_markdown({**data_submission, "reasons": []})
+if "- 判断依据：" not in triage_fallback or "待补信息：`无`" not in triage_fallback:
+    failures.append("triage markdown can emit no rationale while claiming nothing is missing")
+high_ambiguity = recommend({**data_submission, "ambiguity": "high"})
+if any(reason.endswith(": ") for reason in high_ambiguity["reasons"]):
+    failures.append("high-ambiguity rationale is empty")
 
 with tempfile.TemporaryDirectory(prefix="ads-v510-") as temp:
     workspace = Path(temp) / "requirements"

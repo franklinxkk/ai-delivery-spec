@@ -8,7 +8,22 @@ status: in_review
 reviewers: [产品负责人, 架构负责人, 研发负责人, 测试负责人]
 # 依据需求风险裁剪；跨系统/NFR/迁移保留 architecture，多团队交付再加入 delivery。
 required_review_types: [product, architecture, engineering, qa]
-sign_offs: []
+# sign_offs 每项必填 review_type/actor/decision/at/evidence_refs；
+# decision ∈ approve | approve_with_conditions | reject；
+# decision 为 approve_with_conditions 时 conditions 必填且非空。
+sign_offs:
+  - review_type: product
+    actor: 产品负责人
+    decision: approve
+    at: "2026-01-01T10:00:00Z"
+    evidence_refs: [review/REVIEW-CORE-001-product.md]
+  - review_type: architecture
+    actor: 架构负责人
+    decision: approve_with_conditions
+    at: "2026-01-01T11:00:00Z"
+    evidence_refs: [review/REVIEW-CORE-001-architecture.md]
+    conditions:
+      - 基线前补充缓存失效策略说明
 findings:
   - id: REV-CORE-001
     severity: P1

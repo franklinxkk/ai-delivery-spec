@@ -196,3 +196,48 @@ scenarios:
     status: partial
     evidence:
     - maintainer/v5.4.0-design-record.md
+
+  - id: EVAL-V544-EN-SMALL-TRIGGER-001
+    project: crm-status-filter-en
+    lifecycle: specify
+    shape: brownfield
+    perspective: product_owner
+    input: Add an optional customer-tier filter to the existing CRM account list and give me an implementation-ready requirement with acceptance criteria.
+    expected:
+      - invoke ai-delivery-spec even though the request is small and clear
+      - keep questions, headings, tables, diagrams, acceptance prose and gate diagnostics in English
+      - preserve stable IDs, API names, field keys and machine enums without translation
+      - deliver the smallest complete requirement slice without unrelated lifecycle artifacts
+    dimensions: [trigger_recall, convergence_speed, overinterpretation_control, human_usability]
+    status: not_run
+    evidence: []
+
+  - id: EVAL-V544-EN-REVIEW-INTENT-001
+    project: crm-review-projection-en
+    lifecycle: review
+    shape: brownfield
+    perspective: product_engineering
+    input: Create a review version with numbered annotations and a review drawer for frontend, backend and QA.
+    expected:
+      - treat review version and numbered annotations as explicit review-projection confirmation
+      - do not ask again whether review mode is needed
+      - keep visible review content in English and machine handoff values unchanged
+      - preserve product behavior when toggling the review projection
+    dimensions: [trigger_recall, requirement_completeness, human_usability, change_safety]
+    status: not_run
+    evidence: []
+
+  - id: EVAL-V544-ZH-LANGUAGE-FIDELITY-001
+    project: 企业一键上报中文评审
+    lifecycle: specify
+    shape: brownfield
+    perspective: product_owner
+    input: 在现有企业数据一键上报页面增加“上次同步时间”列，保持原布局，只给产品模式和可开发验收标准。
+    expected:
+      - 小而明确的中文需求也必须命中 ai-delivery-spec
+      - 标题、正文、表头、提问、图节点、测试与门禁诊断均使用中文
+      - 不生成评审抽屉，不裸露 Given/When/Then 或机器状态标签
+      - 保留现有布局、动作覆盖和未授权范围
+    dimensions: [trigger_recall, convergence_speed, overinterpretation_control, visual_consistency, human_usability]
+    status: not_run
+    evidence: []
