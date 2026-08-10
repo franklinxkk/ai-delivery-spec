@@ -37,11 +37,11 @@ Use this replaceable domain module for 运管、交通监管、道路运输企�
 - AI may optimize: document extraction, certificate recognition, checklist matching, rule verification, risk hints, task generation, evidence completeness checks, training/course matching, rectification summary, management briefing, and customer migration analysis.
 - AI must not autonomously decide: punishment, license restriction, final major-hazard classification, final safety responsibility conclusion, forced service suspension, transport qualification revocation, or other binding regulated actions.
 
-### Current Baseline and Change Watch (verified 2026-08-09)
+### Current Baseline and Change Watch (verified 2026-08-10)
 
 | Evidence class | Current signal | Requirement effect |
 |---|---|---|
-| binding_baseline | `KS-TRAFFIC-SAFETY-MANAGERS-2024`, `KS-TRAFFIC-DANGEROUS-SAFETY-2025`, existing 2025 inspection and 2026 practitioner/operation rules | resolve enterprise industry, regulated object, jurisdiction, effective date and local implementation before deriving checks, staffing, certificates, warnings or acceptance |
+| binding_baseline | `KS-TRAFFIC-SAFETY-MANAGERS-2024`, `KS-TRAFFIC-PASSENGER-SAFETY-2023`, `KS-TRAFFIC-DANGEROUS-SAFETY-2025`, existing 2025 inspection and 2026 practitioner/operation rules | resolve enterprise industry, regulated object, jurisdiction, effective date and local implementation before deriving checks, staffing, certificates, warnings or acceptance; keep passenger and dangerous-goods applicability/document numbers separate |
 | product_pattern | `KS-TRAFFIC-SMART-PILOTS-2026` | learn regional coordination, infrastructure and scenario patterns; never infer that every transport product needs the same cockpit, data scope or integration |
 | change_watch | ministry/local rules, inspection-code practices and pilot outputs continue to evolve | re-verify before each regulated baseline; local procurement/news evidence cannot override national rules or customer source systems |
 
@@ -424,6 +424,7 @@ Scenic/tourism passenger transport should normally stay inside this traffic doma
 | high-risk alert disposition | regulator / safety manager | alert assigned, handled/escalated, evidence and audit visible |
 | multi-industry enterprise license check | regulator / enterprise | required license set is the union of active industries |
 | two-type personnel certificate expiry | regulator / enterprise | risk shown without deleting personnel; source certificate traceable |
+| road passenger safety staffing | regulator / enterprise | required safety-manager count is derived from the current passenger-enterprise rule and verified active vehicle count; threshold/minimum boundaries, source version and local overlay are visible |
 | driver onboarding with customer-specific steps | safety manager | workflow instance supports configured steps, evidence, return, and approval |
 | training task overdue | safety manager / driver | reminder, overdue state, reassignment, and report impact are visible |
 | pre-trip briefing acknowledgement | driver / dispatcher | acknowledgement captured; expired/missing acknowledgement creates exception |
@@ -478,6 +479,7 @@ Mocked matrices and simulated reviewers cannot satisfy expert review or audit.
 - [ ] Laws, regulations, standards, inspection items, and AI rule tables record official source URL, issuer, document number, effective date, status, scope, last verification date, and human owner.
 - [ ] National, industry, provincial/local, group, and customer-specific standards are registered with issuer, region, effective date, status, applicability, and product-rule mapping when used.
 - [ ] Nine-industry templates map to the current regulatory baseline before PRD, prototype, rule-engine, checklist, or AI answer generation.
+- [ ] Road passenger and dangerous-goods safety-management rules keep their applicability, document numbers and staffing/check logic separate.
 - [ ] Every binding regulated or safety-responsibility action has human accountability and audit evidence.
 - [ ] AI behavior is classified as extraction, rule matching, recommendation, drafting, or decision support; binding decisions remain human-owned.
 - [ ] Batch, multi-step, mobile weak-network, custom workflow, and exception paths are testable.

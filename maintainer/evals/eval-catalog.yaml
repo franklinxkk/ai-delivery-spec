@@ -144,16 +144,15 @@ scenarios:
       - ask zero questions about facts already supplied
       - expose no YAML, stable IDs or workstation terminology in live dialogue
     dimensions: [trigger_recall, convergence_speed, overinterpretation_control, human_usability]
-    status: partial
-    evidence:
-    - maintainer/v5.4.0-design-record.md
+    status: not_run
+    evidence: []
 
   - id: EVAL-V542-AMBIGUOUS-001
     project: enterprise-risk-early-idea
     lifecycle: discover
     shape: greenfield
     perspective: product_owner
-    input: 我想让运智管家能提前发现高风险企业，先帮我把需求想清楚。
+    input: 我想让某交通运输企业监管平台能提前发现高风险企业，先帮我把需求想清楚。
     expected:
       - provide two or three materially different directions plus a no-build option
       - recommend one direction with reasons and tradeoffs
@@ -161,9 +160,8 @@ scenarios:
       - ask at most one highest-impact question in the first response
       - avoid premature pages, YAML, stable IDs and governance jargon
     dimensions: [trigger_recall, clarification_quality, convergence_speed, overinterpretation_control, human_usability]
-    status: partial
-    evidence:
-    - maintainer/v5.4.0-design-record.md
+    status: not_run
+    evidence: []
 
   - id: EVAL-V542-BROWNFIELD-PROTOTYPE-001
     project: enterprise-talk-prototype-iteration
@@ -177,25 +175,23 @@ scenarios:
       - do not ask for an aesthetic direction or replace the design system
       - preserve interaction coverage and produce a project-wide visual lock
     dimensions: [trigger_recall, overinterpretation_control, visual_consistency, change_safety, human_usability]
-    status: partial
-    evidence:
-    - maintainer/v5.4.0-design-record.md
+    status: not_run
+    evidence: []
 
   - id: EVAL-V542-GATE-ROOTS-001
     project: enterprise-talk-prd-review
     lifecycle: review
     shape: brownfield
     perspective: product_engineering
-    input: 运智管家_企业约谈_PRD_v1.0.md
+    input: 某交通监管系统_企业约谈_PRD_v1.0.md
     expected:
       - preserve every machine-readable finding in JSON
       - show every unique finding code once in default concise diagnostics
       - compact repeated findings and avoid one-finding-per-rerun repair loops
       - report the static gate claim boundary
     dimensions: [validation_efficiency, human_usability, context_efficiency]
-    status: partial
-    evidence:
-    - maintainer/v5.4.0-design-record.md
+    status: not_run
+    evidence: []
 
   - id: EVAL-V544-EN-SMALL-TRIGGER-001
     project: crm-status-filter-en

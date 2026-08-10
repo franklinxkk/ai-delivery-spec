@@ -482,12 +482,47 @@ class HandoffChecks:
             "handoff_metrics": len(prototype_metrics),
         })
 
-    def check_custom_rules(self, custom_root: Path, artifacts: dict[str, list[Path]]) -> None:
+    def check_custom_rules(
+        self,
+        custom_root: Path,
+        artifacts: dict[str, list[Path]],
+        *,
+        active_domains: tuple[str, ...] = (),
+    ) -> None:
         """Load local declarative regex rules; never execute project Python code."""
         rule_dir = custom_root / "validators"
         if not rule_dir.is_dir():
             return
+        normalized_active = {item.strip().casefold() for item in active_domains if item.strip()}
+        known_domains: set[str] = set()
+        config_path = custom_root / "config.yaml"
+        if config_path.is_file():
+            try:
+                config = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+                if not isinstance(config, dict):
+                    self.add("BLOCK", "CUSTOM-CONFIG-SHAPE", config_path, "本地扩展配置顶层必须是对象")
+                    config = {}
+                configured = config.get("domains", [])
+                if not isinstance(configured, list):
+                    self.add("BLOCK", "CUSTOM-CONFIG-SHAPE", config_path, "config.domains 必须是数组")
+                    configured = []
+                if isinstance(configured, list):
+                    for item in configured:
+                        domain_id = item.get("domain_id") if isinstance(item, dict) else item
+                        if isinstance(domain_id, str) and domain_id.strip():
+                            known_domains.add(domain_id.strip().casefold())
+            except (OSError, UnicodeError, yaml.YAMLError) as exc:
+                self.add("BLOCK", "CUSTOM-CONFIG-PARSE", config_path, f"本地扩展配置不可读：{exc}")
+        unknown_active = sorted(normalized_active - known_domains) if known_domains else []
+        if unknown_active:
+            self.add(
+                "BLOCK", "CUSTOM-DOMAIN-UNKNOWN", config_path,
+                "--domain 包含未在 custom/config.yaml 注册的领域",
+                ", ".join(unknown_active),
+            )
         loaded_rules = 0
+        applied_rules = 0
+        skipped_domain_rules = 0
         for rule_file in sorted(rule_dir.glob("*.yaml")):
             try:
                 document = yaml.safe_load(rule_file.read_text(encoding="utf-8")) or {}
@@ -508,6 +543,21 @@ class HandoffChecks:
                 assertion = str(rule.get("assertion", "")).lower()
                 severity = str(rule.get("severity", "GAP")).upper()
                 pattern = rule.get("pattern")
+                singular_domain = rule.get("domain")
+                plural_domains = rule.get("domains")
+                domain_contract_valid = not (singular_domain is not None and plural_domains is not None)
+                if singular_domain is not None:
+                    scoped_domains = [singular_domain] if isinstance(singular_domain, str) else []
+                    domain_contract_valid = domain_contract_valid and isinstance(singular_domain, str) and bool(singular_domain.strip())
+                elif plural_domains is not None:
+                    scoped_domains = plural_domains if isinstance(plural_domains, list) else []
+                    domain_contract_valid = domain_contract_valid and isinstance(plural_domains, list) and bool(plural_domains)
+                else:
+                    scoped_domains = []
+                domain_contract_valid = domain_contract_valid and all(
+                    isinstance(item, str) and bool(item.strip()) for item in scoped_domains
+                )
+                normalized_rule_domains = {item.strip().casefold() for item in scoped_domains if isinstance(item, str)}
                 unsafe_pattern = isinstance(pattern, str) and bool(re.search(
                     r"\\[1-9]|\(\?<=[^)]|\(\?<!|\([^)]*[+*][^)]*\)\s*(?:[+*]|\{)", pattern
                 ))
@@ -519,10 +569,11 @@ class HandoffChecks:
                     or not isinstance(pattern, str)
                     or len(pattern) > 500
                     or unsafe_pattern
+                    or not domain_contract_valid
                 ):
                     self.add(
                         "BLOCK", "CUSTOM-RULE-CONTRACT", rule_file,
-                        "规则需声明 CUST-*、有效 artifact、must_match/must_not_match、BLOCK/GAP 和不含反向引用/嵌套量词的短 pattern",
+                        "规则需声明 CUST-*、有效 artifact、must_match/must_not_match、BLOCK/GAP 和安全短 pattern；domain/domains 如声明必须非空且只能选一个字段",
                         ref,
                     )
                     continue
@@ -531,8 +582,20 @@ class HandoffChecks:
                 except re.error as exc:
                     self.add("BLOCK", "CUSTOM-RULE-REGEX", rule_file, f"正则无效：{exc}", ref)
                     continue
-                target_kinds = list(artifacts) if artifact_kind == "all" else [artifact_kind]
                 loaded_rules += 1
+                if normalized_rule_domains and not normalized_active:
+                    self.add(
+                        "BLOCK", "CUSTOM-DOMAIN-CONTEXT-MISSING", rule_file,
+                        "领域限定规则需要通过 --domain 声明当前工件适用领域",
+                        f"{ref}: {', '.join(sorted(normalized_rule_domains))}",
+                    )
+                    skipped_domain_rules += 1
+                    continue
+                if normalized_rule_domains and normalized_rule_domains.isdisjoint(normalized_active):
+                    skipped_domain_rules += 1
+                    continue
+                target_kinds = list(artifacts) if artifact_kind == "all" else [artifact_kind]
+                applied_rules += 1
                 for target_kind in target_kinds:
                     for target in artifacts.get(target_kind, []):
                         raw = self.read(target)
@@ -546,3 +609,5 @@ class HandoffChecks:
                                 affected_consumers=tuple(str(item) for item in rule.get("affected_consumers", []) or []),
                             )
         self.metrics["custom_validator_rules"] = loaded_rules
+        self.metrics["custom_validator_rules_applied"] = applied_rules
+        self.metrics["custom_validator_rules_skipped_domain"] = skipped_domain_rules

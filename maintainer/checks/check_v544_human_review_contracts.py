@@ -30,8 +30,8 @@ def require(relative: str, markers: tuple[str, ...]) -> None:
 
 
 skill = read("SKILL.md")
-if "# AI Delivery Spec 5.4.4" not in skill:
-    failures.append("SKILL.md does not declare 5.4.4")
+if "# AI Delivery Spec 5.4.5" not in skill:
+    failures.append("SKILL.md does not declare 5.4.5")
 require(
     "SKILL.md",
     (

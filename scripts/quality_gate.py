@@ -186,9 +186,29 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
         "原型用本地 iframe 嵌套另一个 HTML 页面，静态门禁无法证明嵌套页的交互合同。",
         "把嵌套页内容并入当前原型的 page-VIEW-* 结构，或作为独立原型文件一并提交门禁。",
     ),
+    "PROTO-IFRAME-UNSAFE-SCHEME": (
+        "iframe 使用 data/javascript/file 等不可审计或可执行的高风险地址。",
+        "移除该 iframe；外部系统只允许 HTTPS，并按远程集成合同声明 INT-*、降级和浏览器安全属性。",
+    ),
+    "PROTO-INSECURE-REMOTE-IFRAME": (
+        "远程 iframe 使用明文 HTTP，传输内容和凭据边界不可接受。",
+        "改用 HTTPS；若对方不支持 HTTPS，移除嵌入并设计明确的外部跳转或降级路径。",
+    ),
+    "PROTO-REMOTE-IFRAME-UNDECLARED": (
+        "远程 iframe 没有声明集成归属、失败降级和最小浏览器安全边界。",
+        "补齐 data-integration-ref=INT-*、data-fallback、title、sandbox 和 referrerpolicy；L2+ 缺任一项均阻断。",
+    ),
+    "PROTO-REMOTE-IFRAME-UNVERIFIED": (
+        "远程 iframe 的静态合同完整，但门禁无法证明外部内容、登录态、网络可达性和运行时交互。",
+        "在目标网络和角色登录态下执行浏览器 ARUN-*，记录成功、失败降级和证据；静态 GAP 不得冒充已验收。",
+    ),
     "PRD-STATE-SEMANTIC-POLLUTION": (
         "状态机表的当前状态/下一状态列写入了 API/FLD/ACT 等工程 ID，状态语义被污染。",
         "状态列只写业务状态名（如 draft、active）；工程 ID 移回动作/规则/接口列或附录。",
+    ),
+    "PRD-DUPLICATE-STABLE-ID-DEFINITION": (
+        "同一个稳定 ID 在一个或多个权威定义表中被重复定义，开发与测试无法判断哪一行生效。",
+        "只保留一处定义；其他位置改为引用，确属不同对象时分配新的稳定 ID。",
     ),
     "PRD-DANGLING-REF": (
         "正文引用了全文没有定义位的稳定 ID，按 ID 追溯会断链。",
@@ -336,6 +356,7 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PRD-STATE-COUNT-MISMATCH": ("A stated state count differs from the referenced state machine.", "Align the claim and the state-machine rows."),
     "PRD-GUARD-CONTRADICTION": ("An action's allow set conflicts with its guard reject set.", "Align the allowed, rejected and illegal transition sets."),
     "PRD-ENUM-NOT-DEFINED": ("A cardinality or enum contract is incomplete or inconsistent.", "Align counts and define every business enum in a rule or state machine."),
+    "PRD-DUPLICATE-STABLE-ID-DEFINITION": ("A stable ID is defined more than once across authoritative PRD tables.", "Keep one definition; turn other occurrences into references or assign a new stable ID."),
     "PRD-NO-FRONTMATTER": ("The input is not Markdown with YAML front matter.", "Baseline in Markdown + front matter before exporting distribution copies."),
     "HANDOFF-STEP-NOT-IN-PRD": ("A packet references a STEP-* that is absent from the PRD baseline.", "Remove the ghost reference or baseline the complete STEP-* card before handoff."),
     "HANDOFF-PACKET-STEP-MISSING": ("The manifest declares a STEP-* that is absent from the packet body.", "Reference the STEP-* in the packet and preserve its implementation semantics."),
@@ -348,6 +369,10 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PRD-MODULE-SLICE-INCOMPLETE": ("A module slice is not locally complete for implementation and testing.", "Complete goals, flows, UI/data, rules, states, metrics, recovery, acceptance and unknowns in the same module section."),
     "PROTO-NO-PAGE-ANCHOR": ("The prototype has no stable page anchor.", "Add a unique data-testid=\"page-VIEW-*\" to every page root."),
     "PROTO-NO-REGION-ANCHOR": ("A complex prototype has no stable region anchors.", "Add unique data-testid=\"region-REG-*\" anchors to its key business regions."),
+    "PROTO-IFRAME-UNSAFE-SCHEME": ("The iframe uses an executable or unauditable URL scheme.", "Remove it; external integrations must use HTTPS and an explicit INT-* contract."),
+    "PROTO-INSECURE-REMOTE-IFRAME": ("The remote iframe uses plaintext HTTP.", "Use HTTPS or replace the embed with an explicit external navigation/fallback path."),
+    "PROTO-REMOTE-IFRAME-UNDECLARED": ("The remote iframe lacks ownership, fallback or browser-security attributes.", "Add data-integration-ref, data-fallback, title, sandbox and referrerpolicy."),
+    "PROTO-REMOTE-IFRAME-UNVERIFIED": ("The remote iframe is declared but its runtime content and availability remain unverified.", "Execute a browser ARUN-* in the target network and role session, including fallback evidence."),
     "PROTO-UNHANDLED-ACTION": ("A prototype action has no observable dispatch path.", "Bind the data-action to one handler and produce a visible page, modal, state or data result."),
     "PROTO-ORPHAN-HANDLER": ("The action registry contains a handler with no source control.", "Restore its data-action control, remove confirmed dead code, or record the approved removal."),
     "PROTO-UNREACHABLE-VIEW": ("A hidden page, modal or drawer has no discoverable route.", "Add a stable data-action/data-view route or remove the approved dead surface."),
@@ -367,6 +392,16 @@ EN_PREFIX_GUIDANCE: tuple[tuple[str, str, str], ...] = (
     ("PRD-", "The PRD lacks a requirement contract needed at this stage.", "Complete confirmed rules, stable IDs, exceptions and acceptance at the referenced location; do not invent values."),
     ("REQ-", "The requirement lifecycle record is incomplete or inconsistent.", "Repair the referenced field while preserving stable IDs, sources, decisions and audit history."),
 )
+
+
+def finding_code_match(code: str) -> str:
+    """Return exact/family/unknown without pretending an unknown code is known."""
+    normalized = code.strip().upper()
+    if normalized in FINDING_GUIDANCE or normalized in EN_FINDING_GUIDANCE:
+        return "exact"
+    if any(normalized.startswith(prefix) for prefix, _cause, _fix in PREFIX_GUIDANCE):
+        return "family"
+    return "unknown"
 
 
 def guidance_for(code: str) -> tuple[str, str]:
@@ -398,7 +433,9 @@ REPAIR_EXAMPLES: tuple[tuple[str, str], ...] = (
     ("INTAKE-SCHEMA", "cp references/templates/requirement-intake-template.yaml intake.yaml，补齐 artifact: requirement_intake、stage: intake、source_refs: [SRC-*]、value_evidence 等必填字段。"),
     ("PROTO-DEMO-SCAFFOLDING-VISIBLE", "删除 <div>验收场景</div> 这类演示文案块，改为真实业务空态文案，如 <p>暂无待办事项</p>。"),
     ("PROTO-NESTED-PRODUCT-IFRAME", "移除 <iframe src=\"child.html\">，把 child.html 的页面迁移为当前文件内的 <section data-testid=\"page-VIEW-CHILD-001\">。"),
+    ("PROTO-REMOTE-IFRAME-UNDECLARED", "<iframe src=\"https://partner.example/app\" data-integration-ref=\"INT-PARTNER-001\" data-fallback=\"外部系统不可用时显示重试与跳转\" title=\"合作方系统\" sandbox referrerpolicy=\"no-referrer\"></iframe>"),
     ("PRD-STATE-SEMANTIC-POLLUTION", "| 待处理 | 复检 | 复检中 | —— 下一状态列写业务状态名；API-RISK-RECHECK 移入“动作/接口”列。"),
+    ("PRD-DUPLICATE-STABLE-ID-DEFINITION", "在权威定义表中只保留一行 VIEW-RISK-LIST-001；其他章节写“参见 VIEW-RISK-LIST-001”，不要再次填写一行定义。"),
     ("HANDOFF-BINDING-TERM-MISSING", "PRD 正文写“上传道路运输经营许可证后进入审核”，原型对应区域可见文案同样写“道路运输经营许可证”。"),
     ("PRD-CONFIRMED-OPEN-UNKNOWN-CONFLICT", "关闭冲突项：unknowns 中该 key 的 status 改为 closed 并从 open_p0_unknown_ids 移除；或删除 decisions 中同 key 条目改登 UNK-*。"),
     ("HANDOFF-AESTHETIC-UNDECIDED", "存量小迭代写 visual_authority: existing 与 design_lock_ref: prototype.html#design-lock；绿地可写 greenfield_default；品牌化方案再引用 DEC-AESTHETIC-*。"),
@@ -434,6 +471,7 @@ def repair_example_for(code: str) -> str:
 def english_repair_example_for(code: str) -> str:
     examples = (
         ("PRD-LANGUAGE", "Set document_language: en-US, translate human-facing headings and tables, and keep REQ/API/field names unchanged."),
+        ("PRD-DUPLICATE-STABLE-ID-DEFINITION", "Keep one VIEW-RISK-LIST-001 definition row; elsewhere write 'See VIEW-RISK-LIST-001' instead of defining it again."),
         ("PRD-MODULE-SLICE", "Complete MOD-AUTH-001 with goal, paths, VIEW/FLD/ACT, RULE/STATE, METRIC, recovery, AC and UNK references."),
         ("PROTO-NO-REGION-ANCHOR", '<section data-testid="region-REG-COURSE-FILTERS">...</section>'),
         ("PROTO-UNHANDLED-ACTION", "Bind actionRegistry['ACT-COURSE-SAVE'] = saveCourse and update a visible data-state or page value."),
@@ -844,6 +882,7 @@ def main() -> int:
     parser.add_argument("--level", choices=["auto", *LEVELS], default="L2")
     parser.add_argument("--stage", choices=list(STAGE_ORDER), default="baseline")
     parser.add_argument("--scope-ref", action="append", default=[], help="Limit stage/P0 evaluation to one stable-ID scope; repeat as needed")
+    parser.add_argument("--domain", action="append", default=[], help="当前工件适用的领域 ID；用于隔离 custom 规则，可重复")
     parser.add_argument("--format", choices=["concise", "json"], default="concise")
     parser.add_argument("--language", choices=["auto", "zh-CN", "en-US"], default="auto", help="Human-readable gate diagnostics; auto reads document_language or HTML lang")
     parser.add_argument("--diagnostics", choices=["first", "roots", "summary", "full"], default="roots")
@@ -989,7 +1028,7 @@ def main() -> int:
             "stage0": [args.inventory] if args.inventory and args.inventory.is_file() else [],
             "handoff": [args.manifest] if args.manifest and args.manifest.is_file() else [],
         }
-        gate.check_custom_rules(custom_root, artifact_map)
+        gate.check_custom_rules(custom_root, artifact_map, active_domains=tuple(args.domain))
     retry_command = "python scripts/quality_gate.py " + subprocess.list2cmdline(sys.argv[1:])
     output_language = resolve_output_language(gate, args.language)
     payload = result_payload(gate, args.profile, retry_command, output_language)

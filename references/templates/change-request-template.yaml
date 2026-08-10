@@ -17,6 +17,8 @@ request:
   after: "{proposed behavior}"
 diff: []
 impacts:
+  # Every list item uses: {ref: REQ-CORE-001, change_type: modify, reason: "why this ID changes"}
+  # Allowed change_type: add | modify | deprecate | remove | verify_only | none
   requirements: []
   roles: []
   modules: []

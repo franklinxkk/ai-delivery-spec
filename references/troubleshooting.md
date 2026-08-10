@@ -20,6 +20,9 @@
 只继续报告中的阶段和稳定 ID 切片。若快照发现版本、锚点或仓库漂移，必须建立经批准的
 新快照，不能静默续跑。
 
+`explain-finding` 只对精确代码或已知代码家族返回修复说明；完全未知的 code 会明确返回
+`recognized=false` 和非零退出码。此时先检查拼写/版本并复制门禁真实 code，不能把通用兜底当成诊断。
+
 ## 常见症状
 
 | 症状 | 常见原因 | 修复方法 |
@@ -34,12 +37,15 @@
 | PROTO-DYNAMIC-ANCHOR-CONSTRUCTION | data-* 名称由字符串拼接，无法枚举真实动作 | 在模板源码直接写稳定锚点，再用浏览器证据证明动态控件 |
 | PROTO-DEPENDENCY-* | 本地 JS/CSS 缺失、使用绝对路径或越过原型目录 | 将依赖放回原型目录并使用可解析相对路径 |
 | PROTO-REMOTE-DEPENDENCY | 原型依赖远程 JS/CSS，静态门禁无法检查 | 冻结为本地依赖，或将未扫描风险保留为 GAP |
+| PROTO-REMOTE-IFRAME-UNDECLARED | 远程 iframe 未声明 INT-*、降级或浏览器安全属性 | L2+ 补齐 `data-integration-ref/data-fallback/title/sandbox/referrerpolicy`；L0/L1 保留 GAP |
+| PROTO-REMOTE-IFRAME-UNVERIFIED | 远程 iframe 只有静态合同，没有目标网络/登录态证据 | 执行浏览器 ARUN，覆盖成功、权限、不可达和降级路径 |
 | PROTO-BROWSER-EVIDENCE-MISSING | L3/L4 只有静态 PASS，没有逐动作证据 | 在浏览器执行 `data-ac`，记录 ARUN，并用 `--acceptance-run` 重跑 |
 | ACCEPTANCE-EVIDENCE-INVALID | ARUN 引用的证据不存在、越界或 `EVD-*` 未登记 | 把文件放在 ARUN 目录内，或在 `evidence_catalog` 登记 URL/相对路径 |
 | PRD-P0-UNKNOWN-NOT-STRUCTURED | 开放项只是 REV/自由文本，没有责任人和影响范围 | 使用 `UNK-*` 登记并同步 `open_p0_unknown_ids` |
 | PROTO-CSS-* | 全局样式或 `!important` 污染可见性/状态 | 将样式限定到所属组件和显式 `data-state` |
 | HANDOFF-XCT-INCOMPLETE | 横切工作包缺少关键运行约束 | 补影响模块、全局不变量、执行点、例外/失败处理和 AC |
 | HANDOFF-* | PRD、原型或工作包发生漂移 | 以同一稳定 ID 修复唯一 PRD 基线及所有受影响表面 |
+| CUSTOM-DOMAIN-CONTEXT-MISSING | `custom/` 有领域限定规则，但门禁不知道当前领域 | 用可重复的 `--domain <domain_id>` 声明当前工件领域；不要把多领域规则混成全局规则 |
 | Product Truth compile stops | 巨型单文件或跨分片引用未闭合 | 保留分片，校验当前片，编译并修复悬空 ID 后续跑 |
 | run interrupted or context lost | 没有可见检查点或恢复入口 | 执行 resume，只继续最后有效阶段/ID 切片 |
 

@@ -230,7 +230,45 @@ class PrototypeChecks:
                 continue
             src = src_match.group(1)
             parsed = urlsplit(src)
-            if parsed.scheme in {"http", "https"} and parsed.netloc:
+            if parsed.scheme.casefold() in {"javascript", "data", "file"}:
+                self.add(
+                    "BLOCK", "PROTO-IFRAME-UNSAFE-SCHEME", path,
+                    "iframe 使用不可审计或可执行的高风险 URL scheme", src,
+                    affected_consumers=("security", "frontend", "qa", "coding_agent"),
+                )
+                continue
+            is_remote = bool(parsed.netloc and parsed.scheme.casefold() in {"", "http", "https"})
+            if is_remote:
+                if parsed.scheme.casefold() in {"", "http"}:
+                    self.add(
+                        "BLOCK", "PROTO-INSECURE-REMOTE-IFRAME", path,
+                        "远程 iframe 使用明文 HTTP，内容和凭据边界不可接受", src,
+                        affected_consumers=("security", "frontend", "qa", "coding_agent"),
+                    )
+                    continue
+                required_attributes = {
+                    "data-integration-ref": r"\bdata-integration-ref\s*=\s*['\"]INT-[A-Z0-9-]+['\"]",
+                    "data-fallback": r"\bdata-fallback\s*=\s*['\"][^'\"]+['\"]",
+                    "title": r"\btitle\s*=\s*['\"][^'\"]+['\"]",
+                    "sandbox": r"\bsandbox(?:\s*=\s*['\"][^'\"]*['\"])?",
+                    "referrerpolicy": r"\breferrerpolicy\s*=\s*['\"][^'\"]+['\"]",
+                }
+                missing = [name for name, pattern in required_attributes.items() if not re.search(pattern, iframe, re.I)]
+                if missing:
+                    severity = "BLOCK" if level in {"L2", "L3", "L4"} else "GAP"
+                    self.add(
+                        severity, "PROTO-REMOTE-IFRAME-UNDECLARED", path,
+                        "远程 iframe 未声明集成归属、降级路径和浏览器安全边界",
+                        f"{src}; missing={','.join(missing)}",
+                        affected_consumers=("product", "architect", "security", "frontend", "qa", "coding_agent"),
+                    )
+                else:
+                    self.add(
+                        "GAP", "PROTO-REMOTE-IFRAME-UNVERIFIED", path,
+                        "远程 iframe 已声明静态合同，但内容、登录态、网络可达性和运行时交互仍需浏览器证据",
+                        src,
+                        affected_consumers=("product", "frontend", "qa", "customer_acceptor"),
+                    )
                 continue
             if parsed.path.lower().endswith(".html"):
                 self.add(

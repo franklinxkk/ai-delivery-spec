@@ -164,6 +164,13 @@ evidence.
 
 ## 9. Portfolio Maintenance
 
+Maintenance verification has two explicit execution models:
+
+- `maintainer/tests/` contains pytest-collectable tests with isolated fixtures and normal assertion failures.
+- `maintainer/checks/` contains standalone release/regression checks invoked as subprocesses by `ai_delivery_spec_cli.py check`; importing them is not a supported API.
+
+Do not place import-time `SystemExit` scripts under `maintainer/tests/`. New current-release behavior should prefer a compact invariant test; retain a historical standalone check only while its contract is still relevant.
+
 `maintainer/evals/industry-assurance-portfolio.yaml` contains seven high-relevance sectors
 selected for different requirement physics rather than a marketing ranking:
 industrial batch genealogy, clinical accountability, regulated money,
@@ -174,7 +181,7 @@ traffic, CRM, education, data-product, and AI-native packs.
 Run the deterministic contract check with:
 
 ```powershell
-py -3 maintainer/tests/test_v510_industry_assurance.py
+py -3 maintainer/checks/check_v510_industry_assurance.py
 ```
 
 The test verifies portfolio structure and coverage. Actual agent transcripts,
