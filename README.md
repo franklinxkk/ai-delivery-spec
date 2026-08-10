@@ -1,4 +1,4 @@
-# AI Delivery Spec 5.4.4 — Requirement Management for Human & AI｜人机共用需求管理
+# AI Delivery Spec 5.4.5 — Requirement Management for Human & AI｜人机共用需求管理
 
 > 只有一句想法，大模型就急着写 PRD，方向和价值还没想清楚？
 >
@@ -12,7 +12,7 @@
 
 它的目标不是多写文档，而是让业务能确认、产品能决策、研发不必猜、测试可以验、负责人知道哪些已证明、哪些仍需人来决定。
 
-[![Version](https://img.shields.io/badge/version-5.4.4-0052A4.svg)]()
+[![Version](https://img.shields.io/badge/version-5.4.5-0052A4.svg)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 
@@ -178,7 +178,10 @@ python scripts/ai_delivery_spec_cli.py impact --truth requirements/truth/compile
 ```bash
 python scripts/ai_delivery_spec_cli.py init-custom --output custom --sharing local
 python scripts/ai_delivery_spec_cli.py init-requirements --output requirements --custom-root custom --template my-team
+python scripts/ai_delivery_spec_cli.py gate --profile prd --prd requirements/PRD.md --custom-root custom --domain my-team
 ```
+
+同一 `custom/` 注册多个领域时，每条领域规则使用 `domain` 或 `domains` 限定适用范围，并为门禁重复传入当前工件的 `--domain`。未限定的规则视为团队全局规则；存在领域限定规则却没有提供领域上下文时，门禁会阻断而不是跨领域误伤或静默跳过。
 
 内置领域包：`traffic`、`crm`、`education-it`、`data-product`、`ai-native`、`oa`、`medical-hospital-it`。当前均为 `contract_tested`；其中部分基于维护者真实实践标记为 `production_practiced`，其余为 `knowledge_only`。这些状态只描述来源与验证边界，不等于当前项目的领域正确性、生产可用性或专家签署。
 

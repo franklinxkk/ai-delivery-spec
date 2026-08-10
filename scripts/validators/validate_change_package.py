@@ -5,10 +5,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
-import yaml
 from jsonschema import Draft202012Validator, FormatChecker
+
+SCRIPT_DIR = Path(__file__).resolve().parents[1]
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from change_package_contract import ChangeContractError, iter_impact_objects, load_yaml_mapping
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -19,7 +25,11 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("document", type=Path)
     args = parser.parse_args()
-    document = yaml.safe_load(args.document.read_text(encoding="utf-8"))
+    try:
+        document = load_yaml_mapping(args.document, label="change package")
+    except ChangeContractError as exc:
+        print(f"FAIL: {exc}")
+        return 1
     schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
     failures = [
         f"schema {'.'.join(str(part) for part in error.path) or '<root>'}: {error.message}"
@@ -56,13 +66,15 @@ def main() -> int:
         migration = document["impacts"]["data_migration"]
         if not migration.get("strategy") or not migration.get("rollback"):
             failures.append("data migration requires strategy and rollback")
-    removed = [
-        item["ref"]
-        for group, items in document.get("impacts", {}).items()
-        if isinstance(items, list)
-        for item in items
-        if isinstance(item, dict) and item.get("change_type") == "remove"
-    ]
+    try:
+        removed = [
+            item["ref"]
+            for _group, _index, item in iter_impact_objects(document)
+            if item.get("change_type") == "remove"
+        ]
+    except ChangeContractError as exc:  # defensive for direct/legacy callers
+        failures.append(str(exc))
+        removed = []
     replacements = document.get("compatibility", {}).get("replacement_map", {})
     missing_replacement = [item for item in removed if item not in replacements]
     if missing_replacement:

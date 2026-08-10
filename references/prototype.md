@@ -312,6 +312,8 @@ L3必须遍历所有声明页面的可见动作，而不是每角色只走一条
 工程原型可拆成本地多文件。相对 JS/CSS 会与 HTML 一起进入动作、状态、语法和 CSS 污染扫描；
 缺失、绝对路径、越过原型目录会阻断，远程依赖保留为 GAP。不得为过门禁打包成不可维护巨型 HTML。
 
+远程 iframe 不是普通本地依赖：`http://`、`data:`、`javascript:`、`file:` 一律阻断；HTTPS iframe 在 L2+ 必须声明 `data-integration-ref="INT-*"`、`data-fallback`、`title`、`sandbox` 和 `referrerpolicy`，L0/L1 缺失时保留 GAP。即使静态声明完整，也只能得到 `PROTO-REMOTE-IFRAME-UNVERIFIED`，必须在目标网络与角色登录态下用浏览器 `ARUN-*` 证明内容、权限、可达性、交互及失败降级。
+
 自动写操作只能使用 mock、shadow 或可丢弃测试数据，未经明确授权和安全计划不得污染生产数据/指标。
 
 | 步骤 | 可见线索 | 用户动作 | 可见结果 | 领域结果 | 阻断/假设 | AC |

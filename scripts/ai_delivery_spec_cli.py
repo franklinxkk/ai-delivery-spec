@@ -116,7 +116,8 @@ def init_custom(args: argparse.Namespace) -> int:
         target / "templates" / "my-team.md": "<!-- extends: unified-requirement-prd-template.md -->\n\n## 项目私有补充\n\n待补充团队特有的评审或审计要求。\n",
         target / "validators" / "my-team.yaml": (
             "rules:\n  - id: CUST-EXAMPLE-001\n    artifact: prd\n    assertion: must_match\n"
-            "    severity: GAP\n    pattern: '项目私有补充'\n    message: PRD 缺少团队私有补充章节\n"
+            "    domains: [my-team]\n    severity: GAP\n    pattern: '项目私有补充'\n"
+            "    message: PRD 缺少团队私有补充章节\n"
         ),
         target / "learning" / "candidates" / "project-local" / "CAND-EXAMPLE.yaml": (
             "schema_version: 5.3.0\ncandidate_id: CAND-MY-TEAM-001\ndomain: my-team\n"
@@ -269,8 +270,8 @@ def run_check(args: argparse.Namespace) -> int:
         [sys.executable, "maintainer/tools/validators/validate_runtime_rule_uniqueness.py"],
         [sys.executable, "maintainer/tools/validators/validate_domain_coverage.py"],
         [sys.executable, "maintainer/tools/validators/validate_eval_catalog.py"],
-        [sys.executable, "maintainer/tests/test_v511_runtime_budget.py"],
-        [sys.executable, "maintainer/tests/test_v540_readme_commands.py"],
+        [sys.executable, "maintainer/checks/check_v511_runtime_budget.py"],
+        [sys.executable, "maintainer/checks/check_v540_readme_commands.py"],
         [sys.executable, "maintainer/tests/test_v541_human_first_gate.py"],
         [sys.executable, "maintainer/tests/test_product_experience.py"],
         [sys.executable, "maintainer/tools/validators/validate_release_claims.py"],
@@ -278,20 +279,20 @@ def run_check(args: argparse.Namespace) -> int:
     release_only_commands: list[list[str]] = [
         [sys.executable, "maintainer/tools/validators/validate_domain_sources.py"],
         [sys.executable, "maintainer/tools/validators/validate_domain_contracts.py"],
-        [sys.executable, "maintainer/tests/test_v502_progressive_truth.py"],
-        [sys.executable, "maintainer/tests/test_v510_requirement_management.py"],
-        [sys.executable, "maintainer/tests/test_v510_unified_prd.py"],
-        [sys.executable, "maintainer/tests/test_v510_lightweight_gate.py"],
-        [sys.executable, "maintainer/tests/test_v510_industry_assurance.py"],
-        [sys.executable, "maintainer/tests/test_v511_domain_assurance.py"],
-        [sys.executable, "maintainer/tests/test_v515_page_delivery_contract.py"],
-        [sys.executable, "maintainer/tests/test_v530_contracts.py"],
-        [sys.executable, "maintainer/tests/test_v540_stage_contracts.py"],
+        [sys.executable, "maintainer/checks/check_v502_progressive_truth.py"],
+        [sys.executable, "maintainer/checks/check_v510_requirement_management.py"],
+        [sys.executable, "maintainer/checks/check_v510_unified_prd.py"],
+        [sys.executable, "maintainer/checks/check_v510_lightweight_gate.py"],
+        [sys.executable, "maintainer/checks/check_v510_industry_assurance.py"],
+        [sys.executable, "maintainer/checks/check_v511_domain_assurance.py"],
+        [sys.executable, "maintainer/checks/check_v515_page_delivery_contract.py"],
+        [sys.executable, "maintainer/checks/check_v530_contracts.py"],
+        [sys.executable, "maintainer/checks/check_v540_stage_contracts.py"],
         [sys.executable, "scripts/validators/validate_requirement_patterns.py", "references/patterns/common-requirement-patterns.yaml"],
-        [sys.executable, "maintainer/tests/test_v544_human_review_contracts.py"],
-        [sys.executable, "maintainer/tests/test_context_planning.py"],
-        [sys.executable, "maintainer/tests/test_execution_state.py"],
-        [sys.executable, "maintainer/tests/test_cli_init.py"],
+        [sys.executable, "maintainer/checks/check_v544_human_review_contracts.py"],
+        [sys.executable, "maintainer/checks/check_context_planning.py"],
+        [sys.executable, "maintainer/checks/check_execution_state.py"],
+        [sys.executable, "maintainer/checks/check_cli_init.py"],
         [sys.executable, "maintainer/tests/test_runtime_resilience.py"],
         [
             sys.executable,
@@ -425,7 +426,7 @@ def status_report(args: argparse.Namespace) -> int:
         },
         "known_limitations": [
             "five domain methods have owner-attested production practice; all built-in packs pass deterministic contract checks but fresh-agent/expert maturity remains separate",
-            "v5.4.4 human-review probes are partial; isolated no-skill comparison, fresh-agent repetitions and versioned user feedback remain separate evidence",
+            "v5.4.5 cross-entry and adversarial contract probes are deterministic; isolated no-skill comparison, fresh-agent repetitions and versioned user feedback remain separate evidence",
             "domain expert, customer, production, legal, safety, and financial correctness are not proven",
             "deterministic fixtures and private brownfield calibration expose method gaps but do not prove implementation or customer acceptance",
         ],
@@ -511,6 +512,8 @@ def quality_gate(args: argparse.Namespace) -> int:
     ]
     for scope_ref in args.scope_ref:
         values.extend(["--scope-ref", scope_ref])
+    for domain in args.domain:
+        values.extend(["--domain", domain])
     if args.custom_root:
         values.extend(["--custom-root", str(args.custom_root)])
     option_names = {
@@ -732,15 +735,33 @@ def assess_candidate(args: argparse.Namespace) -> int:
 
 
 def explain_finding(args: argparse.Namespace) -> int:
-    from quality_gate import english_guidance_for, english_repair_example_for, guidance_for, repair_example_for
+    from quality_gate import (
+        english_guidance_for,
+        english_repair_example_for,
+        finding_code_match,
+        guidance_for,
+        repair_example_for,
+    )
 
-    cause_zh, fix_zh = guidance_for(args.code)
-    example_zh = repair_example_for(args.code)
-    cause_en, fix_en = english_guidance_for(args.code)
-    example_en = english_repair_example_for(args.code)
+    code = args.code.strip().upper()
+    match = finding_code_match(code)
+    if match == "unknown":
+        cause_zh = "未知 finding code：当前版本不认识该代码，也未命中任何已知代码家族。"
+        fix_zh = "检查拼写和 Skill/CLI 版本；先重跑原门禁并复制其真实 code，不要依据通用文案猜测修复。"
+        example_zh = "运行 gate --format json，从 findings[].code 复制完整代码后再次执行 explain-finding。"
+        cause_en = "This finding code is unknown to the current Skill/CLI version."
+        fix_en = "Check spelling and version, rerun the original gate, and copy its real code instead of guessing from generic guidance."
+        example_en = "Run gate --format json, copy the complete findings[].code, then call explain-finding again."
+    else:
+        cause_zh, fix_zh = guidance_for(code)
+        example_zh = repair_example_for(code)
+        cause_en, fix_en = english_guidance_for(code)
+        example_en = english_repair_example_for(code)
     english = args.language == "en-US"
     payload = {
-        "code": args.code,
+        "code": code,
+        "recognized": match != "unknown",
+        "match": match,
         "output_language": "en-US" if english else "zh-CN",
         "cause": cause_en if english else cause_zh,
         "how_to_fix": fix_en if english else fix_zh,
@@ -753,10 +774,10 @@ def explain_finding(args: argparse.Namespace) -> int:
     else:
         labels = ("Cause", "Fix", "Example") if english else ("原因", "修复", "示例")
         print(
-            f"{args.code}\n{labels[0]}: {payload['cause']}\n"
+            f"{code}\n{labels[0]}: {payload['cause']}\n"
             f"{labels[1]}: {payload['how_to_fix']}\n{labels[2]}: {payload['repair_example']}"
         )
-    return 0
+    return 2 if match == "unknown" else 0
 
 
 def resume_execution(args: argparse.Namespace) -> int:
@@ -834,6 +855,7 @@ def main() -> int:
     gate.add_argument("--level", choices=["auto", "L0", "L1", "L2", "L3", "L4"], default="auto")
     gate.add_argument("--stage", choices=["inventory", "clarify", "specify", "review", "baseline", "prototype", "implementation", "acceptance", "closed"], default="baseline")
     gate.add_argument("--scope-ref", action="append", default=[])
+    gate.add_argument("--domain", action="append", default=[], help=gate_help("Active domain ID for scoped custom rules; repeat as needed", "当前工件适用的领域 ID；用于隔离私有规则，可重复"))
     gate.add_argument("--format", choices=["concise", "json"], default="concise")
     gate.add_argument("--language", choices=["auto", "zh-CN", "en-US"], default="auto", help="Human-readable diagnostics; auto follows artifact language")
     gate.add_argument("--diagnostics", choices=["first", "roots", "summary", "full"], default="roots")

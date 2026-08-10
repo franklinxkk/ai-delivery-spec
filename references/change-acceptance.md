@@ -29,6 +29,9 @@ python scripts/analyze_change_impact.py \
   --output requirements/changes/CHG-001-impact.yaml
 ```
 
+`impacts` 下除 `data_migration` 外的每个数组项必须使用对象结构：
+`{ref: REQ-CORE-001, change_type: modify, reason: "为什么该 ID 受影响"}`。影响分析器与变更校验器共享同一受控读取边界：合法对象可作为 `seed_refs` 的后备来源；字符串、空引用或错误嵌套只能返回可定位的非零失败，不得泄漏 Traceback。Schema 仍是完整结构权威，分析器的防御性读取不等于绕过变更校验。
+
 ## 3. 差异与版本 / Diff And Version
 
 机器合同记录字段级变更前/变更后（`before/after`），评审者同时获得可读行为差异。旧基线永久保留；已接受变更增加

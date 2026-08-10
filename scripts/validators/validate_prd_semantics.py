@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""PRD 语义一致性静态检查（5.4.4 正式版）：悬空引用、ID 前缀碰撞、状态机态数不符、
-守卫状态集合互斥（D4 弱信号 WARN）、枚举基数/取值覆盖（D5 弱信号 WARN）。
+"""PRD 语义一致性静态检查（5.4.5）：悬空引用、ID 前缀碰撞、状态机态数不符、
+守卫状态集合互斥（D4 弱信号 WARN）、枚举基数/取值覆盖（D5 弱信号 WARN）、
+正文决策冲突（D6）和跨权威表稳定 ID 重复定义（D7）。
 
 纯静态、零 LLM。接线方式：``gate --profile prd`` 由 quality_gate.Gate._check_semantics
 调用 ``run_semantic_checks``；也可独立执行：
@@ -41,6 +42,7 @@ _FAMILY = "|".join(ID_FAMILIES)
 ID_RE = re.compile(rf"(?<![A-Za-z0-9-])(?:{_FAMILY})-[A-Z0-9](?:[A-Z0-9_-]*[A-Z0-9])?")
 STM_RE = re.compile(r"(?<![A-Za-z0-9-])STM-[A-Z0-9](?:[A-Z0-9_-]*[A-Z0-9])?")
 FRONTMATTER_RE = re.compile(r"\A---\s*\n(.*?)\n---\s*(?:\n|\Z)", re.S)
+TABLE_SEPARATOR_RE = re.compile(r"^\s*\|?(?:\s*:?-{3,}:?\s*\|)+\s*$")
 
 # 示例行只贡献定义、不贡献引用；仅出现于示例行的 ID 整体豁免（格式举例）。
 EXAMPLE_MARKERS = ("格式", "示例", "例如", "如：", "如 ", "举例", "e.g.")
@@ -463,6 +465,125 @@ def _is_example_line(line: str) -> bool:
     return any(marker in line for marker in EXAMPLE_MARKERS)
 
 
+def _table_cells(line: str) -> list[str]:
+    return [cell.strip() for cell in line.strip().strip("|").split("|")]
+
+
+def _markdown_tables(raw: str) -> list[tuple[str, list[str], list[tuple[int, list[str]]]]]:
+    """Return bounded Markdown tables outside frontmatter/fences.
+
+    Each item is ``(nearest_heading, header_cells, [(line_no, cells), ...])``.
+    The parser intentionally ignores free prose and only reads explicit tables.
+    """
+    lines = raw.splitlines()
+    visible = {line_no for line_no, _line in _prose_lines(raw)}
+    headings = _headings(lines)
+    tables: list[tuple[str, list[str], list[tuple[int, list[str]]]]] = []
+    index = 0
+    while index + 1 < len(lines):
+        line_no = index + 1
+        if (
+            line_no not in visible
+            or not lines[index].lstrip().startswith("|")
+            or not TABLE_SEPARATOR_RE.match(lines[index + 1])
+        ):
+            index += 1
+            continue
+        header = _table_cells(lines[index])
+        nearest_heading = ""
+        for _level, title, heading_index in headings:
+            if heading_index >= index:
+                break
+            nearest_heading = title
+        rows: list[tuple[int, list[str]]] = []
+        cursor = index + 2
+        while cursor < len(lines) and cursor + 1 in visible and lines[cursor].lstrip().startswith("|"):
+            if not TABLE_SEPARATOR_RE.match(lines[cursor]):
+                rows.append((cursor + 1, _table_cells(lines[cursor])))
+            cursor += 1
+        tables.append((nearest_heading, header, rows))
+        index = cursor
+    return tables
+
+
+def _normalized_topic(value: str) -> str:
+    return re.sub(r"[\s`*_：:；;，,。.!！?？/\\（）()\[\]{}]+", "", value).casefold()
+
+
+def check_body_decision_conflicts(raw: str) -> list[SemFinding]:
+    """D6: exact-topic conflicts across canonical human decision tables.
+
+    This is deliberately table-bounded rather than broad prose matching, so a
+    product manager's authoritative decision/unknown tables are checked without
+    pretending to understand unrelated natural-language paragraphs. Decisions
+    and unknowns may be split across sections, so collection is document-wide.
+    """
+    findings: list[SemFinding] = []
+    decided: dict[str, tuple[str, int]] = {}
+    opened: dict[str, tuple[str, int]] = {}
+    for _heading, header, rows in _markdown_tables(raw):
+        lowered = [cell.casefold() for cell in header]
+        id_col = next((i for i, cell in enumerate(lowered) if re.search(r"\b(?:unk|dec)(?:\s*/\s*(?:unk|rev|dec))*\s*id\b", re.sub(r"[`*_]", "", cell), re.I)), None)
+        topic_col = next((i for i, cell in enumerate(lowered) if any(term in cell for term in ("问题", "冲突", "topic", "question"))), None)
+        status_col = next((i for i, cell in enumerate(lowered) if any(term in cell for term in ("结论", "状态", "status", "decision"))), None)
+        if id_col is None or topic_col is None or status_col is None:
+            continue
+        for line_no, cells in rows:
+            if max(id_col, topic_col, status_col) >= len(cells):
+                continue
+            item_id = cells[id_col].strip("`* ").upper()
+            topic = _normalized_topic(cells[topic_col])
+            status = _normalized_topic(cells[status_col])
+            if not topic:
+                continue
+            if item_id.startswith("DEC-") and any(term in status for term in ("已确认", "已关闭", "已决定", "已决策", "confirmed", "closed", "resolved", "decided")):
+                decided[topic] = (item_id, line_no)
+            elif item_id.startswith("UNK-") and any(term in status for term in ("未关闭", "开放", "阻断", "待确认", "open", "blocked", "unresolved", "pending")):
+                opened[topic] = (item_id, line_no)
+    for topic in sorted(set(decided) & set(opened)):
+        decision_id, decision_line = decided[topic]
+        unknown_id, unknown_line = opened[topic]
+        findings.append(SemFinding(
+            "BLOCK", "PRD-CONFIRMED-OPEN-UNKNOWN-CONFLICT",
+            f"正文决策表的同一问题同时登记为已确认决策 {decision_id} 和未关闭未知项 {unknown_id}；关闭其中一个并同步 frontmatter/附录",
+            f"{decision_id}@line {decision_line} vs {unknown_id}@line {unknown_line}",
+        ))
+    return findings
+
+
+def check_duplicate_stable_id_definitions(raw: str) -> list[SemFinding]:
+    """D7: duplicate authoritative definitions, not legitimate references.
+
+    Only definition-oriented Markdown tables are considered. Trace/mapping/index
+    tables are excluded, and repeated IDs in prose remain ordinary references.
+    """
+    findings: list[SemFinding] = []
+    id_header = re.compile(r"^(?:(?:UNK|REV|DEC)(?:\s*/\s*(?:UNK|REV|DEC))*|(?:REQ|VIEW|AC|ACT|RULE|FLD|STATE|STM|ROLE|FLOW|MOD|REG|EVT|API|INT))\s*ID$", re.I)
+    definitions: dict[str, list[int]] = {}
+    for heading, header, rows in _markdown_tables(raw):
+        if not header or not id_header.match(re.sub(r"[`*_]", "", header[0]).strip()):
+            continue
+        context = (heading + " " + " ".join(header)).casefold()
+        if any(term in context for term in ("追溯", "映射", "索引", "trace", "mapping", "index")):
+            continue
+        for line_no, cells in rows:
+            if not cells:
+                continue
+            match = ID_RE.search(cells[0].upper())
+            if match:
+                definitions.setdefault(match.group(0), []).append(line_no)
+    for item_id, lines in sorted(definitions.items()):
+        unique_lines = sorted(set(lines))
+        if len(unique_lines) < 2:
+            continue
+        findings.append(SemFinding(
+            "BLOCK", "PRD-DUPLICATE-STABLE-ID-DEFINITION",
+            f"稳定 ID {item_id} 在权威定义表中重复定义；保留一个定义，其余位置改为引用或使用新的稳定 ID",
+            f"{item_id}@lines {','.join(str(item) for item in unique_lines)}",
+        ))
+    return findings
+
+
 def check_guard_contradiction(raw: str) -> list[SemFinding]:
     """D4（弱信号，WARN）：同一动作的“仅 X/Y 可 Z”许可集与“∉/不可”拒绝集显式互斥。
 
@@ -617,7 +738,7 @@ def check_enum_value_coverage(raw: str) -> list[SemFinding]:
 
 
 def run_semantic_checks(raw: str) -> list[SemFinding]:
-    """Run D2/D1/D3 (BLOCK-capable) and D4/D5 (WARN-only) in one pass set; wired into gate --profile prd."""
+    """Run bounded semantic invariants wired into ``gate --profile prd``."""
     return [
         *check_dangling_refs(raw),
         *check_prefix_collision(raw),
@@ -625,6 +746,8 @@ def run_semantic_checks(raw: str) -> list[SemFinding]:
         *check_guard_contradiction(raw),
         *check_enum_cardinality(raw),
         *check_enum_value_coverage(raw),
+        *check_body_decision_conflicts(raw),
+        *check_duplicate_stable_id_definitions(raw),
     ]
 
 
@@ -642,7 +765,7 @@ def main() -> int:
     if any(item.severity == "BLOCK" for item in findings):
         return 1
     if not findings:
-        print("PASS: PRD 语义一致性检查通过（无悬空引用、无前缀碰撞、态数一致）")
+        print("PASS: PRD 语义一致性检查通过（引用、ID、状态、决策与枚举合同一致）")
     return 0
 
 

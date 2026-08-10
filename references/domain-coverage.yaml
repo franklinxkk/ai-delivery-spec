@@ -55,9 +55,9 @@ domains:
         status: passed
         owner: domain maintainer
     known_gaps:
-      - National source coverage was refreshed through 2026-08-09; provincial/local implementation, project procurement and customer source-system rules remain project-specific.
+      - National source coverage was refreshed through 2026-08-10, including separate current passenger and dangerous-goods safety-management baselines; provincial/local implementation, project procurement and customer source-system rules remain project-specific.
       - Nine-industry depth has not been behaviorally evaluated.
-    last_verified_at: "2026-08-09T00:00:00+08:00"
+    last_verified_at: "2026-08-10T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 

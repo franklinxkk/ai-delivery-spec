@@ -10,6 +10,12 @@ from typing import Any
 
 import yaml
 
+from change_package_contract import (
+    ChangeContractError,
+    extract_seed_refs,
+    load_yaml_mapping,
+)
+
 
 def graph_from_truth(document: dict[str, Any]) -> dict[str, set[str]]:
     graph: dict[str, set[str]] = defaultdict(set)
@@ -66,13 +72,13 @@ def main() -> int:
     parser.add_argument("--output", type=Path)
     parser.add_argument("--max-depth", type=int, default=4)
     args = parser.parse_args()
-    truth = yaml.safe_load(args.truth.read_text(encoding="utf-8"))
-    change = yaml.safe_load(args.change.read_text(encoding="utf-8"))
-    seeds = change.get("request", {}).get("seed_refs", [])
-    if not seeds:
-        seeds = [item.get("ref") for values in change.get("impacts", {}).values() if isinstance(values, list) for item in values if item.get("ref")]
-    if not seeds:
-        raise SystemExit("FAIL: change contains no request.seed_refs or impact refs")
+    try:
+        truth = load_yaml_mapping(args.truth, label="truth/trace ledger")
+        change = load_yaml_mapping(args.change, label="change package")
+        seeds = extract_seed_refs(change)
+    except ChangeContractError as exc:
+        print(f"FAIL: {exc}")
+        return 2
     graph = graph_from_truth(truth)
     missing = sorted(set(seeds) - set(graph))
     queue = deque((seed, 0) for seed in seeds if seed in graph)

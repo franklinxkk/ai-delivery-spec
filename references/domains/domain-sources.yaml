@@ -1,5 +1,5 @@
-schema_version: 5.4.4
-last_catalog_review: 2026-08-09
+schema_version: 5.4.5
+last_catalog_review: 2026-08-10
 policy:
   primary_sources_only_for_binding_claims: true
   model_memory_is_authority: false
@@ -670,7 +670,7 @@ sources:
     last_verified_at: 2026-07-11
     refresh_days: 90
 
-  # 2026-08-09 systematic refresh: transport
+  # 2026-08-10 systematic refresh: transport
   - id: KS-TRAFFIC-SAFETY-MANAGERS-2024
     domains: [traffic]
     title: 道路运输企业主要负责人和安全生产管理人员安全考核管理办法（交运规〔2024〕8号）
@@ -687,8 +687,8 @@ sources:
     refresh_days: 90
   - id: KS-TRAFFIC-DANGEROUS-SAFETY-2025
     domains: [traffic]
-    title: 危险货物道路运输企业安全生产管理规范（交运规〔2025〕6号）
-    issuer: 中华人民共和国交通运输部
+    title: 危险货物道路运输企业安全管理规范（交运规〔2025〕6号）
+    issuer: 交通运输部、公安部、应急管理部
     authority_type: ministry_normative_document
     effect_class: binding_baseline
     url: https://xxgk.mot.gov.cn/xzgfxwj/202510/t20251029_4178955.html
@@ -697,7 +697,21 @@ sources:
     applicability: dangerous-goods road transport enterprise safety management
     product_mapping: organization, personnel, vehicle, operation, training, inspection, hazard and emergency controls
     claim_limit: Do not copy an item into every transport industry; verify dangerous-goods scope and local rules.
-    last_verified_at: 2026-08-09
+    last_verified_at: 2026-08-10
+    refresh_days: 90
+  - id: KS-TRAFFIC-PASSENGER-SAFETY-2023
+    domains: [traffic]
+    title: 道路旅客运输企业安全管理规范（交运规〔2023〕4号）
+    issuer: 交通运输部、公安部、应急管理部
+    authority_type: ministry_normative_document
+    effect_class: binding_baseline
+    url: https://xxgk.mot.gov.cn/2020/jigou/ysfws/202311/t20231123_3952565.html
+    status: active_as_verified
+    jurisdiction: China
+    applicability: road passenger transport enterprise safety management
+    product_mapping: organization, safety staffing, personnel assessment, vehicle, driver, operation, training, risk and hidden-danger controls
+    claim_limit: Apply only to road passenger enterprises after vehicle count, role, effective status and local implementation are verified; do not reuse the dangerous-goods rule number.
+    last_verified_at: 2026-08-10
     refresh_days: 90
   - id: KS-TRAFFIC-SMART-PILOTS-2026
     domains: [traffic]

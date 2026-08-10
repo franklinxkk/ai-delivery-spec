@@ -18,10 +18,6 @@ COMPILER = ROOT / "scripts/compile_clarification_transcript.py"
 CAPSULE_VALIDATOR = ROOT / "scripts/validators/validate_capsule_composition.py"
 TRUTH = ROOT / "maintainer/examples/publishing-learning-v5/delivery/truth/product-truth.yaml"
 CONFIG = ROOT / "examples/spec.config.example.yaml"
-TEMP_ROOT = ROOT.parent / ".ads-test-tmp-v542"
-TEMP_ROOT.mkdir(exist_ok=True)
-
-
 def run(script: Path, *args: str, expected: int = 0) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(
         [sys.executable, str(script), *args],
@@ -37,7 +33,7 @@ def run(script: Path, *args: str, expected: int = 0) -> subprocess.CompletedProc
 
 
 def test_turn_budget_fails_closed() -> None:
-    with tempfile.TemporaryDirectory(prefix="ads-deadlock-", dir=TEMP_ROOT) as temp:
+    with tempfile.TemporaryDirectory(prefix="ads-deadlock-") as temp:
         work = Path(temp)
         contract = yaml.safe_load(
             (ROOT / "references/templates/discovery-contract-template.yaml").read_text(encoding="utf-8")
@@ -93,7 +89,7 @@ def test_capsule_write_slots_are_isolated() -> None:
     other["namespace"] = "facility-maintenance"
     for index, policy in enumerate(other["policies"], start=1):
         policy["id"] = f"RULE-FACILITY-MAINTENANCE-{index:03d}"
-    with tempfile.TemporaryDirectory(prefix="ads-capsule-", dir=TEMP_ROOT) as temp:
+    with tempfile.TemporaryDirectory(prefix="ads-capsule-") as temp:
         work = Path(temp)
         first, second = work / "energy.yaml", work / "facility.yaml"
         first.write_text(yaml.safe_dump(source, allow_unicode=True, sort_keys=False), encoding="utf-8")
@@ -116,7 +112,7 @@ def test_capsule_write_slots_are_isolated() -> None:
 
 
 def test_invalid_change_does_not_replace_stable_checkpoint() -> None:
-    with tempfile.TemporaryDirectory(prefix="ads-change-drift-", dir=TEMP_ROOT) as temp:
+    with tempfile.TemporaryDirectory(prefix="ads-change-drift-") as temp:
         work = Path(temp)
         state0 = work / "state-000.yaml"
         run(
@@ -183,7 +179,7 @@ def test_structured_clarification_closes_only_named_unknowns() -> None:
             }
         ],
     }
-    with tempfile.TemporaryDirectory(prefix="ads-grill-", dir=TEMP_ROOT) as temp:
+    with tempfile.TemporaryDirectory(prefix="ads-grill-") as temp:
         work = Path(temp)
         contract_path, transcript_path, output = (
             work / "contract.yaml",

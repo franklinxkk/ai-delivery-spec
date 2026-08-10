@@ -34,7 +34,7 @@ historical_regressions:
     observed_failure: direction questions could be silently defaulted; a complex zero-region prototype could pass static L3; static PASS could be mistaken for browser-complete behavior
     resolved_by: dependency-aware decision-tree clarification; DEC-AESTHETIC/UNK direction contract; REG-* complex-page gate; ARUN-* browser-evidence binding and explicit gap results
     regression_commands:
-      - py -3 maintainer/tests/test_v530_contracts.py
+      - py -3 maintainer/checks/check_v530_contracts.py
       - py -3 scripts/ai_delivery_spec_cli.py check --keep-going
       - py -3 maintainer/tools/validators/validate_v5_architecture.py
       - py -3 maintainer/tools/validators/validate_release_claims.py
@@ -46,7 +46,7 @@ historical_regressions:
     input: private publishing/authorization/learning PRD v3.3 RC1, prototype v3.2 and 14-agent simulation; project artifacts not shipped
     observed_failure: L2 static prototype gate missed concatenated data-action anchors; manual REV entries bypassed structured P0 unknowns; reverse requirements used a competing REQ namespace
     resolved_by: dynamic-anchor blocking and candidate inventory; structured UNK enforcement; INV-to-REQ mapping and owned review batches; explicit not_proven output
-    regression_command: py -3 maintainer/tests/test_v530_contracts.py
+    regression_command: py -3 maintainer/checks/check_v530_contracts.py
     result: passed
     proven: deterministic gates reject the reproduced structural bypasses and the full repository assurance suite passes
     not_proven: project business correctness, real-browser journeys, coding implementation, customer decisions or acceptance
