@@ -1,5 +1,5 @@
 schema_version: 5.3.0
-skill_version: 5.4.5
+skill_version: 5.4.6
 runtime: pure_v5
 domain_packs:
   count: 7
@@ -15,10 +15,27 @@ evaluation_assets:
   catalog_status:
     not_run: 11
     partial: 4
+trace_release_proxy:
+  status: ready_with_limits
+  public_reference: https://skillhub.cn/tutorials#trace-evaluation
+  boundary: local evidence checklist only; not a SkillHub score or 4.9 prediction
+  dimensions:
+    trust: passed
+    reliability: passed
+    adaptability: passed
+    convention: passed
+    effectiveness: partial
+  effectiveness_limit: >-
+    three private real-project calibration shapes and deterministic regressions exposed
+    and repaired contract gaps, but fresh blind Skill-on/Skill-off repetitions, controlled
+    token/time accounting and versioned human ratings remain incomplete
+  private_calibration:
+    sample_shapes: [same-baseline review A/B, brownfield review retrofit, multi-surface prototype acceptance]
+    publication: anonymized aggregate only; raw files and customer/project names excluded
 known_limitations:
 - five domain methods have owner-attested production practice; all built-in packs
   pass deterministic contract checks but fresh-agent/expert maturity remains separate
-- v5.4.5 cross-entry and adversarial contract probes are deterministic; isolated
+- v5.4.6 cross-entry and adversarial contract probes are deterministic; isolated
   no-skill comparison, fresh-agent repetitions and versioned user feedback remain
   separate evidence
 - domain expert, customer, production, legal, safety, and financial correctness are

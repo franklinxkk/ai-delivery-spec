@@ -4,6 +4,7 @@ claim_policy:
   simulated_reviewer_is_expert_review: false
   passed_requires_evidence: true
   quantitative_metrics: maintainer/evals/metric-definitions.yaml
+  trace_release_proxy: maintainer/evals/metric-definitions.yaml#trace_release_proxy
 
 dimensions:
   - trigger_accuracy

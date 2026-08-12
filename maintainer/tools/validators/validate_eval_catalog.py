@@ -10,6 +10,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
 CATALOG = ROOT / "maintainer" / "evals" / "eval-catalog.yaml"
+METRICS = ROOT / "maintainer" / "evals" / "metric-definitions.yaml"
 
 
 def main() -> int:
@@ -23,6 +24,17 @@ def main() -> int:
     metrics_path = catalog.get("claim_policy", {}).get("quantitative_metrics")
     if not metrics_path or not (ROOT / metrics_path).exists():
         failures.append("evaluation catalog must reference quantitative metric definitions")
+    metric_definitions = yaml.safe_load(METRICS.read_text(encoding="utf-8"))
+    trace_proxy = metric_definitions.get("trace_release_proxy", {})
+    if catalog.get("claim_policy", {}).get("trace_release_proxy") != "maintainer/evals/metric-definitions.yaml#trace_release_proxy":
+        failures.append("evaluation catalog must reference the local TRACE release proxy")
+    if set(trace_proxy.get("dimensions", {})) != {"trust", "reliability", "adaptability", "convention", "effectiveness"}:
+        failures.append("TRACE proxy must cover Trust, Reliability, Adaptability, Convention and Effectiveness")
+    if "not the platform algorithm" not in str(trace_proxy.get("purpose", "")):
+        failures.append("TRACE proxy must prohibit presenting a local proxy as the platform algorithm")
+    for dimension, contract in trace_proxy.get("dimensions", {}).items():
+        if not contract.get("meaning") or not contract.get("local_evidence"):
+            failures.append(f"TRACE {dimension} must define meaning and local evidence")
 
     for scenario in scenarios:
         scenario_id = scenario.get("id")
@@ -67,7 +79,7 @@ def main() -> int:
         counts[scenario["status"]] = counts.get(scenario["status"], 0) + 1
     print(
         f"PASS: evaluation catalog is honest and diverse "
-        f"({len(scenarios)} scenarios, {len(projects)} projects, status={counts})"
+        f"({len(scenarios)} scenarios, {len(projects)} projects, TRACE=5 dimensions, status={counts})"
     )
     return 0
 

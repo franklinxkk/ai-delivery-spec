@@ -6,6 +6,36 @@ measurement_policy:
   - Experience timing starts at the user request and includes clarification, artifact generation, gate diagnosis and repair; CLI runtime alone is not end-to-end speed.
   - Human rating claims require real user feedback tied to a version, task shape and evidence reference; agent self-rating is not user feedback.
   - Exploratory single runs may guide iteration but cannot support a general improvement claim.
+trace_release_proxy:
+  purpose: Local packaging review aligned to SkillHub TRACE; it is not the platform algorithm and must not predict or guarantee a public rating.
+  public_reference: https://skillhub.cn/tutorials#trace-evaluation
+  verified_on: 2026-08-12
+  scale: evidence_status_not_numeric_platform_score
+  dimensions:
+    trust:
+      meaning: security, privacy, provenance, least authority and claim honesty
+      local_evidence: [privacy_scan, package_allowlist, evidence_level_boundary, public_claim_validation]
+    reliability:
+      meaning: deterministic execution, controlled failures, dependency clarity and reproducibility
+      local_evidence: [cross_platform_tests, clean_install_smoke, runtime_budget, controlled_failure_regressions]
+    adaptability:
+      meaning: correct trigger and bounded behavior across language, task size, lifecycle stage and brownfield/greenfield shapes
+      local_evidence: [trigger_recall, trigger_precision, bilingual_paths, shape_coverage, overinterpretation_rate]
+    convention:
+      meaning: discoverable metadata, concise entry, progressive disclosure, valid package structure and no debug/private residue
+      local_evidence: [skill_creator_validation, readme_budget, runtime_manifest, package_hygiene]
+    effectiveness:
+      meaning: controlled Skill-on versus Skill-off improvement in accepted outcomes relative to token, time and rework cost
+      local_evidence: [paired_trials, p0_contract_adherence_rate, spec_rework_rate, tokens_per_accepted_ac, human_rating_evidence]
+  hard_blocks:
+    - known privacy or security leak
+    - missing or invented P0 contract
+    - unsupported public quality or acceptance claim
+    - package cannot install or execute its documented minimum path
+  honesty_rules:
+    - A local TRACE proxy PASS is not a SkillHub score.
+    - Private calibration may be reported only as anonymized aggregates; raw customer or project artifacts are never packaged.
+    - A rating target such as 4.9 is an aspiration, not evidence.
 metrics:
   skill_trigger_recall:
     formula: matched requirement tasks that invoke the skill / all matched requirement tasks
@@ -87,6 +117,14 @@ metrics:
     formula: measured time for an intended reader to find the required behavior
     direction: lower_is_better
     release_threshold: baseline_relative
+  unknown_contract_completeness_rate:
+    formula: prototype unknowns with priority, owner, blocks_stage, affected_refs and fallback / all prototype unknowns
+    direction: higher_is_better
+    release_threshold: 1.0_at_review_or_later
+  evidence_claim_honesty_rate:
+    formula: public and delivery conclusions whose claim level does not exceed their cited evidence level / all sampled conclusions
+    direction: higher_is_better
+    release_threshold: 1.0
 release_requirements:
   minimum_repetitions: 3
   required_stages: [requirement, design, coding_delivery]

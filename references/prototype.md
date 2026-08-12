@@ -101,6 +101,10 @@ py -3 scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app-n
   遮罩必须避让评审侧栏。编号默认可关闭，优先标当前可见/可达目标，动态目标在渲染后绑定。
 - 禁止用 `!important` 压制存量样式。浏览器证据至少包含：开关可达、产品→评审→产品往返业务
   指纹不变、无关键控件遮挡、动态视图标注可达、窄屏退化策略。
+- 左侧编号和右侧卡片共享稳定 `data-review-id`（或卡片用同值 `data-review-target`），当前两侧均用
+  `aria-current="true"`/等价可访问状态表达选中；点击任一侧必须定位、滚动并框选另一侧。角色控件用
+  `data-review-role`，对应内容用 `data-review-lens`，不得只切换按钮颜色。浏览器 `ARUN-*` 至少逐项证明
+  编号→卡片、卡片→编号、共识/前端/后端/测试内容差异，以及切回产品态后业务指纹不变。
 
 ### 2.3 重型存量页面的评审容器
 
@@ -158,6 +162,8 @@ py -3 scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app-n
 
 每个重要交互/可测试元素都要有稳定锚点。每项展示指标必须用 `data-metric` 对应 PRD 中的页面
 局部口径，标签和模拟数字本身不构成指标合同。渲染 DOM 不得残留 `${state}` 等模板字符串。
+
+评审态出现 `data-unk="UNK-*"` 或 JS 指标注册表中的未知项时，不能只显示“待确认”。每项必须就近或在同文件注册表绑定 `priority`、`owner`、`blocks_stage`、`affected_refs` 和 `fallback`；否则无法判断谁确认、何时阻断以及确认前如何展示/计算。批量未知项按依赖合并反问，但每个稳定 ID 仍须可单独关闭；开放 P0/关键 P1 不得包装为“完整验收”。
 
 锚点应直接写在源模板中。运行时批量补 `ACT-UI-*`、通过 `data-'+'action` 隐藏名称，或用
 `${act}` 使动作集合不可枚举，都不能建立追溯。动态控件仍需可静态检查的模板/注册表，并由浏览器

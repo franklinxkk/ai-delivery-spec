@@ -18,7 +18,7 @@ lastCursor 当正文标签。稳定 ID、代码、API/字段名、Schema 关键�
 双语。机器侧车交付时另附同语言的人类可读摘要；门禁使用 `--language auto|zh-CN|en-US`，`auto`
 先读 `document_language`，确保诊断也跟随文档语言。
 
-问题简报、方案草图、需求澄清简报和统一 PRD 的权威形态是 Markdown + frontmatter；DOCX/PDF 只允许作为基线后的分发副本，不得反向覆盖权威基线。无 frontmatter 或仅有分发件时，门禁必须阻断而不是猜测元数据。
+问题简报、方案草图、需求澄清简报和统一 PRD 的权威形态是 Markdown + frontmatter；DOCX/PDF 只允许作为基线后的分发副本，不得反向覆盖权威基线。无 frontmatter 或仅有分发件时，门禁必须阻断而不是猜测元数据。分发时必须先从权威 Markdown 生成去除 frontmatter 与 `ADS:*` 编辑注释的人类 Markdown，再转换 DOCX/PDF、渲染检查版式；不得把权威文件直接交给只做纯文本复制的转换器。可用 `project-human` 与 `check-distribution` 检查投影边界，PDF 仍以实际渲染为准。
 
 一份 PRD 采用渐进阅读：30秒摘要与角色阅读入口 → 业务背景与旅程 → 模块完整纵切 → 横切合同
 → 工程附录的机器投影。附录引用相同 ID，不重复改写业务含义。前端、后端、QA或 Coding Agent
@@ -108,6 +108,10 @@ ID 永久稳定。语义未变只改名称时不换 ID；拆分、合并、弃�
 
 横切章节只放真正共享的合同；附录承载面向机器的精确投影（边界见 Human-First 编辑规则）。
 统一 PRD、工程附录和可选 Product Truth 不得互相矛盾，也不得发明基线不存在的行为。
+
+### 指标澄清合同 / Metric Clarification Contract
+
+页面、报表、排序、预警或验收一旦依赖数量、比率、时长、金额、排名或趋势，每个业务含义分配唯一 `METRIC-*`，明确对象、公式/分子分母、时间窗/时区、过滤状态、去重键、权威源、刷新时效、零值/空值、单位精度和口径版本；同一 ID 只能重复展示同一含义。任一会改变实现或验收的口径缺失时，在规格定稿或生成评审态前按依赖批量反问；暂时无人确认则登记 `UNK-METRIC-*`（责任人、影响、`blocks_stage`、回退），可交阻塞草稿，不得标成“已确认”或声明基线/开发就绪。
 
 ## 页面合同 / Page Contract
 

@@ -242,6 +242,10 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
         "同一主题同时登记为已确认决策和未关闭未知项，基线语义自相矛盾。",
         "二选一：关闭对应 UNK-* 并同步 open_p0_unknown_ids，或撤回该决策条目并重新登记为开放未知项。",
     ),
+    "PRD-UNKNOWN-METADATA-DRIFT": (
+        "同一未知项在机器 frontmatter 与人类正文中的优先级、状态或阻断阶段不一致。",
+        "以责任人最新确认结果为准，同步 unknowns、open_p0_unknown_ids 与正文未知项表后重跑门禁。",
+    ),
     "HANDOFF-AESTHETIC-UNDECIDED": (
         "L3/L4 交接没有声明视觉权威与视觉锁，跨页面风格可能漂移。",
         "存量小迭代记录 visual_authority=existing；绿地记录 greenfield_default；品牌化方案可引用 DEC-AESTHETIC-*，并提供 design_lock_ref。",
@@ -322,6 +326,34 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
         "评审开关等纯界面动作错误占用了业务 ACT-* 命名空间。",
         "将其改为 UIACT-REVIEW-*，并保证切换前后业务动作、状态、字段、指标和表单值不变。",
     ),
+    "PROTO-METRIC-ID-SEMANTIC-COLLISION": (
+        "同一个 METRIC-* 被多个业务含义复用，公式、来源和验收无法一一追溯。",
+        "不同业务含义分配不同 METRIC-*；同一指标重复展示时使用相同 data-metric-label 和同一口径定义。",
+    ),
+    "PROTO-METRIC-LABEL-MISSING": (
+        "重复指标卡没有足够的语义标签，静态门禁无法证明它们是否为同一指标。",
+        "为重复 data-metric 增加稳定 data-metric-label，或为不同含义分配不同 METRIC-*。",
+    ),
+    "PROTO-DYNAMIC-METRIC-ID-REUSE": (
+        "动态指标工厂用一个固定 METRIC-* 承载多个运行时标签，运行后会把不同口径压成一个 ID。",
+        "让工厂接收并输出每个指标自己的稳定 METRIC-*，或改为按已定义指标配置渲染。",
+    ),
+    "PROTO-UNKNOWN-CONTRACT-INCOMPLETE": (
+        "原型只显示 UNK-* 或“待确认”，却没有把未知项绑定到可关闭的责任合同。",
+        "为每个 data-unk/注册表项补 priority、owner、blocks_stage、affected_refs 和 fallback；评审前按依赖批量向责任人澄清。",
+    ),
+    "PROTO-REVIEW-LINKAGE-MISSING": (
+        "评审编号与右侧说明卡没有稳定双向关联。",
+        "两侧使用相同 data-review-id，或在目标卡上声明同值 data-review-target，并补浏览器双向定位证据。",
+    ),
+    "PROTO-REVIEW-SELECTION-NOT-SYNCED": (
+        "评审编号点击后没有可验证的左右同步选中状态。",
+        "处理器读取 data-review-id，同时更新两侧 aria-current/选中样式，并用 ARUN-* 证明点击、滚动和框选。",
+    ),
+    "PROTO-REVIEW-LENS-COSMETIC": (
+        "共识/前端/后端/测试镜头只有按钮外观变化，没有角色所需内容差异。",
+        "用 data-review-role 标记控件、data-review-lens 标记对应内容；镜头只改变密度，不得改变事实。",
+    ),
     "PROTO-DYNAMIC-CLASS-POLLUTION": (
         "业务描述被动态拼进 CSS class，可能造成样式失效、选择器污染或未转义内容进入 DOM。",
         "class 只保留固定语义 token；把说明写入转义后的 textContent/单元格，并核对表头与数据列顺序。",
@@ -358,6 +390,7 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PRD-ENUM-NOT-DEFINED": ("A cardinality or enum contract is incomplete or inconsistent.", "Align counts and define every business enum in a rule or state machine."),
     "PRD-DUPLICATE-STABLE-ID-DEFINITION": ("A stable ID is defined more than once across authoritative PRD tables.", "Keep one definition; turn other occurrences into references or assign a new stable ID."),
     "PRD-NO-FRONTMATTER": ("The input is not Markdown with YAML front matter.", "Baseline in Markdown + front matter before exporting distribution copies."),
+    "PRD-UNKNOWN-METADATA-DRIFT": ("The same unknown conflicts across machine and human projections.", "Synchronize priority, status and blocking stage in front matter, the open P0 index and the human unknown table."),
     "HANDOFF-STEP-NOT-IN-PRD": ("A packet references a STEP-* that is absent from the PRD baseline.", "Remove the ghost reference or baseline the complete STEP-* card before handoff."),
     "HANDOFF-PACKET-STEP-MISSING": ("The manifest declares a STEP-* that is absent from the packet body.", "Reference the STEP-* in the packet and preserve its implementation semantics."),
     "HANDOFF-STEP-INCOMPLETE": ("A PRD implementation step lacks a required implementation facet.", "Complete the facet named in the finding; explicitly state none when it is genuinely not applicable."),
@@ -377,6 +410,13 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-ORPHAN-HANDLER": ("The action registry contains a handler with no source control.", "Restore its data-action control, remove confirmed dead code, or record the approved removal."),
     "PROTO-UNREACHABLE-VIEW": ("A hidden page, modal or drawer has no discoverable route.", "Add a stable data-action/data-view route or remove the approved dead surface."),
     "PROTO-REVIEW-UIACTION-NAMESPACE": ("A review-only UI action uses the business ACT-* namespace.", "Rename it to UIACT-REVIEW-* without changing business state or data."),
+    "PROTO-METRIC-ID-SEMANTIC-COLLISION": ("One METRIC-* ID is reused for multiple business meanings.", "Assign unique IDs to distinct metrics; repeated displays of one metric must share one semantic label and caliber."),
+    "PROTO-METRIC-LABEL-MISSING": ("A repeated metric ID has no stable semantic label.", "Add data-metric-label or split distinct meanings into separate METRIC-* IDs."),
+    "PROTO-DYNAMIC-METRIC-ID-REUSE": ("A dynamic metric factory reuses one fixed METRIC-* for multiple runtime labels.", "Pass a stable metric ID per defined metric or render from a metric-definition map."),
+    "PROTO-UNKNOWN-CONTRACT-INCOMPLETE": ("A prototype labels an UNK-* without an owned and closable lifecycle contract.", "Add priority, owner, blocks_stage, affected_refs and fallback to every data-unk or registry entry; clarify material unknowns before review."),
+    "PROTO-REVIEW-LINKAGE-MISSING": ("Review markers and note cards have no stable bidirectional link.", "Share data-review-id on both sides or use a matching data-review-target, then execute a browser ARUN-* proof."),
+    "PROTO-REVIEW-SELECTION-NOT-SYNCED": ("Review marker clicks do not expose a synchronized selection state.", "Read data-review-id, update aria-current on both sides, and prove click, scroll and highlight behavior in a browser."),
+    "PROTO-REVIEW-LENS-COSMETIC": ("Role lenses change controls but have no role-specific content projection.", "Bind data-review-role controls to matching data-review-lens content without changing shared facts."),
     "PROTO-DYNAMIC-CLASS-POLLUTION": ("Business text is interpolated into a CSS class.", "Keep class names as fixed semantic tokens and write escaped descriptions through textContent."),
     "PROTO-JS-SYNTAX": ("The prototype contains invalid JavaScript.", "Repair the referenced script and verify closing script/body/html tags."),
 }

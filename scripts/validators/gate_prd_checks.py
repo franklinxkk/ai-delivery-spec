@@ -129,17 +129,51 @@ class PRDChecks:
             if isinstance(item, dict) and re.fullmatch(r"UNK-[A-Z0-9-]+", str(item.get("id", "")), re.I):
                 records[str(item["id"]).upper()] = item
         # Support a compact Markdown unknown table without treating arbitrary prose as data.
+        # When the same UNK-* is projected in frontmatter and the human table, explicit
+        # priority/status/stage values must agree; otherwise the two audiences see
+        # different release decisions.
+        reported_drift_ids: set[str] = set()
         for line in raw.splitlines():
             if not line.lstrip().startswith("|") or not re.search(r"\bUNK-[A-Z0-9-]+\b", line, re.I):
                 continue
             unknown_id = re.search(r"\bUNK-[A-Z0-9-]+\b", line, re.I).group(0).upper()
-            if unknown_id in records:
-                continue
             lowered = line.lower()
-            priority = "P0" if re.search(r"\bP0\b", line, re.I) else "P1"
-            status = "blocked" if any(term in lowered for term in ("blocked", "阻塞", "open", "未关闭")) else "closed"
-            stage_match = next((name for name in STAGE_ORDER if name in lowered), None)
+            priority_match = re.search(r"\b(P[01])\b", line, re.I)
+            priority = priority_match.group(1).upper() if priority_match else "P1"
+            open_status = bool(re.search(r"\|\s*(?:blocked|open|阻塞中?|未关闭)\s*\|", lowered, re.I))
+            closed_status = bool(re.search(r"\|\s*(?:closed|resolved|已关闭|已解决)\s*\|", lowered, re.I))
+            explicit_status = "blocked" if open_status else "closed" if closed_status else None
+            status = explicit_status or "closed"
+            stage_pattern = "|".join(re.escape(name) for name in STAGE_ORDER)
+            stage_value = re.search(rf"(?:\|\s*|blocks_stage\s*[:=]\s*)({stage_pattern})(?=\s*\||\s|$)", lowered, re.I)
+            stage_match = stage_value.group(1).lower() if stage_value else None
             affected_refs = re.findall(r"\b(?:REQ|FLOW|VIEW|STATE|RULE|API|AC)-[A-Z0-9-]+\b", line, re.I)
+            if unknown_id in records:
+                record = records[unknown_id]
+                drifts: list[str] = []
+                if priority_match and str(record.get("priority", "")).upper() != priority:
+                    drifts.append(f"priority frontmatter={record.get('priority')} body={priority}")
+                if explicit_status:
+                    front_status = str(record.get("status", "open")).lower()
+                    front_open = front_status in {"open", "blocked", "阻塞中", "未关闭"}
+                    body_open = explicit_status == "blocked"
+                    if front_open != body_open:
+                        drifts.append(f"status frontmatter={front_status} body={explicit_status}")
+                if stage_match:
+                    front_stages = record.get("blocks_stage", "baseline")
+                    values = [str(value) for value in front_stages] if isinstance(front_stages, list) else [str(front_stages)]
+                    if stage_match not in values:
+                        drifts.append(f"blocks_stage frontmatter={values} body={stage_match}")
+                if drifts and unknown_id not in reported_drift_ids:
+                    self.add(
+                        "BLOCK", "PRD-UNKNOWN-METADATA-DRIFT", path,
+                        "同一 UNK-* 在机器 frontmatter 与人类正文中的优先级、状态或阻断阶段不一致",
+                        f"{unknown_id}: {'; '.join(drifts)}",
+                        affected_consumers=("product", "architect", "qa", "coding_agent"),
+                        related_refs=(unknown_id,),
+                    )
+                    reported_drift_ids.add(unknown_id)
+                continue
             records[unknown_id] = {
                 "id": unknown_id, "priority": priority, "status": status,
                 "blocks_stage": stage_match or "baseline", "affected_refs": affected_refs,

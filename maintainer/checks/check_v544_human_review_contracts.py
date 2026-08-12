@@ -30,8 +30,8 @@ def require(relative: str, markers: tuple[str, ...]) -> None:
 
 
 skill = read("SKILL.md")
-if "# AI Delivery Spec 5.4.5" not in skill:
-    failures.append("SKILL.md does not declare 5.4.5")
+if "# AI Delivery Spec 5.4.6" not in skill:
+    failures.append("SKILL.md does not declare 5.4.6")
 require(
     "SKILL.md",
     (
@@ -196,6 +196,8 @@ for marker in (
     "baseline_sha256=",
     "visible_review_note_count=",
     "gate_output_ref=",
+    "data-unk=\"UNK-*\"",
+    "priority`、`owner`、`blocks_stage`、`affected_refs` 和 `fallback",
 ):
     if marker not in prototype:
         failures.append(f"prototype contract misses {marker!r}")
@@ -225,6 +227,11 @@ require(
     (
         "通过/失败/阻断/未执行（`pass/fail/blocked/not_run`）",
         "有条件接受/拒绝/待定（`accepted/accepted_with_conditions/rejected/pending`）",
+        "静态结构",
+        "浏览器原型",
+        "业务确认",
+        "真实系统",
+        "客户验收",
     ),
 )
 require(

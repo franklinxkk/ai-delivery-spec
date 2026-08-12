@@ -1,4 +1,4 @@
-# AI Delivery Spec 5.4.5 — Requirement Management for Human & AI｜人机共用需求管理
+# AI Delivery Spec 5.4.6 — Requirement Management for Human & AI｜人机共用需求管理
 
 > 只有一句想法，大模型就急着写 PRD，方向和价值还没想清楚？
 >
@@ -12,7 +12,7 @@
 
 它的目标不是多写文档，而是让业务能确认、产品能决策、研发不必猜、测试可以验、负责人知道哪些已证明、哪些仍需人来决定。
 
-[![Version](https://img.shields.io/badge/version-5.4.5-0052A4.svg)]()
+[![Version](https://img.shields.io/badge/version-5.4.6-0052A4.svg)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 
@@ -156,6 +156,10 @@ AI Delivery Spec 的主场是更广的 **requirement-to-acceptance**：可以在
 python -m pip install -r scripts/requirements.txt
 python scripts/ai_delivery_spec_cli.py route-stage --target clarify --artifact problem-brief.md --format json
 python scripts/ai_delivery_spec_cli.py gate --profile prd --prd requirements/PRD.md --level L2 --language auto
+
+# 分发 Word 前：先去机器 frontmatter，再转换/渲染，最后检查泄漏
+python scripts/ai_delivery_spec_cli.py project-human --input requirements/PRD.md --output requirements/PRD.human.md
+python scripts/ai_delivery_spec_cli.py check-distribution --document requirements/PRD.docx
 ```
 
 持久化产物使用 `ADS:*` 语义锚点和 `resume_context` 续跑；门禁区分 `BLOCK / P0_UNKNOWN / GAP / PASS`，并明确 `not_proven`。静态 PASS 不证明视觉、浏览器交互、真实实现、法规适用性或客户验收。

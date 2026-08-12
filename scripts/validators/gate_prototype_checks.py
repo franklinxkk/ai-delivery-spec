@@ -8,6 +8,8 @@ import shutil
 import subprocess
 import sys
 from collections import Counter
+from html import unescape
+from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
@@ -72,6 +74,134 @@ def _visible_text(raw: str) -> str:
     text = re.sub(r"<style\b.*?</style>", " ", text, flags=re.I | re.S)
     text = re.sub(r"<!--.*?-->", " ", text, flags=re.S)
     return re.sub(r"<[^>]+>", " ", text)
+
+
+class _MetricBindingParser(HTMLParser):
+    """Collect each metric ID with an explicit or visible semantic label."""
+
+    _VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.depth = 0
+        self.active: list[dict[str, object]] = []
+        self.bindings: list[tuple[str, str, bool]] = []
+
+    def _start(self, tag: str, attrs: list[tuple[str, str | None]], *, closed: bool) -> None:
+        tag = tag.casefold()
+        attr_map = {str(key).casefold(): (value or "") for key, value in attrs}
+        if not closed and tag not in self._VOID_TAGS:
+            self.depth += 1
+        metric_id = attr_map.get("data-metric", "").strip()
+        if not metric_id:
+            return
+        explicit_label = next(
+            (attr_map.get(key, "").strip() for key in ("data-metric-label", "aria-label", "title") if attr_map.get(key, "").strip()),
+            "",
+        )
+        record: dict[str, object] = {
+            "id": metric_id.upper(), "tag": tag, "depth": self.depth,
+            "explicit": bool(explicit_label), "text": [explicit_label] if explicit_label else [],
+        }
+        if closed or tag in self._VOID_TAGS:
+            self._finish(record)
+        else:
+            self.active.append(record)
+
+    def _finish(self, record: dict[str, object]) -> None:
+        text = " ".join(str(item) for item in record["text"] if str(item).strip())
+        self.bindings.append((str(record["id"]), text, bool(record["explicit"])))
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self._start(tag, attrs, closed=False)
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self._start(tag, attrs, closed=True)
+
+    def handle_data(self, data: str) -> None:
+        if data.strip():
+            for record in self.active:
+                if not record["explicit"]:
+                    record["text"].append(data)  # type: ignore[union-attr]
+
+    def handle_endtag(self, tag: str) -> None:
+        tag = tag.casefold()
+        for index in range(len(self.active) - 1, -1, -1):
+            record = self.active[index]
+            if record["tag"] == tag and record["depth"] == self.depth:
+                self._finish(record)
+                self.active.pop(index)
+                break
+        if tag not in self._VOID_TAGS:
+            self.depth = max(0, self.depth - 1)
+
+    def close(self) -> None:
+        super().close()
+        for record in self.active:
+            self._finish(record)
+        self.active.clear()
+
+
+def _metric_bindings(raw: str) -> list[tuple[str, str, bool]]:
+    parser = _MetricBindingParser()
+    try:
+        parser.feed(raw)
+        parser.close()
+    except Exception:  # malformed HTML is handled by the prototype syntax checks
+        return []
+    return parser.bindings
+
+
+def _normalize_metric_label(value: str) -> str:
+    """Remove volatile values while retaining the business meaning of a KPI label."""
+    text = unescape(_visible_text(value)).casefold()
+    text = re.sub(r"(?:¥|￥|\$)?[-+]?\d[\d,]*(?:\.\d+)?(?:%|‰)?", " ", text)
+    text = re.sub(r"[：:|/\\·•—–_()（）\[\]{}]+", " ", text)
+    return re.sub(r"\s+", " ", text).strip()[:160]
+
+
+def _prototype_unknown_contracts(raw: str) -> tuple[set[str], set[str]]:
+    """Return bound UNK IDs and those with an owned, stage-aware lifecycle contract.
+
+    Prototypes may bind unknowns directly on a DOM element or through a flat JS
+    registry object. A label such as ``待确认：UNK-*`` is deliberately not enough:
+    without priority, owner, blocking stage, affected refs and fallback, a large
+    batch of unknowns can look governed while no one knows what must be resolved.
+    """
+    bound: set[str] = set()
+    complete: set[str] = set()
+    required_inline = (
+        "data-unk-priority", "data-unk-owner", "data-unk-blocks-stage",
+        "data-unk-affected-refs", "data-unk-fallback",
+    )
+    for tag in re.findall(r"<[A-Za-z][^>]*\bdata-unk\s*=\s*['\"][^'\"]+['\"][^>]*>", raw, re.I | re.S):
+        match = re.search(r"\bdata-unk\s*=\s*['\"](UNK-[A-Z0-9-]+)['\"]", tag, re.I)
+        if not match:
+            continue
+        unknown_id = match.group(1).upper()
+        bound.add(unknown_id)
+        if all(re.search(rf"\b{re.escape(attribute)}\s*=\s*['\"][^'\"]+['\"]", tag, re.I) for attribute in required_inline):
+            complete.add(unknown_id)
+
+    object_pattern = re.compile(
+        r"\{[^{}]{0,1800}\b(?:id|unk|unknown_id|unknownId)\s*:\s*['\"]"
+        r"(UNK-[A-Z0-9-]+)['\"][^{}]{0,1800}\}",
+        re.I | re.S,
+    )
+    for match in object_pattern.finditer(raw):
+        unknown_id = match.group(1).upper()
+        bound.add(unknown_id)
+        body = match.group(0)
+        required_properties = (
+            r"\bpriority\s*:",
+            r"\bowner\s*:",
+            r"\b(?:blocks_stage|blocksStage)\s*:",
+            r"\b(?:affected_refs|affectedRefs)\s*:",
+            r"\b(?:fallback|fallback_path|fallbackPath)\s*:",
+        )
+        if all(re.search(pattern, body, re.I) for pattern in required_properties):
+            complete.add(unknown_id)
+    return bound, complete
 
 
 def _handler_actions(scripts: str) -> set[str]:
@@ -282,7 +412,9 @@ class PrototypeChecks:
         actions = sorted(action_values - set(unstable_action_values))
         states = sorted(set(re.findall(r"\bdata-state\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
         fields = sorted(set(re.findall(r"\bdata-(?:field|bind)\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
-        metrics = sorted(set(re.findall(r"\bdata-metric\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
+        metric_bindings = _metric_bindings(raw)
+        metric_ids = [item[0] for item in metric_bindings]
+        metrics = sorted(set(metric_ids or re.findall(r"\bdata-metric\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
         acceptance_refs = sorted(set(re.findall(r"\bdata-ac\s*=\s*['\"](AC-[A-Z0-9-]+)['\"]", tag_source, re.I)))
         page_testids = [item for item in testids if item.lower().startswith("page-")]
         region_testids = [item for item in testids if item.lower().startswith("region-")]
@@ -309,6 +441,29 @@ class PrototypeChecks:
             for metric in metrics:
                 if not re.fullmatch(r"METRIC-[A-Z0-9-]+", metric, re.I):
                     self.add("BLOCK", "PROTO-UNSTABLE-METRIC", path, "data-metric must bind a stable METRIC-* ID", metric)
+            metric_counts = Counter(metric_ids)
+            for metric_id, count in sorted(metric_counts.items()):
+                if count < 2:
+                    continue
+                bindings = [item for item in metric_bindings if item[0] == metric_id]
+                normalized_labels = [_normalize_metric_label(item[1]) for item in bindings]
+                labels = {item for item in normalized_labels if item}
+                if any(not item for item in normalized_labels):
+                    self.add(
+                        "BLOCK", "PROTO-METRIC-LABEL-MISSING", path,
+                        "重复使用的 METRIC-* 没有可判定的业务标签，无法证明这些卡片是同一指标",
+                        metric_id,
+                        affected_consumers=("product", "backend", "qa", "coding_agent"),
+                        related_refs=(metric_id,),
+                    )
+                elif len(labels) > 1:
+                    self.add(
+                        "BLOCK", "PROTO-METRIC-ID-SEMANTIC-COLLISION", path,
+                        "同一个 METRIC-* 绑定了多个业务含义；指标追溯和计算口径会多对一",
+                        f"{metric_id}: {', '.join(sorted(labels)[:4])}",
+                        affected_consumers=("product", "backend", "qa", "coding_agent"),
+                        related_refs=(metric_id,),
+                    )
         if level in {"L3", "L4"}:
             for region in region_testids:
                 if not re.fullmatch(r"region-REG-[A-Z0-9-]+", region, re.I):
@@ -349,6 +504,86 @@ class PrototypeChecks:
                     script_blocks.append(body)
                 module_script = module_script or script_type == "module"
         scripts = "\n".join(script_blocks)
+        for factory in re.finditer(r"\bfunction\s+([A-Za-z_$][\w$]*)\s*\(([^)]*)\)", scripts, re.I):
+            if "metric" not in factory.group(1).casefold():
+                continue
+            params = [item.strip() for item in factory.group(2).split(",") if item.strip()]
+            semantic_params = [item for item in params if re.fullmatch(r"(?:label|name|title|metricName)", item, re.I)]
+            window = scripts[factory.start():factory.start() + 1200]
+            next_function = re.search(r"\n\s*function\s+[A-Za-z_$]", window[factory.end() - factory.start():], re.I)
+            if next_function:
+                window = window[:factory.end() - factory.start() + next_function.start()]
+            metric_match = re.search(r"data-metric\s*=\s*['\"](METRIC-[A-Z0-9-]+)['\"]", window, re.I)
+            dynamic_label = any(re.search(rf"\$\{{\s*{re.escape(param)}\s*\}}", window) for param in semantic_params)
+            call_count = len(re.findall(rf"\b{re.escape(factory.group(1))}\s*\(", scripts))
+            if metric_match and dynamic_label and call_count > 2:
+                self.add(
+                    "BLOCK", "PROTO-DYNAMIC-METRIC-ID-REUSE", path,
+                    "动态指标工厂用一个固定 METRIC-* 承载多个运行时标签，无法一一追溯口径",
+                    metric_match.group(1).upper(),
+                    affected_consumers=("product", "backend", "qa", "coding_agent"),
+                    related_refs=(metric_match.group(1).upper(),),
+                )
+        review_surface = bool(
+            re.search(r"\bdata-review-id\s*=|\bdata-review-role\s*=|\bclass\s*=\s*['\"][^'\"]*\breview-mode\b", tag_source, re.I)
+            or re.search(r"\bdata-testid\s*=\s*['\"](?:region|drawer)-REVIEW-", tag_source, re.I)
+        )
+        prototype_unknowns, complete_unknowns = _prototype_unknown_contracts(raw)
+        incomplete_unknowns = sorted(prototype_unknowns - complete_unknowns)
+        if incomplete_unknowns:
+            severity = "BLOCK" if review_surface and level in {"L2", "L3", "L4"} else "GAP"
+            self.add(
+                severity, "PROTO-UNKNOWN-CONTRACT-INCOMPLETE", path,
+                f"{len(incomplete_unknowns)} 个原型未知项只有编号/待确认标签，缺少优先级、责任人、阻断阶段、影响引用或回退路径",
+                ", ".join(incomplete_unknowns[:8]),
+                affected_consumers=("product", "backend", "qa", "coding_agent", "customer_acceptor"),
+                related_refs=tuple(incomplete_unknowns[:50]),
+            )
+        if review_surface and level in {"L2", "L3", "L4"}:
+            review_ids = re.findall(r"\bdata-review-id\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)
+            target_ids = set(re.findall(r"\bdata-review-target\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I))
+            if not review_ids:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-LINKAGE-MISSING", path,
+                    "评审态没有为左侧编号和右侧说明建立共享 data-review-id",
+                    affected_consumers=("product", "frontend", "qa", "coding_agent"),
+                )
+            else:
+                for review_id, count in sorted(Counter(review_ids).items()):
+                    if count < 2 and review_id not in target_ids:
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-LINKAGE-MISSING", path,
+                            "评审编号没有对应的右侧说明卡，或说明卡无法反向定位编号",
+                            review_id,
+                            affected_consumers=("product", "frontend", "qa", "coding_agent"),
+                        )
+                reads_review_id = bool(re.search(r"dataset\.reviewId|getAttribute\s*\(\s*['\"]data-review-id|closest\s*\(\s*['\"]\[data-review-id", scripts, re.I))
+                writes_selection = bool(re.search(r"aria-current|dataset\.reviewSelected|classList\.(?:add|remove|toggle)\s*\(\s*['\"](?:active|selected|is-active)", scripts, re.I))
+                initial_selection = bool(re.search(r"\baria-current\s*=\s*['\"]true['\"]", tag_source, re.I))
+                if not (reads_review_id and writes_selection and initial_selection):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-SELECTION-NOT-SYNCED", path,
+                        "评审态未证明点击编号后左右两侧同时形成可见选中态",
+                        "data-review-id + aria-current",
+                        affected_consumers=("product", "frontend", "qa", "coding_agent"),
+                        related_refs=tuple(sorted(set(review_ids))[:20]),
+                    )
+            review_roles = set(re.findall(r"\bdata-review-role\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I))
+            for tag in re.findall(r"<[A-Za-z][^>]*>", tag_source, re.S):
+                if re.search(r"(?:data-action|data-uiact)\s*=\s*['\"]UIACT-REVIEW-LENS['\"]", tag, re.I):
+                    lens_match = re.search(r"\bdata-lens\s*=\s*['\"]([^'\"]+)['\"]", tag, re.I)
+                    if lens_match:
+                        review_roles.add(lens_match.group(1))
+            if review_roles:
+                review_lenses = set(re.findall(r"\bdata-review-lens\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I))
+                missing_lenses = sorted(review_roles - review_lenses)
+                if missing_lenses:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-LENS-COSMETIC", path,
+                        "角色镜头只有切换控件，没有对应的结构化内容投影",
+                        ", ".join(missing_lenses),
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    )
         handler_actions = _handler_actions(scripts)
         dynamic_anchor_actions = set(extract_dynamic_anchor_actions(scripts))
         for placeholder in unstable_action_values:
@@ -524,6 +759,8 @@ class PrototypeChecks:
             "prototype_orphan_handler_actions": len(orphan_handler_actions),
             "prototype_unreachable_surfaces": len(unreachable_surfaces),
             "prototype_dynamic_class_pollution": len(polluted_classes),
+            "prototype_unknowns": len(prototype_unknowns),
+            "prototype_incomplete_unknown_contracts": len(incomplete_unknowns),
         })
 
     def check_acceptance_run(self, path: Path) -> tuple[set[str], bool, bool]:

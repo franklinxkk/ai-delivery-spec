@@ -9,8 +9,10 @@ import re
 import shutil
 import subprocess
 import sys
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
+from xml.etree import ElementTree as ET
 
 try:
     import yaml
@@ -86,6 +88,109 @@ def merge_markdown_template(base: str, overlay: str) -> str:
         else:
             result = result.rstrip() + "\n\n" + replacement
     return result.rstrip() + "\n"
+
+
+def project_human(args: argparse.Namespace) -> int:
+    """Create a human-distribution Markdown projection without machine frontmatter."""
+    try:
+        raw = args.input.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        print(f"BLOCKED: 无法读取权威 Markdown：{exc}" if args.language == "zh-CN" else f"BLOCKED: cannot read canonical Markdown: {exc}")
+        return 2
+    lines = raw.lstrip("\ufeff").splitlines(keepends=True)
+    if lines and lines[0].strip() == "---":
+        closing = next((index for index, line in enumerate(lines[1:], 1) if line.strip() in {"---", "..."}), None)
+        if closing is None:
+            print("BLOCKED: YAML frontmatter 未闭合，不能安全生成分发副本" if args.language == "zh-CN" else "BLOCKED: YAML front matter is not closed; no safe distribution projection can be produced")
+            return 2
+        body = "".join(lines[closing + 1:])
+    else:
+        body = "".join(lines)
+    body = re.sub(r"<!--\s*ADS:[\s\S]*?-->", "", body, flags=re.I)
+    body = re.sub(r"\n{3,}", "\n\n", body).lstrip()
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(body, encoding="utf-8", newline="\n")
+    if args.language == "zh-CN":
+        print(f"PASS: 已生成不含机器 frontmatter 的人类分发 Markdown：{args.output}")
+    else:
+        print(f"PASS: wrote human-distribution Markdown without machine front matter: {args.output}")
+    return 0
+
+
+def _docx_paragraphs(path: Path) -> list[str]:
+    paragraphs: list[str] = []
+    with zipfile.ZipFile(path) as archive:
+        members = [
+            name for name in archive.namelist()
+            if name == "word/document.xml" or re.fullmatch(r"word/(?:header|footer)\d+\.xml", name)
+        ]
+        if "word/document.xml" not in members:
+            raise ValueError("word/document.xml is missing")
+        namespace = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+        for member in members:
+            root = ET.fromstring(archive.read(member))
+            for paragraph in root.iter(f"{namespace}p"):
+                text = "".join(node.text or "" for node in paragraph.iter(f"{namespace}t"))
+                if text.strip():
+                    paragraphs.append(text.strip())
+    return paragraphs
+
+
+def check_distribution(args: argparse.Namespace) -> int:
+    """Block machine metadata or raw Markdown syntax leaking into a human copy."""
+    try:
+        if args.document.suffix.casefold() == ".docx":
+            paragraphs = _docx_paragraphs(args.document)
+        elif args.document.suffix.casefold() in {".md", ".markdown", ".txt"}:
+            paragraphs = [line.strip() for line in args.document.read_text(encoding="utf-8").splitlines() if line.strip()]
+        else:
+            raise ValueError("supported formats: .docx, .md, .markdown, .txt")
+    except (OSError, UnicodeError, ValueError, zipfile.BadZipFile, ET.ParseError) as exc:
+        message = f"分发副本不可读取：{exc}" if args.language == "zh-CN" else f"Distribution copy is not readable: {exc}"
+        payload = {"status": "BLOCKED", "document": str(args.document), "issues": [message]}
+        print(json.dumps(payload, ensure_ascii=False, indent=2) if args.format == "json" else f"BLOCKED: {message}")
+        return 2
+
+    issues: list[str] = []
+    head = paragraphs[:40]
+    machine_key = re.compile(
+        r"^(?:document_language|language_source|delivery_level|schema_version|artifact|open_p0_unknown_ids|governance|unknowns|decisions)\s*:",
+        re.I,
+    )
+    for index, paragraph in enumerate(head, 1):
+        if paragraph == "---" or machine_key.search(paragraph):
+            issues.append(f"paragraph {index}: machine frontmatter leaked ({paragraph[:80]})")
+    markdown_patterns = () if args.document.suffix.casefold() in {".md", ".markdown"} else (
+        (re.compile(r"^#{1,6}\s+"), "raw Markdown heading"),
+        (re.compile(r"```|~~~"), "raw Markdown fence"),
+        (re.compile(r"\*\*[^*]+\*\*|`[^`]+`"), "raw Markdown emphasis/code"),
+        (re.compile(r"^\|.*\|$"), "raw Markdown table row"),
+    )
+    for index, paragraph in enumerate(paragraphs, 1):
+        for pattern, label in markdown_patterns:
+            if pattern.search(paragraph):
+                issues.append(f"paragraph {index}: {label} ({paragraph[:80]})")
+                break
+    issue_limit = max(0, args.max_issues)
+    displayed_issues = issues if issue_limit == 0 else issues[:issue_limit]
+    payload = {
+        "status": "BLOCKED" if issues else "PASS",
+        "document": str(args.document),
+        "paragraphs_checked": len(paragraphs),
+        "issue_count": len(issues),
+        "issues_truncated": len(displayed_issues) < len(issues),
+        "issues": displayed_issues,
+        "not_proven": ["layout/rendering", "page breaks", "fonts", "visual fidelity"],
+    }
+    if args.format == "json":
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+    elif issues:
+        print("BLOCKED: 分发副本仍含机器元数据或未转换 Markdown" if args.language == "zh-CN" else "BLOCKED: distribution copy still contains machine metadata or raw Markdown")
+        for issue in displayed_issues:
+            print(f"- {issue}")
+    else:
+        print("PASS: 分发副本未发现机器 frontmatter 或原始 Markdown 泄漏；仍需渲染检查版式" if args.language == "zh-CN" else "PASS: no machine front matter or raw Markdown leakage found; rendered layout still requires review")
+    return 2 if issues else 0
 
 
 def init_custom(args: argparse.Namespace) -> int:
@@ -424,9 +529,23 @@ def status_report(args: argparse.Namespace) -> int:
             ),
             "catalog_status": eval_status,
         },
+        "trace_release_proxy": {
+            "status": "ready_with_limits",
+            "public_reference": "https://skillhub.cn/tutorials#trace-evaluation",
+            "boundary": "local evidence checklist only; not a SkillHub score or 4.9 prediction",
+            "dimensions": {
+                "trust": "passed", "reliability": "passed", "adaptability": "passed",
+                "convention": "passed", "effectiveness": "partial",
+            },
+            "effectiveness_limit": "three private real-project calibration shapes and deterministic regressions exposed and repaired contract gaps, but fresh blind Skill-on/Skill-off repetitions, controlled token/time accounting and versioned human ratings remain incomplete",
+            "private_calibration": {
+                "sample_shapes": ["same-baseline review A/B", "brownfield review retrofit", "multi-surface prototype acceptance"],
+                "publication": "anonymized aggregate only; raw files and customer/project names excluded",
+            },
+        },
         "known_limitations": [
             "five domain methods have owner-attested production practice; all built-in packs pass deterministic contract checks but fresh-agent/expert maturity remains separate",
-            "v5.4.5 cross-entry and adversarial contract probes are deterministic; isolated no-skill comparison, fresh-agent repetitions and versioned user feedback remain separate evidence",
+            "v5.4.6 cross-entry and adversarial contract probes are deterministic; isolated no-skill comparison, fresh-agent repetitions and versioned user feedback remain separate evidence",
             "domain expert, customer, production, legal, safety, and financial correctness are not proven",
             "deterministic fixtures and private brownfield calibration expose method gaps but do not prove implementation or customer acceptance",
         ],
@@ -834,6 +953,19 @@ def main() -> int:
     )
     custom.add_argument("--force", action="store_true")
     custom.set_defaults(func=init_custom)
+
+    human = sub.add_parser("project-human", help=gate_help("Project canonical Markdown into a human-distribution Markdown copy", "将权威 Markdown 投影为不含机器 frontmatter 的人类分发副本"))
+    human.add_argument("--input", type=Path, required=True)
+    human.add_argument("--output", type=Path, required=True)
+    human.add_argument("--language", choices=["zh-CN", "en-US"], default="zh-CN")
+    human.set_defaults(func=project_human)
+
+    distribution = sub.add_parser("check-distribution", help=gate_help("Check a DOCX/text distribution copy for metadata or raw-Markdown leakage", "检查 DOCX/文本分发副本是否泄漏机器元数据或原始 Markdown"))
+    distribution.add_argument("--document", type=Path, required=True)
+    distribution.add_argument("--format", choices=["concise", "json"], default="concise")
+    distribution.add_argument("--language", choices=["zh-CN", "en-US"], default="zh-CN")
+    distribution.add_argument("--max-issues", type=int, default=20, help="0 keeps every issue; default caps context output at 20")
+    distribution.set_defaults(func=check_distribution)
 
     check = sub.add_parser("check", help="Run fast release-risk checks by default; use --profile release for the full assurance suite")
     check.add_argument("--profile", choices=["fast", "release"], default="fast")

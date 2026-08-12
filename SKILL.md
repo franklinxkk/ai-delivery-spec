@@ -3,12 +3,12 @@ name: ai-delivery-spec
 description: Use for creating, changing, reviewing, reverse-engineering or accepting requirements, PRDs, prototypes, competitor material or existing systems, including any small UI/field/column/tab/dropdown/legacy-HTML change and direct PRD/prototype generation. Always invoke regardless of size or clarity. Deliver the smallest complete, reviewable, implementable, traceable and testable artifact at the target stage. Covers framing through acceptance; excludes scheduling, coding, CI/CD, deployment and operations. 中文：用于任何新增、修改、评审、反推或验收需求、PRD、原型、竞品或存量系统；写/改一个小功能、加字段/列/页签/下拉、旧 HTML 小改、直接生成 PRD/原型也必须调用。按目标阶段交付最小完整、可评审实施追溯验收的产物；不负责排期、编码、CI/CD、部署和运营。
 ---
 
-# AI Delivery Spec 5.4.5 — Requirement Management Kernel｜人机共用需求管理内核
+# AI Delivery Spec 5.4.6 — Requirement Management Kernel｜人机共用需求管理内核
 
 本 Skill 是适用于 ToC/ToB/ToG 的 Requirement Management Kernel：让业务、产品、设计、前后端、架构、需求交付/技术负责人、测试、合规和 Coding Agent 在需求任一阶段进入，得到当前需要的最小合格产物后离开；也可在用户明确要求时持续完成端到端闭环。
 
-默认锁定用户明确指定的语言；未指定时取任务起始时的主要语言，并从 frame 继承到 acceptance；“继续/下一步”不重置，只有用户明确切换才更新。标题、正文、表格、问题、测试叙述、图节点和人类可见状态必须同语。全英文交付不得泄露中文模板标题、表头、提示或诊断；中文交付不得把 Given/When/Then、draft、pending → resolved、lastCursor 等英文裸露为正文。混合输入跟随用户指定语言，否则取主要语言；双语必须明确要求。人类可见状态/字段/事件/队列先写该语言含义，研发核对时括号保留机器原值，如“草稿（`draft`）”或 “Draft (`draft`)”；稳定 ID、代码、API/字段名、Schema 关键字、公式和隐藏机器合同保持原样。YAML/JSON 侧车可保留键名与枚举，但阶段交付须附同语言人类摘要；运行门禁时传 `--language auto|zh-CN|en-US`，`auto` 优先读取 `document_language` 或 HTML `lang`。
-只使用 Agent 完成需求工作不要求安装 Python；运行本地零模型门禁时需要 Python 3.10+：`python -m pip install -r scripts/requirements.txt`。Stable ID 是长期不变的需求编号；Gate 是静态结构门禁，不等于业务、浏览器、实现或客户验收。
+默认锁定用户指定语言；未指定时取任务起始主要语言并贯穿全生命周期，“继续”不重置。标题、正文、表格、问题、测试、图节点和可见状态同语；全英文不得泄露中文模板，中文交付不得把 Given/When/Then、draft、pending → resolved、lastCursor 等英文裸露为正文。人类可见状态/字段/事件/队列先写该语言含义，括号保留必要机器原值；稳定 ID、代码、API/字段名、Schema、公式不翻译。双语须明确要求。YAML/JSON 侧车可保留键名与枚举，但交付须附同语言摘要；门禁用 `--language auto|zh-CN|en-US`。
+只使用 Agent 不要求 Python；零模型门禁需 Python 3.10+ 与 `scripts/requirements.txt`。Gate 只证明静态结构，不证明业务、浏览器、实现或客户验收。
 
 ## 默认选择最轻可行路径
 
@@ -44,6 +44,8 @@ Skill 始终命中但默认走最轻路径。明确、局部、可逆且不改�
 | 私有领域/模板/规则 | `init-custom --sharing local|team`；候选知识用 `candidate record-usage/assess`，只人工晋级 |
 
 一次只加载当前阶段参考、一个精确领域章节和当前 ID 切片。不要加载 README、`maintainer/`、全模板/示例/领域包或整个仓库。frame/explore 仅在法规、安全或行业物理约束会改变选项时加载领域知识。
+
+细反例只进 `maintainer/` 脱敏回归，不注入运行上下文。仅按命中表面预检：指标口径/未知项、评审双向联动、分发投影、组合交接或 Stage 0；连续漏读时缩成单表面切片并过对应门禁，不降标准。
 
 ## 默认最小产物，不为阶段机械建文件
 
@@ -95,7 +97,7 @@ python scripts/ai_delivery_spec_cli.py gate --profile explore --artifact solutio
 python scripts/ai_delivery_spec_cli.py gate --profile clarify --artifact requirement-brief.md
 ```
 
-正式规格沿用 `gate --profile requirement|prd|prototype|handoff|full`。静态门禁只在目标里程碑运行一次；修复后重跑，不在每个经过的工作站重复执行。默认按根因分组输出诊断，JSON 保留全部明细。门禁必须输出 `not_proven`，不能把结构通过宣传为领域正确、真实运行或客户签收。单产物 PASS 不等于交付闭环；宣称最终完成前必须 `gate --profile full`（或 handoff）组合门禁通过。
+正式规格沿用 `gate --profile requirement|prd|prototype|handoff|full`。静态门禁只在目标里程碑运行一次；修复后重跑，不在每个经过的工作站重复执行。默认按根因分组输出诊断，JSON 保留全部明细。门禁必须输出 `not_proven`；静态、浏览器、业务确认、真实实现、客户验收五级证据不可越级，开放 P0/关键 P1 未知项不得称完整验收。单产物 PASS 不等于交付闭环；宣称最终完成前必须 `gate --profile full`（或 handoff）组合门禁通过。
 
 5.4 模板用语言无关的 `<!-- ADS:* -->` 锚点，标题可按团队语言/模板改变。`resume_context` 记录相对路径、阶段和 SHA-256；漂移、缺失和路径越界必须阻断。大项目仍用执行检查点和 ID Slice，产物断点不能替代执行状态。
 
