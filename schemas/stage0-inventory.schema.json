@@ -86,6 +86,18 @@
         }
       }
     },
+    "critical_chains": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/criticalChain" },
+      "description": "只登记当前范围内必须走通的关键存量链；缺失表示尚未做结构化可达性盘点，不表示不存在断裂"
+    },
+    "reachability_breaks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/reachabilityBreak" },
+      "uniqueItems": true,
+      "description": "关键链的已观察断裂或未知项清单；允许在所有链均有证据证明可达时为空，但不得用空数组替代未完成评估"
+    },
     "canonical_candidates": {
       "type": "array",
       "items": { "type": "string", "minLength": 1 }
@@ -95,5 +107,181 @@
       "pattern": "^DEC-CONFLICT-[A-Z0-9-]+$",
       "description": "多个候选基线必须由 DEC-CONFLICT-* 裁决"
     }
-  }
+  },
+  "$defs": {
+    "refArray": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "outputFacet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "refs"],
+      "properties": {
+        "status": { "enum": ["observed", "missing", "unknown", "not_applicable"] },
+        "refs": { "$ref": "#/$defs/refArray" },
+        "note": { "type": "string", "minLength": 1 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "observed" } }, "required": ["status"] },
+          "then": { "properties": { "refs": { "minItems": 1 } } }
+        },
+        {
+          "if": { "properties": { "status": { "const": "not_applicable" } }, "required": ["status"] },
+          "then": { "required": ["note"] }
+        }
+      ]
+    },
+    "nextEntryFacet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "refs"],
+      "properties": {
+        "status": { "enum": ["observed", "missing", "unknown", "terminal"] },
+        "refs": { "$ref": "#/$defs/refArray" },
+        "note": { "type": "string", "minLength": 1 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "observed" } }, "required": ["status"] },
+          "then": { "properties": { "refs": { "minItems": 1 } } }
+        },
+        {
+          "if": { "properties": { "status": { "const": "terminal" } }, "required": ["status"] },
+          "then": { "required": ["note"] }
+        }
+      ]
+    },
+    "nextGuardFacet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "refs"],
+      "properties": {
+        "status": { "enum": ["observed", "missing", "unknown", "not_applicable"] },
+        "refs": { "$ref": "#/$defs/refArray" },
+        "note": { "type": "string", "minLength": 1 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "observed" } }, "required": ["status"] },
+          "then": { "properties": { "refs": { "minItems": 1 } } }
+        },
+        {
+          "if": { "properties": { "status": { "const": "not_applicable" } }, "required": ["status"] },
+          "then": { "required": ["note"] }
+        }
+      ]
+    },
+    "recoveryPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "entry_refs", "guard_refs", "outcome_refs", "break_refs"],
+      "properties": {
+        "status": { "enum": ["observed", "broken", "unknown", "not_applicable"] },
+        "entry_refs": { "$ref": "#/$defs/refArray" },
+        "guard_refs": { "$ref": "#/$defs/refArray" },
+        "outcome_refs": { "$ref": "#/$defs/refArray" },
+        "break_refs": { "$ref": "#/$defs/refArray" },
+        "source_ref": { "type": "string", "minLength": 1 },
+        "source_location": { "type": "string", "minLength": 1 },
+        "note": { "type": "string", "minLength": 1 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "enum": ["observed", "broken", "unknown"] } }, "required": ["status"] },
+          "then": { "required": ["source_ref", "source_location"] }
+        },
+        {
+          "if": { "properties": { "status": { "const": "not_applicable" } }, "required": ["status"] },
+          "then": { "required": ["note"] }
+        }
+      ]
+    },
+    "criticalChainLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "action_ref", "processing_refs", "outputs", "next_entry", "next_guard", "reachability", "source_ref", "source_location", "break_refs"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^INV-LINK-[A-Z0-9-]+$" },
+        "action_ref": { "type": "string", "minLength": 1 },
+        "processing_refs": { "$ref": "#/$defs/refArray" },
+        "outputs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["objects", "states", "versions", "identities"],
+          "properties": {
+            "objects": { "$ref": "#/$defs/outputFacet" },
+            "states": { "$ref": "#/$defs/outputFacet" },
+            "versions": { "$ref": "#/$defs/outputFacet" },
+            "identities": { "$ref": "#/$defs/outputFacet" }
+          }
+        },
+        "next_entry": { "$ref": "#/$defs/nextEntryFacet" },
+        "next_guard": { "$ref": "#/$defs/nextGuardFacet" },
+        "reachability": { "enum": ["reachable", "broken", "unknown", "terminal"] },
+        "source_ref": { "type": "string", "minLength": 1 },
+        "source_location": { "type": "string", "minLength": 1 },
+        "break_refs": { "$ref": "#/$defs/refArray" }
+      }
+    },
+    "criticalChain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "source_ref", "source_location", "assessment_status", "links", "recovery_paths", "break_refs"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^INV-CHAIN-[A-Z0-9-]+$" },
+        "title": { "type": "string", "minLength": 1 },
+        "source_ref": { "type": "string", "minLength": 1 },
+        "source_location": { "type": "string", "minLength": 1 },
+        "assessment_status": { "enum": ["in_progress", "assessed"] },
+        "links": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/criticalChainLink" } },
+        "recovery_paths": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["failure", "return", "retry", "compensation"],
+          "properties": {
+            "failure": { "$ref": "#/$defs/recoveryPath" },
+            "return": { "$ref": "#/$defs/recoveryPath" },
+            "retry": { "$ref": "#/$defs/recoveryPath" },
+            "compensation": { "$ref": "#/$defs/recoveryPath" }
+          }
+        },
+        "break_refs": { "$ref": "#/$defs/refArray" }
+      }
+    },
+    "reachabilityBreak": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "chain_ref", "path_kind", "classification", "source_ref", "source_location", "description"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^INV-BREAK-[A-Z0-9-]+$" },
+        "chain_ref": { "type": "string", "pattern": "^INV-CHAIN-[A-Z0-9-]+$" },
+        "link_ref": { "type": "string", "pattern": "^INV-LINK-[A-Z0-9-]+$" },
+        "path_kind": { "enum": ["processing", "object", "state", "version", "identity", "next_entry", "next_guard", "failure", "return", "retry", "compensation"] },
+        "classification": { "enum": ["unknown", "defect_candidate"] },
+        "source_ref": { "type": "string", "minLength": 1 },
+        "source_location": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "unknown": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "priority", "owner", "blocks_stage"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^UNK-[A-Z0-9-]+$" },
+            "priority": { "enum": ["P0", "P1", "P2"] },
+            "owner": { "type": "string", "minLength": 1 },
+            "blocks_stage": { "enum": ["clarify", "specify", "review", "baseline", "implementation", "acceptance"] }
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "required": ["critical_chains"] },
+      "then": { "required": ["reachability_breaks"] }
+    }
+  ]
 }

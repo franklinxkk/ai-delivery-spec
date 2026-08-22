@@ -16,6 +16,24 @@ import yaml
 from jsonschema import Draft202012Validator
 
 
+def _placeholder_paths(value: object, prefix: str = "") -> list[str]:
+    paths: list[str] = []
+    if isinstance(value, dict):
+        for key, child in value.items():
+            paths.extend(_placeholder_paths(child, f"{prefix}.{key}" if prefix else str(key)))
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            paths.extend(_placeholder_paths(child, f"{prefix}[{index}]"))
+    elif isinstance(value, str):
+        text = value.strip()
+        if (
+            re.search(r"\{[^{}]+\}|(?<![A-Za-z0-9-])(?:TBD|TODO)(?![A-Za-z0-9-])|待指定|待补充|占位", text, re.I)
+            or text == "0" * 64
+        ):
+            paths.append(prefix or "<root>")
+    return paths
+
+
 class HandoffChecks:
     def check_stage0(self, path: Path) -> None:
         try:
@@ -27,6 +45,14 @@ class HandoffChecks:
         if error or document is None:
             self.add("BLOCK", "STAGE0-PARSE", path, error or "Stage 0 台账无效")
             return
+        placeholders = _placeholder_paths(document)
+        if placeholders:
+            self.add(
+                "BLOCK", "STAGE0-PLACEHOLDER", path,
+                "Stage 0 台账仍含模板占位，不能把骨架当作已盘点事实",
+                ", ".join(placeholders[:12]),
+                affected_consumers=("product", "frontend", "backend", "qa"),
+            )
         # disposition is a 5.4.1 contract; older inventories stay exempt so that
         # pre-5.4.1 complete inventories keep passing unchanged.
         version_match = re.match(r"(\d+)\.(\d+)\.(\d+)", str(document.get("schema_version", "")))
@@ -161,6 +187,7 @@ class HandoffChecks:
                     "缺陷候选未经 DEC/CHG 不得直接升级为目标需求", ref,
                     related_refs=(str(item.get("target_requirement_ref")),),
                 )
+        reachability_metrics = self._check_stage0_reachability(path, document, items)
         candidates = document.get("canonical_candidates") or []
         conflict_ref = str(document.get("conflict_decision_ref", ""))
         if len(candidates) > 1 and not conflict_ref.startswith("DEC-CONFLICT-"):
@@ -185,7 +212,539 @@ class HandoffChecks:
             "stage0_inferred_pending": inferred_pending,
             "stage0_review_batches": len(batches),
             "stage0_baseline_refs": len(baseline_refs),
+            **reachability_metrics,
         })
+
+    def _check_stage0_reachability(
+        self, path: Path, document: dict, items: list[object],
+    ) -> dict[str, int]:
+        """Validate only explicitly scoped critical brownfield chains.
+
+        Older inventories remain readable. A legacy inventory with a core action or
+        handler receives a GAP so it cannot claim a clean reachability PASS, but it
+        is not forced to invent a chain. Once ``critical_chains`` is declared, the
+        declared slice must be fully auditable.
+        """
+        item_by_id = {
+            str(item.get("id")): item
+            for item in items
+            if isinstance(item, dict) and item.get("id")
+        }
+        interaction_types = {"action", "handler", "handoff", "system_process", "process"}
+        core_interactions = [
+            item_id for item_id, item in item_by_id.items()
+            if item.get("core_behavior") is True
+            and str(item.get("type", "")).casefold() in interaction_types
+        ]
+        base_metrics = {
+            "stage0_critical_chains": 0,
+            "stage0_chain_links": 0,
+            "stage0_reachability_breaks": 0,
+            "stage0_reachability_unresolved": 0,
+        }
+        if "critical_chains" not in document:
+            if core_interactions:
+                self.add(
+                    "GAP", "STAGE0-REACHABILITY-NOT-DECLARED", path,
+                    "核心动作/处理器尚未声明关键链可达性盘点；旧台账继续兼容，但不能据此宣称主链可达",
+                    ", ".join(core_interactions[:8]),
+                    affected_consumers=("product", "backend", "qa"),
+                )
+            return base_metrics
+
+        chains_raw = document.get("critical_chains")
+        if not isinstance(chains_raw, list):
+            self.add(
+                "BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path,
+                "critical_chains 必须是数组；无法解析的声明不能证明关键链可达",
+                "critical_chains",
+            )
+            return base_metrics
+        if not chains_raw:
+            severity = "BLOCK" if core_interactions else "GAP"
+            self.add(
+                severity, "STAGE0-EMPTY-CHAIN-REGISTER", path,
+                "已声明 critical_chains 却为空；请删除无意义声明，或只为本轮关键链补来源化盘点",
+                ", ".join(core_interactions[:8]) or "critical_chains",
+            )
+            return base_metrics
+
+        breaks_raw = document.get("reachability_breaks")
+        if not isinstance(breaks_raw, list):
+            self.add(
+                "BLOCK", "STAGE0-BREAK-REGISTER-MISSING", path,
+                "声明关键链后必须提供 reachability_breaks 数组；空数组只允许用于已证据化的完整可达链",
+                "reachability_breaks",
+            )
+            breaks_raw = []
+
+        break_by_id: dict[str, dict] = {}
+        for index, record in enumerate(breaks_raw):
+            ref = f"reachability_breaks[{index}]"
+            if not isinstance(record, dict):
+                self.add("BLOCK", "STAGE0-BREAK-CONTRACT-INVALID", path, "断裂记录必须是对象", ref)
+                continue
+            break_id = str(record.get("id", ""))
+            if not re.fullmatch(r"INV-BREAK-[A-Z0-9-]+", break_id, re.I):
+                self.add("BLOCK", "STAGE0-BREAK-CONTRACT-INVALID", path, "断裂记录必须使用 INV-BREAK-*", ref)
+                continue
+            if break_id in break_by_id:
+                self.add("BLOCK", "STAGE0-BREAK-CONTRACT-INVALID", path, "断裂记录 ID 重复", break_id)
+                continue
+            break_by_id[break_id] = record
+            missing = [
+                key for key in (
+                    "chain_ref", "path_kind", "classification", "source_ref",
+                    "source_location", "description",
+                )
+                if not record.get(key)
+            ]
+            if missing:
+                self.add(
+                    "BLOCK", "STAGE0-BREAK-CONTRACT-INVALID", path,
+                    "断裂记录缺少 " + ", ".join(missing), break_id,
+                )
+            classification = str(record.get("classification", "")).casefold()
+            if classification not in {"unknown", "defect_candidate"}:
+                self.add(
+                    "BLOCK", "STAGE0-BREAK-CONTRACT-INVALID", path,
+                    "断裂 classification 只能是 unknown 或 defect_candidate", break_id,
+                )
+            if classification == "unknown":
+                unknown = record.get("unknown") or {}
+                if not (
+                    isinstance(unknown, dict)
+                    and re.fullmatch(r"UNK-[A-Z0-9-]+", str(unknown.get("id", "")), re.I)
+                    and str(unknown.get("priority", "")).upper() == "P0"
+                    and unknown.get("owner")
+                    and unknown.get("blocks_stage")
+                ):
+                    self.add(
+                        "BLOCK", "STAGE0-CRITICAL-BREAK-NOT-OWNED", path,
+                        "关键链 UNKNOWN 断裂必须登记 UNK-*、P0、owner 和 blocks_stage",
+                        break_id, affected_consumers=("product", "backend", "qa"),
+                    )
+
+        chain_ids: set[str] = set()
+        chain_links: dict[str, set[str]] = {}
+        referenced_breaks: set[str] = set()
+        unresolved_count = 0
+        link_count = 0
+        allowed_reachability = {"reachable", "broken", "unknown", "terminal"}
+        allowed_output = {"observed", "missing", "unknown", "not_applicable"}
+        allowed_entry = {"observed", "missing", "unknown", "terminal"}
+        allowed_guard = {"observed", "missing", "unknown", "not_applicable"}
+        allowed_recovery = {"observed", "broken", "unknown", "not_applicable"}
+        entry_item_types = {
+            "view", "page", "screen", "route", "action", "handoff", "handler",
+            "system_process", "process", "event", "queue", "task", "endpoint",
+            "视图", "页面", "路由", "动作", "交接", "处理器", "系统处理", "事件", "队列", "任务", "端点",
+        }
+        guard_item_types = {
+            "guard", "rule", "state", "condition", "handler", "system_process",
+            "process", "policy", "permission",
+            "守卫", "规则", "状态", "条件", "处理器", "系统处理", "策略", "权限",
+        }
+
+        def normalize_refs(
+            value: object, owner_ref: str, field: str, *, validate_items: bool = True,
+        ) -> list[str]:
+            if not isinstance(value, list):
+                self.add(
+                    "BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path,
+                    f"{field} 必须是引用数组", owner_ref,
+                )
+                return []
+            refs = [str(item) for item in value if str(item)]
+            if len(refs) != len(value) or len(refs) != len(set(refs)):
+                self.add(
+                    "BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path,
+                    f"{field} 含空值或重复引用", owner_ref,
+                )
+            for item_ref in refs:
+                if validate_items and item_ref not in item_by_id:
+                    self.add(
+                        "BLOCK", "STAGE0-CHAIN-ORPHAN-ITEM", path,
+                        "关键链引用未解析到 Stage 0 items", f"{owner_ref}.{field}->{item_ref}",
+                    )
+            return refs
+
+        def validate_item_types(
+            refs: list[str], allowed_types: set[str], owner_ref: str, field: str,
+        ) -> None:
+            for item_ref in refs:
+                if item_ref not in item_by_id:
+                    continue
+                item_type = str(item_by_id[item_ref].get("type", "")).casefold()
+                if item_type not in allowed_types:
+                    self.add(
+                        "BLOCK", "STAGE0-CHAIN-REF-TYPE-MISMATCH", path,
+                        f"{field} 引用 type={item_type or '<empty>'}，不能证明可进入点或守卫",
+                        f"{owner_ref}.{field}->{item_ref}",
+                        affected_consumers=("product", "backend", "qa"),
+                    )
+
+        for index, chain in enumerate(chains_raw):
+            fallback_ref = f"critical_chains[{index}]"
+            if not isinstance(chain, dict):
+                self.add("BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path, "关键链必须是对象", fallback_ref)
+                continue
+            chain_id = str(chain.get("id", ""))
+            if not re.fullmatch(r"INV-CHAIN-[A-Z0-9-]+", chain_id, re.I):
+                self.add("BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path, "关键链必须使用 INV-CHAIN-*", fallback_ref)
+                chain_id = fallback_ref
+            elif chain_id in chain_ids:
+                self.add("BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path, "关键链 ID 重复", chain_id)
+            chain_ids.add(chain_id)
+            missing_chain = [
+                key for key in ("title", "source_ref", "source_location", "assessment_status")
+                if not chain.get(key)
+            ]
+            if missing_chain:
+                self.add(
+                    "BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path,
+                    "关键链缺少 " + ", ".join(missing_chain), chain_id,
+                )
+            assessment = str(chain.get("assessment_status", "")).casefold()
+            if assessment not in {"in_progress", "assessed"}:
+                self.add(
+                    "BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path,
+                    "assessment_status 只能是 in_progress 或 assessed", chain_id,
+                )
+            elif assessment == "in_progress":
+                severity = "BLOCK" if str(document.get("inventory_status", "")).casefold() == "inventory_complete" else "GAP"
+                self.add(
+                    severity, "STAGE0-CHAIN-ASSESSMENT-IN-PROGRESS", path,
+                    "关键链可达性仍在盘点中，不能宣称该链已经完整可达",
+                    chain_id, affected_consumers=("product", "backend", "qa"),
+                )
+
+            chain_break_refs = normalize_refs(
+                chain.get("break_refs"), chain_id, "break_refs", validate_items=False,
+            )
+            # Break IDs live in a separate register rather than items.
+            for break_ref in chain_break_refs:
+                if break_ref not in break_by_id:
+                    self.add(
+                        "BLOCK", "STAGE0-CHAIN-ORPHAN-BREAK", path,
+                        "关键链断裂引用未解析到 reachability_breaks", f"{chain_id}->{break_ref}",
+                    )
+            links = chain.get("links")
+            if not isinstance(links, list) or not links:
+                self.add(
+                    "BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path,
+                    "关键链必须至少包含一个 action→processing→output→next link", chain_id,
+                )
+                chain_links[chain_id] = set()
+                continue
+            local_link_ids: set[str] = set()
+            chain_links[chain_id] = local_link_ids
+            chain_has_unresolved = assessment == "in_progress"
+            for link_index, link in enumerate(links):
+                link_count += 1
+                link_fallback = f"{chain_id}.links[{link_index}]"
+                if not isinstance(link, dict):
+                    self.add("BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path, "关键链 link 必须是对象", link_fallback)
+                    chain_has_unresolved = True
+                    continue
+                link_id = str(link.get("id", ""))
+                if not re.fullmatch(r"INV-LINK-[A-Z0-9-]+", link_id, re.I):
+                    self.add("BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path, "link 必须使用 INV-LINK-*", link_fallback)
+                    link_id = link_fallback
+                elif link_id in local_link_ids:
+                    self.add("BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path, "link ID 重复", link_id)
+                local_link_ids.add(link_id)
+                missing_link = [
+                    key for key in ("action_ref", "source_ref", "source_location", "reachability")
+                    if not link.get(key)
+                ]
+                if missing_link:
+                    self.add(
+                        "BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path,
+                        "link 缺少 " + ", ".join(missing_link), link_id,
+                    )
+                action_ref = str(link.get("action_ref", ""))
+                if action_ref not in item_by_id:
+                    self.add(
+                        "BLOCK", "STAGE0-CHAIN-ORPHAN-ITEM", path,
+                        "action_ref 未解析到 Stage 0 items", f"{link_id}->{action_ref or '<empty>'}",
+                    )
+                elif str(item_by_id[action_ref].get("type", "")).casefold() != "action":
+                    self.add(
+                        "BLOCK", "STAGE0-CHAIN-REF-TYPE-MISMATCH", path,
+                        "action_ref 必须指向 type=action 的盘点项", f"{link_id}->{action_ref}",
+                    )
+                processing_refs = normalize_refs(link.get("processing_refs"), link_id, "processing_refs")
+                for processing_ref in processing_refs:
+                    if processing_ref in item_by_id and str(item_by_id[processing_ref].get("type", "")).casefold() not in {
+                        "handler", "system_process", "process",
+                    }:
+                        self.add(
+                            "BLOCK", "STAGE0-CHAIN-REF-TYPE-MISMATCH", path,
+                            "processing_refs 必须指向 handler/system_process/process 盘点项",
+                            f"{link_id}->{processing_ref}",
+                        )
+                link_break_refs = normalize_refs(
+                    link.get("break_refs"), link_id, "break_refs", validate_items=False,
+                )
+                for break_ref in link_break_refs:
+                    if break_ref not in break_by_id:
+                        self.add(
+                            "BLOCK", "STAGE0-CHAIN-ORPHAN-BREAK", path,
+                            "link 断裂引用未解析到 reachability_breaks", f"{link_id}->{break_ref}",
+                        )
+                referenced_breaks.update(link_break_refs)
+                if not set(link_break_refs).issubset(set(chain_break_refs)):
+                    self.add(
+                        "BLOCK", "STAGE0-CHAIN-BREAK-DRIFT", path,
+                        "link.break_refs 必须汇总到所属 chain.break_refs", link_id,
+                    )
+
+                outputs = link.get("outputs")
+                observed_outputs = 0
+                link_unresolved = not processing_refs
+                if not isinstance(outputs, dict):
+                    self.add(
+                        "BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path,
+                        "outputs 必须显式盘点 objects/states/versions/identities", link_id,
+                    )
+                    link_unresolved = True
+                else:
+                    for dimension in ("objects", "states", "versions", "identities"):
+                        facet = outputs.get(dimension)
+                        if not isinstance(facet, dict):
+                            self.add(
+                                "BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path,
+                                f"outputs.{dimension} 缺少结构化盘点", link_id,
+                            )
+                            link_unresolved = True
+                            continue
+                        status = str(facet.get("status", "")).casefold()
+                        refs = normalize_refs(facet.get("refs"), link_id, f"outputs.{dimension}.refs")
+                        expected_types = {
+                            "objects": {"object", "entity"},
+                            "states": {"state"},
+                            "versions": {"version", "field"},
+                            "identities": {"identity", "field", "key"},
+                        }[dimension]
+                        for output_ref in refs:
+                            if output_ref in item_by_id and str(item_by_id[output_ref].get("type", "")).casefold() not in expected_types:
+                                self.add(
+                                    "BLOCK", "STAGE0-CHAIN-REF-TYPE-MISMATCH", path,
+                                    f"outputs.{dimension} 引用类型不匹配",
+                                    f"{link_id}->{output_ref}",
+                                )
+                        if status not in allowed_output:
+                            self.add(
+                                "BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path,
+                                f"outputs.{dimension}.status 无效", link_id,
+                            )
+                            link_unresolved = True
+                        elif status == "observed":
+                            observed_outputs += 1
+                            if not refs:
+                                self.add(
+                                    "BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path,
+                                    f"outputs.{dimension}=observed 必须有 items 引用", link_id,
+                                )
+                        elif status in {"missing", "unknown"}:
+                            link_unresolved = True
+                        elif status == "not_applicable" and not facet.get("note"):
+                            self.add(
+                                "BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path,
+                                f"outputs.{dimension}=not_applicable 必须显示来源化理由", link_id,
+                            )
+
+                next_entry = link.get("next_entry")
+                entry_status = ""
+                if not isinstance(next_entry, dict):
+                    self.add("BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path, "next_entry 缺少结构化盘点", link_id)
+                    link_unresolved = True
+                else:
+                    entry_status = str(next_entry.get("status", "")).casefold()
+                    entry_refs = normalize_refs(next_entry.get("refs"), link_id, "next_entry.refs")
+                    validate_item_types(entry_refs, entry_item_types, link_id, "next_entry.refs")
+                    if entry_status not in allowed_entry:
+                        self.add("BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path, "next_entry.status 无效", link_id)
+                        link_unresolved = True
+                    elif entry_status == "observed" and not entry_refs:
+                        self.add("BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path, "next_entry=observed 必须有入口引用", link_id)
+                    elif entry_status in {"missing", "unknown"}:
+                        link_unresolved = True
+                    elif entry_status == "terminal" and not next_entry.get("note"):
+                        self.add("BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path, "terminal 必须说明为何链路在此结束", link_id)
+
+                next_guard = link.get("next_guard")
+                guard_status = ""
+                if not isinstance(next_guard, dict):
+                    self.add("BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path, "next_guard 缺少结构化盘点", link_id)
+                    link_unresolved = True
+                else:
+                    guard_status = str(next_guard.get("status", "")).casefold()
+                    guard_refs = normalize_refs(next_guard.get("refs"), link_id, "next_guard.refs")
+                    validate_item_types(guard_refs, guard_item_types, link_id, "next_guard.refs")
+                    if guard_status not in allowed_guard:
+                        self.add("BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path, "next_guard.status 无效", link_id)
+                        link_unresolved = True
+                    elif guard_status == "observed" and not guard_refs:
+                        self.add("BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path, "next_guard=observed 必须有守卫引用", link_id)
+                    elif guard_status in {"missing", "unknown"}:
+                        link_unresolved = True
+                    elif guard_status == "not_applicable" and not next_guard.get("note"):
+                        self.add("BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path, "next_guard=not_applicable 必须说明理由", link_id)
+
+                reachability = str(link.get("reachability", "")).casefold()
+                if reachability not in allowed_reachability:
+                    self.add("BLOCK", "STAGE0-CHAIN-CONTRACT-INVALID", path, "reachability 无效", link_id)
+                    link_unresolved = True
+                elif reachability == "reachable" and (
+                    not processing_refs or not observed_outputs
+                    or entry_status != "observed"
+                    or guard_status not in {"observed", "not_applicable"}
+                    or link_unresolved
+                ):
+                    self.add(
+                        "BLOCK", "STAGE0-CHAIN-REACHABILITY-CONTRADICTION", path,
+                        "声明 reachable，但处理器、输出、下一入口或守卫仍缺失/未知",
+                        link_id, affected_consumers=("product", "backend", "qa"),
+                    )
+                elif reachability == "terminal" and (
+                    not processing_refs or not observed_outputs or entry_status != "terminal" or link_unresolved
+                ):
+                    self.add(
+                        "BLOCK", "STAGE0-CHAIN-REACHABILITY-CONTRADICTION", path,
+                        "声明 terminal，但处理器/输出未观察到或 next_entry 未标为 terminal",
+                        link_id,
+                    )
+                elif reachability in {"broken", "unknown"}:
+                    link_unresolved = True
+                if link_unresolved:
+                    unresolved_count += 1
+                    chain_has_unresolved = True
+                    if not link_break_refs:
+                        self.add(
+                            "BLOCK", "STAGE0-CHAIN-UNRESOLVED-UNTRACKED", path,
+                            "link 有 missing/unknown/broken，却没有指向断裂清单",
+                            link_id, affected_consumers=("product", "backend", "qa"),
+                        )
+
+            recovery_paths = chain.get("recovery_paths")
+            required_recovery = ("failure", "return", "retry", "compensation")
+            if not isinstance(recovery_paths, dict):
+                self.add(
+                    "BLOCK", "STAGE0-RECOVERY-CONTRACT-INCOMPLETE", path,
+                    "关键链必须分别盘点 failure/return/retry/compensation", chain_id,
+                )
+                chain_has_unresolved = True
+            else:
+                for kind in required_recovery:
+                    recovery = recovery_paths.get(kind)
+                    if not isinstance(recovery, dict):
+                        self.add(
+                            "BLOCK", "STAGE0-RECOVERY-CONTRACT-INCOMPLETE", path,
+                            f"recovery_paths.{kind} 缺少结构化盘点", chain_id,
+                        )
+                        chain_has_unresolved = True
+                        continue
+                    status = str(recovery.get("status", "")).casefold()
+                    entry_refs = normalize_refs(recovery.get("entry_refs"), chain_id, f"recovery_paths.{kind}.entry_refs")
+                    validate_item_types(
+                        entry_refs, entry_item_types, chain_id, f"recovery_paths.{kind}.entry_refs",
+                    )
+                    recovery_guard_refs = normalize_refs(
+                        recovery.get("guard_refs"), chain_id, f"recovery_paths.{kind}.guard_refs",
+                    )
+                    validate_item_types(
+                        recovery_guard_refs, guard_item_types, chain_id,
+                        f"recovery_paths.{kind}.guard_refs",
+                    )
+                    outcome_refs = normalize_refs(recovery.get("outcome_refs"), chain_id, f"recovery_paths.{kind}.outcome_refs")
+                    recovery_break_refs = normalize_refs(
+                        recovery.get("break_refs"), chain_id,
+                        f"recovery_paths.{kind}.break_refs", validate_items=False,
+                    )
+                    for break_ref in recovery_break_refs:
+                        if break_ref not in break_by_id:
+                            self.add(
+                                "BLOCK", "STAGE0-CHAIN-ORPHAN-BREAK", path,
+                                "恢复路径断裂引用未解析到 reachability_breaks", f"{chain_id}.{kind}->{break_ref}",
+                            )
+                    referenced_breaks.update(recovery_break_refs)
+                    if not set(recovery_break_refs).issubset(set(chain_break_refs)):
+                        self.add(
+                            "BLOCK", "STAGE0-CHAIN-BREAK-DRIFT", path,
+                            "恢复路径 break_refs 必须汇总到所属 chain.break_refs", f"{chain_id}.{kind}",
+                        )
+                    if status not in allowed_recovery:
+                        self.add(
+                            "BLOCK", "STAGE0-RECOVERY-CONTRACT-INCOMPLETE", path,
+                            f"recovery_paths.{kind}.status 无效", chain_id,
+                        )
+                        chain_has_unresolved = True
+                    elif status == "observed":
+                        if not recovery.get("source_ref") or not recovery.get("source_location"):
+                            self.add(
+                                "BLOCK", "STAGE0-RECOVERY-CONTRACT-INCOMPLETE", path,
+                                f"recovery_paths.{kind}=observed 缺少来源", chain_id,
+                            )
+                        if not entry_refs and not outcome_refs:
+                            self.add(
+                                "BLOCK", "STAGE0-RECOVERY-CONTRACT-INCOMPLETE", path,
+                                f"recovery_paths.{kind}=observed 必须指向可返回入口或结果", chain_id,
+                            )
+                    elif status in {"broken", "unknown"}:
+                        unresolved_count += 1
+                        chain_has_unresolved = True
+                        if not recovery.get("source_ref") or not recovery.get("source_location"):
+                            self.add(
+                                "BLOCK", "STAGE0-RECOVERY-CONTRACT-INCOMPLETE", path,
+                                f"recovery_paths.{kind}={status} 缺少观察来源", chain_id,
+                            )
+                        if not recovery_break_refs:
+                            self.add(
+                                "BLOCK", "STAGE0-CHAIN-UNRESOLVED-UNTRACKED", path,
+                                f"recovery_paths.{kind}={status} 却没有指向断裂清单", chain_id,
+                            )
+                    elif status == "not_applicable" and not recovery.get("note"):
+                        self.add(
+                            "BLOCK", "STAGE0-RECOVERY-CONTRACT-INCOMPLETE", path,
+                            f"recovery_paths.{kind}=not_applicable 必须说明来源化理由", chain_id,
+                        )
+
+            if chain_has_unresolved and not chain_break_refs:
+                self.add(
+                    "BLOCK", "STAGE0-EMPTY-BREAK-REGISTER", path,
+                    "关键链仍有未评估、missing、unknown 或 broken，但 chain.break_refs/断裂清单为空",
+                    chain_id, affected_consumers=("product", "backend", "qa"),
+                )
+
+        for break_id, record in break_by_id.items():
+            chain_ref = str(record.get("chain_ref", ""))
+            if chain_ref not in chain_ids:
+                self.add(
+                    "BLOCK", "STAGE0-BREAK-ORPHAN-CHAIN", path,
+                    "断裂记录 chain_ref 未解析到 critical_chains", f"{break_id}->{chain_ref or '<empty>'}",
+                )
+                continue
+            link_ref = str(record.get("link_ref", ""))
+            if link_ref and link_ref not in chain_links.get(chain_ref, set()):
+                self.add(
+                    "BLOCK", "STAGE0-BREAK-ORPHAN-LINK", path,
+                    "断裂记录 link_ref 未解析到所属关键链", f"{break_id}->{link_ref}",
+                )
+            if break_id not in referenced_breaks:
+                self.add(
+                    "BLOCK", "STAGE0-BREAK-NOT-REFERENCED", path,
+                    "reachability_breaks 中的记录没有被所属 chain/link/recovery 引用",
+                    break_id,
+                )
+
+        return {
+            "stage0_critical_chains": len(chains_raw),
+            "stage0_chain_links": link_count,
+            "stage0_reachability_breaks": len(break_by_id),
+            "stage0_reachability_unresolved": unresolved_count,
+        }
 
     def check_agent_handoff(self, path: Path) -> None:
         from quality_gate import HANDOFF_SCHEMA  # deferred: avoids circular import
@@ -387,6 +946,66 @@ class HandoffChecks:
                 affected_consumers=("architect", "frontend", "backend", "qa", "coding_agent"),
             )
 
+    def check_review_manifest_binding(self, manifest_path: Path) -> None:
+        """Align the human workspace handoff indicator with the supplied agent manifest."""
+        document, error = self._yaml_document(manifest_path, self.read(manifest_path))
+        if error or document is None:
+            return
+        manifest_status = str(document.get("status", "")).casefold()
+        baseline = document.get("baseline") or {}
+        manifest_hash = str(baseline.get("hash", "")) if isinstance(baseline, dict) else ""
+        packet_ids = {
+            str(item.get("id", "")).upper()
+            for item in document.get("packets", []) or []
+            if isinstance(item, dict) and item.get("id")
+        }
+        for review_path, review_document in self.review_workspace_contracts:
+            handoff = review_document.get("machine_handoff") or {}
+            if not isinstance(handoff, dict):
+                continue
+            declared_status = str(handoff.get("status", "")).casefold()
+            if declared_status != "ready":
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-HANDOFF-STATUS-DRIFT", review_path,
+                    "本次已提供 Coding Agent handoff，但人类评审工作台仍显示未请求或被阻断",
+                    declared_status or "machine_handoff.status",
+                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                )
+                continue
+            if manifest_status != "ready_for_implementation":
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-HANDOFF-NOT-READY", review_path,
+                    "评审工作台声称机器交接 ready，但实际 manifest 尚未 ready_for_implementation",
+                    manifest_status or "manifest.status",
+                    affected_consumers=("product", "coding_agent"),
+                )
+            review_baseline = review_document.get("baseline") or {}
+            review_hash = str(review_baseline.get("hash", "")) if isinstance(review_baseline, dict) else ""
+            if review_hash != manifest_hash:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-HANDOFF-BASELINE-DRIFT", review_path,
+                    "评审工作台与 Coding Agent manifest 不是同一需求基线",
+                    str(handoff.get("manifest_ref", "")),
+                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                )
+            declared_packets = {str(item).upper() for item in handoff.get("packet_refs", []) or []}
+            missing_packets = sorted(declared_packets - packet_ids)
+            if missing_packets:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-HANDOFF-PACKET-DRIFT", review_path,
+                    "工作台显示可用的机器工作包在实际 manifest 中不存在",
+                    ", ".join(missing_packets[:8]),
+                    affected_consumers=("product", "coding_agent"),
+                    related_refs=tuple(missing_packets[:50]),
+                )
+            manifest_ref = str(handoff.get("manifest_ref", ""))
+            if manifest_ref and Path(manifest_ref).name.casefold() != manifest_path.name.casefold():
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-HANDOFF-MANIFEST-DRIFT", review_path,
+                    "工作台引用的 handoff 文件与本次提供的 manifest 不一致", manifest_ref,
+                    affected_consumers=("product", "coding_agent"),
+                )
+
     def check_handoff(self, prd_path: Path, prototype_paths: list[Path], level: str) -> None:
         """Cross-check the one PRD baseline against one or more prototype projections."""
         try:
@@ -395,6 +1014,27 @@ class HandoffChecks:
         except (OSError, UnicodeError) as exc:
             self.add("BLOCK", "HANDOFF-READ", prd_path, f"handoff artifact cannot be read: {exc}")
             return
+
+        prototype_resolved = {path.resolve() for path in prototype_paths}
+        for legacy_path in sorted(self.review_workspace_legacy_paths & prototype_resolved, key=str):
+            self.add(
+                "BLOCK", "PROTO-REVIEW-WORKSPACE-REQUIRED", legacy_path,
+                "旧式评审叠加可以单独视检，但不能作为研发测试交接；请迁移为 v5.4.7 旅程评审工作台",
+                affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+            )
+        expected_prd_hash = self._sha256(prd)
+        for review_path, review_document in self.review_workspace_contracts:
+            if review_path not in prototype_resolved:
+                continue
+            baseline = review_document.get("baseline") or {}
+            baseline_hash = str(baseline.get("hash", "")) if isinstance(baseline, dict) else ""
+            if baseline_hash != expected_prd_hash:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-BASELINE-DRIFT", review_path,
+                    "评审工作台绑定的 baseline.hash 与本次 PRD 内容不一致",
+                    str(baseline.get("requirement_ref", "")) if isinstance(baseline, dict) else "baseline",
+                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                )
 
         frontmatter = self._frontmatter(prd)
         declared_views = {str(item).upper() for item in frontmatter.get("page_contract_view_ids", []) if item}

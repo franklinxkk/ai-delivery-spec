@@ -23,6 +23,7 @@ RULE = re.compile(r"([^{}]+)\{([^{}]*)\}", re.S)
 FONT_SIZE = re.compile(r"font-size\s*:\s*([0-9]*\.?[0-9]+)\s*px", re.I)
 MIN_FONT_PX = 11.0
 CLASS_IN_SELECTOR = re.compile(r"\.([A-Za-z_-][\w-]*)")
+EXACT_HIDDEN_SELECTOR = re.compile(r"(?<![\w-])\.hidden(?![\w-])")
 
 INTERACTIVE_TAGS = {"a", "button", "input", "select", "textarea"}
 VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
@@ -132,7 +133,7 @@ def scan(text: str) -> list[dict[str, str]]:
     for selector_raw, body_raw in RULE.findall(css):
         selector = " ".join(selector_raw.split())
         body = " ".join(body_raw.split())
-        if ".hidden" in selector:
+        if EXACT_HIDDEN_SELECTOR.search(selector):
             hidden_rules.append((selector, body))
             if not re.search(r"\bdisplay\s*:\s*none\b", body, re.I):
                 findings.append({"kind": "hidden-without-display-none", "selector": selector, "detail": body})
@@ -160,7 +161,9 @@ def scan(text: str) -> list[dict[str, str]]:
                 })
     if len(hidden_rules) > 1:
         findings.append({"kind": "duplicate-hidden-rules", "selector": ".hidden", "detail": f"{len(hidden_rules)} definitions found"})
-    if re.search(r"class=[\"'][^\"']*\bhidden\b", text, re.I) and not hidden_rules:
+    class_values = re.findall(r"\bclass\s*=\s*[\"']([^\"']*)[\"']", text, re.I)
+    uses_exact_hidden_class = any("hidden" in value.split() for value in class_values)
+    if uses_exact_hidden_class and not hidden_rules:
         findings.append({"kind": "missing-hidden-rule", "selector": ".hidden", "detail": "HTML uses hidden class but CSS does not define it"})
     if has_html:
         findings.extend(_scan_html(text, css))

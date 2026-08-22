@@ -1,4 +1,4 @@
-# AI Delivery Spec 5.4.6 — Requirement Management for Human & AI｜人机共用需求管理
+# AI Delivery Spec 5.4.7 — Requirement Management for Human & AI｜人机共用需求管理
 
 > 只有一句想法，大模型就急着写 PRD，方向和价值还没想清楚？
 >
@@ -12,7 +12,7 @@
 
 它的目标不是多写文档，而是让业务能确认、产品能决策、研发不必猜、测试可以验、负责人知道哪些已证明、哪些仍需人来决定。
 
-[![Version](https://img.shields.io/badge/version-5.4.6-0052A4.svg)]()
+[![Version](https://img.shields.io/badge/version-5.4.7-7C3AED.svg)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 
@@ -116,8 +116,10 @@ openclaw skills install @franklinxkk/ai-delivery-spec
 - 客户演示、方案探索和首次需求确认默认交付可操作的产品态。
 - 只有用户明确要求“评审版、编号标注、评审抽屉”等可见投影时，才生成评审态。
 - “交开发、给前后端测试看、开评审会”只说明消费方；若评审态偏好未确认，先询问一次。
-- 评审态只保留页面共识、编号标注、核心流程和角色必需说明，不把整份 PRD 塞进原型。
-- Coding Agent 使用同一基线里的稳定 ID、规则、状态、验收和结构化 handoff，不把右侧说明当机器合同。
+- 评审态按“导读 → 旅程 → 单步聚焦 → 按需页面标注 → 验收场景”组织；编号只负责定位，不再用一个长抽屉平铺所有按钮说明。
+- 产品、前端、后端、测试围绕同一 `STEP-*` 读取各自可执行工作包，并能查看上游、下游、分支、退回和 GAP；桌面画布与 STEP 双向定位，分享链接可恢复页面/步骤/角色上下文，窄屏在产品/评审间全屏切换。
+- 流程、状态与数据流是三种独立的人类可见模型；业务是否确认与证据是否验证分轴记录，静态观察和“页面能点”不能冒充业务批准或真实验收。
+- Coding Agent 使用同一基线里的稳定 ID、规则、状态、验收和结构化 handoff；变更比较关注需求、规则、状态、数据流和 AC 的业务 Diff，而不只看文件 Diff。评审工作台只辅助人类走读，不是机器合同。
 
 跨页面、模块或角色主链需要流程图；存在受守卫状态变化时需要状态转换图；跨系统、双向同步或多权威源时需要数据流/血缘图。简单单页 CRUD 不机械堆图。
 

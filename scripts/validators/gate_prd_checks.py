@@ -425,9 +425,45 @@ class PRDChecks:
         self, path: Path, raw: str, frontmatter: dict[str, Any], level: str
     ) -> None:
         from quality_gate import _heading_position, _module_slices  # deferred: avoids circular import
+        document_lowered = raw.lower()
+        facets_raw = frontmatter.get("activated_facets", []) or []
+        if not isinstance(facets_raw, list):
+            self.add("BLOCK", "PRD-BAD-ACTIVATED-FACETS", path, "activated_facets 必须是数组", "frontmatter.activated_facets")
+            return
+        facets = {str(item).lower() for item in facets_raw}
+        allowed = {"ui", "stateful", "data_submission", "integration", "batch_io", "high_risk"}
+        unknown = sorted(facets - allowed)
+        if unknown:
+            self.add("BLOCK", "PRD-BAD-ACTIVATED-FACETS", path, "未知条件规格: " + ", ".join(unknown))
+        governed_facets = facets & {"data_submission", "integration", "batch_io", "high_risk"}
+        if level in {"L0", "L1"} and governed_facets:
+            self.add(
+                "BLOCK", "PRD-FACET-REQUIRES-L2", path,
+                "当前条件规格涉及多角色、跨边界或治理合同，不能停留在轻量需求卡",
+                ", ".join(sorted(governed_facets)),
+                affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+            )
+        if "data_submission" in facets and level in {"L2", "L3", "L4"}:
+            required = {
+                "来源与映射": ("来源映射", "字段映射", "source mapping", "mapping"),
+                "校验": ("校验", "validation"),
+                "提交状态": ("提交状态", "上报状态", "submission state", "reporting state"),
+                "重试与幂等": ("重试", "retry"),
+                "幂等": ("幂等", "idempotency"),
+                "审计": ("审计", "audit"),
+                "口径与时效": ("指标口径", "计算口径", "metric caliber", "formula"),
+                "刷新/时效": ("刷新", "时效", "延迟", "freshness", "latency"),
+                "对账/更正": ("对账", "更正", "reconciliation", "correction"),
+            }
+            missing = [label for label, terms in required.items() if not any(term in document_lowered for term in terms)]
+            if missing:
+                self.add(
+                    "BLOCK", "PRD-DATA-SUBMISSION-CONTRACT-INCOMPLETE", path,
+                    "数据上报/统计口径规格缺少 " + "、".join(missing), "activated_facets.data_submission",
+                    affected_consumers=("product", "backend", "qa", "coding_agent"),
+                )
         if level not in {"L2", "L3", "L4"}:
             return
-        document_lowered = raw.lower()
         appendix_pos = _heading_position(
             raw, (r"^第四部分", r"^附录\s*A(?:\b|[：:])", r"engineering.+annex")
         )
@@ -486,35 +522,6 @@ class PRDChecks:
                     "模块纵向切片缺少 " + "、".join(missing), module_id,
                     affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
                     related_refs=(module_id,),
-                )
-
-        facets = frontmatter.get("activated_facets", []) or []
-        if not isinstance(facets, list):
-            self.add("BLOCK", "PRD-BAD-ACTIVATED-FACETS", path, "activated_facets 必须是数组", "frontmatter.activated_facets")
-            return
-        facets = {str(item).lower() for item in facets}
-        allowed = {"ui", "stateful", "data_submission", "integration", "batch_io", "high_risk"}
-        unknown = sorted(facets - allowed)
-        if unknown:
-            self.add("BLOCK", "PRD-BAD-ACTIVATED-FACETS", path, "未知条件规格: " + ", ".join(unknown))
-        if "data_submission" in facets:
-            required = {
-                "来源与映射": ("来源映射", "字段映射", "source mapping", "mapping"),
-                "校验": ("校验", "validation"),
-                "提交状态": ("提交状态", "上报状态", "submission state", "reporting state"),
-                "重试与幂等": ("重试", "retry"),
-                "幂等": ("幂等", "idempotency"),
-                "审计": ("审计", "audit"),
-                "口径与时效": ("指标口径", "计算口径", "metric caliber", "formula"),
-                "刷新/时效": ("刷新", "时效", "延迟", "freshness", "latency"),
-                "对账/更正": ("对账", "更正", "reconciliation", "correction"),
-            }
-            missing = [label for label, terms in required.items() if not any(term in document_lowered for term in terms)]
-            if missing:
-                self.add(
-                    "BLOCK", "PRD-DATA-SUBMISSION-CONTRACT-INCOMPLETE", path,
-                    "数据上报/统计口径规格缺少 " + "、".join(missing), "activated_facets.data_submission",
-                    affected_consumers=("product", "backend", "qa", "coding_agent"),
                 )
 
     def check_prd(
@@ -606,6 +613,40 @@ class PRDChecks:
         for label, aliases in section_contract:
             if not _has_heading(raw, aliases):
                 self.add("BLOCK", "PRD-HUMAN-PATH", path, f"human reading path misses {label}", label)
+
+        if level == "L1":
+            h2 = [(title, start) for heading_level, title, start in markdown_headings(raw) if heading_level == 2]
+            required_l1_sections = {
+                "来源、问题与价值": (r"来源.*问题.*价值", r"source.*problem.*value"),
+                "目标、范围与非目标": (r"目标.*范围", r"goal.*scope"),
+                "角色、用户故事与权限": (r"角色.*用户故事.*权限", r"role.*user stor.*permission"),
+                "旅程、流程、异常与状态": (r"(?:旅程|流程).*(?:异常|状态)", r"(?:journey|flow).*(?:exception|state)"),
+                "规则、字段与条件规格": (r"规则.*字段.*条件", r"rule.*field.*facet"),
+                "验收与测试": (r"验收.*测试", r"acceptance.*test"),
+                "未知项与升级判断": (r"未知.*升级", r"unknown.*escalat"),
+            }
+            for label, aliases in required_l1_sections.items():
+                match_index = next(
+                    (index for index, (title, _start) in enumerate(h2) if any(re.search(alias, title, re.I) for alias in aliases)),
+                    None,
+                )
+                if match_index is None:
+                    self.add(
+                        "BLOCK", "PRD-L1-SECTION-MISSING", path,
+                        "L1 需求卡缺少完整语义章节，不能只靠零散 ID 追溯", label,
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    )
+                    continue
+                start = h2[match_index][1]
+                end = h2[match_index + 1][1] if match_index + 1 < len(h2) else len(raw)
+                body = raw[start:end]
+                meaningful = re.sub(r"(?m)^#{1,6}.*$|^\s*\|?[\s:|-]+\|?\s*$|[`#|:*_\-]", "", body).strip()
+                if len(meaningful) < 24:
+                    self.add(
+                        "BLOCK", "PRD-L1-SECTION-EMPTY", path,
+                        "L1 需求卡章节只有标题/表头，没有可实施或可验收内容", label,
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    )
 
         # L0/L1 cards stay compact; L2+ use one unified PRD with exact annexes.
         if level in {"L2", "L3", "L4"}:

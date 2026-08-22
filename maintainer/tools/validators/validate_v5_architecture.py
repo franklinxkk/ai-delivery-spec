@@ -32,6 +32,7 @@ REQUIRED_FILES = (
     "schemas/execution-state.schema.json",
     "schemas/gate-result.schema.json",
     "schemas/agent-handoff.schema.json",
+    "schemas/review-workspace.schema.json",
     "schemas/domain-candidate.schema.json",
     "schemas/domain-usage-log.schema.json",
     "schemas/assumption-register.schema.json",
@@ -40,6 +41,7 @@ REQUIRED_FILES = (
     "references/lifecycle.md",
     "references/specify.md",
     "references/prototype.md",
+    "references/review-workspace.md",
     "references/context.md",
     "references/change-acceptance.md",
     "references/troubleshooting.md",
@@ -76,8 +78,12 @@ REQUIRED_FILES = (
     "scripts/stage_contract.py",
     "maintainer/checks/check_v540_stage_contracts.py",
     "maintainer/checks/check_v540_readme_commands.py",
-    "maintainer/checks/check_v544_human_review_contracts.py",
+    "maintainer/checks/check_human_review_contracts.py",
+    "maintainer/tests/test_human_first_stage0_contracts.py",
     "maintainer/tests/test_product_experience.py",
+    "maintainer/tests/test_v546_contract_invariants.py",
+    "maintainer/tests/test_v547_dynamic_literal_anchor.py",
+    "maintainer/tests/test_v547_review_workspace.py",
     "maintainer/checks/check_v502_progressive_truth.py",
     "maintainer/checks/check_v510_requirement_management.py",
     "maintainer/checks/check_v510_unified_prd.py",
@@ -167,6 +173,7 @@ def main() -> int:
         "schemas/execution-state.schema.json",
         "schemas/gate-result.schema.json",
         "schemas/agent-handoff.schema.json",
+        "schemas/review-workspace.schema.json",
         "schemas/domain-candidate.schema.json",
         "schemas/domain-usage-log.schema.json",
         "schemas/assumption-register.schema.json",
@@ -221,7 +228,7 @@ def main() -> int:
     reference_files = {path.name for path in (ROOT / "references").iterdir() if path.is_file()}
     expected_reference_files = {
         "discover.md", "lifecycle.md", "specify.md", "prototype.md",
-        "context.md", "change-acceptance.md", "troubleshooting.md",
+        "context.md", "change-acceptance.md", "troubleshooting.md", "review-workspace.md",
         "tool-adapters.md", "stages.md", "domain-coverage.yaml", "scaffolding-terms.yaml",
     }
     if reference_files != expected_reference_files:

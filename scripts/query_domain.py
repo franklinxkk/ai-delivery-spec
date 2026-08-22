@@ -205,6 +205,26 @@ def main() -> int:
             record["selected_sections"] = selected
         records.append(record)
 
+    if args.section:
+        if args.format == "yaml":
+            slices = [
+                {"domain_id": record["domain_id"], "selected_sections": record.get("selected_sections", [])}
+                for record in records
+            ]
+            payload: object = slices[0] if len(slices) == 1 else {"domains": slices}
+            print(yaml.safe_dump(payload, allow_unicode=True, sort_keys=False), end="")
+        else:
+            for index, record in enumerate(records):
+                if len(records) > 1:
+                    if index:
+                        print()
+                    print(f"# {record['domain_id']}")
+                for section_index, section in enumerate(record.get("selected_sections", [])):
+                    if index or section_index:
+                        print()
+                    print(str(section), end="" if str(section).endswith("\n") else "\n")
+        return 0
+
     payload: dict[str, object] = records[0] if len(records) == 1 else {
         "composition": [record["domain_id"] for record in records],
         "domains": records,

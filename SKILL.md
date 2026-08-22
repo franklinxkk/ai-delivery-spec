@@ -3,7 +3,7 @@ name: ai-delivery-spec
 description: Use for creating, changing, reviewing, reverse-engineering or accepting requirements, PRDs, prototypes, competitor material or existing systems, including any small UI/field/column/tab/dropdown/legacy-HTML change and direct PRD/prototype generation. Always invoke regardless of size or clarity. Deliver the smallest complete, reviewable, implementable, traceable and testable artifact at the target stage. Covers framing through acceptance; excludes scheduling, coding, CI/CD, deployment and operations. 中文：用于任何新增、修改、评审、反推或验收需求、PRD、原型、竞品或存量系统；写/改一个小功能、加字段/列/页签/下拉、旧 HTML 小改、直接生成 PRD/原型也必须调用。按目标阶段交付最小完整、可评审实施追溯验收的产物；不负责排期、编码、CI/CD、部署和运营。
 ---
 
-# AI Delivery Spec 5.4.6 — Requirement Management Kernel｜人机共用需求管理内核
+# AI Delivery Spec 5.4.7 — Requirement Management Kernel｜人机共用需求管理内核
 
 本 Skill 是适用于 ToC/ToB/ToG 的 Requirement Management Kernel：让业务、产品、设计、前后端、架构、需求交付/技术负责人、测试、合规和 Coding Agent 在需求任一阶段进入，得到当前需要的最小合格产物后离开；也可在用户明确要求时持续完成端到端闭环。
 
@@ -61,7 +61,7 @@ Skill 始终命中但默认走最轻路径。明确、局部、可逆且不改�
 
 假设寄存器仅在跨会话、跨角色复用或治理时单独导出。YAML/JSON 是工具投影，不是另一份 PRD。
 
-客户演示或客户确认阶段默认产品模式。只有用户明确要求“评审版/评审模式/编号标注/评审抽屉”才直接生成可见研发投影；“交开发/给前后端测试看/开需求评审会”只说明消费方，必须询问一次，未确认时继续产品模式。一句话需求首次进入原型且偏好未表达时也只问一次是否追加评审版；不阻断产品模式，明确“我要评审版”即已确认，拒绝后同一需求基线内不重复追问。review 工作站是多角色签署与缺口关闭，不等于原型评审模式。评审模式坚持“机器全量覆盖、人类克制投影”：全量合同进入 handoff；改变数据、状态、指标、责任方或系统边界的步骤形成 `STEP-*`，人类编号只保留关键共识、未知、口径和边界，一个编号可覆盖一个区域。角色镜头、来源、实施卡、核心流程图/状态转换图/数据流血缘图的完整合同见 `references/prototype.md`；Coding Agent 不把评审文案当机器合同。
+客户演示或客户确认默认产品模式。只有用户明确要求“评审版/评审模式/编号标注/评审抽屉”才直接生成投影；“交开发/给前后端测试看/开需求评审会”只说明消费方，必须询问一次，未确认时继续产品模式。一句话需求首次进入原型且偏好未表达时也只问一次是否追加评审版；不阻断产品模式，明确“我要评审版”即已确认，拒绝后同一需求基线内不重复追问。review 工作站用于签署与缺口关闭，不等于原型评审模式。评审模式不是按钮说明长列表，而是导读/旅程/单步聚焦/按需页面/验收五种任务视图；复杂链路先选 `FLOW-*`，再围绕一个 `STEP-*` 查看产品、前端、后端、测试工作包和 `EDGE-*` 交接。窄屏在产品与评审间全屏切换，不用大抽屉遮住页面。全量合同进入同 hash 的 PRD/handoff；可见投影只保留关键共识、未知、口径和边界。确认评审版时读取 `references/review-workspace.md` 和 `schemas/review-workspace.schema.json`；Coding Agent 读取结构化 handoff，不把评审文案当机器合同。
 
 L2/L3 PRD须用统一模板过门禁；评审投影不得替代。P0未知应阻断，结构不全不得称可开发。
 

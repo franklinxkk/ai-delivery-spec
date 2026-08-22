@@ -7,7 +7,7 @@ import re
 import shutil
 import subprocess
 import sys
-from collections import Counter
+from collections import Counter, defaultdict
 from html import unescape
 from html.parser import HTMLParser
 from pathlib import Path
@@ -23,8 +23,14 @@ for _candidate in (SCRIPT_DIR, SCRIPT_DIR / "validators"):
 from jsonschema import Draft202012Validator, FormatChecker
 
 from scan_prototype_css import scan as scan_prototype_css
-from extract_interaction_ledger import extract_dynamic_anchor_actions, extract_handler_actions
+from extract_interaction_ledger import (
+    extract_dynamic_anchor_actions,
+    extract_handler_actions,
+    inspect_runtime_action_assignments,
+)
 from validate_acceptance_run import validate_evidence_refs
+
+REVIEW_WORKSPACE_SCHEMA = SCRIPT_DIR.parent / "schemas" / "review-workspace.schema.json"
 
 # Visible-text markers of acceptance/demo scaffolding that must never ship in a
 # customer-facing prototype. Extend this tuple when new scaffold phrases appear.
@@ -74,6 +80,109 @@ def _visible_text(raw: str) -> str:
     text = re.sub(r"<style\b.*?</style>", " ", text, flags=re.I | re.S)
     text = re.sub(r"<!--.*?-->", " ", text, flags=re.S)
     return re.sub(r"<[^>]+>", " ", text)
+
+
+class _ReviewStatusParser(HTMLParser):
+    """Collect status axes only when their element and ancestors are visible."""
+
+    _VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
+    _LOCALIZED_LABELS = {
+        "confirmed": ("confirmed", "已确认", "确认"),
+        "proposed": ("proposed", "建议", "提议", "待确认"),
+        "inferred": ("inferred", "推断"),
+        "unknown": ("unknown", "未知"),
+        "conflict": ("conflict", "冲突"),
+        "not_run": ("not_run", "not run", "未执行", "未运行"),
+        "static_checked": ("static_checked", "static checked", "静态检查", "静态已检查"),
+        "browser_checked": ("browser_checked", "browser checked", "浏览器检查", "浏览器已检查"),
+        "integration_checked": ("integration_checked", "integration checked", "集成检查", "集成已检查"),
+        "accepted": ("accepted", "已验收", "验收通过"),
+        "failed": ("failed", "失败", "未通过"),
+    }
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.stack: list[tuple[str, bool]] = []
+        self.active: list[dict[str, object]] = []
+        self.found: dict[tuple[str, str], str] = {}
+        self.duplicates: set[tuple[str, str]] = set()
+
+    @staticmethod
+    def _is_hidden(attributes: dict[str, str], parent_hidden: bool, tag: str) -> bool:
+        styles = re.sub(r"\s+", "", attributes.get("style", "").casefold())
+        classes = {item.casefold() for item in attributes.get("class", "").split()}
+        return (
+            parent_hidden
+            or tag in {"script", "style", "template"}
+            or "hidden" in attributes
+            or attributes.get("aria-hidden", "").casefold() == "true"
+            or bool(classes & {"hidden", "is-hidden", "visually-hidden", "sr-only"})
+            or "display:none" in styles
+            or "visibility:hidden" in styles
+            or "opacity:0" in styles
+        )
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = {str(key).casefold(): str(value or "") for key, value in attrs}
+        hidden = self._is_hidden(attributes, self.stack[-1][1] if self.stack else False, tag.casefold())
+        self.stack.append((tag.casefold(), hidden))
+        step = attributes.get("data-review-status-step", "").upper()
+        axis = attributes.get("data-review-status-axis", "").casefold()
+        value = attributes.get("data-review-status-value", "").casefold()
+        if (
+            not hidden
+            and re.fullmatch(r"STEP-[A-Z0-9-]+", step)
+            and axis in {"business", "verification"}
+            and value
+        ):
+            self.active.append({
+                "depth": len(self.stack), "step": step, "axis": axis,
+                "value": value, "text": [],
+            })
+        if tag.casefold() in self._VOID_TAGS:
+            self.handle_endtag(tag)
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self.handle_starttag(tag, attrs)
+        if tag.casefold() not in self._VOID_TAGS:
+            self.handle_endtag(tag)
+
+    def handle_data(self, data: str) -> None:
+        if self.stack and not self.stack[-1][1]:
+            for record in self.active:
+                record["text"].append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        closing = tag.casefold()
+        index = next((item for item in range(len(self.stack) - 1, -1, -1) if self.stack[item][0] == closing), None)
+        if index is None:
+            return
+        closing_depth = index + 1
+        remaining: list[dict[str, object]] = []
+        for record in self.active:
+            if int(record["depth"]) < closing_depth:
+                remaining.append(record)
+                continue
+            label = " ".join(str(item) for item in record["text"]).casefold()
+            value = str(record["value"])
+            aliases = self._LOCALIZED_LABELS.get(value, (value,))
+            if any(alias.casefold() in label for alias in aliases):
+                key = (str(record["step"]), str(record["axis"]))
+                if key in self.found:
+                    self.duplicates.add(key)
+                self.found[key] = value
+        self.active = remaining
+        self.stack = self.stack[:index]
+
+
+def _visible_review_statuses(raw: str) -> tuple[dict[tuple[str, str], str], set[tuple[str, str]]]:
+    parser = _ReviewStatusParser()
+    try:
+        parser.feed(raw)
+        parser.close()
+    except (UnicodeError, ValueError):
+        return {}, set()
+    return parser.found, parser.duplicates
 
 
 class _MetricBindingParser(HTMLParser):
@@ -202,6 +311,143 @@ def _prototype_unknown_contracts(raw: str) -> tuple[set[str], set[str]]:
         if all(re.search(pattern, body, re.I) for pattern in required_properties):
             complete.add(unknown_id)
     return bound, complete
+
+
+def _review_workspace_document(raw: str) -> tuple[dict[str, object] | None, str | None]:
+    """Read the single embedded review-workspace projection contract.
+
+    The JSON block is a projection index bound to the requirement baseline; it
+    is not a second source of business truth.  Keeping it embedded lets a
+    portable single-HTML prototype remain independently reviewable.
+    """
+    matches = re.findall(
+        r"<script\b(?=[^>]*\bid\s*=\s*['\"]review-workspace-manifest['\"])(?=[^>]*\btype\s*=\s*['\"]application/json['\"])[^>]*>([\s\S]*?)</script>",
+        raw,
+        re.I,
+    )
+    if not matches:
+        return None, "missing"
+    if len(matches) > 1:
+        return None, "duplicate"
+    try:
+        document = json.loads(matches[0])
+    except json.JSONDecodeError as exc:
+        return None, f"invalid JSON: line {exc.lineno}, column {exc.colno}: {exc.msg}"
+    if not isinstance(document, dict):
+        return None, "top level must be an object"
+    return document, None
+
+
+def _review_placeholder_paths(value: object, prefix: str = "") -> list[str]:
+    """Find obvious template filler without pretending to understand prose."""
+    failures: list[str] = []
+    if isinstance(value, dict):
+        for key, child in value.items():
+            failures.extend(_review_placeholder_paths(child, f"{prefix}.{key}" if prefix else str(key)))
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            failures.extend(_review_placeholder_paths(child, f"{prefix}[{index}]"))
+    elif isinstance(value, str):
+        text = value.strip()
+        if re.search(r"\{[^{}]+\}|(?<![A-Za-z0-9-])(?:TBD|TODO)(?![A-Za-z0-9-])|待补充|待完善|占位", text, re.I):
+            failures.append(prefix or "<root>")
+        elif re.fullmatch(r"(?:无|暂无|待定|N/?A|none|not applicable)", text, re.I):
+            failures.append(prefix or "<root>")
+    return failures
+
+
+class _ReviewLensParser(HTMLParser):
+    """Collect role-specific slot coverage from visible review templates."""
+
+    _VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.depth = 0
+        self.active_steps: list[dict[str, object]] = []
+        self.active: list[dict[str, object]] = []
+        self.slots: dict[str, set[str]] = {}
+        self.text: dict[str, list[str]] = {}
+        self.step_slots: dict[tuple[str, str], set[str]] = {}
+        self.step_text: dict[tuple[str, str], list[str]] = {}
+        self.step_applicability: dict[tuple[str, str], str] = {}
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        tag = tag.casefold()
+        attr_map = {str(key).casefold(): (value or "") for key, value in attrs}
+        if tag not in self._VOID_TAGS:
+            self.depth += 1
+        step = attr_map.get("data-review-step", "").strip().upper()
+        if step:
+            self.active_steps.append({"step": step, "tag": tag, "depth": self.depth})
+        role = attr_map.get("data-review-lens", "").strip().casefold()
+        if role:
+            active_step = str(self.active_steps[-1]["step"]) if self.active_steps else ""
+            self.active.append({"role": role, "step": active_step, "tag": tag, "depth": self.depth})
+            self.slots.setdefault(role, set())
+            self.text.setdefault(role, [])
+            if active_step:
+                self.step_slots.setdefault((active_step, role), set())
+                self.step_text.setdefault((active_step, role), [])
+                self.step_applicability[(active_step, role)] = attr_map.get(
+                    "data-review-applicability", ""
+                ).strip().casefold()
+        slot = attr_map.get("data-review-slot", "").strip().casefold()
+        if slot:
+            for record in self.active:
+                record_role = str(record["role"])
+                record_step = str(record.get("step", ""))
+                self.slots.setdefault(record_role, set()).add(slot)
+                if record_step:
+                    self.step_slots.setdefault((record_step, record_role), set()).add(slot)
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self.handle_starttag(tag, attrs)
+        self.handle_endtag(tag)
+
+    def handle_data(self, data: str) -> None:
+        if data.strip():
+            for record in self.active:
+                record_role = str(record["role"])
+                record_step = str(record.get("step", ""))
+                self.text.setdefault(record_role, []).append(data.strip())
+                if record_step:
+                    self.step_text.setdefault((record_step, record_role), []).append(data.strip())
+
+    def handle_endtag(self, tag: str) -> None:
+        tag = tag.casefold()
+        for index in range(len(self.active) - 1, -1, -1):
+            record = self.active[index]
+            if record["tag"] == tag and record["depth"] == self.depth:
+                self.active.pop(index)
+                break
+        for index in range(len(self.active_steps) - 1, -1, -1):
+            record = self.active_steps[index]
+            if record["tag"] == tag and record["depth"] == self.depth:
+                self.active_steps.pop(index)
+                break
+        if tag not in self._VOID_TAGS:
+            self.depth = max(0, self.depth - 1)
+
+
+def _review_lens_coverage(raw: str) -> tuple[
+    dict[str, set[str]], dict[str, str],
+    dict[tuple[str, str], set[str]], dict[tuple[str, str], str],
+    dict[tuple[str, str], str],
+]:
+    parser = _ReviewLensParser()
+    try:
+        parser.feed(raw)
+        parser.close()
+    except Exception:
+        return {}, {}, {}, {}, {}
+    return (
+        parser.slots,
+        {role: " ".join(parts).strip() for role, parts in parser.text.items()},
+        parser.step_slots,
+        {key: " ".join(parts).strip() for key, parts in parser.step_text.items()},
+        parser.step_applicability,
+    )
 
 
 def _handler_actions(scripts: str) -> set[str]:
@@ -527,7 +773,545 @@ class PrototypeChecks:
         review_surface = bool(
             re.search(r"\bdata-review-id\s*=|\bdata-review-role\s*=|\bclass\s*=\s*['\"][^'\"]*\breview-mode\b", tag_source, re.I)
             or re.search(r"\bdata-testid\s*=\s*['\"](?:region|drawer)-REVIEW-", tag_source, re.I)
+            or re.search(r"\bdata-review-workspace\s*=", tag_source, re.I)
+            or re.search(r"\bid\s*=\s*['\"]review-workspace-manifest['\"]", tag_source, re.I)
         )
+        review_workspace, review_workspace_error = _review_workspace_document(raw)
+        declared_review_markers: set[str] = set()
+        explicit_workspace = bool(re.search(r"\bdata-review-workspace\s*=", tag_source, re.I))
+        if review_surface and review_workspace is None:
+            if explicit_workspace or review_workspace_error not in {None, "missing"}:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-WORKSPACE-MANIFEST-INVALID", path,
+                    "评审工作台缺少唯一、可解析的内嵌 review-workspace-manifest",
+                    review_workspace_error or "review-workspace-manifest",
+                    affected_consumers=("product", "frontend", "backend", "qa"),
+                )
+            else:
+                # v5.4.6 and earlier review overlays remain inspectable in the
+                # prototype-only profile, but cannot be promoted through a
+                # combined handoff without migration to the v5.4.7 workspace.
+                self.review_workspace_legacy_paths.add(path.resolve())
+                self.add(
+                    "GAP", "PROTO-REVIEW-WORKSPACE-LEGACY", path,
+                    "检测到旧式评审叠加：可继续视检，但未形成旅程/单步聚焦/验收模式与同源绑定合同",
+                    affected_consumers=("product", "frontend", "backend", "qa"),
+                )
+        elif review_workspace is not None:
+            schema_errors = []
+            if REVIEW_WORKSPACE_SCHEMA.is_file():
+                schema = json.loads(REVIEW_WORKSPACE_SCHEMA.read_text(encoding="utf-8"))
+                schema_errors = sorted(
+                    Draft202012Validator(schema).iter_errors(review_workspace),
+                    key=lambda item: tuple(str(part) for part in item.path),
+                )
+                for schema_error in schema_errors:
+                    location = ".".join(str(part) for part in schema_error.path) or "<root>"
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-WORKSPACE-SCHEMA", path,
+                        schema_error.message, location,
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+            if not schema_errors:
+                self.review_workspace_contracts.append((path.resolve(), review_workspace))
+                workspace_id = str(review_workspace.get("workspace_id", ""))
+                declared_language = str(review_workspace.get("language", "")).casefold()
+                html_language_match = re.search(
+                    r"<html\b[^>]*\blang\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I,
+                )
+                html_language = html_language_match.group(1).casefold() if html_language_match else ""
+                if declared_language and declared_language != html_language:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-LANGUAGE-MISMATCH", path,
+                        "评审 manifest 的人类语言与 HTML lang 不一致，角色投影可能混入错误语言",
+                        f"{declared_language or 'missing'} != {html_language or 'missing'}",
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+                root_ids = set(re.findall(r"\bdata-review-workspace\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I))
+                if workspace_id not in root_ids:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-WORKSPACE-ROOT-MISMATCH", path,
+                        "内嵌评审合同没有绑定同名 data-review-workspace 根容器", workspace_id,
+                        affected_consumers=("frontend", "qa"),
+                    )
+
+                baseline = review_workspace.get("baseline") or {}
+                if isinstance(baseline, dict) and str(baseline.get("hash", "")) == "0" * 64:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-BASELINE-PLACEHOLDER", path,
+                        "评审工作台仍使用全零基线 hash，无法证明与 PRD 同源", workspace_id,
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    )
+                placeholder_paths = _review_placeholder_paths(review_workspace)
+                if placeholder_paths:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-WORKSPACE-PLACEHOLDER", path,
+                        "评审工作台索引仍含模板占位或无理由的不适用值",
+                        ", ".join(placeholder_paths[:8]),
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+
+                steps = {
+                    str(item.get("step_id", "")).upper(): item
+                    for item in review_workspace.get("steps", []) or []
+                    if isinstance(item, dict) and item.get("step_id")
+                }
+                step_ids = list(
+                    str(item.get("step_id", "")).upper()
+                    for item in review_workspace.get("steps", []) or []
+                    if isinstance(item, dict) and item.get("step_id")
+                )
+                if len(step_ids) != len(set(step_ids)):
+                    self.add("BLOCK", "PROTO-REVIEW-STEP-DUPLICATE", path, "评审工作台存在重复 STEP-*", workspace_id)
+                anchored_step_ids = [
+                    item.upper() for item in re.findall(
+                        r"\bdata-review-step\s*=\s*['\"](STEP-[A-Z0-9-]+)['\"]",
+                        tag_source, re.I,
+                    )
+                ]
+                if len(anchored_step_ids) != len(set(anchored_step_ids)):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-STEP-ANCHOR-DUPLICATE", path,
+                        "同一个 STEP-* 存在多个评审工作包根，切换与定位不再唯一", workspace_id,
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+                for missing in sorted(set(steps) - set(anchored_step_ids)):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-STEP-ANCHOR-MISSING", path,
+                        "manifest 中的 STEP-* 没有对应的人类工作包 DOM 锚点", missing,
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+                for extra in sorted(set(anchored_step_ids) - set(steps)):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-STEP-ANCHOR-ORPHAN", path,
+                        "HTML 中的 STEP-* 工作包不在评审 manifest 中", extra,
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+                visible_statuses, duplicate_statuses = _visible_review_statuses(raw)
+                for step_id, step in steps.items():
+                    expected_anchor = str(step.get("dom_anchor", ""))
+                    bound = any(
+                        re.search(rf"\bdata-review-step\s*=\s*['\"]{re.escape(step_id)}['\"]", tag, re.I)
+                        and re.search(rf"\bdata-testid\s*=\s*['\"]{re.escape(expected_anchor)}['\"]", tag, re.I)
+                        for tag in re.findall(r"<[A-Za-z][^>]*>", tag_source, re.S)
+                    )
+                    if not bound:
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-STEP-ANCHOR-MISMATCH", path,
+                            "STEP-* 的 data-review-step 与 manifest.dom_anchor 未绑定在同一根容器", step_id,
+                            affected_consumers=("frontend", "qa", "coding_agent"),
+                        )
+                    for axis, field in (
+                        ("business", "business_status"),
+                        ("verification", "verification_status"),
+                    ):
+                        expected_status = str(step.get(field, "")).casefold()
+                        visible_status = visible_statuses.get((step_id, axis))
+                        if (step_id, axis) in duplicate_statuses:
+                            self.add(
+                                "BLOCK", "PROTO-REVIEW-STATUS-AXIS-DUPLICATE", path,
+                                "同一 STEP 状态轴被重复投影；人类会同时看到多个可能冲突的结论",
+                                f"{step_id}/{axis}",
+                                affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                            )
+                        if visible_status is None:
+                            self.add(
+                                "BLOCK", "PROTO-REVIEW-STATUS-AXIS-HIDDEN", path,
+                                "业务语义状态与验证证据状态必须在人类 STEP 工作包中分别可见",
+                                f"{step_id}/{axis}",
+                                affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                            )
+                        elif visible_status != expected_status:
+                            self.add(
+                                "BLOCK", "PROTO-REVIEW-STATUS-AXIS-DRIFT", path,
+                                "人类可见状态与 review manifest 的状态轴不一致",
+                                f"{step_id}/{axis}: {visible_status} != {expected_status}",
+                                affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                            )
+                    source_refs = {str(item).upper() for item in step.get("source_refs", []) or []}
+                    if str(step.get("business_status", "")).casefold() == "confirmed" and not any(
+                        item.startswith(("SRC-", "DEC-")) for item in source_refs
+                    ):
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-CONFIRMED-NO-EVIDENCE", path,
+                            "confirmed STEP-* 至少需要一个 SRC-* 或 DEC-*，不能由原型现状或模型建议自证确认",
+                            step_id,
+                            affected_consumers=("product", "backend", "qa", "coding_agent"),
+                        )
+                    verification_status = str(step.get("verification_status", "")).casefold()
+                    evidence_refs = {
+                        str(item).upper() for item in step.get("evidence_refs", []) or []
+                    }
+                    if verification_status != "not_run" and not any(
+                        item.startswith(("EVD-", "ARUN-")) for item in evidence_refs
+                    ):
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-VERIFICATION-NO-EVIDENCE", path,
+                            "STEP-* 声明已检查、验收或失败，但没有 EVD-* / ARUN-* 运行证据",
+                            step_id,
+                            affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                        )
+                    declared_review_markers.update(
+                        str(item).upper() for item in step.get("marker_refs", []) or []
+                    )
+                journeys = review_workspace.get("journeys", []) or []
+                journey_ids = [
+                    str(item.get("journey_id", "")).upper()
+                    for item in journeys if isinstance(item, dict) and item.get("journey_id")
+                ]
+                if len(journey_ids) != len(set(journey_ids)):
+                    self.add("BLOCK", "PROTO-REVIEW-JOURNEY-DUPLICATE", path, "评审工作台存在重复 FLOW-* 旅程", workspace_id)
+                journey_steps: set[str] = set()
+                for journey in journeys:
+                    if not isinstance(journey, dict):
+                        continue
+                    refs = {str(item).upper() for item in journey.get("step_refs", []) or []}
+                    journey_steps.update(refs)
+                    for missing in sorted(refs - set(steps)):
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-JOURNEY-ORPHAN-STEP", path,
+                            "旅程引用了不存在的 STEP-*", f"{journey.get('journey_id')}->{missing}",
+                            affected_consumers=("product", "frontend", "backend", "qa"),
+                        )
+                    model_refs = journey.get("model_refs") or {}
+                    if isinstance(model_refs, dict):
+                        journey_id = str(journey.get("journey_id", "")).upper()
+                        flow_refs = {str(item).upper() for item in model_refs.get("flow_refs", []) or []}
+                        state_refs = {str(item).upper() for item in model_refs.get("state_machine_refs", []) or []}
+                        data_refs = {str(item).upper() for item in model_refs.get("data_flow_refs", []) or []}
+                        not_applicable = {
+                            str(item).casefold() for item in model_refs.get("not_applicable", []) or []
+                        }
+                        if journey_id and journey_id not in flow_refs:
+                            self.add(
+                                "BLOCK", "PROTO-REVIEW-FLOW-MODEL-MISMATCH", path,
+                                "旅程没有把自身 FLOW-* 登记为责任交接模型", journey_id,
+                                affected_consumers=("product", "backend", "qa"),
+                            )
+                        for dimension, values in (
+                            ("state_machine", state_refs), ("data_flow", data_refs),
+                        ):
+                            if not values and dimension not in not_applicable:
+                                self.add(
+                                    "BLOCK", "PROTO-REVIEW-MODEL-COVERAGE-AMBIGUOUS", path,
+                                    "状态机/数据流为空时必须显式说明不适用，不能把遗漏伪装成无需求",
+                                    f"{journey_id}/{dimension}",
+                                    affected_consumers=("product", "backend", "qa", "coding_agent"),
+                                )
+                            if values and dimension in not_applicable:
+                                self.add(
+                                    "BLOCK", "PROTO-REVIEW-MODEL-COVERAGE-CONFLICT", path,
+                                    "同一旅程模型既有引用又声明不适用", f"{journey_id}/{dimension}",
+                                    affected_consumers=("product", "backend", "qa", "coding_agent"),
+                                )
+                visible_models: set[tuple[str, str]] = set()
+                visible_model_na: set[str] = set()
+                for tag in re.findall(r"<[A-Za-z][^>]*>", tag_source, re.S):
+                    kind_match = re.search(
+                        r"\bdata-review-model\s*=\s*['\"](flow|state_machine|data_flow)['\"]", tag, re.I,
+                    )
+                    ref_match = re.search(r"\bdata-review-model-ref\s*=\s*['\"]([^'\"]+)['\"]", tag, re.I)
+                    if kind_match and ref_match:
+                        visible_models.add((kind_match.group(1).casefold(), ref_match.group(1).upper()))
+                    na_match = re.search(
+                        r"\bdata-review-model-na\s*=\s*['\"](state_machine|data_flow)['\"]", tag, re.I,
+                    )
+                    if na_match:
+                        visible_model_na.add(na_match.group(1).casefold())
+                expected_models: set[tuple[str, str]] = set()
+                expected_model_na: set[str] = set()
+                for journey in journeys:
+                    if not isinstance(journey, dict):
+                        continue
+                    model_refs = journey.get("model_refs") or {}
+                    if not isinstance(model_refs, dict):
+                        continue
+                    expected_models.update(("flow", str(item).upper()) for item in model_refs.get("flow_refs", []) or [])
+                    expected_models.update(("state_machine", str(item).upper()) for item in model_refs.get("state_machine_refs", []) or [])
+                    expected_models.update(("data_flow", str(item).upper()) for item in model_refs.get("data_flow_refs", []) or [])
+                    expected_model_na.update(str(item).casefold() for item in model_refs.get("not_applicable", []) or [])
+                for missing in sorted(expected_models - visible_models):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-MODEL-NOT-VISIBLE", path,
+                        "FLOW/状态机/数据流引用未进入人类可见评审工作台",
+                        f"{missing[0]}:{missing[1]}",
+                        affected_consumers=("product", "backend", "qa"), related_refs=(missing[1],),
+                    )
+                for missing in sorted(expected_model_na - visible_model_na):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-MODEL-NA-HIDDEN", path,
+                        "声明不适用的状态机/数据流没有向人类显示原因",
+                        missing, affected_consumers=("product", "backend", "qa"),
+                    )
+
+                for missing in sorted(set(steps) - journey_steps):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-STEP-NOT-IN-JOURNEY", path,
+                        "STEP-* 未归入任何可走读旅程", missing,
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+
+                incoming = Counter()
+                outgoing = Counter()
+                edge_ids: list[str] = []
+                for edge in review_workspace.get("edges", []) or []:
+                    if not isinstance(edge, dict):
+                        continue
+                    edge_id = str(edge.get("edge_id", "")).upper()
+                    edge_ids.append(edge_id)
+                    kind = str(edge.get("kind", "")).lower()
+                    source = str(edge.get("from_step_ref", "")).upper() if edge.get("from_step_ref") else None
+                    target = str(edge.get("to_step_ref", "")).upper() if edge.get("to_step_ref") else None
+                    if source and source not in steps:
+                        self.add("BLOCK", "PROTO-REVIEW-EDGE-ORPHAN", path, "交接边起点不存在", f"{edge_id}->{source}")
+                    if target and target not in steps:
+                        self.add("BLOCK", "PROTO-REVIEW-EDGE-ORPHAN", path, "交接边终点不存在", f"{edge_id}->{target}")
+                    if kind == "start" and (source is not None or target is None):
+                        self.add("BLOCK", "PROTO-REVIEW-EDGE-SHAPE", path, "start 边必须从旅程外进入一个 STEP-*", edge_id)
+                    elif kind == "finish" and (source is None or target is not None):
+                        self.add("BLOCK", "PROTO-REVIEW-EDGE-SHAPE", path, "finish 边必须从 STEP-* 结束到旅程外", edge_id)
+                    elif kind not in {"start", "finish"} and (source is None or target is None):
+                        self.add("BLOCK", "PROTO-REVIEW-EDGE-SHAPE", path, "分支/并行/退回/异常边必须声明两端 STEP-*", edge_id)
+                    if kind in {"return", "error", "compensate"} and not (edge.get("recovery_refs") or []):
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-EDGE-NO-RECOVERY", path,
+                            "退回/异常/补偿边必须引用恢复、重新进入或接管合同", edge_id,
+                            affected_consumers=("product", "backend", "qa", "coding_agent"),
+                        )
+                    if source in steps:
+                        outgoing[source] += 1
+                    if target in steps:
+                        incoming[target] += 1
+                if len(edge_ids) != len(set(edge_ids)):
+                    self.add("BLOCK", "PROTO-REVIEW-EDGE-DUPLICATE", path, "评审工作台存在重复 EDGE-*", workspace_id)
+                for step_id in sorted(steps):
+                    if not incoming[step_id] or not outgoing[step_id]:
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-STEP-DISCONNECTED", path,
+                            "STEP-* 缺少进入或离开交接边，无法说明上游/下游/退回", step_id,
+                            affected_consumers=("product", "backend", "qa"),
+                        )
+
+                scenarios = {
+                    str(item.get("scenario_id", "")).upper(): item
+                    for item in review_workspace.get("scenarios", []) or []
+                    if isinstance(item, dict) and item.get("scenario_id")
+                }
+                scenario_ids = [
+                    str(item.get("scenario_id", "")).upper()
+                    for item in review_workspace.get("scenarios", []) or []
+                    if isinstance(item, dict) and item.get("scenario_id")
+                ]
+                if len(scenario_ids) != len(set(scenario_ids)):
+                    self.add("BLOCK", "PROTO-REVIEW-SCENARIO-DUPLICATE", path, "评审工作台存在重复 TEST-* 场景", workspace_id)
+                covered_steps: set[str] = set()
+                scenario_coverage_by_step: dict[str, set[str]] = defaultdict(set)
+                for scenario_id, scenario in scenarios.items():
+                    refs = {str(item).upper() for item in scenario.get("covered_step_refs", []) or []}
+                    covered_steps.update(refs)
+                    coverage = {str(item).casefold() for item in scenario.get("coverage", []) or []}
+                    for step_ref in refs:
+                        scenario_coverage_by_step[step_ref].update(coverage)
+                    for missing in sorted(refs - set(steps)):
+                        self.add("BLOCK", "PROTO-REVIEW-SCENARIO-ORPHAN-STEP", path, "测试场景覆盖了不存在的 STEP-*", f"{scenario_id}->{missing}")
+                visible_scenarios: dict[str, str] = {}
+                for tag in re.findall(r"<[A-Za-z][^>]*>", tag_source, re.S):
+                    scenario_match = re.search(
+                        r"\bdata-review-scenario\s*=\s*['\"](TEST-[A-Z0-9-]+)['\"]", tag, re.I,
+                    )
+                    if not scenario_match:
+                        continue
+                    acceptance_match = re.search(
+                        r"\bdata-review-acceptance-ref\s*=\s*['\"](AC-[A-Z0-9-]+)['\"]", tag, re.I,
+                    )
+                    visible_scenarios[scenario_match.group(1).upper()] = (
+                        acceptance_match.group(1).upper() if acceptance_match else ""
+                    )
+                for scenario_id, scenario in scenarios.items():
+                    expected_acceptance = str(scenario.get("acceptance_ref", "")).upper()
+                    if visible_scenarios.get(scenario_id) != expected_acceptance:
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-SCENARIO-NOT-VISIBLE", path,
+                            "TEST-* 场景及其 AC-* 未形成可见、可定位的验收卡",
+                            f"{scenario_id}->{expected_acceptance}",
+                            affected_consumers=("product", "qa", "coding_agent"),
+                            related_refs=(scenario_id, expected_acceptance),
+                        )
+                for missing in sorted(set(steps) - covered_steps):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-STEP-NO-SCENARIO", path,
+                        "STEP-* 没有任何可定位的正反/边界验收场景", missing,
+                        affected_consumers=("product", "qa"),
+                    )
+                for step_id, step in steps.items():
+                    required_risks = {
+                        str(item).casefold() for item in step.get("risk_dimensions", []) or []
+                    }
+                    missing_risks = sorted(required_risks - scenario_coverage_by_step.get(step_id, set()))
+                    if missing_risks:
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-RISK-NOT-TESTED", path,
+                            "STEP-* 已声明风险维度，但关联 TEST/AC 未覆盖",
+                            f"{step_id}: {', '.join(missing_risks)}",
+                            affected_consumers=("product", "qa", "coding_agent"),
+                            related_refs=(step_id,),
+                        )
+                declared_unknowns = {str(item).upper() for item in review_workspace.get("unknown_refs", []) or []}
+                referenced_unknowns: set[str] = set()
+                for step_id, step in steps.items():
+                    step_unknowns: set[str] = set()
+                    role_packets = step.get("role_packets") or {}
+                    if isinstance(role_packets, dict):
+                        qa_packet = role_packets.get("qa") or {}
+                        if isinstance(qa_packet, dict):
+                            qa_refs = {str(item).upper() for item in qa_packet.get("scenario_refs", []) or []}
+                            for missing in sorted(qa_refs - set(scenarios)):
+                                self.add("BLOCK", "PROTO-REVIEW-QA-ORPHAN-SCENARIO", path, "测试镜头引用了不存在的 TEST-*", f"{step_id}->{missing}")
+                        for packet in role_packets.values():
+                            if isinstance(packet, dict):
+                                step_unknowns.update(str(item).upper() for item in packet.get("gap_refs", []) or [])
+                    step_unknowns.update(
+                        str(item).upper() for item in step.get("contract_refs", []) or []
+                        if str(item).upper().startswith("UNK-")
+                    )
+                    referenced_unknowns.update(step_unknowns)
+                    if str(step.get("business_status", "")) != "confirmed" and not step_unknowns:
+                        self.add("BLOCK", "PROTO-REVIEW-UNKNOWN-STEP-NO-GAP", path, "未确认的 STEP-* 未绑定可关闭 UNK-*", step_id)
+                for missing in sorted(referenced_unknowns - declared_unknowns):
+                    self.add("BLOCK", "PROTO-REVIEW-UNKNOWN-NOT-DECLARED", path, "角色工作包引用的 UNK-* 未进入工作台未知项索引", missing)
+
+                handoff = review_workspace.get("machine_handoff") or {}
+                if isinstance(handoff, dict):
+                    handoff_gap_refs = {str(item).upper() for item in handoff.get("gap_refs", []) or []}
+                    referenced_unknowns.update(handoff_gap_refs)
+                    for missing in sorted(handoff_gap_refs - declared_unknowns):
+                        self.add("BLOCK", "PROTO-REVIEW-HANDOFF-UNACCOUNTED", path, "Coding Agent handoff 的阻断项未进入工作台未知项索引", missing)
+                bound_unknowns, _complete_bound_unknowns = _prototype_unknown_contracts(raw)
+                for missing in sorted(declared_unknowns - bound_unknowns):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-UNKNOWN-NOT-VISIBLE", path,
+                        "评审 manifest 声明的 UNK-* 没有可见且可关闭的 data-unk/注册表合同", missing,
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    )
+                for orphan in sorted(declared_unknowns - referenced_unknowns):
+                    self.add("BLOCK", "PROTO-REVIEW-UNKNOWN-ORPHAN", path, "工作台未知项没有绑定 STEP 或 machine handoff", orphan)
+
+                modes = {item.casefold() for item in re.findall(r"\bdata-review-mode\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)}
+                required_modes = {"orientation", "focus", "page", "acceptance"}
+                if len(steps) > 1:
+                    required_modes.add("journey")
+                missing_modes = sorted(required_modes - modes)
+                if missing_modes:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-MODE-MISSING", path,
+                        "评审工作台缺少独立的信息模式，仍会退化成长列表/单抽屉",
+                        ", ".join(missing_modes),
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+                mode_targets = {item.casefold() for item in re.findall(r"\bdata-review-mode-target\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)}
+                if not required_modes.issubset(mode_targets):
+                    self.add("BLOCK", "PROTO-REVIEW-MODE-NOT-NAVIGABLE", path, "评审模式没有为每个必需视图提供可达切换控件", ", ".join(sorted(required_modes - mode_targets)))
+                for attribute in ("data-review-progress", "data-review-current-step", "data-review-scenario", "data-review-compact-view"):
+                    if not re.search(rf"\b{re.escape(attribute)}(?:\s*=|\s|>)", tag_source, re.I):
+                        self.add("BLOCK", "PROTO-REVIEW-WORKSPACE-SURFACE-MISSING", path, "评审工作台缺少必要的任务导航表面", attribute)
+                root_tag = next((tag for tag in re.findall(r"<[A-Za-z][^>]*\bdata-review-workspace\s*=\s*['\"][^'\"]+['\"][^>]*>", tag_source, re.I | re.S)), "")
+                if not re.search(r"\bdata-review-compact\s*=\s*['\"]fullscreen-switcher['\"]", root_tag, re.I):
+                    self.add("BLOCK", "PROTO-REVIEW-COMPACT-OVERLAY", path, "窄屏必须在产品/评审之间全屏切换，不能用宽抽屉遮住产品", workspace_id)
+                if not re.search(r"\bdata-review-marker-policy\s*=\s*['\"](?:selected-step-only|current-page-on-demand)['\"]", root_tag, re.I):
+                    self.add("BLOCK", "PROTO-REVIEW-MARKER-NOISE", path, "编号必须只显示当前 STEP 或按需显示当前页，不能默认铺满全站", workspace_id)
+                default_role = str((review_workspace.get("layout") or {}).get("default_role", ""))
+                if not re.search(rf"\bdata-review-active-role\s*=\s*['\"]{re.escape(default_role)}['\"]", root_tag, re.I):
+                    self.add("BLOCK", "PROTO-REVIEW-LENS-NOT-INTERACTIVE", path, "评审根没有绑定 manifest 默认角色镜头", default_role or workspace_id)
+                reads_mode = bool(re.search(r"dataset\.reviewModeTarget|getAttribute\s*\(\s*['\"]data-review-mode-target", scripts, re.I))
+                writes_mode = bool(re.search(r"dataset\.reviewActiveMode\s*=|setAttribute\s*\(\s*['\"]data-review-active-mode", scripts, re.I))
+                if not (reads_mode and writes_mode):
+                    self.add("BLOCK", "PROTO-REVIEW-MODE-NOT-INTERACTIVE", path, "评审模式切换缺少可静态发现的读取与状态写入", workspace_id)
+                reads_role = bool(re.search(r"dataset\.reviewRole|getAttribute\s*\(\s*['\"]data-review-role", scripts, re.I))
+                writes_role = bool(re.search(r"dataset\.reviewActiveRole\s*=|setAttribute\s*\(\s*['\"]data-review-active-role", scripts, re.I))
+                if not (reads_role and writes_role):
+                    self.add("BLOCK", "PROTO-REVIEW-LENS-NOT-INTERACTIVE", path, "角色镜头切换缺少可静态发现的读取与状态写入", workspace_id)
+
+                (
+                    _lens_slots, _lens_text, step_lens_slots, step_lens_text,
+                    step_lens_applicability,
+                ) = _review_lens_coverage(raw)
+                expected_slots = {
+                    "product": {"purpose", "scope_and_boundary", "decision_and_source", "business_result"},
+                    "frontend": {"entry_and_visibility", "surface_and_fields", "interaction_and_ui_states", "visible_result"},
+                    "backend": {"authority_and_identity", "input_output_and_validation", "guards_and_state_effects", "side_effects_and_audit", "failure_recovery"},
+                    "qa": {"preconditions_and_fixture", "positive_and_negative", "boundary_and_permission", "visible_and_domain_result", "evidence"},
+                }
+                for step_id in sorted(steps):
+                    manifest_packets = steps[step_id].get("role_packets") or {}
+                    for role, required_slots in expected_slots.items():
+                        key = (step_id, role)
+                        packet = manifest_packets.get(role) if isinstance(manifest_packets, dict) else {}
+                        packet = packet if isinstance(packet, dict) else {}
+                        applicability = str(packet.get("applicability", "")).casefold()
+                        dom_applicability = step_lens_applicability.get(key, "")
+                        if applicability != dom_applicability:
+                            self.add(
+                                "BLOCK", "PROTO-REVIEW-ROLE-APPLICABILITY-MISMATCH", path,
+                                "角色是否受影响的 manifest 与可见工作包不一致",
+                                f"{step_id}/{role}: {applicability or 'missing'} != {dom_applicability or 'missing'}",
+                                affected_consumers=(role,), related_refs=(step_id,),
+                            )
+                        if applicability == "not_affected":
+                            if step_lens_slots.get(key, set()):
+                                self.add(
+                                    "BLOCK", "PROTO-REVIEW-NOT-AFFECTED-HAS-CONTRACT", path,
+                                    "标为不受影响的角色仍填充实施槽位，会制造无关负担或第二真相",
+                                    f"{step_id}/{role}", affected_consumers=(role,), related_refs=(step_id,),
+                                )
+                            role_text = step_lens_text.get(key, "")
+                            reason = str(packet.get("not_affected_reason", "") or "")
+                            if not role_text or reason not in role_text:
+                                self.add(
+                                    "BLOCK", "PROTO-REVIEW-NOT-AFFECTED-REASON-HIDDEN", path,
+                                    "不受影响原因必须在人类工作包中可见，不能只藏在 manifest",
+                                    f"{step_id}/{role}", affected_consumers=(role,), related_refs=(step_id,),
+                                )
+                            continue
+                        missing_slots = sorted(required_slots - step_lens_slots.get(key, set()))
+                        if missing_slots:
+                            self.add(
+                                "BLOCK", "PROTO-REVIEW-ROLE-PACKET-INCOMPLETE", path,
+                                "每个 STEP-* 的角色镜头都必须形成可独立执行的工作包",
+                                f"{step_id}/{role}: {', '.join(missing_slots)}",
+                                affected_consumers=(role,),
+                                related_refs=(step_id,),
+                            )
+                        manifest_slots = {
+                            str(item).casefold() for item in packet.get("slot_coverage", []) or []
+                        }
+                        if manifest_slots != step_lens_slots.get(key, set()):
+                            self.add(
+                                "BLOCK", "PROTO-REVIEW-ROLE-SLOT-DRIFT", path,
+                                "角色槽位清单与可见 DOM 投影不一致",
+                                f"{step_id}/{role}", affected_consumers=(role,), related_refs=(step_id,),
+                            )
+                        role_text = step_lens_text.get(key, "")
+                        visible_role_refs = {
+                            item.upper() for item in re.findall(
+                                r"\b(?:SRC|DEC|REQ|ROLE|FLOW|STEP|VIEW|REG|ACT|UIACT|ENT|FLD|METRIC|RULE|STM|STATE|API|EVT|INT|AC|TEST|EVD|UNK|MOD|XCT|EDGE)-[A-Z0-9-]+\b",
+                                role_text, re.I,
+                            )
+                        }
+                        packet_refs = {str(item).upper() for item in packet.get("contract_refs", []) or []}
+                        hidden_refs = sorted(packet_refs - visible_role_refs)
+                        if hidden_refs:
+                            self.add(
+                                "BLOCK", "PROTO-REVIEW-CONTRACT-REF-HIDDEN", path,
+                                "角色工作包摘要没有显示其权威合同引用，接收者无法回到规则/AC",
+                                f"{step_id}/{role}: {', '.join(hidden_refs[:8])}",
+                                affected_consumers=(role,), related_refs=tuple(hidden_refs[:50]),
+                            )
+                        if not role_text or re.search(r"\{[^{}]+\}|\b(?:TBD|TODO)\b|待补充|待完善", role_text, re.I):
+                            self.add(
+                                "BLOCK", "PROTO-REVIEW-ROLE-PACKET-PLACEHOLDER", path,
+                                "STEP-* 的角色工作包为空或仍含模板占位", f"{step_id}/{role}",
+                                affected_consumers=(role,), related_refs=(step_id,),
+                            )
         prototype_unknowns, complete_unknowns = _prototype_unknown_contracts(raw)
         incomplete_unknowns = sorted(prototype_unknowns - complete_unknowns)
         if incomplete_unknowns:
@@ -539,24 +1323,64 @@ class PrototypeChecks:
                 affected_consumers=("product", "backend", "qa", "coding_agent", "customer_acceptor"),
                 related_refs=tuple(incomplete_unknowns[:50]),
             )
+        conflicting_unknowns: set[str] = set()
+        for tag in re.findall(r"<[A-Za-z][^>]*\bdata-unk\s*=\s*['\"][^'\"]+['\"][^>]*>", tag_source, re.I | re.S):
+            unknown_match = re.search(r"\bdata-unk\s*=\s*['\"](UNK-[A-Z0-9-]+)['\"]", tag, re.I)
+            if unknown_match and re.search(
+                r"\bdata-(?:metric|review|contract|decision)-status\s*=\s*['\"](?:confirmed|closed|resolved|decided)['\"]",
+                tag, re.I,
+            ):
+                conflicting_unknowns.add(unknown_match.group(1).upper())
+        for unknown_id in sorted(conflicting_unknowns):
+            self.add(
+                "BLOCK", "PROTO-UNKNOWN-CONFIRMED-CONFLICT", path,
+                "同一原型对象同时标为已确认和未知，评审者无法判断是否可实施", unknown_id,
+                affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                related_refs=(unknown_id,),
+            )
         if review_surface and level in {"L2", "L3", "L4"}:
-            review_ids = re.findall(r"\bdata-review-id\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)
-            target_ids = set(re.findall(r"\bdata-review-target\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I))
-            if not review_ids:
+            review_ids = [
+                item.upper() for item in re.findall(
+                    r"\bdata-review-id\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I
+                )
+            ]
+            target_ids = [
+                item.upper() for item in re.findall(
+                    r"\bdata-review-target\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I
+                )
+            ]
+            if review_workspace is not None:
+                actual_markers = set(review_ids) | set(target_ids)
+                for marker in sorted(actual_markers - declared_review_markers):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-MARKER-NOT-DECLARED", path,
+                        "页面编号/说明卡不在当前 STEP 的 marker_refs 中，会产生跨页噪声或漂移", marker,
+                        affected_consumers=("product", "frontend", "qa", "coding_agent"),
+                    )
+                for marker in sorted(declared_review_markers):
+                    if Counter(review_ids)[marker] != 1 or Counter(target_ids)[marker] != 1:
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-LINKAGE-MISSING", path,
+                            "每个 marker_ref 必须恰好有一个产品落点和一个说明卡，支持双向定位",
+                            marker,
+                            affected_consumers=("product", "frontend", "qa", "coding_agent"),
+                        )
+            elif not review_ids:
                 self.add(
                     "BLOCK", "PROTO-REVIEW-LINKAGE-MISSING", path,
-                    "评审态没有为左侧编号和右侧说明建立共享 data-review-id",
+                    "旧式评审态没有为左侧编号和右侧说明建立共享 data-review-id",
                     affected_consumers=("product", "frontend", "qa", "coding_agent"),
                 )
             else:
                 for review_id, count in sorted(Counter(review_ids).items()):
-                    if count < 2 and review_id not in target_ids:
+                    if count < 2 and review_id not in set(target_ids):
                         self.add(
                             "BLOCK", "PROTO-REVIEW-LINKAGE-MISSING", path,
                             "评审编号没有对应的右侧说明卡，或说明卡无法反向定位编号",
                             review_id,
                             affected_consumers=("product", "frontend", "qa", "coding_agent"),
                         )
+            if review_ids and (review_workspace is None or declared_review_markers):
                 reads_review_id = bool(re.search(r"dataset\.reviewId|getAttribute\s*\(\s*['\"]data-review-id|closest\s*\(\s*['\"]\[data-review-id", scripts, re.I))
                 writes_selection = bool(re.search(r"aria-current|dataset\.reviewSelected|classList\.(?:add|remove|toggle)\s*\(\s*['\"](?:active|selected|is-active)", scripts, re.I))
                 initial_selection = bool(re.search(r"\baria-current\s*=\s*['\"]true['\"]", tag_source, re.I))
@@ -626,12 +1450,12 @@ class PrototypeChecks:
                 affected_consumers=("frontend", "qa", "coding_agent"),
                 related_refs=tuple(item.upper() for item in script_action_candidates[:50]),
             )
-        if level in {"L2", "L3", "L4"} and re.search(
-            r"(?:setAttribute\s*\(\s*['\"]data-action|dataset\.action\s*=)", scripts, re.I
-        ):
+        _literal_runtime_actions, unsafe_runtime_assignments = inspect_runtime_action_assignments(scripts)
+        if level in {"L2", "L3", "L4"} and unsafe_runtime_assignments:
             self.add(
                 "BLOCK", "PROTO-RUNTIME-ACTION-RETROFIT", path,
                 "data-action 必须在视图模板源码中可静态枚举，不能在运行时补挂",
+                unsafe_runtime_assignments[0],
             )
         if level in {"L3", "L4"}:
             metric_like_tags = [

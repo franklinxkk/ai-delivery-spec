@@ -37,8 +37,38 @@ items:
     source_ref: SRC-LEGACY-APP-001
     source_location: "app/order/list.html#export"
     classification: inferred
+    core_behavior: true
     disposition: rebuild_interaction
     review_batch_ref: RBATCH-CHECKOUT-001   # inferred 项必须可归入确认批次
+  - id: INV-HANDLER-ORDER-EXPORT
+    type: handler
+    source_ref: SRC-LEGACY-APP-001
+    source_location: "app/order/export.js#handleExport"
+    classification: confirmed
+  - id: INV-OBJ-EXPORT-FILE
+    type: object
+    source_ref: SRC-LEGACY-APP-001
+    source_location: "app/order/export.js#result"
+    classification: inferred
+    review_batch_ref: RBATCH-CHECKOUT-001
+  - id: INV-STATE-EXPORT-READY
+    type: state
+    source_ref: SRC-LEGACY-APP-001
+    source_location: "app/order/export.js#ready"
+    classification: inferred
+    review_batch_ref: RBATCH-CHECKOUT-001
+  - id: INV-IDENTITY-EXPORT-ID
+    type: identity
+    source_ref: SRC-LEGACY-APP-001
+    source_location: "app/order/export.js#exportId"
+    classification: inferred
+    review_batch_ref: RBATCH-CHECKOUT-001
+  - id: INV-GUARD-ORDER-EXPORT
+    type: guard
+    source_ref: SRC-LEGACY-APP-001
+    source_location: "app/order/export.js#canExport"
+    classification: inferred
+    review_batch_ref: RBATCH-CHECKOUT-001
   - id: INV-STATE-ORDER-ARCHIVED
     type: state
     source_ref: SRC-LEGACY-APP-001
@@ -48,6 +78,67 @@ items:
     # 核心未知项必须登记 P0 UNK-*、owner 和 blocks_stage
     unknown:
       id: UNK-ORDER-ARCHIVED-001
+      priority: P0
+      owner: "{责任人}"
+      blocks_stage: baseline
+
+# 只为本轮必须走通的关键存量链声明；旧台账可暂时省略，但有 core action/handler 时门禁会返回 GAP。
+# 一旦声明，必须逐链盘点 action → handler/系统处理 → 输出对象/状态/版本/身份 → 下一入口/守卫，
+# 并显式审计 failure / return / retry / compensation。这里记录“观察到什么”，不决定目标状态机。
+critical_chains:
+  - id: INV-CHAIN-ORDER-EXPORT
+    title: "订单导出到结果领取"
+    source_ref: SRC-LEGACY-APP-001
+    source_location: "app/order/list.html#export"
+    assessment_status: assessed   # in_progress | assessed；assessed 也可得出 broken/unknown
+    links:
+      - id: INV-LINK-ORDER-EXPORT
+        action_ref: INV-ACT-ORDER-EXPORT
+        processing_refs: [INV-HANDLER-ORDER-EXPORT]
+        outputs:
+          objects: {status: observed, refs: [INV-OBJ-EXPORT-FILE]}
+          states: {status: observed, refs: [INV-STATE-EXPORT-READY]}
+          versions: {status: not_applicable, refs: [], note: "源处理器未观察到版本语义"}
+          identities: {status: observed, refs: [INV-IDENTITY-EXPORT-ID]}
+        next_entry: {status: unknown, refs: [], note: "源码未发现结果领取入口"}
+        next_guard: {status: unknown, refs: [], note: "下一入口未知，守卫无法确认"}
+        reachability: unknown      # reachable | broken | unknown | terminal
+        source_ref: SRC-LEGACY-APP-001
+        source_location: "app/order/export.js#handleExport"
+        break_refs: [INV-BREAK-ORDER-EXPORT-NEXT]
+    recovery_paths:
+      failure:
+        status: observed
+        entry_refs: [INV-VIEW-ORDER-LIST]
+        guard_refs: [INV-GUARD-ORDER-EXPORT]
+        outcome_refs: []
+        break_refs: []
+        source_ref: SRC-LEGACY-APP-001
+        source_location: "app/order/export.js#onError"
+      return: {status: not_applicable, entry_refs: [], guard_refs: [], outcome_refs: [], break_refs: [], note: "源流程无独立退回动作"}
+      retry:
+        status: observed
+        entry_refs: [INV-VIEW-ORDER-LIST]
+        guard_refs: [INV-GUARD-ORDER-EXPORT]
+        outcome_refs: []
+        break_refs: []
+        source_ref: SRC-LEGACY-APP-001
+        source_location: "app/order/list.html#export"
+      compensation: {status: not_applicable, entry_refs: [], guard_refs: [], outcome_refs: [], break_refs: [], note: "源处理器未观察到跨对象写入"}
+    break_refs: [INV-BREAK-ORDER-EXPORT-NEXT]
+
+# 只有所有 declared chain 均已证据化评估且没有 missing/unknown/broken 时才允许为空。
+reachability_breaks:
+  - id: INV-BREAK-ORDER-EXPORT-NEXT
+    chain_ref: INV-CHAIN-ORDER-EXPORT
+    link_ref: INV-LINK-ORDER-EXPORT
+    path_kind: next_entry
+    classification: unknown       # unknown | defect_candidate；仍只是盘点结论，不是目标需求
+    source_ref: SRC-LEGACY-APP-001
+    source_location: "app/order/export.js#handleExport"
+    description: "导出完成后没有观察到用户可继续领取结果的入口及守卫"
+    unknown:
+      id: UNK-ORDER-EXPORT-NEXT
       priority: P0
       owner: "{责任人}"
       blocks_stage: baseline

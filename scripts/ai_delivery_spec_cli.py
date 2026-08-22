@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import shutil
@@ -11,7 +12,7 @@ import subprocess
 import sys
 import zipfile
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from xml.etree import ElementTree as ET
 
 try:
@@ -63,6 +64,106 @@ def current_version() -> str:
     text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
     match = re.search(r"AI Delivery Spec\s+(\d+\.\d+\.\d+)", text)
     return match.group(1) if match else "unknown"
+
+
+def validate_runtime_manifest(root: Path, expected_skill_version: str | None = None) -> list[str]:
+    """Validate the manifest contract and its closed set of runtime files."""
+    manifest_path = root / "runtime-manifest.json"
+    if not manifest_path.is_file():
+        return ["runtime-manifest.json is missing"]
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        return [f"runtime manifest cannot be verified: {exc}"]
+    if not isinstance(manifest, dict):
+        return ["runtime manifest root must be an object"]
+
+    failures: list[str] = []
+    required = {"schema_version", "skill_version", "source_commit", "source_worktree_dirty", "files"}
+    missing_fields = sorted(required - set(manifest))
+    if missing_fields:
+        failures.append("runtime manifest missing required fields: " + ", ".join(missing_fields))
+    extra_fields = sorted(set(manifest) - required)
+    if extra_fields:
+        failures.append("runtime manifest has unsupported fields: " + ", ".join(extra_fields))
+    if manifest.get("schema_version") != "5.3.0":
+        failures.append("runtime manifest schema_version must be 5.3.0")
+    version = manifest.get("skill_version")
+    expected_version = expected_skill_version or current_version()
+    if not isinstance(version, str) or version != expected_version:
+        failures.append(f"runtime manifest skill_version must match {expected_version}")
+    source_commit = manifest.get("source_commit")
+    dirty = manifest.get("source_worktree_dirty")
+    if not isinstance(source_commit, str) or re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64}|uncommitted)(?:-dirty)?", source_commit) is None:
+        failures.append("runtime manifest source_commit must be a full Git SHA or uncommitted, with an optional -dirty suffix")
+    if not isinstance(dirty, bool):
+        failures.append("runtime manifest source_worktree_dirty must be boolean")
+    elif isinstance(source_commit, str) and bool(source_commit.endswith("-dirty")) != dirty:
+        failures.append("runtime manifest source_commit and source_worktree_dirty disagree")
+
+    declared: dict[str, dict] = {}
+    files = manifest.get("files")
+    if not isinstance(files, list) or not files:
+        failures.append("runtime manifest files must be a non-empty array")
+        files = []
+    for index, item in enumerate(files):
+        if not isinstance(item, dict):
+            failures.append(f"runtime manifest files[{index}] must be an object")
+            continue
+        item_fields = {"path", "size", "sha256"}
+        if set(item) != item_fields:
+            failures.append(f"runtime manifest files[{index}] must contain exactly path, size and sha256")
+            continue
+        relative = item.get("path")
+        normalized = PurePosixPath(relative) if isinstance(relative, str) else None
+        if (
+            not relative or normalized is None or normalized.is_absolute()
+            or normalized.as_posix() != relative or ".." in normalized.parts
+            or "\\" in relative or relative == "runtime-manifest.json"
+        ):
+            failures.append(f"runtime manifest files[{index}] has unsafe path: {relative!r}")
+            continue
+        if relative in declared:
+            failures.append(f"runtime manifest has duplicate path: {relative}")
+            continue
+        size, digest = item.get("size"), item.get("sha256")
+        if isinstance(size, bool) or not isinstance(size, int) or size < 0:
+            failures.append(f"runtime manifest has invalid size: {relative}")
+            continue
+        if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+            failures.append(f"runtime manifest has invalid sha256: {relative}")
+            continue
+        declared[relative] = item
+
+    actual: dict[str, Path] = {}
+    try:
+        for path in root.rglob("*"):
+            if path.is_symlink():
+                failures.append(f"runtime contains unsupported symlink: {path.relative_to(root).as_posix()}")
+            elif path.is_file() and path != manifest_path:
+                actual[path.relative_to(root).as_posix()] = path
+    except OSError as exc:
+        failures.append(f"runtime files cannot be inventoried: {exc}")
+    missing_paths = sorted(set(declared) - set(actual))
+    extra_paths = sorted(set(actual) - set(declared))
+    if missing_paths:
+        preview = ", ".join(missing_paths[:5])
+        suffix = f" (+{len(missing_paths) - 5} more)" if len(missing_paths) > 5 else ""
+        failures.append(f"runtime manifest declares {len(missing_paths)} missing file(s): {preview}{suffix}")
+    if extra_paths:
+        preview = ", ".join(extra_paths[:5])
+        suffix = f" (+{len(extra_paths) - 5} more)" if len(extra_paths) > 5 else ""
+        failures.append(f"runtime manifest does not cover {len(extra_paths)} actual file(s): {preview}{suffix}")
+    for relative in sorted(set(actual) & set(declared)):
+        try:
+            data = actual[relative].read_bytes()
+        except OSError as exc:
+            failures.append(f"manifest file cannot be read: {relative}: {exc}")
+            continue
+        item = declared[relative]
+        if len(data) != item["size"] or hashlib.sha256(data).hexdigest() != item["sha256"]:
+            failures.append(f"manifest file drift: {relative}")
+    return failures
 
 
 def merge_markdown_template(base: str, overlay: str) -> str:
@@ -367,7 +468,41 @@ def init_requirements(args: argparse.Namespace) -> int:
 
 def run_check(args: argparse.Namespace) -> int:
     if not MAINTAINER_DIR.is_dir():
-        print("[SKIP] maintainer-only assurance suite is not shipped in the runtime package")
+        if args.profile == "release":
+            print(
+                "BLOCKED: release assurance is maintainer-only and is not shipped in the runtime package; "
+                "run it from a source checkout"
+            )
+            return 2
+        failures = validate_runtime_manifest(ROOT)
+        for schema_path in sorted((ROOT / "schemas").glob("*.schema.json")):
+            try:
+                Draft202012Validator.check_schema(json.loads(schema_path.read_text(encoding="utf-8")))
+            except Exception as exc:  # bounded local schema audit; keep the exact filename
+                failures.append(f"invalid schema {schema_path.name}: {exc}")
+        config_result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts" / "validators" / "validate_spec_config.py"), str(ROOT / "examples" / "spec.config.example.yaml")],
+            cwd=ROOT,
+            text=True,
+            encoding="utf-8",
+            capture_output=True,
+        )
+        if config_result.returncode:
+            failures.append("spec config self-check failed: " + (config_result.stdout + config_result.stderr).strip())
+        if args.product_truth:
+            truth_result = subprocess.run(
+                [sys.executable, str(ROOT / "scripts" / "validators" / "validate_product_truth.py"), str(args.product_truth)],
+                cwd=Path.cwd(), text=True, encoding="utf-8", capture_output=True,
+            )
+            if truth_result.returncode:
+                failures.append("product truth validation failed: " + (truth_result.stdout + truth_result.stderr).strip())
+        if failures:
+            print(f"BLOCKED: runtime fast check found {len(failures)} issue(s)")
+            for failure in failures:
+                print("- " + failure)
+            return 2
+        print("PASS: runtime manifest, JSON Schemas and spec config are internally consistent")
+        print("NOT_PROVEN: maintainer release suite; project artifacts; browser behavior; business correctness")
         return 0
     fast_commands: list[list[str]] = [
         [sys.executable, "maintainer/tools/validators/validate_v5_architecture.py"],
@@ -377,7 +512,7 @@ def run_check(args: argparse.Namespace) -> int:
         [sys.executable, "maintainer/tools/validators/validate_eval_catalog.py"],
         [sys.executable, "maintainer/checks/check_v511_runtime_budget.py"],
         [sys.executable, "maintainer/checks/check_v540_readme_commands.py"],
-        [sys.executable, "maintainer/tests/test_v541_human_first_gate.py"],
+        [sys.executable, "maintainer/tests/test_human_first_stage0_contracts.py"],
         [sys.executable, "maintainer/tests/test_product_experience.py"],
         [sys.executable, "maintainer/tools/validators/validate_release_claims.py"],
     ]
@@ -394,10 +529,8 @@ def run_check(args: argparse.Namespace) -> int:
         [sys.executable, "maintainer/checks/check_v530_contracts.py"],
         [sys.executable, "maintainer/checks/check_v540_stage_contracts.py"],
         [sys.executable, "scripts/validators/validate_requirement_patterns.py", "references/patterns/common-requirement-patterns.yaml"],
-        [sys.executable, "maintainer/checks/check_v544_human_review_contracts.py"],
-        [sys.executable, "maintainer/checks/check_context_planning.py"],
+        [sys.executable, "maintainer/checks/check_human_review_contracts.py"],
         [sys.executable, "maintainer/checks/check_execution_state.py"],
-        [sys.executable, "maintainer/checks/check_cli_init.py"],
         [sys.executable, "maintainer/tests/test_runtime_resilience.py"],
         [
             sys.executable,
@@ -496,9 +629,9 @@ def build_trace(args: argparse.Namespace) -> int:
 def status_report(args: argparse.Namespace) -> int:
     evals_dir = MAINTAINER_DIR / "evals"
     if not evals_dir.is_dir():
-        print("[SKIP] maintainer evaluation assets are not shipped in the runtime package")
+        print("BLOCKED: maintainer evaluation assets are not shipped in the runtime package")
         print(f"runtime skill version: {current_version()}")
-        return 0
+        return 2
     coverage = yaml.safe_load((ROOT / "references/domain-coverage.yaml").read_text(encoding="utf-8"))
     fixtures = yaml.safe_load((ROOT / "maintainer/evals/domain-fixtures.yaml").read_text(encoding="utf-8"))
     catalog = yaml.safe_load((ROOT / "maintainer/evals/eval-catalog.yaml").read_text(encoding="utf-8"))
@@ -545,7 +678,7 @@ def status_report(args: argparse.Namespace) -> int:
         },
         "known_limitations": [
             "five domain methods have owner-attested production practice; all built-in packs pass deterministic contract checks but fresh-agent/expert maturity remains separate",
-            "v5.4.6 cross-entry and adversarial contract probes are deterministic; isolated no-skill comparison, fresh-agent repetitions and versioned user feedback remain separate evidence",
+            "v5.4.7 review-workspace and adversarial contract probes are deterministic; isolated no-skill comparison, fresh-agent repetitions and versioned user feedback remain separate evidence",
             "domain expert, customer, production, legal, safety, and financial correctness are not proven",
             "deterministic fixtures and private brownfield calibration expose method gaps but do not prove implementation or customer acceptance",
         ],
@@ -1035,7 +1168,7 @@ def main() -> int:
 
     candidate = sub.add_parser("candidate", help="Validate a project-local knowledge candidate; never auto-promote")
     candidate_sub = candidate.add_subparsers(dest="candidate_command", required=True)
-    candidate_validate = candidate_sub.add_parser("validate")
+    candidate_validate = candidate_sub.add_parser("validate", help="校验本地候选知识结构与晋级证据；不会自动晋级")
     candidate_validate.add_argument("--input", type=Path, required=True)
     candidate_validate.set_defaults(func=validate_candidate)
 

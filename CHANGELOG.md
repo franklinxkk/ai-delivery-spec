@@ -1,5 +1,18 @@
 # Changelog
 
+## 5.4.7 - 2026-08-22
+
+- Why：结合 Kimi K3、QClaw/GLM、WorkBuddy/DeepSeek、Grok 四组最新独立方案、用户人工视检和存量双态原型反证，确认旧评审态主要按页面与按钮组织信息：接收者能勉强看懂单点，却无法沿真实业务旅程识别责任交接、状态可达性、数据变化和验收闭环。专家产物还暴露批量把未知升级为 confirmed、用自报冷读代替真人证据、技术伪精确和同一规则多版本冲突等风险。
+- Review Workspace：评审态改为导读、旅程、单步聚焦、按需页面定位、验收五种任务模式；编号只定位当前 `STEP-*`/页面入口，不再铺满全站。桌面画布与 STEP 双向定位并保持选中反馈，分享定位可恢复页面/步骤/角色上下文；窄屏在产品/评审间全屏切换。变更比较提升为 REQ/STEP/RULE/STATE/DFD/AC 业务 Diff；系统步骤、外部步骤与断点允许没有虚假的页面钉点。
+- Role Work Packets：每个原子 `STEP-*` 分别向产品、前端、后端、测试投影最小施工包，并保留上游、下游、分支、回退和未知项。前后端可见合同引用，测试可见 `TEST-* → AC-*`、前置、正反边界、双结果和证据要求；Coding Agent 不作为第五个人类镜头，继续读取同源 PRD/Truth、稳定 ID 与结构化 handoff。
+- Flow/State/Data：跨角色交接、受守卫状态、对象/系统数据流必须以相互独立且人眼可见的 FLOW/STM/DFD 投影呈现；确实不适用时显式 N/A。`EDGE-*` 支持 start/next/branch/parallel/join/return/error/compensate/finish，避免把并行、汇聚、错误与补偿压成固定“上一/下一”。
+- Evidence integrity：业务语义状态 `confirmed/proposed/inferred/unknown/conflict` 与验证状态 `not_run/static_checked/browser_checked/integration_checked/accepted/failed` 分轴；confirmed 必须绑定来源/决定，验证结论必须绑定证据。静态观察、评审导航可点击或模型自报均不能升级成业务批准、真实实现或验收。
+- Same-source contract：新增薄型 `schemas/review-workspace.schema.json` 与 `review-workspace-manifest`，只登记 baseline hash、FLOW/STEP/EDGE、角色槽位与引用、TEST/AC、UNK、证据状态和 machine handoff 状态，不复制业务规则正文。旧评审叠加在 prototype 单检中返回迁移 GAP，进入 handoff/full 则阻断；组合门禁核对评审基线与 PRD 内容哈希。
+- Runtime trust：补齐 `candidate validate --help`；runtime `check --profile fast` 真正校验 manifest/schema/config，缺维护资源的 release/status 非零阻断；PASS+INFO 不再输出“违反合同”；Stage 0 占位与 L1 缺少七段最小语义合同均阻断；Stage 0 明确检查跨动作状态可达性；`query-domain --section` 只返回请求切片。
+- Prototype accuracy：动态创建节点后赋予稳定字面量 `ACT-*`/`UIACT-*` 可被识别为有效入口；变量、字符串拼接和既有节点运行时补挂仍阻断。`.hidden` 仅按精确选择器/类判断，避免把 `.is-hidden` 等合法类误当隐藏污染；真实存量原型仍保留 4 个可证实孤儿动作，不用宽豁免制造绿灯。
+- Scope：评审态仍需用户明确要求或确认；小改动不生成全套投影，L1 只需七段短需求卡而非完整 PRD。不用关键词计数冒充角色质量，不强制每 STEP 仅一条用例，也不让评审原型发明 API、表结构、错误码或技术选型。
+- Validation：独立 P1 复审的 35 项聚焦回归通过；Stage 0 16 项、产品体验 8 项、动态锚点 5 项通过。维护区为 55 文件、449,228B，未提高 56/450,000B 预算。匿名跨模块前向夹具的 Stage 0 与 prototype 静态门禁 PASS，handoff 因 6 个真实 P0 未知保持 BLOCKED；纯模型隔离冷读发现的入口漂移、硬编码、输入丢失、领域结果不可见、状态矛盾、画布声明漂移、未知未结构化和 AC 过粗均已回馈修复。本地语料去重为 20 个项目族/46 个场景，只作为覆盖目录；两个学习平台候选仍被新门禁判为 migration GAP/BLOCK，未刷绿。真实浏览器、四位真人产品/前端/后端/测试隔离冷读、真实 Coding Agent 盲实现和客户验收仍未执行，不能由静态 PASS 或模型模拟代替。
+
 
 ## 5.4.6 - 2026-08-12
 

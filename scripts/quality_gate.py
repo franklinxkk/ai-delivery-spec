@@ -278,6 +278,42 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
         "Stage 0 台账仍是旧版按 roles/views/actions 等分栏保存的结构，缺少当前逐项审计合同。",
         "将旧分栏逐项迁入 items；每项补齐 type、source_ref、source_location、classification，推断项再绑定有 owner 的 RBATCH-*。",
     ),
+    "STAGE0-PLACEHOLDER": (
+        "Stage 0 文件仍是未填写模板，模板结构不能证明真实页面、动作、状态或来源已经盘点。",
+        "把花括号、待指定和全零 hash 替换为真实来源事实，无法确认的内容登记有 owner 的 UNK-*。",
+    ),
+    "STAGE0-REACHABILITY-NOT-DECLARED": (
+        "Stage 0 已发现核心动作或处理器，但还没有结构化盘点关键链可达性。",
+        "旧台账可继续使用；只为本轮关键链补 critical_chains，按来源记录处理器、输出、下一入口/守卫与恢复路径，未知登记 UNK-*。",
+    ),
+    "STAGE0-CHAIN-CONTRACT-INVALID": (
+        "关键链结构不完整，无法审计动作到下一入口的真实可达性。",
+        "按 stage0 模板补齐当前链的 action、processing、四类输出、next entry/guard、reachability、来源和 break_refs，不得发明目标规则。",
+    ),
+    "STAGE0-CHAIN-REACHABILITY-CONTRADICTION": (
+        "链路声明可达或终止，但处理器、输出、下一入口/守卫仍缺失或未知。",
+        "以来源事实修正 reachability；不能确认时改为 unknown/broken，并登记有 owner 的断裂记录。",
+    ),
+    "STAGE0-CHAIN-REF-TYPE-MISMATCH": (
+        "关键链引用存在但对象类型不匹配，无法证明 action、处理器或输出维度。",
+        "让 action_ref 指向 action，processing_refs 指向 handler/system_process/process，并把对象、状态、版本、身份分别引用到对应盘点项。",
+    ),
+    "STAGE0-CHAIN-UNRESOLVED-UNTRACKED": (
+        "关键链存在缺失或未知，却没有进入断裂清单。",
+        "建立 INV-BREAK-* 并从 link/recovery 和 chain.break_refs 回链；unknown 断裂再绑定 P0 UNK-*、owner 与 blocks_stage。",
+    ),
+    "STAGE0-EMPTY-BREAK-REGISTER": (
+        "关键链仍有未评估、缺失、未知或断裂，但断裂清单为空。",
+        "补充来源化 INV-BREAK-*；只有所有声明链均已评估且各 link/recovery 有证据可达或明确不适用时才允许空清单。",
+    ),
+    "STAGE0-RECOVERY-CONTRACT-INCOMPLETE": (
+        "关键链没有分别盘点失败、退回、重试和补偿路径。",
+        "按来源把四类路径标为 observed/broken/unknown/not_applicable；未知不能写成无需求，不适用须说明理由。",
+    ),
+    "STAGE0-CRITICAL-BREAK-NOT-OWNED": (
+        "关键链未知断裂没有责任人和阻断边界。",
+        "为 unknown 断裂登记 UNK-*、P0、owner 和 blocks_stage；Stage 0 只记录未知，不替 owner 决定目标规则。",
+    ),
     "PRD-STRUCTURE": (
         "文档虽然包含标题或关键词，但没有可验证的统一 PRD 结构。",
         "按统一 PRD 模板补齐真实业务叙述或工程附录，不要复制空标题。",
@@ -342,6 +378,10 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
         "原型只显示 UNK-* 或“待确认”，却没有把未知项绑定到可关闭的责任合同。",
         "为每个 data-unk/注册表项补 priority、owner、blocks_stage、affected_refs 和 fallback；评审前按依赖批量向责任人澄清。",
     ),
+    "PROTO-UNKNOWN-CONFIRMED-CONFLICT": (
+        "同一原型对象同时携带已确认状态和开放 UNK-*，属于证据状态冲突。",
+        "依据 DEC/source 裁决：已确认则关闭并移除当前 data-unk；仍未知则撤销 confirmed，保留 owner、阻断阶段和回退。",
+    ),
     "PROTO-REVIEW-LINKAGE-MISSING": (
         "评审编号与右侧说明卡没有稳定双向关联。",
         "两侧使用相同 data-review-id，或在目标卡上声明同值 data-review-target，并补浏览器双向定位证据。",
@@ -353,6 +393,102 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-REVIEW-LENS-COSMETIC": (
         "共识/前端/后端/测试镜头只有按钮外观变化，没有角色所需内容差异。",
         "用 data-review-role 标记控件、data-review-lens 标记对应内容；镜头只改变密度，不得改变事实。",
+    ),
+    "PROTO-REVIEW-WORKSPACE-LEGACY": (
+        "旧评审叠加仍围绕页面编号/卡片组织，无法证明接收者能按业务旅程和角色任务独立完成交接。",
+        "迁移为导读、旅程、单步聚焦、页面核对和验收五种按需模式，并嵌入同基线的 review-workspace-manifest。",
+    ),
+    "PROTO-REVIEW-WORKSPACE-MANIFEST-INVALID": (
+        "评审工作台没有唯一、可解析的同源投影索引。",
+        "在同一 HTML 内嵌 application/json 的 review-workspace-manifest，并按 review-workspace schema 校验。",
+    ),
+    "PROTO-REVIEW-LANGUAGE-MISMATCH": (
+        "评审 manifest 与 HTML 声明了不同的人类语言。",
+        "让 manifest.language 与 html[lang] 跟随用户语言；稳定 ID 和机器枚举保持原值，不用关键词禁令代替人工语言复核。",
+    ),
+    "PROTO-REVIEW-ROLE-PACKET-INCOMPLETE": (
+        "角色镜头只是内容过滤或摘要，没有覆盖该角色启动工作所需的完整槽位。",
+        "按 product/frontend/backend/qa 的 data-review-slot 合同补齐工作包；未知语义绑定 UNK-*，不要编造技术决定。",
+    ),
+    "PROTO-REVIEW-ROLE-APPLICABILITY-MISMATCH": (
+        "角色是否受影响的机器索引与人类可见工作包不一致。",
+        "受影响角色使用 active 并补齐槽位；确实不受影响时使用 not_affected、清空合同槽位并显示具体原因。",
+    ),
+    "PROTO-REVIEW-CONFIRMED-NO-EVIDENCE": (
+        "评审步骤被标为已确认，却没有 SRC-* 或 DEC-* 作为确认依据。",
+        "补充可核对来源/决定；只有原型现状、模型建议或演示行为时降为 proposed/unknown 并绑定 UNK-*。",
+    ),
+    "PROTO-REVIEW-VERIFICATION-NO-EVIDENCE": (
+        "评审步骤把实现写成已检查、验收或失败，却没有 EVD-* / ARUN-* 运行证据。",
+        "保持 verification_status=not_run，或绑定真实运行证据后再按实际证据等级升级；不得用作者自述替代。",
+    ),
+    "PROTO-REVIEW-STATUS-AXIS-HIDDEN": (
+        "业务确认状态或验证证据状态只藏在机器清单里，人类接收者看不到。",
+        "在每个 STEP 工作包中分别显示 business 与 verification 状态轴、原值和本地语言含义。",
+    ),
+    "PROTO-REVIEW-STATUS-AXIS-DRIFT": (
+        "人类可见状态与 review manifest 的状态值不一致。",
+        "从同一 STEP 记录投影两条状态轴，禁止在 HTML 中手写另一套状态。",
+    ),
+    "PROTO-REVIEW-STATUS-AXIS-DUPLICATE": (
+        "同一 STEP 状态轴在人类界面重复出现，可能同时展示相互冲突的结论。",
+        "每个 STEP/axis 只投影一次；由 manifest 的同一记录生成标签并删除陈旧副本。",
+    ),
+    "PROTO-REVIEW-VERIFICATION-ARUN-UNRESOLVED": (
+        "评审步骤声称浏览器、集成、验收或失败证据，但引用的 ARUN 未在本次门禁中提供。",
+        "保持 not_run，或把对应 ARUN 文件随门禁一起提供；伪造 EVD/ARUN 标识不能升级证据等级。",
+    ),
+    "PROTO-REVIEW-VERIFICATION-LEVEL-UNPROVED": (
+        "已提供的 ARUN 环境或结论不足以支持评审步骤声明的验证等级。",
+        "按真实 ARUN 环境、失败记录和有证据签署结论降级或补测，不得越级宣传。",
+    ),
+    "PROTO-REVIEW-VERIFICATION-BASELINE-DRIFT": (
+        "评审步骤引用了其他基线版本的验收记录，旧证据不能证明当前语义。",
+        "提供 baseline_version 与当前 review baseline 完全一致的 ARUN，或把验证状态降回真实等级。",
+    ),
+    "PROTO-REVIEW-VERIFICATION-AC-UNPROVED": (
+        "ARUN 存在但没有覆盖当前 STEP 对应的 TEST→AC，属于无关证据借用。",
+        "让该 STEP 的 QA 场景绑定 TEST/AC，并随门禁提供覆盖对应 AC 的 ARUN；accepted 必须通过全部相关 AC。",
+    ),
+    "PROTO-REVIEW-MODEL-COVERAGE-AMBIGUOUS": (
+        "旅程没有说明状态机或数据流是遗漏还是确实不适用。",
+        "分别登记 FLOW/STM/INT|EVT|ENT 引用；确实无状态或数据流时在 not_applicable 显式声明。",
+    ),
+    "PROTO-REVIEW-MODEL-NOT-VISIBLE": (
+        "旅程引用了流程、状态机或数据流，但人类工作台没有对应可见模型。",
+        "分别投影 data-review-model 与 data-review-model-ref；不要用一张万能流程图或隐藏 JSON 冒充人类走读。",
+    ),
+    "PROTO-REVIEW-MODEL-NA-HIDDEN": (
+        "状态机或数据流被声明为不适用，但人类看不到原因。",
+        "使用 data-review-model-na 显示具体不适用理由；无法判断时改为 active 并登记 UNK-*。",
+    ),
+    "PROTO-REVIEW-SCENARIO-NOT-VISIBLE": (
+        "验收场景只存在于 manifest，测试无法从工作台定位 TEST→AC。",
+        "为每个场景显示 data-review-scenario=TEST-* 与 data-review-acceptance-ref=AC-*，并呈现覆盖 STEP 和证据要求。",
+    ),
+    "PROTO-REVIEW-CONTRACT-REF-HIDDEN": (
+        "角色工作包没有显示其规则、状态或 AC 引用，摘要会退化成第二份孤立说明。",
+        "把 manifest.contract_refs 作为可见引用或可展开来源清单呈现；业务正文继续以 PRD/Truth 为权威。",
+    ),
+    "PROTO-REVIEW-RISK-NOT-TESTED": (
+        "步骤声明了边界、权限、恢复或网络并发风险，但验收场景未覆盖。",
+        "从同一 TEST/AC 补充该风险维度、双结果与证据要求，不要在 HTML 另写一套测试。",
+    ),
+    "PROTO-REVIEW-MODE-MISSING": (
+        "评审信息被塞进单一长列表或抽屉，不能按接收者当前任务渐进展开。",
+        "按适用范围提供 orientation/journey/focus/page/acceptance，并让复杂主链从旅程进入、单次只聚焦一个 STEP-*。",
+    ),
+    "PROTO-REVIEW-COMPACT-OVERLAY": (
+        "窄屏评审面板会遮住产品上下文，无法同时完成页面核对。",
+        "使用 fullscreen-switcher 在产品与评审之间切换，保留当前 STEP 与返回目标，再用浏览器证据验证。",
+    ),
+    "PROTO-REVIEW-BASELINE-DRIFT": (
+        "评审工作台与本次 PRD 不是同一内容基线，角色说明可能已经过期。",
+        "从权威 PRD 重新生成投影索引并写入其 SHA-256；同一 CHG 内同步人类投影与 machine handoff。",
+    ),
+    "PRD-FACET-REQUIRES-L2": (
+        "轻量需求卡启用了数据上报、系统集成、批量导入导出或高风险治理规格，L1 无法承载完整跨角色合同。",
+        "升级到 L2 统一 PRD，并补齐适用的来源、映射、状态、异常、审计与验收；不要用关键词把高风险切片伪装成 L1。",
     ),
     "PROTO-DYNAMIC-CLASS-POLLUTION": (
         "业务描述被动态拼进 CSS class，可能造成样式失效、选择器污染或未转义内容进入 DOM。",
@@ -371,6 +507,8 @@ PREFIX_GUIDANCE: tuple[tuple[str, str, str], ...] = (
     ("HANDOFF-", "交接包与需求基线或其他投影不一致。", "对齐基线 hash、责任人、稳定 ID 和验收引用，不要在交接包中另造规则。"),
     ("AI-", "AI 产品能力缺少适用的运行时治理合同。", "补充输入输出、版本、权限、人工门、回退、评测和观测引用。"),
     ("ACCEPTANCE-", "验收执行记录无效或与其结论矛盾。", "按 acceptance-run schema 修复执行环境、实际结果、证据、缺陷和签署结论。"),
+    ("PROTO-REVIEW-STEP-ANCHOR", "评审 STEP 与其人类工作包 DOM 锚点不唯一或未闭合。", "让每个 manifest STEP 恰好绑定一个同 ID 的 data-review-step 与 manifest.dom_anchor；移除幽灵或重复工作包。"),
+    ("PROTO-REVIEW-LENS-", "角色镜头只有外观或内容标签，没有形成真实可达的角色投影。", "读取 data-review-role 并更新根容器 data-review-active-role；保留关联角色入口并用浏览器证据验证。"),
     ("PROTO-CSS-", "CSS 污染可能隐藏或破坏交互状态。", "移除全局 !important 污染，并将可见性规则限制在所属组件和 data-state。"),
     ("PROTO-", "原型缺少可测试交互或状态合同。", "使用稳定 data-testid/data-action/data-state/data-field 和可见结果修复对应元素。"),
     ("PRD-", "PRD 缺少当前交付阶段所需的需求合同。", "按引用位置补齐经确认的规则、稳定 ID、异常和验收，不得发明值。"),
@@ -397,9 +535,19 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "HANDOFF-STEP-CONTRACT-MISSING": ("A ready-for-implementation packet has no implementation_step_refs.", "List every implemented STEP-* or return the packet to review_ready."),
     "HANDOFF-PRD-STEP-NOT-PACKETED": ("A PRD STEP-* is not covered by any ready implementation packet.", "Assign it to an owned packet or remove it from scope through an approved baseline change."),
     "PRD-STRUCTURE": ("The document does not contain a verifiable unified-PRD structure.", "Add real business content using the unified PRD template; do not copy empty headings."),
+    "STAGE0-PLACEHOLDER": ("The Stage 0 artifact is still an unfilled template and proves no inventory facts.", "Replace placeholders and zero hashes with sourced observations, or register owned UNK-* items."),
+    "STAGE0-REACHABILITY-NOT-DECLARED": ("Stage 0 found a core action or handler but has no structured critical-chain reachability inventory.", "Keep the legacy inventory compatible, then add only the in-scope critical chains with sourced processing, outputs, next entry/guard and recovery paths."),
+    "STAGE0-CHAIN-CONTRACT-INVALID": ("The critical-chain contract is incomplete and cannot prove reachability.", "Complete the sourced action, processing, four output facets, next entry/guard, reachability and break references without inventing target rules."),
+    "STAGE0-CHAIN-REACHABILITY-CONTRADICTION": ("A chain claims reachable or terminal while required processing, outputs or successor evidence is missing.", "Correct the observed verdict; use unknown/broken plus an owned break record when the source cannot prove reachability."),
+    "STAGE0-CHAIN-REF-TYPE-MISMATCH": ("A critical-chain reference resolves to the wrong inventory object type.", "Point action_ref to an action, processing_refs to handlers/processes, and each output facet to the matching object, state, version or identity item."),
+    "STAGE0-CHAIN-UNRESOLVED-UNTRACKED": ("A critical-chain gap is not linked to the reachability-break register.", "Create an INV-BREAK-* record and link it from the link/recovery and chain; bind an owned P0 UNK-* when it is unknown."),
+    "STAGE0-EMPTY-BREAK-REGISTER": ("A declared critical chain still has unassessed, missing, unknown or broken facets but its break register is empty.", "Record sourced breaks; an empty register is valid only when every declared link and recovery path is explicitly assessed."),
+    "STAGE0-RECOVERY-CONTRACT-INCOMPLETE": ("Failure, return, retry and compensation are not separately inventoried.", "Mark each path observed, broken, unknown or not_applicable from source evidence; explain not_applicable and register unknowns."),
+    "STAGE0-CRITICAL-BREAK-NOT-OWNED": ("An unknown critical-chain break has no owner or blocking boundary.", "Bind UNK-*, P0, owner and blocks_stage; inventory the unknown without deciding the target rule."),
     "PRD-TOO-THIN": ("The artifact lacks details required by its delivery level.", "Complete the applicable business, interaction, exception and acceptance contracts without inventing values."),
     "PRD-LANGUAGE-DRIFT": ("The document structure does not match its declared language.", "Align headings, body text, tables, questions, diagrams and tests with document_language; keep IDs and machine names unchanged."),
     "PRD-MODULE-SLICE-INCOMPLETE": ("A module slice is not locally complete for implementation and testing.", "Complete goals, flows, UI/data, rules, states, metrics, recovery, acceptance and unknowns in the same module section."),
+    "PRD-FACET-REQUIRES-L2": ("A lightweight card activates data submission, integration, batch I/O or high-risk governance that L1 cannot carry safely.", "Upgrade to an L2 unified PRD and complete the applicable source, mapping, state, failure, audit and acceptance contracts; keyword padding must not bypass the upgrade."),
     "PROTO-NO-PAGE-ANCHOR": ("The prototype has no stable page anchor.", "Add a unique data-testid=\"page-VIEW-*\" to every page root."),
     "PROTO-NO-REGION-ANCHOR": ("A complex prototype has no stable region anchors.", "Add unique data-testid=\"region-REG-*\" anchors to its key business regions."),
     "PROTO-IFRAME-UNSAFE-SCHEME": ("The iframe uses an executable or unauditable URL scheme.", "Remove it; external integrations must use HTTPS and an explicit INT-* contract."),
@@ -414,9 +562,33 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-METRIC-LABEL-MISSING": ("A repeated metric ID has no stable semantic label.", "Add data-metric-label or split distinct meanings into separate METRIC-* IDs."),
     "PROTO-DYNAMIC-METRIC-ID-REUSE": ("A dynamic metric factory reuses one fixed METRIC-* for multiple runtime labels.", "Pass a stable metric ID per defined metric or render from a metric-definition map."),
     "PROTO-UNKNOWN-CONTRACT-INCOMPLETE": ("A prototype labels an UNK-* without an owned and closable lifecycle contract.", "Add priority, owner, blocks_stage, affected_refs and fallback to every data-unk or registry entry; clarify material unknowns before review."),
+    "PROTO-UNKNOWN-CONFIRMED-CONFLICT": ("One prototype object is simultaneously marked confirmed and bound to an open UNK-*.", "Resolve it from a DEC/source: remove the current unknown contract when confirmed, or remove confirmed while keeping the owned gap contract."),
     "PROTO-REVIEW-LINKAGE-MISSING": ("Review markers and note cards have no stable bidirectional link.", "Share data-review-id on both sides or use a matching data-review-target, then execute a browser ARUN-* proof."),
     "PROTO-REVIEW-SELECTION-NOT-SYNCED": ("Review marker clicks do not expose a synchronized selection state.", "Read data-review-id, update aria-current on both sides, and prove click, scroll and highlight behavior in a browser."),
     "PROTO-REVIEW-LENS-COSMETIC": ("Role lenses change controls but have no role-specific content projection.", "Bind data-review-role controls to matching data-review-lens content without changing shared facts."),
+    "PROTO-REVIEW-WORKSPACE-LEGACY": ("The legacy review overlay is page-note oriented and has no journey/task workspace contract.", "Migrate to orientation, journey, single-step focus, page and acceptance modes with an embedded baseline-bound manifest."),
+    "PROTO-REVIEW-WORKSPACE-MANIFEST-INVALID": ("The review workspace has no unique parseable projection manifest.", "Embed one application/json review-workspace-manifest and validate it against the review-workspace schema."),
+    "PROTO-REVIEW-LANGUAGE-MISMATCH": ("The review manifest and HTML declare different human languages.", "Align manifest.language with html[lang] and the user's language while preserving stable IDs and machine enums."),
+    "PROTO-REVIEW-ROLE-PACKET-INCOMPLETE": ("A role lens is a summary/filter rather than a complete start-work packet.", "Complete the product/frontend/backend/qa slot contract and bind unknown semantics to UNK-* instead of inventing decisions."),
+    "PROTO-REVIEW-ROLE-APPLICABILITY-MISMATCH": ("Role applicability differs between the manifest and the visible packet.", "Use active with complete slots, or not_affected with empty slots and one visible reason."),
+    "PROTO-REVIEW-CONFIRMED-NO-EVIDENCE": ("A confirmed review step has no SRC-* or DEC-* evidence.", "Bind a reviewable source or decision, or downgrade the step and attach an owned UNK-* gap."),
+    "PROTO-REVIEW-VERIFICATION-NO-EVIDENCE": ("A review step claims verification without EVD-* or ARUN-* evidence.", "Keep verification_status=not_run, or bind runtime evidence before upgrading the verification level."),
+    "PROTO-REVIEW-STATUS-AXIS-HIDDEN": ("A business or verification status is hidden in the manifest instead of shown to human reviewers.", "Render separate human-readable business and verification status axes in every STEP packet."),
+    "PROTO-REVIEW-STATUS-AXIS-DRIFT": ("The visible status axis differs from the review manifest.", "Project both status axes from the same STEP record instead of hand-writing HTML values."),
+    "PROTO-REVIEW-STATUS-AXIS-DUPLICATE": ("One STEP status axis is rendered more than once and may show conflicting conclusions.", "Render each STEP/axis exactly once from the manifest record and remove stale copies."),
+    "PROTO-REVIEW-VERIFICATION-ARUN-UNRESOLVED": ("A claimed browser, integration, accepted or failed status references no ARUN supplied to this gate.", "Keep not_run or provide the referenced ARUN; an invented identifier is not runtime evidence."),
+    "PROTO-REVIEW-VERIFICATION-BASELINE-DRIFT": ("The cited ARUN belongs to another baseline version.", "Provide an ARUN whose baseline_version exactly matches the review baseline, or lower the verification claim."),
+    "PROTO-REVIEW-VERIFICATION-AC-UNPROVED": ("The ARUN does not cover this STEP's TEST-to-AC contract.", "Bind the STEP to its QA scenarios and provide an ARUN covering the relevant ACs; accepted requires every relevant AC to pass."),
+    "PROTO-REVIEW-VERIFICATION-LEVEL-UNPROVED": ("The supplied ARUN environment or conclusion does not support the claimed verification level.", "Downgrade the claim or execute and attach evidence at the required level."),
+    "PROTO-REVIEW-MODEL-COVERAGE-AMBIGUOUS": ("The journey leaves state or data-flow coverage ambiguous.", "Reference separate flow/state/data models or explicitly mark the inapplicable dimensions."),
+    "PROTO-REVIEW-MODEL-NOT-VISIBLE": ("A referenced flow, state machine, or data flow is absent from the human workspace.", "Render each model with data-review-model and data-review-model-ref instead of hiding it in JSON."),
+    "PROTO-REVIEW-MODEL-NA-HIDDEN": ("An inapplicable state or data-flow dimension has no visible reason.", "Expose the reason with data-review-model-na, or keep it active and bind an owned UNK-* gap."),
+    "PROTO-REVIEW-SCENARIO-NOT-VISIBLE": ("A TEST-* to AC-* scenario exists only in the manifest.", "Render a locatable acceptance card with data-review-scenario and data-review-acceptance-ref."),
+    "PROTO-REVIEW-CONTRACT-REF-HIDDEN": ("A role work packet hides the contracts behind its summary.", "Show the packet contract_refs as visible or expandable source links while keeping the canonical PRD/Truth authoritative."),
+    "PROTO-REVIEW-RISK-NOT-TESTED": ("A declared step risk is absent from its TEST/AC coverage.", "Add the matching risk dimension, dual result and evidence from the canonical acceptance contract."),
+    "PROTO-REVIEW-MODE-MISSING": ("Review information is flattened into one list or drawer instead of matching the receiver's task.", "Provide the applicable orientation, journey, focus, page and acceptance modes and focus one STEP-* at a time."),
+    "PROTO-REVIEW-COMPACT-OVERLAY": ("The compact review surface obscures the product context.", "Use a fullscreen product/review switcher that preserves the current STEP and return target, then verify it in a browser."),
+    "PROTO-REVIEW-BASELINE-DRIFT": ("The review workspace and supplied PRD are not the same content baseline.", "Regenerate the projection from the authoritative PRD hash and update human and machine projections in the same CHG-*.") ,
     "PROTO-DYNAMIC-CLASS-POLLUTION": ("Business text is interpolated into a CSS class.", "Keep class names as fixed semantic tokens and write escaped descriptions through textContent."),
     "PROTO-JS-SYNTAX": ("The prototype contains invalid JavaScript.", "Repair the referenced script and verify closing script/body/html tags."),
 }
@@ -427,6 +599,8 @@ EN_PREFIX_GUIDANCE: tuple[tuple[str, str, str], ...] = (
     ("HANDOFF-", "The handoff package is inconsistent with the requirement baseline.", "Align baseline hashes, owners, stable IDs and acceptance references without inventing rules."),
     ("AI-", "An AI capability lacks an applicable runtime governance contract.", "Add input/output, version, permissions, human gate, fallback, evaluation and observability references."),
     ("ACCEPTANCE-", "The acceptance record is invalid or contradicts its conclusion.", "Repair execution context, actual results, evidence, defects and sign-off against the schema."),
+    ("PROTO-REVIEW-STEP-ANCHOR", "A review STEP is not uniquely bound to its human work-packet DOM root.", "Bind every manifest STEP to exactly one matching data-review-step and manifest.dom_anchor; remove orphan or duplicate packets."),
+    ("PROTO-REVIEW-LENS-", "A role lens has labels or styling but no reachable role projection.", "Read data-review-role, update data-review-active-role on the workspace root, retain related-role navigation and verify it in a browser."),
     ("PROTO-CSS-", "CSS pollution may hide or break interactive state.", "Scope visibility styles to their component and data-state; remove global !important pollution."),
     ("PROTO-", "The prototype lacks a testable interaction or state contract.", "Repair the referenced element using stable data-testid/data-action/data-state/data-field and a visible result."),
     ("PRD-", "The PRD lacks a requirement contract needed at this stage.", "Complete confirmed rules, stable IDs, exceptions and acceptance at the referenced location; do not invent values."),
@@ -544,9 +718,16 @@ def _english_message(item: Finding) -> str:
 
 def localized_finding(item: Finding, language: str) -> dict[str, Any]:
     zh_message = item.message if _contains_cjk(item.message) else f"{item.cause} 技术明细：{item.message}"
-    en_cause, en_fix = english_guidance_for(item.code)
+    if item.severity == "INFO":
+        en_cause = "This is a gate-coverage note, not a contract violation."
+        en_fix = "No repair is required; provide the named sidecar or runtime only when stronger assurance is needed."
+    else:
+        en_cause, en_fix = english_guidance_for(item.code)
     en_message = _english_message(item)
-    en_example = english_repair_example_for(item.code)
+    en_example = (
+        "Keep the current result and add the skipped input only if that assurance is required."
+        if item.severity == "INFO" else english_repair_example_for(item.code)
+    )
     english = language.casefold().startswith("en")
     record = asdict(item)
     record.update({
@@ -645,6 +826,8 @@ class Gate(PRDChecks, PrototypeChecks, HandoffChecks):
         self.prototype_acceptance_refs: set[str] = set()
         self.prototype_baseline_signatures: Counter[tuple[str, str, str]] = Counter()
         self.prototype_inherited_findings = 0
+        self.review_workspace_contracts: list[tuple[Path, dict[str, Any]]] = []
+        self.review_workspace_legacy_paths: set[Path] = set()
 
     def read(self, path: Path) -> str:
         key = path.resolve()
@@ -672,7 +855,13 @@ class Gate(PRDChecks, PrototypeChecks, HandoffChecks):
             message = f"存量基线已存在，本次未新增：{message}"
             self.prototype_inherited_findings += 1
             self.metrics["prototype_inherited_findings"] = self.prototype_inherited_findings
-        cause, how_to_fix = guidance_for(code)
+        if severity == "INFO":
+            cause = "这是门禁覆盖范围说明，不代表工件违反交付合同。"
+            how_to_fix = "无需修复；需要更强保证时，按该说明提供对应侧车或运行环境。"
+            repair_example = "保留当前 PASS/GAP/BLOCK 结论，另行补充被跳过检查所需输入。"
+        else:
+            cause, how_to_fix = guidance_for(code)
+            repair_example = repair_example_for(code)
         self.findings.append(Finding(
             severity=severity,
             code=code,
@@ -681,7 +870,7 @@ class Gate(PRDChecks, PrototypeChecks, HandoffChecks):
             ref=ref,
             cause=cause,
             how_to_fix=how_to_fix,
-            repair_example=repair_example_for(code),
+            repair_example=repair_example,
             affected_consumers=affected_consumers,
             related_refs=related_refs,
             binding_source_refs=binding_source_refs,
@@ -1023,7 +1212,9 @@ def main() -> int:
         gate.check_handoff(valid_prd, valid_prototypes, prototype_level)
     if args.profile in {"handoff", "full"} and valid_prd and args.manifest and args.manifest.is_file():
         gate.check_manifest_prd_binding(valid_prd, args.manifest)
+        gate.check_review_manifest_binding(args.manifest)
     valid_acceptance_runs: list[Path] = []
+    acceptance_claims: dict[str, dict[str, Any]] = {}
     evidenced_acs: set[str] = set()
     browser_evidence = False
     conclusive_evidence = False
@@ -1033,9 +1224,120 @@ def main() -> int:
             continue
         valid_acceptance_runs.append(acceptance_run)
         passed, is_browser, is_conclusive = gate.check_acceptance_run(acceptance_run)
+        try:
+            run_document = yaml.safe_load(gate.read(acceptance_run)) or {}
+        except yaml.YAMLError:
+            run_document = {}
+        if isinstance(run_document, dict):
+            run_id = str(run_document.get("run_id", "")).upper()
+            if re.fullmatch(r"ARUN-[A-Z0-9-]+", run_id):
+                run_items = [item for item in run_document.get("items", []) or [] if isinstance(item, dict)]
+                environment = str(run_document.get("environment", "")).casefold()
+                acceptance_claims[run_id] = {
+                    "browser": is_browser,
+                    "integration": bool(
+                        re.search(r"\b(?:integration|sit|uat|staging)\b", environment)
+                        or any(marker in environment for marker in ("集成", "联调", "预发布"))
+                    ),
+                    "conclusive": is_conclusive,
+                    "baseline_version": str(run_document.get("baseline_version", "")),
+                    "covered_acs": {
+                        str(item.get("acceptance_ref", "")).upper()
+                        for item in run_items if str(item.get("acceptance_ref", "")).upper().startswith("AC-")
+                    },
+                    "passed_acs": set(passed),
+                    "failed_acs": {
+                        str(item.get("acceptance_ref", "")).upper()
+                        for item in run_items
+                        if item.get("result") in {"fail", "blocked"}
+                        and str(item.get("acceptance_ref", "")).upper().startswith("AC-")
+                    },
+                    "failed": str(run_document.get("conclusion", "")).casefold() == "rejected"
+                    or any(
+                        isinstance(item, dict) and item.get("result") in {"fail", "blocked"}
+                        for item in run_document.get("items", []) or []
+                    ),
+                }
         evidenced_acs.update(passed)
         browser_evidence = browser_evidence or is_browser
         conclusive_evidence = conclusive_evidence or is_conclusive
+    for review_path, review_document in gate.review_workspace_contracts:
+        scenarios = [item for item in review_document.get("scenarios", []) or [] if isinstance(item, dict)]
+        expected_baseline_version = str((review_document.get("baseline") or {}).get("version", ""))
+        for step in review_document.get("steps", []) or []:
+            if not isinstance(step, dict):
+                continue
+            status = str(step.get("verification_status", "not_run")).casefold()
+            if status not in {"browser_checked", "integration_checked", "accepted", "failed"}:
+                continue
+            step_id = str(step.get("step_id", "STEP-UNKNOWN"))
+            claimed_runs = {
+                str(item).upper() for item in step.get("evidence_refs", []) or []
+                if str(item).upper().startswith("ARUN-")
+            }
+            resolved = [acceptance_claims[item] for item in claimed_runs if item in acceptance_claims]
+            if not claimed_runs or len(resolved) != len(claimed_runs):
+                missing = sorted(claimed_runs - set(acceptance_claims)) or ["ARUN-* missing"]
+                gate.add(
+                    "BLOCK", "PROTO-REVIEW-VERIFICATION-ARUN-UNRESOLVED", review_path,
+                    "验证状态引用的 ARUN 未随本次门禁提供，证据等级不可解析",
+                    f"{step_id}: {', '.join(missing)}",
+                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                )
+                continue
+            drifted_runs = sorted(
+                run_id for run_id in claimed_runs
+                if acceptance_claims[run_id]["baseline_version"] != expected_baseline_version
+            )
+            if drifted_runs:
+                gate.add(
+                    "BLOCK", "PROTO-REVIEW-VERIFICATION-BASELINE-DRIFT", review_path,
+                    "评审步骤引用的 ARUN 不属于当前 review baseline version",
+                    f"{step_id}: {', '.join(drifted_runs)}",
+                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                )
+                continue
+            qa_packet = ((step.get("role_packets") or {}).get("qa") or {})
+            scenario_refs = {str(item).upper() for item in qa_packet.get("scenario_refs", []) or []}
+            required_acs = {
+                str(item.get("acceptance_ref", "")).upper()
+                for item in scenarios
+                if (
+                    str(item.get("scenario_id", "")).upper() in scenario_refs
+                    or step_id in {str(ref).upper() for ref in item.get("covered_step_refs", []) or []}
+                )
+                and str(item.get("acceptance_ref", "")).upper().startswith("AC-")
+            }
+            covered_acs = set().union(*(item["covered_acs"] for item in resolved))
+            if not required_acs or not required_acs <= covered_acs:
+                missing = required_acs - covered_acs
+                gate.add(
+                    "BLOCK", "PROTO-REVIEW-VERIFICATION-AC-UNPROVED", review_path,
+                    "ARUN 没有覆盖当前 STEP 对应的 TEST→AC，不能用无关验收记录升级验证状态",
+                    f"{step_id}: {', '.join(sorted(missing or required_acs)) or 'AC-* missing'}",
+                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                )
+                continue
+            status_supported_acs = (
+                set().union(*(item["covered_acs"] for item in resolved if item["browser"]))
+                if status == "browser_checked" else
+                set().union(*(item["covered_acs"] for item in resolved if item["integration"]))
+                if status == "integration_checked" else
+                set().union(*(item["passed_acs"] for item in resolved if item["conclusive"]))
+                if status == "accepted" else
+                set().union(*(item["failed_acs"] for item in resolved))
+            )
+            level_supported = (
+                bool(required_acs & status_supported_acs) if status == "failed"
+                else required_acs <= status_supported_acs
+            )
+            if not level_supported:
+                gate.add(
+                    "BLOCK", "PROTO-REVIEW-VERIFICATION-LEVEL-UNPROVED", review_path,
+                    "已提供 ARUN 的环境或结论不足以支撑当前 verification_status",
+                    f"{step_id}: {status}",
+                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                )
     if valid_prototypes and prototype_level in {"L3", "L4"}:
         if not valid_acceptance_runs:
             gate.add(
@@ -1085,8 +1387,10 @@ def main() -> int:
         english = output_language.casefold().startswith("en")
         print("NOT_PROVEN: " + ("; " if english else "；").join(payload["not_proven"]))
         labels = ("Cause", "Fix", "Example") if english else ("原因", "修复", "示例")
+        actionable_findings = [item for item in gate.findings if item.severity != "INFO"]
+        information_findings = [item for item in gate.findings if item.severity == "INFO"]
         if args.diagnostics == "roots":
-            roots, unique_count = diagnostic_roots(gate.findings, args.max_findings)
+            roots, unique_count = diagnostic_roots(actionable_findings, args.max_findings)
             for item, count in roots:
                 ref = f" [{item.ref}]" if item.ref else ""
                 localized = localized_finding(item, output_language)
@@ -1096,24 +1400,30 @@ def main() -> int:
                 print(f"  {labels[2]}: {localized['repair_example']}")
             print(
                 f"ROOT_GROUPS shown={len(roots)} unique={unique_count} "
-                f"repeated_findings_compacted={len(gate.findings) - len(roots)}"
+                f"repeated_findings_compacted={len(actionable_findings) - len(roots)}"
             )
             hidden_groups = unique_count - len(roots)
             if hidden_groups > 0:
                 print(f"... {hidden_groups} additional root groups; rerun with --format json")
         else:
             limit = 1 if args.diagnostics == "first" else min(max(args.max_findings, 0), 12) if args.diagnostics == "summary" else max(args.max_findings, 0)
-            for item in gate.findings[:limit]:
+            for item in actionable_findings[:limit]:
                 ref = f" [{item.ref}]" if item.ref else ""
                 localized = localized_finding(item, output_language)
                 print(f"{item.severity} {item.code}{ref}: {localized['message']}")
                 print(f"  {labels[0]}: {localized['cause']}")
                 print(f"  {labels[1]}: {localized['how_to_fix']}")
                 print(f"  {labels[2]}: {localized['repair_example']}")
-            hidden = len(gate.findings) - limit
+            hidden = len(actionable_findings) - limit
             if hidden > 0:
                 print(f"... {hidden} additional findings; rerun with --format json")
-        if gate.findings:
+        for item in information_findings[: min(max(args.max_findings, 0), 5)]:
+            localized = localized_finding(item, output_language)
+            ref = f" [{item.ref}]" if item.ref else ""
+            print(f"INFO {item.code}{ref}: {localized['message']}")
+        if len(information_findings) > 5:
+            print(f"... {len(information_findings) - 5} additional INFO records; rerun with --format json")
+        if actionable_findings:
             print(f"RETRY: {payload['retry_command']}")
     return int(payload["exit_code"])
 

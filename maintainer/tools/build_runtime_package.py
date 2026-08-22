@@ -49,13 +49,20 @@ def file_record(path: Path) -> dict[str, object]:
 
 
 def source_revision() -> tuple[str, bool]:
-    commit = subprocess.run(
-        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True, capture_output=True,
-    ).stdout.strip() or "uncommitted"
-    dirty = bool(subprocess.run(
-        ["git", "status", "--porcelain"], cwd=ROOT, text=True, capture_output=True,
-    ).stdout.strip())
-    return (f"{commit}-dirty" if dirty and commit != "uncommitted" else commit), dirty
+    try:
+        revision = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True, capture_output=True,
+        )
+        if revision.returncode or not revision.stdout.strip():
+            return "uncommitted-dirty", True
+        commit = revision.stdout.strip()
+        status = subprocess.run(
+            ["git", "status", "--porcelain"], cwd=ROOT, text=True, capture_output=True,
+        )
+    except OSError:
+        return "uncommitted-dirty", True
+    dirty = status.returncode != 0 or bool(status.stdout.strip())
+    return (f"{commit}-dirty" if dirty else commit), dirty
 
 
 def self_check(root: Path) -> list[str]:

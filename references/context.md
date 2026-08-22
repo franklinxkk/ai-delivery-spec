@@ -95,6 +95,12 @@ Round 0 建立来源/权威清单；后续按端到端角色纵切，通常每�
 指标、状态和开放项，再按端到端角色路径或稳定 ID 切片。只有用户已确认可见评审模式时，三个以上
 重型页面才允许进入分页/懒加载评审容器；材料很大本身不构成自动生成评审模式的授权。
 
+Stage 0 的对象计数或结构 PASS 不证明主链可达。对每条进入本轮范围的核心链，逐步核对“上一步实际产出
+的对象/状态/版本/身份键”是否满足下一动作守卫；再核对失败、退回、重试和补偿能否回到可达入口。无法
+从源码、运行证据或权威决定确认时登记 `UNK-*`，不能因两个按钮分别可点击就宣称端到端闭环。
+结构化盘点使用 `critical_chains` 与 `reachability_breaks`；旧台账可先以 GAP 兼容，但一旦声明链路，空断裂
+清单不能掩盖未评估或 unknown/broken 的 link/recovery。Stage 0 只记录观察事实和缺口，不替产品决定目标规则。
+
 ## Agent 交接投影 / Agent Handoff Projection
 
 长时间 AI Coding 只按 `schemas/agent-handoff.schema.json` 生成已触发工作包：
@@ -109,6 +115,11 @@ Round 0 建立来源/权威清单；后续按端到端角色纵切，通常每�
 还必须引用工程团队维护的 `engineering_baseline_ref`。模块 Agent 只加载根摘要、一个模块包、
 直接 XCT/EDGE 和测试，不加载全项目；它可返回 `REV-*` 或变更提案，但不能直接修改业务基线。
 Qoder/Claude/Cursor/Codex 规则只是控制面的投影，不能复制出不同业务 ID。
+
+可见评审工作台是人类执行导航，不是 Agent 的第五个角色镜头。Agent 从 manifest 取得当前 packet 与
+`STEP/AC` 引用，再解析同 hash 的 PRD/Truth 切片和工程基线；评审 HTML 仅可用于定位 `VIEW/REG/ACT`
+和可见状态，不得从角色说明文案反推出新规则。handoff 缺失或 hash 漂移时返回 GAP，不能退回“通读
+评审原型后自行实现”。
 
 每个 `XCT-*` 正文至少声明：影响模块、全局不变量、执行点、例外与失败处理和对应 `AC-*`。
 只有“权限/审计见全局规则”的空壳不能进入 ready_for_implementation，门禁返回

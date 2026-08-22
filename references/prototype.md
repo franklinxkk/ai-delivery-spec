@@ -49,8 +49,9 @@ py -3 scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app-n
   拒绝或延后后，同一需求基线内不再询问；范围或交付对象实质变化时才重新确认。
 - 正式需求生命周期的 review 工作站是评审签署和缺口关闭，不等于原型的可见评审模式。“评审一下
   现有原型”默认只做分析并报告问题；除非用户另行确认，不修改页面、不增加编号或评审抽屉。
-- 人类评审模式采用页面共识 + `1/2/3...` 编号标注 + 共识/前端/后端/测试角色说明。每点只写该位置
-  必须知道的目标、输入输出、限制、守卫、失败恢复和验收证据，不复制整份 PRD，也不承载代码方案。
+- 人类评审模式采用“旅程导读 → 单步聚焦 → 按需页面标注 → 验收场景”的评审工作台；`1/2/3...`
+  编号只是页面定位手段，不是信息架构。每点只写该位置必须知道的目标、输入输出、限制、守卫、失败
+  恢复和验收引用，不复制整份 PRD，也不承载代码方案。
 - Coding Agent 不以可见标注文案为唯一输入；单 HTML 可嵌入结构化 handoff，多文件项目可用独立
   JSON/YAML。handoff 只引用同一基线、稳定 ID、当前变化、禁止推断和开放项。
 
@@ -65,7 +66,7 @@ py -3 scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app-n
 - 权限守卫、异常、重试、补偿、对账和恢复；
 - 高价值输入输出、边界与验收证据。
 
-常规字段释义、显然按钮、重复规则和完整测试步骤只进入机器覆盖账本，不逐项占用右侧抽屉。一个编号
+常规字段释义、显然按钮、重复规则和完整测试步骤只进入机器覆盖账本，不逐项占用聚焦面板。一个编号
 可以覆盖一个区域或一段连续操作。每条可见说明使用“已确认/建议/未知/观察缺陷”之一，并提供精确
 `source_ref`；没有来源的技术接口、数据库表或 API 路径不得补写为已确认合同。角色栏只显示有实施
 责任的产品/前端/后端/测试内容，空栏不渲染。禁止用“每个字段必须一个可见标注”作为完整性门槛。
@@ -89,24 +90,14 @@ py -3 scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app-n
 可见状态与反馈；后端显示权威源、守卫、状态、事件、幂等与恢复；测试显示正反路径、边界和证据。镜头
 只能改变呈现密度，不能拥有不同事实。核心字段缺失时显示“待确认/GAP”，不得用空白或通用话术掩盖。
 
-### 2.2 评审叠加实现合同
+### 2.2 评审工作台（按需加载）
 
-- 产品模式与评审模式共享同一份业务 DOM、状态仓和 `ACT-*`，评审开关、编号显隐、分组切换等纯
-  界面动作使用 `UIACT-REVIEW-*`；禁止复制一份产品页面或用 `ACT-REVIEW-*` 混入业务动作。
-- 交互账本是从原型提取的覆盖清单和回归证据，不是需求权威源；它不能为 PRD 中不存在的业务
-  `ACT-*`、`AC-*` 或规则自证合法。纯界面 `UIACT-*` 可不进入业务动作清单，但仍须有处理器和可见结果。
-- 模式切换前后必须比较业务指纹：业务 `data-action/data-state/data-field/data-metric`、表单值、
-  disabled/checked 与当前视图保持一致；评审模式只改变布局和说明可见性。
-- 评审开关始终可点击且不可被抽屉覆盖；侧栏优先参与布局重排。固定页头、弹窗、抽屉、Toast 和
-  遮罩必须避让评审侧栏。编号默认可关闭，优先标当前可见/可达目标，动态目标在渲染后绑定。
-- 禁止用 `!important` 压制存量样式。浏览器证据至少包含：开关可达、产品→评审→产品往返业务
-  指纹不变、无关键控件遮挡、动态视图标注可达、窄屏退化策略。
-- 左侧编号和右侧卡片共享稳定 `data-review-id`（或卡片用同值 `data-review-target`），当前两侧均用
-  `aria-current="true"`/等价可访问状态表达选中；点击任一侧必须定位、滚动并框选另一侧。角色控件用
-  `data-review-role`，对应内容用 `data-review-lens`，不得只切换按钮颜色。浏览器 `ARUN-*` 至少逐项证明
-  编号→卡片、卡片→编号、共识/前端/后端/测试内容差异，以及切回产品态后业务指纹不变。
+确认需要评审模式后，必须继续完整读取 `references/review-workspace.md`。该合同把评审组织成导读、旅程、
+单步聚焦、按需页面和验收五种任务模式，以 `FLOW-* → STEP-* → EDGE-*` 表达跨页/跨角色交接；四个
+人类角色读取同一基线的工作包，Coding Agent 读取结构化 handoff。不得用按钮说明长列表、固定宽长抽屉
+或 H5 遮罩替代评审工作台。
 
-### 2.3 重型存量页面的评审容器
+### 2.5 重型存量页面的评审容器
 
 只有评审模式已经确认且存在三个以上重型 HTML/Axure 页面时才使用容器。容器必须分页/分组，默认
 不创建产品 iframe，一次只在用户选择后懒加载一页，并提供同目录直接打开回退；不得把全部页面同时
@@ -446,6 +437,23 @@ classification：confirmed、inferred、unknown、defect_candidate。核心未�
 已有 PRD 时，恢复观察使用 `INV-*`，并通过 `baseline_requirement_refs`、`mapping_status`、准确
 `target_refs` 映射。所有推断项进入有责任人的 `RBATCH-*`；未确认、否决或转未知前不得声明
 `baseline_ready`。反推能恢复交互证据，不能推断 API语义、指标口径、权限权威、合规或 AC 真相。
+
+对象清单不证明关键链可达。只对本轮必须走通的存量主链声明 `critical_chains`，逐个 link 记录
+`action_ref → processing_refs → outputs(objects/states/versions/identities) → next_entry/next_guard`、
+观察来源和 `reachability`；同一链再分别盘点 `failure/return/retry/compensation`。没有来源的维度标为
+`missing/unknown`，并通过 `reachability_breaks` 登记 `INV-BREAK-*`；关键 unknown 断裂绑定 P0 `UNK-*`、
+owner 与 `blocks_stage`。这只是“当前系统实际能否走通”的盘点，不选择赢单后应进入哪个目标状态、
+不补 API/表/错误码，也不把缺陷候选升级为需求。
+
+`observed` 引用还必须匹配盘点类型，不能用“ID 存在”冒充语义可达。`next_entry.refs` 采用保守精确
+集合：view/page/screen/route/action/handoff/handler/system_process/process/event/queue/task/endpoint；
+`next_guard.refs` 采用 guard/rule/state/condition/handler/system_process/process/policy/permission（兼容对应
+中文精确值）。不做关键词包含匹配；新类型先登记 GAP/扩展门禁，不能用未知 type 证明 reachable。
+
+旧台账没有 `critical_chains` 时保持可读；若已标记 core action/handler，Stage 0 返回 GAP 提醒补关键链，
+不机械要求所有静态页面建立流程。新台账一旦声明关键链，就必须完成四类输出、下一入口/守卫和四类恢复
+路径。`reachability_breaks: []` 只在所有 declared link/recovery 均有来源证明 `reachable/terminal` 或明确
+`not_applicable` 时成立；任何 `in_progress/missing/unknown/broken` 仍存在而断裂清单为空都必须阻断。
 
 ## 存量资产处置 / Legacy Asset Disposition
 

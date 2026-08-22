@@ -1,0 +1,453 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/review-workspace.schema.json",
+  "title": "AI Delivery Spec Human Review Workspace Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "workspace_id",
+    "language",
+    "baseline",
+    "layout",
+    "roles",
+    "journeys",
+    "steps",
+    "edges",
+    "scenarios",
+    "unknown_refs",
+    "machine_handoff",
+    "not_proven"
+  ],
+  "properties": {
+    "schema_version": { "const": "5.4.7" },
+    "workspace_id": { "type": "string", "pattern": "^REVIEW-[A-Z0-9-]+$" },
+    "language": { "enum": ["zh-CN", "en-US"] },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "hash", "requirement_ref"],
+      "properties": {
+        "version": { "type": "string", "minLength": 1 },
+        "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "requirement_ref": { "type": "string", "minLength": 1 }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["default_mode", "default_role", "desktop_surface", "compact_surface", "marker_policy"],
+      "properties": {
+        "default_mode": { "enum": ["orientation", "journey", "focus", "page", "acceptance"] },
+        "default_role": { "enum": ["product", "frontend", "backend", "qa"] },
+        "desktop_surface": { "const": "adaptive_canvas_focus" },
+        "compact_surface": { "const": "fullscreen_switcher" },
+        "marker_policy": { "enum": ["selected_step_only", "current_page_on_demand"] }
+      }
+    },
+    "roles": {
+      "type": "array",
+      "minItems": 4,
+      "uniqueItems": true,
+      "items": { "enum": ["product", "frontend", "backend", "qa"] },
+      "allOf": [
+        { "contains": { "const": "product" } },
+        { "contains": { "const": "frontend" } },
+        { "contains": { "const": "backend" } },
+        { "contains": { "const": "qa" } }
+      ]
+    },
+    "journeys": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/journey" }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/step" }
+    },
+    "edges": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/edge" }
+    },
+    "scenarios": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/scenario" }
+    },
+    "unknown_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^UNK-[A-Z0-9-]+$" }
+    },
+    "machine_handoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "manifest_ref", "packet_refs", "gap_refs"],
+      "properties": {
+        "status": { "enum": ["not_requested", "blocked", "ready"] },
+        "manifest_ref": { "type": ["string", "null"], "minLength": 1 },
+        "packet_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^(MOD|XCT|EDGE)-[A-Z0-9-]+$" }
+        },
+        "gap_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^UNK-[A-Z0-9-]+$" }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "not_requested" } }, "required": ["status"] },
+          "then": {
+            "properties": {
+              "manifest_ref": { "type": "null" },
+              "packet_refs": { "maxItems": 0 },
+              "gap_refs": { "maxItems": 0 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "blocked" } }, "required": ["status"] },
+          "then": {
+            "properties": {
+              "manifest_ref": { "type": "null" },
+              "packet_refs": { "maxItems": 0 },
+              "gap_refs": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "ready" } }, "required": ["status"] },
+          "then": {
+            "properties": {
+              "manifest_ref": { "type": "string", "minLength": 1 },
+              "packet_refs": { "minItems": 1 },
+              "gap_refs": { "maxItems": 0 }
+            }
+          }
+        }
+      ]
+    },
+    "not_proven": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 3 }
+    }
+  },
+  "$defs": {
+    "stableRef": {
+      "type": "string",
+      "pattern": "^(SRC|DEC|CHG|REQ|ROLE|FLOW|STEP|VIEW|REG|ACT|UIACT|ENT|FLD|METRIC|RULE|STM|STATE|API|EVT|INT|AC|TEST|EVD|UNK|INV|MOD|XCT|EDGE)-[A-Z0-9-]+$"
+    },
+    "refList": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/stableRef" }
+    },
+    "gapList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^UNK-[A-Z0-9-]+$" }
+    },
+    "journey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["journey_id", "title", "goal", "entry_refs", "completion_refs", "step_refs", "model_refs"],
+      "properties": {
+        "journey_id": { "type": "string", "pattern": "^FLOW-[A-Z0-9-]+$" },
+        "title": { "type": "string", "minLength": 2 },
+        "goal": { "type": "string", "minLength": 5 },
+        "entry_refs": { "$ref": "#/$defs/refList" },
+        "completion_refs": { "$ref": "#/$defs/refList" },
+        "step_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^STEP-[A-Z0-9-]+$" }
+        },
+        "model_refs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["flow_refs", "state_machine_refs", "data_flow_refs", "not_applicable"],
+          "properties": {
+            "flow_refs": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "type": "string", "pattern": "^FLOW-[A-Z0-9-]+$" }
+            },
+            "state_machine_refs": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "type": "string", "pattern": "^STM-[A-Z0-9-]+$" }
+            },
+            "data_flow_refs": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "type": "string", "pattern": "^(INT|EVT|ENT)-[A-Z0-9-]+$" }
+            },
+            "not_applicable": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "enum": ["state_machine", "data_flow"] }
+            }
+          }
+        }
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "step_id",
+        "dom_anchor",
+        "title",
+        "task_kind",
+        "accountable_ref",
+        "business_status",
+        "verification_status",
+        "source_refs",
+        "evidence_refs",
+        "target_refs",
+        "outcome_refs",
+        "contract_refs",
+        "risk_dimensions",
+        "marker_refs",
+        "role_packets"
+      ],
+      "properties": {
+        "step_id": { "type": "string", "pattern": "^STEP-[A-Z0-9-]+$" },
+        "dom_anchor": { "type": "string", "pattern": "^review-step-STEP-[A-Z0-9-]+$" },
+        "title": { "type": "string", "minLength": 2 },
+        "task_kind": { "enum": ["user_commit", "system_commit", "decision", "observation", "handoff"] },
+        "accountable_ref": { "type": "string", "pattern": "^(ROLE|ENT)-[A-Z0-9-]+$" },
+        "business_status": { "enum": ["confirmed", "proposed", "inferred", "unknown", "conflict"] },
+        "verification_status": { "enum": ["not_run", "static_checked", "browser_checked", "integration_checked", "accepted", "failed"] },
+        "source_refs": { "$ref": "#/$defs/refList" },
+        "evidence_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^(EVD|ARUN)-[A-Z0-9-]+$" }
+        },
+        "target_refs": { "$ref": "#/$defs/refList" },
+        "outcome_refs": { "$ref": "#/$defs/refList" },
+        "contract_refs": { "$ref": "#/$defs/refList" },
+        "risk_dimensions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["boundary", "permission_or_role", "failure_or_recovery", "network_or_concurrency"] }
+        },
+        "marker_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^(VIEW|REG|ACT|FLD|METRIC|STATE)-[A-Z0-9-]+$" }
+        },
+        "role_packets": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["product", "frontend", "backend", "qa"],
+          "properties": {
+            "product": { "$ref": "#/$defs/productPacket" },
+            "frontend": { "$ref": "#/$defs/frontendPacket" },
+            "backend": { "$ref": "#/$defs/backendPacket" },
+            "qa": { "$ref": "#/$defs/qaPacket" }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "verification_status": { "const": "not_run" } },
+            "required": ["verification_status"]
+          },
+          "then": { "properties": { "evidence_refs": { "maxItems": 0 } } },
+          "else": { "properties": { "evidence_refs": { "minItems": 1 } } }
+        }
+      ]
+    },
+    "productPacket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["applicability", "not_affected_reason", "slot_coverage", "contract_refs", "gap_refs"],
+      "properties": {
+        "applicability": { "enum": ["active", "not_affected"] },
+        "not_affected_reason": { "type": ["string", "null"], "minLength": 5 },
+        "slot_coverage": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["purpose", "scope_and_boundary", "decision_and_source", "business_result"] },
+          "maxItems": 4
+        },
+        "contract_refs": { "$ref": "#/$defs/refListMaybeEmpty" },
+        "gap_refs": { "$ref": "#/$defs/gapList" }
+      },
+      "allOf": [{ "$ref": "#/$defs/packetApplicability" }]
+    },
+    "frontendPacket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["applicability", "not_affected_reason", "slot_coverage", "contract_refs", "gap_refs"],
+      "properties": {
+        "applicability": { "enum": ["active", "not_affected"] },
+        "not_affected_reason": { "type": ["string", "null"], "minLength": 5 },
+        "slot_coverage": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["entry_and_visibility", "surface_and_fields", "interaction_and_ui_states", "visible_result"] },
+          "maxItems": 4
+        },
+        "contract_refs": { "$ref": "#/$defs/refListMaybeEmpty" },
+        "gap_refs": { "$ref": "#/$defs/gapList" }
+      },
+      "allOf": [{ "$ref": "#/$defs/packetApplicability" }]
+    },
+    "backendPacket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["applicability", "not_affected_reason", "slot_coverage", "contract_refs", "gap_refs"],
+      "properties": {
+        "applicability": { "enum": ["active", "not_affected"] },
+        "not_affected_reason": { "type": ["string", "null"], "minLength": 5 },
+        "slot_coverage": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["authority_and_identity", "input_output_and_validation", "guards_and_state_effects", "side_effects_and_audit", "failure_recovery"] },
+          "maxItems": 5
+        },
+        "contract_refs": { "$ref": "#/$defs/refListMaybeEmpty" },
+        "gap_refs": { "$ref": "#/$defs/gapList" }
+      },
+      "allOf": [
+        { "$ref": "#/$defs/packetApplicability" },
+        {
+          "if": {
+            "properties": { "applicability": { "const": "active" } },
+            "required": ["applicability"]
+          },
+          "then": { "properties": { "slot_coverage": { "minItems": 5 } } }
+        }
+      ]
+    },
+    "qaPacket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["applicability", "not_affected_reason", "scenario_refs", "slot_coverage", "contract_refs", "gap_refs"],
+      "properties": {
+        "applicability": { "enum": ["active", "not_affected"] },
+        "not_affected_reason": { "type": ["string", "null"], "minLength": 5 },
+        "scenario_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^TEST-[A-Z0-9-]+$" }
+        },
+        "slot_coverage": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["preconditions_and_fixture", "positive_and_negative", "boundary_and_permission", "visible_and_domain_result", "evidence"] },
+          "maxItems": 5
+        },
+        "contract_refs": { "$ref": "#/$defs/refListMaybeEmpty" },
+        "gap_refs": { "$ref": "#/$defs/gapList" }
+      },
+      "allOf": [
+        { "$ref": "#/$defs/packetApplicability" },
+        {
+          "if": {
+            "properties": { "applicability": { "const": "active" } },
+            "required": ["applicability"]
+          },
+          "then": { "properties": { "slot_coverage": { "minItems": 5 } } }
+        }
+      ]
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["edge_id", "kind", "from_step_ref", "to_step_ref", "producer_ref", "consumer_ref", "payload_refs", "entry_refs", "postcondition_refs", "recovery_refs"],
+      "properties": {
+        "edge_id": { "type": "string", "pattern": "^EDGE-[A-Z0-9-]+$" },
+        "kind": { "enum": ["start", "next", "branch", "parallel", "join", "return", "error", "compensate", "finish"] },
+        "from_step_ref": { "type": ["string", "null"], "pattern": "^STEP-[A-Z0-9-]+$" },
+        "to_step_ref": { "type": ["string", "null"], "pattern": "^STEP-[A-Z0-9-]+$" },
+        "producer_ref": { "type": "string", "pattern": "^(ROLE|ENT)-[A-Z0-9-]+$" },
+        "consumer_ref": { "type": "string", "pattern": "^(ROLE|ENT)-[A-Z0-9-]+$" },
+        "payload_refs": { "$ref": "#/$defs/refList" },
+        "entry_refs": { "$ref": "#/$defs/refList" },
+        "postcondition_refs": { "$ref": "#/$defs/refList" },
+        "recovery_refs": { "$ref": "#/$defs/refListMaybeEmpty" },
+        "condition_ref": { "anyOf": [{ "$ref": "#/$defs/stableRef" }, { "type": "null" }] }
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scenario_id",
+        "acceptance_ref",
+        "covered_step_refs",
+        "title",
+        "source_refs",
+        "coverage"
+      ],
+      "properties": {
+        "scenario_id": { "type": "string", "pattern": "^TEST-[A-Z0-9-]+$" },
+        "acceptance_ref": { "type": "string", "pattern": "^AC-[A-Z0-9-]+$" },
+        "covered_step_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^STEP-[A-Z0-9-]+$" }
+        },
+        "title": { "type": "string", "minLength": 2 },
+        "source_refs": { "$ref": "#/$defs/refList" },
+        "coverage": {
+          "type": "array",
+          "minItems": 4,
+          "uniqueItems": true,
+          "items": { "enum": ["positive", "negative", "boundary", "permission_or_role", "failure_or_recovery", "network_or_concurrency", "visible_and_domain_result", "evidence"] },
+          "allOf": [
+            { "contains": { "const": "positive" } },
+            { "contains": { "const": "negative" } },
+            { "contains": { "const": "visible_and_domain_result" } },
+            { "contains": { "const": "evidence" } }
+          ]
+        }
+      }
+    },
+    "refListMaybeEmpty": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/stableRef" }
+    },
+    "packetApplicability": {
+      "if": {
+        "properties": { "applicability": { "const": "not_affected" } },
+        "required": ["applicability"]
+      },
+      "then": {
+        "properties": {
+          "not_affected_reason": { "type": "string", "minLength": 5 },
+          "slot_coverage": { "maxItems": 0 },
+          "contract_refs": { "maxItems": 0 },
+          "gap_refs": { "maxItems": 0 },
+          "scenario_refs": { "maxItems": 0 }
+        }
+      },
+      "else": {
+        "properties": {
+          "not_affected_reason": { "type": "null" },
+          "contract_refs": { "minItems": 1 },
+          "slot_coverage": { "minItems": 4 },
+          "scenario_refs": { "minItems": 1 }
+        }
+      }
+    }
+  }
+}

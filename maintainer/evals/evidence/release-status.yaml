@@ -1,5 +1,5 @@
 schema_version: 5.3.0
-skill_version: 5.4.6
+skill_version: 5.4.7
 runtime: pure_v5
 domain_packs:
   count: 7
@@ -26,18 +26,18 @@ trace_release_proxy:
     convention: passed
     effectiveness: partial
   effectiveness_limit: >-
-    three private real-project calibration shapes and deterministic regressions exposed
-    and repaired contract gaps, but fresh blind Skill-on/Skill-off repetitions, controlled
-    token/time accounting and versioned human ratings remain incomplete
+    private real-project calibration and one isolated pure-model cold-read exposed and
+    repaired contract gaps, but repeated blind Skill-on/Skill-off runs, controlled token/time
+    accounting, real receiver handoff and versioned human ratings remain incomplete
   private_calibration:
     sample_shapes: [same-baseline review A/B, brownfield review retrofit, multi-surface prototype acceptance]
     publication: anonymized aggregate only; raw files and customer/project names excluded
 known_limitations:
 - five domain methods have owner-attested production practice; all built-in packs
   pass deterministic contract checks but fresh-agent/expert maturity remains separate
-- v5.4.6 cross-entry and adversarial contract probes are deterministic; isolated
-  no-skill comparison, fresh-agent repetitions and versioned user feedback remain
-  separate evidence
+- v5.4.7 review-workspace and adversarial contract probes are deterministic; one isolated
+  no-skill cold-read is recorded separately, while fresh-agent repetitions, real receiver
+  handoff and versioned user feedback remain incomplete
 - domain expert, customer, production, legal, safety, and financial correctness are
   not proven
 - deterministic fixtures and private brownfield calibration expose method gaps but
