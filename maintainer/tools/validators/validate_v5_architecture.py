@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate v5 runtime budgets, routing, schemas, and public claim sources."""
+"""Validate runtime budgets and capability contracts without pinning prose."""
 
 from __future__ import annotations
 
@@ -123,6 +123,13 @@ def line_count(path: Path) -> int:
     return len(path.read_text(encoding="utf-8").splitlines())
 
 
+def is_ignored_root_dir(name: str) -> bool:
+    """Ignore known generated local evidence, never arbitrary product dirs."""
+    return name in {
+        ".pytest_cache", ".mypy_cache", ".ruff_cache", "htmlcov", "dist", "build", "custom",
+    } or name.startswith(("pytest-cache-files-", "ads-human-review-", "ads-init-", "ads-manifest-"))
+
+
 def main() -> int:
     failures: list[str] = []
     skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
@@ -130,20 +137,20 @@ def main() -> int:
         failures.append(f"SKILL.md exceeds {SKILL_LINE_BUDGET} lines")
     if len(skill) > SKILL_CHAR_BUDGET:
         failures.append(f"SKILL.md exceeds {SKILL_CHAR_BUDGET} characters")
-    marker_groups = (
-        ("ToB/ToG",),
-        ("Requirement Management Kernel", "需求管理内核"),
-        ("Product Truth", "结构化事实源"),
-        ("one human-readable", "一份人类可读"),
-        ("both directions", "双向追溯"),
-        ("Start with intake", "需求准入"),
-        ("scripts/query_domain.py",),
-        ("schemas/agent-handoff.schema.json",),
-        ("schemas/domain-candidate.schema.json",),
-    )
-    for aliases in marker_groups:
+    # Stable capabilities belong here; release-era slogans and incidental file
+    # names do not. Required runtime files are validated separately below.
+    capability_groups = {
+        "requirements kernel": ("Requirement Management Kernel", "需求管理内核"),
+        "shared human/agent contract": ("人机共用", "human and agent"),
+        "single product fact line": ("产品事实主线", "product fact line"),
+        "bidirectional trace": ("双向追溯", "bidirectional trace"),
+        "requirements intake": ("需求准入", "requirements intake"),
+        "retrieved domain evidence": ("scripts/query_domain.py",),
+        "structured implementation handoff": ("结构化 handoff", "structured handoff"),
+    }
+    for capability, aliases in capability_groups.items():
         if not any(marker.lower() in skill.lower() for marker in aliases):
-            failures.append(f"SKILL.md missing v5 marker: {' / '.join(aliases)}")
+            failures.append(f"SKILL.md missing capability contract: {capability}")
 
     for relative in REQUIRED_FILES:
         path = ROOT / relative
@@ -207,12 +214,12 @@ def main() -> int:
         ".gitattributes", ".gitignore", "CHANGELOG.md", "LICENSE", "README.md", "SKILL.md"
     }
     allowed_root_dirs = {".github", "agents", "examples", "maintainer", "references", "schemas", "scripts"}
-    ignored_root_dirs = {
-        ".pytest_cache", ".mypy_cache", ".ruff_cache", "htmlcov", "dist", "build", "custom",
-    }
     # Git worktrees expose `.git` as a pointer file instead of a directory.
     actual_root_files = {path.name for path in ROOT.iterdir() if path.is_file() and path.name != ".git"}
-    actual_root_dirs = {path.name for path in ROOT.iterdir() if path.is_dir() and path.name not in ignored_root_dirs | {".git"}}
+    actual_root_dirs = {
+        path.name for path in ROOT.iterdir()
+        if path.is_dir() and path.name != ".git" and not is_ignored_root_dir(path.name)
+    }
     if actual_root_files != allowed_root_files:
         failures.append(f"root files are not minimal: {sorted(actual_root_files)}")
     if actual_root_dirs != allowed_root_dirs:
@@ -241,13 +248,16 @@ def main() -> int:
         if not (ROOT / "maintainer" / required_dir).is_dir():
             failures.append(f"maintainer lab misses directory: {required_dir}")
 
-    package_files = [
-        path for path in ROOT.rglob("*")
-        if path.is_file()
-        and ".git" not in path.parts
-        and "__pycache__" not in path.parts
-        and path.suffix != ".pyc"
-    ]
+    package_files = []
+    for path in ROOT.rglob("*"):
+        if not path.is_file() or path.suffix == ".pyc":
+            continue
+        relative_parts = path.relative_to(ROOT).parts
+        if ".git" in relative_parts or "__pycache__" in relative_parts:
+            continue
+        if relative_parts and is_ignored_root_dir(relative_parts[0]):
+            continue
+        package_files.append(path)
     if len(package_files) > REPOSITORY_FILE_BUDGET:
         failures.append(
             f"repository has {len(package_files)} publishable files; budget is {REPOSITORY_FILE_BUDGET}"

@@ -1019,7 +1019,7 @@ class HandoffChecks:
         for legacy_path in sorted(self.review_workspace_legacy_paths & prototype_resolved, key=str):
             self.add(
                 "BLOCK", "PROTO-REVIEW-WORKSPACE-REQUIRED", legacy_path,
-                "旧式评审叠加可以单独视检，但不能作为研发测试交接；请迁移为 v5.4.7 旅程评审工作台",
+                "旧式评审叠加可以单独视检，但不能作为研发测试交接；请迁移为 v5.4.7 Final 上下文驱动评审工作台",
                 affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
             )
         expected_prd_hash = self._sha256(prd)

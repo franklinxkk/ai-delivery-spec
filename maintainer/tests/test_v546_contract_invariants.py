@@ -1,4 +1,4 @@
-"""5.4.6 cross-entry, fragile-surface, domain and trust-boundary regressions."""
+"""Cross-entry, fragile-surface, domain, source, and trust-boundary invariants."""
 from __future__ import annotations
 import json
 import subprocess
@@ -6,6 +6,7 @@ import sys
 import zipfile
 from pathlib import Path
 import yaml
+from jsonschema import Draft202012Validator
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from quality_gate import Gate
@@ -176,3 +177,44 @@ def test_human_projection_and_distribution_gate_prevent_word_metadata_leak(tmp_p
     _write_minimal_docx(clean_docx, ['Product requirement', 'Body content'])
     clean = run('scripts/ai_delivery_spec_cli.py', 'check-distribution', '--document', str(clean_docx), '--format', 'json')
     assert clean.returncode == 0 and json.loads(clean.stdout)['status'] == 'PASS'
+
+def test_distribution_gate_blocks_secrets_without_echoing_them(tmp_path: Path) -> None:
+    secret_value = 'live-credential-value-123456789'
+    exposed = tmp_path / 'exposed.txt'
+    exposed.write_text(f'client_secret: {secret_value}\n', encoding='utf-8')
+    result = run('scripts/ai_delivery_spec_cli.py', 'check-distribution', '--document', str(exposed), '--format', 'json')
+    assert result.returncode == 2
+    payload = json.loads(result.stdout)
+    assert payload['status'] == 'BLOCKED' and any('plaintext credential' in issue for issue in payload['issues'])
+    assert secret_value not in result.stdout + result.stderr
+    referenced = tmp_path / 'referenced.yaml'
+    referenced.write_text('secret_refs: [SECRET-RUNTIME-001]\n', encoding='utf-8')
+    safe = run('scripts/ai_delivery_spec_cli.py', 'check-distribution', '--document', str(referenced), '--format', 'json')
+    assert safe.returncode == 0
+
+def test_delivery_profiles_sources_and_execution_constraints_are_orthogonal() -> None:
+    truth_schema = json.loads((ROOT / 'schemas/product-truth.schema.json').read_text(encoding='utf-8'))
+    truth = yaml.safe_load((ROOT / 'references/templates/product-truth-template.yaml').read_text(encoding='utf-8'))
+    assert not list(Draft202012Validator(truth_schema).iter_errors(truth))
+    truth['delivery_context'].update({'artifact_mode': 'card', 'risk_facets': ['regulated'], 'evidence_level': 'browser'})
+    truth['sources'][0].update({'kind': 'engineering_constraint', 'credential_status': 'secret_ref_only', 'secret_refs': ['SECRET-RUNTIME-001']})
+    assert not list(Draft202012Validator(truth_schema).iter_errors(truth))
+
+    handoff_schema = json.loads((ROOT / 'schemas/agent-handoff.schema.json').read_text(encoding='utf-8'))
+    handoff = yaml.safe_load((ROOT / 'references/templates/agent-handoff-manifest-template.yaml').read_text(encoding='utf-8'))
+    handoff['execution_constraints'] = {
+        'baseline_ref': 'ENG-BASELINE-001', 'protected_surfaces': ['production data'],
+        'allowed_actions': ['read approved fixtures'], 'forbidden_actions': ['write production'],
+        'environment_refs': ['ENV-TEST-001'], 'secret_refs': ['SECRET-RUNTIME-001'],
+        'required_evidence': ['ARUN-SANDBOX-001'], 'rollback_owner': 'engineering owner',
+    }
+    assert not list(Draft202012Validator(handoff_schema).iter_errors(handoff))
+    handoff['execution_constraints']['secret_refs'] = ['literal-password']
+    assert list(Draft202012Validator(handoff_schema).iter_errors(handoff))
+
+def test_architecture_gate_checks_capabilities_without_requiring_old_slogans() -> None:
+    validator = (ROOT / 'maintainer/tools/validators/validate_v5_architecture.py').read_text(encoding='utf-8')
+    assert 'ToB/ToG' not in validator
+    assert 'one human-readable' not in validator
+    result = run('maintainer/tools/validators/validate_v5_architecture.py')
+    assert result.returncode == 0, result.stdout + result.stderr

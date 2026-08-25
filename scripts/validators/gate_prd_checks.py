@@ -96,6 +96,46 @@ class PRDChecks:
                     return True
         return False
 
+    def _check_document_status_consistency(
+        self,
+        path: Path,
+        raw: str,
+        frontmatter: dict[str, Any],
+    ) -> None:
+        """Reject a baseline/ready claim that still identifies itself as a draft.
+
+        This is deliberately narrow: it compares explicit document-control
+        metadata instead of inferring maturity from arbitrary prose.
+        """
+        status = str(frontmatter.get("status", "")).strip().casefold().replace("-", "_").replace(" ", "_")
+        baseline_claims = {
+            "baseline", "baselined", "approved", "ready", "ready_for_implementation",
+            "已基线", "已批准", "可实施", "可开发",
+        }
+        if status not in baseline_claims:
+            return
+
+        contradictions: list[str] = []
+        version = str(frontmatter.get("baseline_version", frontmatter.get("version", ""))).strip()
+        if re.search(r"(?:^|[._-])(?:draft|candidate|review)(?:$|[._-])|草稿|待评审", version, re.I):
+            contradictions.append(f"baseline_version={version}")
+
+        control_block = "\n".join(raw.splitlines()[:160])
+        status_row = re.search(
+            r"(?im)^\s*\|\s*(?:当前状态|文档状态|状态|status)\s*\|\s*([^|\n]+)\|",
+            control_block,
+        )
+        if status_row and re.search(r"草稿|待评审|draft|review\s*candidate", status_row.group(1), re.I):
+            contradictions.append(f"document_control={status_row.group(1).strip()}")
+
+        if contradictions:
+            self.add(
+                "BLOCK", "PRD-STATUS-CONTRADICTION", path,
+                "frontmatter 声称已基线/可实施，但版本或文档控制仍明确标为草稿/待评审",
+                "; ".join(contradictions),
+                affected_consumers=("product", "architect", "frontend", "backend", "qa", "coding_agent"),
+            )
+
     def _check_unknowns(
         self,
         path: Path,
@@ -735,6 +775,7 @@ class PRDChecks:
             for failure in analyze_prd_structure(raw, full_prd=True):
                 self.add("BLOCK", "PRD-STRUCTURE", path, failure)
         self._check_authority(path, frontmatter)
+        self._check_document_status_consistency(path, raw, frontmatter)
         self._check_unknowns(path, raw, frontmatter, stage=stage, scope_refs=scope_refs)
         self._check_triggered_contracts(path, raw, frontmatter, level)
         self._check_testability(path, raw, frontmatter, level)

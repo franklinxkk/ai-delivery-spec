@@ -523,6 +523,154 @@ def _unreachable_hidden_surfaces(tag_source: str, scripts: str) -> list[str]:
     return sorted(set(unreachable))
 
 
+class _ReviewFinalParser(HTMLParser):
+    """Collect the 5.4.7-final context-scoped review projection."""
+
+    _VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.stack: list[tuple[str, bool]] = []
+        self.context_stack: list[tuple[int, str]] = []
+        self.active_cards: list[dict[str, object]] = []
+        self.context_roots: Counter[str] = Counter()
+        self.markers: list[dict[str, str]] = []
+        self.cards: list[dict[str, str]] = []
+        self.card_text: dict[str, str] = {}
+        self.targets: dict[str, Counter[str]] = defaultdict(Counter)
+        self.visible_targets: dict[str, Counter[str]] = defaultdict(Counter)
+        self.content_owners: list[tuple[str, str]] = []
+        self.workspace_roots: list[dict[str, str]] = []
+
+    @staticmethod
+    def _hidden(attrs: dict[str, str], parent_hidden: bool, tag: str) -> bool:
+        style = re.sub(r"\s+", "", attrs.get("style", "").casefold())
+        classes = {item.casefold() for item in attrs.get("class", "").split()}
+        return (
+            parent_hidden
+            or tag in {"script", "style", "template"}
+            or "hidden" in attrs
+            or attrs.get("aria-hidden", "").casefold() == "true"
+            or bool(classes & {"hidden", "is-hidden"})
+            or "display:none" in style
+            or "visibility:hidden" in style
+        )
+
+    @staticmethod
+    def _target_refs(attrs: dict[str, str]) -> set[str]:
+        refs: set[str] = set()
+        for key, prefixes in (
+            ("data-action", ("ACT-",)),
+            ("data-field", ("FLD-",)),
+            ("data-bind", ("FLD-",)),
+            ("data-metric", ("METRIC-",)),
+            ("data-state", ("STATE-",)),
+        ):
+            value = attrs.get(key, "").upper()
+            if value.startswith(prefixes):
+                refs.add(value)
+        testid = attrs.get("data-testid", "").upper()
+        for prefix in ("PAGE-", "REGION-"):
+            if testid.startswith(prefix):
+                candidate = testid[len(prefix):]
+                if re.fullmatch(r"(?:VIEW|REG)-[A-Z0-9-]+", candidate):
+                    refs.add(candidate)
+        return refs
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        tag = tag.casefold()
+        attr_map = {str(key).casefold(): str(value or "") for key, value in attrs}
+        hidden = self._hidden(attr_map, self.stack[-1][1] if self.stack else False, tag)
+        self.stack.append((tag, hidden))
+        depth = len(self.stack)
+
+        context_ref = attr_map.get("data-review-context-root", "").upper()
+        if context_ref:
+            self.context_roots[context_ref] += 1
+            self.context_stack.append((depth, context_ref))
+        active_context = self.context_stack[-1][1] if self.context_stack else ""
+
+        if "data-review-workspace" in attr_map:
+            self.workspace_roots.append(attr_map)
+
+        marker_ref = attr_map.get("data-review-ref", "").upper()
+        if re.fullmatch(r"(?:RP|RVP)-[A-Z0-9-]+", marker_ref):
+            self.markers.append({
+                "ref": marker_ref,
+                "context": attr_map.get("data-review-context", active_context).upper(),
+                "number": attr_map.get("data-review-number", ""),
+                "visible": str(not hidden).lower(),
+            })
+
+        point_ref = attr_map.get("data-review-point", "").upper()
+        if re.fullmatch(r"(?:RP|RVP)-[A-Z0-9-]+", point_ref):
+            record = {
+                "ref": point_ref,
+                "context": attr_map.get("data-review-context", "").upper(),
+                "number": attr_map.get("data-review-number", ""),
+                "business_status": attr_map.get("data-review-business-status", "").casefold(),
+                "verification_status": attr_map.get("data-review-verification-status", "").casefold(),
+                "evidence_origin": attr_map.get("data-review-evidence-origin", "").casefold(),
+                "visible": str(not hidden).lower(),
+            }
+            self.cards.append(record)
+            self.active_cards.append({"depth": depth, "ref": point_ref, "text": [], "hidden": hidden})
+
+        content = attr_map.get("data-review-content", "").casefold()
+        owner = attr_map.get("data-review-owner-tab", "").casefold()
+        if content:
+            self.content_owners.append((content, owner))
+
+        if active_context:
+            for target_ref in self._target_refs(attr_map):
+                self.targets[active_context][target_ref] += 1
+                if not hidden:
+                    self.visible_targets[active_context][target_ref] += 1
+
+        if tag in self._VOID_TAGS:
+            self.handle_endtag(tag)
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self.handle_starttag(tag, attrs)
+        if tag.casefold() not in self._VOID_TAGS:
+            self.handle_endtag(tag)
+
+    def handle_data(self, data: str) -> None:
+        if not data.strip():
+            return
+        for record in self.active_cards:
+            if not bool(record["hidden"]):
+                record["text"].append(data.strip())  # type: ignore[union-attr]
+
+    def handle_endtag(self, tag: str) -> None:
+        closing = tag.casefold()
+        index = next((item for item in range(len(self.stack) - 1, -1, -1) if self.stack[item][0] == closing), None)
+        if index is None:
+            return
+        closing_depth = index + 1
+        remaining_cards: list[dict[str, object]] = []
+        for record in self.active_cards:
+            if int(record["depth"]) < closing_depth:
+                remaining_cards.append(record)
+                continue
+            ref = str(record["ref"])
+            text = " ".join(str(item) for item in record["text"])
+            self.card_text[ref] = f"{self.card_text.get(ref, '')} {text}".strip()
+        self.active_cards = remaining_cards
+        self.context_stack = [item for item in self.context_stack if item[0] < closing_depth]
+        self.stack = self.stack[:index]
+
+
+def _review_final_projection(raw: str) -> _ReviewFinalParser:
+    parser = _ReviewFinalParser()
+    try:
+        parser.feed(raw)
+        parser.close()
+    except Exception:
+        pass
+    return parser
+
+
 class PrototypeChecks:
     def _prototype_dependency(self, prototype: Path, uri: str, kind: str) -> Path | None:
         """Resolve a local prototype dependency without leaving the prototype directory."""
@@ -569,6 +717,625 @@ class PrototypeChecks:
                 attrs[key.strip().lower()] = value.strip()
             contracts[marker.group(1).upper()] = (attrs, raw[marker.end():end])
         return contracts
+
+    def _check_review_workspace_final(
+        self,
+        path: Path,
+        raw: str,
+        tag_source: str,
+        scripts: str,
+        document: dict[str, object],
+    ) -> set[str]:
+        """Validate the context-driven 5.4.7-final human review projection.
+
+        Static checks prove declaration integrity and the presence of runtime
+        mechanisms. Product-fingerprint invariance, overlay ordering, target
+        visibility and non-overlap still require the browser ARUN contract.
+        """
+        schema_errors = []
+        if REVIEW_WORKSPACE_SCHEMA.is_file():
+            schema = json.loads(REVIEW_WORKSPACE_SCHEMA.read_text(encoding="utf-8"))
+            schema_errors = sorted(
+                Draft202012Validator(schema).iter_errors(document),
+                key=lambda item: tuple(str(part) for part in item.path),
+            )
+            for error in schema_errors:
+                location = ".".join(str(part) for part in error.path) or "<root>"
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-WORKSPACE-SCHEMA", path,
+                    error.message, location,
+                    affected_consumers=("product", "frontend", "backend", "qa"),
+                )
+        if schema_errors:
+            return set()
+
+        self.review_workspace_contracts.append((path.resolve(), document))
+        projection = _review_final_projection(raw)
+        workspace_id = str(document.get("workspace_id", ""))
+        workspace = document.get("workspace") or {}
+        workspace = workspace if isinstance(workspace, dict) else {}
+        review_level = str(workspace.get("review_level", ""))
+        default_tab = str(workspace.get("default_tab", ""))
+        initial_context = str(workspace.get("initial_context_ref", "")).upper()
+
+        declared_language = str(document.get("language", "")).casefold()
+        html_language_match = re.search(r"<html\b[^>]*\blang\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)
+        html_language = html_language_match.group(1).casefold() if html_language_match else ""
+        if declared_language != html_language:
+            self.add(
+                "BLOCK", "PROTO-REVIEW-LANGUAGE-MISMATCH", path,
+                "评审 manifest 的人类语言与 HTML lang 不一致",
+                f"{declared_language or 'missing'} != {html_language or 'missing'}",
+                affected_consumers=("product", "frontend", "backend", "qa"),
+            )
+
+        if len(projection.workspace_roots) != 1:
+            self.add(
+                "BLOCK", "PROTO-REVIEW-CONTEXT-CONTRACT", path,
+                "5.4.7 Final 必须且只能有一个 data-review-workspace 根",
+                str(len(projection.workspace_roots)),
+                affected_consumers=("frontend", "qa"),
+            )
+            root: dict[str, str] = {}
+        else:
+            root = projection.workspace_roots[0]
+        expected_resizable = str(bool((document.get("layout_contract") or {}).get("resizable"))).lower()
+        required_root = {
+            "data-review-workspace": workspace_id,
+            "data-review-level": review_level,
+            "data-review-active-tab": default_tab,
+            "data-review-current-context": initial_context,
+            "data-review-current-context-control": "read-only",
+            "data-review-layout": "participate-in-layout",
+            "data-review-overlay-product-ui": "false",
+            "data-review-resizable": expected_resizable,
+            "data-review-collapsible": "true",
+        }
+        for name, expected in required_root.items():
+            if root.get(name, "") != expected:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-CONTEXT-CONTRACT" if "context" in name else "PROTO-REVIEW-LAYOUT-NONOVERLAP",
+                    path, "评审根属性与 Final manifest 不一致", f"{name}: {root.get(name, 'missing')} != {expected}",
+                    affected_consumers=("product", "frontend", "qa"),
+                )
+
+        prohibited_attributes = (
+            "data-review-mode", "data-review-mode-target", "data-review-active-role",
+            "data-review-role", "data-review-lens", "data-review-journey", "data-review-step",
+        )
+        for attribute in prohibited_attributes:
+            if re.search(rf"\b{re.escape(attribute)}\s*=", tag_source, re.I):
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-LEVEL", path,
+                    "Final 评审态不得恢复 Journey/STEP/Page/Role 驱动的人类一级导航", attribute,
+                    affected_consumers=("product", "frontend", "backend", "qa"),
+                )
+
+        baseline = document.get("baseline") or {}
+        if isinstance(baseline, dict) and str(baseline.get("hash", "")) == "0" * 64:
+            self.add(
+                "BLOCK", "PROTO-REVIEW-BASELINE-PLACEHOLDER", path,
+                "评审工作台仍使用全零基线 hash，无法证明与 PRD 同源", workspace_id,
+                affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+            )
+        placeholder_paths = _review_placeholder_paths(document)
+        if placeholder_paths:
+            self.add(
+                "BLOCK", "PROTO-REVIEW-WORKSPACE-PLACEHOLDER", path,
+                "评审工作台索引仍含模板占位或无理由的不适用值", ", ".join(placeholder_paths[:8]),
+                affected_consumers=("product", "frontend", "backend", "qa"),
+            )
+
+        context_items = [item for item in document.get("review_contexts", []) or [] if isinstance(item, dict)]
+        point_items = [item for item in document.get("review_points", []) or [] if isinstance(item, dict)]
+        candidate_items = [item for item in document.get("candidate_review_points", []) or [] if isinstance(item, dict)]
+        context_ids = [str(item.get("context_ref", "")).upper() for item in context_items]
+        point_ids = [str(item.get("ref", "")).upper() for item in point_items]
+        contexts = {str(item.get("context_ref", "")).upper(): item for item in context_items}
+        points = {str(item.get("ref", "")).upper(): item for item in point_items}
+        candidate_ids = [str(item.get("candidate_id", "")).upper() for item in candidate_items]
+        candidate_subjects = [str(item.get("subject_ref", "")).upper() for item in candidate_items]
+        if str(document.get("contract_revision", "")).upper() == "RC2":
+            legacy_record_ids = sorted(point_id for point_id in point_ids if not point_id.startswith("RVP-"))
+            if legacy_record_ids:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-TRUTH-ID", path,
+                    "RC2 的评审记录 ID 必须使用 RVP-*，并通过 subject_ref 单独引用业务事实",
+                    ", ".join(legacy_record_ids[:8]),
+                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                )
+        if len(context_ids) != len(set(context_ids)) or len(point_ids) != len(set(point_ids)):
+            self.add(
+                "BLOCK", "PROTO-REVIEW-DECLARED-DENOMINATOR", path,
+                "review_contexts 或 review_points 存在重复稳定 ID，官方分母不唯一", workspace_id,
+                affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+            )
+        if len(candidate_ids) != len(set(candidate_ids)):
+            self.add(
+                "BLOCK", "PROTO-REVIEW-CANDIDATE-DIFF", path,
+                "candidate_review_points 存在重复 candidate_id，防漏结果不可审计", workspace_id,
+                affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+            )
+        if set(candidate_ids) & set(point_ids):
+            self.add(
+                "BLOCK", "PROTO-REVIEW-DECLARED-DENOMINATOR", path,
+                "Candidate 被复用为正式 ReviewPoint；两者必须物理分离", ", ".join(sorted(set(candidate_ids) & set(point_ids))),
+                affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+            )
+        for item in candidate_items:
+            if not item.get("candidate_reason") or item.get("business_status") != "gap":
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-CANDIDATE-DIFF", path,
+                    "Candidate 必须说明高价值发现原因并保持 GAP，禁止静默提升", str(item.get("candidate_id", "missing")),
+                    affected_consumers=("product", "frontend", "backend", "qa"),
+                )
+        for point in point_items:
+            if point.get("business_status") == "confirmed" and point.get("evidence_origin") in {"prototype_inferred", "assumption"}:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-STATUS-AXES", path,
+                    "原型反推或假设不能标为已确认，必须保持 GAP/待决并引导产品澄清", str(point.get("ref", "missing")),
+                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                )
+        if initial_context not in contexts or str(contexts.get(initial_context, {}).get("context_type", "")) != "VIEW":
+            self.add(
+                "BLOCK", "PROTO-REVIEW-CONTEXT-CONTRACT", path,
+                "初始 CurrentContext 必须引用已声明 VIEW", initial_context or "missing",
+                affected_consumers=("product", "frontend", "qa"),
+            )
+
+        location_surface = re.search(
+            r"<[A-Za-z][^>]*\bdata-review-product-location(?:\s*=|\s|>)[^>]*>",
+            tag_source,
+            re.I | re.S,
+        )
+        if location_surface is None:
+            self.add(
+                "BLOCK", "PROTO-PRODUCT-LOCATION-MISMATCH", path,
+                "评审工作台缺少只读系统位置表面，冷读者无法判断当前功能从哪个产品入口进入",
+                "data-review-product-location",
+                affected_consumers=("product", "frontend", "backend", "qa"),
+            )
+
+        def static_selector_tags(selector: str) -> list[str]:
+            selector = selector.strip()
+            id_match = re.fullmatch(r"#([A-Za-z_][\w:.-]*)", selector)
+            if id_match:
+                value = re.escape(id_match.group(1))
+                return [
+                    tag for tag in re.findall(r"<[A-Za-z][^>]*>", tag_source, re.S)
+                    if re.search(rf"\bid\s*=\s*['\"]{value}['\"]", tag, re.I)
+                ]
+            attr_match = re.fullmatch(
+                r"\[([A-Za-z_:][-\w:.]*)\s*=\s*['\"]([^'\"]+)['\"]\]", selector
+            )
+            if attr_match:
+                name, value = map(re.escape, attr_match.groups())
+                return [
+                    tag for tag in re.findall(r"<[A-Za-z][^>]*>", tag_source, re.S)
+                    if re.search(rf"\b{name}\s*=\s*['\"]{value}['\"]", tag, re.I)
+                ]
+            return []
+
+        for context_ref, context in contexts.items():
+            location = context.get("product_location") or {}
+            if not isinstance(location, dict):
+                continue
+            mode = str(location.get("navigation_mode", ""))
+            parent_ref = str(location.get("parent_view_ref", "") or "").upper()
+            if mode == "inherit_parent":
+                parent = contexts.get(parent_ref)
+                if parent is None or str(parent.get("context_type", "")) != "VIEW":
+                    self.add(
+                        "BLOCK", "PROTO-PRODUCT-LOCATION-MISMATCH", path,
+                        "业务浮层必须继承一个已声明 VIEW 的产品位置", f"{context_ref}->{parent_ref or 'missing'}",
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+                else:
+                    parent_location = parent.get("product_location") or {}
+                    if isinstance(parent_location, dict):
+                        inherited_fields = ("menu_path", "active_entry_selector")
+                        drift = [
+                            field for field in inherited_fields
+                            if location.get(field) != parent_location.get(field)
+                        ]
+                        if drift:
+                            self.add(
+                                "BLOCK", "PROTO-PRODUCT-LOCATION-MISMATCH", path,
+                                "业务浮层必须继承父 VIEW 的菜单路径；无菜单父页面也必须继承其空路径与豁免位置",
+                                f"{context_ref}->{parent_ref}: {', '.join(drift)}",
+                                affected_consumers=("product", "frontend", "backend", "qa"),
+                            )
+            elif mode == "inherit_invoker":
+                if str(context.get("context_type", "")) == "VIEW" or parent_ref:
+                    self.add(
+                        "BLOCK", "PROTO-PRODUCT-LOCATION-MISMATCH", path,
+                        "inherit_invoker 只适用于可从多个 VIEW 打开的业务浮层，且不得伪造固定 parent_view_ref", context_ref,
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+            if mode != "menu_bound":
+                continue
+            selector = str(location.get("active_entry_selector", "") or "")
+            matches = static_selector_tags(selector)
+            if len(matches) > 1:
+                self.add(
+                    "BLOCK", "PROTO-PRODUCT-LOCATION-MISMATCH", path,
+                    "活动菜单入口选择器在产品 DOM 中不唯一", f"{context_ref}/{selector}: {len(matches)}",
+                    affected_consumers=("product", "frontend", "qa"),
+                )
+            if context_ref != initial_context or len(matches) != 1:
+                continue
+            tag = matches[0]
+            active = bool(
+                re.search(r"\bclass\s*=\s*['\"][^'\"]*\bactive\b", tag, re.I)
+                or re.search(r"\baria-current\s*=\s*['\"](?:page|true)['\"]", tag, re.I)
+                or re.search(r"\bdata-active\s*=\s*['\"]true['\"]", tag, re.I)
+            )
+            if not active or re.search(r"\bdisabled(?:\s|=|>)", tag, re.I):
+                self.add(
+                    "BLOCK", "PROTO-PRODUCT-LOCATION-MISMATCH", path,
+                    "初始 VIEW 的真实产品菜单未唯一高亮，或入口被错误禁用", f"{context_ref}/{selector}",
+                    affected_consumers=("product", "frontend", "qa"),
+                )
+
+        declared_order: dict[str, tuple[str, int]] = {}
+        for context_ref, context in contexts.items():
+            refs = [str(item).upper() for item in context.get("review_point_refs", []) or []]
+            for number, point_ref in enumerate(refs, start=1):
+                if point_ref in declared_order:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-DECLARED-DENOMINATOR", path,
+                        "同一评审点被多个 Context 或同一 Context 重复声明", point_ref,
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    )
+                declared_order[point_ref] = (context_ref, number)
+                point = points.get(point_ref)
+                if point is None or str(point.get("owner_context_ref", "")).upper() != context_ref:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-POINT-COVERAGE", path,
+                        "Context 的有序评审点与 ReviewPoint.owner_context_ref 不一致", f"{context_ref}->{point_ref}",
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    )
+        for orphan in sorted(set(points) - set(declared_order)):
+            self.add(
+                "BLOCK", "PROTO-REVIEW-POINT-COVERAGE", path,
+                "ReviewPoint 没有进入任何 review_contexts 官方分母", orphan,
+                affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+            )
+
+        if projection.context_roots[initial_context] != 1:
+            self.add(
+                "BLOCK", "PROTO-REVIEW-CONTEXT-CONTRACT", path,
+                "初始 CurrentContextRoot 必须在产品 DOM 中恰好存在一次", initial_context,
+                affected_consumers=("frontend", "qa"),
+            )
+        for context_ref in sorted(set(contexts) - {initial_context}):
+            if projection.context_roots[context_ref] > 1:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-CONTEXT-CONTRACT", path,
+                    "业务浮层 ContextRoot 在静态 DOM 中重复，最上层解析可能歧义", context_ref,
+                    affected_consumers=("frontend", "qa"),
+                )
+            elif projection.context_roots[context_ref] == 0:
+                self.add(
+                    "GAP", "PROTO-REVIEW-OVERLAY-DETECTION", path,
+                    "动态业务浮层未在静态 DOM 中出现，必须由浏览器 ARUN 证明 Context Event、探测与回退", context_ref,
+                    affected_consumers=("frontend", "qa"),
+                )
+
+        overlay_signatures: Counter[tuple[str, str, int]] = Counter()
+        for context_ref, context in contexts.items():
+            detection = context.get("detection") or {}
+            if not isinstance(detection, dict):
+                continue
+            signature = (
+                str(detection.get("type", "")), str(detection.get("target", "")),
+                int(detection.get("overlay_priority", 0)),
+            )
+            if str(context.get("context_type", "")) != "VIEW":
+                overlay_signatures[signature] += 1
+        for signature, count in overlay_signatures.items():
+            if count > 1:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-OVERLAY-DETECTION", path,
+                    "多个业务浮层使用相同探测目标与优先级，无法确定 topmost Context", str(signature),
+                    affected_consumers=("frontend", "qa"),
+                )
+
+        visible_tabs = [item.casefold() for item in re.findall(r"\bdata-review-tab\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)]
+        tab_targets = {item.casefold() for item in re.findall(r"\bdata-review-tab-target\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)}
+        required_tabs = {"overview", "function_flow", "boundary_acceptance"}
+        if review_level in {"R1", "R2"}:
+            if Counter(visible_tabs) != Counter({item: 1 for item in required_tabs}) or tab_targets != required_tabs:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-LEVEL", path,
+                    "R1/R2 必须且只能呈现总览、功能与流转、边界与验收三个可达一级页签", ", ".join(visible_tabs),
+                    affected_consumers=("product", "frontend", "backend", "qa"),
+                )
+        elif set(visible_tabs) - required_tabs or tab_targets - required_tabs:
+            self.add(
+                "BLOCK", "PROTO-REVIEW-LEVEL", path,
+                "R0 即使呈现页签也不得增加 Journey/STEP/Page/Role 导航", ", ".join(visible_tabs),
+                affected_consumers=("product", "frontend", "backend", "qa"),
+            )
+
+        ownership = {
+            "overview": {"background_problem", "goals_success", "roles", "scope", "main_chain", "change_summary", "risk_summary"},
+            "function_flow": {"current_context", "business_duty", "upstream_downstream", "review_points", "visible_domain_results", "data_event_summary"},
+            "boundary_acceptance": {"rules", "permissions", "state_machines", "metric_calculations", "exceptions_recovery", "acceptance_tests", "open_items"},
+        }
+        owner_counts = Counter(item[0] for item in projection.content_owners)
+        for content, owner in projection.content_owners:
+            if owner not in ownership or content not in ownership[owner]:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-TAB-OWNERSHIP", path,
+                    "评审内容进入了错误页签或没有唯一 owner", f"{content}->{owner or 'missing'}",
+                    affected_consumers=("product", "frontend", "backend", "qa"),
+                )
+        for duplicate, count in owner_counts.items():
+            if count > 1:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-TAB-OWNERSHIP", path,
+                    "同一完整内容域在多个位置重复，形成第二份可修改事实", duplicate,
+                    affected_consumers=("product", "frontend", "backend", "qa"),
+                )
+        if review_level in {"R1", "R2"}:
+            minimum_content = {
+                "goals_success", "scope", "main_chain", "current_context",
+                "review_points", "visible_domain_results", "rules", "acceptance_tests", "open_items",
+            }
+            for missing in sorted(minimum_content - set(owner_counts)):
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-TAB-OWNERSHIP", path,
+                    "三页签缺少最小人类冷读内容域", missing,
+                    affected_consumers=("product", "frontend", "backend", "qa"),
+                )
+
+        marker_counts = Counter(item["ref"] for item in projection.markers)
+        card_counts = Counter(item["ref"] for item in projection.cards)
+        for extra in sorted((set(marker_counts) | set(card_counts)) - set(points)):
+            self.add(
+                "BLOCK", "PROTO-REVIEW-POINT-COVERAGE", path,
+                "DOM 中出现未由 review_contexts 声明的官方 marker/card", extra,
+                affected_consumers=("product", "frontend", "qa"),
+            )
+        for point_ref, point in points.items():
+            context_ref, expected_number = declared_order.get(point_ref, ("", 0))
+            marker_required = bool(point.get("marker_required"))
+            target_selector = str(point.get("target_selector", "") or "")
+            subject_ref = str(point.get("subject_ref", "") or "").upper()
+            visible_subject_count = projection.visible_targets[context_ref][subject_ref]
+            if not marker_required and (target_selector or visible_subject_count > 0):
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-MARKER-REQUIRED", path,
+                    "已有可见 UI 目标的正式评审点不得只在右栏编号，必须在产品目标旁显示同号 marker",
+                    point_ref,
+                    affected_consumers=("product", "frontend", "qa", "coding_agent"),
+                    related_refs=(point_ref,),
+                )
+            expected_marker_count = 1 if marker_required else 0
+            if marker_counts[point_ref] != expected_marker_count or card_counts[point_ref] != 1:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-POINT-COVERAGE", path,
+                    "每个声明评审点必须有一张卡；需要 UI 落点时还必须恰好一个 marker", point_ref,
+                    affected_consumers=("product", "frontend", "qa", "coding_agent"),
+                )
+            for item in [*([marker for marker in projection.markers if marker["ref"] == point_ref]), *([card for card in projection.cards if card["ref"] == point_ref])]:
+                if item.get("context") != context_ref or item.get("number") != str(expected_number):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-CONTEXT-NUMBERING", path,
+                        "marker/card 必须按当前 Context 的声明顺序从 1 编号", f"{point_ref}: {item.get('context')}/{item.get('number')}",
+                        affected_consumers=("product", "frontend", "qa"),
+                    )
+            card = next((item for item in projection.cards if item["ref"] == point_ref), {})
+            for key in ("business_status", "verification_status", "evidence_origin"):
+                if card.get(key) != str(point.get(key, "")).casefold():
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-STATUS-AXES", path,
+                        "ReviewPoint 卡片未同步显示业务状态、验证状态和证据来源", f"{point_ref}/{key}",
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+            card_text = projection.card_text.get(point_ref, "")
+            for visible_value in (str(point.get("title", "")), str(point.get("summary", ""))):
+                if visible_value and visible_value not in card_text:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-POINT-COVERAGE", path,
+                        "ReviewPoint 的标题或连贯业务摘要只在 manifest 中存在，未在人类卡片可见", point_ref,
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+                    break
+            target_ref = str(point.get("target_ref", "") or "").upper()
+            if marker_required and target_ref:
+                visible_count = projection.visible_targets[context_ref][target_ref]
+                total_count = projection.targets[context_ref][target_ref]
+                if context_ref == initial_context and visible_count != 1:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-TARGET-RESOLUTION", path,
+                        "初始 CurrentContext 内 marker 目标必须当前可见且恰好一个", f"{context_ref}/{target_ref}: {visible_count}",
+                        affected_consumers=("frontend", "qa"), related_refs=(point_ref, target_ref),
+                    )
+                elif total_count > 1:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-TARGET-RESOLUTION", path,
+                        "同一 Context 内目标锚点不唯一，禁止取全局第一个节点", f"{context_ref}/{target_ref}: {total_count}",
+                        affected_consumers=("frontend", "qa"), related_refs=(point_ref, target_ref),
+                    )
+
+        declared_targets = {
+            str(point.get("target_ref", "")).upper()
+            for point in point_items if point.get("target_ref")
+        }
+        candidate_gap_refs: set[str] = set()
+        candidate_block_refs: set[str] = set()
+        high_risk_action = re.compile(r"(?:SUBMIT|SAVE|DELETE|REMOVE|APPROVE|REJECT|PUBLISH|UPLOAD|IMPORT|SYNC|SEND|ASSIGN|CLOSE|CANCEL|REVOKE|PAY|REFUND)")
+        for context_ref, target_counts in projection.targets.items():
+            for target_ref in target_counts:
+                if target_ref in declared_targets or target_ref in candidate_subjects or target_ref.startswith("VIEW-"):
+                    continue
+                if target_ref.startswith(("METRIC-", "STATE-")) or (target_ref.startswith("ACT-") and high_risk_action.search(target_ref)):
+                    candidate_block_refs.add(target_ref)
+                elif target_ref.startswith(("ACT-", "FLD-", "REG-")):
+                    candidate_gap_refs.add(target_ref)
+        for ref in sorted(candidate_block_refs):
+            self.add(
+                "BLOCK", "PROTO-REVIEW-CANDIDATE-DIFF", path,
+                "高风险 Candidate 未进入声明评审点；门禁只报告，不自动改变官方分母", ref,
+                affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"), related_refs=(ref,),
+            )
+        for ref in sorted(candidate_gap_refs - candidate_block_refs):
+            self.add(
+                "GAP", "PROTO-REVIEW-CANDIDATE-DIFF", path,
+                "稳定业务锚点未进入声明评审点，请人工确认是遗漏还是有依据的不适用", ref,
+                affected_consumers=("product", "frontend", "backend", "qa"), related_refs=(ref,),
+            )
+
+        event_name = str((document.get("context_contract") or {}).get("product_context_event", "")) if isinstance(document.get("context_contract"), dict) else ""
+        runtime_contracts = {
+            "PROTO-PRODUCT-LOCATION-MISMATCH": (
+                "resolveProductLocation" in scripts
+                and "syncProductLocation" in scripts
+                and all(item in scripts for item in ("observed", "expected", "diff"))
+                and "active_menu_path" in scripts
+                and "expanded_menu_ancestors" in scripts
+            ),
+            "PROTO-REVIEW-PRODUCT-FINGERPRINT-INVARIANT": (
+                scripts.count("captureProductFingerprint") >= 3
+                and "captureReviewFingerprint" in scripts
+                and "assertProductFingerprintInvariant" in scripts
+                and "runReviewAction" in scripts
+                and "__ADS_REVIEW_GATE__" in scripts
+                and "PROTO-REVIEW-PRODUCT-FINGERPRINT-INVARIANT" in scripts
+            ),
+            "PROTO-REVIEW-OVERLAY-DETECTION": (
+                bool(event_name and event_name in scripts and re.search(r"addEventListener", scripts))
+                and "MutationObserver" in scripts and "resolveCurrentContext" in scripts
+                and "PROTO-REVIEW-OVERLAY-UNDECLARED" in scripts
+            ),
+            "PROTO-REVIEW-TARGET-RESOLUTION": (
+                ("targetFor" in scripts or "resolveReviewTarget" in scripts)
+                and "currentContextRoot" in scripts and "querySelectorAll" in scripts
+                and ("isTargetVisible" in scripts or "visible" in scripts)
+                and "nodes.length===0" in scripts and "nodes.length>1" in scripts
+                and "PROTO-REVIEW-TARGET-UNRESOLVED" in scripts
+                and "PROTO-REVIEW-TARGET-AMBIGUOUS" in scripts
+            ),
+            "PROTO-REVIEW-SELECTION-NOT-SYNCED": (
+                "data-review-target-selected" in scripts
+                and "aria-current" in scripts
+                and ("focusReviewTarget" in scripts or "highlightReviewTarget" in scripts)
+                and bool(re.search(
+                    r"\[\s*data-review-target-selected\s*=\s*['\"]?true['\"]?\s*\][^{]*\{[^}]*(?:outline|box-shadow)\s*:",
+                    raw, re.I | re.S,
+                ))
+            ),
+            "PROTO-REVIEW-SHARE-LOCATOR": (
+                bool(re.search(r"URLSearchParams|location\.hash", scripts))
+                and all(item in scripts for item in ("baseline_ref", "context_ref", "review_point_ref", "active_tab"))
+                and "hydrateLocator" in scripts
+            ),
+            "PROTO-REVIEW-RECORD-PERSISTENCE": (
+                "localStorage" in scripts and "JSON.stringify" in scripts and "JSON.parse" in scripts
+            ),
+        }
+        for code, passed in runtime_contracts.items():
+            if not passed:
+                self.add(
+                    "BLOCK", code, path,
+                    "Final 评审运行时缺少可静态发现的必要机制；仍需浏览器 ARUN 证明真实行为", workspace_id,
+                    affected_consumers=("product", "frontend", "backend", "qa"),
+                )
+
+        review_actions = {
+            item.upper() for item in re.findall(r"\bdata-action\s*=\s*['\"](UIACT-REVIEW-[A-Z0-9-]+)['\"]", tag_source, re.I)
+        }
+        required_actions = {
+            "UIACT-REVIEW-SELECT", "UIACT-REVIEW-TOGGLE", "UIACT-REVIEW-SHARE",
+            "UIACT-REVIEW-RECORD", "UIACT-REVIEW-EXPORT", "UIACT-REVIEW-IMPORT",
+        }
+        if review_level in {"R1", "R2"}:
+            required_actions |= {"UIACT-REVIEW-TAB", "UIACT-REVIEW-COMPACT"}
+        missing_actions = sorted(required_actions - review_actions)
+        if missing_actions:
+            self.add(
+                "BLOCK", "PROTO-REVIEW-LEVEL", path,
+                "评审工作台缺少必要的纯评审动作入口", ", ".join(missing_actions),
+                affected_consumers=("product", "frontend", "qa"),
+            )
+        expand_button = re.search(
+            r"<button[^>]*data-action\s*=\s*['\"]UIACT-REVIEW-TOGGLE['\"][^>]*data-ads-act\s*=\s*['\"]expand['\"][^>]*>",
+            tag_source, re.I | re.S,
+        ) or re.search(
+            r"<button[^>]*data-ads-act\s*=\s*['\"]expand['\"][^>]*data-action\s*=\s*['\"]UIACT-REVIEW-TOGGLE['\"][^>]*>",
+            tag_source, re.I | re.S,
+        )
+        if not expand_button or "ads-collapsed" not in scripts or "UIACT-REVIEW-TOGGLE" not in scripts:
+            self.add(
+                "BLOCK", "PROTO-REVIEW-COLLAPSE-ROUNDTRIP", path,
+                "评审栏必须使用可操作按钮完成收起→展开往返，不能收起后失去入口", workspace_id,
+                affected_consumers=("product", "frontend", "qa"),
+            )
+
+        progress_tag = next((tag for tag in re.findall(r"<[A-Za-z][^>]*>", tag_source, re.S) if re.search(r"\bdata-review-progress(?:\s*=|\s|>)", tag, re.I)), "")
+        denominator_match = re.search(r"\bdata-review-progress-denominator\s*=\s*['\"](\d+)['\"]", progress_tag, re.I)
+        if not denominator_match or int(denominator_match.group(1)) != len(points):
+            self.add(
+                "BLOCK", "PROTO-REVIEW-PROGRESS-DENOMINATOR", path,
+                "可见评审进度分母必须等于全部适用的声明 ReviewPoint，浏览不改变分母", f"expected={len(points)}",
+                affected_consumers=("product", "frontend", "qa"),
+            )
+        for attribute in ("data-review-share-locator", "data-review-records"):
+            if not re.search(rf"\b{re.escape(attribute)}(?:\s*=|\s|>)", tag_source, re.I):
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-SHARE-LOCATOR" if "share" in attribute else "PROTO-REVIEW-RECORD-PERSISTENCE",
+                    path, "评审工作台缺少可见的分享定位或评审记录表面", attribute,
+                    affected_consumers=("product", "frontend", "qa"),
+                )
+
+        if re.search(r"\[data-review-workspace\][^{]*\{[^}]*position\s*:\s*fixed", raw, re.I | re.S) or re.search(r"data-review-workspace[^>]*style\s*=\s*['\"][^'\"]*position\s*:\s*fixed", tag_source, re.I):
+            self.add(
+                "BLOCK", "PROTO-REVIEW-LAYOUT-NONOVERLAP", path,
+                "桌面评审区使用 fixed 覆盖产品主区，违反 participate_in_layout", workspace_id,
+                affected_consumers=("product", "frontend", "qa"),
+            )
+
+        cold_read = document.get("cold_read_contract") or {}
+        if isinstance(cold_read, dict) and str(cold_read.get("status", "")) == "passed" and not cold_read.get("evidence_refs"):
+            self.add(
+                "BLOCK", "PROTO-REVIEW-COLD-READ", path,
+                "冷读通过必须绑定未参与者证据，不能由生成者或模型自报", workspace_id,
+                affected_consumers=("product", "frontend", "backend", "qa"),
+            )
+
+        declared_unknowns = {str(item).upper() for item in document.get("unknown_refs", []) or []}
+        referenced_unknowns: set[str] = set()
+        for point in point_items:
+            point_unknowns: set[str] = set()
+            for key in ("precondition_refs", "boundary_refs", "source_refs"):
+                point_unknowns.update(
+                    str(item).upper() for item in point.get(key, []) or []
+                    if str(item).upper().startswith("UNK-")
+                )
+            referenced_unknowns.update(point_unknowns)
+            if str(point.get("business_status", "")) in {"pending_decision", "gap"} and not point_unknowns:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-POINT-COVERAGE", path,
+                    "未决定或 GAP ReviewPoint 必须绑定可关闭 UNK-*", str(point.get("ref", "")),
+                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                )
+        handoff = document.get("machine_handoff") or {}
+        if isinstance(handoff, dict):
+            referenced_unknowns.update(str(item).upper() for item in handoff.get("gap_refs", []) or [])
+        for missing in sorted(referenced_unknowns - declared_unknowns):
+            self.add(
+                "BLOCK", "PROTO-REVIEW-POINT-COVERAGE", path,
+                "ReviewPoint 或 handoff 引用的 UNK-* 未进入工作台未知项索引", missing,
+                affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+            )
+
+        return {
+            str(point.get("target_ref", "")).upper()
+            for point in point_items
+            if point.get("marker_required") and point.get("target_ref")
+        }
 
     def check_prototype(self, path: Path, level: str) -> None:
         try:
@@ -794,9 +1561,13 @@ class PrototypeChecks:
                 self.review_workspace_legacy_paths.add(path.resolve())
                 self.add(
                     "GAP", "PROTO-REVIEW-WORKSPACE-LEGACY", path,
-                    "检测到旧式评审叠加：可继续视检，但未形成旅程/单步聚焦/验收模式与同源绑定合同",
+                    "检测到旧式评审叠加：可继续视检，但未形成 CurrentContext、声明分母、三页签与产品指纹合同",
                     affected_consumers=("product", "frontend", "backend", "qa"),
                 )
+        elif review_workspace is not None and str(review_workspace.get("schema_version", "")) == "5.4.7-final":
+            declared_review_markers = self._check_review_workspace_final(
+                path, raw, tag_source, scripts, review_workspace,
+            )
         elif review_workspace is not None:
             schema_errors = []
             if REVIEW_WORKSPACE_SCHEMA.is_file():
@@ -833,6 +1604,114 @@ class PrototypeChecks:
                         "BLOCK", "PROTO-REVIEW-WORKSPACE-ROOT-MISMATCH", path,
                         "内嵌评审合同没有绑定同名 data-review-workspace 根容器", workspace_id,
                         affected_consumers=("frontend", "qa"),
+                    )
+                root_tag = next((
+                    tag for tag in re.findall(
+                        r"<[A-Za-z][^>]*\bdata-review-workspace\s*=\s*['\"][^'\"]+['\"][^>]*>",
+                        tag_source, re.I | re.S,
+                    )
+                ), "")
+                desktop_surface = str((review_workspace.get("layout") or {}).get("desktop_surface", ""))
+                if not re.search(
+                    rf"\bdata-review-desktop-surface\s*=\s*['\"]{re.escape(desktop_surface)}['\"]",
+                    root_tag, re.I,
+                ):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-DESKTOP-SURFACE-DRIFT", path,
+                        "评审根没有绑定 manifest 的桌面自适应表面策略",
+                        desktop_surface or workspace_id,
+                        affected_consumers=("product", "frontend", "qa"),
+                    )
+
+                page_presentations: dict[str, tuple[str, str, str]] = {}
+                duplicate_presentations: set[str] = set()
+                for item in review_workspace.get("page_presentations", []) or []:
+                    if not isinstance(item, dict):
+                        continue
+                    view_ref = str(item.get("view_ref", "")).upper()
+                    if view_ref in page_presentations:
+                        duplicate_presentations.add(view_ref)
+                    page_presentations[view_ref] = (
+                        str(item.get("page_profile", "")).casefold(),
+                        str(item.get("focus_surface", "")).casefold(),
+                        str(item.get("collision_policy", "")).casefold(),
+                    )
+                for duplicate in sorted(duplicate_presentations):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-PAGE-PRESENTATION-DUPLICATE", path,
+                        "同一个 VIEW-* 登记了多个聚焦呈现，运行时无法确定应使用哪一种布局", duplicate,
+                        affected_consumers=("product", "frontend", "qa"), related_refs=(duplicate,),
+                    )
+
+                visible_presentations: dict[str, tuple[str, str, str]] = {}
+                duplicate_visible_presentations: set[str] = set()
+                for tag in re.findall(r"<[A-Za-z][^>]*>", tag_source, re.S):
+                    view_match = re.search(
+                        r"\bdata-review-page-ref\s*=\s*['\"](VIEW-[A-Z0-9-]+)['\"]", tag, re.I,
+                    )
+                    if not view_match:
+                        continue
+                    view_ref = view_match.group(1).upper()
+                    profile_match = re.search(r"\bdata-review-page-profile\s*=\s*['\"]([^'\"]+)['\"]", tag, re.I)
+                    surface_match = re.search(r"\bdata-review-focus-surface\s*=\s*['\"]([^'\"]+)['\"]", tag, re.I)
+                    collision_match = re.search(r"\bdata-review-collision-policy\s*=\s*['\"]([^'\"]+)['\"]", tag, re.I)
+                    value = (
+                        profile_match.group(1).casefold() if profile_match else "",
+                        surface_match.group(1).casefold() if surface_match else "",
+                        collision_match.group(1).casefold() if collision_match else "",
+                    )
+                    if view_ref in visible_presentations:
+                        duplicate_visible_presentations.add(view_ref)
+                    visible_presentations[view_ref] = value
+                for duplicate in sorted(duplicate_visible_presentations):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-PAGE-PRESENTATION-DUPLICATE", path,
+                        "同一个 VIEW-* 存在多个可见聚焦呈现容器", duplicate,
+                        affected_consumers=("frontend", "qa"), related_refs=(duplicate,),
+                    )
+
+                expected_page_refs: set[str] = set()
+                for step in review_workspace.get("steps", []) or []:
+                    if isinstance(step, dict):
+                        expected_page_refs.update(
+                            str(item).upper() for item in step.get("target_refs", []) or []
+                            if str(item).upper().startswith("VIEW-")
+                        )
+                for journey in review_workspace.get("journeys", []) or []:
+                    if isinstance(journey, dict):
+                        expected_page_refs.update(
+                            str(item).upper() for item in journey.get("entry_refs", []) or []
+                            if str(item).upper().startswith("VIEW-")
+                        )
+                for missing in sorted(expected_page_refs - set(page_presentations)):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-PAGE-PRESENTATION-MISSING", path,
+                        "进入聚焦评审的页面没有声明页面画像、评审表面和冲突策略", missing,
+                        affected_consumers=("product", "frontend", "qa"), related_refs=(missing,),
+                    )
+                product_page_refs = {
+                    item[5:].upper() for item in page_testids if item.upper().startswith("PAGE-VIEW-")
+                }
+                for orphan in sorted(set(page_presentations) - product_page_refs):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-PAGE-PRESENTATION-ORPHAN", path,
+                        "页面自适应呈现引用了原型中不存在的 VIEW-*", orphan,
+                        affected_consumers=("product", "frontend", "qa"), related_refs=(orphan,),
+                    )
+                for view_ref, expected in sorted(page_presentations.items()):
+                    actual = visible_presentations.get(view_ref)
+                    if actual != expected:
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-PAGE-PRESENTATION-DRIFT", path,
+                            "人类可见的页面画像/聚焦表面/冲突策略与 manifest 不一致",
+                            f"{view_ref}: {actual or 'missing'} != {expected}",
+                            affected_consumers=("product", "frontend", "qa"), related_refs=(view_ref,),
+                        )
+                for orphan in sorted(set(visible_presentations) - set(page_presentations)):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-PAGE-PRESENTATION-ORPHAN", path,
+                        "HTML 中存在未登记到 manifest 的页面评审表面", orphan,
+                        affected_consumers=("frontend", "qa"), related_refs=(orphan,),
                     )
 
                 baseline = review_workspace.get("baseline") or {}
@@ -1214,7 +2093,6 @@ class PrototypeChecks:
                 for attribute in ("data-review-progress", "data-review-current-step", "data-review-scenario", "data-review-compact-view"):
                     if not re.search(rf"\b{re.escape(attribute)}(?:\s*=|\s|>)", tag_source, re.I):
                         self.add("BLOCK", "PROTO-REVIEW-WORKSPACE-SURFACE-MISSING", path, "评审工作台缺少必要的任务导航表面", attribute)
-                root_tag = next((tag for tag in re.findall(r"<[A-Za-z][^>]*\bdata-review-workspace\s*=\s*['\"][^'\"]+['\"][^>]*>", tag_source, re.I | re.S)), "")
                 if not re.search(r"\bdata-review-compact\s*=\s*['\"]fullscreen-switcher['\"]", root_tag, re.I):
                     self.add("BLOCK", "PROTO-REVIEW-COMPACT-OVERLAY", path, "窄屏必须在产品/评审之间全屏切换，不能用宽抽屉遮住产品", workspace_id)
                 if not re.search(r"\bdata-review-marker-policy\s*=\s*['\"](?:selected-step-only|current-page-on-demand)['\"]", root_tag, re.I):
@@ -1338,7 +2216,14 @@ class PrototypeChecks:
                 affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
                 related_refs=(unknown_id,),
             )
-        if review_surface and level in {"L2", "L3", "L4"}:
+        if (
+            review_surface
+            and level in {"L2", "L3", "L4"}
+            and not (
+                isinstance(review_workspace, dict)
+                and str(review_workspace.get("schema_version", "")) == "5.4.7-final"
+            )
+        ):
             review_ids = [
                 item.upper() for item in re.findall(
                     r"\bdata-review-id\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I

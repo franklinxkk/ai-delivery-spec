@@ -46,6 +46,15 @@
         },
         "delivery_mode": { "enum": ["ultra_light", "lite", "standard", "full"] },
         "tier": { "enum": ["L0", "L1", "L2", "L3", "L4"] },
+        "artifact_mode": { "enum": ["direct", "card", "prd"] },
+        "risk_facets": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": ["state", "authority", "integration", "metric", "permission", "privacy", "regulated", "migration", "irreversible", "irreversible_ai_write", "strong_audit"]
+          }
+        },
+        "evidence_level": { "enum": ["static", "browser", "real_system", "customer_acceptance"] },
         "project_shape": { "enum": ["greenfield", "brownfield", "hybrid"] },
         "customer_profile": { "type": "array", "items": { "type": "string" } },
         "governance_profiles": { "type": "array", "items": { "type": "string" } },
@@ -175,10 +184,18 @@
       "properties": {
         "id": { "$ref": "#/$defs/stableId" },
         "kind": {
-          "enum": ["user_input", "customer_artifact", "contract", "prototype", "legacy_system", "law", "regulation", "standard", "guidance", "project_rule", "inference"]
+          "enum": ["user_input", "business_opportunity", "product_decision", "engineering_constraint", "evaluation_assignment", "customer_artifact", "contract", "prototype", "legacy_system", "law", "regulation", "standard", "guidance", "project_rule", "inference"]
         },
         "title": { "type": "string" },
         "location": { "type": "string" },
+        "content_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "sensitivity": { "enum": ["public", "internal", "confidential", "restricted"] },
+        "credential_status": { "enum": ["clear", "redacted", "secret_ref_only", "quarantined"] },
+        "secret_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^SECRET-[A-Z0-9-]+$" }
+        },
         "authority": { "enum": ["primary", "accountable", "secondary", "inferred", "unknown"] },
         "status": { "enum": ["active", "superseded", "draft", "unknown"] },
         "disposition": { "enum": ["embedded", "authoritative_annex", "deferred", "conflict", "not_applicable"] },

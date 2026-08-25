@@ -395,13 +395,29 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
         "用 data-review-role 标记控件、data-review-lens 标记对应内容；镜头只改变密度，不得改变事实。",
     ),
     "PROTO-REVIEW-WORKSPACE-LEGACY": (
-        "旧评审叠加仍围绕页面编号/卡片组织，无法证明接收者能按业务旅程和角色任务独立完成交接。",
-        "迁移为导读、旅程、单步聚焦、页面核对和验收五种按需模式，并嵌入同基线的 review-workspace-manifest。",
+        "旧评审叠加没有 CurrentContext、声明分母、三页签和产品副作用边界。",
+        "保留完整产品操作，迁移为上下文驱动的总览/功能与流转/边界与验收三页签，并嵌入同基线 manifest。",
     ),
     "PROTO-REVIEW-WORKSPACE-MANIFEST-INVALID": (
         "评审工作台没有唯一、可解析的同源投影索引。",
         "在同一 HTML 内嵌 application/json 的 review-workspace-manifest，并按 review-workspace schema 校验。",
     ),
+    "PROTO-REVIEW-CONTEXT-CONTRACT": ("CurrentContext 声明或只读绑定不完整。", "以最上层业务浮层否则活动 VIEW 为当前上下文；只允许产品 ACT-* 改变它。"),
+    "PROTO-REVIEW-DECLARED-DENOMINATOR": ("官方评审点分母重复或不唯一。", "让 review_contexts 的有序 review_point_refs 成为唯一分母；Candidate 不得自动晋级。"),
+    "PROTO-REVIEW-POINT-COVERAGE": ("声明评审点与可见卡片、落点或上下文归属不闭合。", "对齐 manifest、marker 和 card；无 UI 落点时显式 marker_required=false。"),
+    "PROTO-REVIEW-CONTEXT-NUMBERING": ("评审编号没有在当前上下文内按声明顺序从 1 开始。", "按每个 Context 的 review_point_refs 重编号，Overlay 关闭后恢复父上下文编号。"),
+    "PROTO-REVIEW-PRODUCT-FINGERPRINT-INVARIANT": ("纯评审动作缺少产品指纹不变量机制。", "分别捕获 Product/Review Fingerprint，并用浏览器证据证明 UIACT-REVIEW-* 前后产品指纹相同。"),
+    "PROTO-REVIEW-TAB-OWNERSHIP": ("三页签的信息所有权缺失、错位或重复。", "总览讲全局，功能与流转讲当前上下文，边界与验收持有规则/状态/指标/AC 详情。"),
+    "PROTO-REVIEW-STATUS-AXES": ("评审卡没有同步显示业务状态、验证状态和证据来源。", "从同一 ReviewPoint 投影紧凑状态行，勿把三条轴合并或制造三套工作流。"),
+    "PROTO-REVIEW-SHARE-LOCATOR": ("分享定位没有绑定 baseline/context/point/tab。", "移除 Journey/Step/Role 定位，首次 hydration 后再建立产品指纹基线。"),
+    "PROTO-REVIEW-PROGRESS-DENOMINATOR": ("可见进度不是声明的适用评审点分母。", "浏览不推进进度；只有 confirmed 或 accepted_with_gap 评审处置计入完成。"),
+    "PROTO-REVIEW-COLD-READ": ("冷读通过没有未参与者证据。", "让产品、前端、后端、测试分别在 3 分钟内冷读并记录召回、误猜和首次澄清。"),
+    "PROTO-REVIEW-LEVEL": ("评审层恢复了额外一级模式或缺少目标等级的必要入口。", "R1/R2 只保留总览、功能与流转、边界与验收；R0 也不得增加 Journey/Step/Page/Role 模式。"),
+    "PROTO-REVIEW-CANDIDATE-DIFF": ("Candidate Set 与声明评审点存在未裁决差集。", "人工决定声明或不适用并留依据；门禁不得自动改变官方分母。"),
+    "PROTO-REVIEW-LAYOUT-NONOVERLAP": ("评审区可能覆盖或压坏产品主操作区。", "桌面参与布局并可折叠/调宽；用浏览器证明业务浮层和反馈高于评审区。"),
+    "PROTO-REVIEW-OVERLAY-DETECTION": ("业务浮层探测缺失或 topmost 解析有歧义。", "优先产品 Context Event，再用声明探测；MutationObserver 只触发重新解析。"),
+    "PROTO-REVIEW-TARGET-RESOLUTION": ("评审目标没有在 CurrentContextRoot 内得到唯一可见结果。", "只在当前上下文查找，0 个 unresolved，多于 1 个 BLOCK；禁止全局取第一个。"),
+    "PROTO-REVIEW-RECORD-PERSISTENCE": ("评审记录不能稳定持久化或跨基线隔离。", "使用 baseline+context+point 键；单 HTML 支持 localStorage 与 JSON 导入导出。"),
     "PROTO-REVIEW-LANGUAGE-MISMATCH": (
         "评审 manifest 与 HTML 声明了不同的人类语言。",
         "让 manifest.language 与 html[lang] 跟随用户语言；稳定 ID 和机器枚举保持原值，不用关键词禁令代替人工语言复核。",
@@ -481,6 +497,26 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-REVIEW-COMPACT-OVERLAY": (
         "窄屏评审面板会遮住产品上下文，无法同时完成页面核对。",
         "使用 fullscreen-switcher 在产品与评审之间切换，保留当前 STEP 与返回目标，再用浏览器证据验证。",
+    ),
+    "PROTO-REVIEW-DESKTOP-SURFACE-DRIFT": (
+        "桌面评审根与 manifest 的自适应表面策略不一致。",
+        "在根容器同步 data-review-desktop-surface=adaptive_by_mode_and_page；不要把固定右栏写成全局默认。",
+    ),
+    "PROTO-REVIEW-PAGE-PRESENTATION-MISSING": (
+        "进入聚焦评审的页面没有声明与页面任务匹配的呈现方式。",
+        "为该 VIEW-* 登记 page_profile、focus_surface、collision_policy 和理由，并投影到同名 data-review-* 属性。",
+    ),
+    "PROTO-REVIEW-PAGE-PRESENTATION-DUPLICATE": (
+        "同一页面存在多个相互竞争的评审呈现定义。",
+        "每个 VIEW-* 只保留一条当前有效映射；屏幕变化由该映射的响应式实现处理。",
+    ),
+    "PROTO-REVIEW-PAGE-PRESENTATION-DRIFT": (
+        "可见页面评审表面与 manifest 不一致，接收者无法判断哪个布局有效。",
+        "同步 data-review-page-profile、data-review-focus-surface 与 data-review-collision-policy，并用浏览器验证遮挡和宽度。",
+    ),
+    "PROTO-REVIEW-PAGE-PRESENTATION-ORPHAN": (
+        "页面评审表面引用了不存在或未登记的 VIEW-*。",
+        "绑定真实 page-VIEW-* 根并从 manifest 删除孤立映射；不得用截图坐标代替页面身份。",
     ),
     "PROTO-REVIEW-BASELINE-DRIFT": (
         "评审工作台与本次 PRD 不是同一内容基线，角色说明可能已经过期。",
@@ -566,8 +602,24 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-REVIEW-LINKAGE-MISSING": ("Review markers and note cards have no stable bidirectional link.", "Share data-review-id on both sides or use a matching data-review-target, then execute a browser ARUN-* proof."),
     "PROTO-REVIEW-SELECTION-NOT-SYNCED": ("Review marker clicks do not expose a synchronized selection state.", "Read data-review-id, update aria-current on both sides, and prove click, scroll and highlight behavior in a browser."),
     "PROTO-REVIEW-LENS-COSMETIC": ("Role lenses change controls but have no role-specific content projection.", "Bind data-review-role controls to matching data-review-lens content without changing shared facts."),
-    "PROTO-REVIEW-WORKSPACE-LEGACY": ("The legacy review overlay is page-note oriented and has no journey/task workspace contract.", "Migrate to orientation, journey, single-step focus, page and acceptance modes with an embedded baseline-bound manifest."),
+    "PROTO-REVIEW-WORKSPACE-LEGACY": ("The legacy review overlay has no CurrentContext, declared denominator, three-tab projection, or product-effect boundary.", "Preserve the operable product and migrate to a context-driven Overview / Function & Flow / Boundary & Acceptance projection with a baseline-bound manifest."),
     "PROTO-REVIEW-WORKSPACE-MANIFEST-INVALID": ("The review workspace has no unique parseable projection manifest.", "Embed one application/json review-workspace-manifest and validate it against the review-workspace schema."),
+    "PROTO-REVIEW-CONTEXT-CONTRACT": ("The CurrentContext declaration or read-only binding is incomplete.", "Resolve the topmost business overlay or active VIEW and let only real product ACT-* actions change it."),
+    "PROTO-REVIEW-DECLARED-DENOMINATOR": ("The official review-point denominator is duplicated or ambiguous.", "Use each context's ordered review_point_refs as the sole denominator; never auto-promote candidates."),
+    "PROTO-REVIEW-POINT-COVERAGE": ("Declared review points do not close across context ownership, cards, and markers.", "Align manifest, marker, and card; declare marker_required=false for facts with no UI target."),
+    "PROTO-REVIEW-CONTEXT-NUMBERING": ("Review numbering does not restart from one in declaration order for the current context.", "Number each context independently and restore the parent context numbering after an overlay closes."),
+    "PROTO-REVIEW-PRODUCT-FINGERPRINT-INVARIANT": ("Pure review actions have no product-fingerprint invariant mechanism.", "Capture separate Product and Review Fingerprints and prove UIACT-REVIEW-* preserves the product fingerprint in a browser."),
+    "PROTO-REVIEW-TAB-OWNERSHIP": ("The three tabs have missing, misplaced, or duplicate information ownership.", "Keep global facts in Overview, current-context facts in Function & Flow, and detailed rules/state/metrics/acceptance in Boundary & Acceptance."),
+    "PROTO-REVIEW-STATUS-AXES": ("A review card does not expose business status, verification status, and evidence origin together.", "Project one compact status line from the same ReviewPoint without inventing three workflows."),
+    "PROTO-REVIEW-SHARE-LOCATOR": ("The share locator is not bound to baseline, context, point, and tab.", "Remove Journey/Step/Role locators and establish the initial product fingerprint only after hydration."),
+    "PROTO-REVIEW-PROGRESS-DENOMINATOR": ("Visible progress does not use applicable declared review points as its denominator.", "Navigation must not advance progress; only confirmed or accepted_with_gap review dispositions resolve points."),
+    "PROTO-REVIEW-COLD-READ": ("A cold-read pass has no independent participant evidence.", "Have product, frontend, backend, and QA cold-read within three minutes and record recall, guesses, and first clarification."),
+    "PROTO-REVIEW-LEVEL": ("The review layer restores forbidden top-level modes or omits required controls for its level.", "R1/R2 expose only Overview, Function & Flow, and Boundary & Acceptance; R0 must not add Journey/Step/Page/Role modes."),
+    "PROTO-REVIEW-CANDIDATE-DIFF": ("The candidate set has an unresolved difference from declared review points.", "Have a human declare or reject each candidate with a reason; never mutate the official denominator automatically."),
+    "PROTO-REVIEW-LAYOUT-NONOVERLAP": ("The review surface may cover or damage the primary product workspace.", "Make the desktop surface participate in layout and prove business overlays and feedback remain above it in a browser."),
+    "PROTO-REVIEW-OVERLAY-DETECTION": ("Business-overlay detection is missing or topmost resolution is ambiguous.", "Prefer Product Context Events, then declared detection; MutationObserver may only request re-resolution."),
+    "PROTO-REVIEW-TARGET-RESOLUTION": ("A review target is not exactly one visible node within CurrentContextRoot.", "Resolve only inside the current context: zero is unresolved and multiple is blocking; never take a global first match."),
+    "PROTO-REVIEW-RECORD-PERSISTENCE": ("Review records are not durable or baseline-isolated.", "Key records by baseline+context+point; static HTML must support localStorage and JSON export/import."),
     "PROTO-REVIEW-LANGUAGE-MISMATCH": ("The review manifest and HTML declare different human languages.", "Align manifest.language with html[lang] and the user's language while preserving stable IDs and machine enums."),
     "PROTO-REVIEW-ROLE-PACKET-INCOMPLETE": ("A role lens is a summary/filter rather than a complete start-work packet.", "Complete the product/frontend/backend/qa slot contract and bind unknown semantics to UNK-* instead of inventing decisions."),
     "PROTO-REVIEW-ROLE-APPLICABILITY-MISMATCH": ("Role applicability differs between the manifest and the visible packet.", "Use active with complete slots, or not_affected with empty slots and one visible reason."),
@@ -588,6 +640,11 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-REVIEW-RISK-NOT-TESTED": ("A declared step risk is absent from its TEST/AC coverage.", "Add the matching risk dimension, dual result and evidence from the canonical acceptance contract."),
     "PROTO-REVIEW-MODE-MISSING": ("Review information is flattened into one list or drawer instead of matching the receiver's task.", "Provide the applicable orientation, journey, focus, page and acceptance modes and focus one STEP-* at a time."),
     "PROTO-REVIEW-COMPACT-OVERLAY": ("The compact review surface obscures the product context.", "Use a fullscreen product/review switcher that preserves the current STEP and return target, then verify it in a browser."),
+    "PROTO-REVIEW-DESKTOP-SURFACE-DRIFT": ("The desktop review root and manifest disagree on the adaptive surface strategy.", "Bind data-review-desktop-surface=adaptive_by_mode_and_page and do not make one fixed right rail the global default."),
+    "PROTO-REVIEW-PAGE-PRESENTATION-MISSING": ("A focused review page has no page-specific presentation contract.", "Declare page_profile, focus_surface, collision_policy and rationale for the VIEW-* and expose the same data-review-* mapping."),
+    "PROTO-REVIEW-PAGE-PRESENTATION-DUPLICATE": ("One VIEW-* has competing review presentation definitions.", "Keep one active mapping per VIEW-* and handle viewport changes inside that responsive implementation."),
+    "PROTO-REVIEW-PAGE-PRESENTATION-DRIFT": ("The visible page review surface differs from the manifest.", "Align data-review-page-profile, data-review-focus-surface and data-review-collision-policy, then verify width and collisions in a browser."),
+    "PROTO-REVIEW-PAGE-PRESENTATION-ORPHAN": ("A page review surface references a missing or unregistered VIEW-*.", "Bind it to a real page-VIEW-* root and remove orphan mappings instead of relying on screenshot coordinates."),
     "PROTO-REVIEW-BASELINE-DRIFT": ("The review workspace and supplied PRD are not the same content baseline.", "Regenerate the projection from the authoritative PRD hash and update human and machine projections in the same CHG-*.") ,
     "PROTO-DYNAMIC-CLASS-POLLUTION": ("Business text is interpolated into a CSS class.", "Keep class names as fixed semantic tokens and write escaped descriptions through textContent."),
     "PROTO-JS-SYNTAX": ("The prototype contains invalid JavaScript.", "Repair the referenced script and verify closing script/body/html tags."),
@@ -1262,8 +1319,70 @@ def main() -> int:
         browser_evidence = browser_evidence or is_browser
         conclusive_evidence = conclusive_evidence or is_conclusive
     for review_path, review_document in gate.review_workspace_contracts:
-        scenarios = [item for item in review_document.get("scenarios", []) or [] if isinstance(item, dict)]
         expected_baseline_version = str((review_document.get("baseline") or {}).get("version", ""))
+        if str(review_document.get("schema_version", "")) == "5.4.7-final":
+            for point in review_document.get("review_points", []) or []:
+                if not isinstance(point, dict):
+                    continue
+                status = str(point.get("verification_status", "not_run")).casefold()
+                if status not in {"passed", "failed"}:
+                    continue
+                point_ref = str(point.get("ref", "RVP-UNKNOWN"))
+                claimed_runs = {
+                    str(item).upper() for item in point.get("evidence_refs", []) or []
+                    if str(item).upper().startswith("ARUN-")
+                }
+                resolved = [acceptance_claims[item] for item in claimed_runs if item in acceptance_claims]
+                if not claimed_runs or len(resolved) != len(claimed_runs):
+                    missing = sorted(claimed_runs - set(acceptance_claims)) or ["ARUN-* missing"]
+                    gate.add(
+                        "BLOCK", "PROTO-REVIEW-VERIFICATION-ARUN-UNRESOLVED", review_path,
+                        "ReviewPoint 验证状态引用的 ARUN 未随本次门禁提供",
+                        f"{point_ref}: {', '.join(missing)}",
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    )
+                    continue
+                drifted_runs = sorted(
+                    run_id for run_id in claimed_runs
+                    if acceptance_claims[run_id]["baseline_version"] != expected_baseline_version
+                )
+                if drifted_runs:
+                    gate.add(
+                        "BLOCK", "PROTO-REVIEW-VERIFICATION-BASELINE-DRIFT", review_path,
+                        "ReviewPoint 引用的 ARUN 不属于当前 review baseline version",
+                        f"{point_ref}: {', '.join(drifted_runs)}",
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    )
+                    continue
+                required_acs = {
+                    str(item).upper() for item in point.get("acceptance_refs", []) or []
+                    if str(item).upper().startswith("AC-")
+                }
+                covered_acs = set().union(*(item["covered_acs"] for item in resolved))
+                if not required_acs or not required_acs <= covered_acs:
+                    missing = required_acs - covered_acs
+                    gate.add(
+                        "BLOCK", "PROTO-REVIEW-VERIFICATION-AC-UNPROVED", review_path,
+                        "ARUN 没有覆盖当前 ReviewPoint 的 AC，不能用无关证据升级验证状态",
+                        f"{point_ref}: {', '.join(sorted(missing or required_acs)) or 'AC-* missing'}",
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    )
+                    continue
+                supported_acs = (
+                    set().union(*(item["passed_acs"] for item in resolved))
+                    if status == "passed" else
+                    set().union(*(item["failed_acs"] for item in resolved))
+                )
+                supported = required_acs <= supported_acs if status == "passed" else bool(required_acs & supported_acs)
+                if not supported:
+                    gate.add(
+                        "BLOCK", "PROTO-REVIEW-VERIFICATION-LEVEL-UNPROVED", review_path,
+                        "已提供 ARUN 的结果不足以支撑当前 verification_status",
+                        f"{point_ref}: {status}",
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    )
+            continue
+        scenarios = [item for item in review_document.get("scenarios", []) or [] if isinstance(item, dict)]
         for step in review_document.get("steps", []) or []:
             if not isinstance(step, dict):
                 continue

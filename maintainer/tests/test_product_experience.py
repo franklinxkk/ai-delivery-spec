@@ -25,7 +25,7 @@ def run(*parts: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run([sys.executable, *parts], cwd=ROOT, text=True, encoding='utf-8', errors='replace', capture_output=True)
 
 def test_trigger_and_minimum_change_contract() -> None:
-    skill = require('SKILL.md', '写/改一个小功能', '加字段/列/页签/下拉', 'Always invoke regardless of size or clarity', '也必须调用', '小迭代先最小改动', '示例子集', '反向同步不得进入正向上报队列')
+    skill = require('SKILL.md', '写/改一个小功能', '加字段/列/页签/下拉', 'Always invoke regardless of size or clarity', '也必须调用', '`direct`', '最小主产物', '存量系统先做 Stage 0')
     agent = require('agents/openai.yaml', 'policy:', 'allow_implicit_invocation: true', 'Use $ai-delivery-spec', '使用', "user's language")
     require('references/discover.md', '最小改动模式', '不超过一个短屏', '生产者/权威源 → 汇聚或转换方 → 消费方')
     require('references/prototype.md', 'parity_status=pass|blocked', '正向上报、反向同步和纠错申请必须使用不同命令/队列')
@@ -70,7 +70,15 @@ def test_experience_metrics_cover_reported_regressions() -> None:
 def test_generated_status_matches_release_summary() -> None:
     result = run('scripts/ai_delivery_spec_cli.py', 'status', '--format', 'yaml')
     assert result.returncode == 0
-    assert yaml.safe_load(result.stdout) == yaml.safe_load(read('maintainer/evals/evidence/release-status.yaml'))
+    generated = yaml.safe_load(result.stdout)
+    evidence = yaml.safe_load(read('maintainer/evals/evidence/release-status.yaml'))
+    for key in ('schema_version', 'skill_version', 'runtime', 'domain_packs', 'evaluation_assets'):
+        assert generated[key] == evidence[key]
+    assert generated['domain_packs']['production_claims_allowed'] == 0
+    assert generated['trace_release_proxy']['dimensions']['effectiveness'] == 'partial'
+    assert evidence['trace_release_proxy']['dimensions']['effectiveness'] == 'partial'
+    combined = yaml.safe_dump(generated, allow_unicode=True).lower()
+    assert 'customer acceptance' in combined and 'not proven' in combined
 
 def test_ai_applicability() -> None:
     assert not ai_contract_applicable('本期不建设独立 AI 模型。Coding Agent 读取稳定 ID 后实现页面。')

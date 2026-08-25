@@ -18,6 +18,13 @@
     "owner": {"type": "string", "minLength": 1},
     "document_language": {"type": "string", "minLength": 2},
     "source_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^SRC-[A-Z0-9-]+$"}},
+    "artifact_mode": {"enum": ["direct", "card", "prd"]},
+    "risk_facets": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": ["state", "authority", "integration", "metric", "permission", "privacy", "regulated", "migration", "irreversible", "irreversible_ai_write", "strong_audit"]}
+    },
+    "evidence_level": {"enum": ["static", "browser", "real_system", "customer_acceptance"]},
     "value": {"enum": ["low", "medium", "high", "critical"]},
     "priority": {"enum": ["P0", "P1", "P2", "P3"]},
     "complexity": {

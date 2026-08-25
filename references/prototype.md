@@ -35,6 +35,8 @@ py -3 scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app-n
 
 ## 2. 产品模式、评审模式与三类核心图 / Product, Review And Core Diagrams
 
+- 普通“一句话做一个 HTML/原型”默认指向可实施产品原型，不等于允许模型补齐业务。先保留目标，按 `stages.md` 关闭会阻断原型的 P0，闭合后必须继续生成，不能停在澄清清单。
+  明确“先看效果/概念原型/低保真/允许合理假设/先画再聊”才允许先出 `concept_candidate`；列明假设、GAP、阻断项和下一轮验证，且不得标为基线、可开发、已评审或已验收。仅要求 HTML 时不机械追加 PRD。
 - 探索、售前、客户演示、客户确认阶段默认使用可操作的产品模式，不在页面边缘预埋整份研发说明。
 - 只有用户明确要求“评审版”“评审模式”“编号标注”“评审抽屉”等可见研发投影时才直接生成。显式
   “我要评审版”已经构成确认，不重复追问。
@@ -49,16 +51,19 @@ py -3 scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app-n
   拒绝或延后后，同一需求基线内不再询问；范围或交付对象实质变化时才重新确认。
 - 正式需求生命周期的 review 工作站是评审签署和缺口关闭，不等于原型的可见评审模式。“评审一下
   现有原型”默认只做分析并报告问题；除非用户另行确认，不修改页面、不增加编号或评审抽屉。
-- 人类评审模式采用“旅程导读 → 单步聚焦 → 按需页面标注 → 验收场景”的评审工作台；`1/2/3...`
-  编号只是页面定位手段，不是信息架构。每点只写该位置必须知道的目标、输入输出、限制、守卫、失败
-  恢复和验收引用，不复制整份 PRD，也不承载代码方案。
+- 人类评审模式遵守 `Review Explains, Product Operates`：产品自身的菜单、页面、弹窗、抽屉和动作承载
+  动线，评审层只解释真实产品动作产生的 `CurrentContext`。R1/R2 只允许“总览 / 功能与流转 /
+  边界与验收”三个一级页签；不得另建旅程、步骤、页面或角色模式。`1/2/3...` 只在当前上下文内
+  定位已声明评审点，切换上下文后重新编号，不是全局信息架构。
+- 只要正式评审点存在可见 UI 目标，就必须 `marker_required=true`，并在产品目标旁渲染同号 marker；`marker_required=false` 只用于确实没有 UI 落点的系统规则。
+  点击左侧 marker 或右侧卡片后，marker、卡片和真实产品目标必须同时出现可见选中/框选态；仅滚动、只高亮右栏或只有右栏 `1/2/3` 均为阻断缺陷。
 - Coding Agent 不以可见标注文案为唯一输入；单 HTML 可嵌入结构化 handoff，多文件项目可用独立
   JSON/YAML。handoff 只引用同一基线、稳定 ID、当前变化、禁止推断和开放项。
 
 ### 2.1 评审投影的信息预算
 
-评审模式必须同时满足“机器覆盖完整、人工投影克制”。全量字段、动作、状态、指标、权限和 AC
-进入隐藏/独立的结构化 handoff 与覆盖账本；可见编号只投影会改变实现、验收或上线结论的内容：
+评审模式必须同时满足“机器覆盖完整、人工投影克制”。全量 FLOW/STEP/EDGE/STATE/DATA/AC/TEST
+进入同基线 PRD、结构化 handoff 与覆盖账本；可见编号只投影会改变实现、验收或上线结论的内容：
 
 - 阻断决策的未知项、冲突和回退策略；
 - 跨页面、角色或系统的交接，以及写入、删除、提交、撤回等不可逆/受守卫状态变化；
@@ -66,14 +71,14 @@ py -3 scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app-n
 - 权限守卫、异常、重试、补偿、对账和恢复；
 - 高价值输入输出、边界与验收证据。
 
-常规字段释义、显然按钮、重复规则和完整测试步骤只进入机器覆盖账本，不逐项占用聚焦面板。一个编号
-可以覆盖一个区域或一段连续操作。每条可见说明使用“已确认/建议/未知/观察缺陷”之一，并提供精确
-`source_ref`；没有来源的技术接口、数据库表或 API 路径不得补写为已确认合同。角色栏只显示有实施
-责任的产品/前端/后端/测试内容，空栏不渲染。禁止用“每个字段必须一个可见标注”作为完整性门槛。
+常规字段释义、显然按钮、重复规则和完整测试步骤只进入机器覆盖账本，不逐项占用评审面板。一个编号
+可以覆盖一个区域或一段连续操作。每条可见说明同时显示业务状态、验证状态和必要的证据来源；没有
+来源的技术接口、数据库表或 API 路径不得补写为已确认合同。禁止用“每个字段必须一个可见标注”作为
+完整性门槛，也禁止从 DOM、视觉显著性或模型判断自动增加官方评审点。
 
-“克制”只减少重复，不减少核心实现语义。凡一个步骤会改变持久数据、业务状态、指标、责任方，或跨越
-页面/模块/系统边界，必须建立 `STEP-*` 实施卡；连续且事务边界相同的纯界面动作可以合并。每张卡在
-当前页面/图旁即可独立读懂，不要求接收方去其他章节拼接：
+“克制”只减少重复，不减少核心实现语义。凡一个动作会改变持久数据、业务状态、指标、责任方，或跨越
+页面/模块/系统边界，机器合同仍须建立 `STEP-*`；连续且事务边界相同的纯界面动作可以合并。人类侧
+不以 STEP 建导航，而把相关实施语义投影到当前 `ReviewPoint` 的“功能与流转”摘要和“边界与验收”详情：
 
 | 实施卡字段 | 必须回答的问题 |
 |---|---|
@@ -86,16 +91,20 @@ py -3 scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app-n
 | 失败与恢复 | 校验失败、超时、重复、部分成功、陈旧写入如何恢复、补偿、重试、幂等和对账 |
 | 追溯与验收 | `REQ/FLOW/ACT/RULE/STATE/API/EVT/AC/source_ref`；已确认/建议/未知/观察缺陷 |
 
-同一 `STEP-*` 允许用“共识/前端/后端/测试”镜头过滤：共识显示业务目的和边界；前端显示入口、控件、
-可见状态与反馈；后端显示权威源、守卫、状态、事件、幂等与恢复；测试显示正反路径、边界和证据。镜头
-只能改变呈现密度，不能拥有不同事实。核心字段缺失时显示“待确认/GAP”，不得用空白或通用话术掩盖。
+前端、后端、测试和 Coding Agent 需要的事实仍然完整存在，但不再变成人类一级角色镜头。右侧先用一条
+连贯说明回答“这里做什么、从哪里来、会变成什么、失败怎么办”，详细权限/口径/状态/异常/AC 再进入
+“边界与验收”；机器继续读取稳定 ID 与同源 handoff。核心字段缺失时显示“待确认/GAP”，不得用空白、
+角色切换或通用话术掩盖。
 
 ### 2.2 评审工作台（按需加载）
 
-确认需要评审模式后，必须继续完整读取 `references/review-workspace.md`。该合同把评审组织成导读、旅程、
-单步聚焦、按需页面和验收五种任务模式，以 `FLOW-* → STEP-* → EDGE-*` 表达跨页/跨角色交接；四个
-人类角色读取同一基线的工作包，Coding Agent 读取结构化 handoff。不得用按钮说明长列表、固定宽长抽屉
-或 H5 遮罩替代评审工作台。
+确认需要评审模式后，必须完整读取 `references/review-workspace.md`。以真实产品 `CurrentContext` 为唯一人类动线，以 `review_contexts` 的有序 `review_point_refs` 为官方分母，以 Candidate Diff 防漏，以 Product Fingerprint 隔离评审副作用。
+FLOW/STEP/EDGE 仍表达机器与 PRD 中的跨页/跨角色合同，但只能投影为当前上下文的主链、实施语义和上下游说明；桌面说明区参与布局且不遮挡业务浮层，窄屏切换时保留产品状态。
+
+### 2.3 产品位置合同 / Product Location Contract
+
+`CurrentContext` 解释当前页面/浮层，ProductLocation 证明其真实系统入口。每个 `VIEW-*` 必须为 `menu_bound` 或具理由的 `menu_exempt`，业务浮层必须 `inherit_parent`；页面切换原子同步活动视图、路由、菜单路径、父级展开、面包屑、标题和上下文。
+已有导航是产品权威，不得降级为静态假菜单。浏览器须验证菜单/正文入口、刷新/深链、浮层继承、无权拒绝和评审动作前后位置指纹；漂移返回 `PROTO-PRODUCT-LOCATION-MISMATCH`，完整合同见 `references/review-workspace.md`。
 
 ### 2.5 重型存量页面的评审容器
 
@@ -117,6 +126,8 @@ py -3 scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app-n
 | “评审一下现有原型，不要改页面” | 执行评审分析，不生成评审模式原型 |
 
 | “帮我做一个企业约谈原型”，澄清后详细需求已确定 | 首次进入原型时询问一次；未回复先交付产品模式 |
+| “帮我做一个企业约谈 HTML”，只有一句业务描述 | 目标保持为可实施产品原型；分批关闭阻断 P0 后继续生成，不停在需求清单 |
+| “先做概念 HTML 看效果，规则后面补” | 立即生成带假设/GAP 的产品模式概念候选，不声明可开发或已基线 |
 | “只做干净的产品原型，不要评审标注” | 只生成产品模式，同一需求基线内不再询问 |
 以下图按条件出现，是人类评审的主干而不是装饰：
 
@@ -299,7 +310,8 @@ queue=
 和反馈；后端能按同一 `STEP-*` 列出权威源、处理/公式、权限/状态守卫、幂等、接口/事件和失败恢复；
 测试能形成角色 × 权限层 × 状态 × 异常矩阵及对应证据；Coding Agent 能输出不新增业务假设的入口图、
 状态/事件表、失败矩阵和实现切片。任何角色仍需产品口头补充核心语义，或不同角色复述出相互冲突的
-状态、口径、事件和责任边界时，记录 GAP 并回写基线，不能以“说明大致有了”通过。
+状态、口径、事件和责任边界时，记录 GAP 并回写基线，不能以“说明大致有了”通过。角色复述是冷读
+验证，不要求也不得恢复产品/前端/后端/测试一级切换；人从同一 CurrentContext 与三页签读取共同事实。
 L3必须遍历所有声明页面的可见动作，而不是每角色只走一条成功主路径（`happy path`）；确认动作打开
 的是所属实体页面/弹窗、字段控件与页面合同一致、关闭后持久结果回到所属列表/详情。
 
@@ -369,8 +381,12 @@ parity_status=pass|blocked|not_applicable
 preserved_counts=
 approved_removals=
 review_projection=unset|confirmed|declined
-visible_review_note_count=
-review_coverage_ref=
+review_level=R0|R1|R2|not_applicable
+review_context_count=
+declared_review_point_count=
+candidate_diff_status=pass|gap|blocked|not_applicable
+product_fingerprint_evidence_ref=
+review_record_persistence=not_applicable|static_declared|browser_verified
 browser_evidence_status=pending|passed|blocked
 visual_authority=existing|greenfield_default|DEC-AESTHETIC-*
 design_lock_ref=inline|file|DEC-AESTHETIC-*

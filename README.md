@@ -15,9 +15,10 @@
 [![Version](https://img.shields.io/badge/version-5.4.7-7C3AED.svg)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
+[![Forks](https://img.shields.io/github/forks/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec/forks)
 
-<!-- CLAIM: CLM-ADOPTION-20260808; as_of=2026-08-08; evidence=public-platform-pages-verified -->
-公开采用信号（截至 2026-08-08）：[ClawHub 1.6k+ 下载，安全审计 Pass](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec) · [SkillHub AI 评分 4.8/5.0，双安全报告无风险](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)。如果它帮你减少了返工，欢迎到 [GitHub 点个 Star ⭐](https://github.com/franklinxkk/ai-delivery-spec)。
+<!-- CLAIM: CLM-ADOPTION-20260824; as_of=2026-08-24; evidence=clawhub-public-api+github-public-repository+skillhub-public-evaluation -->
+公开采用信号（截至 2026-08-24）：[ClawHub 2k+ 下载，安全审计 Pass](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec) · [SkillHub AI 评分 4.8/5.0，双安全报告无风险](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec) · [GitHub 26 Stars、6 Forks](https://github.com/franklinxkk/ai-delivery-spec)。如果它帮你减少了返工，欢迎到 [GitHub 点个 Star ⭐](https://github.com/franklinxkk/ai-delivery-spec)。
 
 ## 先看它能帮你的角色
 
@@ -79,6 +80,11 @@ openclaw skills install @franklinxkk/ai-delivery-spec
 - 后端开发 / 架构师：“从需求中提取对象、权威源、计算口径、状态守卫、事件、NFR 与待定技术决策。”
 - 测试工程师：“把需求转换成正反用例、边界、异常、权限、证据和回归清单，并标出不可验收的描述。”
 
+如果你只说一句“帮我做一个企业约谈 HTML”，Skill 会记住最终目标，先分批确认会改变范围、规则、
+权限、状态、指标或数据的关键决定；P0 关闭后继续生成可实施产品原型，不会停在一张需求清单，也不会
+靠猜测把缺口画成已确认功能。若你只是想先看方向，可以明确说“先做概念原型，允许合理假设”：它会
+先交最小可操作候选，并把假设与 GAP 明示出来，不冒充可开发基线。
+
 你不需要说 `Ultra-Light`、`L2` 或任何阶段名。只要说真实目标：
 
 - “把列表里的‘联系人’改成‘企业联系人’，其他逻辑不变。”——自动按快速小改处理：直接改，只说明差异、边界、正反验收和未证明事项，不建整套文档。
@@ -116,8 +122,8 @@ openclaw skills install @franklinxkk/ai-delivery-spec
 - 客户演示、方案探索和首次需求确认默认交付可操作的产品态。
 - 只有用户明确要求“评审版、编号标注、评审抽屉”等可见投影时，才生成评审态。
 - “交开发、给前后端测试看、开评审会”只说明消费方；若评审态偏好未确认，先询问一次。
-- 评审态按“导读 → 旅程 → 单步聚焦 → 按需页面标注 → 验收场景”组织；编号只负责定位，不再用一个长抽屉平铺所有按钮说明。
-- 产品、前端、后端、测试围绕同一 `STEP-*` 读取各自可执行工作包，并能查看上游、下游、分支、退回和 GAP；桌面画布与 STEP 双向定位，分享链接可恢复页面/步骤/角色上下文，窄屏在产品/评审间全屏切换。
+- R1/R2 评审态固定为“总览 / 功能与流转 / 边界与验收”三个一级页签；左侧始终是完整可操作产品，右侧只解释当前真实页面或业务浮层，不再另造旅程、步骤或角色导航。
+- 有 UI 落点的关键评审点必须在产品目标旁显示同号标记。点击左侧标号或右侧卡片时，真实目标、标号和说明卡同时框选并互相定位；页面/浮层切换后按当前上下文重新编号。分享定位恢复基线、上下文、评审点和页签，窄屏在产品/评审间全屏切换。
 - 流程、状态与数据流是三种独立的人类可见模型；业务是否确认与证据是否验证分轴记录，静态观察和“页面能点”不能冒充业务批准或真实验收。
 - Coding Agent 使用同一基线里的稳定 ID、规则、状态、验收和结构化 handoff；变更比较关注需求、规则、状态、数据流和 AC 的业务 Diff，而不只看文件 Diff。评审工作台只辅助人类走读，不是机器合同。
 

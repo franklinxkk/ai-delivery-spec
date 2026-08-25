@@ -9,6 +9,21 @@
     "schema_version": { "const": "5.3.0" },
     "status": { "enum": ["draft", "review_ready", "ready_for_implementation", "superseded"] },
     "engineering_baseline_ref": { "type": ["string", "null"] },
+    "execution_constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseline_ref", "protected_surfaces", "allowed_actions", "forbidden_actions", "environment_refs", "secret_refs", "required_evidence", "rollback_owner"],
+      "properties": {
+        "baseline_ref": { "type": "string", "minLength": 1 },
+        "protected_surfaces": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "allowed_actions": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "forbidden_actions": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "environment_refs": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "secret_refs": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^SECRET-[A-Z0-9-]+$" } },
+        "required_evidence": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "rollback_owner": { "type": "string", "minLength": 1 }
+      }
+    },
     "baseline": {
       "type": "object",
       "additionalProperties": false,

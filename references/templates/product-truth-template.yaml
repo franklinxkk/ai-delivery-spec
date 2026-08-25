@@ -18,6 +18,9 @@ delivery_context:
   lifecycle_stage: specify
   delivery_mode: standard
   tier: L2
+  artifact_mode: prd
+  risk_facets: []
+  evidence_level: static
   project_shape: greenfield
   customer_profile: [tob]
   governance_profiles: []
@@ -30,6 +33,10 @@ sources:
     kind: user_input
     title: "{source title}"
     location: "{path, URL, meeting, or owner}"
+    content_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+    sensitivity: internal
+    credential_status: clear
+    secret_refs: []
     authority: accountable
     status: active
     disposition: embedded

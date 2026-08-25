@@ -237,15 +237,47 @@ def _docx_paragraphs(path: Path) -> list[str]:
     return paragraphs
 
 
+SECRET_ASSIGNMENT_RE = re.compile(
+    r'''(?ix)["']?(password|passwd|pwd|api[_-]?key|access[_-]?token|refresh[_-]?token|client[_-]?secret|secret[_-]?key)["']?\s*[:=]\s*["']?([^\s"';,]{8,})'''
+)
+BEARER_SECRET_RE = re.compile(r"(?i)\bBearer\s+[A-Za-z0-9._~+/=-]{12,}")
+PRIVATE_KEY_RE = re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----")
+KNOWN_TOKEN_RE = re.compile(r"\b(?:gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,})\b")
+
+
+def _looks_like_secret_reference(value: str) -> bool:
+    normalized = value.strip("[](){}<>'\" ").casefold()
+    if not normalized:
+        return True
+    safe_markers = ("redacted", "masked", "placeholder", "example", "dummy", "changeme", "secret-", "vault://", "env://", "${")
+    return any(marker in normalized for marker in safe_markers) or set(normalized) <= {"*", "x", "-", "_"}
+
+
+def _secret_issues(paragraphs: list[str]) -> list[str]:
+    """Return location-only findings; never echo a suspected secret value."""
+    findings: list[str] = []
+    for index, paragraph in enumerate(paragraphs, 1):
+        if PRIVATE_KEY_RE.search(paragraph):
+            findings.append(f"paragraph {index}: probable private key material")
+        if BEARER_SECRET_RE.search(paragraph):
+            findings.append(f"paragraph {index}: probable bearer credential")
+        if KNOWN_TOKEN_RE.search(paragraph):
+            findings.append(f"paragraph {index}: probable provider token")
+        for match in SECRET_ASSIGNMENT_RE.finditer(paragraph):
+            if not _looks_like_secret_reference(match.group(2)):
+                findings.append(f"paragraph {index}: probable plaintext credential in {match.group(1)}")
+    return findings
+
+
 def check_distribution(args: argparse.Namespace) -> int:
-    """Block machine metadata or raw Markdown syntax leaking into a human copy."""
+    """Block metadata, raw Markdown, or probable plaintext secrets in a distribution copy."""
     try:
         if args.document.suffix.casefold() == ".docx":
             paragraphs = _docx_paragraphs(args.document)
-        elif args.document.suffix.casefold() in {".md", ".markdown", ".txt"}:
+        elif args.document.suffix.casefold() in {".md", ".markdown", ".txt", ".html", ".htm", ".yaml", ".yml", ".json"}:
             paragraphs = [line.strip() for line in args.document.read_text(encoding="utf-8").splitlines() if line.strip()]
         else:
-            raise ValueError("supported formats: .docx, .md, .markdown, .txt")
+            raise ValueError("supported formats: .docx, .md, .markdown, .txt, .html, .yaml, .yml, .json")
     except (OSError, UnicodeError, ValueError, zipfile.BadZipFile, ET.ParseError) as exc:
         message = f"分发副本不可读取：{exc}" if args.language == "zh-CN" else f"Distribution copy is not readable: {exc}"
         payload = {"status": "BLOCKED", "document": str(args.document), "issues": [message]}
@@ -260,7 +292,7 @@ def check_distribution(args: argparse.Namespace) -> int:
     )
     for index, paragraph in enumerate(head, 1):
         if paragraph == "---" or machine_key.search(paragraph):
-            issues.append(f"paragraph {index}: machine frontmatter leaked ({paragraph[:80]})")
+            issues.append(f"paragraph {index}: machine frontmatter leaked")
     markdown_patterns = () if args.document.suffix.casefold() in {".md", ".markdown"} else (
         (re.compile(r"^#{1,6}\s+"), "raw Markdown heading"),
         (re.compile(r"```|~~~"), "raw Markdown fence"),
@@ -270,8 +302,9 @@ def check_distribution(args: argparse.Namespace) -> int:
     for index, paragraph in enumerate(paragraphs, 1):
         for pattern, label in markdown_patterns:
             if pattern.search(paragraph):
-                issues.append(f"paragraph {index}: {label} ({paragraph[:80]})")
+                issues.append(f"paragraph {index}: {label}")
                 break
+    issues.extend(_secret_issues(paragraphs))
     issue_limit = max(0, args.max_issues)
     displayed_issues = issues if issue_limit == 0 else issues[:issue_limit]
     payload = {
@@ -281,16 +314,16 @@ def check_distribution(args: argparse.Namespace) -> int:
         "issue_count": len(issues),
         "issues_truncated": len(displayed_issues) < len(issues),
         "issues": displayed_issues,
-        "not_proven": ["layout/rendering", "page breaks", "fonts", "visual fidelity"],
+        "not_proven": ["layout/rendering", "page breaks", "fonts", "visual fidelity", "absence of encoded/image/contextual secrets"],
     }
     if args.format == "json":
         print(json.dumps(payload, ensure_ascii=False, indent=2))
     elif issues:
-        print("BLOCKED: 分发副本仍含机器元数据或未转换 Markdown" if args.language == "zh-CN" else "BLOCKED: distribution copy still contains machine metadata or raw Markdown")
+        print("BLOCKED: 分发副本仍含机器元数据、未转换 Markdown 或疑似明文凭据" if args.language == "zh-CN" else "BLOCKED: distribution copy still contains machine metadata, raw Markdown, or a probable plaintext credential")
         for issue in displayed_issues:
             print(f"- {issue}")
     else:
-        print("PASS: 分发副本未发现机器 frontmatter 或原始 Markdown 泄漏；仍需渲染检查版式" if args.language == "zh-CN" else "PASS: no machine front matter or raw Markdown leakage found; rendered layout still requires review")
+        print("PASS: 分发副本未发现机器 frontmatter、原始 Markdown 或常见明文凭据；仍需渲染与人工隐私复核" if args.language == "zh-CN" else "PASS: no machine front matter, raw Markdown, or common plaintext credential pattern found; rendered layout and human privacy review remain required")
     return 2 if issues else 0
 
 
@@ -1093,7 +1126,7 @@ def main() -> int:
     human.add_argument("--language", choices=["zh-CN", "en-US"], default="zh-CN")
     human.set_defaults(func=project_human)
 
-    distribution = sub.add_parser("check-distribution", help=gate_help("Check a DOCX/text distribution copy for metadata or raw-Markdown leakage", "检查 DOCX/文本分发副本是否泄漏机器元数据或原始 Markdown"))
+    distribution = sub.add_parser("check-distribution", help=gate_help("Check a DOCX/text distribution copy for metadata, raw-Markdown, or probable credential leakage", "检查 DOCX/文本分发副本是否泄漏机器元数据、原始 Markdown 或疑似凭据"))
     distribution.add_argument("--document", type=Path, required=True)
     distribution.add_argument("--format", choices=["concise", "json"], default="concise")
     distribution.add_argument("--language", choices=["zh-CN", "en-US"], default="zh-CN")

@@ -63,7 +63,7 @@ def test_context_plan_scales_without_silent_loss() -> None:
     assert {'MOD-CONTENT-001', 'FLOW-PUBLISH-001'} <= slice_ids
 
 def test_legacy_delivery_init_preserves_local_config() -> None:
-    with tempfile.TemporaryDirectory(prefix='ads-init-', dir=ROOT) as temp:
+    with tempfile.TemporaryDirectory(prefix='ads-init-') as temp:
         target = Path(temp) / 'delivery'
         run(CLI, 'init-delivery', '--output', str(target), '--truth-layout', 'progressive')
         required = ('spec.config.yaml', 'manifest.json', 'truth/index.yaml', 'truth/fragments/00-core.yaml', 'truth/fragments/MOD-EXAMPLE.yaml', 'evidence')
@@ -76,7 +76,7 @@ def test_legacy_delivery_init_preserves_local_config() -> None:
         assert yaml.safe_load(config_path.read_text(encoding='utf-8'))['context']['profile'] == 'minimal'
 
 def test_runtime_manifest_requires_schema_and_closed_file_set() -> None:
-    with tempfile.TemporaryDirectory(prefix='ads-manifest-', dir=ROOT) as temp:
+    with tempfile.TemporaryDirectory(prefix='ads-manifest-') as temp:
         runtime = Path(temp)
         skill, data = (runtime / 'SKILL.md', b'x')
         skill.write_bytes(data)

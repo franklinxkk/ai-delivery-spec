@@ -60,11 +60,12 @@ def visible_text(payload: dict) -> str:
 require(
     "SKILL.md",
     (
-        "用户明确要求“评审版/评审模式/编号标注/评审抽屉”",
-        "未确认时继续产品模式",
-        "默认锁定用户指定语言",
-        "无页面入口权限时菜单/路由入口不可见",
-        "静态、浏览器、业务确认、真实实现、客户验收五级证据不可越级",
+        "只有用户明确要求评审版",
+        "或在首次交开发前确认后",
+        "客户演示/需求确认默认产品模式",
+        "锁定任务起始语言",
+        "evidence_level=static|browser|real_system|customer_acceptance",
+        "Gate 只证明静态合同，不证明",
     ),
 )
 require(
@@ -74,17 +75,25 @@ require(
         "核心流程图",
         "状态转换图",
         "数据流/血缘图",
+        "入口权限不足时是菜单/路由隐藏还是局部禁用",
         "普通无入口角色不需要先进入页面再看“您无权限”",
+        "产品位置合同 / Product Location Contract",
+        "PROTO-PRODUCT-LOCATION-MISMATCH",
     ),
 )
 require(
     "references/review-workspace.md",
     (
-        "未参与原讨论的接收者能独立",
-        "一个 STEP 是一个可归责工作提交点",
-        "applicability=not_affected",
-        "machine_handoff.status",
-        "冷读通过仍不证明实现正确",
+        "未参与原讨论的产品、前端、后端、测试",
+        "Review Explains, Product Operates",
+        "CurrentContext = 最上层活动业务浮层，否则为活动产品视图",
+        "R1/R2 只有三个一级页签",
+        "review_contexts",
+        "Candidate - Declared",
+        "ProductFingerprint(before) == ProductFingerprint(after)",
+        "ProductLocation：产品导航证明系统位置",
+        "页面切换同步活动视图、路由、活动菜单路径",
+        "不得增加 Journey/Step/Role 导航",
     ),
 )
 
@@ -124,7 +133,7 @@ if inherited.get("metrics", {}).get("prototype_inherited_findings", 0) < 1:
 
 
 # A handoff STEP is implementable only when it resolves to the bound PRD.
-with tempfile.TemporaryDirectory(prefix="ads-human-review-", dir=ROOT) as raw:
+with tempfile.TemporaryDirectory(prefix="ads-human-review-") as raw:
     work = Path(raw)
     prd = work / "prd.md"
     prd_text = "# PRD\n\nREQ-DEMO-001 / ACT-DEMO-001 / AC-DEMO-001\n"
@@ -153,4 +162,4 @@ with tempfile.TemporaryDirectory(prefix="ads-human-review-", dir=ROOT) as raw:
 
 if failures:
     raise SystemExit("\n".join(failures))
-print("PASS: review opt-in, language projection, inherited debt, role workspace and STEP handoff boundaries hold")
+print("PASS: review opt-in, language projection, inherited debt, context-driven human review and machine handoff boundaries hold")

@@ -22,6 +22,25 @@ frame/explore 中可提出带标签的假设和方案，但不得创建正式 `R
 contextual、historical 或 untrusted；同时记录状态、范围、解释责任人和位置。若同一范围有多个
 canonical 候选，停止并创建 `DEC-CONFLICT-*`，不能按文件名、时间或详细程度擅自选择。
 
+来源的“内容类型”与“权威等级”不得混为一列。至少区分：`business_opportunity`（问题/机会输入）、
+`product_decision`（已授权产品决定）、`engineering_constraint`（环境/架构/交付约束）、
+`evaluation_assignment`（作业、测评或验证任务）、合同/法规/标准、存量系统观察和 inference。
+评测要求不能自动升级成产品范围，工程约束不能改写业务目标，竞品行为也不能替代责任人决定。
+
+### 来源接收安全闸
+
+在摘录、转写、打包、提交或调用外部服务前，先检查明文密码、API key/token、Authorization、私钥、
+Cookie/会话、个人联系方式、客户记录和受限附件。发现疑似敏感值时：
+
+1. 停止复制原值到 PRD、原型、提示词、日志、测试夹具或公开仓库；
+2. 生成脱敏工作副本并保存原内容 SHA-256，来源登记 `sensitivity` 与 `credential_status`；
+3. 只保留 `SECRET-*`/密钥系统引用和责任人，不把秘密本身写入 Product Truth 或 handoff；
+4. 无法确认是否可用时隔离为 `quarantined`，由授权人决定后再继续受影响范围；
+5. 自动扫描只是发现线索，不能证明不存在编码、图片或上下文型秘密。
+
+状态建议使用 `clear | redacted | secret_ref_only | quarantined`。公开或跨组织分发前还要运行
+`check-distribution`；它不替代人工隐私复核。
+
 尽可能提取：
 
 - 角色、组织、租户、合作方、客户和数据范围；

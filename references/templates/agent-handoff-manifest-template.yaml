@@ -1,6 +1,16 @@
 schema_version: 5.3.0
 status: draft
 engineering_baseline_ref: null
+# 仅在实现存在环境/权限/安全边界时取消注释；不得在 secret_refs 写入秘密原值。
+# execution_constraints:
+#   baseline_ref: ENG-BASELINE-001
+#   protected_surfaces: []
+#   allowed_actions: []
+#   forbidden_actions: []
+#   environment_refs: []
+#   secret_refs: [SECRET-EXAMPLE-001]
+#   required_evidence: []
+#   rollback_owner: "{accountable human}"
 baseline:
   version: 0.1-draft
   hash: "0000000000000000000000000000000000000000000000000000000000000000"

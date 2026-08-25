@@ -26,19 +26,36 @@ trace_release_proxy:
     convention: passed
     effectiveness: partial
   effectiveness_limit: >-
-    private real-project calibration and one isolated pure-model cold-read exposed and
-    repaired contract gaps, but repeated blind Skill-on/Skill-off runs, controlled token/time
-    accounting, real receiver handoff and versioned human ratings remain incomplete
+    three private real-project calibration shapes and deterministic regressions exposed and
+    repaired contract gaps, but fresh blind Skill-on/Skill-off repetitions, controlled token/time
+    accounting and versioned human ratings remain incomplete
   private_calibration:
     sample_shapes: [same-baseline review A/B, brownfield review retrofit, multi-surface prototype acceptance]
     publication: anonymized aggregate only; raw files and customer/project names excluded
 known_limitations:
 - five domain methods have owner-attested production practice; all built-in packs
   pass deterministic contract checks but fresh-agent/expert maturity remains separate
-- v5.4.7 review-workspace and adversarial contract probes are deterministic; one isolated
-  no-skill cold-read is recorded separately, while fresh-agent repetitions, real receiver
-  handoff and versioned user feedback remain incomplete
+- v5.4.7 review-workspace and adversarial contract probes are deterministic; isolated
+  no-skill comparison, fresh-agent repetitions and versioned user feedback remain
+  separate evidence
 - domain expert, customer, production, legal, safety, and financial correctness are
   not proven
 - deterministic fixtures and private brownfield calibration expose method gaps but
   do not prove implementation or customer acceptance
+release_guards_2026_08_26:
+  one_line_prototype_routing:
+    cases: 6
+    default: preserve_html_target_and_close_blocking_p0
+    explicit_concept: allow_labeled_concept_candidate_without_readiness_claim
+  review_linkage:
+    ui_grounded_marker_required: true
+    selected_surfaces: [marker, card, target]
+    collapse_expand_roundtrip: required
+    controlled_browser_fixture: passed
+    browser_fixture_scope: marker_card_target_selection_and_overlay_context_roundtrip
+  regression:
+    pytest: 74_passed
+    release_gate: passed
+    package_paths: passed
+    validator_wiring: passed
+    skill_creator_utf8: passed

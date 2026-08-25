@@ -2,8 +2,26 @@
 
 ## 5.4.7 - 2026-08-22
 
+- Final release guard（同版本发版前修复，2026-08-26）：一句话要求 HTML 默认保持“可实施产品原型”为停止点，分批关闭原型阶段 P0 后继续生成，不再停在需求清单或无解释地不出产物；明确“先看效果/概念原型/允许合理假设”才允许先交带假设与 GAP 的 `concept_candidate`，且不得冒充基线、可开发、已评审或已验收。仅要求 HTML 时不机械附送 PRD，中英文语义等价。
+- Review linkage guard：有可见 UI 目标的正式 ReviewPoint 必须在产品目标旁显示同号 marker；点击左侧 marker 或右侧卡片时，真实 target、marker、card 三处同步框选并双向定位。新增 `selection_contract`、`PROTO-REVIEW-MARKER-REQUIRED` 与 `PROTO-REVIEW-SELECTION-NOT-SYNCED`；右栏存在 `1/2/3` 而左侧无落点、只有滚动没有目标焦点环、收起后无反向展开入口均不得交付。业务浮层可正确继承 `menu_exempt` 父页面，不再被迫伪造菜单路径。
+- Baseline truth guard：新增 `PRD-STATUS-CONTRADICTION`，阻断 frontmatter 声称 `baseline/ready`、但 `baseline_version` 或文档控制仍明确为 `draft/草稿/待评审` 的矛盾工件。脱敏真实缺陷样本已复现并由新门禁阻断。
+- Final validation：一句话路由与评审联动正反例并入既有集中测试，不新增维护文件；全量 pytest `74 passed`，完整 release gate、发布包路径检查、校验器接线和 Skill Creator UTF-8 校验通过。受控浏览器夹具验证 marker/card/target 双向框选、评审栏收起恢复与业务浮层上下文往返；维护区保持 56 文件/449,081 bytes，未提高既有预算。静态与受控浏览器夹具仍不证明领域正确、真人冷读、真实实现或客户验收。
+- Final RC2 protocol/runtime correction（同版本待发补丁）：人工复核确认 RC1 仍存在“合同写对、执行器未完全照做”。正式 Declaration 与 `candidate_review_points[]` 物理分离；存量小写动作只生成带理由的 `PROTO-OBS-*` 候选；Target 在 CurrentContext 内执行 exactly-one，零/多命中均阻断且禁止 first/index/root 回退；业务浮层由 Manifest `detectionSelector` 与继承模式驱动；评审记录 `RVP-*` 与真实 `subject_ref` 分离，不再自动伪造 `REQ/RULE/STATE/AC`；Observed Product Fingerprint 接入可见运行门禁；收起→展开、分享定位刷新恢复进入浏览器往返。指标、规则字段、高风险动作和行为状态进入 Candidate Diff，未知业务口径保持 GAP。`resizable` 按实际实现声明为 false，删除旧重复 Runtime。33 项聚焦回归通过，三份完整原型的参数化浏览器 Runner 对 22/19/4 个主导航上下文、收起展开、页签与分享恢复通过；浮层核心链路另做浏览器实测。真人多角色冷读仍未执行，不能据此冻结 Final。
+- Product Location correction（同版本待发补丁）：真实项目冷读发现核心旅程虽可达，但简化评审壳的左侧菜单保持静态，产研与测试无法判断当前功能在系统中的真实入口。新增 `ProductLocation` 合同：每个 VIEW 必须绑定唯一菜单路径或具理由的独立入口，页面切换同步路由、活动菜单、父级展开、面包屑、标题与 CurrentContext；浮层继承父页面位置。Schema、静态运行时门禁、浏览器 ARUN 和冷读新增 `PROTO-PRODUCT-LOCATION-MISMATCH`，禁止用静态假菜单替代完整存量导航。
+- Full-product runtime correction（同版本待发补丁）：用 CRM、安驾后台和学员 H5 三份完整原型派生评审态时补齐真实运行边界：同页只保留一个可见评审事实面；评审事件不得进入业务 dispatcher；固定业务浮层在桌面止于产品区、窄屏恢复全屏；动态 `innerHTML` 重绘后恢复正式 marker；只显示 CurrentContext marker；标号避碰、完整落在视口内且不遮挡关键动作；右栏卡片默认摘要、按需展开。以上均进入浏览器 ARUN，静态声明不得冒充运行证明。
+- Final Review correction（同版本）：依据多模型产物人工冷读反证，撤销 Preview 中把 `orientation / journey / focus / page / acceptance` 与产品/前端/后端/测试角色镜头设为人类一级导航的设计。新合同遵守 `Review Explains, Product Operates`：完整产品自身承担动线，评审层跟随最上层业务浮层或活动 VIEW 的只读 `CurrentContext`。
+- Human projection：R1/R2 固定为“总览 / 功能与流转 / 边界与验收”三页签，R0 可省略可见页签；复杂度只增加信息深度。FLOW/STEP/EDGE/STATE/DATA/AC/TEST 继续保留在 PRD、Product Truth 与机器 handoff，并按当前上下文投影，不再控制人的导航。
+- Declaration and runtime safety：`review_contexts` 成为官方评审点与进度分母的唯一声明源；Candidate Diff 只报告遗漏且禁止自动晋级。新增上下文内重编号、marker/card 同源、当前上下文唯一目标解析、Product/Review Fingerprint 分离、非遮挡布局、Overlay 探测、分享定位和按 baseline 隔离的持久化评审记录合同。
+- Gate migration：`review-workspace.schema.json` 升级为 `5.4.7-final`，确定性门禁覆盖 context、denominator、point coverage、numbering、three-tab ownership、status axes、candidate diff、fingerprint mechanism、layout、overlay detection、target resolution、share/progress、record persistence 与 cold-read evidence；旧五模式 manifest 不再被 Final Schema 接受。
+- Coherence patch（同版本）：把用户可见工作量收敛为 `direct / standard / governed`，并将主产物形态、风险切面、证据等级拆成正交轴；L0-L4 仅作为旧 Schema/CLI 兼容映射，避免一个数字同时冒充文档深度、业务风险、原型复杂度和验收证据。
+- Runtime subtraction：重写精简 `SKILL.md` 主入口，删除 CRM 专属链路、固定 100KB/页面数量阈值和权限/同步等重复细则，改为按阶段引用；保留任意阶段进入、最轻路径、来源权威、P0 未知、Stage 0、统一 PRD、同源三投影、变更追溯和证据诚实等核心能力。
+- Upstream/source safety：来源类型新增业务机会、产品决定、工程约束和评测任务，禁止它们互相越权；来源登记支持 hash、敏感级别、凭据处置和 `SECRET-*` 引用。`check-distribution` 同时检查常见明文凭据且只报告位置/类型，不回显疑似秘密，并明确自动扫描不能证明无编码/图片/上下文秘密。
+- Execution boundary：把受保护表面、允许/禁止动作、环境/密钥引用、必需证据和回滚责任人作为可选 `execution_constraints` 合并进既有 Coding Agent handoff；不新增执行阶段，不扩张到 Sprint、编码、部署或运维。
+- Validation：新增工作深度正交性、来源分类/凭据引用、执行约束 Schema 与秘密不回显正反例；公开“最好”主张改为预注册盲测达标后才允许，本次静态回归不预支比较结论。
+- Maintainer subtraction：把强制“七阶段 × 九角色 × 每角色四项输出”的 456 行历史行业夹具改为 140 行风险镜头组合；过期文案关键词门禁改为能力/结构门禁，生成型 pytest 目录不再冒充运行时架构。完整 `check --profile release` 通过；维护区仍为 55 文件，降至 421,497B，未提高预算。
 - Why：结合 Kimi K3、QClaw/GLM、WorkBuddy/DeepSeek、Grok 四组最新独立方案、用户人工视检和存量双态原型反证，确认旧评审态主要按页面与按钮组织信息：接收者能勉强看懂单点，却无法沿真实业务旅程识别责任交接、状态可达性、数据变化和验收闭环。专家产物还暴露批量把未知升级为 confirmed、用自报冷读代替真人证据、技术伪精确和同一规则多版本冲突等风险。
 - Review Workspace：评审态改为导读、旅程、单步聚焦、按需页面定位、验收五种任务模式；编号只定位当前 `STEP-*`/页面入口，不再铺满全站。桌面画布与 STEP 双向定位并保持选中反馈，分享定位可恢复页面/步骤/角色上下文；窄屏在产品/评审间全屏切换。变更比较提升为 REQ/STEP/RULE/STATE/DFD/AC 业务 Diff；系统步骤、外部步骤与断点允许没有虚假的页面钉点。
+- Adaptive presentation：右侧评审栏不再是固定模板。每个进入聚焦评审的 `VIEW-*` 必须按指标/宽表、表单详情、流程画布、混合工作台或移动页面画像，显式选择侧边检查器、底部停靠、就地展开或全屏工作区，并登记业务浮层冲突策略；Schema、DOM 映射和正反例门禁共同阻止缺映射、漂移、重复和孤立页面。
 - Role Work Packets：每个原子 `STEP-*` 分别向产品、前端、后端、测试投影最小施工包，并保留上游、下游、分支、回退和未知项。前后端可见合同引用，测试可见 `TEST-* → AC-*`、前置、正反边界、双结果和证据要求；Coding Agent 不作为第五个人类镜头，继续读取同源 PRD/Truth、稳定 ID 与结构化 handoff。
 - Flow/State/Data：跨角色交接、受守卫状态、对象/系统数据流必须以相互独立且人眼可见的 FLOW/STM/DFD 投影呈现；确实不适用时显式 N/A。`EDGE-*` 支持 start/next/branch/parallel/join/return/error/compensate/finish，避免把并行、汇聚、错误与补偿压成固定“上一/下一”。
 - Evidence integrity：业务语义状态 `confirmed/proposed/inferred/unknown/conflict` 与验证状态 `not_run/static_checked/browser_checked/integration_checked/accepted/failed` 分轴；confirmed 必须绑定来源/决定，验证结论必须绑定证据。静态观察、评审导航可点击或模型自报均不能升级成业务批准、真实实现或验收。

@@ -7,6 +7,9 @@ outcome: "{observable customer or business result}"
 owner: "{accountable product owner}"
 document_language: zh-CN # 默认跟随用户当前请求；显式要求可覆盖
 source_refs: [SRC-REQ-001]
+artifact_mode: prd # direct | card | prd；决定主产物深度
+risk_facets: [] # 只列已触发风险，不从 L0-L4 推断
+evidence_level: static # static | browser | real_system | customer_acceptance；只写已取得证据上限
 value: medium
 priority: P2
 complexity:

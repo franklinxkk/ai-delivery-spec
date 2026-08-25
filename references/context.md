@@ -116,10 +116,29 @@ Stage 0 的对象计数或结构 PASS 不证明主链可达。对每条进入本
 直接 XCT/EDGE 和测试，不加载全项目；它可返回 `REV-*` 或变更提案，但不能直接修改业务基线。
 Qoder/Claude/Cursor/Codex 规则只是控制面的投影，不能复制出不同业务 ID。
 
-可见评审工作台是人类执行导航，不是 Agent 的第五个角色镜头。Agent 从 manifest 取得当前 packet 与
-`STEP/AC` 引用，再解析同 hash 的 PRD/Truth 切片和工程基线；评审 HTML 仅可用于定位 `VIEW/REG/ACT`
-和可见状态，不得从角色说明文案反推出新规则。handoff 缺失或 hash 漂移时返回 GAP，不能退回“通读
-评审原型后自行实现”。
+当实现存在不可从 PRD 推断的环境、权限或安全边界时，只在同一 manifest 中增加可选
+`execution_constraints`，不新建“执行阶段”或第二份需求合同：
+
+```yaml
+execution_constraints:
+  baseline_ref: ENG-BASELINE-001
+  protected_surfaces: []
+  allowed_actions: []
+  forbidden_actions: []
+  environment_refs: []
+  secret_refs: [] # 只写 SECRET-* 或密钥系统引用，绝不写原值
+  required_evidence: []
+  rollback_owner: "{accountable human}"
+```
+
+这里记录“实现不能越过什么、要拿什么证据”，不写 Sprint、命令流水账、数据库方案或部署步骤。
+约束必须回链已批准业务/工程来源；`forbidden_actions` 优先于 Agent 自主性，`secret_refs` 不得被
+展开到提示词、日志、代码或测试夹具。
+
+可见评审工作台是随产品 `CurrentContext` 变化的人类解释层，不替产品导航，也不是 Agent 的第五个
+角色镜头。Agent 从 manifest 取得当前 packet 与 `STEP/AC` 引用，再解析同 hash 的 PRD/Truth 切片和
+工程基线；评审 HTML 仅可用于定位 `VIEW/REG/ACT` 和可见状态，不得从人类摘要反推出新规则。handoff
+缺失或 hash 漂移时返回 GAP，不能退回“通读评审原型后自行实现”。
 
 每个 `XCT-*` 正文至少声明：影响模块、全局不变量、执行点、例外与失败处理和对应 `AC-*`。
 只有“权限/审计见全局规则”的空壳不能进入 ready_for_implementation，门禁返回
