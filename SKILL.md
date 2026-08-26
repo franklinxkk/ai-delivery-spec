@@ -46,13 +46,13 @@ description: Use for creating, changing, reviewing, reverse-engineering or accep
 
 客户演示/需求确认默认产品模式。只有用户明确要求评审版，或在首次交开发前确认后，才生成可见评审投影；拒绝后同一基线不重复询问。评审态遵守 `Review Explains, Product Operates`：左侧始终是完整可操作产品，右侧只解释真实产品动作产生的当前页面/业务浮层上下文。R1/R2 人类一级导航固定为“总览 / 功能与流转 / 边界与验收”，不得再增加旅程、步骤、页面或产品/前端/后端/测试角色模式；复杂度只增加信息深度。`review_contexts` 声明评审点并确定分母，Candidate Diff 只防漏、不自动入选；纯评审动作不得改变 Product Fingerprint。FLOW/STEP/EDGE/STATE/DATA/AC/TEST 保留在同 hash 的 PRD 与结构化 handoff 中，并按当前上下文投影，不从右栏文案猜规则。确认评审版时完整读取 `references/review-workspace.md`。
 
-Candidate 与 Declaration 必须是物理分离的数据集合：扫描稳定锚点、存量小写 `data-action` 或运行时动态页面只能生成带 `candidate_reason` 的 `candidate_review_points`，不得 append 到正式评审点或改变进度。`review_point_id` 只标识评审记录，`subject_ref` 才引用真实 Product Truth；只有原型观察时使用 `PROTO-OBS-* + business_status=gap + evidence_origin=prototype_inferred`，禁止自动伪造 `REQ/RULE/STATE/AC` 或标成已确认。指标候选必须列出可见指标，并要求产品在开发前冻结对象、公式/分子分母、时间字段与窗口、状态过滤、去重、数据权威、刷新时点、空值/失败、单位精度与下钻条件。
+Candidate 与 Declaration 必须是物理分离且 `subject_ref` 不重叠的数据集合：扫描稳定锚点、存量小写 `data-action` 或运行时动态页面只能生成带 `candidate_reason` 的 `candidate_review_points`，不得 append 到正式评审点或改变进度。`review_point_id` 只标识评审记录，`subject_ref` 才引用真实 Product Truth；正式 ReviewPoint 的 subject/source/precondition/result/boundary/AC 必须在本次 PRD 基线可解析。只有原型观察时使用 `PROTO-OBS-* + business_status=gap + evidence_origin=prototype_inferred`，禁止自动伪造 `REQ/RULE/STATE/AC` 或标成已确认。指标候选必须列出可见指标，并要求产品在开发前冻结对象、公式/分子分母、时间字段与窗口、状态过滤、去重、数据权威、刷新时点、空值/失败、单位精度与下钻条件。
 
 评审态不得把真实导航降级成静态装饰。每个 `VIEW-*` 必须绑定唯一可见菜单路径，或说明为什么是扫码页、H5 独立页等无菜单入口；页面切换同步活动菜单、父级展开、路由、面包屑、标题和 `CurrentContext`。业务浮层继承父页面位置，只改变浮层 `CurrentContext`。任何静态假菜单、位置漂移或评审动作改变产品位置都阻断交付。
 
 同一产物只能有一个可见评审事实面：迁移存量评审版时停用旧说明栏/角色镜头，不能让新旧评审层并存。`UIACT-REVIEW-*` 必须与业务 `ACT-*` 事件隔离。每个有 UI 落点的正式评审点都必须在左侧目标旁显示同号 marker；右侧不得出现没有左侧落点的“1/2/3”。点击 marker 或右侧卡片时，当前 marker、卡片和真实目标必须同时形成可见选中/框选态并互相滚动定位。产品动态重绘后须恢复当前 Context 的正式标号，只显示当前 Context 标号，并在浏览器中证明标号不重叠、不越出视口。桌面业务浮层只能占产品区域，不能盖住评审栏；窄屏切换回产品时恢复业务浮层全屏。右栏卡片默认摘要、按需展开，不复制整份 PRD。
 
-CurrentContext 必须由 manifest 的 detection 合同统一解析最上层业务浮层，不为单个原型硬编码特例。标号解析只允许 `CurrentContextRoot` 内当前可见且恰好一个目标；零个显示 unresolved，多个 BLOCK ambiguous，禁止取第一个或回退到 Context Root（显式声明 `target_mode=context_root` 的页面方向标号除外）。收起与展开、产品/评审切换、页签、记录、导入导出和分享都要跑双向浏览器验收；Fingerprint 违规必须进入可失败 Gate，不能只 `console.error`。分享链接需在打开时校验 baseline、恢复产品上下文/页签/评审点；无法自动重开业务浮层时明确 GAP。
+CurrentContext 必须由 manifest 的 detection 合同统一解析最上层业务浮层，不为单个原型硬编码特例。标号解析只允许 `CurrentContextRoot` 内当前可见且恰好一个目标；零个显示 unresolved，多个 BLOCK ambiguous，禁止取第一个或回退到 Context Root。`target_mode=context_root` 只允许 `VIEW/REG` 页面方向标号；`ACT/FLD/METRIC/STATE` 必须 `selector_exactly_one`。收起与展开、产品/评审切换、页签、记录、导入导出和分享都要跑双向浏览器验收；Fingerprint 违规必须进入可失败 Gate，不能只 `console.error`。分享链接必须在打开时校验 baseline 并恢复产品上下文/页签/评审点；R1/R2 冷读不得写不适用，未执行保持 pending/blocked。无法自动重开业务浮层时明确 GAP。
 
 存量系统先做 Stage 0：页面、角色、入口、动作/处理器、状态、实体、字段/指标、数据源、代表数据和关键链可达性。未经批准不得丢失基线功能，也不得新增角色、页面、实体、审批、指标、状态或技术伪精确。权限、外部数据方向、指标口径、复杂流程/状态/数据流的详细合同按对应参考执行。
 

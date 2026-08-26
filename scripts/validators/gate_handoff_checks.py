@@ -14,6 +14,8 @@ for _candidate in (SCRIPT_DIR, SCRIPT_DIR / "validators"):
 
 import yaml
 from jsonschema import Draft202012Validator
+from validate_prd_semantics import collect_defined_ids
+
 
 
 def _placeholder_paths(value: object, prefix: str = "") -> list[str]:
@@ -1023,6 +1025,7 @@ class HandoffChecks:
                 affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
             )
         expected_prd_hash = self._sha256(prd)
+        prd_baseline_ids = collect_defined_ids(prd)
         for review_path, review_document in self.review_workspace_contracts:
             if review_path not in prototype_resolved:
                 continue
@@ -1035,6 +1038,63 @@ class HandoffChecks:
                     str(baseline.get("requirement_ref", "")) if isinstance(baseline, dict) else "baseline",
                     affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
                 )
+            for point in review_document.get("review_points", []) or []:
+                if not isinstance(point, dict):
+                    continue
+                point_ref = str(point.get("ref", "RVP-UNKNOWN"))
+                subject_ref = str(point.get("subject_ref", "")).upper()
+                if subject_ref and not subject_ref.startswith("PROTO-OBS-") and subject_ref not in prd_baseline_ids:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-SUBJECT-UNRESOLVED", review_path,
+                        "ReviewPoint.subject_ref 未解析到本次提供的权威 PRD 基线",
+                        f"{point_ref}->{subject_ref}",
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                        related_refs=(point_ref, subject_ref),
+                    )
+                for source_ref in {
+                    str(item).upper() for item in point.get("source_refs", []) or [] if str(item).strip()
+                }:
+                    if source_ref not in prd_baseline_ids:
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-SOURCE-UNRESOLVED", review_path,
+                            "ReviewPoint.source_refs 未解析到本次提供的权威 PRD 基线",
+                            f"{point_ref}->{source_ref}",
+                            affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                            related_refs=(point_ref, source_ref),
+                        )
+                for acceptance_ref in {
+                    str(item).upper() for item in point.get("acceptance_refs", []) or [] if str(item).strip()
+                }:
+                    if acceptance_ref not in prd_baseline_ids:
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-AC-UNRESOLVED", review_path,
+                            "ReviewPoint.acceptance_refs 未解析到本次提供的权威 PRD 基线",
+                            f"{point_ref}->{acceptance_ref}",
+                            affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                            related_refs=(point_ref, acceptance_ref),
+                        )
+                other_refs: dict[str, set[str]] = {}
+                for field in (
+                    "actor_refs", "precondition_refs", "visible_result_refs",
+                    "domain_result_refs", "boundary_refs", "target_ref",
+                ):
+                    value = point.get(field)
+                    values = value if isinstance(value, list) else [value]
+                    refs = {
+                        str(item).upper() for item in values
+                        if item and str(item).strip() and str(item).upper() != subject_ref
+                    }
+                    if refs:
+                        other_refs[field] = refs
+                for field, refs in other_refs.items():
+                    for unresolved_ref in sorted(refs - prd_baseline_ids):
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-REF-UNRESOLVED", review_path,
+                            f"ReviewPoint.{field} 未解析到本次提供的权威 PRD 基线",
+                            f"{point_ref}->{unresolved_ref}",
+                            affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                            related_refs=(point_ref, unresolved_ref),
+                        )
 
         frontmatter = self._frontmatter(prd)
         declared_views = {str(item).upper() for item in frontmatter.get("page_contract_view_ids", []) if item}

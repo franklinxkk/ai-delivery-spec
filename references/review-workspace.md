@@ -90,7 +90,8 @@ BLOCK；门禁不得自动把候选晋级为官方评审点，也不得改变分
 Candidate 必须进入独立 `candidate_review_points[]`，并至少说明 `subject_ref`、`candidate_reason`、
 selector、cardinality 和 `UNK-*`。存量小写动作只可规范化为 `PROTO-OBS-ACT-*` 候选身份，不能借
 规范化创造 `ACT-*` Product Truth。动态页面在浏览器中枚举指标、高风险动作和规则字段；候选可见但
-不计进度，产品明确确认并绑定来源后才从候选移入 Declaration。
+不计进度，产品明确确认并绑定来源后才从候选移入 Declaration；晋级后必须从 Candidate Set 删除，
+`candidate_review_points[].subject_ref` 与 `review_points[].subject_ref` 的交集必须为空。
 
 ## 5. ReviewPoint 最小完整合同
 
@@ -126,6 +127,10 @@ source_refs: [REQ-EXAMPLE-001]
   事实从哪里来。
 
 `RVP-*` 只是评审记录身份，不替代 `subject_ref`。没有真实来源时不得自动生成 `REQ/RULE/STATE/AC`。
+正式交接时，`subject_ref/source_refs/precondition_refs/visible_result_refs/domain_result_refs/boundary_refs/
+acceptance_refs/target_ref` 必须逐项解析到本次提供的权威 PRD 稳定 ID 索引；Product Truth 为主源时也
+必须把这些 ID 投影进同 hash PRD。`PROTO-OBS-*` 仅作为 `gap + prototype_inferred` 例外，不能替代
+基线事实。
 人类卡片用一条紧凑状态行显示业务状态、验证状态和必要的证据来源，不创建三套工作流。`confirmed`
 仍需有效来源；`passed` 仍需本次可解析 `ARUN/EVD`。原型中可见、模型自评或静态 Gate PASS 均不能
 冒充业务批准或运行验收。
@@ -195,7 +200,7 @@ Expected ProductLocation 另行逐字段 diff。违规必须进入 `window.__ADS
 ## 10. 分享、进度与评审记录
 
 - 分享定位只包含 `baseline_ref + context_ref + optional review_point_ref + active_tab`，不包含
-  Journey/Step/Role。首次 hydration 可先由产品路由落到目标 Context，再建立初始产品指纹；之后所有
+  Journey/Step/Role；`hydrate_on_load` 固定为 true。首次 hydration 先由产品路由落到目标 Context，再建立初始产品指纹；之后所有
   纯评审动作仍满足不变量。
 - 收起后必须保留真正可操作的“展开评审”按钮，并验证收起→展开后 CurrentContext、产品指纹、活动
   页签和记录均不丢失；只有“收起”入口而没有反向处理器属于结构性 BLOCK。
@@ -277,7 +282,8 @@ R1/R2 至少执行并留证：
 R1/R2 由未参与原讨论的产品、前端、后端、测试分别冷读。目标是在 3 分钟内沿产品入口找到当前功能，
 复述输入、处理、可见结果、领域结果、主要异常和下一交接；声明评审点回忆率至少 80%，P0/P1 为
 100%。记录找到入口时间、误猜规则、首次澄清、阻断 GAP 和证据。失败应修复信息投影、上下文或文字
-层级，不得增加 Journey/Step/Role 导航。
+层级，不得增加 Journey/Step/Role 导航。R1/R2 的状态只能是 pending/passed/failed/blocked，不能用
+`not_applicable` 逃避；只有 R0 可声明不适用。
 
 ## 14. 迁移与完成条件
 

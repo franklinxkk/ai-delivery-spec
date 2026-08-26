@@ -732,6 +732,49 @@ class PrototypeChecks:
         mechanisms. Product-fingerprint invariance, overlay ordering, target
         visibility and non-overlap still require the browser ARUN contract.
         """
+        preflight_workspace = document.get("workspace") or {}
+        preflight_workspace = preflight_workspace if isinstance(preflight_workspace, dict) else {}
+        preflight_level = str(preflight_workspace.get("review_level", ""))
+        for point in document.get("review_points", []) or []:
+            if not isinstance(point, dict):
+                continue
+            point_ref = str(point.get("ref", "missing"))
+            subject_ref = str(point.get("subject_ref", "")).upper()
+            target_mode = str(point.get("target_mode", ""))
+            if target_mode == "context_root" and not subject_ref.startswith(("VIEW-", "REG-")):
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-TARGET-MODE-INVALID", path,
+                    "context_root 只允许页面或业务区域方向标号，动作、字段、指标和状态必须精确定位",
+                    f"{point_ref}/{subject_ref or 'missing'}",
+                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                )
+            elif subject_ref.startswith(("ACT-", "FLD-", "METRIC-", "STATE-")) and target_mode != "selector_exactly_one":
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-TARGET-MODE-INVALID", path,
+                    "动作、字段、指标和状态评审点必须使用 selector_exactly_one，禁止回退到整页",
+                    f"{point_ref}/{subject_ref}",
+                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                )
+        preflight_cold_read = document.get("cold_read_contract") or {}
+        if (
+            preflight_level in {"R1", "R2"}
+            and isinstance(preflight_cold_read, dict)
+            and str(preflight_cold_read.get("status", "")) == "not_applicable"
+        ):
+            self.add(
+                "BLOCK", "PROTO-REVIEW-COLD-READ", path,
+                "R1/R2 评审投影必须保留真实冷读结论，不能声明不适用",
+                preflight_level,
+                affected_consumers=("product", "frontend", "backend", "qa"),
+            )
+        preflight_share = document.get("share_contract") or {}
+        if isinstance(preflight_share, dict) and preflight_share.get("hydrate_on_load") is not True:
+            self.add(
+                "BLOCK", "PROTO-REVIEW-SHARE-LOCATOR", path,
+                "正式分享定位必须在打开时恢复 baseline、Context、ReviewPoint 和页签",
+                "share_contract.hydrate_on_load",
+                affected_consumers=("product", "frontend", "qa"),
+            )
         schema_errors = []
         if REVIEW_WORKSPACE_SCHEMA.is_file():
             schema = json.loads(REVIEW_WORKSPACE_SCHEMA.read_text(encoding="utf-8"))
@@ -835,6 +878,7 @@ class PrototypeChecks:
         points = {str(item.get("ref", "")).upper(): item for item in point_items}
         candidate_ids = [str(item.get("candidate_id", "")).upper() for item in candidate_items]
         candidate_subjects = [str(item.get("subject_ref", "")).upper() for item in candidate_items]
+        declared_subjects = [str(item.get("subject_ref", "")).upper() for item in point_items]
         if str(document.get("contract_revision", "")).upper() == "RC2":
             legacy_record_ids = sorted(point_id for point_id in point_ids if not point_id.startswith("RVP-"))
             if legacy_record_ids:
@@ -861,6 +905,15 @@ class PrototypeChecks:
                 "BLOCK", "PROTO-REVIEW-DECLARED-DENOMINATOR", path,
                 "Candidate 被复用为正式 ReviewPoint；两者必须物理分离", ", ".join(sorted(set(candidate_ids) & set(point_ids))),
                 affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+            )
+        overlapping_subjects = sorted(set(candidate_subjects) & set(declared_subjects))
+        if overlapping_subjects:
+            self.add(
+                "BLOCK", "PROTO-REVIEW-CANDIDATE-DECLARATION-OVERLAP", path,
+                "同一业务事实不能同时保留在 Candidate 与正式 Declaration；确认后必须移出候选集",
+                ", ".join(overlapping_subjects[:8]),
+                affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                related_refs=tuple(overlapping_subjects[:50]),
             )
         for item in candidate_items:
             if not item.get("candidate_reason") or item.get("business_status") != "gap":

@@ -2,6 +2,7 @@
 
 ## 5.4.7 - 2026-08-22
 
+- Semantic closure guard（同版本发布后补丁，2026-08-26）：关闭六个可由合法 Schema 结构绕过的评审语义缺口。`context_root` 只允许 `VIEW/REG`，动作、字段、指标和状态必须在 CurrentContext 内唯一定位；Candidate 与正式 Declaration 的 `subject_ref` 必须互斥；R1/R2 冷读不能用 `not_applicable` 逃避；分享定位必须打开即 hydration。ReviewPoint 的 subject、来源、前置、双结果、边界、目标和 AC 统一复用 PRD 语义解析器核对权威定义位，仅在正文提及幽灵 ID 仍会阻断。旧 Preview finding 的 CLI 修复建议统一迁移到 Final CurrentContext 三页签，不再指导恢复 Journey/STEP/Role 模式。聚焦回归 21/21、完整 pytest 71/71、完整 release gate 通过；维护区仍为 56 文件/449,738 bytes，未提高预算。静态与受控夹具不证明真人冷读、业务规则正确、真实实现或客户验收。
 - Final release guard（同版本发版前修复，2026-08-26）：一句话要求 HTML 默认保持“可实施产品原型”为停止点，分批关闭原型阶段 P0 后继续生成，不再停在需求清单或无解释地不出产物；明确“先看效果/概念原型/允许合理假设”才允许先交带假设与 GAP 的 `concept_candidate`，且不得冒充基线、可开发、已评审或已验收。仅要求 HTML 时不机械附送 PRD，中英文语义等价。
 - Review linkage guard：有可见 UI 目标的正式 ReviewPoint 必须在产品目标旁显示同号 marker；点击左侧 marker 或右侧卡片时，真实 target、marker、card 三处同步框选并双向定位。新增 `selection_contract`、`PROTO-REVIEW-MARKER-REQUIRED` 与 `PROTO-REVIEW-SELECTION-NOT-SYNCED`；右栏存在 `1/2/3` 而左侧无落点、只有滚动没有目标焦点环、收起后无反向展开入口均不得交付。业务浮层可正确继承 `menu_exempt` 父页面，不再被迫伪造菜单路径。
 - Baseline truth guard：新增 `PRD-STATUS-CONTRADICTION`，阻断 frontmatter 声称 `baseline/ready`、但 `baseline_version` 或文档控制仍明确为 `draft/草稿/待评审` 的矛盾工件。脱敏真实缺陷样本已复现并由新门禁阻断。

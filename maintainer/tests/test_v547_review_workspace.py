@@ -1,4 +1,3 @@
-"""Focused regressions for the context-driven v5.4.7 Final review workspace."""
 from __future__ import annotations
 
 import copy
@@ -14,7 +13,6 @@ from quality_gate import Gate
 
 
 ONE_LINE_ROUTING_CASES = [
-    # prompt, p0_open, concept_explicit, generate_now, state
     ("帮我做一个企业约谈 HTML。", True, False, False, "blocked_by_p0_unknown"),
     ("先做概念 HTML 看效果，允许合理假设。", True, True, True, "concept_candidate"),
     ("不要问，先画一个 HTML，缺口写待确认。", True, True, True, "restricted_concept_candidate"),
@@ -50,10 +48,6 @@ def test_one_line_prototype_routing_has_no_unsafe_or_dead_end_combination() -> N
     assert "concept_candidate" in stages and "concept_candidate" in prototype
     assert "只要求 HTML 时不机械附送 PRD" in stages
     assert "帮我做一个企业约谈 HTML" in readme and "不会停在一张需求清单" in readme
-
-
-def test_review_workspace_docs_require_left_marker_and_three_surface_selection() -> None:
-    skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
     contract = (ROOT / "references/review-workspace.md").read_text(encoding="utf-8")
     schema = (ROOT / "schemas/review-workspace.schema.json").read_text(encoding="utf-8")
     assert "右侧不得出现没有左侧落点的“1/2/3”" in skill
@@ -84,6 +78,28 @@ def review_point(ref: str, context: str, target: str, title: str, summary: str, 
         "acceptance_refs": [ac],
         "source_refs": ["SRC-X", "REQ-X"],
     }
+
+
+def candidate(subject: str = "PROTO-OBS-ACT-SAVE-LEGACY") -> dict:
+    return {
+        "candidate_id": "CAND-VIEW-X-SAVE-LEGACY", "owner_context_ref": "VIEW-X",
+        "subject_ref": subject, "candidate_type": "动作", "label": "保存",
+        "selector": "[data-action='save-legacy']", "cardinality_policy": "exactly_one",
+        "candidate_reason": ["state_guard"], "business_status": "gap",
+        "evidence_origin": "prototype_inferred", "unknown_ref": "UNK-VIEW-X-SAVE-LEGACY",
+    }
+
+
+BASELINE_REFS = " / ".join((
+    "REQ-X", "SRC-X", "ROLE-OPERATOR", "VIEW-X", "DRAWER-X", "ACT-X-SUBMIT", "ACT-X-CONFIRM",
+    "RULE-READY", "REG-RESULT", "STATE-SAVED", "EVT-SAVED", "RULE-DUPLICATE",
+    "AC-X-SUBMIT", "AC-X-CONFIRM", "FLOW-X", "STEP-X", "EDGE-X", "STM-X", "DFD-X", "TEST-X",
+))
+
+
+def baseline_prd() -> str:
+    rows = "\n".join(f"| {ref} | 已确认定义 |" for ref in BASELINE_REFS.split(" / "))
+    return f"# 基线\n\n| ID | 定义 |\n|---|---|\n{rows}\n"
 
 
 def manifest(baseline_hash: str, *, level: str = "R1") -> dict:
@@ -203,11 +219,6 @@ def manifest(baseline_hash: str, *, level: str = "R1") -> dict:
             "critical_point_recall": 1,
             "status": "pending",
             "evidence_refs": [],
-        },
-        "machine_models": {
-            "flow_refs": ["FLOW-X"], "step_refs": ["STEP-X"], "edge_refs": ["EDGE-X"],
-            "state_machine_refs": ["STM-X"], "data_flow_refs": ["DFD-X"],
-            "acceptance_refs": ["AC-X-SUBMIT", "AC-X-CONFIRM"], "test_refs": ["TEST-X"],
         },
         "unknown_refs": [],
         "machine_handoff": {"status": "not_requested", "manifest_ref": None, "packet_refs": [], "gap_refs": []},
@@ -361,18 +372,25 @@ def test_complete_final_workspace_passes_static_review_contract(tmp_path: Path) 
     assert "PROTO-PRODUCT-LOCATION-MISMATCH" not in codes
 
 
-def test_product_location_rejects_static_or_unsynchronized_navigation(tmp_path: Path) -> None:
-    static_menu = review_html(manifest("1" * 64)).replace(
-        '<button class="active" data-action="ACT-X-NAVIGATE" data-view-target="VIEW-X">',
-        '<button class="active" disabled data-action="ACT-X-NAVIGATE" data-view-target="VIEW-X">',
-        1,
+def test_review_workspace_structural_mutations_are_blocked(tmp_path: Path) -> None:
+    base = review_html(manifest("1" * 64))
+    candidate_raw = base.replace('</main>', '<button data-action="ACT-X-DELETE" data-ac="AC-X-DELETE">删除</button></main>', 1).replace(
+        '"ACT-X-SUBMIT":()=>true', '"ACT-X-SUBMIT":()=>true,"ACT-X-DELETE":()=>true')
+    cases = (
+        (base.replace('<button class="active" data-action="ACT-X-NAVIGATE"', '<button class="active" disabled data-action="ACT-X-NAVIGATE"', 1), "PROTO-PRODUCT-LOCATION-MISMATCH"),
+        (base.replace("syncProductLocation", "lostProductLocationSync"), "PROTO-PRODUCT-LOCATION-MISMATCH"),
+        (base.replace('<nav><button data-action="UIACT-REVIEW-TAB"', '<nav data-review-mode="journey"><button data-action="UIACT-REVIEW-TAB"', 1), "PROTO-REVIEW-LEVEL"),
+        (base.replace('data-review-context="DRAWER-X" data-review-number="1"', 'data-review-context="DRAWER-X" data-review-number="2"'), "PROTO-REVIEW-CONTEXT-NUMBERING"),
+        (base.replace('<button data-action="ACT-X-SUBMIT"', '<button data-action="ACT-X-SUBMIT">副本</button><button data-action="ACT-X-SUBMIT"', 1), "PROTO-REVIEW-TARGET-RESOLUTION"),
+        (base.replace("focusReviewTarget", "missingTargetFocus"), "PROTO-REVIEW-SELECTION-NOT-SYNCED"),
+        (base.replace('data-review-evidence-origin="explicit_source"', '', 1), "PROTO-REVIEW-STATUS-AXES"),
+        (base.replace("assertProductFingerprintInvariant", "lostInvariant"), "PROTO-REVIEW-PRODUCT-FINGERPRINT-INVARIANT"),
+        (base.replace('[data-review-workspace]{min-width:0}', '[data-review-workspace]{position:fixed;min-width:0}'), "PROTO-REVIEW-LAYOUT-NONOVERLAP"),
+        (base.replace("localStorage.setItem", "memoryStore.setItem").replace("localStorage.getItem", "memoryStore.getItem"), "PROTO-REVIEW-RECORD-PERSISTENCE"),
+        (candidate_raw, "PROTO-REVIEW-CANDIDATE-DIFF"),
     )
-    codes = {item.code for item in html_gate(tmp_path / "disabled-menu.html", static_menu).findings}
-    assert "PROTO-PRODUCT-LOCATION-MISMATCH" in codes
-
-    missing_sync = review_html(manifest("1" * 64)).replace("syncProductLocation", "lostProductLocationSync")
-    codes = {item.code for item in html_gate(tmp_path / "missing-location-sync.html", missing_sync).findings}
-    assert "PROTO-PRODUCT-LOCATION-MISMATCH" in codes
+    for index, (raw, expected) in enumerate(cases):
+        assert expected in {item.code for item in html_gate(tmp_path / f"mutation-{index}.html", raw).findings}
 
 
 def test_overlay_can_inherit_a_menu_exempt_parent_without_fake_menu_path(tmp_path: Path) -> None:
@@ -393,72 +411,15 @@ def test_overlay_can_inherit_a_menu_exempt_parent_without_fake_menu_path(tmp_pat
     assert "PROTO-PRODUCT-LOCATION-MISMATCH" in codes
 
 
-def test_final_workspace_rejects_old_modes_and_role_navigation(tmp_path: Path) -> None:
-    raw = review_html(manifest("1" * 64)).replace(
-        '<nav><button data-action="UIACT-REVIEW-TAB"',
-        '<nav data-review-mode="journey" data-review-active-role="product"><button data-action="UIACT-REVIEW-TAB"',
-        1,
-    )
-    codes = {item.code for item in html_gate(tmp_path / "old-nav.html", raw).findings}
-    assert "PROTO-REVIEW-LEVEL" in codes
-
-
 def test_declaration_is_the_only_denominator_and_numbers_restart_per_context(tmp_path: Path) -> None:
     document = manifest("1" * 64)
     document["review_contexts"][1]["review_point_refs"] = ["RVP-VIEW-SUBMIT", "RVP-DRAWER-CONFIRM"]
     assert "PROTO-REVIEW-DECLARED-DENOMINATOR" in review_codes(tmp_path / "duplicate-owner.html", document)
 
-    raw = review_html(manifest("1" * 64)).replace(
-        'data-review-context="DRAWER-X" data-review-number="1"',
-        'data-review-context="DRAWER-X" data-review-number="2"',
-    )
-    codes = {item.code for item in html_gate(tmp_path / "bad-number.html", raw).findings}
-    assert "PROTO-REVIEW-CONTEXT-NUMBERING" in codes
-
-
-def test_target_resolution_is_scoped_and_exactly_one(tmp_path: Path) -> None:
-    raw = review_html(manifest("1" * 64)).replace(
-        '<button data-action="ACT-X-SUBMIT"',
-        '<button data-action="ACT-X-SUBMIT" data-copy="1">副本</button><button data-action="ACT-X-SUBMIT"',
-        1,
-    )
-    codes = {item.code for item in html_gate(tmp_path / "duplicate-target.html", raw).findings}
-    assert "PROTO-REVIEW-TARGET-RESOLUTION" in codes
-
-
-def test_ui_grounded_review_point_requires_left_marker_and_three_surface_focus(tmp_path: Path) -> None:
+def test_ui_grounded_review_point_requires_left_marker(tmp_path: Path) -> None:
     document = manifest("1" * 64)
     document["review_points"][0]["marker_required"] = False
-    raw = review_html(document)
-    codes = {item.code for item in html_gate(tmp_path / "card-only.html", raw).findings}
-    assert "PROTO-REVIEW-MARKER-REQUIRED" in codes
-
-    no_focus = review_html(manifest("1" * 64)).replace("focusReviewTarget", "missingTargetFocus")
-    codes = {item.code for item in html_gate(tmp_path / "no-target-focus.html", no_focus).findings}
-    assert "PROTO-REVIEW-SELECTION-NOT-SYNCED" in codes
-
-
-def test_status_axes_and_candidate_diff_cannot_be_hidden(tmp_path: Path) -> None:
-    raw = review_html(manifest("1" * 64)).replace('data-review-evidence-origin="explicit_source"', '', 1)
-    assert "PROTO-REVIEW-STATUS-AXES" in {item.code for item in html_gate(tmp_path / "status.html", raw).findings}
-
-    candidate = review_html(manifest("1" * 64)).replace(
-        '</main>', '<button data-action="ACT-X-DELETE" data-ac="AC-X-DELETE">删除</button></main>', 1,
-    ).replace('"ACT-X-SUBMIT":()=>true', '"ACT-X-SUBMIT":()=>true,"ACT-X-DELETE":()=>true')
-    assert "PROTO-REVIEW-CANDIDATE-DIFF" in {item.code for item in html_gate(tmp_path / "candidate.html", candidate).findings}
-
-
-def test_runtime_boundaries_layout_and_persistence_are_required(tmp_path: Path) -> None:
-    raw = review_html(manifest("1" * 64)).replace("assertProductFingerprintInvariant", "lostInvariant")
-    assert "PROTO-REVIEW-PRODUCT-FINGERPRINT-INVARIANT" in {item.code for item in html_gate(tmp_path / "fingerprint.html", raw).findings}
-
-    fixed = review_html(manifest("1" * 64)).replace(
-        '[data-review-workspace]{min-width:0}', '[data-review-workspace]{position:fixed;min-width:0}',
-    )
-    assert "PROTO-REVIEW-LAYOUT-NONOVERLAP" in {item.code for item in html_gate(tmp_path / "fixed.html", fixed).findings}
-
-    no_store = review_html(manifest("1" * 64)).replace("localStorage.setItem", "memoryStore.setItem").replace("localStorage.getItem", "memoryStore.getItem")
-    assert "PROTO-REVIEW-RECORD-PERSISTENCE" in {item.code for item in html_gate(tmp_path / "record.html", no_store).findings}
+    assert "PROTO-REVIEW-MARKER-REQUIRED" in review_codes(tmp_path / "card-only.html", document)
 
 
 def test_r0_may_omit_visible_tabs_but_keeps_context_and_denominator(tmp_path: Path) -> None:
@@ -503,7 +464,7 @@ def test_legacy_overlay_is_gap_for_visual_review_but_blocked_for_handoff(tmp_pat
 
 def test_review_workspace_hash_and_handoff_indicator_match_real_inputs(tmp_path: Path) -> None:
     prd = tmp_path / "prd.md"
-    prd.write_text("# 基线\n\nREQ-X / VIEW-X / AC-X-SUBMIT\n", encoding="utf-8")
+    prd.write_text(baseline_prd(), encoding="utf-8")
     document = manifest("2" * 64)
     html = tmp_path / "review.html"
     gate = html_gate(html, review_html(document))
@@ -523,11 +484,62 @@ def test_review_workspace_hash_and_handoff_indicator_match_real_inputs(tmp_path:
     assert not {item.code for item in gate.findings if item.code.startswith("PROTO-REVIEW-HANDOFF-")}
 
 
+def test_rc2_closes_semantic_escape_hatches(tmp_path: Path) -> None:
+    cases = []
+    bad_target = manifest("1" * 64)
+    bad_target["review_points"][0]["target_mode"] = "context_root"
+    cases.append((bad_target, "PROTO-REVIEW-TARGET-MODE-INVALID"))
+    overlap = manifest("1" * 64)
+    overlap["candidate_review_points"] = [candidate("ACT-X-SUBMIT")]
+    cases.append((overlap, "PROTO-REVIEW-CANDIDATE-DECLARATION-OVERLAP"))
+    no_cold_read = manifest("1" * 64, level="R2")
+    no_cold_read["cold_read_contract"]["status"] = "not_applicable"
+    cases.append((no_cold_read, "PROTO-REVIEW-COLD-READ"))
+    no_hydration = manifest("1" * 64)
+    no_hydration["share_contract"]["hydrate_on_load"] = False
+    cases.append((no_hydration, "PROTO-REVIEW-SHARE-LOCATOR"))
+    for index, (document, expected) in enumerate(cases):
+        assert expected in review_codes(tmp_path / f"escape-{index}.html", document)
+
+    r0 = manifest("1" * 64, level="R0")
+    r0["cold_read_contract"]["status"] = "not_applicable"
+    assert "PROTO-REVIEW-COLD-READ" not in review_codes(tmp_path / "r0-na.html", r0, include_tabs=False)
+
+
+def test_handoff_resolves_every_reviewpoint_reference_against_prd(tmp_path: Path) -> None:
+    prd = tmp_path / "prd.md"
+    prd.write_text(baseline_prd(), encoding="utf-8")
+    document = manifest(hashlib.sha256(prd.read_bytes()).hexdigest())
+    html = tmp_path / "resolved.html"
+    gate = html_gate(html, review_html(document))
+    gate.check_handoff(prd, [html], "L2")
+    unresolved = {item.code for item in gate.findings if "UNRESOLVED" in item.code}
+    assert not unresolved
+
+    point = document["review_points"][0]
+    point.update({
+        "subject_ref": "ACT-GHOST", "target_ref": "ACT-GHOST", "source_refs": ["SRC-GHOST"],
+        "precondition_refs": ["RULE-GHOST"], "boundary_refs": ["EDGE-GHOST"],
+        "acceptance_refs": ["AC-GHOST"],
+    })
+    prd.write_text(baseline_prd() + "\nACT-GHOST / SRC-GHOST / RULE-GHOST / EDGE-GHOST / AC-GHOST\n", encoding="utf-8")
+    html = tmp_path / "unresolved.html"
+    gate = html_gate(html, review_html(document))
+    gate.check_handoff(prd, [html], "L2")
+    codes = {item.code for item in gate.findings}
+    assert {"PROTO-REVIEW-SUBJECT-UNRESOLVED", "PROTO-REVIEW-SOURCE-UNRESOLVED",
+            "PROTO-REVIEW-REF-UNRESOLVED", "PROTO-REVIEW-AC-UNRESOLVED"} <= codes
+
+
 def test_repaired_cli_and_query_surfaces_are_truthful() -> None:
     candidate = run("scripts/ai_delivery_spec_cli.py", "candidate", "--help")
     assert candidate.returncode == 0 and "validate" in candidate.stdout and "校验本地候选" in candidate.stdout
     section = run("scripts/query_domain.py", "--domain", "crm", "--section", "Domain Events", "--format", "markdown")
     assert section.returncode == 0 and "Domain Events" in section.stdout and "Compact context" not in section.stdout
+    for code in ("PROTO-REVIEW-MODE-MISSING", "PROTO-REVIEW-LENS-NOT-INTERACTIVE"):
+        explained = run("scripts/ai_delivery_spec_cli.py", "explain-finding", code, "--format", "json")
+        payload = explained.stdout
+        assert explained.returncode == 0 and "CurrentContext" in payload and "orientation/journey/focus/page" not in payload
 
 
 def test_prototype_cannot_label_one_value_confirmed_and_unknown(tmp_path: Path) -> None:
@@ -576,19 +588,7 @@ activated_facets: []
 
 def test_rc2_candidate_is_physically_separate_from_declaration(tmp_path: Path) -> None:
     document = manifest("1" * 64)
-    document["candidate_review_points"] = [{
-        "candidate_id": "CAND-VIEW-X-SAVE-LEGACY",
-        "owner_context_ref": "VIEW-X",
-        "subject_ref": "PROTO-OBS-ACT-SAVE-LEGACY",
-        "candidate_type": "动作",
-        "label": "保存",
-        "selector": "[data-action='save-legacy']",
-        "cardinality_policy": "exactly_one",
-        "candidate_reason": ["state_guard", "permission_guard"],
-        "business_status": "gap",
-        "evidence_origin": "prototype_inferred",
-        "unknown_ref": "UNK-VIEW-X-SAVE-LEGACY",
-    }]
+    document["candidate_review_points"] = [candidate()]
     before = sum(len(item["review_point_refs"]) for item in document["review_contexts"])
     codes = review_codes(tmp_path / "candidate.html", document)
     after = sum(len(item["review_point_refs"]) for item in document["review_contexts"])

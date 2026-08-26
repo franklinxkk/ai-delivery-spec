@@ -414,9 +414,15 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-REVIEW-COLD-READ": ("冷读通过没有未参与者证据。", "让产品、前端、后端、测试分别在 3 分钟内冷读并记录召回、误猜和首次澄清。"),
     "PROTO-REVIEW-LEVEL": ("评审层恢复了额外一级模式或缺少目标等级的必要入口。", "R1/R2 只保留总览、功能与流转、边界与验收；R0 也不得增加 Journey/Step/Page/Role 模式。"),
     "PROTO-REVIEW-CANDIDATE-DIFF": ("Candidate Set 与声明评审点存在未裁决差集。", "人工决定声明或不适用并留依据；门禁不得自动改变官方分母。"),
+    "PROTO-REVIEW-CANDIDATE-DECLARATION-OVERLAP": ("同一业务事实同时存在于 Candidate 与正式 Declaration。", "已确认并绑定来源的 subject_ref 必须移出 candidate_review_points；未确认时只保留 Candidate GAP。"),
     "PROTO-REVIEW-LAYOUT-NONOVERLAP": ("评审区可能覆盖或压坏产品主操作区。", "桌面参与布局并可折叠/调宽；用浏览器证明业务浮层和反馈高于评审区。"),
     "PROTO-REVIEW-OVERLAY-DETECTION": ("业务浮层探测缺失或 topmost 解析有歧义。", "优先产品 Context Event，再用声明探测；MutationObserver 只触发重新解析。"),
     "PROTO-REVIEW-TARGET-RESOLUTION": ("评审目标没有在 CurrentContextRoot 内得到唯一可见结果。", "只在当前上下文查找，0 个 unresolved，多于 1 个 BLOCK；禁止全局取第一个。"),
+    "PROTO-REVIEW-TARGET-MODE-INVALID": ("评审点用整页 Context Root 逃避精确目标解析。", "context_root 只用于 VIEW/REG 页面方向标号；ACT/FLD/METRIC/STATE 必须 selector_exactly_one。"),
+    "PROTO-REVIEW-SUBJECT-UNRESOLVED": ("ReviewPoint.subject_ref 不在本次权威 PRD 基线中。", "把该业务事实定义并追溯到当前 PRD，或降为 PROTO-OBS-* Candidate GAP，禁止伪造稳定 ID。"),
+    "PROTO-REVIEW-SOURCE-UNRESOLVED": ("ReviewPoint.source_refs 引用了本次权威 PRD 基线中不存在的来源或决定。", "补齐真实 SRC/DEC/REQ 定义与来源登记，或撤销已确认声明。"),
+    "PROTO-REVIEW-AC-UNRESOLVED": ("ReviewPoint.acceptance_refs 引用了本次权威 PRD 基线中不存在的验收标准。", "在当前 PRD 机器可读验收中定义该 AC，或移除错误引用。"),
+    "PROTO-REVIEW-REF-UNRESOLVED": ("ReviewPoint 的角色、前置、结果、边界或目标引用不在本次权威 PRD 基线中。", "在当前 PRD 中定义并追溯该稳定 ID，或把未知语义登记为有责任人的 UNK-*。"),
     "PROTO-REVIEW-RECORD-PERSISTENCE": ("评审记录不能稳定持久化或跨基线隔离。", "使用 baseline+context+point 键；单 HTML 支持 localStorage 与 JSON 导入导出。"),
     "PROTO-REVIEW-LANGUAGE-MISMATCH": (
         "评审 manifest 与 HTML 声明了不同的人类语言。",
@@ -616,9 +622,15 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-REVIEW-COLD-READ": ("A cold-read pass has no independent participant evidence.", "Have product, frontend, backend, and QA cold-read within three minutes and record recall, guesses, and first clarification."),
     "PROTO-REVIEW-LEVEL": ("The review layer restores forbidden top-level modes or omits required controls for its level.", "R1/R2 expose only Overview, Function & Flow, and Boundary & Acceptance; R0 must not add Journey/Step/Page/Role modes."),
     "PROTO-REVIEW-CANDIDATE-DIFF": ("The candidate set has an unresolved difference from declared review points.", "Have a human declare or reject each candidate with a reason; never mutate the official denominator automatically."),
+    "PROTO-REVIEW-CANDIDATE-DECLARATION-OVERLAP": ("The same business subject exists in both Candidate and formal Declaration.", "Remove a confirmed subject_ref from candidate_review_points; keep only the Candidate GAP until it is confirmed and sourced."),
     "PROTO-REVIEW-LAYOUT-NONOVERLAP": ("The review surface may cover or damage the primary product workspace.", "Make the desktop surface participate in layout and prove business overlays and feedback remain above it in a browser."),
     "PROTO-REVIEW-OVERLAY-DETECTION": ("Business-overlay detection is missing or topmost resolution is ambiguous.", "Prefer Product Context Events, then declared detection; MutationObserver may only request re-resolution."),
     "PROTO-REVIEW-TARGET-RESOLUTION": ("A review target is not exactly one visible node within CurrentContextRoot.", "Resolve only inside the current context: zero is unresolved and multiple is blocking; never take a global first match."),
+    "PROTO-REVIEW-TARGET-MODE-INVALID": ("A review point uses the whole Context Root to bypass exact target resolution.", "Use context_root only for VIEW/REG direction markers; ACT/FLD/METRIC/STATE must use selector_exactly_one."),
+    "PROTO-REVIEW-SUBJECT-UNRESOLVED": ("ReviewPoint.subject_ref does not resolve in the supplied authoritative PRD baseline.", "Define and trace the fact in the current PRD, or keep it as a PROTO-OBS-* Candidate GAP instead of inventing a stable ID."),
+    "PROTO-REVIEW-SOURCE-UNRESOLVED": ("ReviewPoint.source_refs cites a source or decision absent from the supplied PRD baseline.", "Add the real SRC/DEC/REQ definition and source register entry, or revoke the confirmed claim."),
+    "PROTO-REVIEW-AC-UNRESOLVED": ("ReviewPoint.acceptance_refs cites an AC absent from the supplied PRD baseline.", "Define the AC in the current PRD machine-readable acceptance contract or remove the invalid reference."),
+    "PROTO-REVIEW-REF-UNRESOLVED": ("A ReviewPoint actor, precondition, result, boundary, or target reference is absent from the supplied PRD baseline.", "Define and trace the stable ID in the current PRD, or bind unresolved semantics to an owned UNK-* gap."),
     "PROTO-REVIEW-RECORD-PERSISTENCE": ("Review records are not durable or baseline-isolated.", "Key records by baseline+context+point; static HTML must support localStorage and JSON export/import."),
     "PROTO-REVIEW-LANGUAGE-MISMATCH": ("The review manifest and HTML declare different human languages.", "Align manifest.language with html[lang] and the user's language while preserving stable IDs and machine enums."),
     "PROTO-REVIEW-ROLE-PACKET-INCOMPLETE": ("A role lens is a summary/filter rather than a complete start-work packet.", "Complete the product/frontend/backend/qa slot contract and bind unknown semantics to UNK-* instead of inventing decisions."),
@@ -665,9 +677,46 @@ EN_PREFIX_GUIDANCE: tuple[tuple[str, str, str], ...] = (
 )
 
 
+LEGACY_REVIEW_FINDING_PREFIXES = (
+    "PROTO-REVIEW-LENS-",
+    "PROTO-REVIEW-STEP-ANCHOR",
+    "PROTO-REVIEW-PAGE-PRESENTATION-",
+)
+LEGACY_REVIEW_FINDING_CODES = frozenset({
+    "PROTO-REVIEW-ROLE-PACKET-INCOMPLETE",
+    "PROTO-REVIEW-ROLE-APPLICABILITY-MISMATCH",
+    "PROTO-REVIEW-CONFIRMED-NO-EVIDENCE",
+    "PROTO-REVIEW-STATUS-AXIS-HIDDEN",
+    "PROTO-REVIEW-STATUS-AXIS-DRIFT",
+    "PROTO-REVIEW-STATUS-AXIS-DUPLICATE",
+    "PROTO-REVIEW-MODEL-COVERAGE-AMBIGUOUS",
+    "PROTO-REVIEW-MODEL-COVERAGE-CONFLICT",
+    "PROTO-REVIEW-MODEL-NOT-VISIBLE",
+    "PROTO-REVIEW-MODEL-NA-HIDDEN",
+    "PROTO-REVIEW-SCENARIO-NOT-VISIBLE",
+    "PROTO-REVIEW-CONTRACT-REF-HIDDEN",
+    "PROTO-REVIEW-RISK-NOT-TESTED",
+    "PROTO-REVIEW-MODE-MISSING",
+    "PROTO-REVIEW-MODE-NOT-NAVIGABLE",
+    "PROTO-REVIEW-COMPACT-OVERLAY",
+    "PROTO-REVIEW-DESKTOP-SURFACE-DRIFT",
+})
+
+
+def _is_legacy_review_finding(code: str) -> bool:
+    normalized = code.strip().upper()
+    return normalized in LEGACY_REVIEW_FINDING_CODES or any(
+        normalized.startswith(prefix) for prefix in LEGACY_REVIEW_FINDING_PREFIXES
+    )
+
+
 def finding_code_match(code: str) -> str:
     """Return exact/family/unknown without pretending an unknown code is known."""
     normalized = code.strip().upper()
+    if normalized in LEGACY_REVIEW_FINDING_CODES:
+        return "exact"
+    if any(normalized.startswith(prefix) for prefix in LEGACY_REVIEW_FINDING_PREFIXES):
+        return "family"
     if normalized in FINDING_GUIDANCE or normalized in EN_FINDING_GUIDANCE:
         return "exact"
     if any(normalized.startswith(prefix) for prefix, _cause, _fix in PREFIX_GUIDANCE):
@@ -677,6 +726,11 @@ def finding_code_match(code: str) -> str:
 
 def guidance_for(code: str) -> tuple[str, str]:
     """Return bounded, deterministic repair guidance for one finding code."""
+    if _is_legacy_review_finding(code):
+        return (
+            "该 finding 属于 5.4.7 Preview 旧评审合同，原工件仍在使用 Journey/STEP/Role/自适应页面模式。",
+            "不要补旧模式；保留完整产品操作并整体迁移到 Final CurrentContext + 总览/功能与流转/边界与验收三页签投影。",
+        )
     if code in FINDING_GUIDANCE:
         return FINDING_GUIDANCE[code]
     for prefix, cause, fix in PREFIX_GUIDANCE:
@@ -689,6 +743,11 @@ def guidance_for(code: str) -> tuple[str, str]:
 
 
 def english_guidance_for(code: str) -> tuple[str, str]:
+    if _is_legacy_review_finding(code):
+        return (
+            "This finding belongs to the deprecated 5.4.7 Preview review contract using Journey/STEP/Role or adaptive page modes.",
+            "Do not repair the old modes; preserve the operable product and migrate the whole projection to Final CurrentContext plus Overview / Function & Flow / Boundary & Acceptance.",
+        )
     if code in EN_FINDING_GUIDANCE:
         return EN_FINDING_GUIDANCE[code]
     for prefix, cause, fix in EN_PREFIX_GUIDANCE:
@@ -733,6 +792,8 @@ REPAIR_EXAMPLES: tuple[tuple[str, str], ...] = (
 
 
 def repair_example_for(code: str) -> str:
+    if _is_legacy_review_finding(code):
+        return "删除旧 Journey/STEP/Role/页面模式入口，生成 5.4.7-final manifest，以真实产品 CurrentContext 驱动三页签和 ReviewPoint。"
     for prefix, example in REPAIR_EXAMPLES:
         if code.startswith(prefix):
             return example
@@ -740,6 +801,8 @@ def repair_example_for(code: str) -> str:
 
 
 def english_repair_example_for(code: str) -> str:
+    if _is_legacy_review_finding(code):
+        return "Remove legacy Journey/STEP/Role/page-mode controls and generate a 5.4.7-final manifest driven by the real product CurrentContext, three tabs, and ReviewPoints."
     examples = (
         ("PRD-LANGUAGE", "Set document_language: en-US, translate human-facing headings and tables, and keep REQ/API/field names unchanged."),
         ("PRD-DUPLICATE-STABLE-ID-DEFINITION", "Keep one VIEW-RISK-LIST-001 definition row; elsewhere write 'See VIEW-RISK-LIST-001' instead of defining it again."),

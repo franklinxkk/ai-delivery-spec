@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PRD 语义一致性静态检查（5.4.5）：悬空引用、ID 前缀碰撞、状态机态数不符、
+"""PRD 语义一致性静态检查（5.4.x）：悬空引用、ID 前缀碰撞、状态机态数不符、
 守卫状态集合互斥（D4 弱信号 WARN）、枚举基数/取值覆盖（D5 弱信号 WARN）、
 正文决策冲突（D6）和跨权威表稳定 ID 重复定义（D7）。
 
@@ -35,8 +35,9 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
 ID_FAMILIES = (
-    "FLOW", "RULE", "ACT", "STM", "REQ", "MOD", "AC", "UNK", "ASM", "DEC",
-    "FLD", "EVT", "API", "INT", "ROLE", "VIEW", "REG", "SRC", "COR",
+    "FLOW", "STEP", "EDGE", "DFD", "RULE", "ACT", "STM", "STATE", "REQ", "MOD",
+    "AC", "TEST", "UNK", "ASM", "DEC", "FLD", "METRIC", "EVT", "API", "INT",
+    "ROLE", "VIEW", "REG", "SRC", "EVD", "ARUN", "CHG", "REV", "REL", "ENT", "COR",
 )
 _FAMILY = "|".join(ID_FAMILIES)
 ID_RE = re.compile(rf"(?<![A-Za-z0-9-])(?:{_FAMILY})-[A-Z0-9](?:[A-Z0-9_-]*[A-Z0-9])?")
@@ -262,6 +263,12 @@ def _collect_ids(raw: str) -> tuple[dict[str, tuple[int, str]], dict[str, list[t
         ):
             referenced.pop(token, None)
     return defined, referenced
+
+
+def collect_defined_ids(raw: str) -> set[str]:
+    """Return authoritative PRD definition IDs using the shared semantic parser."""
+    defined, _referenced = _collect_ids(raw)
+    return set(defined)
 
 
 def check_dangling_refs(raw: str) -> list[SemFinding]:

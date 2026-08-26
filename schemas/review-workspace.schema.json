@@ -209,7 +209,7 @@
       "properties": {
         "locator_fields": { "const": ["baseline_ref", "context_ref", "review_point_ref", "active_tab"] },
         "forbidden_locator_fields": { "const": ["journey", "step", "role"] },
-        "hydrate_on_load": { "type": "boolean" }
+        "hydrate_on_load": { "const": true }
       }
     },
     "review_record_contract": {
@@ -261,6 +261,28 @@
       "items": { "type": "string", "minLength": 8 }
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "workspace": {
+            "properties": { "review_level": { "enum": ["R1", "R2"] } },
+            "required": ["review_level"]
+          }
+        },
+        "required": ["workspace"]
+      },
+      "then": {
+        "properties": {
+          "cold_read_contract": {
+            "properties": {
+              "status": { "enum": ["pending", "passed", "failed", "blocked"] }
+            }
+          }
+        }
+      }
+    }
+  ],
   "$defs": {
     "ref": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*-[A-Z0-9-]+$" },
     "contextRef": {
@@ -472,6 +494,44 @@
         }
       },
       "allOf": [
+        {
+          "if": {
+            "properties": { "target_mode": { "const": "context_root" } },
+            "required": ["target_mode"]
+          },
+          "then": {
+            "properties": {
+              "subject_ref": { "pattern": "^(?:VIEW|REG)-[A-Z0-9-]+$" },
+              "marker_required": { "const": true }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "subject_ref": { "pattern": "^(?:ACT|FLD|METRIC|STATE)-[A-Z0-9-]+$" }
+            },
+            "required": ["subject_ref"]
+          },
+          "then": {
+            "properties": {
+              "target_mode": { "const": "selector_exactly_one" },
+              "target_ref": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "subject_ref": { "pattern": "^PROTO-OBS-[A-Z0-9-]+$" } },
+            "required": ["subject_ref"]
+          },
+          "then": {
+            "properties": {
+              "business_status": { "const": "gap" },
+              "evidence_origin": { "const": "prototype_inferred" }
+            }
+          }
+        },
         {
           "if": { "properties": { "marker_required": { "const": true } }, "required": ["marker_required"] },
           "then": { "properties": { "target_selector": { "type": "string", "minLength": 1 } } },
