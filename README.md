@@ -1,23 +1,41 @@
 # AI Delivery Spec 5.4.8 — Requirement Management for Human & AI｜人机共用需求管理
 
-> 一句话需求，AI 就直接画页面；真正开工时，指标口径、状态守卫、权限、异常和验收全靠人补？
+> AI 把 PRD 和页面生成得越来越快，但指标、状态、权限、异常和验收仍在开工后靠人补。
 >
-> PRD、原型、开发实现和测试用例各说各话；需求一变，又要靠会议人工同步？
+> **AI Delivery Spec 把一句话需求、存量系统或变更，收敛为业务能确认、研发可实施、测试可复现、Coding Agent 可执行的同一份需求基线。**
 
-**Any Stage In. Right-Sized Artifact Out. One Traceable Requirement Baseline.**
-
-AI Delivery Spec 是面向大模型时代、适用于 ToC 与 ToB/ToG 的需求管理 Skill。它可以从一个 Idea、客户问题、会议纪要、竞品、旧 PRD、原型、存量系统、变更或缺陷开始，把“业务为什么做”收敛为业务能确认、产品能决策、研发可实施、测试可独立验收、Coding Agent 可按契约执行的同一份需求事实。
-
-它不是 PRD 改写器，也不强迫小需求走完大流程：**小改直接交最小闭环，复杂需求才升级治理。**
+适用于 ToC 与 ToB/ToG 产品：小改直接交最小闭环，跨角色、跨系统或高风险需求才升级治理。
 
 [![Version](https://img.shields.io/badge/version-5.4.8-7C3AED.svg)]()
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec)
 [![Forks](https://img.shields.io/github/forks/franklinxkk/ai-delivery-spec?style=social)](https://github.com/franklinxkk/ai-delivery-spec/forks)
 
-[ClawHub 下载与安全审计](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec) · [SkillHub 最新评分与安全报告](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec) · 如果它帮你少开一次“补规则”的会，欢迎到 [GitHub 点个 Star ⭐](https://github.com/franklinxkk/ai-delivery-spec)。
+## 社区验证
 
-## 60 秒上手
+| 平台 | 当前数据 | 详情 |
+|---|---:|---|
+| ClawHub | **2,200+ 次下载/使用** | [版本、下载量与安全审计](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec) |
+| SkillHub | **4.8 / 5 分** | [评分与安全扫描报告](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec) |
+| GitHub | Apache 2.0 开源 | [源码、版本记录与 Issue](https://github.com/franklinxkk/ai-delivery-spec) |
+
+> 社区数据核对于 2026-08-28，会随平台实时变化。如果它帮你少开一次“补规则”的会，欢迎到 [GitHub 点个 Star ⭐](https://github.com/franklinxkk/ai-delivery-spec)。
+
+## 它先解决谁的什么关键问题
+
+| 角色 | 最常见的交付损耗 | 使用后得到什么 |
+|---|---|---|
+| 初级产品经理 | 不知道该问什么，把页面描述当需求 | 有边界的澄清引导、最小需求卡、规则与异常底线 |
+| 中高级产品 / 产品负责人 | 跨模块、状态、数据和团队输出难统一 | 一份可追溯基线、分级交付、内审与变更影响 |
+| 业务 / 售前 / 实施 / 设计 | 客户语言转成产品方案时不断失真 | 事实、假设、未知和可确认的产品态原型 |
+| 前端开发 | 入口、交互、权限和失败反馈靠评审会补 | 页面、动作、状态结果、二级上下文与可观察验收 |
+| 后端 / 架构师 | 指标口径、权威源、状态守卫和幂等晚补 | 对象、规则、数据流、状态、事件和 NFR 边界 |
+| 测试工程师 | 只有正向页面描述，无法独立复现 | 正反例、边界、异常、权限、证据和回归范围 |
+| Coding Agent | 文档可读但不可执行，缺口被模型自动脑补 | 稳定 ID、机器切片、GAP 纪律和结构化 handoff |
+
+## 60 秒上手（Quick Start）
+
+### 1. 安装
 
 ```bash
 # Codex / Claude Code / Cursor / Trae 等 Agent Skills 兼容工具
@@ -27,24 +45,26 @@ npx skills add franklinxkk/ai-delivery-spec
 openclaw skills install @franklinxkk/ai-delivery-spec
 ```
 
-安装后直接说真实目标，不需要先学阶段名或模板：
+### 2. 直接说目标，或选择一个快捷入口
+
+不需要先学习阶段名、模板或内部 ID。拿不准时只用 `/ads`：
 
 ```text
-使用 $ai-delivery-spec。我是<角色>，现在有<想法、材料或系统>，
-本次只要<目标产物或停止点>。复用已确认事实；不确定的不要猜；
-只问会改变范围或结果的问题，交付最小但完整的结果。
+/ads 我有一个“企业数据一键上报”的想法，请判断目前最需要澄清什么，并带我做到可交付。
 ```
 
-也可以用四个轻量入口；它们是**意图别名，不是四套新流程**：
+目标明确时直接选停止点：
 
-| 入口 | 适合什么时候 | 行为 |
+| 入口 | 复制后替换括号内容 | 得到什么 |
 |---|---|---|
-| `/ads` | 不知道该走哪一步 | 识别当前阶段与风险，路由到最小下一产物 |
-| `/dig` | 想把需求“深挖到底” | 每次只问一个真正改变决策的问题，从战略、系统、行为动机、反方挑战四个镜头收敛；仍写回 DEC/UNK/ASM 与既有需求产物 |
-| `/prd` | 目标是可评审、可实施 PRD | 先关闭阻断开工的 P0 未知项，再直接形成一份统一 PRD |
-| `/proto` | 目标是可操作原型 | 默认交产品态；若要给研发测试走读，先确认是否同时生成评审态 |
+| `/ads` | `/ads 我现在有（想法/材料/旧系统），本次想做到（目标）` | 自动判断从哪里进入、做到哪里停止 |
+| `/dig` | `/dig 深挖这个需求，一次只问我一个真正影响方向的问题` | 用战略、系统、行为动机、反方挑战四个镜头关闭关键未知 |
+| `/prd` | `/prd 基于这些材料形成可评审、可实施、可验收的统一 PRD` | 资料够就直接出 PRD；存在 P0 未知则先澄清，再自动返回 PRD |
+| `/proto` | `/proto 基于已确认需求生成可操作 HTML；需要评审态时先问我` | 默认生成产品态；概念原型与研发评审态按目标区分 |
 
-这些入口是否能作为裸斜杠命令使用，取决于宿主：有的工具会在消息到达模型前拦截未知命令。此时请用该宿主的显式 Skill 调用形式，例如 `/ai-delivery-spec /dig …`、`$ai-delivery-spec /dig …`，或直接说“用 ADS 深度澄清 / 直接出 PRD / 直接出原型”。四个入口保证语义等价，不宣称跨宿主原生注册。
+四个入口是意图别名，不是四套新流程。部分宿主会在消息到达模型前拦截未知命令，因此不宣称跨宿主原生注册；此时改用 `/ai-delivery-spec /dig …`、`$ai-delivery-spec /dig …`，或直接说“使用 ai-delivery-spec 深度澄清这个需求”。
+
+### 3. 它会自动控制轻重
 
 如果你只说一句“帮我做一个企业约谈 HTML”，Skill 会记住 HTML 是最终目标，先分批确认会改变范围、规则、权限、状态、指标或数据的关键决定；P0 关闭后继续生成可实施原型，**不会停在一张需求清单**。若只是想先看方向，请明确说“先做概念原型，允许合理假设”；假设和 GAP 会被显式标出，不冒充开发基线。
 
@@ -57,18 +77,6 @@ openclaw skills install @franklinxkk/ai-delivery-spec
 一个 Idea 也能开始。先看[最小需求样例](examples/minimal-v5/README.md)；需要理解指标、泳道流转和二级抽屉如何进入评审态时，直接打开[中等需求交互样例](examples/medium-review-handoff/review-prototype.html)。该匿名样例用于首次理解与冷读训练，不冒充可复制的完整 Schema/发布夹具。
 
 **English works end to end.** Say: “Use `/ads` and follow my language. Ask only scope-changing questions, deliver the smallest complete artifact, and mark what remains unproven.” Stable IDs and machine keys remain unchanged.
-
-## 它解决谁的什么问题
-
-| 角色 | 最常见损耗 | 得到什么 |
-|---|---|---|
-| 初级产品经理 | 不知道该问什么，把页面描述当需求 | 有边界的问题引导、最小需求卡、规则与异常底线 |
-| 中高级产品 / 产品负责人 | 跨模块、状态、数据和团队输出难统一 | 一份可追溯基线、分级交付、内审与变更影响 |
-| 业务 / 售前 / 实施 / 设计 | 客户语言到界面方案失真 | 事实、假设、未知和可确认的产品态原型 |
-| 前端开发 | 入口、交互、权限和失败反馈靠猜 | 页面、动作、状态结果、二级上下文与可观察验收 |
-| 后端 / 架构师 | 指标口径、权威源、守卫和幂等晚补 | 对象、规则、数据流、状态、事件和 NFR 边界 |
-| 测试工程师 | 只有正向描述，无法独立复现 | 正反、边界、异常、权限、证据和回归范围 |
-| Coding Agent | 文档可读但不可执行，缺口被自动脑补 | 稳定 ID、机器切片、GAP 纪律和结构化 handoff |
 
 ## 一条主线，不是一条僵硬流水线
 
