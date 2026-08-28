@@ -1,5 +1,5 @@
 schema_version: 5.3.0
-# Package the generic lifecycle SVG; never ship customer-derived public assets.
+# Public onboarding no longer depends on repository SVG assets; keep the runtime focused.
 max_files: 114
 include:
   - SKILL.md
@@ -7,7 +7,6 @@ include:
   - CHANGELOG.md
   - LICENSE
   - agents/openai.yaml
-  - .github/assets/**
   - examples/**
   - references/**
   - schemas/**

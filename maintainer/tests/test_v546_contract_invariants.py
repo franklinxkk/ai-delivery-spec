@@ -110,7 +110,7 @@ def test_explain_finding_distinguishes_exact_family_and_unknown() -> None:
 def test_version_and_generated_custom_rule_contract(tmp_path: Path) -> None:
     config = json.loads((ROOT / 'schemas/spec-config.schema.json').read_text(encoding='utf-8'))
     versions = config['properties']['execution']['properties']['expected_skill_version']['enum']
-    assert '5.4.7' in versions
+    assert {'5.4.7', '5.4.8'} <= set(versions)
     custom = tmp_path / 'custom'
     assert run('scripts/ai_delivery_spec_cli.py', 'init-custom', '--output', str(custom)).returncode == 0
     rule = yaml.safe_load((custom / 'validators/my-team.yaml').read_text(encoding='utf-8'))['rules'][0]

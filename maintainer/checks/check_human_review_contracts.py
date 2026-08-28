@@ -60,10 +60,9 @@ def visible_text(payload: dict) -> str:
 require(
     "SKILL.md",
     (
-        "只有用户明确要求评审版",
-        "或在首次交开发前确认后",
-        "客户演示/需求确认默认产品模式",
-        "锁定任务起始语言",
+        "评审态只在用户要求或首次交开发前确认后生成",
+        "客户演示/确认默认产品态",
+        "锁定用户语言",
         "evidence_level=static|browser|real_system|customer_acceptance",
         "Gate 只证明静态合同，不证明",
     ),

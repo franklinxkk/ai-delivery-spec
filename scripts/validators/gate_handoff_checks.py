@@ -1021,7 +1021,7 @@ class HandoffChecks:
         for legacy_path in sorted(self.review_workspace_legacy_paths & prototype_resolved, key=str):
             self.add(
                 "BLOCK", "PROTO-REVIEW-WORKSPACE-REQUIRED", legacy_path,
-                "旧式评审叠加可以单独视检，但不能作为研发测试交接；请迁移为 v5.4.7 Final 上下文驱动评审工作台",
+                "旧式评审叠加可以单独视检，但不能作为研发测试交接；请迁移为 v5.4.8 上下文与语义覆盖驱动的评审工作台",
                 affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
             )
         expected_prd_hash = self._sha256(prd)
@@ -1095,6 +1095,44 @@ class HandoffChecks:
                             affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
                             related_refs=(point_ref, unresolved_ref),
                         )
+            point_ids = {
+                str(item.get("ref", "")).upper()
+                for item in review_document.get("review_points", []) or []
+                if isinstance(item, dict)
+            }
+            for item in review_document.get("semantic_coverage_items", []) or []:
+                if not isinstance(item, dict):
+                    continue
+                coverage_id = str(item.get("coverage_id", "SCOV-UNKNOWN")).upper()
+                subject_ref = str(item.get("subject_ref", "")).upper()
+                source_refs = {
+                    str(ref).upper() for ref in item.get("source_refs", []) or [] if str(ref).strip()
+                }
+                target_ref = str(item.get("target_ref", "") or "").upper()
+                unknown_ref = str(item.get("unknown_ref", "") or "").upper()
+                mapped_points = {
+                    str(ref).upper() for ref in item.get("review_point_refs", []) or [] if str(ref).strip()
+                }
+                unresolved = {
+                    ref for ref in ({subject_ref, target_ref, unknown_ref} | source_refs)
+                    if ref and ref not in prd_baseline_ids
+                }
+                for ref in sorted(unresolved):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-SEMANTIC-REF-UNRESOLVED", review_path,
+                        "语义覆盖项未解析到本次提供的权威 PRD 基线",
+                        f"{coverage_id}->{ref}",
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                        related_refs=(coverage_id, ref),
+                    )
+                for point_ref in sorted(mapped_points - point_ids):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-SEMANTIC-COVERAGE", review_path,
+                        "语义覆盖项引用了不存在的 ReviewPoint",
+                        f"{coverage_id}->{point_ref}",
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                        related_refs=(coverage_id, point_ref),
+                    )
 
         frontmatter = self._frontmatter(prd)
         declared_views = {str(item).upper() for item in frontmatter.get("page_contract_view_ids", []) if item}

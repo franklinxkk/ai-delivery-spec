@@ -595,6 +595,8 @@ def run_check(args: argparse.Namespace) -> int:
             "maintainer/examples/publishing-learning-v5/delivery/projections/unified-prd.md",
         ],
         [sys.executable, "scripts/validators/validate_unified_prd.py", "maintainer/examples/publishing-learning-v5/delivery/projections/unified-prd.md"],
+        [sys.executable, "scripts/validators/validate_release_package.py"],
+        [sys.executable, "scripts/validators/validate_validator_wiring.py"],
     ]
     commands = fast_commands if args.profile == "fast" else fast_commands + release_only_commands
     if args.product_truth:
@@ -711,7 +713,7 @@ def status_report(args: argparse.Namespace) -> int:
         },
         "known_limitations": [
             "five domain methods have owner-attested production practice; all built-in packs pass deterministic contract checks but fresh-agent/expert maturity remains separate",
-            "v5.4.7 review-workspace and adversarial contract probes are deterministic; isolated no-skill comparison, fresh-agent repetitions and versioned user feedback remain separate evidence",
+            "v5.4.8 semantic-coverage and review-workspace probes are deterministic; isolated no-skill comparison, fresh-agent repetitions and versioned user feedback remain separate evidence",
             "domain expert, customer, production, legal, safety, and financial correctness are not proven",
             "deterministic fixtures and private brownfield calibration expose method gaps but do not prove implementation or customer acceptance",
         ],

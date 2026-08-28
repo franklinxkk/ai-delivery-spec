@@ -8,6 +8,7 @@ import fnmatch
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import shutil
@@ -65,6 +66,18 @@ def source_revision() -> tuple[str, bool]:
     return (f"{commit}-dirty" if dirty else commit), dirty
 
 
+def release_source_failures(source_commit: str, source_worktree_dirty: bool) -> list[str]:
+    """Reject release artifacts that cannot be traced to one clean Git commit."""
+    failures: list[str] = []
+    if source_worktree_dirty:
+        failures.append(
+            "release package requires a clean Git worktree; commit the intended files and rebuild"
+        )
+    if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", source_commit):
+        failures.append("release package source_commit must be one full clean Git SHA")
+    return failures
+
+
 def self_check(root: Path) -> list[str]:
     failures: list[str] = []
     commands = (
@@ -96,7 +109,13 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, help="target zip; omitted for check-only")
     parser.add_argument("--check", action="store_true", help="validate selection and extracted runtime")
+    parser.add_argument(
+        "--release", action="store_true",
+        help="enforce clean-source release provenance and run extracted-package checks",
+    )
     args = parser.parse_args()
+    if args.release:
+        args.check = True
     config = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
     files = select_files(config)
     failures: list[str] = []
@@ -113,6 +132,8 @@ def main() -> int:
     if not version:
         failures.append("SKILL.md does not declare a release version in its H1 heading")
     source_commit, source_worktree_dirty = source_revision()
+    if args.release:
+        failures.extend(release_source_failures(source_commit, source_worktree_dirty))
     manifest = {
         "schema_version": "5.3.0", "skill_version": version,
         "source_commit": source_commit,

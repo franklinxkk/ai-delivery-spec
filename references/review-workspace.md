@@ -4,14 +4,15 @@
 Product Truth、结构化 handoff 或验收证据的权威边界。
 
 > **Review Explains, Product Operates.** 左侧始终是完整可操作产品；右侧只解释真实产品动作产生的当前
-> 上下文。Context 定位置，Declaration 定分母，Candidate Diff 防漏，Fingerprint 定副作用边界，
+> 上下文。Context 定位置，Declaration 定评审点分母，Semantic Coverage 定功能完整性分母，Candidate Diff 防漏，Fingerprint 定副作用边界，
 > Layout + Detection 保证真实可运行，Target Resolution 防绑错，Review Record 防丢结论。
 
 ## 1. 人类任务与禁止结构
 
 完成标准是未参与原讨论的产品、前端、后端、测试能沿产品自身入口独立操作，在当前页面或业务浮层旁
-理解用途、上下游、结果、规则、边界和验收，并能报告 GAP、开始实现或编写测试；仍需作者逐页串讲即为
-GAP。
+理解用途、上下游、结果、规则、边界和验收，并能报告 GAP、开始实现或编写测试。每个页面及由它打开的
+业务弹窗、抽屉、气泡都必须覆盖影响实现/验收的功能语义；仍需作者补讲指标、流转、权限、数据写入、
+异常或二级页面功能即为 GAP。
 
 R1/R2 只有三个一级页签：
 
@@ -92,6 +93,40 @@ selector、cardinality 和 `UNK-*`。存量小写动作只可规范化为 `PROTO
 规范化创造 `ACT-*` Product Truth。动态页面在浏览器中枚举指标、高风险动作和规则字段；候选可见但
 不计进度，产品明确确认并绑定来源后才从候选移入 Declaration；晋级后必须从 Candidate Set 删除，
 `candidate_review_points[].subject_ref` 与 `review_points[].subject_ref` 的交集必须为空。
+
+### 4.1 Semantic Coverage：先定功能分母，再做克制投影
+
+5.4.8 的“克制”只压缩文字和重复，不允许缩减功能。先从同一基线的 PRD 页面合同、Stage 0、稳定锚点、
+运行时语义扫描和冷读结果建立 `semantic_coverage_items[]`，再决定哪些项可按规则等价合并到一个
+ReviewPoint。每个适用项必须在人类右栏恰好出现一次最小说明；有 UI 落点时还必须映射到同目标 marker。
+
+必须进入语义分母的类型：
+
+- `action`：会产生业务结果或改变下一动作的操作；
+- `field_rule`：必填、条件、联动、计算、权限或校验字段；
+- `metric`：每个可见指标及其独立口径；
+- `state_transition`：允许流转、守卫、非法路径、撤回/回退；
+- `permission_guard`：菜单、数据范围、动作和字段权限；
+- `data_write`：持久化、覆盖、追加、同步、删除和审计；
+- `event_handoff`：跨角色、页面、模块或系统的事件与下一入口；
+- `error_recovery`：失败、超时、重复、部分成功、冲突、补偿和重试；
+- `business_region`：承载独立任务的区域；
+- `overlay`：业务弹窗、抽屉、气泡及其自身功能；
+- `role_path`：核心角色从入口到结果的操作路径。
+
+每项状态只能是 `covered`、`gap` 或 `not_applicable`：`covered` 必须映射同 Context 的正式 RVP 并显示
+一句最小充分说明；`gap` 还必须绑定 `UNK-*`，P0/关键 P1 阻断完整交接；`not_applicable` 必须有来源和
+理由且不能占用右栏。一个 ReviewPoint 只在语义项对象、规则、结果和验收等价时才可合并多项；不能用
+“页面入口”“核心操作”“处理结果”三个泛化点代替页面功能。
+
+每个 `VIEW-*` 必须用 `PAGE-CONTRACT` 的 `surfaces` 与 Context 的 `surface_types` 双向对齐。声明
+`metrics` 就必须逐项存在 `METRIC-*` 语义；声明 `workflow` 就必须有状态流转；声明 `drawer_form` 就
+必须通过 `secondary_context_refs` 指向可到达的独立业务 Context。发现 `role=dialog` 或
+`data-testid=modal-/drawer-` 却没有 CurrentContext 时直接 BLOCK。
+
+右栏使用 `data-review-semantic-ref="SCOV-*"` 和 `data-review-semantic-owner` 呈现最小说明。简单筛选、
+显然按钮或完全等价规则可以一句话/区域合并；指标、状态、权限、数据写入、交接、异常和二级页面详情归
+“边界与验收”，不能只留一句泛化摘要。详细公式和测试仍以同 hash PRD/handoff 为权威。
 
 ## 5. ReviewPoint 最小完整合同
 
@@ -232,6 +267,8 @@ HTML 内嵌唯一 `<script type="application/json" id="review-workspace-manifest
              data-review-number="1" data-review-business-status="confirmed"
              data-review-verification-status="not_run"
              data-review-evidence-origin="explicit_source">…</article>
+    <p data-review-semantic-ref="SCOV-EXAMPLE-001" data-review-semantic-owner="function_flow"
+       data-review-context="VIEW-EXAMPLE-001">校验通过后提交，并在原页显示持久结果。</p>
   </section>
   <section data-review-tab="boundary_acceptance">…</section>
 </aside>
@@ -273,6 +310,10 @@ R1/R2 至少执行并留证：
 24. 动态重绘页面或浮层后，当前 Context marker 自动恢复且 marker/card/ref 仍一致；
 25. 只显示 CurrentContext marker，全部可见 marker 不重叠、不越出视口且不遮挡关键产品动作；
 26. 桌面业务固定浮层止于产品区，窄屏产品态恢复全屏，关闭后评审与产品位置均回到父 Context。
+27. 每个 VIEW 的 PAGE-CONTRACT 与 `surface_types` 一致；全部适用 `SCOV-*` 在右栏恰好出现一次；
+28. 指标页面逐个核对 `METRIC-*` 口径，工作流页面核对流转守卫，业务弹窗/抽屉进入独立 Context；
+29. 简单项合并后仍能逐项回溯语义分母，P0/P1 GAP 会阻断完整交接。
+30. 浏览器可见规则文本与 PRD 逐字核对；正文中的 `<`、`>` 等比较符必须使用 HTML 实体或安全文本写入，不能被浏览器误解析为标签而吞字。
 
 浏览器未执行时只能声明静态合同已通过并保留 ARUN GAP，不能称“可完美复现”“已验收”或“真实运行
 无副作用”。
@@ -280,8 +321,9 @@ R1/R2 至少执行并留证：
 ## 13. 冷读门禁
 
 R1/R2 由未参与原讨论的产品、前端、后端、测试分别冷读。目标是在 3 分钟内沿产品入口找到当前功能，
-复述输入、处理、可见结果、领域结果、主要异常和下一交接；声明评审点回忆率至少 80%，P0/P1 为
-100%。记录找到入口时间、误猜规则、首次澄清、阻断 GAP 和证据。失败应修复信息投影、上下文或文字
+复述输入、处理、可见结果、领域结果、指标口径、允许状态流转、主要异常、二级页面和下一交接；声明
+评审点回忆率至少 80%，P0/P1 及核心角色路径为 100%。记录找到入口时间、误猜规则、首次澄清、阻断
+GAP 和证据。失败应修复信息投影、上下文或文字
 层级，不得增加 Journey/Step/Role 导航。R1/R2 的状态只能是 pending/passed/failed/blocked，不能用
 `not_applicable` 逃避；只有 R0 可声明不适用。
 
@@ -294,5 +336,6 @@ R1/R2 由未参与原讨论的产品、前端、后端、测试分别冷读。�
 完成必须同时满足：需求内核无回归；CurrentContext 可确定；ProductLocation 与菜单/路由/标题同步；声明评审点唯一且分母稳定；R1/R2 只有三
 页签；纯评审动作产品指纹不变；Candidate Diff 不自动晋级；布局不遮挡；Overlay 可探测；目标在当前
 上下文唯一；评审记录可持久化且不跨 baseline 污染；页面只有一个评审事实面；评审事件与业务事件隔离；
-动态重绘后标号恢复且只显示当前 Context；标号可见、避碰、不越界；业务浮层不覆盖评审区。任何一项缺失
-都不得包装为 5.4.7 Final。
+动态重绘后标号恢复且只显示当前 Context；标号可见、避碰、不越界；业务浮层不覆盖评审区；
+PAGE-CONTRACT、语义分母、右栏最小说明和 marker 映射闭合；指标、工作流、二级 Context 与核心角色
+路径无静默遗漏。任何一项缺失都不得包装为 5.4.8 完整评审交接。

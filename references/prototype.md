@@ -62,8 +62,9 @@ py -3 scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app-n
 
 ### 2.1 评审投影的信息预算
 
-评审模式必须同时满足“机器覆盖完整、人工投影克制”。全量 FLOW/STEP/EDGE/STATE/DATA/AC/TEST
-进入同基线 PRD、结构化 handoff 与覆盖账本；可见编号只投影会改变实现、验收或上线结论的内容：
+评审模式必须同时满足“语义覆盖完整、人工表达克制”。全量 FLOW/STEP/EDGE/STATE/DATA/AC/TEST
+进入同基线 PRD、结构化 handoff 与覆盖账本；每个页面和二级业务浮层先建立影响实现/验收的语义分母，
+再把每个适用功能项映射为可见的一句说明或规则等价分组。以下内容不得省略：
 
 - 阻断决策的未知项、冲突和回退策略；
 - 跨页面、角色或系统的交接，以及写入、删除、提交、撤回等不可逆/受守卫状态变化；
@@ -71,8 +72,9 @@ py -3 scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app-n
 - 权限守卫、异常、重试、补偿、对账和恢复；
 - 高价值输入输出、边界与验收证据。
 
-常规字段释义、显然按钮、重复规则和完整测试步骤只进入机器覆盖账本，不逐项占用评审面板。一个编号
-可以覆盖一个区域或一段连续操作。每条可见说明同时显示业务状态、验证状态和必要的证据来源；没有
+纯装饰、标签可直接理解且无独立规则/结果的控件不进入功能分母；常规筛选、简单查看等功能仍要在右栏
+有一句最小说明，完全等价的重复规则可合并为一个区域编号。一个编号可以覆盖一个区域或一段事务边界
+一致的连续操作，但不能用“入口/操作/结果”三个泛化点代替页面功能。每条可见说明同时显示业务状态、验证状态和必要的证据来源；没有
 来源的技术接口、数据库表或 API 路径不得补写为已确认合同。禁止用“每个字段必须一个可见标注”作为
 完整性门槛，也禁止从 DOM、视觉显著性或模型判断自动增加官方评审点。
 
@@ -98,7 +100,7 @@ py -3 scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app-n
 
 ### 2.2 评审工作台（按需加载）
 
-确认需要评审模式后，必须完整读取 `references/review-workspace.md`。以真实产品 `CurrentContext` 为唯一人类动线，以 `review_contexts` 的有序 `review_point_refs` 为官方分母，以 Candidate Diff 防漏，以 Product Fingerprint 隔离评审副作用。
+确认需要评审模式后，必须完整读取 `references/review-workspace.md`。以真实产品 `CurrentContext` 为唯一人类动线，以 `review_contexts` 的有序 `review_point_refs` 为评审点分母，以 `semantic_coverage_items` 为功能完整性分母，以 Candidate Diff 防漏，以 Product Fingerprint 隔离评审副作用。
 FLOW/STEP/EDGE 仍表达机器与 PRD 中的跨页/跨角色合同，但只能投影为当前上下文的主链、实施语义和上下游说明；桌面说明区参与布局且不遮挡业务浮层，窄屏切换时保留产品状态。
 
 ### 2.3 产品位置合同 / Product Location Contract

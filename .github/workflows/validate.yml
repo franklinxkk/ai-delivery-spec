@@ -45,6 +45,10 @@ jobs:
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
         run: python scripts/ai_delivery_spec_cli.py check --profile release --keep-going
 
+      - name: Require clean-source runtime package once
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        run: python maintainer/tools/build_runtime_package.py --release --check
+
       - name: Validate Publishing Product Truth explicitly
         run: >-
           python scripts/validators/validate_product_truth.py

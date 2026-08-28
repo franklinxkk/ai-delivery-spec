@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>服务工单驾驶舱｜5.4.8 中等评审态样例</title>
+  <style>
+    :root{--brand:#5b5ce2;--brand-soft:#eeefff;--ink:#172033;--muted:#6b7280;--line:#e7eaf0;--canvas:#f5f7fb;--good:#16a36a;--warn:#e79022;--danger:#e24c4b;--review:390px}
+    *{box-sizing:border-box} body{margin:0;font:14px/1.55 Inter,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);background:var(--canvas)}
+    button,select{font:inherit} button{cursor:pointer}.app{min-height:100vh;display:grid;grid-template-columns:208px minmax(0,1fr) var(--review);transition:grid-template-columns .22s ease}
+    .app.review-collapsed{grid-template-columns:208px minmax(0,1fr) 0}.sidebar{background:#14213d;color:#dce5f7;padding:22px 14px;position:sticky;top:0;height:100vh}
+    .brand{font-weight:800;font-size:17px;color:#fff;margin:0 10px 26px}.menu{display:grid;gap:6px}.menu button{border:0;background:transparent;color:inherit;text-align:left;border-radius:9px;padding:11px 12px}.menu button.active{background:#3346a6;color:#fff}.menu small{display:block;color:#9fb0cf;margin:22px 12px 6px}
+    .main{min-width:0;padding:22px 26px 48px}.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.crumb{color:var(--muted);font-size:13px}.top-actions{display:flex;gap:8px}.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 13px;color:var(--ink)}.btn.primary{border-color:var(--brand);background:var(--brand);color:#fff}
+    h1{font-size:24px;margin:6px 0 3px}h2{font-size:16px;margin:0}.subtitle{color:var(--muted);margin:0}.filters{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin:18px 0}.filters select{border:1px solid var(--line);border-radius:8px;padding:8px 30px 8px 10px;background:#fff}
+    .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.metric{position:relative;background:#fff;border:1px solid var(--line);border-radius:13px;padding:17px;min-height:116px}.metric .label{color:var(--muted)}.metric strong{display:block;font-size:27px;margin:8px 0 2px}.metric .delta{font-size:12px;color:var(--good)}
+    .section-head{display:flex;justify-content:space-between;align-items:center;margin:24px 0 10px}.legend{font-size:12px;color:var(--muted)}.board{display:grid;grid-template-columns:repeat(4,minmax(210px,1fr));gap:12px;overflow:auto;padding-bottom:8px}.lane{background:#eef1f6;border-radius:13px;padding:12px;min-height:360px}.lane-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}.count{background:#fff;color:var(--muted);border-radius:99px;padding:1px 8px}
+    .ticket{position:relative;background:#fff;border:1px solid var(--line);border-radius:10px;padding:13px;margin-bottom:9px;box-shadow:0 3px 12px rgba(18,33,62,.04)}.ticket:hover{border-color:#b8baf4}.ticket h3{font-size:14px;margin:0 0 8px}.ticket-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}.tag{display:inline-block;border-radius:5px;padding:2px 6px;background:#fff1df;color:#b86500;font-size:12px;margin-bottom:7px}
+    .marker{position:absolute;top:-9px;right:-8px;width:25px;height:25px;border:2px solid #fff;border-radius:50%;background:var(--brand);color:#fff;font-weight:800;box-shadow:0 3px 10px rgba(91,92,226,.35);z-index:3}.marker.static{position:relative;top:auto;right:auto;flex:0 0 auto}.review-selected,[data-review-target-selected="true"]{outline:3px solid rgba(91,92,226,.42);outline-offset:3px}.marker[aria-current=true],.review-card[aria-current=true]{background:var(--brand-soft);color:var(--brand);border-color:var(--brand)}
+    .review{min-width:0;background:#fff;border-left:1px solid var(--line);height:100vh;position:sticky;top:0;overflow:auto;transition:opacity .16s ease}.review-collapsed .review{opacity:0;pointer-events:none;overflow:hidden}.review-inner{padding:18px}.review-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.review-head h2{font-size:18px}.context{color:var(--brand);font-size:12px;margin-top:3px}.close{border:0;background:#f1f3f7;border-radius:7px;width:30px;height:30px}.review-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:16px 0}.review-tabs button{border:0;border-radius:7px;background:#f1f3f7;padding:8px 3px;color:var(--muted)}.review-tabs button.active{background:var(--brand-soft);color:var(--brand);font-weight:700}.tab{display:none}.tab.active{display:block}.summary{background:#f8f9fc;border-radius:10px;padding:11px;margin-bottom:11px;font-size:13px}.review-list:not([hidden]){display:grid;gap:8px}.review-list[hidden]{display:none}.review-card{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px;display:grid;grid-template-columns:25px 1fr;gap:9px;color:var(--ink)}.review-card .num{width:25px;height:25px;border-radius:50%;display:grid;place-items:center;background:var(--brand);color:#fff;font-weight:800}.review-card strong{display:block;margin-bottom:3px}.review-card p{margin:0;color:#4b5563;font-size:13px}.review-card .meta{margin-top:5px;color:#8a91a0;font-size:11px}.note{border-left:3px solid var(--warn);background:#fff8ed;padding:9px 10px;margin:9px 0;color:#77501d;font-size:12px}.coverage{width:100%;border-collapse:collapse;font-size:12px}.coverage th,.coverage td{border-bottom:1px solid var(--line);padding:7px;text-align:left}.ok{color:var(--good);font-weight:700}.not-proven{color:var(--danger)}
+    .review-launch{position:fixed;right:18px;top:18px;z-index:20;display:none;border:0;border-radius:9px;background:var(--brand);color:#fff;padding:9px 13px;box-shadow:0 5px 18px rgba(91,92,226,.35)}.app.review-collapsed ~ .review-launch{display:block}
+    .drawer-mask{position:fixed;left:208px;right:var(--review);top:0;bottom:0;background:rgba(15,23,42,.34);display:none;z-index:30}.drawer-mask.open{display:block}.drawer{position:absolute;right:0;top:0;height:100%;width:min(620px,92vw);background:#fff;box-shadow:-16px 0 40px rgba(15,23,42,.14);padding:22px;overflow:auto}.drawer-head{display:flex;justify-content:space-between;align-items:start;border-bottom:1px solid var(--line);padding-bottom:14px}.drawer-head button{border:0;background:#f2f4f7;border-radius:7px;width:30px;height:30px}.origin{background:#f7f8fb;border-radius:10px;padding:11px;margin:15px 0}.form-row{position:relative;margin:15px 0}.form-row label{display:block;font-weight:700;margin-bottom:6px}.form-row input,.form-row textarea,.form-row select{width:100%;border:1px solid #cfd5df;border-radius:8px;padding:9px}.form-row textarea{min-height:82px;resize:vertical}.drawer-actions{display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--line);padding-top:14px}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#172033;color:#fff;border-radius:8px;padding:9px 14px;display:none;z-index:50}.toast.show{display:block}
+    @media(max-width:1100px){.app{grid-template-columns:76px minmax(0,1fr) var(--review)}.app.review-collapsed{grid-template-columns:76px minmax(0,1fr) 0}.brand{font-size:0}.brand:after{content:"OPS";font-size:15px}.menu button{font-size:0}.menu button:before{content:"•";font-size:20px}.metrics{grid-template-columns:repeat(2,1fr)}.drawer-mask{left:76px}}
+    @media(max-width:760px){.app,.app.review-collapsed{display:block}.sidebar{display:none}.main{padding:16px}.review{position:fixed;inset:0;z-index:40}.review-collapsed .review{display:none}.metrics{grid-template-columns:1fr}.review-launch{top:auto;bottom:18px}.filters{align-items:stretch;flex-direction:column}.drawer-mask{inset:0}}
+  </style>
+</head>
+<body>
+  <div class="app" id="app" data-state="board_ready">
+    <aside class="sidebar">
+      <div class="brand">ServiceOps 中台</div>
+      <nav class="menu" aria-label="主菜单">
+        <small>经营分析</small>
+        <button class="active" data-action="ACT-NAV-DASH">响应驾驶舱</button>
+        <button data-action="ACT-NAV-CUSTOMER">客户视图</button>
+        <small>服务协同</small>
+        <button data-action="ACT-NAV-TICKET">服务工单</button>
+        <button data-action="ACT-NAV-ITERATION">需求迭代</button>
+      </nav>
+    </aside>
+
+    <!-- PAGE-CONTRACT: VIEW-BOARD-001; primary=dashboard; layout=composite; surfaces=filters,metrics,workflow,drawer_form -->
+    <main class="main" data-testid="page-VIEW-BOARD-001" data-review-context-root="VIEW-BOARD-001" data-review-context-type="VIEW">
+      <div class="topbar">
+        <div><div class="crumb">经营分析 / 响应驾驶舱</div><h1>服务响应驾驶舱</h1><p class="subtitle">从异常发现到需求交付的统一响应视图</p></div>
+        <div class="top-actions"><button class="btn" data-action="ACT-EXPORT">导出</button><button class="btn primary" data-action="ACT-CREATE">新建工单</button></div>
+      </div>
+
+      <section class="filters" data-review-anchor="ACT-FILTER-001">
+        <button class="marker" data-review-ref="RVP-FILTER" aria-current="true">1</button>
+        <select aria-label="时间范围"><option>近 30 天</option><option>本月</option><option>本季度</option></select>
+        <select aria-label="服务团队"><option>全部服务团队</option><option>一线客服组</option><option>产品支持组</option></select>
+        <button class="btn primary" data-action="ACT-FILTER-001">查询</button><button class="btn" data-action="ACT-RESET">重置</button>
+      </section>
+
+      <section class="metrics" aria-label="响应指标">
+        <article class="metric" data-metric="METRIC-DUE-001" data-review-anchor="METRIC-DUE-001"><button class="marker" data-review-ref="RVP-METRIC-DUE">2</button><span class="label">待响应</span><strong>18</strong><span class="delta">较昨日 -3</span></article>
+        <article class="metric" data-metric="METRIC-SLA-001" data-review-anchor="METRIC-SLA-001"><button class="marker" data-review-ref="RVP-METRIC-SLA">3</button><span class="label">按时响应率</span><strong>92.6%</strong><span class="delta">较上期 +2.1%</span></article>
+        <article class="metric" data-metric="METRIC-WIP-001" data-review-anchor="METRIC-WIP-001"><button class="marker" data-review-ref="RVP-METRIC-WIP">4</button><span class="label">处理中</span><strong>31</strong><span class="delta">其中 6 条临近 SLA</span></article>
+        <article class="metric" data-metric="METRIC-CLOSED-001" data-review-anchor="METRIC-CLOSED-001"><button class="marker" data-review-ref="RVP-METRIC-CLOSED">5</button><span class="label">已关闭</span><strong>126</strong><span class="delta">近 30 天</span></article>
+      </section>
+
+      <div class="section-head" data-review-anchor="RULE-FLOW-001"><div><h2>需求迭代流转</h2><span class="legend">点击卡片查看任务拆解与验收</span></div><button class="marker static" data-review-ref="RVP-FLOW">6</button></div>
+      <section class="board" aria-label="需求流转泳道">
+        <div class="lane"><div class="lane-head"><b>待响应</b><span class="count">3</span></div>
+          <article class="ticket" tabindex="0" data-action="ACT-OPEN-TASK" data-ticket="DMD-024" data-review-anchor="ACT-OPEN-TASK-001"><button class="marker" data-review-ref="RVP-TASK-OPEN">7</button><span class="tag">P1 · 客户工单</span><h3>批量导入失败需要错误明细</h3><div class="ticket-meta"><span>客服一组</span><span>剩余 2h</span></div></article>
+          <article class="ticket" tabindex="0" data-action="ACT-OPEN-TASK" data-ticket="DMD-027"><h3>消息通知增加已读状态</h3><div class="ticket-meta"><span>客服二组</span><span>剩余 6h</span></div></article>
+        </div>
+        <div class="lane"><div class="lane-head"><b>分析中</b><span class="count">2</span></div><article class="ticket"><span class="tag">P1 · 产品分析</span><h3>工单升级后自动关联需求</h3><div class="ticket-meta"><span>产品 A</span><span>今日</span></div></article></div>
+        <div class="lane"><div class="lane-head"><b>待排期</b><span class="count">4</span></div><article class="ticket"><span class="tag">P2 · 待评估</span><h3>客户健康度增加服务指标</h3><div class="ticket-meta"><span>产品 B</span><span>v2.6</span></div></article></div>
+        <div class="lane"><div class="lane-head"><b>开发中</b><span class="count">3</span></div><article class="ticket"><span class="tag">P0 · 联调中</span><h3>回款异常自动生成响应任务</h3><div class="ticket-meta"><span>版本负责人</span><span>68%</span></div></article></div>
+      </section>
+    </main>
+
+    <aside class="review" data-demo-review-workspace="REVIEW-MEDIUM-001" data-review-current-context="VIEW-BOARD-001">
+      <div class="review-inner">
+        <div class="review-head"><div><h2>评审说明</h2><div class="context" id="contextLabel">响应驾驶舱 · VIEW-BOARD-001</div></div><button class="close" data-action="UIACT-REVIEW-TOGGLE" data-ads-act="collapse" aria-label="收起评审说明">×</button></div>
+        <div class="review-tabs"><button class="active" data-tab="overview">总览</button><button data-tab="function">功能与流转</button><button data-tab="boundary">边界与验收</button></div>
+        <section class="tab active" data-tab-panel="overview"><div class="summary"><b>本页目标</b><br>让负责人识别服务响应压力，并从工单进入可执行的需求迭代闭环。</div><table class="coverage"><tr><th>覆盖对象</th><th>状态</th></tr><tr><td>筛选与指标</td><td class="ok">已覆盖</td></tr><tr><td>泳道流转</td><td class="ok">已覆盖</td></tr><tr><td>任务拆解抽屉</td><td class="ok">已覆盖</td></tr><tr><td>真实接口与数据</td><td class="not-proven">未证明</td></tr></table><div class="note">静态样例只证明评审信息组织和浏览器交互，不证明业务批准或真实实现。</div></section>
+        <section class="tab" data-tab-panel="function"><div class="review-list" id="viewCards">
+          <button class="review-card" data-review-point="RVP-FILTER" aria-current="true"><span class="num">1</span><span><strong>筛选作用域</strong><p>时间与团队筛选同时作用于四个指标和当前泳道；查询更新页面，重置恢复“近 30 天 / 全部团队”。</p><span class="meta">ACT-FILTER-001 · AC-FILTER-001</span></span></button>
+          <button class="review-card" data-review-point="RVP-METRIC-DUE"><span class="num">2</span><span><strong>待响应</strong><p>状态=待响应且未删除的工单数；按当前筛选范围实时查询工单主表，查询失败显示“加载失败”而不是 0。</p><span class="meta">METRIC-DUE-001 · RULE-METRIC-001</span></span></button>
+          <button class="review-card" data-review-point="RVP-METRIC-SLA"><span class="num">3</span><span><strong>按时响应率</strong><p>统计期内首次响应时间≤SLA 截止时间的已响应工单数 ÷ 已响应工单数×100%，保留 1 位；分母为 0 显示“—”。</p><span class="meta">METRIC-SLA-001 · AC-METRIC-SLA</span></span></button>
+          <button class="review-card" data-review-point="RVP-METRIC-WIP"><span class="num">4</span><span><strong>处理中</strong><p>当前状态=处理中且未删除的工单数；下方提示其中距 SLA 截止不足 4 小时的数量。</p><span class="meta">METRIC-WIP-001</span></span></button>
+          <button class="review-card" data-review-point="RVP-METRIC-CLOSED"><span class="num">5</span><span><strong>已关闭</strong><p>按 closed_at 归入筛选时间范围；重新打开的工单不计入当前已关闭数。</p><span class="meta">METRIC-CLOSED-001</span></span></button>
+          <button class="review-card" data-review-point="RVP-FLOW"><span class="num">6</span><span><strong>状态主链</strong><p>待响应→分析中→待排期→开发中→已完成；每条迁移都校验角色与前置条件，成功后记录操作者、时间与来源状态。</p><span class="meta">STM-DEMAND-001 · RULE-FLOW-001</span></span></button>
+          <button class="review-card" data-review-point="RVP-TASK-OPEN"><span class="num">7</span><span><strong>打开任务拆解</strong><p>点击需求卡打开对应抽屉并保持当前菜单与筛选；评审上下文同步切换到 DRAWER-TASK-001。</p><span class="meta">ACT-OPEN-TASK-001 · VIEW-TASK-001</span></span></button>
+        </div><div class="review-list" id="drawerCards" hidden>
+          <button class="review-card" data-review-point="RVP-TASK-TITLE"><span class="num">1</span><span><strong>任务标题</strong><p>必填，去除首尾空格后 1—100 字；重复标题允许，但同需求下提示已有同名任务。</p><span class="meta">FIELD-TASK-TITLE · RULE-TASK-001</span></span></button>
+          <button class="review-card" data-review-point="RVP-TASK-OWNER"><span class="num">2</span><span><strong>责任人与验收</strong><p>责任人和验收标准必填；仅产品可新增，其他角色只读。验收标准必须是可观察结果。</p><span class="meta">FIELD-OWNER · FIELD-AC · RULE-ROLE-001</span></span></button>
+          <button class="review-card" data-review-point="RVP-TASK-SAVE"><span class="num">3</span><span><strong>保存任务</strong><p>校验成功后写入任务并追加操作记录；服务端失败时抽屉不关闭、保留输入并展示 requestId。</p><span class="meta">ACT-TASK-ADD-001 · EVT-TASK-CREATED · AC-TASK-001</span></span></button>
+        </div></section>
+        <section class="tab" data-tab-panel="boundary"><div class="summary"><b>角色守卫</b><br>客服可领取和补充；产品可确认需求、拆任务；版本负责人可排期；测试可提交验证结论。无权限动作不展示，接口仍需二次校验。</div><div class="summary"><b>失败与恢复</b><br>指标查询失败不得回落为 0；状态迁移失败不移动卡片；任务保存失败保留输入并提供可追踪错误。</div><div class="summary"><b>验收证据</b><br>本样例状态：未执行。真实交付至少需要接口响应、审计记录、权限反例、状态迁移和浏览器 E2E 证据。</div></section>
+      </div>
+    </aside>
+  </div>
+
+  <button class="review-launch" data-action="UIACT-REVIEW-TOGGLE" data-ads-act="expand">评审说明</button>
+
+  <div class="drawer-mask" id="drawerMask" role="dialog" aria-modal="true" aria-label="任务拆解" data-testid="drawer-DRAWER-TASK-001" data-review-context-root="DRAWER-TASK-001" data-review-context-type="DRAWER">
+    <section class="drawer">
+      <div class="drawer-head"><div><div class="crumb">需求 DMD-024 / 任务拆解</div><h2>批量导入失败需要错误明细</h2></div><button data-action="ACT-CLOSE-TASK" aria-label="关闭">×</button></div>
+      <div class="origin"><b>来源工单：</b>TKT-1028 · 当前状态：分析中<br><span class="subtitle">原问题：批量导入遇到错误时只显示失败，无法定位具体行。</span></div>
+      <div class="form-row" data-review-anchor="FIELD-TASK-TITLE"><button class="marker" data-review-ref="RVP-TASK-TITLE">1</button><label for="taskTitle">任务标题</label><input id="taskTitle" maxlength="100" value="返回逐行错误明细"></div>
+      <div class="form-row" data-review-anchor="FIELD-TASK-OWNER"><button class="marker" data-review-ref="RVP-TASK-OWNER">2</button><label for="owner">责任人</label><select id="owner"><option>前端 A</option><option>后端 B</option></select><label for="acceptance" style="margin-top:12px">验收标准</label><textarea id="acceptance">上传包含 3 条错误数据的文件后，页面逐行展示行号、字段和错误原因；正确数据不受影响。</textarea></div>
+      <div class="drawer-actions" data-review-anchor="ACT-TASK-ADD-001"><button class="marker static" data-review-ref="RVP-TASK-SAVE">3</button><button class="btn" data-action="ACT-CLOSE-TASK">取消</button><button class="btn primary" data-action="ACT-TASK-ADD-001">保存任务</button></div>
+    </section>
+  </div>
+  <div class="toast" id="toast">任务已保存（教学样例：未连接真实接口）</div>
+
+  <script>
+    const app=document.getElementById('app');
+    const drawer=document.getElementById('drawerMask');
+    const contextLabel=document.getElementById('contextLabel');
+    const viewCards=document.getElementById('viewCards');
+    const drawerCards=document.getElementById('drawerCards');
+    const actionRegistry={
+      'ACT-NAV-DASH':showDemoResult,'ACT-NAV-CUSTOMER':showDemoResult,'ACT-NAV-TICKET':showDemoResult,'ACT-NAV-ITERATION':showDemoResult,
+      'ACT-EXPORT':showDemoResult,'ACT-CREATE':showDemoResult,'ACT-FILTER-001':showDemoResult,'ACT-RESET':showDemoResult,
+      'ACT-OPEN-TASK':openDrawer,'ACT-CLOSE-TASK':closeDrawer,'ACT-TASK-ADD-001':saveTask,
+      'UIACT-REVIEW-TOGGLE':toggleReview
+    };
+    const targetByPoint={
+      'RVP-FILTER':'ACT-FILTER-001','RVP-METRIC-DUE':'METRIC-DUE-001','RVP-METRIC-SLA':'METRIC-SLA-001','RVP-METRIC-WIP':'METRIC-WIP-001','RVP-METRIC-CLOSED':'METRIC-CLOSED-001','RVP-FLOW':'RULE-FLOW-001','RVP-TASK-OPEN':'ACT-OPEN-TASK-001','RVP-TASK-TITLE':'FIELD-TASK-TITLE','RVP-TASK-OWNER':'FIELD-TASK-OWNER','RVP-TASK-SAVE':'ACT-TASK-ADD-001'
+    };
+    function setContext(kind){
+      const isDrawer=kind==='drawer';
+      document.querySelector('[data-demo-review-workspace]').dataset.reviewCurrentContext=isDrawer?'DRAWER-TASK-001':'VIEW-BOARD-001';
+      contextLabel.textContent=isDrawer?'任务拆解抽屉 · DRAWER-TASK-001':'响应驾驶舱 · VIEW-BOARD-001';
+      viewCards.hidden=isDrawer;drawerCards.hidden=!isDrawer;
+    }
+    function focusReviewTarget(ref){
+      document.querySelectorAll('.review-selected').forEach(n=>n.classList.remove('review-selected'));
+      document.querySelectorAll('[data-review-target-selected="true"]').forEach(n=>n.removeAttribute('data-review-target-selected'));
+      document.querySelectorAll('[aria-current=true]').forEach(n=>n.setAttribute('aria-current','false'));
+      const target=document.querySelector(`[data-review-anchor="${targetByPoint[ref]}"]`);
+      const marker=document.querySelector(`.marker[data-review-ref="${ref}"]`);
+      const card=document.querySelector(`.review-card[data-review-point="${ref}"]`);
+      [target,marker,card].filter(Boolean).forEach(n=>{n.classList.add('review-selected');n.setAttribute('aria-current','true')});
+      if(target)target.setAttribute('data-review-target-selected','true');
+      if(target)target.scrollIntoView({behavior:'smooth',block:'center'});
+      if(card)card.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+    function selectPoint(ref){focusReviewTarget(ref)}
+    function openDrawer(){drawer.classList.add('open');app.dataset.state='task_editing';setContext('drawer');document.querySelector('[data-tab="function"]').click()}
+    function closeDrawer(){drawer.classList.remove('open');app.dataset.state='board_ready';setContext('view')}
+    function toggleReview(node){app.classList.toggle('review-collapsed',node.dataset.adsAct==='collapse')}
+    function showToast(message){const toast=document.getElementById('toast');toast.textContent=message;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1600)}
+    function showDemoResult(node){app.dataset.state=node.dataset.action==='ACT-FILTER-001'?'filter_applied':'action_recorded';showToast(node.dataset.action==='ACT-FILTER-001'?'已按当前条件刷新（教学样例）':'教学样例：该动作未连接真实服务')}
+    function saveTask(){app.dataset.state='task_saved';showToast('任务已保存（教学样例：未连接真实接口）')}
+    document.addEventListener('click',event=>{
+      const marker=event.target.closest('[data-review-ref]');if(marker){selectPoint(marker.dataset.reviewRef);return}
+      const card=event.target.closest('[data-review-point]');if(card){selectPoint(card.dataset.reviewPoint);return}
+      const tab=event.target.closest('[data-tab]');if(tab){document.querySelectorAll('[data-tab]').forEach(n=>n.classList.toggle('active',n===tab));document.querySelectorAll('[data-tab-panel]').forEach(n=>n.classList.toggle('active',n.dataset.tabPanel===tab.dataset.tab));return}
+      const node=event.target.closest('[data-action]');if(!node)return;
+      const handler=actionRegistry[node.dataset.action];if(handler)handler(node);
+    });
+    document.addEventListener('keydown',event=>{if(event.key==='Escape'&&drawer.classList.contains('open'))closeDrawer()});
+  </script>
+</body>
+</html>

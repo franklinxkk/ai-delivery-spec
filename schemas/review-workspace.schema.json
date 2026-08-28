@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/franklinxkk/ai-delivery-spec/schemas/review-workspace.schema.json",
-  "title": "AI Delivery Spec 5.4.7 Final Human Review Workspace",
+  "title": "AI Delivery Spec 5.4.8 Human Review Workspace",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -31,8 +31,8 @@
     "not_proven"
   ],
   "properties": {
-    "schema_version": { "const": "5.4.7-final" },
-    "contract_revision": { "enum": ["RC1", "RC2"] },
+    "schema_version": { "enum": ["5.4.7-final", "5.4.8"] },
+    "contract_revision": { "enum": ["RC1", "RC2", "RC3"] },
     "workspace_id": { "type": "string", "pattern": "^REVIEW-[A-Z0-9-]+$" },
     "language": { "type": "string", "pattern": "^[a-z]{2}(?:-[A-Z]{2})?$" },
     "baseline": { "$ref": "#/$defs/baseline" },
@@ -121,6 +121,42 @@
         },
         "high_risk_omission": { "const": "block" }
       }
+    },
+    "semantic_coverage_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "denominator",
+        "source_layers",
+        "critical_coverage",
+        "simple_projection",
+        "uncovered_result"
+      ],
+      "properties": {
+        "denominator": { "const": "all_implementation_acceptance_relevant_semantic_items" },
+        "source_layers": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "prd_page_contracts",
+              "stage0_inventory",
+              "stable_anchors",
+              "runtime_semantic_scan",
+              "cold_read"
+            ]
+          }
+        },
+        "critical_coverage": { "const": 1 },
+        "simple_projection": { "const": "one_sentence_or_rule_equivalent_group" },
+        "uncovered_result": { "const": "gap_or_block_never_silent" }
+      }
+    },
+    "semantic_coverage_items": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/semanticCoverageItem" }
     },
     "layout_contract": {
       "type": "object",
@@ -264,6 +300,23 @@
   "allOf": [
     {
       "if": {
+        "properties": { "schema_version": { "const": "5.4.8" } },
+        "required": ["schema_version"]
+      },
+      "then": {
+        "required": ["semantic_coverage_contract", "semantic_coverage_items"],
+        "properties": {
+          "contract_revision": { "const": "RC3" },
+          "review_contexts": {
+            "items": {
+              "required": ["surface_types", "secondary_context_refs"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
         "properties": {
           "workspace": {
             "properties": { "review_level": { "enum": ["R1", "R2"] } },
@@ -324,6 +377,34 @@
           "type": "array",
           "uniqueItems": true,
           "items": { "type": "string", "pattern": "^(?:RP|RVP)-[A-Z0-9-]+$" }
+        },
+        "surface_types": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "metrics",
+              "list",
+              "form",
+              "drawer_form",
+              "detail",
+              "workflow",
+              "composer",
+              "resource_pool",
+              "hierarchy",
+              "assessment_insert",
+              "import",
+              "export",
+              "preview",
+              "other"
+            ]
+          }
+        },
+        "secondary_context_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/contextRef" }
         }
       },
       "allOf": [
@@ -573,6 +654,134 @@
         "evidence_origin": { "const": "prototype_inferred" },
         "unknown_ref": { "type": "string", "pattern": "^UNK-[A-Z0-9-]+$" }
       }
+    },
+    "semanticCoverageItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coverage_id",
+        "subject_ref",
+        "owner_context_ref",
+        "semantic_type",
+        "criticality",
+        "label",
+        "source_refs",
+        "ui_grounded",
+        "target_ref",
+        "coverage_status",
+        "review_point_refs",
+        "human_summary",
+        "detail_owner",
+        "unknown_ref",
+        "not_applicable_reason"
+      ],
+      "properties": {
+        "coverage_id": { "type": "string", "pattern": "^SCOV-[A-Z0-9-]+$" },
+        "subject_ref": { "$ref": "#/$defs/ref" },
+        "owner_context_ref": { "$ref": "#/$defs/contextRef" },
+        "semantic_type": {
+          "enum": [
+            "action",
+            "field_rule",
+            "metric",
+            "state_transition",
+            "permission_guard",
+            "data_write",
+            "event_handoff",
+            "error_recovery",
+            "business_region",
+            "overlay",
+            "role_path"
+          ]
+        },
+        "criticality": { "enum": ["P0", "P1", "P2"] },
+        "label": { "type": "string", "minLength": 2 },
+        "source_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/ref" }
+        },
+        "ui_grounded": { "type": "boolean" },
+        "target_ref": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "pattern": "^(?:VIEW|REG|ACT|FLD|METRIC|STATE)-[A-Z0-9-]+$" }
+          ]
+        },
+        "coverage_status": { "enum": ["covered", "gap", "not_applicable"] },
+        "review_point_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^RVP-[A-Z0-9-]+$" }
+        },
+        "human_summary": { "type": ["string", "null"] },
+        "detail_owner": {
+          "enum": ["function_flow", "boundary_acceptance", "not_applicable"]
+        },
+        "unknown_ref": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "pattern": "^UNK-[A-Z0-9-]+$" }
+          ]
+        },
+        "not_applicable_reason": { "type": ["string", "null"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "coverage_status": { "const": "covered" } }, "required": ["coverage_status"] },
+          "then": {
+            "properties": {
+              "review_point_refs": { "minItems": 1 },
+              "human_summary": { "type": "string", "minLength": 12 },
+              "unknown_ref": { "type": "null" },
+              "not_applicable_reason": { "type": "null" },
+              "detail_owner": { "enum": ["function_flow", "boundary_acceptance"] }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "coverage_status": { "const": "gap" } }, "required": ["coverage_status"] },
+          "then": {
+            "properties": {
+              "review_point_refs": { "minItems": 1 },
+              "human_summary": { "type": "string", "minLength": 12 },
+              "unknown_ref": { "type": "string", "pattern": "^UNK-[A-Z0-9-]+$" },
+              "not_applicable_reason": { "type": "null" },
+              "detail_owner": { "enum": ["function_flow", "boundary_acceptance"] }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "coverage_status": { "const": "not_applicable" } }, "required": ["coverage_status"] },
+          "then": {
+            "properties": {
+              "review_point_refs": { "maxItems": 0 },
+              "human_summary": { "type": "null" },
+              "unknown_ref": { "type": "null" },
+              "not_applicable_reason": { "type": "string", "minLength": 8 },
+              "detail_owner": { "const": "not_applicable" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "ui_grounded": { "const": true } }, "required": ["ui_grounded"] },
+          "then": { "properties": { "target_ref": { "type": "string", "minLength": 1 } } }
+        },
+        {
+          "if": {
+            "properties": {
+              "semantic_type": {
+                "enum": ["metric", "state_transition", "permission_guard", "data_write", "event_handoff", "error_recovery", "overlay", "role_path"]
+              }
+            },
+            "required": ["semantic_type"]
+          },
+          "then": {
+            "properties": { "detail_owner": { "const": "boundary_acceptance" } }
+          }
+        }
+      ]
     },
     "refArray": {
       "type": "array",

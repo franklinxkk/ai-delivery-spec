@@ -10,8 +10,13 @@ interface:
     handoff, or audit risk. / 使用 $ai-delivery-spec 从当前阶段进入并跟随用户语言；
     单点可逆低风险需求直接快速小改，不建流程文件，只说明差异、边界、正反验收和未证明项；
     仅按状态、数据、权限、集成、合规安全、迁移、AI写回、交接或审计风险升级。
+    Treat /ads, /dig, /prd and /proto as lightweight intent aliases when present;
+    they route into the same artifacts and gates rather than separate workflows.
 
 inputs:
+  intent_shortcut:
+    enum: ["auto", "ads", "dig", "prd", "proto"]
+    default: "auto"
   entry_stage:
     enum: ["auto", "frame", "explore", "intake", "clarify", "specify", "review", "baseline", "change", "acceptance"]
     default: "auto"

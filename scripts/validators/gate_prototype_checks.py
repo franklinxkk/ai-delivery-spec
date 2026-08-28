@@ -524,7 +524,7 @@ def _unreachable_hidden_surfaces(tag_source: str, scripts: str) -> list[str]:
 
 
 class _ReviewFinalParser(HTMLParser):
-    """Collect the 5.4.7-final context-scoped review projection."""
+    """Collect the context-scoped 5.4.7/5.4.8 review projection."""
 
     _VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
 
@@ -533,12 +533,17 @@ class _ReviewFinalParser(HTMLParser):
         self.stack: list[tuple[str, bool]] = []
         self.context_stack: list[tuple[int, str]] = []
         self.active_cards: list[dict[str, object]] = []
+        self.active_semantics: list[dict[str, object]] = []
         self.context_roots: Counter[str] = Counter()
         self.markers: list[dict[str, str]] = []
         self.cards: list[dict[str, str]] = []
         self.card_text: dict[str, str] = {}
+        self.semantic_surfaces: list[dict[str, str]] = []
+        self.semantic_text: dict[str, str] = {}
+        self.product_overlays: list[dict[str, str]] = []
         self.targets: dict[str, Counter[str]] = defaultdict(Counter)
         self.visible_targets: dict[str, Counter[str]] = defaultdict(Counter)
+        self.unbound_metric_like: Counter[str] = Counter()
         self.content_owners: list[tuple[str, str]] = []
         self.workspace_roots: list[dict[str, str]] = []
 
@@ -593,6 +598,18 @@ class _ReviewFinalParser(HTMLParser):
         if "data-review-workspace" in attr_map:
             self.workspace_roots.append(attr_map)
 
+        testid = attr_map.get("data-testid", "")
+        if (
+            attr_map.get("role", "").casefold() == "dialog"
+            or re.match(r"^(?:modal|drawer)-", testid, re.I)
+        ):
+            self.product_overlays.append({
+                "testid": testid or "role=dialog",
+                "declared_context": context_ref,
+                "active_context": active_context,
+                "visible": str(not hidden).lower(),
+            })
+
         marker_ref = attr_map.get("data-review-ref", "").upper()
         if re.fullmatch(r"(?:RP|RVP)-[A-Z0-9-]+", marker_ref):
             self.markers.append({
@@ -616,6 +633,17 @@ class _ReviewFinalParser(HTMLParser):
             self.cards.append(record)
             self.active_cards.append({"depth": depth, "ref": point_ref, "text": [], "hidden": hidden})
 
+        semantic_ref = attr_map.get("data-review-semantic-ref", "").upper()
+        if re.fullmatch(r"SCOV-[A-Z0-9-]+", semantic_ref):
+            semantic_record = {
+                "ref": semantic_ref,
+                "owner": attr_map.get("data-review-semantic-owner", "").casefold(),
+                "context": attr_map.get("data-review-context", active_context).upper(),
+                "visible": str(not hidden).lower(),
+            }
+            self.semantic_surfaces.append(semantic_record)
+            self.active_semantics.append({"depth": depth, "ref": semantic_ref, "text": [], "hidden": hidden})
+
         content = attr_map.get("data-review-content", "").casefold()
         owner = attr_map.get("data-review-owner-tab", "").casefold()
         if content:
@@ -626,6 +654,9 @@ class _ReviewFinalParser(HTMLParser):
                 self.targets[active_context][target_ref] += 1
                 if not hidden:
                     self.visible_targets[active_context][target_ref] += 1
+            class_tokens = {item.casefold() for item in attr_map.get("class", "").split()}
+            if not hidden and class_tokens & {"metric", "metric-card", "stat-card", "kpi"} and not attr_map.get("data-metric"):
+                self.unbound_metric_like[active_context] += 1
 
         if tag in self._VOID_TAGS:
             self.handle_endtag(tag)
@@ -639,6 +670,9 @@ class _ReviewFinalParser(HTMLParser):
         if not data.strip():
             return
         for record in self.active_cards:
+            if not bool(record["hidden"]):
+                record["text"].append(data.strip())  # type: ignore[union-attr]
+        for record in self.active_semantics:
             if not bool(record["hidden"]):
                 record["text"].append(data.strip())  # type: ignore[union-attr]
 
@@ -657,6 +691,15 @@ class _ReviewFinalParser(HTMLParser):
             text = " ".join(str(item) for item in record["text"])
             self.card_text[ref] = f"{self.card_text.get(ref, '')} {text}".strip()
         self.active_cards = remaining_cards
+        remaining_semantics: list[dict[str, object]] = []
+        for record in self.active_semantics:
+            if int(record["depth"]) < closing_depth:
+                remaining_semantics.append(record)
+                continue
+            ref = str(record["ref"])
+            text = " ".join(str(item) for item in record["text"])
+            self.semantic_text[ref] = f"{self.semantic_text.get(ref, '')} {text}".strip()
+        self.active_semantics = remaining_semantics
         self.context_stack = [item for item in self.context_stack if item[0] < closing_depth]
         self.stack = self.stack[:index]
 
@@ -726,7 +769,7 @@ class PrototypeChecks:
         scripts: str,
         document: dict[str, object],
     ) -> set[str]:
-        """Validate the context-driven 5.4.7-final human review projection.
+        """Validate the context-driven 5.4.7/5.4.8 human review projection.
 
         Static checks prove declaration integrity and the presence of runtime
         mechanisms. Product-fingerprint invariance, overlay ordering, target
@@ -815,7 +858,7 @@ class PrototypeChecks:
         if len(projection.workspace_roots) != 1:
             self.add(
                 "BLOCK", "PROTO-REVIEW-CONTEXT-CONTRACT", path,
-                "5.4.7 Final 必须且只能有一个 data-review-workspace 根",
+                "5.4.7 Final/5.4.8 评审合同必须且只能有一个 data-review-workspace 根",
                 str(len(projection.workspace_roots)),
                 affected_consumers=("frontend", "qa"),
             )
@@ -872,6 +915,8 @@ class PrototypeChecks:
         context_items = [item for item in document.get("review_contexts", []) or [] if isinstance(item, dict)]
         point_items = [item for item in document.get("review_points", []) or [] if isinstance(item, dict)]
         candidate_items = [item for item in document.get("candidate_review_points", []) or [] if isinstance(item, dict)]
+        semantic_items = [item for item in document.get("semantic_coverage_items", []) or [] if isinstance(item, dict)]
+        schema_version = str(document.get("schema_version", ""))
         context_ids = [str(item.get("context_ref", "")).upper() for item in context_items]
         point_ids = [str(item.get("ref", "")).upper() for item in point_items]
         contexts = {str(item.get("context_ref", "")).upper(): item for item in context_items}
@@ -879,12 +924,20 @@ class PrototypeChecks:
         candidate_ids = [str(item.get("candidate_id", "")).upper() for item in candidate_items]
         candidate_subjects = [str(item.get("subject_ref", "")).upper() for item in candidate_items]
         declared_subjects = [str(item.get("subject_ref", "")).upper() for item in point_items]
-        if str(document.get("contract_revision", "")).upper() == "RC2":
+        semantic_ids = [str(item.get("coverage_id", "")).upper() for item in semantic_items]
+        semantic_keys = [
+            (
+                str(item.get("owner_context_ref", "")).upper(),
+                str(item.get("subject_ref", "")).upper(),
+            )
+            for item in semantic_items
+        ]
+        if str(document.get("contract_revision", "")).upper() in {"RC2", "RC3"}:
             legacy_record_ids = sorted(point_id for point_id in point_ids if not point_id.startswith("RVP-"))
             if legacy_record_ids:
                 self.add(
                     "BLOCK", "PROTO-REVIEW-TRUTH-ID", path,
-                    "RC2 的评审记录 ID 必须使用 RVP-*，并通过 subject_ref 单独引用业务事实",
+                    "RC2/RC3 的评审记录 ID 必须使用 RVP-*，并通过 subject_ref 单独引用业务事实",
                     ", ".join(legacy_record_ids[:8]),
                     affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
                 )
@@ -898,6 +951,16 @@ class PrototypeChecks:
             self.add(
                 "BLOCK", "PROTO-REVIEW-CANDIDATE-DIFF", path,
                 "candidate_review_points 存在重复 candidate_id，防漏结果不可审计", workspace_id,
+                affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+            )
+        if schema_version == "5.4.8" and (
+            len(semantic_ids) != len(set(semantic_ids))
+            or len(semantic_keys) != len(set(semantic_keys))
+        ):
+            self.add(
+                "BLOCK", "PROTO-REVIEW-SEMANTIC-COVERAGE", path,
+                "页面语义覆盖账本存在重复 coverage_id 或重复 Context/subject，覆盖分母不可审计",
+                workspace_id,
                 affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
             )
         if set(candidate_ids) & set(point_ids):
@@ -1055,6 +1118,243 @@ class PrototypeChecks:
                 affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
             )
 
+        if schema_version == "5.4.8":
+            page_contracts = self._page_contracts(raw)
+            semantic_by_context: dict[str, list[dict[str, object]]] = defaultdict(list)
+            for item in semantic_items:
+                semantic_by_context[str(item.get("owner_context_ref", "")).upper()].append(item)
+
+            candidate_semantic_overlap = sorted(set(candidate_subjects) & {item[1] for item in semantic_keys})
+            if candidate_semantic_overlap:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-CANDIDATE-DECLARATION-OVERLAP", path,
+                    "同一业务语义不能同时存在于 Candidate 与正式语义覆盖账本",
+                    ", ".join(candidate_semantic_overlap[:8]),
+                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    related_refs=tuple(candidate_semantic_overlap[:50]),
+                )
+
+            for context_ref, context in contexts.items():
+                context_type = str(context.get("context_type", ""))
+                surface_types = {str(item) for item in context.get("surface_types", []) or []}
+                secondary_refs = {str(item).upper() for item in context.get("secondary_context_refs", []) or []}
+                context_semantics = semantic_by_context.get(context_ref, [])
+                semantic_types = {str(item.get("semantic_type", "")) for item in context_semantics}
+
+                for secondary_ref in sorted(secondary_refs):
+                    secondary = contexts.get(secondary_ref)
+                    if secondary is None or str(secondary.get("context_type", "")) == "VIEW":
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-OVERLAY-UNCOVERED", path,
+                            "secondary_context_refs 必须引用已声明的业务弹窗、抽屉或气泡 Context",
+                            f"{context_ref}->{secondary_ref}",
+                            affected_consumers=("product", "frontend", "backend", "qa"),
+                        )
+                        continue
+                    location = secondary.get("product_location") or {}
+                    if (
+                        isinstance(location, dict)
+                        and str(location.get("navigation_mode", "")) == "inherit_parent"
+                        and str(location.get("parent_view_ref", "")).upper() != context_ref
+                    ):
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-OVERLAY-UNCOVERED", path,
+                            "二级业务 Context 的父页面与声明入口不一致",
+                            f"{context_ref}->{secondary_ref}",
+                            affected_consumers=("product", "frontend", "backend", "qa"),
+                        )
+
+                if context_type != "VIEW":
+                    continue
+                page_contract = page_contracts.get(context_ref)
+                if page_contract is None:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-PAGE-CONTRACT-MISSING", path,
+                        "5.4.8 的每个评审 VIEW 必须有 PAGE-CONTRACT，避免模型从页面外观缩减功能分母",
+                        context_ref,
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    )
+                else:
+                    attrs, _ = page_contract
+                    declared_surfaces = {
+                        item.strip()
+                        for item in re.split(r"[,|]", attrs.get("surfaces", ""))
+                        if item.strip()
+                    }
+                    if declared_surfaces != surface_types:
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-PAGE-CONTRACT-MISMATCH", path,
+                            "评审 Context 的 surface_types 必须与 PAGE-CONTRACT 完全一致",
+                            f"{context_ref}: page={sorted(declared_surfaces)} manifest={sorted(surface_types)}",
+                            affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                        )
+                if "metrics" in surface_types and "metric" not in semantic_types:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-METRIC-UNCOVERED", path,
+                        "页面声明了指标表面，却没有任何逐项指标语义说明",
+                        context_ref,
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    )
+                if "metrics" in surface_types:
+                    visible_metric_refs = {
+                        ref for ref in projection.visible_targets.get(context_ref, {})
+                        if ref.startswith("METRIC-")
+                    }
+                    semantic_metric_refs = {
+                        str(item.get("subject_ref", "")).upper()
+                        for item in context_semantics
+                        if str(item.get("semantic_type", "")) == "metric"
+                        and str(item.get("coverage_status", "")) != "not_applicable"
+                    }
+                    missing_metric_refs = sorted(visible_metric_refs - semantic_metric_refs)
+                    ungrounded_metric_refs = sorted(
+                        ref for ref in visible_metric_refs
+                        if not any(
+                            str(item.get("subject_ref", "")).upper() == ref
+                            and bool(item.get("ui_grounded"))
+                            and str(item.get("target_ref", "")).upper() == ref
+                            for item in context_semantics
+                        )
+                    )
+                    if missing_metric_refs or ungrounded_metric_refs or projection.unbound_metric_like[context_ref]:
+                        detail = ", ".join(missing_metric_refs[:8]) or f"unbound_metric_cards={projection.unbound_metric_like[context_ref]}"
+                        if not missing_metric_refs and ungrounded_metric_refs:
+                            detail = "missing_metric_marker=" + ", ".join(ungrounded_metric_refs[:8])
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-METRIC-UNCOVERED", path,
+                            "每个可见指标卡都必须有唯一 METRIC-* 并逐项进入语义覆盖账本",
+                            f"{context_ref}: {detail}",
+                            affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                            related_refs=tuple(missing_metric_refs[:50]),
+                        )
+                if "workflow" in surface_types and "state_transition" not in semantic_types:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-STATE-PATH-UNCOVERED", path,
+                        "工作流/看板页面必须说明允许状态流转、守卫和非法路径",
+                        context_ref,
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    )
+                if "drawer_form" in surface_types and not secondary_refs:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-OVERLAY-UNCOVERED", path,
+                        "页面包含抽屉表单却没有声明二级业务 Context",
+                        context_ref,
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    )
+
+            semantic_surface_counts = Counter(item["ref"] for item in projection.semantic_surfaces)
+            semantic_surfaces = {item["ref"]: item for item in projection.semantic_surfaces}
+            for item in semantic_items:
+                coverage_id = str(item.get("coverage_id", "")).upper()
+                subject_ref = str(item.get("subject_ref", "")).upper()
+                context_ref = str(item.get("owner_context_ref", "")).upper()
+                semantic_type = str(item.get("semantic_type", ""))
+                status = str(item.get("coverage_status", ""))
+                criticality = str(item.get("criticality", ""))
+                mapped_points = [str(ref).upper() for ref in item.get("review_point_refs", []) or []]
+                human_summary = str(item.get("human_summary", "") or "")
+                target_ref = str(item.get("target_ref", "") or "").upper()
+
+                if context_ref not in contexts:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-SEMANTIC-COVERAGE", path,
+                        "语义覆盖项引用了未声明 CurrentContext", f"{coverage_id}->{context_ref or 'missing'}",
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    )
+                for point_ref in mapped_points:
+                    point = points.get(point_ref)
+                    if point is None or str(point.get("owner_context_ref", "")).upper() != context_ref:
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-SEMANTIC-COVERAGE", path,
+                            "语义覆盖项必须映射到同一 Context 内的正式 ReviewPoint",
+                            f"{coverage_id}->{point_ref}",
+                            affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                        )
+                    elif status == "gap" and str(point.get("business_status", "")) not in {"gap", "pending_decision"}:
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-SEMANTIC-COVERAGE", path,
+                            "开放语义缺口不能映射到已确认 ReviewPoint",
+                            f"{coverage_id}->{point_ref}",
+                            affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                        )
+                    elif status == "covered" and str(point.get("business_status", "")) != "confirmed":
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-SEMANTIC-COVERAGE", path,
+                            "已覆盖语义项必须映射到已确认 ReviewPoint；待决内容应保持 gap",
+                            f"{coverage_id}->{point_ref}",
+                            affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                        )
+                if status in {"covered", "gap"}:
+                    if semantic_surface_counts[coverage_id] != 1:
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-SEMANTIC-COVERAGE", path,
+                            "每个适用语义项必须在右侧恰好出现一次最小说明",
+                            f"{coverage_id}: {semantic_surface_counts[coverage_id]}",
+                            affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                        )
+                    else:
+                        surface = semantic_surfaces[coverage_id]
+                        if surface.get("context") != context_ref or surface.get("owner") != str(item.get("detail_owner", "")):
+                            self.add(
+                                "BLOCK", "PROTO-REVIEW-SEMANTIC-COVERAGE", path,
+                                "语义说明必须位于声明的 CurrentContext 和唯一责任页签",
+                                coverage_id,
+                                affected_consumers=("product", "frontend", "backend", "qa"),
+                            )
+                        if human_summary and human_summary not in projection.semantic_text.get(coverage_id, ""):
+                            self.add(
+                                "BLOCK", "PROTO-REVIEW-SEMANTIC-COVERAGE", path,
+                                "语义说明只存在于 manifest，未在人类可见右栏呈现",
+                                coverage_id,
+                                affected_consumers=("product", "frontend", "backend", "qa"),
+                            )
+                    if bool(item.get("ui_grounded")):
+                        grounded = any(
+                            str(points.get(point_ref, {}).get("target_ref", "")).upper() == target_ref
+                            and bool(points.get(point_ref, {}).get("marker_required"))
+                            for point_ref in mapped_points
+                        )
+                        if not grounded:
+                            self.add(
+                                "BLOCK", "PROTO-REVIEW-MARKER-REQUIRED", path,
+                                "有 UI 落点的语义项必须映射到同目标 marker，不能只在右栏说明",
+                                f"{coverage_id}/{target_ref or 'missing'}",
+                                affected_consumers=("product", "frontend", "qa", "coding_agent"),
+                            )
+                elif semantic_surface_counts[coverage_id]:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-SEMANTIC-COVERAGE", path,
+                        "not_applicable 语义项不得占用人类评审面板",
+                        coverage_id,
+                        affected_consumers=("product", "frontend", "qa"),
+                    )
+
+                if semantic_type == "metric" and not subject_ref.startswith("METRIC-"):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-METRIC-UNCOVERED", path,
+                        "指标语义项必须引用真实 METRIC-* 口径，不得用泛化区域代替",
+                        f"{coverage_id}/{subject_ref}",
+                        affected_consumers=("product", "backend", "qa", "coding_agent"),
+                    )
+                if status == "gap":
+                    severity = "BLOCK" if criticality in {"P0", "P1"} else "GAP"
+                    self.add(
+                        severity, "PROTO-REVIEW-SEMANTIC-COVERAGE", path,
+                        "关键实现/验收语义仍未关闭，不能以结构完整替代业务完整",
+                        f"{coverage_id}/{criticality}",
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                        related_refs=tuple(filter(None, (coverage_id, subject_ref, str(item.get("unknown_ref", "") or "")))),
+                    )
+
+            for overlay in projection.product_overlays:
+                if not overlay.get("declared_context"):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-OVERLAY-UNCOVERED", path,
+                        "发现业务弹窗/抽屉但没有独立 CurrentContext；二级功能无法被研发和测试冷读",
+                        overlay.get("testid", "role=dialog"),
+                        affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+                    )
+
         if projection.context_roots[initial_context] != 1:
             self.add(
                 "BLOCK", "PROTO-REVIEW-CONTEXT-CONTRACT", path,
@@ -1136,6 +1436,16 @@ class PrototypeChecks:
                 "goals_success", "scope", "main_chain", "current_context",
                 "review_points", "visible_domain_results", "rules", "acceptance_tests", "open_items",
             }
+            if schema_version == "5.4.8":
+                semantic_types = {str(item.get("semantic_type", "")) for item in semantic_items}
+                if "metric" in semantic_types:
+                    minimum_content.add("metric_calculations")
+                if "state_transition" in semantic_types:
+                    minimum_content.add("state_machines")
+                if "permission_guard" in semantic_types:
+                    minimum_content.add("permissions")
+                if "error_recovery" in semantic_types:
+                    minimum_content.add("exceptions_recovery")
             for missing in sorted(minimum_content - set(owner_counts)):
                 self.add(
                     "BLOCK", "PROTO-REVIEW-TAB-OWNERSHIP", path,
@@ -1360,6 +1670,10 @@ class PrototypeChecks:
 
         declared_unknowns = {str(item).upper() for item in document.get("unknown_refs", []) or []}
         referenced_unknowns: set[str] = set()
+        for item in semantic_items:
+            unknown_ref = str(item.get("unknown_ref", "") or "").upper()
+            if unknown_ref:
+                referenced_unknowns.add(unknown_ref)
         for point in point_items:
             point_unknowns: set[str] = set()
             for key in ("precondition_refs", "boundary_refs", "source_refs"):
@@ -1400,6 +1714,15 @@ class PrototypeChecks:
         # regex over the whole document also matches JavaScript selectors such
         # as `[data-testid="page-X"]` and falsely reports duplicate pages.
         tag_source = self._tag_source(raw)
+        visible_source = re.sub(r"<script\b.*?</script>|<style\b.*?</style>|<!--.*?-->", " ", raw, flags=re.I | re.S)
+        malformed_comparisons = re.findall(r"<[A-Za-z][A-Za-z0-9_-]*(?=[≤≥，。；：<])[^>]*>", visible_source)
+        for fragment in malformed_comparisons[:5]:
+            self.add(
+                "BLOCK", "PROTO-VISIBLE-COMPARISON-UNESCAPED", path,
+                "可见规则中的比较符被浏览器解析为 HTML 标签，公式或字段约束会吞字",
+                fragment[:160],
+                affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
+            )
         polluted_classes = []
         for class_value in re.findall(r"\bclass\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I):
             for token in re.split(r"\s+", class_value):
@@ -1617,7 +1940,7 @@ class PrototypeChecks:
                     "检测到旧式评审叠加：可继续视检，但未形成 CurrentContext、声明分母、三页签与产品指纹合同",
                     affected_consumers=("product", "frontend", "backend", "qa"),
                 )
-        elif review_workspace is not None and str(review_workspace.get("schema_version", "")) == "5.4.7-final":
+        elif review_workspace is not None and str(review_workspace.get("schema_version", "")) in {"5.4.7-final", "5.4.8"}:
             declared_review_markers = self._check_review_workspace_final(
                 path, raw, tag_source, scripts, review_workspace,
             )
@@ -2274,7 +2597,7 @@ class PrototypeChecks:
             and level in {"L2", "L3", "L4"}
             and not (
                 isinstance(review_workspace, dict)
-                and str(review_workspace.get("schema_version", "")) == "5.4.7-final"
+                and str(review_workspace.get("schema_version", "")) in {"5.4.7-final", "5.4.8"}
             )
         ):
             review_ids = [

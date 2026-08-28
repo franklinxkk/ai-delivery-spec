@@ -11,7 +11,7 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[3]
-VERSION = "5.4.7"
+VERSION = "5.4.8"
 PUBLIC_FILES = (
     "README.md",
     "maintainer/README.md",
@@ -121,7 +121,7 @@ def main() -> int:
         if marker not in ignore:
             failures.append(f".gitignore misses generated-file rule: {marker}")
 
-    allowed_examples = {"minimal-v5"}
+    allowed_examples = {"minimal-v5", "medium-review-handoff"}
     shipped_examples = {path.name for path in (ROOT / "examples").iterdir() if path.is_dir()}
     unexpected_examples = shipped_examples - allowed_examples
     if unexpected_examples:

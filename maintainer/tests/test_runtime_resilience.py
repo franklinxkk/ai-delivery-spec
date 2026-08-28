@@ -19,6 +19,8 @@ sys.path.insert(0, str(ROOT / 'scripts'))
 from plan_context import build_plan
 from query_product_truth import make_slice
 from ai_delivery_spec_cli import validate_runtime_manifest
+sys.path.insert(0, str(ROOT / 'maintainer/tools'))
+from build_runtime_package import release_source_failures
 
 def run(script: Path, *args: str, expected: int=0) -> subprocess.CompletedProcess[str]:
     result = subprocess.run([sys.executable, str(script), *args], cwd=ROOT, text=True, encoding='utf-8', errors='replace', capture_output=True)
@@ -96,6 +98,14 @@ def test_runtime_manifest_requires_schema_and_closed_file_set() -> None:
         extra.unlink()
         skill.write_text('xx')
         assert 'manifest file drift' in check(valid)
+
+def test_release_package_rejects_dirty_or_untraceable_source() -> None:
+    clean_sha = 'a' * 40
+    assert not release_source_failures(clean_sha, False)
+    dirty = release_source_failures(f'{clean_sha}-dirty', True)
+    assert any('clean Git worktree' in item for item in dirty)
+    assert any('full clean Git SHA' in item for item in dirty)
+    assert release_source_failures('uncommitted-dirty', True)
 
 def test_turn_budget_fails_closed() -> None:
     with tempfile.TemporaryDirectory(prefix='ads-deadlock-') as temp:

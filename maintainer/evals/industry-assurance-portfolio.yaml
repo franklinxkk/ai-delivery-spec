@@ -1,4 +1,4 @@
-schema_version: 5.4.7
+schema_version: 5.4.8
 portfolio_id: PORT-CAPABILITY-CROSS-DOMAIN
 name: 跨领域需求能力组合夹具
 purpose: 用不同需求物理证明方法能按风险选择必要合同与接收者，不要求每个项目、阶段或角色机械跑满。

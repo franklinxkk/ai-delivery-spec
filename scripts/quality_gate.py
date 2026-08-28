@@ -182,6 +182,10 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
         "原型可见文本残留验收演示脚手架，会被客户误读为产品功能。",
         "删除 finding.ref 指示的演示文案（验收场景/验收样本/E2E CONSOLE/体验身份/继承预览等），只保留真实业务内容。",
     ),
+    "PROTO-VISIBLE-COMPARISON-UNESCAPED": (
+        "可见规则中的比较符未安全编码，浏览器会把部分公式误解析为标签并吞掉文字。",
+        "把正文中的 < 和 > 分别写为 &lt; 和 &gt;，或通过 textContent 安全写入；随后在浏览器中逐字核对 PRD 规则。",
+    ),
     "PROTO-NESTED-PRODUCT-IFRAME": (
         "原型用本地 iframe 嵌套另一个 HTML 页面，静态门禁无法证明嵌套页的交互合同。",
         "把嵌套页内容并入当前原型的 page-VIEW-* 结构，或作为独立原型文件一并提交门禁。",
@@ -414,6 +418,13 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-REVIEW-COLD-READ": ("冷读通过没有未参与者证据。", "让产品、前端、后端、测试分别在 3 分钟内冷读并记录召回、误猜和首次澄清。"),
     "PROTO-REVIEW-LEVEL": ("评审层恢复了额外一级模式或缺少目标等级的必要入口。", "R1/R2 只保留总览、功能与流转、边界与验收；R0 也不得增加 Journey/Step/Page/Role 模式。"),
     "PROTO-REVIEW-CANDIDATE-DIFF": ("Candidate Set 与声明评审点存在未裁决差集。", "人工决定声明或不适用并留依据；门禁不得自动改变官方分母。"),
+    "PROTO-REVIEW-SEMANTIC-COVERAGE": ("影响实现或验收的页面语义没有完整映射到人类评审说明。", "从 PRD、Stage 0、页面合同和稳定锚点重建语义分母；每项映射 ReviewPoint 或给出有依据的不适用。"),
+    "PROTO-REVIEW-METRIC-UNCOVERED": ("指标表面缺少逐项可计算、可验收的口径说明。", "为每个 METRIC-* 冻结对象、公式、时间窗、状态过滤、去重、来源、刷新、空值、单位和下钻，并在右栏可见。"),
+    "PROTO-REVIEW-STATE-PATH-UNCOVERED": ("工作流或看板缺少允许流转、守卫和非法路径说明。", "补齐来源状态、目标状态、触发动作、角色、守卫、失败结果、事件和恢复，并映射到当前 Context。"),
+    "PROTO-REVIEW-OVERLAY-UNCOVERED": ("业务弹窗、抽屉或二级页面没有独立评审上下文。", "把二级业务表面声明为 MODAL/DRAWER/POPOVER Context，绑定父页面、入口、功能点和验收。"),
+    "PROTO-REVIEW-PAGE-CONTRACT-MISSING": ("评审页面没有 PAGE-CONTRACT，无法建立可信功能分母。", "为每个 VIEW 声明 primary、layout 和 surfaces，再从页面合同生成语义覆盖账本。"),
+    "PROTO-REVIEW-PAGE-CONTRACT-MISMATCH": ("PAGE-CONTRACT 与评审 Context 的页面表面声明不一致。", "以批准的页面合同为权威，对齐 surfaces；不能通过删减 manifest 逃避覆盖。"),
+    "PROTO-REVIEW-SEMANTIC-REF-UNRESOLVED": ("评审语义引用没有解析到同一 PRD 基线。", "把 subject、source、target 和 unknown 稳定 ID 写回同 hash PRD，禁止用原型观察伪造业务事实。"),
     "PROTO-REVIEW-CANDIDATE-DECLARATION-OVERLAP": ("同一业务事实同时存在于 Candidate 与正式 Declaration。", "已确认并绑定来源的 subject_ref 必须移出 candidate_review_points；未确认时只保留 Candidate GAP。"),
     "PROTO-REVIEW-LAYOUT-NONOVERLAP": ("评审区可能覆盖或压坏产品主操作区。", "桌面参与布局并可折叠/调宽；用浏览器证明业务浮层和反馈高于评审区。"),
     "PROTO-REVIEW-OVERLAY-DETECTION": ("业务浮层探测缺失或 topmost 解析有歧义。", "优先产品 Context Event，再用声明探测；MutationObserver 只触发重新解析。"),
@@ -622,6 +633,13 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-REVIEW-COLD-READ": ("A cold-read pass has no independent participant evidence.", "Have product, frontend, backend, and QA cold-read within three minutes and record recall, guesses, and first clarification."),
     "PROTO-REVIEW-LEVEL": ("The review layer restores forbidden top-level modes or omits required controls for its level.", "R1/R2 expose only Overview, Function & Flow, and Boundary & Acceptance; R0 must not add Journey/Step/Page/Role modes."),
     "PROTO-REVIEW-CANDIDATE-DIFF": ("The candidate set has an unresolved difference from declared review points.", "Have a human declare or reject each candidate with a reason; never mutate the official denominator automatically."),
+    "PROTO-REVIEW-SEMANTIC-COVERAGE": ("Implementation- or acceptance-relevant page semantics are not fully mapped to the human review projection.", "Rebuild the semantic denominator from the PRD, Stage 0, page contracts, and stable anchors; map each item to a ReviewPoint or a justified not-applicable decision."),
+    "PROTO-REVIEW-METRIC-UNCOVERED": ("A metric surface lacks an itemized, computable, and testable metric contract.", "Freeze object, formula, time window, state filter, deduplication, source, refresh, null behavior, unit, and drill-down for every METRIC-* and show it in the review panel."),
+    "PROTO-REVIEW-STATE-PATH-UNCOVERED": ("A workflow or board lacks allowed transitions, guards, and illegal-path behavior.", "Define source and target states, trigger, role, guard, failure result, event, and recovery, then map them to the current context."),
+    "PROTO-REVIEW-OVERLAY-UNCOVERED": ("A business modal, drawer, or secondary surface has no independent review context.", "Declare it as a MODAL/DRAWER/POPOVER context and bind its parent, entry, functions, and acceptance."),
+    "PROTO-REVIEW-PAGE-CONTRACT-MISSING": ("A reviewed page has no PAGE-CONTRACT, so its function denominator is not trustworthy.", "Declare primary, layout, and surfaces for every VIEW before deriving the semantic coverage ledger."),
+    "PROTO-REVIEW-PAGE-CONTRACT-MISMATCH": ("The PAGE-CONTRACT and review context disagree about the page surfaces.", "Treat the approved page contract as authority and align surfaces instead of shrinking the manifest to evade coverage."),
+    "PROTO-REVIEW-SEMANTIC-REF-UNRESOLVED": ("A review semantic reference does not resolve to the same PRD baseline.", "Project subject, source, target, and unknown IDs into the same-hash PRD; do not fabricate business truth from prototype observations."),
     "PROTO-REVIEW-CANDIDATE-DECLARATION-OVERLAP": ("The same business subject exists in both Candidate and formal Declaration.", "Remove a confirmed subject_ref from candidate_review_points; keep only the Candidate GAP until it is confirmed and sourced."),
     "PROTO-REVIEW-LAYOUT-NONOVERLAP": ("The review surface may cover or damage the primary product workspace.", "Make the desktop surface participate in layout and prove business overlays and feedback remain above it in a browser."),
     "PROTO-REVIEW-OVERLAY-DETECTION": ("Business-overlay detection is missing or topmost resolution is ambiguous.", "Prefer Product Context Events, then declared detection; MutationObserver may only request re-resolution."),
@@ -658,6 +676,7 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-REVIEW-PAGE-PRESENTATION-DRIFT": ("The visible page review surface differs from the manifest.", "Align data-review-page-profile, data-review-focus-surface and data-review-collision-policy, then verify width and collisions in a browser."),
     "PROTO-REVIEW-PAGE-PRESENTATION-ORPHAN": ("A page review surface references a missing or unregistered VIEW-*.", "Bind it to a real page-VIEW-* root and remove orphan mappings instead of relying on screenshot coordinates."),
     "PROTO-REVIEW-BASELINE-DRIFT": ("The review workspace and supplied PRD are not the same content baseline.", "Regenerate the projection from the authoritative PRD hash and update human and machine projections in the same CHG-*.") ,
+    "PROTO-VISIBLE-COMPARISON-UNESCAPED": ("A visible comparison was parsed as an HTML tag and lost part of its rule text.", "Encode < and > as &lt; and &gt; or assign the copy through textContent, then compare the browser text with the PRD."),
     "PROTO-DYNAMIC-CLASS-POLLUTION": ("Business text is interpolated into a CSS class.", "Keep class names as fixed semantic tokens and write escaped descriptions through textContent."),
     "PROTO-JS-SYNTAX": ("The prototype contains invalid JavaScript.", "Repair the referenced script and verify closing script/body/html tags."),
 }
@@ -762,6 +781,7 @@ def english_guidance_for(code: str) -> tuple[str, str]:
 REPAIR_EXAMPLES: tuple[tuple[str, str], ...] = (
     ("INTAKE-SCHEMA", "cp references/templates/requirement-intake-template.yaml intake.yaml，补齐 artifact: requirement_intake、stage: intake、source_refs: [SRC-*]、value_evidence 等必填字段。"),
     ("PROTO-DEMO-SCAFFOLDING-VISIBLE", "删除 <div>验收场景</div> 这类演示文案块，改为真实业务空态文案，如 <p>暂无待办事项</p>。"),
+    ("PROTO-VISIBLE-COMPARISON-UNESCAPED", "把可见文案中的 0 < 比例 ≤ 100 写为 0 &lt; 比例 ≤ 100，并在浏览器中核对完整显示。"),
     ("PROTO-NESTED-PRODUCT-IFRAME", "移除 <iframe src=\"child.html\">，把 child.html 的页面迁移为当前文件内的 <section data-testid=\"page-VIEW-CHILD-001\">。"),
     ("PROTO-REMOTE-IFRAME-UNDECLARED", "<iframe src=\"https://partner.example/app\" data-integration-ref=\"INT-PARTNER-001\" data-fallback=\"外部系统不可用时显示重试与跳转\" title=\"合作方系统\" sandbox referrerpolicy=\"no-referrer\"></iframe>"),
     ("PRD-STATE-SEMANTIC-POLLUTION", "| 待处理 | 复检 | 复检中 | —— 下一状态列写业务状态名；API-RISK-RECHECK 移入“动作/接口”列。"),
@@ -793,7 +813,7 @@ REPAIR_EXAMPLES: tuple[tuple[str, str], ...] = (
 
 def repair_example_for(code: str) -> str:
     if _is_legacy_review_finding(code):
-        return "删除旧 Journey/STEP/Role/页面模式入口，生成 5.4.7-final manifest，以真实产品 CurrentContext 驱动三页签和 ReviewPoint。"
+        return "删除旧 Journey/STEP/Role/页面模式入口，生成 5.4.8 manifest，以真实产品 CurrentContext 驱动三页签和 ReviewPoint。"
     for prefix, example in REPAIR_EXAMPLES:
         if code.startswith(prefix):
             return example
@@ -802,7 +822,7 @@ def repair_example_for(code: str) -> str:
 
 def english_repair_example_for(code: str) -> str:
     if _is_legacy_review_finding(code):
-        return "Remove legacy Journey/STEP/Role/page-mode controls and generate a 5.4.7-final manifest driven by the real product CurrentContext, three tabs, and ReviewPoints."
+        return "Remove legacy Journey/STEP/Role/page-mode controls and generate a 5.4.8 manifest driven by the real product CurrentContext, three tabs, and ReviewPoints."
     examples = (
         ("PRD-LANGUAGE", "Set document_language: en-US, translate human-facing headings and tables, and keep REQ/API/field names unchanged."),
         ("PRD-DUPLICATE-STABLE-ID-DEFINITION", "Keep one VIEW-RISK-LIST-001 definition row; elsewhere write 'See VIEW-RISK-LIST-001' instead of defining it again."),
@@ -812,6 +832,7 @@ def english_repair_example_for(code: str) -> str:
         ("PROTO-ORPHAN-HANDLER", 'If ACT-COURSE-SAVE remains registered, keep a source control with data-action="ACT-COURSE-SAVE" or record its approved removal.'),
         ("PROTO-UNREACHABLE-VIEW", 'Open data-testid="drawer-VIEW-DETAIL" from data-action="ACT-DETAIL-OPEN", or remove the approved dead drawer.'),
         ("PROTO-REVIEW-UIACTION-NAMESPACE", 'Rename data-action="ACT-REVIEW-TOGGLE" to data-action="UIACT-REVIEW-TOGGLE".'),
+        ("PROTO-VISIBLE-COMPARISON-UNESCAPED", "Encode comparison characters in authored HTML text, then verify the visible browser copy against the PRD."),
         ("PROTO-DYNAMIC-CLASS-POLLUTION", 'Use class="severity severity-high" and assign the description through cell.textContent.'),
         ("HANDOFF-STEP-", "Complete all eight STEP-* facets; explicitly state none when a facet is not applicable, then align the manifest and packet body."),
         ("HANDOFF-PRD-STEP-NOT-PACKETED", "Assign the STEP-* to one owned packet or remove it through an approved baseline change."),
@@ -1383,7 +1404,7 @@ def main() -> int:
         conclusive_evidence = conclusive_evidence or is_conclusive
     for review_path, review_document in gate.review_workspace_contracts:
         expected_baseline_version = str((review_document.get("baseline") or {}).get("version", ""))
-        if str(review_document.get("schema_version", "")) == "5.4.7-final":
+        if str(review_document.get("schema_version", "")) in {"5.4.7-final", "5.4.8"}:
             for point in review_document.get("review_points", []) or []:
                 if not isinstance(point, dict):
                     continue

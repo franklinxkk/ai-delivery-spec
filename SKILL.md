@@ -1,17 +1,30 @@
 ---
 name: ai-delivery-spec
-description: Use for creating, changing, reviewing, reverse-engineering or accepting requirements, PRDs, prototypes, competitor material or existing systems, including any small UI/field/column/tab/dropdown/legacy-HTML change and direct PRD/prototype generation. Always invoke regardless of size or clarity. Deliver the smallest complete, reviewable, implementable, traceable and testable artifact at the target stage. Covers framing through acceptance; excludes scheduling, coding, CI/CD, deployment and operations. 中文：用于任何新增、修改、评审、反推或验收需求、PRD、原型、竞品或存量系统；写/改一个小功能、加字段/列/页签/下拉、旧 HTML 小改、直接生成 PRD/原型也必须调用。按目标阶段交付最小完整、可评审实施追溯验收的产物；不负责排期、编码、CI/CD、部署和运营。
+description: Use for creating, changing, reviewing, reverse-engineering or accepting requirements, PRDs, prototypes, competitor material or existing systems, including any small UI, field, column, tab, dropdown or legacy-HTML change. Supports /ads, /dig, /prd and /proto intent shortcuts where the host routes them. Always invoke regardless of size or clarity. Deliver the smallest complete, reviewable, implementable, traceable and testable artifact at the target stage. 中文：用于任何新增、修改、评审、反推或验收需求、PRD、原型、竞品或存量系统；写/改一个小功能、加字段/列/页签/下拉或旧 HTML 小改也必须调用；支持 /ads、/dig、/prd、/proto 意图快捷入口。按目标阶段交付最小完整、可评审实施追溯验收的产物。
 ---
 
-# AI Delivery Spec 5.4.7 — Requirement Management Kernel｜人机共用需求管理内核
+# AI Delivery Spec 5.4.8 — Requirement Management Kernel｜人机共用需求管理内核
 
 让业务、产品、设计、前后端、架构、测试、合规和 Coding Agent 从需求任一阶段进入，共用一条产品事实主线，取得当前所需的最小合格产物后离开；用户明确要求端到端时持续到目标完成。
 
-锁定任务起始语言并贯穿对话、PRD、原型、图、测试和可见状态；只有用户明确要求才双语。人类可见内容先写用户语言，括号保留必要机器原值；稳定 ID、代码、API、字段、Schema、公式不翻译。YAML/JSON 可保留键名与枚举，但交付须附同语言摘要。Gate 只证明静态合同，不证明业务正确、浏览器行为、真实实现或客户验收。
+锁定用户语言并贯穿对话与产物，除非明确要求才双语；稳定 ID、代码、API、字段、Schema、公式不翻译。YAML/JSON 可保留机器键，须附同语言摘要。Gate 只证明静态合同，不证明业务正确、浏览器行为、真实实现或客户验收。
+
+## 0. 四个轻量入口
+
+`/ads`、`/dig`、`/prd`、`/proto` 是同一需求内核的意图别名，不创建四套流程或四类新产物。宿主支持原生斜杠命令时可直接路由；若宿主拦截未知命令，使用其显式 Skill 形式（如 `/ai-delivery-spec /dig …`、`$ai-delivery-spec /dig …`）或自然语言“帮我深挖需求/直接写 PRD/生成原型”。不得宣称四个裸别名已在所有宿主原生注册。
+
+| 入口 | 默认行为 |
+|---|---|
+| `/ads` | 通用入口。识别当前材料、风险和目标，选择最轻路径，只问真正阻断目标的 P0。 |
+| `/dig` | 深挖澄清。一次只问一个最能改变结果的问题，显示进度；按战略、系统、行为心理、反方挑战四个镜头自适应追问，仍写回现有 Requirement Brief、DEC/UNK/ASM，不生成独立“拷问报告”。 |
+| `/prd` | 目标直达 specify。资料足够时直接生成需求卡或统一 PRD；开放 P0 阻断时先澄清，关闭后自动返回 PRD，不重跑无关阶段。 |
+| `/proto` | 目标直达可实施产品原型。先关闭原型阶段 P0；只有用户明确要求概念候选才带假设先画。默认产品态，研发评审投影仍按既有规则确认一次。 |
+
+四镜头不是固定问卷：战略看目标/价值/非目标，系统看角色/权威/状态/副作用，行为心理只看可观察动机与误用、不做诊断，反方挑战关键假设与退路。P0 全部关闭或由具名责任人接受风险且有退路后停止；概念候选保留 GAP。
 
 ## 1. 先选最轻工作深度
 
-- `direct`：来源明确、局部、可逆，不改变跨模块状态、数据权威、权限/指标、迁移、法规安全或高影响 AI 写回。直接交付差异、边界、正反验收和未证明事项；无未知则零澄清，不建生命周期文件。
+- `direct`：来源明确、局部、可逆，不改变跨模块状态、数据权威、权限/指标、迁移、法规安全或高影响 AI 写回。直接交付差异、边界、正反验收和未证明事项；无未知则零澄清，不建生命周期文件。未给出的可逆表现只可继承已核实的存量惯例；未读到基线时列为非阻断 GAP，不能写成精确规则。
 - `standard`：跨角色/页面/模块，或存在状态、数据、异常、集成和正式交接。使用需求卡或统一 PRD，按适用切面闭环。
 - `governed`：强审计、多次变更/多投影、敏感/受监管、不可逆副作用或复杂跨系统权威。启用 Product Truth、正式评审/基线、变更和证据治理中真正需要的部分。
 
@@ -44,13 +57,13 @@ description: Use for creating, changing, reviewing, reverse-engineering or accep
 
 实时对话先交付判断，不展示内部 YAML/ID。持久化只在跨会话、跨角色、审计、变更或工具校验时发生。默认最小主产物：frame/problem brief；explore/solution sketch；clarify/requirement brief；specify/需求卡或统一 PRD；review/baseline 复用同一规格并绑定签署、版本/hash；change/acceptance 回链当前基线。Product Truth 只在多投影、反复变更、血缘或强审计确有需要时启用。
 
-客户演示/需求确认默认产品模式。只有用户明确要求评审版，或在首次交开发前确认后，才生成可见评审投影；拒绝后同一基线不重复询问。评审态遵守 `Review Explains, Product Operates`：左侧始终是完整可操作产品，右侧只解释真实产品动作产生的当前页面/业务浮层上下文。R1/R2 人类一级导航固定为“总览 / 功能与流转 / 边界与验收”，不得再增加旅程、步骤、页面或产品/前端/后端/测试角色模式；复杂度只增加信息深度。`review_contexts` 声明评审点并确定分母，Candidate Diff 只防漏、不自动入选；纯评审动作不得改变 Product Fingerprint。FLOW/STEP/EDGE/STATE/DATA/AC/TEST 保留在同 hash 的 PRD 与结构化 handoff 中，并按当前上下文投影，不从右栏文案猜规则。确认评审版时完整读取 `references/review-workspace.md`。
+客户演示/确认默认产品态；评审态只在用户要求或首次交开发前确认后生成。它遵守 `Review Explains, Product Operates`：左侧是完整产品，右侧只解释当前页面/业务浮层；R1/R2 固定“总览 / 功能与流转 / 边界与验收”。每个页面和二级浮层从 PRD、Stage 0 与锚点建立语义账本；影响实现/验收的动作、字段规则、指标、状态、权限、写入、交接、异常和角色路径必须映射同 Context 的正式评审点，或有来源地声明不适用。简单项可一句话/规则组，关键口径不得省略。`review_contexts` 是评审点分母，语义账本是完整性分母；Candidate 只防漏，评审动作不得改变 Product Fingerprint。机器模型保留在同 hash 的 PRD 与结构化 handoff。生成前完整读取 `references/review-workspace.md`。
 
-Candidate 与 Declaration 必须是物理分离且 `subject_ref` 不重叠的数据集合：扫描稳定锚点、存量小写 `data-action` 或运行时动态页面只能生成带 `candidate_reason` 的 `candidate_review_points`，不得 append 到正式评审点或改变进度。`review_point_id` 只标识评审记录，`subject_ref` 才引用真实 Product Truth；正式 ReviewPoint 的 subject/source/precondition/result/boundary/AC 必须在本次 PRD 基线可解析。只有原型观察时使用 `PROTO-OBS-* + business_status=gap + evidence_origin=prototype_inferred`，禁止自动伪造 `REQ/RULE/STATE/AC` 或标成已确认。指标候选必须列出可见指标，并要求产品在开发前冻结对象、公式/分子分母、时间字段与窗口、状态过滤、去重、数据权威、刷新时点、空值/失败、单位精度与下钻条件。
+Candidate 与 Declaration 物理分离且 `subject_ref` 不重叠；观察只生成带理由的 `candidate_review_points`，不得自动晋级。正式 RVP 的 subject/source/precondition/result/boundary/AC 必须解析到 PRD；纯观察使用 `PROTO-OBS-* + gap + prototype_inferred`，禁止伪造已确认事实。每张指标卡冻结对象、公式、时间窗、过滤/去重、权威源、刷新、空值/失败、精度和下钻；工作流覆盖迁移、角色守卫、非法路径与恢复；二级弹窗/抽屉是独立 CurrentContext。
 
 评审态不得把真实导航降级成静态装饰。每个 `VIEW-*` 必须绑定唯一可见菜单路径，或说明为什么是扫码页、H5 独立页等无菜单入口；页面切换同步活动菜单、父级展开、路由、面包屑、标题和 `CurrentContext`。业务浮层继承父页面位置，只改变浮层 `CurrentContext`。任何静态假菜单、位置漂移或评审动作改变产品位置都阻断交付。
 
-同一产物只能有一个可见评审事实面：迁移存量评审版时停用旧说明栏/角色镜头，不能让新旧评审层并存。`UIACT-REVIEW-*` 必须与业务 `ACT-*` 事件隔离。每个有 UI 落点的正式评审点都必须在左侧目标旁显示同号 marker；右侧不得出现没有左侧落点的“1/2/3”。点击 marker 或右侧卡片时，当前 marker、卡片和真实目标必须同时形成可见选中/框选态并互相滚动定位。产品动态重绘后须恢复当前 Context 的正式标号，只显示当前 Context 标号，并在浏览器中证明标号不重叠、不越出视口。桌面业务浮层只能占产品区域，不能盖住评审栏；窄屏切换回产品时恢复业务浮层全屏。右栏卡片默认摘要、按需展开，不复制整份 PRD。
+同一产物只有一个评审事实面；`UIACT-REVIEW-*` 与业务 `ACT-*` 隔离。有 UI 落点的 RVP 在真实目标旁显示同号 marker，右侧不得出现没有左侧落点的“1/2/3”；点击任一侧时 marker、卡片、目标同步框选定位。动态重绘只恢复当前 Context 标号。浏览器须证明标号不碰撞/越界、桌面业务浮层不盖评审栏、窄屏切换可恢复；右栏只放摘要与按需详情。
 
 CurrentContext 必须由 manifest 的 detection 合同统一解析最上层业务浮层，不为单个原型硬编码特例。标号解析只允许 `CurrentContextRoot` 内当前可见且恰好一个目标；零个显示 unresolved，多个 BLOCK ambiguous，禁止取第一个或回退到 Context Root。`target_mode=context_root` 只允许 `VIEW/REG` 页面方向标号；`ACT/FLD/METRIC/STATE` 必须 `selector_exactly_one`。收起与展开、产品/评审切换、页签、记录、导入导出和分享都要跑双向浏览器验收；Fingerprint 违规必须进入可失败 Gate，不能只 `console.error`。分享链接必须在打开时校验 baseline 并恢复产品上下文/页签/评审点；R1/R2 冷读不得写不适用，未执行保持 pending/blocked。无法自动重开业务浮层时明确 GAP。
 

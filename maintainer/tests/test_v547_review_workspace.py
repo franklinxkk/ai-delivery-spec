@@ -114,8 +114,8 @@ def manifest(baseline_hash: str, *, level: str = "R1") -> dict:
         ),
     ]
     return {
-        "schema_version": "5.4.7-final",
-        "contract_revision": "RC2",
+        "schema_version": "5.4.8",
+        "contract_revision": "RC3",
         "workspace_id": "REVIEW-X",
         "language": "zh-CN",
         "baseline": {"version": "1.0", "hash": baseline_hash, "requirement_ref": "prd.md"},
@@ -148,6 +148,8 @@ def manifest(baseline_hash: str, *, level: str = "R1") -> dict:
                     "breadcrumb": ["业务管理", "记录列表"], "page_title": "记录列表",
                     "parent_view_ref": None, "exemption_reason": None,
                 },
+                "surface_types": ["list", "drawer_form"],
+                "secondary_context_refs": ["DRAWER-X"],
                 "review_point_refs": ["RVP-VIEW-SUBMIT"],
             },
             {
@@ -159,6 +161,8 @@ def manifest(baseline_hash: str, *, level: str = "R1") -> dict:
                     "breadcrumb": ["业务管理", "记录列表", "变更确认"], "page_title": "变更确认",
                     "parent_view_ref": "VIEW-X", "exemption_reason": None,
                 },
+                "surface_types": ["form"],
+                "secondary_context_refs": [],
                 "review_point_refs": ["RVP-DRAWER-CONFIRM"],
             },
         ],
@@ -169,6 +173,33 @@ def manifest(baseline_hash: str, *, level: str = "R1") -> dict:
             "candidate_sources": ["product_truth", "page_contracts", "stable_anchors"],
             "high_risk_omission": "block",
         },
+        "semantic_coverage_contract": {
+            "denominator": "all_implementation_acceptance_relevant_semantic_items",
+            "source_layers": ["prd_page_contracts", "stable_anchors", "cold_read"],
+            "critical_coverage": 1,
+            "simple_projection": "one_sentence_or_rule_equivalent_group",
+            "uncovered_result": "gap_or_block_never_silent",
+        },
+        "semantic_coverage_items": [
+            {
+                "coverage_id": "SCOV-VIEW-SUBMIT", "subject_ref": "ACT-X-SUBMIT",
+                "owner_context_ref": "VIEW-X", "semantic_type": "action", "criticality": "P1",
+                "label": "提交记录", "source_refs": ["REQ-X", "ACT-X-SUBMIT"],
+                "ui_grounded": True, "target_ref": "ACT-X-SUBMIT", "coverage_status": "covered",
+                "review_point_refs": ["RVP-VIEW-SUBMIT"],
+                "human_summary": "校验通过后提交当前记录，并在原页面显示持久化结果。",
+                "detail_owner": "function_flow", "unknown_ref": None, "not_applicable_reason": None,
+            },
+            {
+                "coverage_id": "SCOV-DRAWER-CONFIRM", "subject_ref": "ACT-X-CONFIRM",
+                "owner_context_ref": "DRAWER-X", "semantic_type": "data_write", "criticality": "P0",
+                "label": "确认变更", "source_refs": ["REQ-X", "ACT-X-CONFIRM"],
+                "ui_grounded": True, "target_ref": "ACT-X-CONFIRM", "coverage_status": "covered",
+                "review_point_refs": ["RVP-DRAWER-CONFIRM"],
+                "human_summary": "确认后写入当前变更，并将处理结果返回所属业务页面。",
+                "detail_owner": "boundary_acceptance", "unknown_ref": None, "not_applicable_reason": None,
+            },
+        ],
         "layout_contract": {
             "desktop_mode": "participate_in_layout", "overlay_product_ui": False,
             "resizable": True, "collapsible": True,
@@ -241,8 +272,13 @@ def review_html(document: dict, *, include_tabs: bool = True) -> str:
                 f'<button data-action="UIACT-REVIEW-SELECT" data-review-ref="{point_ref}" '
                 f'data-review-context="{context_ref}" data-review-number="{number}" aria-current="false">{number}</button>'
             )
+        page_contract = ""
+        if context["context_type"] == "VIEW":
+            surfaces = ",".join(context.get("surface_types", []))
+            layout = "composite" if len(context.get("surface_types", [])) > 1 else "single"
+            page_contract = f'<!-- PAGE-CONTRACT: {context_ref}; primary=list; layout={layout}; surfaces={surfaces} -->'
         context_parts.append(
-            f'<main{testid}{hidden} data-review-context-root="{context_ref}" '
+            f'{page_contract}<main{testid}{hidden} data-review-context-root="{context_ref}" '
             f'data-review-context-type="{context["context_type"]}">{"".join(points)}</main>'
         )
 
@@ -266,6 +302,18 @@ def review_html(document: dict, *, include_tabs: bool = True) -> str:
             ("boundary_acceptance", "边界与验收"),
         )
     )
+    semantic_function = "".join(
+        f'<p data-review-semantic-ref="{item["coverage_id"]}" data-review-semantic-owner="function_flow" '
+        f'data-review-context="{item["owner_context_ref"]}">{item["human_summary"]}</p>'
+        for item in document.get("semantic_coverage_items", [])
+        if item.get("detail_owner") == "function_flow"
+    )
+    semantic_boundary = "".join(
+        f'<p data-review-semantic-ref="{item["coverage_id"]}" data-review-semantic-owner="boundary_acceptance" '
+        f'data-review-context="{item["owner_context_ref"]}">{item["human_summary"]}</p>'
+        for item in document.get("semantic_coverage_items", [])
+        if item.get("detail_owner") == "boundary_acceptance"
+    )
     tab_sections = f'''
       <nav>{tab_buttons}</nav>
       <section data-review-tab="overview">
@@ -276,13 +324,15 @@ def review_html(document: dict, *, include_tabs: bool = True) -> str:
       <section data-review-tab="function_flow">
         <div data-review-content="current_context" data-review-owner-tab="function_flow">当前上下文</div>
         <div data-review-content="review_points" data-review-owner-tab="function_flow">{"".join(cards)}</div>
+        {semantic_function}
         <div data-review-content="visible_domain_results" data-review-owner-tab="function_flow">可见结果与领域结果</div>
       </section>
       <section data-review-tab="boundary_acceptance">
         <div data-review-content="rules" data-review-owner-tab="boundary_acceptance">规则与权限</div>
+        {semantic_boundary}
         <div data-review-content="acceptance_tests" data-review-owner-tab="boundary_acceptance">AC-X-SUBMIT / AC-X-CONFIRM</div>
         <div data-review-content="open_items" data-review-owner-tab="boundary_acceptance">开放项已核对：0 项</div>
-      </section>''' if include_tabs else f'<section data-review-r0>{"".join(cards)}</section>'
+      </section>''' if include_tabs else f'<section data-review-r0>{"".join(cards)}{semantic_function}{semantic_boundary}</section>'
 
     workspace = document["workspace"]
     review_controls = '''
@@ -372,6 +422,51 @@ def test_complete_final_workspace_passes_static_review_contract(tmp_path: Path) 
     assert "PROTO-PRODUCT-LOCATION-MISMATCH" not in codes
 
 
+def test_v548_metrics_workflow_and_secondary_surfaces_cannot_silently_escape(tmp_path: Path) -> None:
+    for surface, code in (("metrics", "PROTO-REVIEW-METRIC-UNCOVERED"), ("workflow", "PROTO-REVIEW-STATE-PATH-UNCOVERED")):
+        document = manifest("1" * 64)
+        document["review_contexts"][0]["surface_types"].append(surface)
+        assert code in review_codes(tmp_path / f"{surface}-missing.html", document)
+
+    partial = manifest("1" * 64)
+    partial["review_contexts"][0]["surface_types"].append("metrics")
+    partial["semantic_coverage_items"][0].update({
+        "subject_ref": "METRIC-ONE", "semantic_type": "metric", "target_ref": "METRIC-ONE",
+        "detail_owner": "boundary_acceptance",
+    })
+    partial["review_points"][0].update({
+        "subject_ref": "METRIC-ONE", "target_ref": "METRIC-ONE",
+        "target_selector": "[data-action='METRIC-ONE']",
+    })
+    raw = review_html(partial).replace("</main>", '<div data-metric="METRIC-TWO">未声明指标</div><div class="metric">无 ID 指标</div></main>', 1)
+    assert "PROTO-REVIEW-METRIC-UNCOVERED" in {item.code for item in html_gate(tmp_path / "metrics-partial.html", raw).findings}
+
+    secondary = manifest("1" * 64)
+    secondary["review_contexts"][0]["secondary_context_refs"] = []
+    assert "PROTO-REVIEW-OVERLAY-UNCOVERED" in review_codes(tmp_path / "drawer-missing.html", secondary)
+
+
+def test_v548_semantic_projection_must_be_visible_and_critical_gap_blocks(tmp_path: Path) -> None:
+    document = manifest("1" * 64)
+    raw = review_html(document).replace('data-review-semantic-ref="SCOV-VIEW-SUBMIT"', 'data-review-semantic-ref="SCOV-MISSING"', 1)
+    codes = {item.code for item in html_gate(tmp_path / "semantic-hidden.html", raw).findings}
+    assert "PROTO-REVIEW-SEMANTIC-COVERAGE" in codes
+
+    gap = manifest("1" * 64)
+    gap_item = gap["semantic_coverage_items"][1]
+    gap_item["coverage_status"] = "gap"
+    gap_item["unknown_ref"] = "UNK-DRAWER-CONFIRM-RULE"
+    gap["unknown_refs"] = ["UNK-DRAWER-CONFIRM-RULE"]
+    assert "PROTO-REVIEW-SEMANTIC-COVERAGE" in review_codes(tmp_path / "semantic-gap.html", gap)
+
+
+def test_v548_business_dialog_without_current_context_is_blocked(tmp_path: Path) -> None:
+    raw = review_html(manifest("1" * 64)).replace(
+        "</main>", '<section role="dialog" data-testid="drawer-unmapped">未声明二级功能</section></main>', 1,
+    )
+    assert "PROTO-REVIEW-OVERLAY-UNCOVERED" in {item.code for item in html_gate(tmp_path / "unmapped-dialog.html", raw).findings}
+
+
 def test_review_workspace_structural_mutations_are_blocked(tmp_path: Path) -> None:
     base = review_html(manifest("1" * 64))
     candidate_raw = base.replace('</main>', '<button data-action="ACT-X-DELETE" data-ac="AC-X-DELETE">删除</button></main>', 1).replace(
@@ -434,6 +529,8 @@ def test_overlay_detection_rejects_ambiguous_topmost_candidates(tmp_path: Path) 
         "context_ref": "MODAL-X", "context_type": "MODAL", "title": "冲突浮层",
         "detection": copy.deepcopy(document["review_contexts"][1]["detection"]),
         "product_location": copy.deepcopy(document["review_contexts"][1]["product_location"]),
+        "surface_types": ["form"],
+        "secondary_context_refs": [],
         "review_point_refs": [],
     })
     assert "PROTO-REVIEW-OVERLAY-DETECTION" in review_codes(tmp_path / "ambiguous-overlay.html", document)
@@ -460,6 +557,29 @@ def test_legacy_overlay_is_gap_for_visual_review_but_blocked_for_handoff(tmp_pat
     assert any(item.code == "PROTO-REVIEW-WORKSPACE-LEGACY" and item.severity == "GAP" for item in gate.findings)
     gate.check_handoff(prd, [old], "L2")
     assert any(item.code == "PROTO-REVIEW-WORKSPACE-REQUIRED" and item.severity == "BLOCK" for item in gate.findings)
+
+
+def test_versioned_review_compatibility_matrix_is_enforced(tmp_path: Path) -> None:
+    stages = (ROOT / "references/stages.md").read_text(encoding="utf-8")
+    for marker in ("5.4.6—5.4.8 兼容与迁移矩阵", "PROTO-REVIEW-WORKSPACE-LEGACY", "5.4.7-final", "5.4.8/RC3", "兼容读取不等于自动升级"):
+        assert marker in stages
+
+    rc2 = manifest("1" * 64)
+    rc2["schema_version"] = "5.4.7-final"
+    rc2["contract_revision"] = "RC2"
+    rc2.pop("semantic_coverage_contract")
+    rc2.pop("semantic_coverage_items")
+    for context in rc2["review_contexts"]:
+        context.pop("surface_types")
+        context.pop("secondary_context_refs")
+    rc2_codes = review_codes(tmp_path / "v547-final.html", rc2)
+    assert "PROTO-REVIEW-WORKSPACE-MANIFEST-INVALID" not in rc2_codes
+    assert "PROTO-REVIEW-SEMANTIC-COVERAGE" not in rc2_codes
+
+    downgraded = copy.deepcopy(rc2)
+    downgraded["schema_version"] = "5.4.8"
+    downgraded_codes = review_codes(tmp_path / "v548-downgraded.html", downgraded)
+    assert "PROTO-REVIEW-WORKSPACE-SCHEMA" in downgraded_codes
 
 
 def test_review_workspace_hash_and_handoff_indicator_match_real_inputs(tmp_path: Path) -> None:

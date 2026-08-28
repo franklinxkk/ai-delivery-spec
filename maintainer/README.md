@@ -93,3 +93,5 @@ project-local candidate → 跨项目使用证据 → assess → 独立人工评
 ## 10. 预算与发布
 
 实验室从属于运行时。`check_v511_runtime_budget.py` 守住不超过 56 个维护文件、450 KB、默认 fast check 12 条命令；不得为容纳历史产物提高预算。普通使用不加载本目录，候选发布才运行 `check --profile release`。
+
+正式包：`python maintainer/tools/build_runtime_package.py --release --output ../ai-delivery-spec-vX.Y.Z.zip`。该模式隐含检查并拒绝 dirty、短 SHA 或不可追溯来源；提交后反读 `runtime-manifest.json`，核对版本、完整 commit、`source_worktree_dirty=false` 和文件 hash。

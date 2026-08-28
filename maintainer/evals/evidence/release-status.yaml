@@ -1,5 +1,5 @@
 schema_version: 5.3.0
-skill_version: 5.4.7
+skill_version: 5.4.8
 runtime: pure_v5
 domain_packs:
   count: 7
@@ -35,13 +35,10 @@ trace_release_proxy:
 known_limitations:
 - five domain methods have owner-attested production practice; all built-in packs
   pass deterministic contract checks but fresh-agent/expert maturity remains separate
-- v5.4.7 review-workspace and adversarial contract probes are deterministic; isolated
-  no-skill comparison, fresh-agent repetitions and versioned user feedback remain
-  separate evidence
 - domain expert, customer, production, legal, safety, and financial correctness are
   not proven
-- deterministic fixtures and private brownfield calibration expose method gaps but
-  do not prove implementation or customer acceptance
+- deterministic v5.4.8 probes and private calibration expose method gaps but do not
+  replace blind no-skill comparison, fresh-agent repetitions, production or customer acceptance
 release_guards_2026_08_26:
   one_line_prototype_routing:
     cases: 6
@@ -51,11 +48,30 @@ release_guards_2026_08_26:
     ui_grounded_marker_required: true
     selected_surfaces: [marker, card, target]
     collapse_expand_roundtrip: required
-    controlled_browser_fixture: passed
-    browser_fixture_scope: marker_card_target_selection_and_overlay_context_roundtrip
+    controlled_browser_fixture: passed_on_medium_example
+    browser_fixture_scope: >-
+      local HTTP desktop check covered collapse/expand, marker-card-target bidirectional
+      selection, drawer context switch, hidden inactive cards and drawer/review coexistence
+  semantic_coverage:
+    focused_contract_cases: 25_passed
+    page_contract_required: true
+    metric_state_and_secondary_context_omission: blocked
+    medium_example_static_gate: passed_with_observable_domain_state
+    medium_example_browser_interaction: passed_within_declared_scope
+  shortcut_routing:
+    aliases: [ads, dig, prd, proto]
+    same_artifact_lifecycle: true
+    product_experience_contracts: 10_passed
+    raw_alias_contract: host_dependent
+    codex: ads_dig_prd_pass; proto_transport_blocked
+    kimi: provider_quota_blocked
+    workbuddy: raw_alias_rejected; explicit_skill_auth_blocked
+    boundary: semantics pass; native slash registration is host-specific
   regression:
-    pytest: 74_passed
+    pytest: 78_passed
     release_gate: passed
+    runtime_package: 114_files
+    maintainer_budget: 55_files_under_450000_bytes
     package_paths: passed
     validator_wiring: passed
     skill_creator_utf8: passed

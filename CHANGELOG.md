@@ -1,5 +1,16 @@
 # Changelog
 
+## 5.4.8 - 2026-08-26
+
+- **Why**：真实 CRM 评审态再次暴露“页面可走、单点按钮有说明，但指标口径、泳道迁移、需求卡二级抽屉和简单功能点仍需产品经理口头补充”的缺口；SkillHub 反馈同时指出首屏文档过重、文件说明重复、新手缺少中等需求参照。根因不是继续增加角色页签，而是评审点 Declaration 只能证明已声明点没有断链，不能证明“所有影响实施与验收的页面语义”都已进入覆盖分母。
+- **Semantic Coverage Contract**：评审工作台 Schema 升级为 `5.4.8 / RC3`，保留 `5.4.7-final` 兼容读取；新增 `semantic_coverage_contract`、`semantic_coverage_items`、页面 `surface_types` 和 `secondary_context_refs`。每个页面必须声明 `PAGE-CONTRACT`；指标、状态迁移、权限、数据写入、事件、错误恢复、业务浮层和角色路径必须映射到 PRD 稳定 ID、可见说明与 RVP，或带来源说明为不适用。P0/P1 未覆盖直接阻断，简单功能允许一句话或等价规则组，不要求给装饰元素编号。
+- **Review Gate**：新增指标口径、状态路径、二级业务上下文、页面合同和语义引用的确定性门禁；业务弹窗/抽屉若没有独立 CurrentContext，指标页没有 `METRIC-*` 口径，泳道页没有受守卫迁移，均不能静默通过。语义项与候选观察物理分离，机器 handoff 复用 PRD 权威定义核对来源、目标和未知项。
+- **Four Thin Shortcuts**：新增 `/ads`、`/dig`、`/prd`、`/proto` 四个意图别名，宿主不支持斜杠时自然语言等价。它们只改变当前停止点和提问策略，不复制生命周期、模板或 CLI。`/dig` 自适应使用战略、系统、可观察行为动机和反方挑战四镜头，一次只问一个会改变决策的问题，结果仍写回既有 `DEC/UNK/ASM/REQ/RULE/AC`，不生成脱离交付的独立报告。
+- **Onboarding Subtraction**：README 收敛为问题定位、60 秒入口、角色价值、产品态/评审态/机器合同、门禁与边界；去掉易过期的硬编码社区数字。新增一个匿名中等交互样例，集中展示驾驶舱指标口径、泳道状态规则、卡片进入任务拆解抽屉以及右栏收起/恢复；同时移出已不再引用的生命周期 SVG，运行包仍保持 114 文件，并明确样例不是完整发布 Schema 夹具。
+- **Scope / Unchanged**：没有增加生命周期阶段，没有把评审态设为默认，没有把右栏变成 Coding Agent 唯一合同，没有接管排期、编码、部署或领域签署。存量 `5.4.7-final` 评审 manifest 继续可读；只有新生成的 5.4.8 工件强制 RC3 语义覆盖。
+- **Release and Compatibility Hardening**：运行包新增 `--release` 干净来源硬门禁，dirty、短 SHA 或不可追溯来源不能生成正式包，CI 在干净 checkout 上执行同一检查；阶段合同补齐 5.4.6 旧评审叠加、5.4.7 普通工件/`5.4.7-final` 和 5.4.8/RC3 的兼容与迁移矩阵，回归证明旧工件只在原合同范围内读取，不能靠降版本逃避新语义覆盖。
+- **Validation（本地候选）**：完整 pytest `78/78`，其中 5.4.8 评审态专项正反例 `25/25`、产品体验合同 `10/10`；完整 release gate、发布声明、README 首次使用、发布包路径与校验器接线、运行包 114 文件、维护区 55 文件且低于 450,000B、JSON/Python/示例 JavaScript 语法和 Skill Creator UTF-8 检查通过，脏工作树正式打包反例按预期失败。中等 HTML 静态原型门禁 PASS，动作具备可观察业务状态。本地 HTTP 浏览器实测覆盖右栏收起/恢复、标号—说明—目标双向框选、二级上下文切换和产品/评审并行；另用匿名 AI Native 与 CRM 主线执行桌面浏览器全链，发现并修复了比较符被解析为标签、marker 越界和弹窗横向滚动。Codex 项目 Skill 的 `/ads`、`/dig`、`/prd` 语义冒烟通过，`/proto` 受传输超时阻断；Kimi 受提供方额度阻断，WorkBuddy 裸别名被宿主拦截且显式 Skill 调用受本地认证阻断，因此不宣称跨宿主原生注册。上述受控测试仍不证明领域正确、真人冷读、真实实现、窄屏、客户验收或跨模型长期稳定性。
+
 ## 5.4.7 - 2026-08-22
 
 - Semantic closure guard（同版本发布后补丁，2026-08-26）：关闭六个可由合法 Schema 结构绕过的评审语义缺口。`context_root` 只允许 `VIEW/REG`，动作、字段、指标和状态必须在 CurrentContext 内唯一定位；Candidate 与正式 Declaration 的 `subject_ref` 必须互斥；R1/R2 冷读不能用 `not_applicable` 逃避；分享定位必须打开即 hydration。ReviewPoint 的 subject、来源、前置、双结果、边界、目标和 AC 统一复用 PRD 语义解析器核对权威定义位，仅在正文提及幽灵 ID 仍会阻断。旧 Preview finding 的 CLI 修复建议统一迁移到 Final CurrentContext 三页签，不再指导恢复 Journey/STEP/Role 模式。聚焦回归 21/21、完整 pytest 71/71、完整 release gate 通过；维护区仍为 56 文件/449,738 bytes，未提高预算。静态与受控夹具不证明真人冷读、业务规则正确、真实实现或客户验收。
@@ -9,7 +20,7 @@
 - Final validation：一句话路由与评审联动正反例并入既有集中测试，不新增维护文件；全量 pytest `74 passed`，完整 release gate、发布包路径检查、校验器接线和 Skill Creator UTF-8 校验通过。受控浏览器夹具验证 marker/card/target 双向框选、评审栏收起恢复与业务浮层上下文往返；维护区保持 56 文件/449,081 bytes，未提高既有预算。静态与受控浏览器夹具仍不证明领域正确、真人冷读、真实实现或客户验收。
 - Final RC2 protocol/runtime correction（同版本待发补丁）：人工复核确认 RC1 仍存在“合同写对、执行器未完全照做”。正式 Declaration 与 `candidate_review_points[]` 物理分离；存量小写动作只生成带理由的 `PROTO-OBS-*` 候选；Target 在 CurrentContext 内执行 exactly-one，零/多命中均阻断且禁止 first/index/root 回退；业务浮层由 Manifest `detectionSelector` 与继承模式驱动；评审记录 `RVP-*` 与真实 `subject_ref` 分离，不再自动伪造 `REQ/RULE/STATE/AC`；Observed Product Fingerprint 接入可见运行门禁；收起→展开、分享定位刷新恢复进入浏览器往返。指标、规则字段、高风险动作和行为状态进入 Candidate Diff，未知业务口径保持 GAP。`resizable` 按实际实现声明为 false，删除旧重复 Runtime。33 项聚焦回归通过，三份完整原型的参数化浏览器 Runner 对 22/19/4 个主导航上下文、收起展开、页签与分享恢复通过；浮层核心链路另做浏览器实测。真人多角色冷读仍未执行，不能据此冻结 Final。
 - Product Location correction（同版本待发补丁）：真实项目冷读发现核心旅程虽可达，但简化评审壳的左侧菜单保持静态，产研与测试无法判断当前功能在系统中的真实入口。新增 `ProductLocation` 合同：每个 VIEW 必须绑定唯一菜单路径或具理由的独立入口，页面切换同步路由、活动菜单、父级展开、面包屑、标题与 CurrentContext；浮层继承父页面位置。Schema、静态运行时门禁、浏览器 ARUN 和冷读新增 `PROTO-PRODUCT-LOCATION-MISMATCH`，禁止用静态假菜单替代完整存量导航。
-- Full-product runtime correction（同版本待发补丁）：用 CRM、安驾后台和学员 H5 三份完整原型派生评审态时补齐真实运行边界：同页只保留一个可见评审事实面；评审事件不得进入业务 dispatcher；固定业务浮层在桌面止于产品区、窄屏恢复全屏；动态 `innerHTML` 重绘后恢复正式 marker；只显示 CurrentContext marker；标号避碰、完整落在视口内且不遮挡关键动作；右栏卡片默认摘要、按需展开。以上均进入浏览器 ARUN，静态声明不得冒充运行证明。
+- Full-product runtime correction（同版本待发补丁）：用匿名 CRM、出版服务后台和学员 H5 三份完整原型派生评审态时补齐真实运行边界：同页只保留一个可见评审事实面；评审事件不得进入业务 dispatcher；固定业务浮层在桌面止于产品区、窄屏恢复全屏；动态 `innerHTML` 重绘后恢复正式 marker；只显示 CurrentContext marker；标号避碰、完整落在视口内且不遮挡关键动作；右栏卡片默认摘要、按需展开。以上均进入浏览器 ARUN，静态声明不得冒充运行证明。
 - Final Review correction（同版本）：依据多模型产物人工冷读反证，撤销 Preview 中把 `orientation / journey / focus / page / acceptance` 与产品/前端/后端/测试角色镜头设为人类一级导航的设计。新合同遵守 `Review Explains, Product Operates`：完整产品自身承担动线，评审层跟随最上层业务浮层或活动 VIEW 的只读 `CurrentContext`。
 - Human projection：R1/R2 固定为“总览 / 功能与流转 / 边界与验收”三页签，R0 可省略可见页签；复杂度只增加信息深度。FLOW/STEP/EDGE/STATE/DATA/AC/TEST 继续保留在 PRD、Product Truth 与机器 handoff，并按当前上下文投影，不再控制人的导航。
 - Declaration and runtime safety：`review_contexts` 成为官方评审点与进度分母的唯一声明源；Candidate Diff 只报告遗漏且禁止自动晋级。新增上下文内重编号、marker/card 同源、当前上下文唯一目标解析、Product/Review Fingerprint 分离、非遮挡布局、Overlay 探测、分享定位和按 baseline 隔离的持久化评审记录合同。

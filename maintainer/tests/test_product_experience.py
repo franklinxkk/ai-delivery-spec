@@ -32,10 +32,36 @@ def test_trigger_and_minimum_change_contract() -> None:
     assert 'version: "5.4.2"' not in agent and skill
 
 def test_convergence_and_visual_lock_contract() -> None:
-    discover = require('references/discover.md', '发散：', '聚焦：', '深化：', '小而明确的需求默认0轮澄清', '普通模糊需求最多2个阻断决策轮', '自由对话不展示这些内部 ID', '不得把无关工作区的客户、合同、回款、角色或流程移植进方案')
+    discover = require('references/discover.md', '发散：', '聚焦：', '深化：', '小而明确的需求默认0轮澄清', '普通模糊需求默认最多2个阻断决策轮', '自由对话不展示这些内部 ID', '不得把无关工作区的客户、合同、回款、角色或流程移植进方案')
     require('references/stages.md', '不要在到达目标前逐站运行门禁')
     require('references/prototype.md', '现有 HTML、截图和已批准页面是默认视觉权威', '不询问美学方向', 'visual_authority=existing', 'design_lock_ref')
     assert 'L1三批、L2六批、L3/L4八批' not in discover
+
+def test_v548_shortcuts_are_thin_routes_and_medium_example_is_shipped() -> None:
+    skill = require('SKILL.md', '`/ads`', '`/dig`', '`/prd`', '`/proto`', '不创建四套流程或四类新产物', '不得宣称四个裸别名已在所有宿主原生注册', '未读到基线时列为非阻断 GAP')
+    discover = require(
+        'references/discover.md',
+        '战略（strategic）', '系统（systemic）', '行为心理（psychological）', '反方挑战（devil\'s advocate）',
+        '不得另造一份与基线竞争的拷问报告', '一次只问一个',
+    )
+    stages = require('references/stages.md', '四个快捷入口只覆盖本次目标', '它们是意图别名', '`/ads`', '`/dig`', '`/prd`', '`/proto`', '没有读到基线时必须记为非阻断 GAP', '不得把四个裸别名描述成跨宿主原生注册')
+    readme = require('README.md', '意图别名，不是四套新流程', 'examples/medium-review-handoff/review-prototype.html', '消息到达模型前拦截未知命令', '不宣称跨宿主原生注册')
+    agent = yaml.safe_load(read('agents/openai.yaml'))
+    assert set(agent['inputs']['intent_shortcut']['enum']) == {'auto', 'ads', 'dig', 'prd', 'proto'}
+    assert '/clarify' not in skill + discover + stages + readme + read('agents/openai.yaml')
+    assert 'grill report' not in (skill + discover + stages + readme).lower()
+    example = require(
+        'examples/medium-review-handoff/review-prototype.html',
+        '.app.review-collapsed ~ .review-launch{display:block}',
+        '.review-list:not([hidden]){display:grid;gap:8px}',
+        '.review-list[hidden]{display:none}',
+        'left:208px;right:var(--review)',
+        'data-ads-act="collapse"', 'data-ads-act="expand"',
+        'data-review-anchor="METRIC-SLA-001"', 'data-review-point="RVP-METRIC-SLA"',
+        'data-review-context-root="DRAWER-TASK-001"',
+    )
+    assert 'data-action="UIACT-REVIEW-TOGGLE"' in example
+    assert 'data-state="board_ready"' in example and "app.dataset.state='task_saved'" in example
 
 def test_root_diagnostics_compact_repetition() -> None:
     findings = [Finding('BLOCK', 'CODE-A', 'a', 'one'), Finding('BLOCK', 'CODE-A', 'b', 'two'), Finding('GAP', 'CODE-B', 'c', 'three')]
@@ -55,6 +81,20 @@ class MemoryGate(Gate):
 
     def read(self, path: Path) -> str:
         return self.documents[str(path)]
+
+def test_visible_comparison_copy_cannot_be_swallowed_as_html_tag() -> None:
+    broken = Path('broken-comparison.html')
+    safe = Path('safe-comparison.html')
+    documents = {
+        str(broken): '<section data-testid="page-VIEW-X" data-state="ready"><p>比例0<rate≤100，金额>0。</p></section>',
+        str(safe): '<section data-testid="page-VIEW-X" data-state="ready"><p>比例0 &lt; rate ≤ 100，金额 &gt; 0。</p></section>',
+    }
+    gate = MemoryGate(documents)
+    gate.check_prototype(broken, 'L0')
+    assert 'PROTO-VISIBLE-COMPARISON-UNESCAPED' in {item.code for item in gate.findings}
+    gate = MemoryGate(documents)
+    gate.check_prototype(safe, 'L0')
+    assert 'PROTO-VISIBLE-COMPARISON-UNESCAPED' not in {item.code for item in gate.findings}
 
 def test_brownfield_visual_lock_satisfies_handoff() -> None:
     prd, prototype = (Path('prd.md'), Path('prototype.html'))
