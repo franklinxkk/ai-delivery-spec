@@ -64,9 +64,9 @@ Sprint、代码、发布或运营。
 - hash 链只能检测本地变化，不能替代要求更高的外部签署。
 
 ```powershell
-py -3 scripts/manage_execution_state.py create --truth product-truth.yaml --config spec.config.yaml --installed-skill C:/path/to/ai-delivery-spec/SKILL.md --execution-id EXEC-PROJECT-001 --output evidence/state-000.yaml
-py -3 scripts/manage_execution_state.py verify --state evidence/state-000.yaml
-py -3 scripts/manage_execution_state.py gate --state evidence/state-000.yaml --gate-id contract_traceability --projection requirements/PRD.md --output gate-contract.yaml
+python scripts/manage_execution_state.py create --truth product-truth.yaml --config spec.config.yaml --installed-skill C:/path/to/ai-delivery-spec/SKILL.md --execution-id EXEC-PROJECT-001 --output evidence/state-000.yaml
+python scripts/manage_execution_state.py verify --state evidence/state-000.yaml
+python scripts/manage_execution_state.py gate --state evidence/state-000.yaml --gate-id contract_traceability --projection requirements/PRD.md --output gate-contract.yaml
 ```
 
 有效门禁覆盖版本/环境、复杂度/领域证据、上下文存续、发现就绪、合同追溯、审计访问和回退风险。

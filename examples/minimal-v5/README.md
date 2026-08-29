@@ -13,12 +13,14 @@
 Agent 应先确认这是需求卡，而不是要求用户选择 mode、tier、domain。仓库内已经提供一份
 已闭合的示例输入和需求卡，安装依赖后可直接验证：
 
-```powershell
-py -3 scripts/ai_delivery_spec_cli.py triage --input examples/minimal-v5/intake.yaml
-py -3 scripts/ai_delivery_spec_cli.py gate --profile prd --prd examples/minimal-v5/requirement-card.md --level auto
+以下命令使用当前环境的 `python`；若系统只提供 `python3`，请等价替换命令前缀。
+
+```bash
+python scripts/ai_delivery_spec_cli.py triage --input examples/minimal-v5/intake.yaml
+python scripts/ai_delivery_spec_cli.py gate --profile prd --prd examples/minimal-v5/requirement-card.md --level auto
 ```
 
-期望结果：分诊建议 `requirement_card`，门禁返回 `PASS`。这只证明该需求卡结构完整、
+期望结果：分诊建议 `ultra_light / L0` 与 `requirement_card`，`--level auto` 门禁返回 `PASS`。这只证明该需求卡结构完整、
 可测试；不等于真实客户已经验收。
 
 ## 这个示例教会三件事

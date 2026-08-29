@@ -3,75 +3,31 @@ skill_version: 5.4.8
 runtime: pure_v5
 domain_packs:
   count: 7
-  maturity:
-    contract_tested: 7
-  practice_status:
-    production_practiced: 5
-    knowledge_only: 2
+  maturity: {contract_tested: 7}
+  practice_status: {production_practiced: 5, knowledge_only: 2}
   production_claims_allowed: 0
 evaluation_assets:
   domain_fixtures: 16
   contract_fixtures_passed: 16
-  catalog_status:
-    not_run: 11
-    partial: 4
+  catalog_status: {not_run: 11, partial: 4}
 trace_release_proxy:
   status: ready_with_limits
   public_reference: https://skillhub.cn/tutorials#trace-evaluation
   boundary: local evidence checklist only; not a SkillHub score or 4.9 prediction
-  dimensions:
-    trust: passed
-    reliability: passed
-    adaptability: passed
-    convention: passed
-    effectiveness: partial
-  effectiveness_limit: >-
-    three private real-project calibration shapes and deterministic regressions exposed and
-    repaired contract gaps, but fresh blind Skill-on/Skill-off repetitions, controlled token/time
-    accounting and versioned human ratings remain incomplete
-  private_calibration:
-    sample_shapes: [same-baseline review A/B, brownfield review retrofit, multi-surface prototype acceptance]
-    publication: anonymized aggregate only; raw files and customer/project names excluded
-known_limitations:
-- five domain methods have owner-attested production practice; all built-in packs
-  pass deterministic contract checks but fresh-agent/expert maturity remains separate
-- domain expert, customer, production, legal, safety, and financial correctness are
-  not proven
-- deterministic v5.4.8 probes and private calibration expose method gaps but do not
-  replace blind no-skill comparison, fresh-agent repetitions, production or customer acceptance
-release_guards_2026_08_26:
-  one_line_prototype_routing:
-    cases: 6
-    default: preserve_html_target_and_close_blocking_p0
-    explicit_concept: allow_labeled_concept_candidate_without_readiness_claim
-  review_linkage:
-    ui_grounded_marker_required: true
-    selected_surfaces: [marker, card, target]
-    collapse_expand_roundtrip: required
-    controlled_browser_fixture: passed_on_medium_example
-    browser_fixture_scope: >-
-      local HTTP desktop check covered collapse/expand, marker-card-target bidirectional
-      selection, drawer context switch, hidden inactive cards and drawer/review coexistence
-  semantic_coverage:
-    focused_contract_cases: 25_passed
-    page_contract_required: true
-    metric_state_and_secondary_context_omission: blocked
-    medium_example_static_gate: passed_with_observable_domain_state
-    medium_example_browser_interaction: passed_within_declared_scope
-  shortcut_routing:
-    aliases: [ads, dig, prd, proto]
-    same_artifact_lifecycle: true
-    product_experience_contracts: 10_passed
-    raw_alias_contract: host_dependent
-    codex: ads_dig_prd_pass; proto_transport_blocked
-    kimi: provider_quota_blocked
-    workbuddy: raw_alias_rejected; explicit_skill_auth_blocked
-    boundary: semantics pass; native slash registration is host-specific
-  regression:
+  dimensions: {trust: passed, reliability: passed, adaptability: passed, convention: passed, effectiveness: partial}
+  effectiveness_limit: deterministic/private calibration repaired gaps; blind A/B, token/time and human ratings remain incomplete
+release_evidence:
+  verified_at: 2026-08-29
+  scope: local deterministic checks on Windows; not customer or production acceptance
+  results:
     pytest: 78_passed
     release_gate: passed
-    runtime_package: 114_files
+    public_quickstart_and_badcases: passed
+    trace_input_badcases: passed
+    runtime_package_check: 114_source_files
     maintainer_budget: 55_files_under_450000_bytes
-    package_paths: passed
-    validator_wiring: passed
-    skill_creator_utf8: passed
+    skill_creator_quick_validate: passed
+    dirty_release_provenance_guard: blocked_as_expected
+known_limitations:
+- contract tests do not prove fresh-agent/expert/production maturity
+- domain, legal, safety, financial, production and customer correctness remain not proven

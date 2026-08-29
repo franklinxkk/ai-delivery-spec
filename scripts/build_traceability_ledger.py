@@ -12,6 +12,18 @@ from typing import Any
 import yaml
 
 
+def load_truth(path: Path) -> dict[str, Any] | None:
+    try:
+        document = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, yaml.YAMLError):
+        print(f"BLOCKED: Product Truth is missing, unreadable or invalid YAML: {path}; run compile-truth first or fix --truth")
+        return None
+    if not isinstance(document, dict):
+        print(f"BLOCKED: Product Truth root must be an object: {path}; fix the source or rerun compile-truth")
+        return None
+    return document
+
+
 def walk(value: Any):
     if isinstance(value, dict):
         yield value
@@ -72,7 +84,9 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--baseline-version", default="unversioned")
     args = parser.parse_args()
-    document = yaml.safe_load(args.truth.read_text(encoding="utf-8"))
+    document = load_truth(args.truth)
+    if document is None:
+        return 2
     if document.get("layout") == "progressive_shards":
         import sys
         sys.path.insert(0, str(Path(__file__).resolve().parent))

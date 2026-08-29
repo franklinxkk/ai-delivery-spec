@@ -1,7 +1,7 @@
 ---
 artifact: requirement_card
 baseline_version: 1.0
-delivery_level: L1
+delivery_level: L0
 delivery_shape: requirement_card
 document_language: zh-CN
 language_source: user_request

@@ -84,14 +84,14 @@ Breaking changes require:
 
 Run:
 
-```powershell
-py -3 scripts/ai_delivery_spec_cli.py check
+```bash
+python scripts/ai_delivery_spec_cli.py check
 ```
 
 For Product Truth changes:
 
-```powershell
-py -3 scripts/validators/validate_product_truth.py path/to/product-truth.yaml
+```bash
+python scripts/validators/validate_product_truth.py path/to/product-truth.yaml
 ```
 
 For prototype extraction or compatibility work, run the applicable artifact

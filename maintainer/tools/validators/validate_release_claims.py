@@ -77,6 +77,16 @@ def main() -> int:
         failures.append("release status does not declare pure_v5 runtime")
     if release_status.get("domain_packs", {}).get("count") != len(coverage.get("domains", [])):
         failures.append("release status domain count is stale")
+    evidence = release_status.get("release_evidence", {})
+    required_results = {
+        "pytest", "release_gate", "public_quickstart_and_badcases", "trace_input_badcases",
+        "runtime_package_check", "maintainer_budget", "skill_creator_quick_validate",
+        "dirty_release_provenance_guard",
+    }
+    if not evidence.get("verified_at") or required_results - set(evidence.get("results", {})):
+        failures.append("release status misses machine-readable release evidence")
+    if "not customer or production acceptance" not in str(evidence.get("scope", "")):
+        failures.append("release evidence misses its non-production boundary")
     for domain in coverage.get("domains", []):
         if domain["domain_id"] not in readme:
             failures.append(f"README omits domain pack: {domain['domain_id']}")

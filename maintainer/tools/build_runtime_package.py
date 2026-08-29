@@ -83,6 +83,7 @@ def self_check(root: Path) -> list[str]:
     commands = (
         [sys.executable, "scripts/ai_delivery_spec_cli.py", "version"],
         [sys.executable, "scripts/validators/validate_spec_config.py", "examples/spec.config.example.yaml"],
+        [sys.executable, "scripts/ai_delivery_spec_cli.py", "gate", "--profile", "prd", "--prd", "examples/minimal-v5/requirement-card.md", "--level", "auto"],
     )
     clean_env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
     for command in commands:

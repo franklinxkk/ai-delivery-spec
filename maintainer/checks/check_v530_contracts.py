@@ -92,66 +92,60 @@ status: baselined
 
 # {case['title']}需求卡
 
-## 0. 文档控制与 30 秒摘要
+## 0. 文档控制与摘要
 
 | 项目 | 内容 |
 |---|---|
 | REQ ID / 版本 | `{req}` / `v1.0` |
 | 负责人 / 确认人 | 产品负责人 / {case['role_name']}代表 |
-| 准入结论 | accept；单角色、可逆、局部读取体验调整 |
-| 一句话结果 | {case['outcome']} |
-| 成功信号 | 正向与恢复验收均通过，原业务数据和权限不改变 |
+| 准入 / 结果 | accept；局部可逆；{case['outcome']} |
+| 成功 | 正向与恢复 AC 均通过，数据和权限不变 |
 
 ## 1. 来源、问题与价值
 
-来源`{case['src']}`是现有项目材料中的可观察页面和字段。当前用户需要通过重复浏览或手工查找
-才能完成该局部任务。增加一个不持久化业务状态的轻量控件，可减少查找步骤且不改变原有数据。
+来源 `{case['src']}` 是现有页面证据；当前需要重复浏览或手工查找。新增轻量查询控件减少步骤，
+不持久化业务状态、不改变原数据。
 
 ## 2. 目标、范围与非目标
 
-- 目标：{case['outcome']}。
-- 本期范围：只修改`{case['view']}`的展示与本地查询参数，不新增业务实体、审批或跨系统写入。
-- 明确不做：不改变数据范围、后端权限、原记录状态、导入导出和统计口径。
-- 约束与依赖：沿用页面已有字段来源；权限仍由原列表查询守卫控制。
+- 目标：{case['outcome']}；范围：仅修改 `{case['view']}` 展示与查询参数。
+- 不做：不新增实体、审批、写回、导入导出或指标，不改变数据范围、权限和记录状态。
+- 依赖：沿用既有字段来源与列表查询守卫。
 
 ## 3. 角色、用户故事与权限
 
-| ROLE/REQ | 场景 | 用户故事 | 数据/权限边界 |
-|---|---|---|---|
-| `{case['role']}` / `{req}` | {case['scene']} | 作为{case['role_name']}，我希望{case['story']}，从而减少重复查找。 | 仅查看原本有权访问的记录；不得扩大组织、租户或所有者范围。 |
+`{case['role']}` 在 {case['scene']} 中希望{case['story']}；只查看原本有权访问的记录，
+不得扩大组织、租户或所有者范围。该边界绑定 `{req}`。
 
 ## 4. 用户旅程、主流程、异常与状态
 
-入口`{case['view']}` → 执行`{act}` → 页面刷新当前列表 → 用户看到符合条件的记录 → 清除条件恢复默认。
-查询失败时保留控件值并显示可重试错误；空结果显示空态与“清除条件”，无权时仍显示原无权页。
+`{case['flow']}`：进入 `{case['view']}` → 执行 `{act}` → 刷新列表 → 查看结果 → 清除后恢复默认。
+失败保留控件值并可重试；空结果显示清除入口；无权仍显示原无权页。
 
-| FLOW/ACT | 前置与输入 | 可见结果 | 领域/状态结果 | 失败与恢复 | AC |
-|---|---|---|---|---|---|
-| `{case['flow']}` / `{act}` | `{case['role']}`已进入页面；输入`{case['field']}` | {case['visible_result']} | 只更新查询视图，不写业务数据 | 错误保留输入并可重试；清除后恢复默认 | `{ac_positive}`、`{ac_recovery}` |
+状态为 default → loading → result/empty/error；仅更新查询视图，不写业务数据，验收绑定
+`{ac_positive}`、`{ac_recovery}`。
 
 ## 5. 规则、字段与条件规格
 
-- 页面入口与布局：控件放在现有列表筛选区，不新增导航和弹窗。
-- 字段与控件：`{case['field']}`使用{case['control']}；默认值为“{case['default']}”。
-- 动作权限：`{act}`对原页面可见角色开放；服务端继续应用原数据范围，不因控件值放宽权限。
-- 页面状态：default显示默认结果；loading禁用重复触发；empty显示清除入口；error保留输入；no_permission不返回记录。
-- 校验与长度：控件只接受既有选项或布尔/排序枚举，不允许自由输入未知值。
-- 失败恢复：查询失败不改变业务数据，用户可以重试、清除或离开页面。
-- `stateful`不适用：没有持久业务状态转换。
-- `data_submission`不适用：只读查询，不上报或写回数据。
-- `integration`、`batch_io`、`high_risk`不适用：不新增外部接口、批量文件或高风险决策。
+| ID | 规则 |
+|---|---|
+| `{case['field']}` | {case['control']}；默认“{case['default']}”；只接受既有选项/枚举 |
+| `{act}` | 原页面角色可用；服务端继续叠加原数据范围；loading 禁止重复触发 |
+| `{case['view']}` | 筛选区内展示；{case['visible_result']}；error 保留输入，empty 可清除 |
+
+无持久状态、上报写回、外部集成、批量文件或高风险决策；失败可重试、清除或离开。
 
 ## 6. 验收与测试
 
-| AC/TEST | Given 前置/角色 | When 操作/输入 | Then 可见结果 | And 领域结果 | 反例/证据 |
-|---|---|---|---|---|---|
-| `{ac_positive}` / `{case['test_positive']}` | 有权{case['role_name']}进入页面且存在匹配/不匹配记录 | 执行`{act}`并选择非默认值 | {case['visible_result']} | 原记录、权限和总数据不变 | 截图/查询参数/结果集合对比 |
-| `{ac_recovery}` / `{case['test_recovery']}` | 查询被模拟为失败或无匹配结果 | 保持条件并重试或清除 | 显示错误/空态；重试成功或清除后恢复默认 | 不产生写入和越权数据 | 错误态截图/请求日志 |
+| AC/TEST | 前提与操作 | 可见/领域结果 | 证据 |
+|---|---|---|---|
+| `{ac_positive}` / `{case['test_positive']}` | 有权{case['role_name']}执行 `{act}` 并选非默认值 | {case['visible_result']}；记录、权限、总量不变 | 截图、查询参数、结果集合 |
+| `{ac_recovery}` / `{case['test_recovery']}` | 模拟失败/空结果后重试或清除 | 错误/空态可恢复；无写入和越权 | 错误态截图、请求日志 |
 
 ## 7. 未知项与升级判断
 
-P0/P1未知项为空。字段来源、默认值、角色和恢复路径均由现有页面证据确认。若后续要求保存个人偏好、
-改变数据范围、跨端同步、统计指标或批量操作，必须创建`CHG-*`并重新分诊，必要时升级统一PRD。
+P0/P1 为空；字段、默认值、角色和恢复路径已有证据。若新增偏好保存、权限、同步、指标或批量操作，
+创建 `CHG-*` 重新分诊，必要时升级统一 PRD。
 """
 
 
@@ -291,88 +285,19 @@ with tempfile.TemporaryDirectory(prefix="ads-v530-") as temp_name:
     if code != 2 or "STAGE0-LEGACY-INVENTORY" not in codes(payload):
         failures.append(f"legacy Stage 0 shape lacked explicit migration guidance: {codes(payload)}")
 
-    card_cases = [
-        {
-            "code": "PUBLISHING-RESOURCE-FORMAT", "project": "出版学习与授权平台",
-            "title": "资源列表增加文件格式筛选", "outcome": "内容制作人员可按视频、音频、文档或图片快速缩小资源范围",
-            "scene": "资源管理列表查找素材", "story": "按已有文件格式筛选当前资源列表",
-            "role": "ROLE-PUBLISHING-CONTENT", "role_name": "内容制作人员", "mod": "MOD-PUBLISHING-RESOURCE",
-            "view": "VIEW-PUBLISHING-RESOURCE-LIST", "field": "FLD-PUBLISHING-FILE-FORMAT", "control": "单选下拉", "default": "全部格式",
-            "visible_result": "列表只显示所选格式资源并展示当前条件", "src": "SRC-PUBLISHING-PROTO-RESOURCE",
-        },
-        {
-            "code": "PUBLISHING-COURSE-MINE", "project": "出版学习与授权平台",
-            "title": "课程列表增加仅看我创建", "outcome": "课程编辑可一键只查看本人创建且原本有权访问的课程",
-            "scene": "课程管理列表定位本人课程", "story": "使用仅看我创建开关减少翻页查找",
-            "role": "ROLE-PUBLISHING-EDITOR", "role_name": "课程编辑", "mod": "MOD-PUBLISHING-COURSE",
-            "view": "VIEW-PUBLISHING-COURSE-LIST", "field": "FLD-PUBLISHING-COURSE-MINE", "control": "布尔开关", "default": "关闭",
-            "visible_result": "开启后只显示createdBy为当前用户的有权课程", "src": "SRC-PUBLISHING-PROTO-COURSE", "changed": True,
-        },
-        {
-            "code": "CRM-LEAD-SOURCE", "project": "CRM经营响应平台",
-            "title": "线索列表增加来源筛选", "outcome": "销售可按现有线索来源字典筛选自己有权查看的线索",
-            "scene": "线索列表按来源查找", "story": "选择来源后只查看对应渠道线索",
-            "role": "ROLE-CRM-SALES", "role_name": "销售", "mod": "MOD-CRM-LEAD",
-            "view": "VIEW-CRM-LEAD-LIST", "field": "FLD-CRM-LEAD-SOURCE", "control": "可清除单选下拉", "default": "全部来源",
-            "visible_result": "列表和结果数按所选来源刷新", "src": "SRC-CRM-PROTO-LEAD",
-        },
-        {
-            "code": "CRM-TICKET-OVERDUE", "project": "CRM经营响应平台",
-            "title": "工单列表增加仅看超期", "outcome": "客服可快速查看截止时间已过且未关闭的有权工单",
-            "scene": "工单列表处理超期待办", "story": "使用仅看超期筛选定位需要优先响应的工单",
-            "role": "ROLE-CRM-SERVICE", "role_name": "客服", "mod": "MOD-CRM-TICKET",
-            "view": "VIEW-CRM-TICKET-LIST", "field": "FLD-CRM-TICKET-OVERDUE", "control": "布尔开关", "default": "关闭",
-            "visible_result": "开启后只显示截止时间早于当前时间且状态非关闭的工单", "src": "SRC-CRM-PROTO-TICKET", "changed": True,
-        },
-        {
-            "code": "REPORT-TEMPLATE-CREATOR", "project": "数据报告管理",
-            "title": "报告模板列表增加创建人筛选", "outcome": "报告配置管理员可按已有创建人筛选模板",
-            "scene": "模板管理列表定位责任人", "story": "选择创建人后查看对应模板",
-            "role": "ROLE-REPORT-ADMIN", "role_name": "报告配置管理员", "mod": "MOD-REPORT-TEMPLATE",
-            "view": "VIEW-REPORT-TPL-LIST", "field": "FLD-REPORT-TPL-CREATOR", "control": "可搜索单选下拉", "default": "全部创建人",
-            "visible_result": "列表只显示对应创建人的有权模板", "src": "SRC-REPORT-PROTO-TEMPLATE",
-        },
-        {
-            "code": "REPORT-FAILED-FILTER", "project": "数据报告管理",
-            "title": "我的报告增加生成失败筛选", "outcome": "报告使用人可快速查看本人有权访问的生成失败报告",
-            "scene": "我的报告列表定位失败结果", "story": "选择生成失败状态后快速定位需重新处理的报告",
-            "role": "ROLE-REPORT-USER", "role_name": "报告使用人", "mod": "MOD-REPORT-GENERATED",
-            "view": "VIEW-REPORT-MY-LIST", "field": "FLD-REPORT-GEN-STATUS", "control": "状态单选下拉", "default": "全部状态",
-            "visible_result": "列表只显示status=failed的有权报告", "src": "SRC-REPORT-PROTO-GENERATED", "changed": True,
-        },
-        {
-            "code": "REG-UNIT-LAST-SUCCESS", "project": "人车企数据核对与自动上报",
-            "title": "上报单元按上次成功时间排序", "outcome": "企业管理员可按上次成功时间升序或降序查看七个上报单元",
-            "scene": "企业上报页识别长期未成功单元", "story": "切换上次成功时间排序后优先检查较久未完成的单元",
-            "role": "ROLE-ENT-ADMIN", "role_name": "企业管理员", "mod": "MOD-REPORT-RECONCILE",
-            "view": "VIEW-ENT-REPORT", "field": "FLD-UNIT-LAST-SUCCESS-SORT", "control": "排序枚举按钮", "default": "固定业务顺序",
-            "visible_result": "七个单元按所选时间顺序重排且状态不变", "src": "SRC-REPORTING-BASELINE-001",
-        },
-        {
-            "code": "REG-COPY-CORRELATION", "project": "人车企数据核对与自动上报",
-            "title": "系统失败结果支持复制关联号", "outcome": "企业管理员可复制当前系统失败单元的关联号用于反馈",
-            "scene": "上报进度查看系统失败详情", "story": "点击复制关联号并在反馈中粘贴准确标识",
-            "role": "ROLE-ENT-ADMIN", "role_name": "企业管理员", "mod": "MOD-REPORT-RECONCILE",
-            "view": "VIEW-REPORT-PROGRESS", "field": "FLD-REPORT-CORRELATION-ID", "control": "只读文本和复制按钮", "default": "无关联号时隐藏",
-            "visible_result": "成功复制后按钮短暂显示已复制且原失败状态不变", "src": "SRC-REPORTING-BASELINE-001", "changed": True,
-        },
-        {
-            "code": "KB-MY-CREATED", "project": "SaaS知识库管理",
-            "title": "知识列表增加仅看我创建", "outcome": "知识管理员可只查看本人创建且原本有权访问的知识条目",
-            "scene": "知识列表定位本人内容", "story": "开启仅看我创建以减少搜索范围",
-            "role": "ROLE-KB-ADMIN", "role_name": "知识管理员", "mod": "MOD-KB-CONTENT",
-            "view": "VIEW-KB-LIST", "field": "FLD-KB-MY-CREATED", "control": "布尔开关", "default": "关闭",
-            "visible_result": "开启后只显示createdBy为当前用户的有权知识", "src": "SRC-KB-PROTO-001",
-        },
-        {
-            "code": "KB-COPY-ASSET-ID", "project": "SaaS知识库管理",
-            "title": "知识资产详情支持复制资产编号", "outcome": "知识管理员可复制当前资产稳定编号用于沟通定位",
-            "scene": "知识资产详情沟通问题", "story": "点击复制资产编号并粘贴到评审记录",
-            "role": "ROLE-KB-ADMIN", "role_name": "知识管理员", "mod": "MOD-KB-ASSET",
-            "view": "VIEW-KB-ASSET-DETAIL", "field": "FLD-KB-ASSET-ID", "control": "只读文本和复制按钮", "default": "显示现有编号",
-            "visible_result": "复制成功后显示已复制，资产内容和状态不改变", "src": "SRC-KB-PROTO-001", "changed": True,
-        },
-    ]
+    card_keys = ("code", "project", "title", "outcome", "scene", "story", "role", "role_name", "mod", "view", "field", "control", "default", "visible_result", "src", "changed")
+    card_cases = [dict(zip(card_keys, row)) for row in (
+        ("PUBLISHING-RESOURCE-FORMAT", "出版学习与授权平台", "资源列表增加文件格式筛选", "内容制作人员可按视频、音频、文档或图片快速缩小资源范围", "资源管理列表查找素材", "按已有文件格式筛选当前资源列表", "ROLE-PUBLISHING-CONTENT", "内容制作人员", "MOD-PUBLISHING-RESOURCE", "VIEW-PUBLISHING-RESOURCE-LIST", "FLD-PUBLISHING-FILE-FORMAT", "单选下拉", "全部格式", "列表只显示所选格式资源并展示当前条件", "SRC-PUBLISHING-PROTO-RESOURCE", False),
+        ("PUBLISHING-COURSE-MINE", "出版学习与授权平台", "课程列表增加仅看我创建", "课程编辑可一键只查看本人创建且原本有权访问的课程", "课程管理列表定位本人课程", "使用仅看我创建开关减少翻页查找", "ROLE-PUBLISHING-EDITOR", "课程编辑", "MOD-PUBLISHING-COURSE", "VIEW-PUBLISHING-COURSE-LIST", "FLD-PUBLISHING-COURSE-MINE", "布尔开关", "关闭", "开启后只显示createdBy为当前用户的有权课程", "SRC-PUBLISHING-PROTO-COURSE", True),
+        ("CRM-LEAD-SOURCE", "CRM经营响应平台", "线索列表增加来源筛选", "销售可按现有线索来源字典筛选自己有权查看的线索", "线索列表按来源查找", "选择来源后只查看对应渠道线索", "ROLE-CRM-SALES", "销售", "MOD-CRM-LEAD", "VIEW-CRM-LEAD-LIST", "FLD-CRM-LEAD-SOURCE", "可清除单选下拉", "全部来源", "列表和结果数按所选来源刷新", "SRC-CRM-PROTO-LEAD", False),
+        ("CRM-TICKET-OVERDUE", "CRM经营响应平台", "工单列表增加仅看超期", "客服可快速查看截止时间已过且未关闭的有权工单", "工单列表处理超期待办", "使用仅看超期筛选定位需要优先响应的工单", "ROLE-CRM-SERVICE", "客服", "MOD-CRM-TICKET", "VIEW-CRM-TICKET-LIST", "FLD-CRM-TICKET-OVERDUE", "布尔开关", "关闭", "开启后只显示截止时间早于当前时间且状态非关闭的工单", "SRC-CRM-PROTO-TICKET", True),
+        ("REPORT-TEMPLATE-CREATOR", "数据报告管理", "报告模板列表增加创建人筛选", "报告配置管理员可按已有创建人筛选模板", "模板管理列表定位责任人", "选择创建人后查看对应模板", "ROLE-REPORT-ADMIN", "报告配置管理员", "MOD-REPORT-TEMPLATE", "VIEW-REPORT-TPL-LIST", "FLD-REPORT-TPL-CREATOR", "可搜索单选下拉", "全部创建人", "列表只显示对应创建人的有权模板", "SRC-REPORT-PROTO-TEMPLATE", False),
+        ("REPORT-FAILED-FILTER", "数据报告管理", "我的报告增加生成失败筛选", "报告使用人可快速查看本人有权访问的生成失败报告", "我的报告列表定位失败结果", "选择生成失败状态后快速定位需重新处理的报告", "ROLE-REPORT-USER", "报告使用人", "MOD-REPORT-GENERATED", "VIEW-REPORT-MY-LIST", "FLD-REPORT-GEN-STATUS", "状态单选下拉", "全部状态", "列表只显示status=failed的有权报告", "SRC-REPORT-PROTO-GENERATED", True),
+        ("REG-UNIT-LAST-SUCCESS", "人车企数据核对与自动上报", "上报单元按上次成功时间排序", "企业管理员可按上次成功时间升序或降序查看七个上报单元", "企业上报页识别长期未成功单元", "切换上次成功时间排序后优先检查较久未完成的单元", "ROLE-ENT-ADMIN", "企业管理员", "MOD-REPORT-RECONCILE", "VIEW-ENT-REPORT", "FLD-UNIT-LAST-SUCCESS-SORT", "排序枚举按钮", "固定业务顺序", "七个单元按所选时间顺序重排且状态不变", "SRC-REPORTING-BASELINE-001", False),
+        ("REG-COPY-CORRELATION", "人车企数据核对与自动上报", "系统失败结果支持复制关联号", "企业管理员可复制当前系统失败单元的关联号用于反馈", "上报进度查看系统失败详情", "点击复制关联号并在反馈中粘贴准确标识", "ROLE-ENT-ADMIN", "企业管理员", "MOD-REPORT-RECONCILE", "VIEW-REPORT-PROGRESS", "FLD-REPORT-CORRELATION-ID", "只读文本和复制按钮", "无关联号时隐藏", "成功复制后按钮短暂显示已复制且原失败状态不变", "SRC-REPORTING-BASELINE-001", True),
+        ("KB-MY-CREATED", "SaaS知识库管理", "知识列表增加仅看我创建", "知识管理员可只查看本人创建且原本有权访问的知识条目", "知识列表定位本人内容", "开启仅看我创建以减少搜索范围", "ROLE-KB-ADMIN", "知识管理员", "MOD-KB-CONTENT", "VIEW-KB-LIST", "FLD-KB-MY-CREATED", "布尔开关", "关闭", "开启后只显示createdBy为当前用户的有权知识", "SRC-KB-PROTO-001", False),
+        ("KB-COPY-ASSET-ID", "SaaS知识库管理", "知识资产详情支持复制资产编号", "知识管理员可复制当前资产稳定编号用于沟通定位", "知识资产详情沟通问题", "点击复制资产编号并粘贴到评审记录", "ROLE-KB-ADMIN", "知识管理员", "MOD-KB-ASSET", "VIEW-KB-ASSET-DETAIL", "FLD-KB-ASSET-ID", "只读文本和复制按钮", "显示现有编号", "复制成功后显示已复制，资产内容和状态不改变", "SRC-KB-PROTO-001", True),
+    )]
 
     for case in card_cases:
         case.update({

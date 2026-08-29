@@ -58,7 +58,7 @@ openclaw skills install @franklinxkk/ai-delivery-spec
 | 入口 | 复制后替换括号内容 | 得到什么 |
 |---|---|---|
 | `/ads` | `/ads 我现在有（想法/材料/旧系统），本次想做到（目标）` | 自动判断从哪里进入、做到哪里停止 |
-| `/dig` | `/dig 深挖这个需求，一次只问我一个真正影响方向的问题` | 用战略、系统、行为动机、反方挑战四个镜头关闭关键未知 |
+| `/dig` | `/dig 深挖这个需求，一次只问我一个真正影响方向的问题` | 用战略、系统、行为心理（只看可观察动机）、反方挑战四个镜头关闭关键未知 |
 | `/prd` | `/prd 基于这些材料形成可评审、可实施、可验收的统一 PRD` | 资料够就直接出 PRD；存在 P0 未知则先澄清，再自动返回 PRD |
 | `/proto` | `/proto 基于已确认需求生成可操作 HTML；需要评审态时先问我` | 默认生成产品态；概念原型与研发评审态按目标区分 |
 
@@ -118,7 +118,7 @@ openclaw skills install @franklinxkk/ai-delivery-spec
 
 ## 门禁：发现缺口，不制造绿灯
 
-只用 Agent 完成需求工作无需 Python。运行零模型本地门禁需要 Python 3.10+，以及 PyYAML、jsonschema **两个本地依赖**：
+只用 Agent 完成需求工作无需 Python。运行零模型本地门禁需要 Python 3.10+，以及 PyYAML、jsonschema **两个本地依赖**。以下统一使用 `python`；若系统只提供 `python3`，替换命令前缀即可：
 
 ```bash
 python -m pip install -r scripts/requirements.txt
@@ -128,7 +128,7 @@ python scripts/ai_delivery_spec_cli.py gate --profile prd --prd requirements/PRD
 
 持久化产物使用 `ADS:*` 语义锚点和 `resume_context` 续跑。门禁区分 `BLOCK / P0_UNKNOWN / GAP / PASS` 并记录 `not_proven`；静态 PASS 不证明真实实现、法规适用性或客户验收。
 
-复杂项目才启用 Product Truth，执行顺序不能颠倒：
+复杂项目才启用 Product Truth，执行顺序不能颠倒。`init-requirements` 生成的是含占位符和空分片的脚手架；先填入已确认的业务事实，再运行 `compile-truth`，否则门禁会受控阻断：
 
 ```bash
 python scripts/ai_delivery_spec_cli.py init-requirements --output requirements --with-product-truth

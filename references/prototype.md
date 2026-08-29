@@ -21,7 +21,7 @@
 存量原型先执行交互盘点：
 
 ```powershell
-py -3 scripts/extract_interaction_ledger.py --input app.html --output interaction-ledger.json
+python scripts/extract_interaction_ledger.py --input app.html --output interaction-ledger.json
 ```
 
 修改前登记视图、动作、处理器、字段、状态、弹窗、角色路径、数据集和缺口。
@@ -30,7 +30,7 @@ py -3 scripts/extract_interaction_ledger.py --input app.html --output interactio
 不能因此声称旧债已修复：
 
 ```powershell
-py -3 scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app-new.html --prototype-baseline app-old.html --level L2
+python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app-new.html --prototype-baseline app-old.html --level L2
 ```
 
 ## 2. 产品模式、评审模式与三类核心图 / Product, Review And Core Diagrams

@@ -37,5 +37,5 @@ What reusable behavior becomes better, and for whom?
 - [ ] Customer/private/protected data is absent.
 - [ ] Golden examples/eval catalog are updated where relevant.
 - [ ] README, agent metadata, version, and CHANGELOG agree.
-- [ ] `py -3 scripts/ai_delivery_spec_cli.py check` passes.
+- [ ] `python scripts/ai_delivery_spec_cli.py check` passes.
 - [ ] The protected branch requires the `required-gate` status before merge.
