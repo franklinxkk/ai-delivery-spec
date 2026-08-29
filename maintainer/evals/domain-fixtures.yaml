@@ -129,3 +129,27 @@ fixtures:
     contract_assertions:
       must_include: [repeated propose-reject loop, configured limit, human/manual path]
     status: passed
+  - id: FX-MEDIA-MOMENT-AUTHORIZATION
+    domain: media-knowledge
+    type: permission_and_retrieval
+    source: references/domains/domain-media-knowledge.md
+    expected: multimodal retrieval returns an exact authorized moment without leaking restricted results or evidence
+    contract_assertions:
+      must_include: [multimodal moment retrieval, Retrieval relevance is not authorization, "no result, preview, metadata or answer leakage"]
+    status: passed
+  - id: FX-MEDIA-RIGHTS-WITHDRAWAL
+    domain: media-knowledge
+    type: lifecycle
+    source: references/domains/domain-media-knowledge.md
+    expected: a revoked or expired right freezes new use and reaches every declared derivative and index
+    contract_assertions:
+      must_include: [rights withdrawal cascade, new use freezes, "affected derivatives, previews, transcripts, keyframes, caches, embeddings, graph statements, exports and dataset uses"]
+    status: passed
+  - id: FX-MEDIA-PROVENANCE-BOUNDARY
+    domain: media-knowledge
+    type: evidence_boundary
+    source: references/domains/domain-media-knowledge.md
+    expected: cryptographic provenance and AI annotations retain explicit evidence limits
+    contract_assertions:
+      must_include: [C2PA validity is not truth, valid provenance is not proof that a claim is true, AI output never silently overwrites confirmed facts]
+    status: passed

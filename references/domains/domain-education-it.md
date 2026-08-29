@@ -35,7 +35,7 @@ This module is distilled from multi-year higher-education informationization mat
 - AI must not decide automatically: student disciplinary action, scholarship/aid final result, psychological crisis classification, final grades, graduation eligibility, teacher performance conclusion, official evaluation result, or any legally/accountably binding school decision.
 - Representative system families to abstract from: academic affairs suites such as training-plan, course, scheduling, selection, exam, score, graduation-audit, and textbook management; learning/teaching platforms with course resources, classroom interaction, homework, analytics, and AI classroom signals; student-affairs platforms covering one-stop community, counselor workbench, aid/award/sanction/dorm/safety/employment; research management platforms covering project, fund, contract, output, IP, ethics/integrity, and achievement transformation; university data platforms covering standards, master data, indicators, reports, and dashboards.
 
-### Current Baseline and Change Watch (verified 2026-08-09)
+### Current Baseline and Change Watch (verified 2026-08-29)
 
 | Evidence class | Current signal | Requirement effect |
 |---|---|---|

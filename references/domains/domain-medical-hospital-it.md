@@ -59,7 +59,7 @@ before PRD signoff.
   pharmaceutical manufacturing, insurance claim adjudication independent of
   hospital workflow, and public-health command systems outside hospital IT.
 
-### Current Baseline and Change Watch (verified 2026-08-09)
+### Current Baseline and Change Watch (verified 2026-08-29)
 
 | Evidence class | Current signal | Requirement effect |
 |---|---|---|

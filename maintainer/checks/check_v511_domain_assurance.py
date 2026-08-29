@@ -1,4 +1,4 @@
-"""Regression for evidence-bounded domain maturity and OA source semantics."""
+"""Domain assurance regression."""
 
 from pathlib import Path
 import subprocess
@@ -13,58 +13,73 @@ sources = yaml.safe_load((ROOT / "references/domains/domain-sources.yaml").read_
 failures: list[str] = []
 
 domains = coverage.get("domains", [])
-if len(domains) != 7:
-    failures.append("expected seven built-in domain packs")
+if len(domains) != 8:
+    failures.append("expected eight built-in domain packs")
 for domain in domains:
-    if domain.get("maturity") != "contract_tested":
-        failures.append(f"{domain.get('domain_id')} did not pass contract-tested promotion")
-    if domain.get("coverage", {}).get("contract_eval") != "passed":
-        failures.append(f"{domain.get('domain_id')} lacks passing deterministic contract evaluation")
+    domain_id = domain.get("domain_id")
+    if domain.get("maturity") != "contract_tested" or domain.get("coverage", {}).get("contract_eval") != "passed":
+        failures.append(f"{domain_id} lacks contract maturity")
     if domain.get("coverage", {}).get("behavioral_eval") == "passed":
-        failures.append(f"{domain.get('domain_id')} overclaims fresh-agent behavioral validation")
+        failures.append(f"{domain_id} overclaims behavior")
 
 source_map = {source["id"]: source for source in sources.get("sources", [])}
-for source_id in (
+
+
+def require_sources(ids: tuple[str, ...], label: str) -> None:
+    for source_id in ids:
+        if source_id not in source_map:
+            failures.append(f"missing {label} evidence: {source_id}")
+
+
+oa_vendors = (
     "KS-OA-WEAVER-WHITEPAPER", "KS-OA-SEEYON-OPEN-PLATFORM",
     "KS-OA-LANDRAY-CASES", "KS-OA-DINGTALK-OSS", "KS-OA-FEISHU-OSS",
-):
-    source = source_map.get(source_id)
-    if not source:
-        failures.append(f"missing OA vendor evidence: {source_id}")
-        continue
+)
+require_sources(oa_vendors, "OA vendor")
+for source_id in oa_vendors:
+    source = source_map.get(source_id, {})
     if not source.get("evidence_role") or not source.get("claim_limit"):
         failures.append(f"{source_id} lacks evidence role/claim limit")
-
 for source_id in ("KS-OA-DINGTALK-OSS", "KS-OA-FEISHU-OSS"):
-    if "do not prove" not in source_map[source_id]["claim_limit"]:
+    if "do not prove" not in source_map.get(source_id, {}).get("claim_limit", ""):
         failures.append(f"{source_id} confuses open component with open core product")
 
-for source_id in (
+require_sources((
     "KS-DATA-PROPERTY-REGISTER-2026", "KS-DATA-PUBLIC-AUTH-2025",
     "KS-DATA-HQ-DATASET-2026", "KS-DATA-MODEL-DATA-2026",
     "KS-DATA-ACCOUNTING-2023", "KS-DATA-EU-AI-ACT-2024",
-):
-    if source_id not in source_map:
-        failures.append(f"missing data-value/AI-supply evidence: {source_id}")
+), "data-value/AI-supply")
 
-data_pack = (ROOT / "references/domains/domain-data-mart.md").read_text(encoding="utf-8")
-for invariant in (
+def require_text(path: str, phrases: tuple[str, ...], label: str) -> None:
+    text = (ROOT / path).read_text(encoding="utf-8")
+    for phrase in phrases:
+        if phrase not in text:
+            failures.append(f"{label} misses invariant: {phrase}")
+
+
+require_text("references/domains/domain-data-mart.md", (
     "registration-accounting separation", "digital-contract enforcement",
     "model feedback flywheel", "split leakage/contamination",
-):
-    if invariant not in data_pack:
-        failures.append(f"data pack misses lifecycle invariant: {invariant}")
+), "data pack")
+require_text("references/domains/domain-media-knowledge.md", (
+    "KnowledgeMoment = asset_id + rendition_id + temporal/spatial selector",
+    "`/ads`, `/dig`, `/prd` and `/proto`",
+), "media-knowledge pack")
 
-section_query = subprocess.run(
-    [
-        sys.executable, str(ROOT / "scripts/query_domain.py"), "--domain", "data-product",
-        "--section", "Core Workflows", "--format", "markdown",
-    ],
-    cwd=ROOT, text=True, encoding="utf-8", capture_output=True,
-)
-if section_query.returncode or "## Core Workflows" not in section_query.stdout or "## Acceptance Checklist" in section_query.stdout:
-    failures.append("domain query did not return the exact requested section")
+
+def check_section(domain_id: str) -> None:
+    query = subprocess.run(
+        [sys.executable, str(ROOT / "scripts/query_domain.py"), "--domain", domain_id,
+         "--section", "Core Workflows", "--format", "markdown"],
+        cwd=ROOT, text=True, encoding="utf-8", capture_output=True,
+    )
+    if query.returncode or "## Core Workflows" not in query.stdout or "## Acceptance Checklist" in query.stdout:
+        failures.append(f"{domain_id} query did not return the exact requested section")
+
+
+for domain_id in ("data-product", "media-knowledge"):
+    check_section(domain_id)
 
 if failures:
     raise SystemExit("\n".join(failures))
-print("PASS: seven packs remain evidence-bounded; OA and data-value/AI-supply sources and section retrieval are verified")
+print("PASS: eight evidence-bounded domain packs verified")

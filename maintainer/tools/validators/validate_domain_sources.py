@@ -39,6 +39,14 @@ TRUSTED_HOST_SUFFIXES = (
     "oecd.org",
     "unesco.org",
     "modelcontextprotocol.io",
+    "c2pa.org",
+    "iptc.org",
+    "iiif.io",
+    "pbcore.org",
+    "loc.gov",
+    "digitizationguidelines.gov",
+    "mpeg.org",
+    "nrta.gov.cn",
 )
 VENDOR_HOST_SUFFIXES = (
     "weaver.com.cn",
@@ -50,6 +58,8 @@ VENDOR_HOST_SUFFIXES = (
     "salesforce.com",
     "hubspot.com",
     "tencent.com.cn", "qwenwork.cn", "feishu.cn",
+    "nvidia.com",
+    "twelvelabs.io",
 )
 OFFICIAL_GITHUB_PREFIXES = (
     "/open-dingtalk",
@@ -67,6 +77,7 @@ VENDOR_AUTHORITY_TYPES = {
 
 def main() -> int:
     registry = yaml.safe_load(REGISTRY.read_text(encoding="utf-8"))
+    effect_classes = registry.get("policy", {}).get("effect_classes", {})
     failures: list[str] = []
     seen_ids: set[str] = set()
     seen_urls: set[str] = set()
@@ -91,6 +102,8 @@ def main() -> int:
         ):
             if source.get(field) in (None, "", []):
                 failures.append(f"{source_id} missing {field}")
+        if source.get("effect_class") not in effect_classes:
+            failures.append(f"{source_id} missing or invalid effect_class")
 
         url = source.get("url", "")
         parsed = urlparse(url)

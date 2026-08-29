@@ -43,13 +43,13 @@ same 15 section headings used here and in `domain-module-template.md`.
   safety, enforcement, account closure, payment, or irreversible business
   actions without explicit authorized human accountability.
 
-### Current Baseline and Change Watch (verified 2026-08-09)
+### Current Baseline and Change Watch (verified 2026-08-29)
 
 | Evidence class | Current signal | Requirement effect |
 |---|---|---|
-| design_guidance | `KS-AI-GBZ185-SERIES-2026` covers agent architecture, identity, description, discovery, interaction and tool calling; `KS-AI-MCP-2026-07-28` resets MCP around a stateless core and formal extensions | declare protocol/profile versions, identity/authority, capability metadata, discovery, auth, tool side effects, compatibility and migration tests instead of saying only “supports agents/MCP” |
+| design_guidance | `KS-AI-AGENT-IMPLEMENTATION-2026` adds current agent policy direction; `KS-AI-GBZ185-SERIES-2026` covers agent architecture, identity, description, discovery, interaction and tool calling; `KS-AI-MCP-2026-07-28` resets MCP around a stateless core and formal extensions | declare policy applicability, protocol/profile versions, identity/authority, capability metadata, discovery, auth, tool side effects, compatibility and migration tests instead of saying only “supports agents/MCP” |
 | binding_baseline | existing privacy, data-security, AI-content-labeling and anthropomorphic-interaction rules remain applicable by product scenario | resolve whether content, interaction, personal data and high-impact writeback rules apply; keep accountable human gates and audit evidence |
-| change_watch | `KS-AI-NIST-AGENT-STANDARDS-2026` and `KS-AI-AGENT-SECURITY-DRAFT-2026` signal stronger identity, permission, tool, data, log and shutdown controls | use them for threat modeling and re-verification only; initiatives and draft projects cannot create a compliance hard stop |
+| change_watch | `KS-AI-NIST-AGENT-STANDARDS-2026`, `KS-AI-AGENT-SECURITY-DRAFT-2026` and `KS-OA-OFFICE-AGENT-INTERFACE-DRAFT-2026` signal stronger identity, permission, tool, data, log, shutdown and office-interface controls | use them for threat modeling and re-verification only; initiatives, consultations and draft projects cannot create a compliance hard stop |
 | compatibility guard | MCP 2026-07-28 deprecates legacy lifecycle/SSE features with a migration window | never silently break older clients; record supported versions, deprecated paths, fallback and coexistence evidence |
 
 ### AI Transformation Horizon

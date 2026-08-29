@@ -64,7 +64,7 @@ as mandatory features for every project.
 | model-data-scene flywheel | dataset delivery becomes continuous supply and evaluation | model/evaluation/app feedback creates traceable dataset changes without polluting held-out tests |
 | asset and value management | registration, accounting, valuation and financing become connected but separate workflows | no credential or appraisal automatically becomes accounting recognition, ownership judgment, or guaranteed value |
 
-### Current Baseline and Change Watch (verified 2026-08-09)
+### Current Baseline and Change Watch (verified 2026-08-29)
 
 | Evidence class | Current signal | Requirement effect |
 |---|---|---|

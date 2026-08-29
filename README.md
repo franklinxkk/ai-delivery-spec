@@ -137,7 +137,7 @@ python scripts/ai_delivery_spec_cli.py trace --truth requirements/truth/compiled
 python scripts/ai_delivery_spec_cli.py impact --truth requirements/truth/compiled/product-truth.yaml --change requirements/changes/CHG-CORE-001.yaml
 ```
 
-团队自己的术语和规则放在私有 `custom/`。内置领域包为 `traffic`、`crm`、`education-it`、`data-product`、`ai-native`、`oa`、`medical-hospital-it`，当前成熟度均为 `contract_tested`；实践状态分别使用 `production_practiced` 或 `knowledge_only`。这些标签不等于当前项目已获专家确认或生产可用。
+团队自己的术语和规则放在私有 `custom/`。内置领域包为 `traffic`、`crm`、`education-it`、`data-product`、`ai-native`、`media-knowledge`、`oa`、`medical-hospital-it`，当前成熟度均为 `contract_tested`；实践状态分别使用 `production_practiced` 或 `knowledge_only`。这些标签不等于当前项目已获专家确认或生产可用。
 
 ## 边界与验证
 

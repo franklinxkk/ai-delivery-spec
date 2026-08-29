@@ -43,6 +43,7 @@ DOMAIN_FILES = {
     "medical-hospital-it": "references/domains/domain-medical-hospital-it.md",
     "data-product": "references/domains/domain-data-mart.md",
     "ai-native": "references/domains/domain-ai-native.md",
+    "media-knowledge": "references/domains/domain-media-knowledge.md",
 }
 
 

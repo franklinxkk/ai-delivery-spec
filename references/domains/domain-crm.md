@@ -43,7 +43,7 @@ This file validates that the domain module contract can migrate beyond traffic s
 - Keep shared CRM fields canonical as `FLD-*`; projections show only relevant
   scenario, state, rule, permission, exception, and acceptance differences.
 
-### Current Baseline and Change Watch (verified 2026-08-09)
+### Current Baseline and Change Watch (verified 2026-08-29)
 
 | Evidence class | Current signal | Requirement effect |
 |---|---|---|

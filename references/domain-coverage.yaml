@@ -57,7 +57,7 @@ domains:
     known_gaps:
       - National source coverage was refreshed through 2026-08-10, including separate current passenger and dangerous-goods safety-management baselines; provincial/local implementation, project procurement and customer source-system rules remain project-specific.
       - Nine-industry depth has not been behaviorally evaluated.
-    last_verified_at: "2026-08-10T00:00:00+08:00"
+    last_verified_at: "2026-08-29T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -98,7 +98,7 @@ domains:
     known_gaps:
       - CPQ, complex account hierarchy, customer success, and partner conflict need deeper evaluation.
       - Current fixtures are evaluation inputs, not production evidence; Microsoft, Salesforce and HubSpot sources are vendor product patterns, not independent outcome proof.
-    last_verified_at: "2026-08-09T00:00:00+08:00"
+    last_verified_at: "2026-08-29T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -140,7 +140,7 @@ domains:
       - Current knowledge is higher-education heavy.
       - Vocational education, enterprise training, one-book-one-code, channel authorization, and content rights require deeper coverage.
       - The exact national term “AI教育三进战略” was not verified from a primary source and must remain an unknown until its issuer/document is supplied.
-    last_verified_at: "2026-08-09T00:00:00+08:00"
+    last_verified_at: "2026-08-29T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -198,7 +198,7 @@ domains:
       - DingTalk and Feishu public repositories validate exact SDK/demo/integration components only, not core-product open-source status.
       - OA pack still needs fresh-agent behavioral runs and accountable OA practitioner review before behavior_validated or expert_reviewed promotion.
       - The 2026 archive standard project guide is change-watch evidence, not a published standard.
-    last_verified_at: "2026-08-09T00:00:00+08:00"
+    last_verified_at: "2026-08-29T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -235,7 +235,7 @@ domains:
       - High-risk clinical, legal, interoperability, privacy, and local-policy assertions require accountable review.
       - No production claim is allowed from simulated scenarios.
       - A consolidated “数智医院” evaluation transition has not been verified in a publicly accessible NHC replacement standard; preserve it as change watch only.
-    last_verified_at: "2026-08-09T00:00:00+08:00"
+    last_verified_at: "2026-08-29T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -278,7 +278,7 @@ domains:
       - Regional implementation details, sector rules, price/settlement, accounting judgment and cross-border applicability remain project evidence.
       - Fresh-agent behavior, data-domain expert review and production correctness are not proven by the expanded knowledge or static contracts.
       - Official platform, typical-case and sandbox evidence describes implementation patterns, not universal architecture or outcome proof.
-    last_verified_at: "2026-08-09T00:00:00+08:00"
+    last_verified_at: "2026-08-29T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 
@@ -319,7 +319,45 @@ domains:
     known_gaps:
       - Agent delegation, identity, memory governance, prompt injection, red-team, GB/Z 185 profiles and MCP 2026-07-28 migration need executable evaluations.
       - NIST initiatives and China agent-security standard projects are change-watch sources, not final binding standards.
-    last_verified_at: "2026-08-09T00:00:00+08:00"
+    last_verified_at: "2026-08-29T00:00:00+08:00"
+    maintainer: ai-delivery-spec maintainers
+    production_claim: prohibited
+
+  - domain_id: media-knowledge
+    name: Media Assets and Multimodal Knowledge
+    knowledge_file: references/domains/domain-media-knowledge.md
+    applies_when: [media asset, video archive, audio archive, live stream, multimodal knowledge, video search, moment retrieval, media RAG, AI clipping]
+    does_not_apply_when: [decorative media upload with no managed lifecycle or semantic retrieval]
+    coverage:
+      knowledge: sourced
+      scenarios: mocked
+      contract_eval: passed
+      behavioral_eval: not_run
+      expert_review: not_reviewed
+    maturity: contract_tested
+    practice_status: knowledge_only
+    evidence:
+      - id: EV-DOM-MEDIA-SOURCES
+        kind: official_source
+        location: references/domains/domain-sources.yaml#KS-MEDIA-IPTC-VMH-1.7
+        status: current
+        owner: domain maintainer
+      - id: EV-DOM-MEDIA-KNOWLEDGE
+        kind: mock_scenario
+        location: references/domains/domain-media-knowledge.md
+        status: current
+        owner: domain maintainer
+      - id: EV-DOM-MEDIA-CONTRACT
+        kind: contract_eval
+        location: maintainer/evals/domain-fixtures.yaml#FX-MEDIA-MOMENT-AUTHORIZATION
+        status: passed
+        owner: domain maintainer
+    known_gaps:
+      - Fresh-agent behavior and accountable media-archivist, rights and privacy expert review have not run.
+      - Project contracts, source systems, jurisdictions, languages, media corpus and downstream use remain project evidence.
+      - Vendor product patterns do not prove project recall, precision, localization, latency, cost, safety or production suitability.
+      - Static contracts do not prove preservation fidelity, legal rights, identity, authenticity or truth.
+    last_verified_at: "2026-08-29T00:00:00+08:00"
     maintainer: ai-delivery-spec maintainers
     production_claim: prohibited
 

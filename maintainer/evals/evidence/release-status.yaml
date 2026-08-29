@@ -2,13 +2,13 @@ schema_version: 5.3.0
 skill_version: 5.4.8
 runtime: pure_v5
 domain_packs:
-  count: 7
-  maturity: {contract_tested: 7}
-  practice_status: {production_practiced: 5, knowledge_only: 2}
+  count: 8
+  maturity: {contract_tested: 8}
+  practice_status: {production_practiced: 5, knowledge_only: 3}
   production_claims_allowed: 0
 evaluation_assets:
-  domain_fixtures: 16
-  contract_fixtures_passed: 16
+  domain_fixtures: 19
+  contract_fixtures_passed: 19
   catalog_status: {not_run: 11, partial: 4}
 trace_release_proxy:
   status: ready_with_limits
@@ -24,7 +24,7 @@ release_evidence:
     release_gate: passed
     public_quickstart_and_badcases: passed
     trace_input_badcases: passed
-    runtime_package_check: 114_source_files
+    runtime_package_check: 115_source_files
     maintainer_budget: 55_files_under_450000_bytes
     skill_creator_quick_validate: passed
     dirty_release_provenance_guard: blocked_as_expected

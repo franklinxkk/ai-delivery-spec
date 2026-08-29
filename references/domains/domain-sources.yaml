@@ -1,5 +1,5 @@
 schema_version: 5.4.5
-last_catalog_review: 2026-08-10
+last_catalog_review: 2026-08-29
 policy:
   primary_sources_only_for_binding_claims: true
   model_memory_is_authority: false
@@ -22,6 +22,7 @@ sources:
     title: ISO/IEC/IEEE 29148:2018 Requirements engineering
     issuer: ISO/IEC/IEEE
     authority_type: international_standard
+    effect_class: design_guidance
     url: https://www.iso.org/standard/72089.html
     status: confirmed_current
     jurisdiction: global
@@ -34,6 +35,7 @@ sources:
     title: ISO/IEC 25010:2023 Product quality model
     issuer: ISO/IEC
     authority_type: international_standard
+    effect_class: design_guidance
     url: https://www.iso.org/standard/78176.html
     status: current
     jurisdiction: global
@@ -46,6 +48,7 @@ sources:
     title: Web Content Accessibility Guidelines 2.2
     issuer: W3C
     authority_type: recommendation
+    effect_class: design_guidance
     url: https://www.w3.org/TR/WCAG22/
     status: current
     jurisdiction: global
@@ -54,27 +57,31 @@ sources:
     last_verified_at: 2026-07-11
     refresh_days: 180
   - id: KS-COMMON-PIPL
-    domains: [common, crm, education-it, medical-hospital-it, oa, data-product, ai-native]
+    domains: [common, crm, education-it, medical-hospital-it, oa, data-product, ai-native, media-knowledge]
     title: 中华人民共和国个人信息保护法
     issuer: 全国人民代表大会常务委员会
     authority_type: law
+    effect_class: binding_baseline
     url: https://www.samr.gov.cn/wljys/gzzd/art/2023/art_3ef1e889c1e644d4b65b5f5c7f432386.html
     status: active
     jurisdiction: China
     applicability: personal information processing
     product_mapping: purpose, minimum necessary, consent/legal basis, rights, security, cross-border
+    claim_limit: Verify role, jurisdiction, processing purpose, information type and legal basis for the project; the source does not make every media operation consent-only.
     last_verified_at: 2026-07-11
     refresh_days: 90
   - id: KS-COMMON-DSL
-    domains: [common, medical-hospital-it, education-it, data-product, ai-native]
+    domains: [common, medical-hospital-it, education-it, data-product, ai-native, media-knowledge]
     title: 中华人民共和国数据安全法
     issuer: 全国人民代表大会常务委员会
     authority_type: law
+    effect_class: binding_baseline
     url: https://www.samr.gov.cn/zw/zfxxgk/fdzdgknr/bgt/art/2023/art_33654085364e45e2a878c70a06934414.html
     status: active
     jurisdiction: China
     applicability: data processing, classification, risk, incident and security obligations
     product_mapping: data classification, responsibility, lifecycle, incident and audit
+    claim_limit: Verify project jurisdiction, data classification and applicable obligations before creating a hard stop.
     last_verified_at: 2026-07-11
     refresh_days: 90
 
@@ -83,6 +90,7 @@ sources:
     title: 交通运输涉企行政检查标准
     issuer: 中华人民共和国交通运输部
     authority_type: ministry_rule_or_guidance
+    effect_class: binding_baseline
     url: https://www.mot.gov.cn/zhuanti/sheqixzjcgszl/jianchabz/202506/t20250611_4170318.html
     status: active_as_verified
     jurisdiction: China
@@ -95,6 +103,7 @@ sources:
     title: 道路运输从业人员管理规定（2026 修订）
     issuer: 中华人民共和国交通运输部
     authority_type: department_rule
+    effect_class: binding_baseline
     url: https://xxgk.mot.gov.cn/gz/202602/t20260213_4200291.html
     status: active_as_verified
     jurisdiction: China
@@ -107,6 +116,7 @@ sources:
     title: 道路危险货物运输管理规定（2026 修订）
     issuer: 中华人民共和国交通运输部
     authority_type: department_rule
+    effect_class: binding_baseline
     url: https://xxgk.mot.gov.cn/jigou/fgs/202602/t20260213_4200285.html
     status: active_as_verified
     jurisdiction: China
@@ -119,6 +129,7 @@ sources:
     title: 机动车驾驶员培训管理规定（2026 修订）
     issuer: 中华人民共和国交通运输部
     authority_type: department_rule
+    effect_class: binding_baseline
     url: https://xxgk.mot.gov.cn/gz/202602/W020260213620830542770.pdf
     status: active_as_verified
     jurisdiction: China
@@ -132,6 +143,7 @@ sources:
     title: 高等学校数字校园建设规范（试行）
     issuer: 中华人民共和国教育部
     authority_type: ministry_guidance
+    effect_class: design_guidance
     url: https://www.moe.gov.cn/jyb_xwfb/gzdt_gzdt/s5987/202103/t20210326_522685.html
     status: active_as_verified
     jurisdiction: China
@@ -144,6 +156,7 @@ sources:
     title: 教育部机关及直属事业单位教育数据管理办法
     issuer: 中华人民共和国教育部
     authority_type: ministry_rule
+    effect_class: binding_baseline
     url: https://www.moe.gov.cn/srcsite/A03/s7050/201802/t20180211_327248.html
     status: active_as_verified
     jurisdiction: China
@@ -156,6 +169,7 @@ sources:
     title: JY/T 0661-2025 教育数据分类分级指南
     issuer: 中华人民共和国教育部
     authority_type: education_industry_standard
+    effect_class: design_guidance
     url: https://www.moe.gov.cn/srcsite/A16/s3342/202601/W020260107510856466340.pdf
     status: effective_as_verified
     jurisdiction: China
@@ -169,6 +183,7 @@ sources:
     title: 电子病历应用管理规范（试行）
     issuer: 国家卫生计生委、国家中医药管理局
     authority_type: ministry_normative_document
+    effect_class: binding_baseline
     url: https://www.nhc.gov.cn/wjw/c100175/201702/90f3de8ae03d488cbddf509dc958f75b.shtml
     status: active_as_verified
     jurisdiction: China
@@ -181,6 +196,7 @@ sources:
     title: 关于进一步加强医疗机构电子病历信息使用管理的通知
     issuer: 国家卫生健康委员会
     authority_type: ministry_notice
+    effect_class: binding_baseline
     url: https://www.nhc.gov.cn/yzygj/c100068/202506/c68abee7c54b4651a774cd533761780b.shtml
     status: active_as_verified
     jurisdiction: China
@@ -193,6 +209,7 @@ sources:
     title: 医疗卫生机构网络安全管理办法
     issuer: 国家卫生健康委员会等
     authority_type: ministry_rule
+    effect_class: binding_baseline
     url: https://www.nhc.gov.cn/guihuaxxs/c100133/202208/8a23d01133214a779879094dd20cd383.shtml
     status: active
     jurisdiction: China
@@ -205,6 +222,7 @@ sources:
     title: HL7 FHIR R5
     issuer: HL7 International
     authority_type: interoperability_standard
+    effect_class: design_guidance
     url: https://hl7.org/fhir/overview.html
     status: current_published_version_as_verified
     jurisdiction: global
@@ -217,6 +235,7 @@ sources:
     title: DICOM Current Edition
     issuer: NEMA/MITA
     authority_type: interoperability_standard
+    effect_class: design_guidance
     url: https://www.dicomstandard.org/current/
     status: continuously_updated
     jurisdiction: global
@@ -230,6 +249,7 @@ sources:
     title: 中华人民共和国电子签名法
     issuer: 全国人民代表大会常务委员会
     authority_type: law
+    effect_class: binding_baseline
     url: https://www.npc.gov.cn/zgrdw/npc/xinwen/2019-05/07/content_2086835.htm
     status: active_as_verified
     jurisdiction: China
@@ -242,6 +262,7 @@ sources:
     title: 党政机关公文处理工作条例
     issuer: 中共中央办公厅、国务院办公厅
     authority_type: regulation
+    effect_class: binding_baseline
     url: https://www.miit.gov.cn/xwdt/szyw/art/2020/art_6afb8ee6d07540dcacccbeb47dbc0fd4.html
     status: active_as_verified
     jurisdiction: China
@@ -254,6 +275,7 @@ sources:
     title: GB/T 39362-2020 党政机关电子公文归档规范
     issuer: 国家市场监督管理总局、国家标准化管理委员会
     authority_type: recommended_national_standard
+    effect_class: design_guidance
     url: https://std.samr.gov.cn/gb/search/gbDetailed?id=B4C25880C3DF1CB3E05397BE0A0A92D0
     status: current_as_verified
     jurisdiction: China
@@ -266,6 +288,7 @@ sources:
     title: 电子档案管理办法
     issuer: 国家档案局
     authority_type: department_rule
+    effect_class: binding_baseline
     url: https://www.saac.gov.cn/daj/xzfgk/202412/41b270e9dfc44f48a09adcc5f4fe8296/files/5f1c2c5c5762425e8639468cc83e5941.pdf
     status: active_as_verified
     jurisdiction: China
@@ -279,6 +302,7 @@ sources:
     title: Weaver e-cology Product Whitepaper
     issuer: 泛微网络
     authority_type: vendor_whitepaper
+    effect_class: product_pattern
     url: https://www.weaver.com.cn/subpage/apply/Weaver_e-cology_Product_Whitepaper.pdf
     status: current_as_verified
     jurisdiction: vendor product evidence
@@ -294,6 +318,7 @@ sources:
     title: Seeyon Open Platform Product Documentation
     issuer: 致远互联
     authority_type: vendor_product_docs
+    effect_class: product_pattern
     url: https://open.seeyon.com/book/product.html
     status: current_as_verified
     jurisdiction: vendor product evidence
@@ -309,6 +334,7 @@ sources:
     title: Landray Customer Case Library
     issuer: 蓝凌软件
     authority_type: vendor_case_library
+    effect_class: product_pattern
     url: https://www.landray.com.cn/case
     status: current_as_verified
     jurisdiction: vendor scenario evidence
@@ -324,6 +350,7 @@ sources:
     title: DingTalk Open Platform Team Public Repositories
     issuer: 钉钉开放平台团队
     authority_type: vendor_open_source
+    effect_class: product_pattern
     url: https://github.com/open-dingtalk
     status: current_as_verified
     jurisdiction: exact public repositories and licensed components
@@ -339,6 +366,7 @@ sources:
     title: Lark and Feishu Public Repositories
     issuer: Lark Technologies / 飞书
     authority_type: vendor_open_source
+    effect_class: product_pattern
     url: https://github.com/larksuite
     status: current_as_verified
     jurisdiction: exact public repositories and licensed components
@@ -354,6 +382,7 @@ sources:
     title: ISO 10002:2018 Complaints handling in organizations
     issuer: ISO
     authority_type: international_standard
+    effect_class: design_guidance
     url: https://www.iso.org/standard/71580.html
     status: confirmed_current
     jurisdiction: global
@@ -367,6 +396,7 @@ sources:
     title: PROV-O The PROV Ontology
     issuer: W3C
     authority_type: recommendation
+    effect_class: design_guidance
     url: https://www.w3.org/TR/prov-o/
     status: current_recommendation
     jurisdiction: global
@@ -379,6 +409,7 @@ sources:
     title: OpenLineage Specification
     issuer: OpenLineage project
     authority_type: open_standard
+    effect_class: design_guidance
     url: https://openlineage.io/docs/spec/facets/
     status: current_as_verified
     jurisdiction: global
@@ -391,6 +422,7 @@ sources:
     title: JSON Schema Draft 2020-12
     issuer: JSON Schema project
     authority_type: specification
+    effect_class: design_guidance
     url: https://json-schema.org/draft/2020-12
     status: current_as_verified
     jurisdiction: global
@@ -404,6 +436,7 @@ sources:
     title: 国家数据基础设施建设指引
     issuer: 国家发展改革委、国家数据局、工业和信息化部
     authority_type: national_policy_guidance
+    effect_class: design_guidance
     url: https://www.nda.gov.cn/sjj/ywpd/szkjyjcss/0110/20250106095112713400492_pc.html
     status: active_as_verified
     jurisdiction: China
@@ -416,6 +449,7 @@ sources:
     title: 可信数据空间发展行动计划（2024—2028年）
     issuer: 国家数据局
     authority_type: national_action_plan
+    effect_class: design_guidance
     url: https://www.nda.gov.cn/sjj/zwgk/zcfb/1122/ff808081-92b8a4f1-0193-530c6ac8-0475.pdf
     status: active_plan
     jurisdiction: China
@@ -428,6 +462,7 @@ sources:
     title: 公共数据资源登记管理暂行办法
     issuer: 国家发展改革委、国家数据局
     authority_type: administrative_normative_document
+    effect_class: binding_baseline
     url: https://www.nda.gov.cn/sjj/zwgk/zcfb/0120/ff808081-93de5a43-0194-8300870a-0b64.pdf
     status: effective
     jurisdiction: China
@@ -440,6 +475,7 @@ sources:
     title: 公共数据资源授权运营实施规范（试行）
     issuer: 国家发展改革委、国家数据局
     authority_type: administrative_normative_document
+    effect_class: binding_baseline
     url: https://www.nda.gov.cn/sjj/xxgk/zc/xzgfxwj/0120/20250120175648588490013_pc.html
     status: effective
     jurisdiction: China
@@ -452,6 +488,7 @@ sources:
     title: 数据产权登记工作指引（试行）
     issuer: 国家数据局
     authority_type: national_work_guidance
+    effect_class: design_guidance
     url: https://www.nda.gov.cn/sjj/zwgk/tzgg/0703/20260703230745065425855_pc.html
     status: active_as_verified
     jurisdiction: China
@@ -464,6 +501,7 @@ sources:
     title: 关于推进行业高质量数据集建设行动的实施方案
     issuer: 国家数据局
     authority_type: national_action_plan
+    effect_class: design_guidance
     url: https://www.nda.gov.cn/sjj/zwgk/tzgg/0608/20260608172117399715004_pc.html
     status: active_plan
     jurisdiction: China
@@ -476,6 +514,7 @@ sources:
     title: 2026年“模数共振”行动
     issuer: 工业和信息化部、国家数据局
     authority_type: joint_action_notice
+    effect_class: design_guidance
     url: https://www.nda.gov.cn/sjj/zwgk/tzgg/0428/20260428215540161552208_pc.html
     status: active_2026
     jurisdiction: China
@@ -488,6 +527,7 @@ sources:
     title: 企业数据资源相关会计处理暂行规定
     issuer: 中华人民共和国财政部
     authority_type: accounting_rule
+    effect_class: binding_baseline
     url: https://www.mof.gov.cn/gkml/caizhengwengao/wg2023/wg202308/202312/t20231227_3924258.htm
     status: effective
     jurisdiction: China
@@ -500,6 +540,7 @@ sources:
     title: 四川省“数据要素×”重点工作方案（2025—2026年）
     issuer: 四川省发展和改革委员会等部门
     authority_type: regional_action_plan
+    effect_class: design_guidance
     url: https://credit.sc.gov.cn/640.news.detail.dhtml?news_id=16899
     status: active_plan
     jurisdiction: China-Sichuan
@@ -512,6 +553,7 @@ sources:
     title: Regulation (EU) 2024/1689, Article 10 Data and data governance
     issuer: European Union
     authority_type: regulation
+    effect_class: binding_baseline
     url: https://eur-lex.europa.eu/eli/reg/2024/1689/oj?locale=en
     status: in_force_with_staged_application
     jurisdiction: European-Union
@@ -524,6 +566,7 @@ sources:
     title: Mapping relevant data collection mechanisms for AI training
     issuer: OECD
     authority_type: intergovernmental_policy_report
+    effect_class: design_guidance
     url: https://www.oecd.org/content/dam/oecd/en/publications/reports/2025/10/mapping-relevant-data-collection-mechanisms-for-ai-training_62921889/3264cd4c-en.pdf
     status: published
     jurisdiction: global
@@ -536,6 +579,7 @@ sources:
     title: Codex parent-child agent liveness and wait semantics issue
     issuer: OpenAI Codex project
     authority_type: vendor_open_source
+    effect_class: product_pattern
     url: https://github.com/openai/codex/issues/16900
     status: current_as_verified
     jurisdiction: exact public issue and repository behavior
@@ -550,6 +594,7 @@ sources:
     title: Qwen Code sub-agent support issue
     issuer: Qwen Code project
     authority_type: vendor_open_source
+    effect_class: product_pattern
     url: https://github.com/QwenLM/qwen-code/issues/344
     status: current_as_verified
     jurisdiction: exact public issue and repository behavior
@@ -565,6 +610,7 @@ sources:
     title: ISO/IEC 42001:2023 AI management systems
     issuer: ISO/IEC
     authority_type: international_standard
+    effect_class: design_guidance
     url: https://www.iso.org/standard/42001
     status: current
     jurisdiction: global
@@ -577,6 +623,7 @@ sources:
     title: NIST AI Risk Management Framework 1.0
     issuer: NIST
     authority_type: framework
+    effect_class: design_guidance
     url: https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-ai-rmf-10
     status: current_with_revision_underway
     jurisdiction: United States / voluntary global reference
@@ -585,15 +632,17 @@ sources:
     last_verified_at: 2026-07-11
     refresh_days: 90
   - id: KS-AI-CHINA-LABEL-2025
-    domains: [ai-native]
+    domains: [ai-native, media-knowledge]
     title: 人工智能生成合成内容标识办法
     issuer: 国家互联网信息办公室等
     authority_type: department_rule
+    effect_class: binding_baseline
     url: https://www.cac.gov.cn/2025-03/14/c_1743654684782215.htm
     status: effective
     jurisdiction: China
     applicability: AI-generated/synthesized content labeling within stated scope
     product_mapping: explicit/implicit labeling, content metadata and platform responsibility
+    claim_limit: Apply only after verifying that the service and generated or synthesized content fall within the rule; labeling does not prove truth, ownership or lawful reuse.
     last_verified_at: 2026-07-11
     refresh_days: 90
   - id: KS-AI-CHINA-ANTHROPOMORPHIC-2026
@@ -601,6 +650,7 @@ sources:
     title: 人工智能拟人化互动服务管理暂行办法
     issuer: 国家互联网信息办公室
     authority_type: department_rule
+    effect_class: binding_baseline
     url: https://www.cac.gov.cn/2026-04/10/c_1777558395078289.htm
     status: active_as_verified
     jurisdiction: China
@@ -614,6 +664,7 @@ sources:
     title: BPMN 2.0.2
     issuer: Object Management Group
     authority_type: standard
+    effect_class: design_guidance
     url: https://www.omg.org/bpmn/
     status: current_formal_version_as_verified
     jurisdiction: global
@@ -626,6 +677,7 @@ sources:
     title: DMN 1.5
     issuer: Object Management Group
     authority_type: standard
+    effect_class: design_guidance
     url: https://www.omg.org/spec/DMN/
     status: current_formal_version_as_verified
     jurisdiction: global
@@ -638,6 +690,7 @@ sources:
     title: OpenAPI Specification 3.2.0
     issuer: OpenAPI Initiative
     authority_type: specification
+    effect_class: design_guidance
     url: https://spec.openapis.org/oas/latest.html
     status: current_published_version_as_verified
     jurisdiction: global
@@ -650,6 +703,7 @@ sources:
     title: AsyncAPI Specification 3.1.0
     issuer: AsyncAPI Initiative
     authority_type: specification
+    effect_class: design_guidance
     url: https://www.asyncapi.com/docs/reference/specification/latest
     status: current_published_version_as_verified
     jurisdiction: global
@@ -662,6 +716,7 @@ sources:
     title: CloudEvents
     issuer: CNCF CloudEvents project
     authority_type: specification
+    effect_class: design_guidance
     url: https://cloudevents.io/
     status: current_as_verified
     jurisdiction: global
@@ -1080,4 +1135,277 @@ sources:
     evidence_role: official vendor integration-pattern evidence
     claim_limit: The source supports deep product integration, not a verified organizational merger, independent superiority or universal migration requirement.
     last_verified_at: 2026-08-09
+    refresh_days: 30
+
+  # 2026-08-29 media assets and multimodal knowledge baseline
+  - id: KS-MEDIA-FACE-2025
+    domains: [media-knowledge]
+    title: 人脸识别技术应用安全管理办法
+    issuer: 国家互联网信息办公室、公安部
+    authority_type: department_rule
+    effect_class: binding_baseline
+    url: https://www.cac.gov.cn/2025-03/21/c_1744174262156096.htm
+    status: effective
+    jurisdiction: China
+    applicability: face-recognition technology applications within the stated scope
+    product_mapping: necessity, notice, protection, alternative path, storage and accountable use of face information
+    claim_limit: Verify scope, purpose, role and legal basis; visual analysis is not automatically face recognition, and recognition output is not authoritative identity proof.
+    last_verified_at: 2026-08-29
+    refresh_days: 90
+  - id: KS-MEDIA-COPYRIGHT-2020
+    domains: [media-knowledge]
+    title: 中华人民共和国著作权法（2020年修正）
+    issuer: 全国人民代表大会常务委员会
+    authority_type: law
+    effect_class: binding_baseline
+    url: https://fjca.miit.gov.cn/zwgk/zcwj/wjfb/art/2020/art_3fd5e3c5e6624d95af229036f95e20d3.html
+    status: active
+    jurisdiction: China
+    applicability: copyrighted works and acts of reproduction, adaptation, communication and other use
+    product_mapping: rights owner, work, grant, permitted action, term, territory, attribution, derivative and dispute evidence
+    claim_limit: Product requirements must use project contracts and legal review to determine the actual grant, exceptions and ownership; metadata alone does not prove a license.
+    last_verified_at: 2026-08-29
+    refresh_days: 90
+  - id: KS-MEDIA-IPTC-VMH-1.7
+    domains: [media-knowledge]
+    title: IPTC Video Metadata Hub Recommendation 1.7
+    issuer: International Press Telecommunications Council
+    authority_type: recommendation
+    effect_class: design_guidance
+    url: https://iptc.org/standards/video-metadata-hub/recommendation/
+    status: current_as_verified
+    jurisdiction: global
+    applicability: interoperable descriptive, rights, technical and administrative video metadata
+    product_mapping: video work, asset, rendition, identifiers, rights, people, places and controlled metadata exchange
+    claim_limit: Select and map only the fields needed by the project; the recommendation does not replace source-system ownership, rights evidence or preservation policy.
+    last_verified_at: 2026-08-29
+    refresh_days: 180
+  - id: KS-MEDIA-C2PA-2.4
+    domains: [media-knowledge, ai-native]
+    title: C2PA Technical Specification 2.4
+    issuer: Coalition for Content Provenance and Authenticity
+    authority_type: protocol_specification_release
+    effect_class: design_guidance
+    url: https://spec.c2pa.org/specifications/specifications/2.4/specs/C2PA_Specification.html
+    status: current_as_verified
+    jurisdiction: global_protocol_ecosystem
+    applicability: cryptographically verifiable content provenance and ingredient relationships
+    product_mapping: signed assertions, claim generator, ingredients, transformations, validation status and trust-chain evidence
+    claim_limit: A valid manifest can support provenance integrity; it does not prove that depicted events, assertions, ownership or permitted use are true.
+    last_verified_at: 2026-08-29
+    refresh_days: 90
+  - id: KS-MEDIA-W3C-FRAGMENTS
+    domains: [media-knowledge]
+    title: W3C Media Fragments URI 1.0
+    issuer: W3C
+    authority_type: recommendation
+    effect_class: design_guidance
+    url: https://www.w3.org/TR/media-frags/
+    status: recommendation
+    jurisdiction: global
+    applicability: interoperable temporal, spatial, track and identifier media fragments
+    product_mapping: exact moment and region selectors, replayable evidence links and fragment interoperability
+    claim_limit: Media-fragment syntax does not solve rendition time-base drift, permissions, retention or evidence authority by itself.
+    last_verified_at: 2026-08-29
+    refresh_days: 180
+  - id: KS-MEDIA-W3C-ANNOTATION
+    domains: [media-knowledge]
+    title: W3C Web Annotation Data Model
+    issuer: W3C
+    authority_type: recommendation
+    effect_class: design_guidance
+    url: https://www.w3.org/TR/annotation-model/
+    status: recommendation
+    jurisdiction: global
+    applicability: interoperable annotation body, target, selector, motivation and provenance
+    product_mapping: human and machine annotations linked to precise media targets with creator and purpose
+    claim_limit: The model structures annotations; it does not make machine annotations confirmed facts or settle vocabulary governance.
+    last_verified_at: 2026-08-29
+    refresh_days: 180
+  - id: KS-MEDIA-IIIF-3
+    domains: [media-knowledge]
+    title: IIIF Presentation API 3.0
+    issuer: IIIF Consortium
+    authority_type: standard
+    effect_class: design_guidance
+    url: https://iiif.io/api/presentation/3.0/
+    status: current_as_verified
+    jurisdiction: global
+    applicability: presentation and annotation of digital images, audio, video and compound objects
+    product_mapping: manifests, canvases, ranges, annotations, derivatives and interoperable viewing
+    claim_limit: Use as an interchange or viewer pattern when appropriate; it is not a universal internal storage model or rights engine.
+    last_verified_at: 2026-08-29
+    refresh_days: 180
+  - id: KS-MEDIA-PBCORE-2.1
+    domains: [media-knowledge]
+    title: PBCore Metadata Standard 2.1
+    issuer: PBCore community
+    authority_type: standard
+    effect_class: design_guidance
+    url: https://pbcore.org/xsd
+    status: current_as_verified
+    jurisdiction: global
+    applicability: audiovisual cataloging, instantiations, intellectual content and technical metadata
+    product_mapping: work/asset/instantiation separation, tracks, essence, rights and exchange profiles
+    claim_limit: Map only the selected profile; PBCore does not replace project source authority, preservation or permission decisions.
+    last_verified_at: 2026-08-29
+    refresh_days: 180
+  - id: KS-MEDIA-PREMIS-3
+    domains: [media-knowledge]
+    title: PREMIS Data Dictionary for Preservation Metadata 3.0
+    issuer: Library of Congress
+    authority_type: standard
+    effect_class: design_guidance
+    url: https://www.loc.gov/standards/premis/index.html
+    status: current_as_verified
+    jurisdiction: global
+    applicability: long-term digital preservation objects, events, agents and rights
+    product_mapping: preservation object identity, fixity, event, agent, rights and migration evidence
+    claim_limit: Use when preservation is a project outcome; it does not prescribe the whole product catalog or ordinary application workflow.
+    last_verified_at: 2026-08-29
+    refresh_days: 180
+  - id: KS-MEDIA-FADGI-2026
+    domains: [media-knowledge]
+    title: Federal Agencies Digital Guidelines Initiative audiovisual guidance
+    issuer: Federal Agencies Digital Guidelines Initiative
+    authority_type: government_guidance
+    effect_class: design_guidance
+    url: https://www.digitizationguidelines.gov/
+    status: current_guidance_as_verified
+    jurisdiction: United States / voluntary reference
+    applicability: digitization, file-format, quality-control and preservation planning
+    product_mapping: master/access derivative, technical QC, format choice, fixity and preservation planning
+    claim_limit: This is design guidance, not a mandatory project profile outside its applicable authority; verify the selected medium and current document version.
+    last_verified_at: 2026-08-29
+    refresh_days: 180
+  - id: KS-MEDIA-MPEG7
+    domains: [media-knowledge]
+    title: MPEG-7 Multimedia Content Description Interface
+    issuer: Moving Picture Experts Group
+    authority_type: international_standard
+    effect_class: design_guidance
+    url: https://www.mpeg.org/standards/MPEG-7/
+    status: current_series_as_verified
+    jurisdiction: global
+    applicability: multimedia content description and search interoperability
+    product_mapping: audiovisual descriptors, segments, concepts, events and machine-readable descriptions
+    claim_limit: Verify the exact part and profile before adoption; the standard series is an option, not a requirement for every multimodal product.
+    last_verified_at: 2026-08-29
+    refresh_days: 180
+  - id: KS-MEDIA-GYT360-2022
+    domains: [media-knowledge]
+    title: GY/T 360—2022 广播电视和网络视听节目内容标识标记技术规范
+    issuer: 国家广播电视总局
+    authority_type: industry_standard
+    effect_class: design_guidance
+    url: https://www.nrta.gov.cn/art/2022/9/29/art_3715_61975.html
+    status: published_as_verified
+    jurisdiction: China
+    applicability: broadcast television and network audiovisual programme content identifiers and marks
+    product_mapping: content identification, exchange mapping and audiovisual programme metadata profiles
+    claim_limit: Verify applicability and obtain the authoritative standard text before treating any field or code as mandatory.
+    last_verified_at: 2026-08-29
+    refresh_days: 180
+  - id: KS-MEDIA-GYT261-2012
+    domains: [media-knowledge]
+    title: GY/T 261—2012 广播电视数字版权管理元数据规范
+    issuer: 国家广播电视总局
+    authority_type: industry_standard
+    effect_class: design_guidance
+    url: https://www.nrta.gov.cn/art/2020/5/8/art_3715_51072.html
+    status: published_as_verified
+    jurisdiction: China
+    applicability: broadcast and television digital-rights metadata exchange
+    product_mapping: rights subject, object, permission, constraint and authorization metadata mapping
+    claim_limit: Verify current applicability and the selected rights profile; metadata records do not by themselves prove legal authorization.
+    last_verified_at: 2026-08-29
+    refresh_days: 180
+  - id: KS-MEDIA-AZURE-VIDEO-INDEXER-2026
+    domains: [media-knowledge, ai-native]
+    title: Azure AI Video Indexer overview
+    issuer: Microsoft
+    authority_type: vendor_product_docs
+    effect_class: product_pattern
+    url: https://learn.microsoft.com/en-us/azure/azure-video-indexer/video-indexer-overview
+    status: current_vendor_docs_as_verified
+    jurisdiction: global_product
+    applicability: managed audio/video ingestion, enrichment, search and insight patterns
+    product_mapping: upload, transcription, OCR, face/speaker/topic insights, time-coded search and review
+    evidence_role: official vendor product-pattern evidence
+    claim_limit: Documentation proves described product behavior only; it does not prove project accuracy, compliance, rights, cost or superiority.
+    last_verified_at: 2026-08-29
+    refresh_days: 30
+  - id: KS-MEDIA-NVIDIA-VSS-2026
+    domains: [media-knowledge, ai-native]
+    title: NVIDIA Video Search and Summarization overview
+    issuer: NVIDIA
+    authority_type: vendor_product_docs
+    effect_class: product_pattern
+    url: https://docs.nvidia.com/vss/3.0.0/overview/latest/
+    status: current_vendor_docs_as_verified
+    jurisdiction: global_product
+    applicability: multimodal video ingestion, search, summarization, question answering and alert patterns
+    product_mapping: stream/file ingestion, embeddings, retrieval, summaries, prompts, alerts and deployment components
+    evidence_role: official vendor architecture and product-pattern evidence
+    claim_limit: Vendor architecture is an option, not a universal design; it does not prove gold-query quality, lawful surveillance use, latency, cost or production fitness.
+    last_verified_at: 2026-08-29
+    refresh_days: 30
+  - id: KS-MEDIA-TWELVELABS-SEARCH-2026
+    domains: [media-knowledge, ai-native]
+    title: Twelve Labs multimodal video search guide
+    issuer: Twelve Labs
+    authority_type: vendor_product_docs
+    effect_class: product_pattern
+    url: https://docs.twelvelabs.io/docs/guides/search
+    status: current_vendor_docs_as_verified
+    jurisdiction: global_product
+    applicability: semantic video search over visual, spoken, sound and text modalities
+    product_mapping: index, natural-language query, multimodal moment result, confidence and time range
+    evidence_role: official vendor API and product-pattern evidence
+    claim_limit: The guide demonstrates vendor capabilities; project recall, precision, localization, permissions and business value require independent evaluation.
+    last_verified_at: 2026-08-29
+    refresh_days: 30
+
+  # 2026-08-29 legacy-pack freshness patch
+  - id: KS-TRAFFIC-GOODS-STATION-2026
+    domains: [traffic]
+    title: 道路货物运输及站场管理规定（2026修订）
+    issuer: 中华人民共和国交通运输部
+    authority_type: department_rule
+    effect_class: binding_baseline
+    url: https://xxgk.mot.gov.cn/jigou/fgs/202602/P020260213414417030676.pdf
+    status: effective_2026-03-20
+    jurisdiction: China
+    applicability: road freight transport and freight-station operation within the stated scope
+    product_mapping: enterprise and vehicle eligibility, freight operation, station duties, records, supervision and legal responsibility
+    claim_limit: Verify enterprise type, local implementation, effective date and exact article before deriving fields or hard stops; do not apply freight-station duties to unrelated transport sectors.
+    last_verified_at: 2026-08-29
+    refresh_days: 90
+  - id: KS-AI-AGENT-IMPLEMENTATION-2026
+    domains: [ai-native]
+    title: 智能体规范应用与创新发展实施意见
+    issuer: 中央网络安全和信息化委员会办公室
+    authority_type: national_policy_guidance
+    effect_class: design_guidance
+    url: https://www.cac.gov.cn/2026-05/08/c_1779979789523320.htm
+    status: active_policy_guidance
+    jurisdiction: China
+    applicability: agent technology, products, services, standards, evaluation, security and ecosystem development
+    product_mapping: agent identity and interoperability, tools and memory, quality evaluation, security controls, human intervention, incident response and industry application
+    claim_limit: The opinion establishes policy direction and design concerns; it does not by itself make every proposed standard or product pattern a binding project requirement.
+    last_verified_at: 2026-08-29
+    refresh_days: 90
+  - id: KS-OA-OFFICE-AGENT-INTERFACE-DRAFT-2026
+    domains: [oa, ai-native]
+    title: 人工智能 关键基础技术 办公智能体应用接口规范行业标准计划项目公示
+    issuer: 中华人民共和国工业和信息化部
+    authority_type: standards_plan_consultation
+    effect_class: change_watch
+    url: https://www.miit.gov.cn/jgsj/kjs/jscx/bzgf/art/2026/art_5450afc3d84b44c18272afaf6270de07.html
+    status: plan_consultation_not_final_standard
+    jurisdiction: China
+    applicability: future office-agent application interface standard monitoring
+    product_mapping: watch office-agent interface, capability, interoperability and evaluation requirements for later migration planning
+    claim_limit: This is a standards-plan consultation, not a published standard; it can trigger re-verification but cannot create a compliance hard stop or fixed interface contract.
+    last_verified_at: 2026-08-29
     refresh_days: 30
