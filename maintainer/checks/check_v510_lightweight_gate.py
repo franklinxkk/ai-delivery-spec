@@ -1,5 +1,3 @@
-"""Regression: final gate is deterministic, profile-based, and non-generative."""
-
 from __future__ import annotations
 
 import json
@@ -39,14 +37,14 @@ for profile, option, artifact in (
 ):
     result = run("--profile", profile, option, str(artifact), "--format", "json")
     if result.returncode != 0:
-        failures.append(f"valid {profile} did not pass: {result.stdout}{result.stderr}")
+        failures.append(f"{profile} failed: {result.stdout}{result.stderr}")
         continue
     payload = json.loads(result.stdout)
     if payload["status"] != "PASS":
-        failures.append(f"valid {profile} status was {payload['status']}")
+        failures.append(f"{profile} status={payload['status']}")
     counts = payload["metrics"]["input_read_counts"]
     if any(count != 1 for count in counts.values()):
-        failures.append(f"{profile} reread its input: {counts}")
+        failures.append(f"{profile} reread: {counts}")
 
 full = run(
     "--profile", "full",
@@ -56,13 +54,13 @@ full = run(
     "--format", "json",
 )
 if full.returncode != 0:
-    failures.append(f"valid full profile did not pass: {full.stdout}{full.stderr}")
+    failures.append(f"full failed: {full.stdout}{full.stderr}")
 else:
     payload = json.loads(full.stdout)
     if len(payload["metrics"]["input_read_counts"]) != 3 or any(
         count != 1 for count in payload["metrics"]["input_read_counts"].values()
     ):
-        failures.append(f"full profile did not read each input exactly once: {payload['metrics']['input_read_counts']}")
+        failures.append(f"full reread: {payload['metrics']['input_read_counts']}")
 
 with tempfile.TemporaryDirectory(prefix="ads-handoff-") as temp:
     second_prototype = Path(temp) / "second.html"
@@ -75,20 +73,21 @@ with tempfile.TemporaryDirectory(prefix="ads-handoff-") as temp:
         "--format", "json",
     )
 if handoff.returncode != 0:
-    failures.append(f"valid multi-prototype handoff did not pass: {handoff.stdout}{handoff.stderr}")
+    failures.append(f"handoff failed: {handoff.stdout}{handoff.stderr}")
 else:
     payload = json.loads(handoff.stdout)
     if payload["metrics"].get("handoff_prototypes") != 2 or any(
         count != 1 for count in payload["metrics"]["input_read_counts"].values()
     ):
-        failures.append(f"handoff did not cross-check two single-read prototypes: {payload['metrics']}")
+        failures.append(f"handoff reread: {payload['metrics']}")
 
+expected = {"HANDOFF-PROTOTYPE-ACTION-NOT-IN-PRD", "HANDOFF-PROTOTYPE-AC-NOT-IN-PRD", "HANDOFF-PROTOTYPE-FIELD-NOT-IN-PRD", "HANDOFF-PROTOTYPE-METRIC-NOT-IN-PRD"}
 with tempfile.TemporaryDirectory(prefix="ads-handoff-bad-") as temp:
     bad_handoff_prototype = Path(temp) / "bad-handoff.html"
     bad_handoff_prototype.write_text(
         valid_prototype.read_text(encoding="utf-8").replace(
             'data-action="ACT-SUBMIT"',
-            'data-action="ACT-NOT-IN-PRD" data-ac="AC-NOT-IN-PRD"',
+            'data-action="ACT-NOT-IN-PRD" data-ac="AC-NOT-IN-PRD" data-field="FLD-NOT-IN-PRD" data-metric="METRIC-NOT-IN-PRD"',
         ).replace("ACT-SUBMIT", "ACT-NOT-IN-PRD"),
         encoding="utf-8",
     )
@@ -96,13 +95,20 @@ with tempfile.TemporaryDirectory(prefix="ads-handoff-bad-") as temp:
         "--profile", "handoff", "--prd", str(valid_prd),
         "--prototype", str(bad_handoff_prototype), "--format", "json",
     )
+    prototype_with_prd = run(
+        "--profile", "prototype", "--prd", str(valid_prd),
+        "--prototype", str(bad_handoff_prototype), "--format", "json",
+    )
 if bad_handoff.returncode != 2:
-    failures.append(f"cross-artifact drift was not blocked: {bad_handoff.stdout}{bad_handoff.stderr}")
+    failures.append(f"drift passed: {bad_handoff.stdout}{bad_handoff.stderr}")
 else:
     codes = {item["code"] for item in json.loads(bad_handoff.stdout)["findings"]}
-    expected = {"HANDOFF-PROTOTYPE-ACTION-NOT-IN-PRD", "HANDOFF-PROTOTYPE-AC-NOT-IN-PRD"}
     if not expected.issubset(codes):
-        failures.append(f"handoff drift blockers were incomplete: {sorted(codes)}")
+        failures.append(f"drift codes: {sorted(codes)}")
+if prototype_with_prd.returncode != 2 or not expected <= {
+    item["code"] for item in json.loads(prototype_with_prd.stdout)["findings"]
+}:
+    failures.append("prototype --prd skipped parity")
 
 bad_requirement = run("--profile", "requirement", "--requirement", str(invalid_requirement), "--format", "json")
 if bad_requirement.returncode != 2 or json.loads(bad_requirement.stdout)["status"] != "BLOCKED":
@@ -110,7 +116,7 @@ if bad_requirement.returncode != 2 or json.loads(bad_requirement.stdout)["status
 
 keyword_shell = run("--profile", "prd", "--prd", str(keyword_shell_prd), "--format", "json")
 if keyword_shell.returncode != 2:
-    failures.append(f"keyword-only PRD shell was not blocked: {keyword_shell.stdout}{keyword_shell.stderr}")
+    failures.append(f"PRD shell passed: {keyword_shell.stdout}{keyword_shell.stderr}")
 elif not any(item["code"] == "PRD-STRUCTURE" for item in json.loads(keyword_shell.stdout)["findings"]):
     failures.append("keyword-only PRD was blocked without the structural contract finding")
 
@@ -122,19 +128,19 @@ else:
     codes = {item["code"] for item in payload["findings"]}
     required_codes = {"PROTO-NO-PAGE-ANCHOR", "PROTO-UNHANDLED-ACTION", "PROTO-JS-SYNTAX"}
     if not required_codes.issubset(codes) or not any(code.startswith("PROTO-CSS-") for code in codes):
-        failures.append(f"prototype blockers were not precise enough: {sorted(codes)}")
+        failures.append(f"prototype codes: {sorted(codes)}")
     if not payload.get("retry_command") or any(
         not item.get("cause") or not item.get("how_to_fix") for item in payload["findings"]
     ):
-        failures.append("gate findings do not provide bounded cause/fix/retry guidance")
+        failures.append("missing cause/fix/retry")
 
 review = run("--profile", "prototype", "--prototype", str(review_prototype), "--format", "json")
 if review.returncode != 1:
-    failures.append(f"review-only prototype should exit 1: {review.stdout}{review.stderr}")
+    failures.append(f"review exit: {review.stdout}{review.stderr}")
 else:
     payload = json.loads(review.stdout)
     if payload["status"] != "REVIEW_COMPLETE_WITH_GAPS" or payload["summary"]["blockers"]:
-        failures.append(f"review-only finding was classified incorrectly: {payload}")
+        failures.append(f"review status: {payload}")
 
 missing = run("--profile", "full", "--prd", str(valid_prd), "--prototype", str(valid_prototype), "--format", "json")
 if missing.returncode != 2 or not any(
@@ -145,8 +151,8 @@ if missing.returncode != 2 or not any(
 source = GATE.read_text(encoding="utf-8")
 for forbidden in ("openai", "anthropic", "generate_requirement", "auto_fix"):
     if forbidden in source.lower():
-        failures.append(f"quality gate contains generative/fix coupling: {forbidden}")
+        failures.append(f"generative coupling: {forbidden}")
 
 if failures:
     raise SystemExit("\n".join(failures))
-print("PASS: lightweight gate scans each input once, supports five profiles, and cross-checks multi-surface handoff")
+print("PASS: deterministic profiles and handoff parity")

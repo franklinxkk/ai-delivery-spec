@@ -242,6 +242,18 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
         "PRD 声明的绑定词没有同时出现在 PRD 正文和原型可见文本中，跨端用词不一致。",
         "让 finding.ref 指示的绑定词原样出现在 PRD 正文和原型可见文案中，或在评审后收窄 binding_terms 声明。",
     ),
+    "HANDOFF-PROTOTYPE-ACTION-NOT-IN-PRD": (
+        "原型暴露了 PRD 基线未定义的产品动作，开发无法判断它是正式需求还是演示行为。",
+        "在 PRD 定义该 ACT-* 的角色、前置、结果、失败恢复和验收；若只是评审界面行为，改用 UIACT-*。",
+    ),
+    "HANDOFF-PROTOTYPE-FIELD-NOT-IN-PRD": (
+        "原型字段没有对应的 PRD 字段合同，后端、前端和测试缺少同一口径。",
+        "在 PRD 字段表定义该 FLD-* 的来源、类型、必填、权限、校验和敏感级别，或从原型移除。",
+    ),
+    "HANDOFF-PROTOTYPE-METRIC-NOT-IN-PRD": (
+        "原型指标没有对应的 PRD 口径，展示值无法可靠实现或验收。",
+        "在 PRD 定义该 METRIC-* 的业务含义、分子分母、范围、时间窗、去重、刷新、空值和数据权威。",
+    ),
     "PRD-CONFIRMED-OPEN-UNKNOWN-CONFLICT": (
         "同一主题同时登记为已确认决策和未关闭未知项，基线语义自相矛盾。",
         "二选一：关闭对应 UNK-* 并同步 open_p0_unknown_ids，或撤回该决策条目并重新登记为开放未知项。",
@@ -582,6 +594,9 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PRD-DUPLICATE-STABLE-ID-DEFINITION": ("A stable ID is defined more than once across authoritative PRD tables.", "Keep one definition; turn other occurrences into references or assign a new stable ID."),
     "PRD-NO-FRONTMATTER": ("The input is not Markdown with YAML front matter.", "Baseline in Markdown + front matter before exporting distribution copies."),
     "PRD-UNKNOWN-METADATA-DRIFT": ("The same unknown conflicts across machine and human projections.", "Synchronize priority, status and blocking stage in front matter, the open P0 index and the human unknown table."),
+    "HANDOFF-PROTOTYPE-ACTION-NOT-IN-PRD": ("The prototype exposes a product action absent from the PRD baseline.", "Define the ACT-* actor, precondition, result, recovery and acceptance in the PRD, or use UIACT-* for review-shell behavior."),
+    "HANDOFF-PROTOTYPE-FIELD-NOT-IN-PRD": ("The prototype field has no PRD field contract.", "Define its source, type, requiredness, authorization, validation and sensitivity in the PRD, or remove it."),
+    "HANDOFF-PROTOTYPE-METRIC-NOT-IN-PRD": ("The prototype metric has no PRD caliber contract.", "Define meaning, numerator, denominator, scope, time window, deduplication, refresh, empty-value behavior and authority."),
     "HANDOFF-STEP-NOT-IN-PRD": ("A packet references a STEP-* that is absent from the PRD baseline.", "Remove the ghost reference or baseline the complete STEP-* card before handoff."),
     "HANDOFF-PACKET-STEP-MISSING": ("The manifest declares a STEP-* that is absent from the packet body.", "Reference the STEP-* in the packet and preserve its implementation semantics."),
     "HANDOFF-STEP-INCOMPLETE": ("A PRD implementation step lacks a required implementation facet.", "Complete the facet named in the finding; explicitly state none when it is genuinely not applicable."),
@@ -1259,10 +1274,11 @@ def main() -> int:
     parser.add_argument("--max-findings", type=int, default=20)
     parser.add_argument("--custom-root", type=Path, help="项目本地私有扩展目录；默认自动发现当前目录 custom/")
     args = parser.parse_args()
+    explicit_prototype_handoff = args.profile == "prototype" and args.prd is not None
     required = {
         "requirement": ("requirement",),
         "prd": ("prd",),
-        "prototype": ("prototype",),
+        "prototype": ("prd", "prototype") if explicit_prototype_handoff else ("prototype",),
         "handoff": ("prd", "prototype"),
         "full": ("requirement", "prd", "prototype"),
         "stage0": ("inventory",),
@@ -1349,7 +1365,7 @@ def main() -> int:
                     gate, "validate_ia_skeleton.py", skeleton, "PROTO-IA-SKELETON",
                     extra=["--level", prototype_level],
                 )
-    if args.profile in {"handoff", "full"} and valid_prd and valid_prototypes:
+    if (args.profile in {"handoff", "full"} or explicit_prototype_handoff) and valid_prd and valid_prototypes:
         gate.check_handoff(valid_prd, valid_prototypes, prototype_level)
     if args.profile in {"handoff", "full"} and valid_prd and args.manifest and args.manifest.is_file():
         gate.check_manifest_prd_binding(valid_prd, args.manifest)

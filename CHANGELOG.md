@@ -1,5 +1,14 @@
 # Changelog
 
+## 5.4.9 - 2026-09-01
+
+- **Why**：5.4.8 的公开入口与主合同已经稳定，但真实 CRM、AI Native、跨系统批量上报和中型评审样例仍复现了四类“自检绿、用户路径失败”：`prototype --prd` 静默忽略跨产物交接、字段/指标投影漂移未阻断、模型用语法检查冒充正式 PASS，以及业务抽屉在窄屏遮住评审态重新展开入口。黄金 PRD 同时残留 19 条悬空引用 WARN，削弱样例可信度。
+- **Frozen-kernel stability patch**：不新增工作站、Schema、下游格式或工件语义。`prototype` profile 显式收到 PRD 时会同时执行 PRD 与 handoff 校验；L2+ handoff 增加 `FLD-*`、`METRIC-*` 与 PRD 合同的一致性检查。纯产品态、未传 PRD 的小原型仍保持轻量。
+- **Clarification and evidence discipline**：跨系统批量“部分失败”被收紧为隔离粒度、批次/记录状态、幂等键、可重报范围、聚合回执五项不可分 P0 组。任何 PASS 声明必须来自实际目标 profile，并报告退出码和 `not_proven`；HTML/JS 语法检查不能替代需求、原型或交接门禁。
+- **Review runtime and golden examples**：中型评审样例修复窄屏业务抽屉遮挡重新展开入口；黄金 PRD 就近补齐来源、指标、流程、集成、状态、规则与 AC 定义，不再以 dangling-reference WARN 冒充干净样例。README 的角色价值、快速入口、生命周期、三种表面、门禁与边界均增加紧邻英文说明，并删除重复的 GitHub 表格入口。
+- **Validation**：Kimi K3 与 DeepSeek V4 Pro 在相同脱敏材料上完成 CRM/AI Native 四角色冷读；修复前反例分别被候选门禁拦截 13 项与 14 项，修复后两组正例均为 `PASS / blockers=0 / gaps=0`。独立 Codex Coding Agent 只读 CRM 正例完成有界服务实现，主代理复跑 25/25 自动化测试通过。评审运行时聚焦回归 35/35 通过；此前 fixture 创建前的 23 个错误经正常 Windows 临时目录权限复跑确认属于 ACL 环境伪失败。完整发布门禁、Skill Creator、运行包和安全扫描结果见 Release Notes。
+- **Evidence boundary**：上述证据证明确定性合同、模型冷读和有界 Coding Agent 实现，不证明真人团队完整盲审、真实数据库/接口/IAM、AI 模型效果、性能、安全、客户签认或生产稳定性。AI Native 本轮未执行盲实现；CRM 原始评测工件在 390px 下仍有 63px 横向溢出，未包装成公共运行时已全面解决。
+
 ## 5.4.8 - 2026-08-26
 
 - **Why**：真实 CRM 评审态再次暴露“页面可走、单点按钮有说明，但指标口径、泳道迁移、需求卡二级抽屉和简单功能点仍需产品经理口头补充”的缺口；SkillHub 反馈同时指出首屏文档过重、文件说明重复、新手缺少中等需求参照。根因不是继续增加角色页签，而是评审点 Declaration 只能证明已声明点没有断链，不能证明“所有影响实施与验收的页面语义”都已进入覆盖分母。

@@ -1,4 +1,4 @@
-"""High-value product-experience capability regressions."""
+"""Product experience regression"""
 from __future__ import annotations
 import subprocess
 import sys
@@ -25,9 +25,9 @@ def run(*parts: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run([sys.executable, *parts], cwd=ROOT, text=True, encoding='utf-8', errors='replace', capture_output=True)
 
 def test_trigger_and_minimum_change_contract() -> None:
-    skill = require('SKILL.md', '写/改一个小功能', '加字段/列/页签/下拉', 'Always invoke regardless of size or clarity', '也必须调用', '`direct`', '最小主产物', '存量系统先做 Stage 0')
+    skill = require('SKILL.md', '写/改一个小功能', '加字段/列/页签/下拉', 'Always invoke regardless of size or clarity', '也必须调用', '`direct`', '最小主产物', '存量系统先做 Stage 0', '声称 `PASS` 前运行', '语法检查不得替代门禁')
     agent = require('agents/openai.yaml', 'policy:', 'allow_implicit_invocation: true', 'Use $ai-delivery-spec', '使用', "user's language")
-    require('references/discover.md', '最小改动模式', '不超过一个短屏', '生产者/权威源 → 汇聚或转换方 → 消费方')
+    require('references/discover.md', '最小改动模式', '不超过一个短屏', '生产者/权威源 → 汇聚或转换方 → 消费方', '隔离粒度、批次/记录状态、幂等键', '可重报范围与聚合回执是同一组 P0')
     require('references/prototype.md', 'parity_status=pass|blocked', '正向上报、反向同步和纠错申请必须使用不同命令/队列')
     assert 'version: "5.4.2"' not in agent and skill
 
@@ -45,7 +45,8 @@ def test_v548_shortcuts_are_thin_routes_and_medium_example_is_shipped() -> None:
         '不得另造一份与基线竞争的拷问报告', '一次只问一个',
     )
     stages = require('references/stages.md', '四个快捷入口只覆盖本次目标', '它们是意图别名', '`/ads`', '`/dig`', '`/prd`', '`/proto`', '没有读到基线时必须记为非阻断 GAP', '不得把四个裸别名描述成跨宿主原生注册')
-    readme = require('README.md', '意图别名，不是四套新流程', 'examples/medium-review-handoff/review-prototype.html', '消息到达模型前拦截未知命令', '不宣称跨宿主原生注册')
+    readme = require('README.md', '意图别名，不是四套新流程', 'examples/medium-review-handoff/review-prototype.html', '消息到达模型前拦截未知命令', '不宣称跨宿主原生注册', '社区验证｜Community Validation', '60 秒上手｜60-Second Quick Start', '**English:**')
+    assert '| GitHub | Apache 2.0 开源 |' not in readme
     agent = yaml.safe_load(read('agents/openai.yaml'))
     assert set(agent['inputs']['intent_shortcut']['enum']) == {'auto', 'ads', 'dig', 'prd', 'proto'}
     assert '/clarify' not in skill + discover + stages + readme + read('agents/openai.yaml')
@@ -53,6 +54,7 @@ def test_v548_shortcuts_are_thin_routes_and_medium_example_is_shipped() -> None:
     example = require(
         'examples/medium-review-handoff/review-prototype.html',
         '.app.review-collapsed ~ .review-launch{display:block}',
+        '.review-launch{position:fixed;right:18px;top:18px;z-index:45;',
         '.review-list:not([hidden]){display:grid;gap:8px}',
         '.review-list[hidden]{display:none}',
         'left:208px;right:var(--review)',

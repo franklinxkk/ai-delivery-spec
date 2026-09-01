@@ -1,5 +1,5 @@
 schema_version: 5.3.0
-skill_version: 5.4.8
+skill_version: 5.4.9
 runtime: pure_v5
 domain_packs:
   count: 8
@@ -17,7 +17,7 @@ trace_release_proxy:
   dimensions: {trust: passed, reliability: passed, adaptability: passed, convention: passed, effectiveness: partial}
   effectiveness_limit: deterministic/private calibration repaired gaps; blind A/B, token/time and human ratings remain incomplete
 release_evidence:
-  verified_at: 2026-08-29
+  verified_at: 2026-09-01
   scope: local deterministic checks on Windows; not customer or production acceptance
   results:
     pytest: 78_passed

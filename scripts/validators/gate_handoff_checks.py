@@ -1138,6 +1138,7 @@ class HandoffChecks:
         declared_views = {str(item).upper() for item in frontmatter.get("page_contract_view_ids", []) if item}
         prd_actions = {item.upper() for item in re.findall(r"\bACT-[A-Z0-9-]+\b", prd, re.I)}
         prd_ac_refs = {item.upper() for item in re.findall(r"\bAC-[A-Z0-9-]+\b", prd, re.I)}
+        prd_field_refs = {item.upper() for item in re.findall(r"\bFLD-[A-Z0-9-]+\b", prd, re.I)}
         prd_metric_refs = {item.upper() for item in re.findall(r"\bMETRIC-[A-Z0-9-]+\b", prd, re.I)}
         machine_ac_defs = {
             item.upper()
@@ -1146,6 +1147,7 @@ class HandoffChecks:
         prototype_views: set[str] = set()
         prototype_actions: set[str] = set()
         prototype_acs: set[str] = set()
+        prototype_fields: set[str] = set()
         prototype_metrics: set[str] = set()
         for path, raw in prototype_raw:
             tags = self._tag_source(raw)
@@ -1161,12 +1163,18 @@ class HandoffChecks:
                 # check_prototype still blocks because their rendered presence is unproven.
                 prototype_actions.update(item.upper() for item in re.findall(r"\bACT-[A-Z0-9-]+\b", raw, re.I))
             prototype_acs.update(item.upper() for item in re.findall(r"\bdata-ac\s*=\s*['\"](AC-[A-Z0-9-]+)['\"]", tags, re.I))
+            prototype_fields.update(item.upper() for item in re.findall(r"\bdata-field\s*=\s*['\"](FLD-[A-Z0-9-]+)['\"]", tags, re.I))
             prototype_metrics.update(item.upper() for item in re.findall(r"\bdata-metric\s*=\s*['\"](METRIC-[A-Z0-9-]+)['\"]", tags, re.I))
 
         for action in sorted(prototype_actions - prd_actions):
             self.add("BLOCK", "HANDOFF-PROTOTYPE-ACTION-NOT-IN-PRD", prd_path, "prototype action is absent from the PRD baseline", action)
         for ac_id in sorted(prototype_acs - prd_ac_refs):
             self.add("BLOCK", "HANDOFF-PROTOTYPE-AC-NOT-IN-PRD", prd_path, "prototype AC is absent from the PRD baseline", ac_id)
+        if level in {"L2", "L3", "L4"}:
+            for field in sorted(prototype_fields - prd_field_refs):
+                self.add("BLOCK", "HANDOFF-PROTOTYPE-FIELD-NOT-IN-PRD", prd_path, "prototype field is absent from the PRD field contract", field)
+            for metric in sorted(prototype_metrics - prd_metric_refs):
+                self.add("BLOCK", "HANDOFF-PROTOTYPE-METRIC-NOT-IN-PRD", prd_path, "prototype metric is absent from the PRD caliber contract", metric)
         if level in {"L3", "L4"}:
             for ac_id in sorted(prototype_acs - machine_ac_defs):
                 self.add("BLOCK", "HANDOFF-PROTOTYPE-AC-NOT-MACHINE-DEFINED", prd_path, "prototype AC has no machine-readable PRD definition", ac_id)
@@ -1174,8 +1182,6 @@ class HandoffChecks:
                 self.add("BLOCK", "HANDOFF-UNDECLARED-PROTOTYPE-VIEW", prd_path, "prototype exposes a view outside the declared PRD scope", view)
             for view in sorted(declared_views - prototype_views):
                 self.add("BLOCK", "HANDOFF-DECLARED-VIEW-NOT-PROTOTYPED", prd_path, "declared implementation view is absent from all supplied prototypes", view)
-            for metric in sorted(prototype_metrics - prd_metric_refs):
-                self.add("BLOCK", "HANDOFF-PROTOTYPE-METRIC-NOT-IN-PRD", prd_path, "prototype metric is absent from the PRD caliber contract", metric)
         binding_terms = [
             str(term).strip() for term in frontmatter.get("binding_terms", []) or []
             if str(term).strip()
@@ -1217,6 +1223,7 @@ class HandoffChecks:
             "handoff_views": len(prototype_views),
             "handoff_actions": len(prototype_actions),
             "handoff_acceptance_refs": len(prototype_acs),
+            "handoff_fields": len(prototype_fields),
             "handoff_metrics": len(prototype_metrics),
         })
 

@@ -3,7 +3,7 @@ name: ai-delivery-spec
 description: Use for creating, changing, reviewing, reverse-engineering or accepting requirements, PRDs, prototypes, competitor material or existing systems, including any small UI, field, column, tab, dropdown or legacy-HTML change. Supports /ads, /dig, /prd and /proto intent shortcuts where the host routes them. Always invoke regardless of size or clarity. Deliver the smallest complete, reviewable, implementable, traceable and testable artifact at the target stage. 中文：用于任何新增、修改、评审、反推或验收需求、PRD、原型、竞品或存量系统；写/改一个小功能、加字段/列/页签/下拉或旧 HTML 小改也必须调用；支持 /ads、/dig、/prd、/proto 意图快捷入口。按目标阶段交付最小完整、可评审实施追溯验收的产物。
 ---
 
-# AI Delivery Spec 5.4.8 — Requirement Management Kernel｜人机共用需求管理内核
+# AI Delivery Spec 5.4.9 — Requirement Management Kernel｜人机共用需求管理内核
 
 让业务、产品、设计、前后端、架构、测试、合规和 Coding Agent 从需求任一阶段进入，共用一条产品事实主线，取得当前所需的最小合格产物后离开；用户明确要求端到端时持续到目标完成。
 
@@ -79,7 +79,7 @@ CurrentContext 必须由 manifest 的 detection 合同统一解析最上层业�
 
 ## 6. 门禁与完成
 
-静态门禁只在目标里程碑运行，修复后重跑；默认按根因输出。开放 P0/关键 P1 未知不得称开发就绪或完整验收；单产物 PASS 不等于交付闭环。正式最终交接运行 `gate --profile full` 或 handoff 组合门禁，并明确 `not_proven`。
+静态门禁只在里程碑运行，修复后重跑。开放 P0/P1 不得称开发就绪或完整验收；单产物 PASS 不等于交付闭环。声称 `PASS` 前运行 `gate --profile ...`，报告命令、退出码与 `not_proven`；语法检查不得替代门禁。最终运行 full/handoff 门禁。
 
 ```bash
 python scripts/ai_delivery_spec_cli.py gate --profile clarify --artifact requirement-brief.md
