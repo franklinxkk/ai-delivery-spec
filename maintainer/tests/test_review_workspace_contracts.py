@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -10,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 from quality_gate import Gate
+from validators.validate_prd_semantics import run_semantic_checks
 
 
 ONE_LINE_ROUTING_CASES = [
@@ -335,7 +337,7 @@ def review_html(document: dict, *, include_tabs: bool = True) -> str:
       </section>''' if include_tabs else f'<section data-review-r0>{"".join(cards)}{semantic_function}{semantic_boundary}</section>'
 
     workspace = document["workspace"]
-    review_controls = '''
+    review_controls = f'''
       <button data-action="UIACT-REVIEW-TOGGLE" data-ads-act="collapse">收起说明</button>
       <button data-action="UIACT-REVIEW-TOGGLE" data-ads-act="expand">展开说明</button>
       <button data-action="UIACT-REVIEW-SHARE" data-review-share-locator>复制定位</button>
@@ -343,10 +345,11 @@ def review_html(document: dict, *, include_tabs: bool = True) -> str:
       <button data-action="UIACT-REVIEW-EXPORT">导出记录</button>
       <button data-action="UIACT-REVIEW-IMPORT">导入记录</button>
       <button data-action="UIACT-REVIEW-COMPACT">切换全屏</button>
-      <div data-review-progress data-review-progress-denominator="2" data-review-progress-resolved="0">0/2</div>
+      <div data-review-progress data-review-progress-denominator="{sum(len(item['review_point_refs']) for item in document['review_contexts'])}" data-review-progress-resolved="0">0/{sum(len(item['review_point_refs']) for item in document['review_contexts'])}</div>
       <div data-review-records>评审记录</div>'''
     handlers = [
-        "ACT-X-NAVIGATE", "ACT-X-SUBMIT", "ACT-X-CONFIRM", "UIACT-REVIEW-SELECT", "UIACT-REVIEW-TOGGLE",
+        "ACT-X-NAVIGATE", *[str(item["target_ref"]) for item in document["review_points"]],
+        "UIACT-REVIEW-SELECT", "UIACT-REVIEW-TOGGLE",
         "UIACT-REVIEW-SHARE", "UIACT-REVIEW-RECORD", "UIACT-REVIEW-EXPORT",
         "UIACT-REVIEW-IMPORT", "UIACT-REVIEW-COMPACT",
     ] + (["UIACT-REVIEW-TAB"] if include_tabs else [])
@@ -370,18 +373,21 @@ def review_html(document: dict, *, include_tabs: bool = True) -> str:
       function exactlyOne(nodes){{if(nodes.length!==1)throw new Error("target cardinality");return nodes[0]}}
       function resolveReviewTarget(selector){{const nodes=[...currentContextRoot().querySelectorAll(selector)].filter(isTargetVisible);if(nodes.length===0)throw new Error("PROTO-REVIEW-TARGET-UNRESOLVED");if(nodes.length>1)throw new Error("PROTO-REVIEW-TARGET-AMBIGUOUS");return nodes[0]}}
       function focusReviewTarget(pointRef,selector){{document.querySelectorAll("[data-review-target-selected]").forEach(node=>node.removeAttribute("data-review-target-selected"));document.querySelectorAll("[data-review-ref],[data-review-point]").forEach(node=>node.setAttribute("aria-current",String((node.dataset.reviewRef||node.dataset.reviewPoint)===pointRef)));resolveReviewTarget(selector).setAttribute("data-review-target-selected","true")}}
-      const pointSelectors={{"RVP-VIEW-SUBMIT":"[data-action='ACT-X-SUBMIT']","RVP-DRAWER-CONFIRM":"[data-action='ACT-X-CONFIRM']"}};
-      const shareLocator=new URLSearchParams({{baseline_ref:"1.0",context_ref:"VIEW-X",review_point_ref:"RVP-VIEW-SUBMIT",active_tab:"overview"}}); location.hash=shareLocator.toString();
+      const pointSelectors={json.dumps({item['ref']: f"[data-action='{item['target_ref']}']" for item in document['review_points']}, ensure_ascii=False)};
+      const shareLocator=new URLSearchParams({{baseline_ref:"{document['baseline']['version']}",context_ref:"VIEW-X",review_point_ref:"{document['review_contexts'][0]['review_point_refs'][0]}",active_tab:"overview"}}); location.hash=shareLocator.toString();
       function hydrateLocator(){{return new URLSearchParams(location.hash.slice(1)).get("context_ref")}}
-      function saveReviewRecords(value){{localStorage.setItem("review:1.0",JSON.stringify(value))}}
-      function loadReviewRecords(){{return JSON.parse(localStorage.getItem("review:1.0")||"[]")}}
+      function saveReviewRecords(value){{localStorage.setItem("review:{document['baseline']['version']}",JSON.stringify(value))}}
+      function loadReviewRecords(){{return JSON.parse(localStorage.getItem("review:{document['baseline']['version']}")||"[]")}}
+      function applyDomainResult(){{document.querySelector("[data-domain-state]").setAttribute("data-state","updated")}}
       const actionRegistry={{{registry}}};
+      {''.join(f'actionRegistry["{item["target_ref"]}"]=applyDomainResult;' for item in document['review_points'])}
       actionRegistry["UIACT-REVIEW-SELECT"]=(node)=>{{const pointRef=node.dataset.reviewRef||node.dataset.reviewPoint;focusReviewTarget(pointRef,pointSelectors[pointRef])}};
       document.addEventListener("click",event=>{{const node=event.target.closest("[data-action]");if(!node)return;const handler=actionRegistry[node.dataset.action];if(!handler)return;if(node.dataset.action==="UIACT-REVIEW-TOGGLE")document.body.classList.toggle("ads-collapsed",node.dataset.adsAct==="collapse");if(node.dataset.action.startsWith("UIACT-REVIEW-"))runReviewAction(()=>handler(node));else handler(node)}});
     '''
-    return f'''<!doctype html><html lang="zh-CN"><head><style>body{{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px)}}[data-review-workspace]{{min-width:0}}[data-review-target-selected="true"]{{outline:3px solid #6d5dfc;outline-offset:3px}}</style></head><body>
+    return f'''<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><style>body{{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px)}}.active{{font-weight:700}}[data-review-workspace]{{min-width:0}}[data-review-target-selected="true"]{{outline:3px solid #6d5dfc;outline-offset:3px}}</style></head><body>
       <nav><button class="active" data-action="ACT-X-NAVIGATE" data-view-target="VIEW-X">记录列表</button></nav>
       {"".join(context_parts)}
+      <output data-domain-state data-state="ready">等待业务操作</output>
       <aside data-review-workspace="REVIEW-X" data-review-level="{workspace["review_level"]}"
         data-review-active-tab="{workspace["default_tab"]}" data-review-current-context="{workspace["initial_context_ref"]}"
         data-review-current-context-control="read-only" data-review-layout="participate-in-layout"
@@ -561,7 +567,7 @@ def test_legacy_overlay_is_gap_for_visual_review_but_blocked_for_handoff(tmp_pat
 
 def test_versioned_review_compatibility_matrix_is_enforced(tmp_path: Path) -> None:
     stages = (ROOT / "references/stages.md").read_text(encoding="utf-8")
-    for marker in ("5.4.6—5.4.8 兼容与迁移矩阵", "PROTO-REVIEW-WORKSPACE-LEGACY", "5.4.7-final", "5.4.8/RC3", "兼容读取不等于自动升级"):
+    for marker in ("5.4.6—5.4.9 兼容与迁移矩阵", "PROTO-REVIEW-WORKSPACE-LEGACY", "5.4.7-final", "5.4.8/RC3", "5.4.9", "RC4", "兼容读取不等于自动升级"):
         assert marker in stages
 
     rc2 = manifest("1" * 64)
@@ -738,3 +744,333 @@ def test_rc2_requires_expand_button_and_hydration(tmp_path: Path) -> None:
     raw = review_html(manifest("1" * 64)).replace("function hydrateLocator()", "function omittedHydration()", 1)
     codes = {item.code for item in html_gate(tmp_path / "no-hydrate.html", raw).findings}
     assert "PROTO-REVIEW-SHARE-LOCATOR" in codes
+
+
+def manifest_v549(baseline_hash: str) -> dict:
+    document = manifest(baseline_hash)
+    document["schema_version"] = "5.4.9"
+    document["contract_revision"] = "RC4"
+    for point in document["review_points"]:
+        point["implementation_detail"] = {
+            "required": True,
+            "reason": "该动作会写入业务对象并影响后续页面结果",
+            "roles": ["frontend", "backend", "qa"],
+        }
+    document["human_projection_contract"] = {
+        "primary_copy": "business_natural_language",
+        "stable_ids_visibility": "collapsed_technical_trace_only",
+        "field_enums_visibility": "collapsed_technical_trace_only",
+        "implementation_detail_mode": "progressive_disclosure",
+        "implementation_detail_roles": ["frontend", "backend", "qa"],
+        "technical_terms": ["recordStatus", "saved"],
+    }
+    document["diagram_contract"] = {
+        "simple_crud_policy": "not_required",
+        "decisions": [
+            {
+                "context_ref": "VIEW-X", "complexity_drivers": ["cross_page", "cross_role"],
+                "required_types": ["core_flow"], "diagram_refs": ["DIAG-X-CORE"],
+                "not_required_reason": None,
+            },
+            {
+                "context_ref": "DRAWER-X", "complexity_drivers": ["cross_page"],
+                "required_types": ["core_flow"], "diagram_refs": ["DIAG-X-CORE"],
+                "not_required_reason": None,
+            },
+        ],
+        "diagrams": [
+            {
+                "diagram_ref": "DIAG-X-CORE", "diagram_type": "core_flow", "owner_tab": "overview",
+                "title": "记录提交与确认流程", "context_refs": ["VIEW-X", "DRAWER-X"],
+                "current_context_highlight": True,
+            }
+        ],
+    }
+    document["acceptance_examples"] = [
+        {
+            "example_ref": "TEST-X-VIEW-POS", "owner_context_ref": "VIEW-X", "kind": "positive",
+            "precondition": "操作者拥有提交权限且记录内容完整", "action": "点击提交当前记录",
+            "expected_visible_result": "页面显示提交成功并刷新当前记录", "expected_domain_result": "记录被持久保存且产生一条审计记录",
+            "acceptance_ref": "AC-X-SUBMIT",
+        },
+        {
+            "example_ref": "TEST-X-VIEW-NEG", "owner_context_ref": "VIEW-X", "kind": "negative",
+            "precondition": "必填内容缺失或操作者没有提交权限", "action": "尝试提交当前记录",
+            "expected_visible_result": "页面指出具体问题并保留已有输入", "expected_domain_result": "记录不写入且不产生成功事件",
+            "acceptance_ref": "AC-X-SUBMIT",
+        },
+        {
+            "example_ref": "TEST-X-DRAWER-POS", "owner_context_ref": "DRAWER-X", "kind": "positive",
+            "precondition": "确认抽屉已打开且变更仍是最新版本", "action": "点击确认变更",
+            "expected_visible_result": "抽屉关闭并在原页面显示最新结果", "expected_domain_result": "变更被保存并记录操作者与时间",
+            "acceptance_ref": "AC-X-CONFIRM",
+        },
+        {
+            "example_ref": "TEST-X-DRAWER-NEG", "owner_context_ref": "DRAWER-X", "kind": "negative",
+            "precondition": "当前记录已被其他人更新为新版本", "action": "继续确认旧版本变更",
+            "expected_visible_result": "抽屉保留并提示刷新后重新确认", "expected_domain_result": "旧版本不覆盖新版本且记录冲突日志",
+            "acceptance_ref": "AC-X-CONFIRM",
+        },
+    ]
+    return document
+
+
+def review_html_v549(document: dict) -> str:
+    raw = review_html(document)
+    raw = raw.replace("AC-X-SUBMIT / AC-X-CONFIRM", "以下样例覆盖提交成功、权限拒绝、确认成功和版本冲突。")
+    core_flow = '''<div data-review-content="core_flow_diagram" data-review-owner-tab="overview">
+      <figure data-review-diagram="DIAG-X-CORE" data-review-diagram-type="core_flow" data-review-diagram-owner="overview" data-review-context="VIEW-X">
+        <figcaption>记录提交与确认流程</figcaption>
+        <div data-review-flow-context="VIEW-X" data-review-diagram-ref="DIAG-X-CORE" data-flow-current="true">填写并提交记录（当前页面）</div>
+        <div>校验通过后进入确认</div>
+        <div data-review-flow-context="DRAWER-X" data-review-diagram-ref="DIAG-X-CORE" data-flow-current="false">确认变更并返回原页面</div>
+      </figure>
+    </div>'''
+    if document.get("diagram_contract", {}).get("diagrams"):
+        raw = raw.replace(
+            '<div data-review-content="main_chain" data-review-owner-tab="overview">业务主链</div>',
+            '<div data-review-content="main_chain" data-review-owner-tab="overview">业务主链</div>' + core_flow,
+        )
+    for point in document["review_points"]:
+        point_ref = point["ref"]
+        title = point["title"]
+        detail = f'''<details data-review-role-details data-review-detail-for="{point_ref}"><summary>查看实现与验收要点</summary>
+          <p data-review-role-detail="frontend"><b>前端实现：</b>保持当前输入与页面上下文，提交中禁用重复操作，成功和失败都给出明确可见反馈。</p>
+          <p data-review-role-detail="backend"><b>后端处理：</b>校验权限、当前版本和业务前提，成功写入并记录审计，失败不得产生成功副作用。</p>
+          <p data-review-role-detail="qa"><b>测试验收：</b>分别执行成功、权限拒绝和版本冲突，核对页面反馈与持久数据是否同时符合预期。</p>
+        </details>'''
+        raw = raw.replace(f'<h3>{title}</h3><p>{point["summary"]}</p>', f'<h3>{title}</h3><p>{point["summary"]}</p>{detail}', 1)
+    examples = []
+    labels = {"positive": "正向", "negative": "反向"}
+    for item in document["acceptance_examples"]:
+        examples.append(
+            f'<article data-review-example="{item["example_ref"]}" data-review-example-kind="{item["kind"]}" '
+            f'data-review-context="{item["owner_context_ref"]}" data-review-acceptance-ref="{item["acceptance_ref"]}">'
+            f'<b>{labels[item["kind"]]}样例</b><p>前提：{item["precondition"]}</p><p>动作：{item["action"]}</p>'
+            f'<p>页面结果：{item["expected_visible_result"]}</p><p>业务结果：{item["expected_domain_result"]}</p></article>'
+        )
+    trace_refs = sorted(set(re.findall(r"\b[A-Z][A-Z0-9]*-[A-Z0-9-]+\b", json.dumps(document, ensure_ascii=False))))
+    trace_terms = document["human_projection_contract"]["technical_terms"]
+    boundary_insert = (
+        '<div data-review-content="acceptance_examples" data-review-owner-tab="boundary_acceptance">'
+        + "".join(examples) + '</div><details data-review-trace><summary>技术追溯</summary><p>'
+        + " / ".join(trace_refs) + '</p><p>' + " / ".join(trace_terms) + '</p></details>'
+    )
+    raw = raw.replace(
+        '<div data-review-content="open_items" data-review-owner-tab="boundary_acceptance">开放项已核对：0 项</div>',
+        boundary_insert + '<div data-review-content="open_items" data-review-owner-tab="boundary_acceptance">开放项已核对：0 项</div>',
+    )
+    raw = raw.replace(
+        '</body>',
+        '<script>function syncReviewDiagramContext(contextRef){document.querySelectorAll("[data-review-flow-context]").forEach(node=>node.setAttribute("data-flow-current",String(node.dataset.reviewFlowContext===contextRef)))}</script></body>',
+    )
+    return raw
+
+
+def v549_codes(tmp_path: Path, document: dict | None = None, raw: str | None = None) -> set[str]:
+    document = document or manifest_v549("1" * 64)
+    raw = raw or review_html_v549(document)
+    return {item.code for item in html_gate(tmp_path / "v549-review.html", raw).findings}
+
+
+def test_v549_lightweight_human_projection_passes(tmp_path: Path) -> None:
+    codes = v549_codes(tmp_path)
+    assert not {code for code in codes if code.startswith("PROTO-REVIEW-")}
+
+
+def test_v549_human_projection_adversarial_failures_are_blocked(tmp_path: Path) -> None:
+    document = manifest_v549("1" * 64)
+    base = review_html_v549(document)
+    cases = (
+        (base.replace("业务主链", "业务主链 ACT-X-SUBMIT", 1), "PROTO-REVIEW-HUMAN-COPY-LEAK"),
+        (base.replace("<details data-review-trace>", "<details data-review-trace open>", 1), "PROTO-REVIEW-TECHNICAL-TRACE"),
+        (base.replace('data-review-role-detail="backend"', 'data-review-role-detail="product"', 1), "PROTO-REVIEW-ROLE-DETAIL"),
+        (base.replace('data-review-diagram="DIAG-X-CORE"', 'data-review-diagram="DIAG-X-MISSING"', 1), "PROTO-REVIEW-DIAGRAM-VISIBLE"),
+        (base.replace('data-flow-current="true"', 'data-flow-current="false"', 1), "PROTO-REVIEW-DIAGRAM-CONTEXT"),
+        (base.replace('data-review-example="TEST-X-VIEW-NEG"', 'data-review-example="TEST-X-VIEW-POS"', 1), "PROTO-REVIEW-EXECUTABLE-EXAMPLE"),
+    )
+    for index, (raw, expected) in enumerate(cases):
+        codes = {item.code for item in html_gate(tmp_path / f"v549-bad-{index}.html", raw).findings}
+        assert expected in codes
+
+
+def test_v549_simple_crud_does_not_require_a_diagram(tmp_path: Path) -> None:
+    document = manifest_v549("1" * 64)
+    document["review_contexts"][0]["secondary_context_refs"] = []
+    document["review_contexts"] = document["review_contexts"][:1]
+    document["review_points"] = document["review_points"][:1]
+    document["semantic_coverage_items"] = document["semantic_coverage_items"][:1]
+    document["workspace"]["initial_context_ref"] = "VIEW-X"
+    document["diagram_contract"] = {
+        "simple_crud_policy": "not_required",
+        "decisions": [{
+            "context_ref": "VIEW-X", "complexity_drivers": ["simple_crud"],
+            "required_types": [], "diagram_refs": [],
+            "not_required_reason": "单页局部提交，没有跨页面、角色或系统交接",
+        }],
+        "diagrams": [],
+    }
+    document["acceptance_examples"] = []
+    raw = review_html_v549(document)
+    trace_refs = sorted(set(re.findall(r"\b[A-Z][A-Z0-9]*-[A-Z0-9-]+\b", json.dumps(document, ensure_ascii=False))))
+    raw = re.sub(r'(<details data-review-trace><summary>技术追溯</summary><p>)[^<]*(</p>)', rf'\1{" / ".join(trace_refs)}\2', raw, count=1)
+    codes = {item.code for item in html_gate(tmp_path / "v549-simple.html", raw).findings}
+    assert "PROTO-REVIEW-DIAGRAM-DECISION" not in codes
+    assert "PROTO-REVIEW-DIAGRAM-VISIBLE" not in codes
+    assert "PROTO-REVIEW-EXECUTABLE-EXAMPLE" not in codes
+
+
+def review_feedback_manifest(*, after: bool) -> dict:
+    document = manifest_v549(("2" if after else "1") * 64)
+    document["baseline"]["version"] = "1.1" if after else "1.0"
+    document["workspace"]["initial_context_ref"] = "VIEW-X"
+    document["review_contexts"] = document["review_contexts"][:1]
+    document["review_contexts"][0]["secondary_context_refs"] = []
+    document["review_contexts"][0]["surface_types"] = ["form", "preview" if after else "import"]
+
+    before_specs = [
+        ("001", "ACT-RULE-QUERY", "查询配置", "按规则名称查询当前机构可见的配置。"),
+        ("002", "ACT-RULE-SCOPE", "设置适用范围", "选择本规则适用的企业范围。"),
+        ("003", "ACT-RULE-EFFECTIVE", "设置生效时间", "设置规则开始生效的日期。"),
+        ("004", "ACT-RULE-VALIDATE", "保存前校验", "保存前检查全部必填项，缺失时留在当前页面并提示。"),
+        ("005", "ACT-RULE-IMPORT", "批量导入", "下载模板填写规则后批量导入，并显示每条记录的处理结果。"),
+    ]
+    after_specs = [
+        ("001", "ACT-RULE-QUERY", "查询配置", "可组合规则名称、状态和适用范围查询；查询结果仍受当前机构数据范围限制。"),
+        ("002", "ACT-RULE-SCOPE", "设置适用范围", "先选企业类型再选具体企业；没有数据权限的企业不出现在候选列表中。"),
+        ("003", "ACT-RULE-EFFECTIVE", "设置生效时间", "按北京时间生效；同一企业的相同规则时间段不得重叠。"),
+        ("004", "ACT-RULE-VALIDATE", "保存前校验", "前端提示缺项，服务端再次校验范围、时间冲突和当前版本；失败时不写入。"),
+        ("006", "ACT-RULE-PREVIEW", "试运行预览", "只预览当前条件预计命中的企业和异常，不保存配置，也不触发正式检查。"),
+    ]
+    specs = after_specs if after else before_specs
+    points = []
+    semantic_items = []
+    for suffix, target, title, summary in specs:
+        point = review_point(f"RVP-RULE-{suffix}", "VIEW-X", target, title, summary, f"AC-RULE-{suffix}")
+        point["implementation_detail"] = {
+            "required": True,
+            "reason": "该操作影响规则查询、保存或预览结果",
+            "roles": ["frontend", "backend", "qa"],
+        }
+        points.append(point)
+        semantic_items.append({
+            "coverage_id": f"SCOV-RULE-{suffix}", "subject_ref": target,
+            "owner_context_ref": "VIEW-X", "semantic_type": "action", "criticality": "P1",
+            "label": title, "source_refs": ["REQ-X", target],
+            "ui_grounded": True, "target_ref": target, "coverage_status": "covered",
+            "review_point_refs": [f"RVP-RULE-{suffix}"], "human_summary": summary,
+            "detail_owner": "function_flow", "unknown_ref": None, "not_applicable_reason": None,
+        })
+    document["review_points"] = points
+    document["semantic_coverage_items"] = semantic_items
+    document["review_contexts"][0]["review_point_refs"] = [item["ref"] for item in points]
+    document["diagram_contract"] = {
+        "simple_crud_policy": "not_required",
+        "decisions": [{
+            "context_ref": "VIEW-X", "complexity_drivers": ["simple_crud"],
+            "required_types": [], "diagram_refs": [],
+            "not_required_reason": "本次变更都在同一配置页面完成，不涉及跨页、跨角色或跨系统流转",
+        }],
+        "diagrams": [],
+    }
+    document["acceptance_examples"] = []
+    return document
+
+
+def test_v549_review_feedback_modify_delete_add_is_a_versioned_change(tmp_path: Path) -> None:
+    before = review_feedback_manifest(after=False)
+    after = review_feedback_manifest(after=True)
+    before_raw = review_html_v549(before)
+    after_raw = review_html_v549(after)
+
+    before_findings = html_gate(tmp_path / "review-before.html", before_raw).findings
+    after_findings = html_gate(tmp_path / "review-after.html", after_raw).findings
+    before_codes = {item.code for item in before_findings}
+    after_codes = {item.code for item in after_findings}
+    assert not [item for item in before_findings if item.severity != "INFO"], [
+        (item.severity, item.code, item.message) for item in before_findings
+    ]
+    assert not [item for item in after_findings if item.severity != "INFO"], [
+        (item.severity, item.code, item.message) for item in after_findings
+    ]
+    assert not {code for code in before_codes if code.startswith("PROTO-REVIEW-")}, [
+        (item.code, item.message) for item in before_findings
+    ]
+    assert not {code for code in after_codes if code.startswith("PROTO-REVIEW-")}, [
+        (item.code, item.message) for item in after_findings
+    ]
+
+    for point_before, point_after in zip(before["review_points"][:4], after["review_points"][:4]):
+        assert point_before["ref"] == point_after["ref"]
+        assert point_before["summary"] != point_after["summary"]
+    assert "RVP-RULE-005" in before["review_contexts"][0]["review_point_refs"]
+    assert "RVP-RULE-005" not in after["review_contexts"][0]["review_point_refs"]
+    assert "RVP-RULE-006" in after["review_contexts"][0]["review_point_refs"]
+    assert 'data-review-ref="RVP-RULE-005"' not in after_raw
+    assert 'data-review-point="RVP-RULE-005"' not in after_raw
+    assert 'data-review-ref="RVP-RULE-006" data-review-context="VIEW-X" data-review-number="5"' in after_raw
+    assert 'data-review-point="RVP-RULE-006" data-review-context="VIEW-X" data-review-number="5"' in after_raw
+    assert "review:1.0" in before_raw and "review:1.1" not in before_raw
+    assert "review:1.1" in after_raw and "review:1.0" not in after_raw
+
+    missing_new_marker = after_raw.replace(
+        '<button data-action="UIACT-REVIEW-SELECT" data-review-ref="RVP-RULE-006"',
+        '<button data-action="UIACT-REVIEW-SELECT" data-review-ref="RVP-RULE-REMOVED"',
+        1,
+    )
+    missing_codes = {item.code for item in html_gate(tmp_path / "review-after-missing-marker.html", missing_new_marker).findings}
+    assert "PROTO-REVIEW-POINT-COVERAGE" in missing_codes
+
+
+def test_v549_prd_semantic_escape_hatches_are_blocked() -> None:
+    raw = """# 需求
+
+| UNK/REV/DEC ID | 原问题/冲突 | 批次回答或证据 | 影响的 REQ/RULE/AC | 责任人 | 结论/状态 |
+|---|---|---|---|---|---|
+| DEC-RULE-001 | 是否自动通过 | 模型推断 | REQ-RULE-001 | 产品负责人 | 已确认 |
+
+| AC ID | REQ/行为 | 前置与角色 | 步骤/输入 | 预期可见结果 | 预期领域结果 | 反例 | 证据 |
+|---|---|---|---|---|---|---|---|
+| AC-RULE-001 | REQ-RULE-001 | 管理员 | 点击保存 | 功能正常 | 处理成功 | 无 | 截图 |
+
+## 附录 A：全局字段字典
+| FLD ID | 实体.字段 | 中文名/含义 | 类型/字典 | 必填/默认 | 来源 | 编辑权/数据范围 | 校验 | 敏感级别 |
+|---|---|---|---|---|---|---|---|---|
+| FLD-ERROR-001 | Record.errorReason | 失败原因 | string | 否 | 页面 | 管理员 | 500字 | 内部 |
+"""
+    codes = {item.code for item in run_semantic_checks(raw)}
+    assert {
+        "PRD-CONFIRMED-DECISION-NO-AUTHORITY",
+        "PRD-AC-NOT-FALSIFIABLE",
+        "PRD-REPRESENTATION-GAP",
+    } <= codes
+
+
+def test_v549_duplicate_unknown_frontmatter_is_blocked(tmp_path: Path) -> None:
+    prd = tmp_path / "duplicate-unknown.md"
+    prd.write_text("""---
+document_language: zh-CN
+delivery_level: L1
+open_p0_unknown_ids: [UNK-RULE-001]
+unknowns:
+  - id: UNK-RULE-001
+    priority: P0
+    status: open
+    blocks_stage: baseline
+    owner: 产品负责人
+    affected_refs: [REQ-RULE-001]
+  - id: UNK-RULE-001
+    priority: P1
+    status: open
+    blocks_stage: review
+    owner: 测试负责人
+    affected_refs: [REQ-RULE-001]
+activated_facets: []
+---
+# 需求卡
+
+REQ-RULE-001 / UNK-RULE-001
+""", encoding="utf-8")
+    gate = Gate()
+    gate.check_prd(prd, "L1")
+    assert "PRD-DUPLICATE-UNKNOWN-DEFINITION" in {item.code for item in gate.findings}

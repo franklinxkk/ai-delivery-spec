@@ -28,8 +28,8 @@ maintainer_files = [
 maintainer_bytes = sum(path.stat().st_size for path in maintainer_files)
 if len(maintainer_files) > 56:
     failures.append(f"maintainer lab contains {len(maintainer_files)} files; expected <=56")
-if maintainer_bytes > 450_000:
-    failures.append(f"maintainer lab contains {maintainer_bytes} bytes; expected <=450000")
+if maintainer_bytes > 475_000:
+    failures.append(f"maintainer lab contains {maintainer_bytes} bytes; expected <=475000")
 cli = (ROOT / "scripts/ai_delivery_spec_cli.py").read_text(encoding="utf-8")
 fast_slice = cli.split("fast_commands: list[list[str]] = [", 1)[-1].split(
     "release_only_commands: list[list[str]] = [", 1

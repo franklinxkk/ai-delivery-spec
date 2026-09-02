@@ -61,14 +61,31 @@ R1/R2 只有三个一级页签：
 
 | 页签 | 唯一负责的完整内容 |
 |---|---|
-| 总览 | 背景/问题、目标与成功信号、角色表、范围/非目标、主链、变更摘要、P0/P1 摘要 |
-| 功能与流转 | CurrentContext、当前业务职责、上下游、声明评审点、可见/领域结果、当前数据与事件摘要 |
-| 边界与验收 | 详细规则、权限、状态机、指标计算、异常/恢复/幂等、AC/TEST、UNK/DEC/GAP 详情 |
+| 总览 | 背景/问题、目标与成功信号、角色表、范围/非目标、主链、变更摘要、P0/P1 摘要；复杂模块显示核心流程图并高亮 CurrentContext |
+| 功能与流转 | CurrentContext、当前业务职责、上下游、带同号 marker 的自然语言说明、可见/领域结果；复杂评审点按需展开前端实现、后端处理、测试验收 |
+| 边界与验收 | 详细规则、权限、指标、异常/恢复/幂等、少量正反例；按触发条件显示状态转换图或数据流图；最后提供默认收起的技术追溯 |
 
 其他页签只能摘要并引用，不得复制完整正文。一个内容域只能有一个 owner；同一规则、状态机、指标公式
 或验收正文在多个页签重复出现时记录 `PROTO-REVIEW-TAB-OWNERSHIP`。流程图、状态图和数据流图只在
-确实满足 `prototype.md` 的触发条件时出现：总览显示主链摘要，功能与流转显示当前上下游，边界与验收
-持有详细状态/数据/规则合同。
+确实满足 `prototype.md` 的触发条件时出现：总览显示核心流程和当前页面，功能与流转显示当前上下游，
+边界与验收持有详细状态/数据/规则合同。简单单页 CRUD 的 `diagram_contract` 明确记录不画图理由，
+不得为了“完整”添加装饰图。
+
+### 3.1 人类主阅读面与技术追溯
+
+5.4.9 起，右栏明确分成两个信息层，不再把稳定 ID、字段名和机器枚举混入功能说明：
+
+- **主阅读面**使用操作者语言说明“谁在什么前提下做什么、页面看到什么、业务实际改变什么、失败如何
+  恢复”。标题、状态和图节点都使用自然语言；不得显示 `VIEW-* / ACT-* / AC-*`、`leadId`、
+  `pending_review` 等技术追溯文本。
+- **按需实施详情**仅在一个评审点确实涉及写入、状态、权限、口径、跨边界或恢复时出现，使用默认收起
+  的 `<details data-review-role-details data-review-detail-for="RVP-*">`，其中只保留三段：前端实现、
+  后端处理、测试验收。简单查看、普通筛选和无独立规则的 CRUD 不机械展开。
+- **技术追溯**全页只保留一个默认收起的 `<details data-review-trace>`；稳定 ID、字段原名、机器枚举和
+  AC/来源映射全部放在这里。它帮助研发和 Agent 精确回链，但不承担业务解释，也不作为右栏第二真相。
+
+`human_projection_contract.technical_terms[]` 声明本次必须隐藏到技术追溯的字段名和枚举。静态门禁检查
+明显泄露、默认展开和追溯缺失；“是否说人话、是否足够理解”仍由未参与者冷读证明。
 
 ## 4. Declaration 定分母，Candidate Diff 只防漏
 
@@ -96,7 +113,7 @@ selector、cardinality 和 `UNK-*`。存量小写动作只可规范化为 `PROTO
 
 ### 4.1 Semantic Coverage：先定功能分母，再做克制投影
 
-5.4.8 的“克制”只压缩文字和重复，不允许缩减功能。先从同一基线的 PRD 页面合同、Stage 0、稳定锚点、
+5.4.8 起的“克制”只压缩文字和重复，不允许缩减功能。先从同一基线的 PRD 页面合同、Stage 0、稳定锚点、
 运行时语义扫描和冷读结果建立 `semantic_coverage_items[]`，再决定哪些项可按规则等价合并到一个
 ReviewPoint。每个适用项必须在人类右栏恰好出现一次最小说明；有 UI 落点时还必须映射到同目标 marker。
 
@@ -152,6 +169,10 @@ domain_result_refs: [STATE-EXAMPLE-SUBMITTED, EVT-EXAMPLE-SUBMITTED]
 boundary_refs: [RULE-EXAMPLE-DUPLICATE]
 acceptance_refs: [AC-EXAMPLE-SUBMIT]
 source_refs: [REQ-EXAMPLE-001]
+implementation_detail:
+  required: true
+  reason: 提交会写入业务对象并触发后续事件
+  roles: [frontend, backend, qa]
 ```
 
 三条轴必须分开：
@@ -174,6 +195,9 @@ acceptance_refs/target_ref` 必须逐项解析到本次提供的权威 PRD 稳�
 
 - 每个 Context 按其 `review_point_refs` 数组顺序从 1 重新编号；Overlay 打开后从 1 开始，关闭后恢复
   父级编号，不使用全局、Journey 或 STEP 顺序。
+- 评审意见导致修改、删除或新增时，先按 `change-acceptance.md` 建立 `CHG-*` 和新基线。修改项可在业务
+  身份不变时保留 `RVP-*`；删除项退出新 Declaration；新增项取得新的 `RVP-*`。随后按新 Declaration
+  重算可见序号，禁止把显示数字当永久身份或把旧记录静默套到新点上。
 - 可见 UI 目标对应的正式 ReviewPoint 必须 `marker_required=true`；marker 固定在真实目标旁并与 card
   同时绑定同一 `context/ref/number`。右栏不得出现没有左侧 marker 的编号说明；只有确无 UI 落点的
   系统规则才可 `marker_required=false` 并在卡片上说明原因。
@@ -195,9 +219,10 @@ FLOW/STEP/EDGE/STATE/DATA/AC/TEST 继续完整存在于 PRD、Product Truth 和�
 - EDGE 投影为当前功能的上游、下游和交接；
 - STATE/DATA/规则/指标/AC/TEST 的详细正文归“边界与验收”。
 
-右侧先让人连续读懂“这里做什么 → 从哪里来 → 会变成什么 → 失败怎么办”，再按需展开详情。产品、
-前端、后端、测试需要的事实不得丢失，但不再用角色切换隐藏；Coding Agent 始终读取同 baseline hash 的
-结构化 handoff，不从人类摘要推断实现。
+右侧先让人连续读懂“这里做什么 → 从哪里来 → 会变成什么 → 失败怎么办”，再按需展开前端实现、后端
+处理和测试验收。稳定 ID、字段原名、枚举和机器索引统一进入默认收起的技术追溯。产品、前端、后端、
+测试需要的事实不得丢失，但不再用角色切换隐藏；Coding Agent 始终读取同 baseline hash 的结构化
+handoff，不从人类摘要推断实现。
 
 ## 8. 布局不得破坏产品
 
@@ -338,4 +363,4 @@ GAP 和证据。失败应修复信息投影、上下文或文字
 上下文唯一；评审记录可持久化且不跨 baseline 污染；页面只有一个评审事实面；评审事件与业务事件隔离；
 动态重绘后标号恢复且只显示当前 Context；标号可见、避碰、不越界；业务浮层不覆盖评审区；
 PAGE-CONTRACT、语义分母、右栏最小说明和 marker 映射闭合；指标、工作流、二级 Context 与核心角色
-路径无静默遗漏。任何一项缺失都不得包装为 5.4.8 完整评审交接。
+路径无静默遗漏。任何一项缺失都不得包装为 5.4.9 完整评审交接。

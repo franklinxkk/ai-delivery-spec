@@ -83,7 +83,7 @@ REQUIRED_FILES = (
     "maintainer/tests/test_product_experience.py",
     "maintainer/tests/test_v546_contract_invariants.py",
     "maintainer/tests/test_v547_dynamic_literal_anchor.py",
-    "maintainer/tests/test_v547_review_workspace.py",
+    "maintainer/tests/test_review_workspace_contracts.py",
     "maintainer/checks/check_v502_progressive_truth.py",
     "maintainer/checks/check_v510_requirement_management.py",
     "maintainer/checks/check_v510_unified_prd.py",

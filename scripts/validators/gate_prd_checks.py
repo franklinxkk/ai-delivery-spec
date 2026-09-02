@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import re
 import sys
+import json
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -165,9 +167,33 @@ class PRDChecks:
                 related_refs=tuple(invalid_open_ids),
             )
         records: dict[str, dict[str, Any]] = {}
+        record_occurrences: dict[str, list[dict[str, Any]]] = defaultdict(list)
         for item in frontmatter.get("unknowns", []) or []:
             if isinstance(item, dict) and re.fullmatch(r"UNK-[A-Z0-9-]+", str(item.get("id", "")), re.I):
-                records[str(item["id"]).upper()] = item
+                unknown_id = str(item["id"]).upper()
+                record_occurrences[unknown_id].append(item)
+                records[unknown_id] = item
+        for unknown_id, occurrences in sorted(record_occurrences.items()):
+            if len(occurrences) < 2:
+                continue
+            fingerprints = {
+                (
+                    str(item.get("priority", "")).upper(),
+                    str(item.get("status", "")).casefold(),
+                    json.dumps(item.get("blocks_stage", ""), ensure_ascii=False, sort_keys=True),
+                    str(item.get("owner", "")),
+                    json.dumps(item.get("affected_refs", []), ensure_ascii=False, sort_keys=True),
+                )
+                for item in occurrences
+            }
+            detail = "conflicting metadata" if len(fingerprints) > 1 else "duplicate definition"
+            self.add(
+                "BLOCK", "PRD-DUPLICATE-UNKNOWN-DEFINITION", path,
+                "同一 UNK-* 在 frontmatter 中重复定义；未知项必须只有一条权威记录，其他位置只引用",
+                f"{unknown_id}: {detail}",
+                affected_consumers=("product", "architect", "qa", "coding_agent"),
+                related_refs=(unknown_id,),
+            )
         # Support a compact Markdown unknown table without treating arbitrary prose as data.
         # When the same UNK-* is projected in frontmatter and the human table, explicit
         # priority/status/stage values must agree; otherwise the two audiences see

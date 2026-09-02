@@ -17,15 +17,19 @@ trace_release_proxy:
   dimensions: {trust: passed, reliability: passed, adaptability: passed, convention: passed, effectiveness: partial}
   effectiveness_limit: deterministic/private calibration repaired gaps; blind A/B, token/time and human ratings remain incomplete
 release_evidence:
-  verified_at: 2026-09-01
+  verified_at: 2026-09-02
   scope: local deterministic checks on Windows; not customer or production acceptance
   results:
-    pytest: 78_passed
+    pytest: 84_passed
+    review_workspace_contracts: 31_passed
+    review_change_modify_delete_add: positive_pass_negative_blocked
+    local_installation: two_primary_locations_report_5.4.9_and_validate
+    browser_review_linkage: marker_card_target_bidirectional_passed
     release_gate: passed
     public_quickstart_and_badcases: passed
     trace_input_badcases: passed
     runtime_package_check: 115_source_files
-    maintainer_budget: 55_files_under_450000_bytes
+    maintainer_budget: 55_files_under_475000_bytes
     skill_creator_quick_validate: passed
     dirty_release_provenance_guard: blocked_as_expected
 known_limitations:

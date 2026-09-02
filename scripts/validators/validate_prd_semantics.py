@@ -591,6 +591,107 @@ def check_duplicate_stable_id_definitions(raw: str) -> list[SemFinding]:
     return findings
 
 
+def check_confirmed_decision_authority(raw: str) -> list[SemFinding]:
+    """D8: a confirmed DEC must cite a human/authoritative decision source."""
+    findings: list[SemFinding] = []
+    for _heading, header, rows in _markdown_tables(raw):
+        lowered = [re.sub(r"[`*_]", "", cell).casefold() for cell in header]
+        id_col = next((i for i, cell in enumerate(lowered) if "id" in cell and "dec" in cell), None)
+        evidence_col = next((i for i, cell in enumerate(lowered) if any(term in cell for term in ("证据", "来源", "回答", "evidence", "source"))), None)
+        status_col = next((i for i, cell in enumerate(lowered) if any(term in cell for term in ("结论", "状态", "status", "decision"))), None)
+        if id_col is None or evidence_col is None or status_col is None:
+            continue
+        for line_no, cells in rows:
+            if max(id_col, evidence_col, status_col) >= len(cells):
+                continue
+            item_id = cells[id_col].strip("`* ").upper()
+            if not item_id.startswith("DEC-"):
+                continue
+            status = _normalized_topic(cells[status_col])
+            if not any(term in status for term in ("已确认", "已关闭", "已决定", "已决策", "confirmed", "closed", "resolved", "decided")):
+                continue
+            evidence = cells[evidence_col].strip()
+            inferred_only = bool(re.search(r"模型(?:推断|建议)|AI\s*(?:inference|suggestion)|竞品做法|原型观察|assumption", evidence, re.I))
+            authority = bool(re.search(
+                r"\b(?:SRC|EVD)-[A-Z0-9-]+\b|用户|客户|负责人|产品经理|业务方|会议|邮件|工单|合同|法规|制度|签署|批准|确认人|approved\s+by|customer|owner",
+                evidence,
+                re.I,
+            ))
+            if len(evidence) < 3 or inferred_only or not authority:
+                findings.append(SemFinding(
+                    "BLOCK", "PRD-CONFIRMED-DECISION-NO-AUTHORITY",
+                    f"已确认决策 {item_id} 没有可复核的人类决定或权威来源；模型推断、竞品做法和原型观察只能保持待确认",
+                    f"{item_id}@line {line_no}",
+                ))
+    return findings
+
+
+def check_acceptance_falsifiability(raw: str) -> list[SemFinding]:
+    """D9: canonical AC rows must expose dual results, a counterexample and evidence."""
+    findings: list[SemFinding] = []
+    weak = re.compile(r"^(?:正常|功能正常|处理成功|显示正确|符合预期|可正常使用|pass|passed|ok|无|暂无|n/?a)$", re.I)
+    for _heading, header, rows in _markdown_tables(raw):
+        normalized = [re.sub(r"[`*_\s]", "", cell).casefold() for cell in header]
+        id_col = next((i for i, cell in enumerate(normalized) if cell in {"acid", "验收id"}), None)
+        if id_col is None:
+            continue
+        aliases = {
+            "steps": ("步骤/输入", "步骤", "输入", "steps/input", "steps"),
+            "visible": ("预期可见结果", "可见结果", "expectedvisible"),
+            "domain": ("预期领域结果", "领域结果", "expecteddomain"),
+            "negative": ("反例", "负向", "negativecase", "negative"),
+            "evidence": ("证据", "evidence"),
+        }
+        columns: dict[str, int] = {}
+        for key, names in aliases.items():
+            index = next((i for i, cell in enumerate(normalized) if cell in {re.sub(r"\s", "", name).casefold() for name in names}), None)
+            if index is not None:
+                columns[key] = index
+        if set(columns) != set(aliases):
+            continue
+        for line_no, cells in rows:
+            if id_col >= len(cells):
+                continue
+            item_id = cells[id_col].strip("`* ").upper()
+            if not item_id.startswith("AC-"):
+                continue
+            failures: list[str] = []
+            for key, index in columns.items():
+                value = cells[index].strip() if index < len(cells) else ""
+                if len(value) < 4 or weak.fullmatch(re.sub(r"[`*_。.!！]", "", value).strip()):
+                    failures.append(key)
+            if failures:
+                findings.append(SemFinding(
+                    "BLOCK", "PRD-AC-NOT-FALSIFIABLE",
+                    f"验收标准 {item_id} 缺少可执行、可证伪的双结果/反例/证据：{', '.join(failures)}",
+                    f"{item_id}@line {line_no}",
+                ))
+    return findings
+
+
+def check_representation_gap(raw: str) -> list[SemFinding]:
+    """D10: error/debug values in a field dictionary must state their carrier."""
+    findings: list[SemFinding] = []
+    risky_value = re.compile(r"错误原因|失败原因|请求编号|请求ID|requestId|同步游标|lastCursor|失败明细", re.I)
+    carrier = re.compile(r"业务持久|持久字段|非持久|瞬时|接口响应|响应字段|审计|日志|计算投影|derived|transient|audit|log", re.I)
+    for heading, header, rows in _markdown_tables(raw):
+        normalized_header = " ".join(re.sub(r"[`*_]", "", cell) for cell in header)
+        if not re.search(r"FLD\s*ID|字段", normalized_header, re.I):
+            continue
+        if not re.search(r"字段字典|field dictionary", heading + " " + normalized_header, re.I):
+            continue
+        for line_no, cells in rows:
+            row = " | ".join(cells)
+            item = ID_RE.search(row.upper())
+            if item and item.group(0).startswith("FLD-") and risky_value.search(row) and not carrier.search(row):
+                findings.append(SemFinding(
+                    "BLOCK", "PRD-REPRESENTATION-GAP",
+                    f"{item.group(0)} 展示错误/追踪值但未说明它是业务持久字段、瞬时响应、审计日志还是计算投影",
+                    f"{item.group(0)}@line {line_no}",
+                ))
+    return findings
+
+
 def check_guard_contradiction(raw: str) -> list[SemFinding]:
     """D4（弱信号，WARN）：同一动作的“仅 X/Y 可 Z”许可集与“∉/不可”拒绝集显式互斥。
 
@@ -755,6 +856,9 @@ def run_semantic_checks(raw: str) -> list[SemFinding]:
         *check_enum_value_coverage(raw),
         *check_body_decision_conflicts(raw),
         *check_duplicate_stable_id_definitions(raw),
+        *check_confirmed_decision_authority(raw),
+        *check_acceptance_falsifiability(raw),
+        *check_representation_gap(raw),
     ]
 
 

@@ -262,6 +262,22 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
         "同一未知项在机器 frontmatter 与人类正文中的优先级、状态或阻断阶段不一致。",
         "以责任人最新确认结果为准，同步 unknowns、open_p0_unknown_ids 与正文未知项表后重跑门禁。",
     ),
+    "PRD-DUPLICATE-UNKNOWN-DEFINITION": (
+        "同一 UNK-* 在权威未知项清单中重复定义，可能产生不同责任、优先级或阻断结论。",
+        "只保留一条结构化未知项记录；正文、评审态和 handoff 只引用该 ID。",
+    ),
+    "PRD-CONFIRMED-DECISION-NO-AUTHORITY": (
+        "已确认 DEC-* 没有具名决策人或可复核权威来源。",
+        "补充用户/责任人确认或 SRC/EVD 证据；模型推断、竞品做法和原型观察保持待确认。",
+    ),
+    "PRD-AC-NOT-FALSIFIABLE": (
+        "AC-* 缺少可执行的双结果、反例或证据，无法独立验收。",
+        "补齐前提、动作/输入、可见结果、领域结果、负向/边界路径和证据；删除“功能正常”等空结论。",
+    ),
+    "PRD-REPRESENTATION-GAP": (
+        "错误或追踪值没有说明其承载方式，容易被误做成持久业务字段。",
+        "明确它是业务持久字段、瞬时响应、审计日志或计算投影；未知时登记 UNK-REPRESENTATION-*。",
+    ),
     "HANDOFF-AESTHETIC-UNDECIDED": (
         "L3/L4 交接没有声明视觉权威与视觉锁，跨页面风格可能漂移。",
         "存量小迭代记录 visual_authority=existing；绿地记录 greenfield_default；品牌化方案可引用 DEC-AESTHETIC-*，并提供 design_lock_ref。",
@@ -431,6 +447,13 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-REVIEW-LEVEL": ("评审层恢复了额外一级模式或缺少目标等级的必要入口。", "R1/R2 只保留总览、功能与流转、边界与验收；R0 也不得增加 Journey/Step/Page/Role 模式。"),
     "PROTO-REVIEW-CANDIDATE-DIFF": ("Candidate Set 与声明评审点存在未裁决差集。", "人工决定声明或不适用并留依据；门禁不得自动改变官方分母。"),
     "PROTO-REVIEW-SEMANTIC-COVERAGE": ("影响实现或验收的页面语义没有完整映射到人类评审说明。", "从 PRD、Stage 0、页面合同和稳定锚点重建语义分母；每项映射 ReviewPoint 或给出有依据的不适用。"),
+    "PROTO-REVIEW-HUMAN-COPY-LEAK": ("稳定 ID、字段名或机器枚举泄露到人类主阅读区。", "主阅读面改写成自然语言；技术标识统一移入默认收起的技术追溯。"),
+    "PROTO-REVIEW-TECHNICAL-TRACE": ("技术追溯缺失、默认展开或没有覆盖机器映射。", "只保留一个默认收起的 data-review-trace，并覆盖本次 manifest 的稳定 ID、字段名和枚举。"),
+    "PROTO-REVIEW-ROLE-DETAIL": ("复杂评审点缺少可按需展开的前端、后端或测试实施说明。", "在自然语言摘要下补一个默认收起的三段实施详情；简单项不要机械展开。"),
+    "PROTO-REVIEW-DIAGRAM-DECISION": ("复杂度与应显示的流程/状态/数据图不一致。", "按跨页、跨角色、跨系统、三步依赖和关键状态触发精确决定；简单 CRUD 明确不画图。"),
+    "PROTO-REVIEW-DIAGRAM-VISIBLE": ("声明图没有在正确页签唯一可见，或出现未声明图。", "核心流程放总览；状态图和数据流图放边界与验收，并与 diagram_contract 一一对应。"),
+    "PROTO-REVIEW-DIAGRAM-CONTEXT": ("核心流程图没有映射并高亮当前 CurrentContext。", "为图中页面/浮层节点绑定 data-review-flow-context，并随产品上下文唯一更新当前高亮。"),
+    "PROTO-REVIEW-EXECUTABLE-EXAMPLE": ("复杂上下文缺少少量可直接执行的正反例，或样例与 AC/Context 漂移。", "在边界与验收保留 2—6 条样例，至少一正一反，写清前提、动作、可见结果、领域结果和 AC。"),
     "PROTO-REVIEW-METRIC-UNCOVERED": ("指标表面缺少逐项可计算、可验收的口径说明。", "为每个 METRIC-* 冻结对象、公式、时间窗、状态过滤、去重、来源、刷新、空值、单位和下钻，并在右栏可见。"),
     "PROTO-REVIEW-STATE-PATH-UNCOVERED": ("工作流或看板缺少允许流转、守卫和非法路径说明。", "补齐来源状态、目标状态、触发动作、角色、守卫、失败结果、事件和恢复，并映射到当前 Context。"),
     "PROTO-REVIEW-OVERLAY-UNCOVERED": ("业务弹窗、抽屉或二级页面没有独立评审上下文。", "把二级业务表面声明为 MODAL/DRAWER/POPOVER Context，绑定父页面、入口、功能点和验收。"),
@@ -594,6 +617,10 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PRD-DUPLICATE-STABLE-ID-DEFINITION": ("A stable ID is defined more than once across authoritative PRD tables.", "Keep one definition; turn other occurrences into references or assign a new stable ID."),
     "PRD-NO-FRONTMATTER": ("The input is not Markdown with YAML front matter.", "Baseline in Markdown + front matter before exporting distribution copies."),
     "PRD-UNKNOWN-METADATA-DRIFT": ("The same unknown conflicts across machine and human projections.", "Synchronize priority, status and blocking stage in front matter, the open P0 index and the human unknown table."),
+    "PRD-DUPLICATE-UNKNOWN-DEFINITION": ("One UNK-* has multiple authoritative definitions.", "Keep one structured record and make every other projection reference that ID."),
+    "PRD-CONFIRMED-DECISION-NO-AUTHORITY": ("A confirmed DEC-* has no accountable human or authoritative source.", "Bind a named decision or SRC/EVD evidence; keep model inference, competitor patterns, and prototype observations pending."),
+    "PRD-AC-NOT-FALSIFIABLE": ("An AC-* lacks executable dual results, a counterexample, or evidence.", "Specify precondition, action/input, visible result, domain result, negative/boundary path, and evidence."),
+    "PRD-REPRESENTATION-GAP": ("An error or trace value has no declared carrier and may be mistaken for persistent business data.", "Classify it as persistent business data, transient response, audit/log data, or a derived projection; register an unknown when undecided."),
     "HANDOFF-PROTOTYPE-ACTION-NOT-IN-PRD": ("The prototype exposes a product action absent from the PRD baseline.", "Define the ACT-* actor, precondition, result, recovery and acceptance in the PRD, or use UIACT-* for review-shell behavior."),
     "HANDOFF-PROTOTYPE-FIELD-NOT-IN-PRD": ("The prototype field has no PRD field contract.", "Define its source, type, requiredness, authorization, validation and sensitivity in the PRD, or remove it."),
     "HANDOFF-PROTOTYPE-METRIC-NOT-IN-PRD": ("The prototype metric has no PRD caliber contract.", "Define meaning, numerator, denominator, scope, time window, deduplication, refresh, empty-value behavior and authority."),
@@ -649,6 +676,13 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-REVIEW-LEVEL": ("The review layer restores forbidden top-level modes or omits required controls for its level.", "R1/R2 expose only Overview, Function & Flow, and Boundary & Acceptance; R0 must not add Journey/Step/Page/Role modes."),
     "PROTO-REVIEW-CANDIDATE-DIFF": ("The candidate set has an unresolved difference from declared review points.", "Have a human declare or reject each candidate with a reason; never mutate the official denominator automatically."),
     "PROTO-REVIEW-SEMANTIC-COVERAGE": ("Implementation- or acceptance-relevant page semantics are not fully mapped to the human review projection.", "Rebuild the semantic denominator from the PRD, Stage 0, page contracts, and stable anchors; map each item to a ReviewPoint or a justified not-applicable decision."),
+    "PROTO-REVIEW-HUMAN-COPY-LEAK": ("Stable IDs, field names, or machine enums leaked into the primary human reading surface.", "Rewrite the primary copy in natural language and move technical identifiers into the collapsed trace."),
+    "PROTO-REVIEW-TECHNICAL-TRACE": ("The technical trace is missing, expanded by default, or incomplete.", "Keep exactly one collapsed data-review-trace and include every declared stable ID, field name, and enum mapping."),
+    "PROTO-REVIEW-ROLE-DETAIL": ("A complex review point lacks on-demand frontend, backend, or QA implementation detail.", "Add one collapsed three-role detail below the natural-language summary; do not expand simple items mechanically."),
+    "PROTO-REVIEW-DIAGRAM-DECISION": ("The diagram set does not match the declared complexity drivers.", "Derive only the required core-flow, state, and data-flow diagrams; declare simple CRUD as diagram-free."),
+    "PROTO-REVIEW-DIAGRAM-VISIBLE": ("A declared diagram is missing, duplicated, or rendered in the wrong tab.", "Put core flow in Overview and state/data flow in Boundary & Acceptance, one DOM surface per manifest diagram."),
+    "PROTO-REVIEW-DIAGRAM-CONTEXT": ("The core-flow diagram does not map and highlight the current context.", "Bind flow nodes to data-review-flow-context and keep exactly one current node synchronized with product context."),
+    "PROTO-REVIEW-EXECUTABLE-EXAMPLE": ("A complex context lacks a small executable positive/negative example set or its examples drift from AC/context.", "Keep 2-6 examples with at least one positive and one negative, including precondition, action, visible/domain result, and AC."),
     "PROTO-REVIEW-METRIC-UNCOVERED": ("A metric surface lacks an itemized, computable, and testable metric contract.", "Freeze object, formula, time window, state filter, deduplication, source, refresh, null behavior, unit, and drill-down for every METRIC-* and show it in the review panel."),
     "PROTO-REVIEW-STATE-PATH-UNCOVERED": ("A workflow or board lacks allowed transitions, guards, and illegal-path behavior.", "Define source and target states, trigger, role, guard, failure result, event, and recovery, then map them to the current context."),
     "PROTO-REVIEW-OVERLAY-UNCOVERED": ("A business modal, drawer, or secondary surface has no independent review context.", "Declare it as a MODAL/DRAWER/POPOVER context and bind its parent, entry, functions, and acceptance."),
@@ -828,7 +862,7 @@ REPAIR_EXAMPLES: tuple[tuple[str, str], ...] = (
 
 def repair_example_for(code: str) -> str:
     if _is_legacy_review_finding(code):
-        return "删除旧 Journey/STEP/Role/页面模式入口，生成 5.4.8 manifest，以真实产品 CurrentContext 驱动三页签和 ReviewPoint。"
+        return "删除旧 Journey/STEP/Role/页面模式入口，生成 5.4.9/RC4 manifest，以真实产品 CurrentContext 驱动三页签和 ReviewPoint。"
     for prefix, example in REPAIR_EXAMPLES:
         if code.startswith(prefix):
             return example
@@ -837,7 +871,7 @@ def repair_example_for(code: str) -> str:
 
 def english_repair_example_for(code: str) -> str:
     if _is_legacy_review_finding(code):
-        return "Remove legacy Journey/STEP/Role/page-mode controls and generate a 5.4.8 manifest driven by the real product CurrentContext, three tabs, and ReviewPoints."
+        return "Remove legacy Journey/STEP/Role/page-mode controls and generate a 5.4.9/RC4 manifest driven by the real product CurrentContext, three tabs, and ReviewPoints."
     examples = (
         ("PRD-LANGUAGE", "Set document_language: en-US, translate human-facing headings and tables, and keep REQ/API/field names unchanged."),
         ("PRD-DUPLICATE-STABLE-ID-DEFINITION", "Keep one VIEW-RISK-LIST-001 definition row; elsewhere write 'See VIEW-RISK-LIST-001' instead of defining it again."),

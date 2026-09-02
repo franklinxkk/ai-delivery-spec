@@ -124,6 +124,8 @@ openclaw skills install @franklinxkk/ai-delivery-spec
   **EN:** Key functions receive markers beside real targets; selecting either side highlights the target, marker, and explanation together.
 - 简单功能可用一句话说明；装饰元素不强行标注。  
   **EN:** Simple functions may use one sentence; decorative elements are not annotated mechanically.
+- 说明先写人能连续读懂的业务语言；复杂点再按需展开前端、后端和测试细节。稳定 ID、字段名和机器枚举默认收进“技术追溯”。
+  **EN:** Lead with continuous business language; expand frontend, backend, and QA detail only for complex points. Stable IDs, field names, and machine enums stay in a collapsed technical trace.
 - 指标卡必须写清口径、时间窗、范围、来源、刷新、缺失/延迟和验收。  
   **EN:** Every metric card defines formula, time window, scope, authority, refresh, missing/delayed data, and acceptance.
 - 泳道或状态页必须写清迁移条件、角色守卫、副作用、失败与恢复。  
@@ -133,8 +135,8 @@ openclaw skills install @franklinxkk/ai-delivery-spec
 - 评审栏可以收起再展开；窄屏可在产品态和评审态间切换，不覆盖关键操作。  
   **EN:** The panel can collapse and reopen; narrow screens switch between product and review surfaces without covering key operations.
 
-跨页面、模块或角色主链才画流程图；受守卫的状态变化画状态图；跨系统或多权威源画数据流。简单 CRUD 不机械堆图。  
-**English:** Use a journey diagram for real cross-page/module/role chains, a state diagram for guarded transitions, and a data-flow diagram for cross-system or multi-authority data. Do not add diagrams to simple CRUD work by default.
+跨页面、模块或角色主链才在总览画核心流程并高亮当前页面；受守卫的状态变化在边界页画状态图；跨系统或多权威源画数据流，并保留少量可执行正反例。简单 CRUD 不机械堆图。
+**English:** Overview shows a current-context-highlighted core flow only for real cross-page/module/role chains; Boundary & Acceptance adds guarded state or cross-system data-flow diagrams plus a few executable positive/negative cases. Simple CRUD stays diagram-free.
 
 ## 与 Spec Kit / OpenSpec 的边界｜Boundary with Spec Kit and OpenSpec
 

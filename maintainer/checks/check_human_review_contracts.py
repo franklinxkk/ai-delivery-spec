@@ -93,6 +93,9 @@ require(
         "ProductLocation：产品导航证明系统位置",
         "页面切换同步活动视图、路由、活动菜单路径",
         "不得增加 Journey/Step/Role 导航",
+        "人类主阅读面与技术追溯",
+        "data-review-role-details",
+        "data-review-trace",
     ),
 )
 

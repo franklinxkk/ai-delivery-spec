@@ -6,8 +6,10 @@
 - **Frozen-kernel stability patch**：不新增工作站、Schema、下游格式或工件语义。`prototype` profile 显式收到 PRD 时会同时执行 PRD 与 handoff 校验；L2+ handoff 增加 `FLD-*`、`METRIC-*` 与 PRD 合同的一致性检查。纯产品态、未传 PRD 的小原型仍保持轻量。
 - **Clarification and evidence discipline**：跨系统批量“部分失败”被收紧为隔离粒度、批次/记录状态、幂等键、可重报范围、聚合回执五项不可分 P0 组。任何 PASS 声明必须来自实际目标 profile，并报告退出码和 `not_proven`；HTML/JS 语法检查不能替代需求、原型或交接门禁。
 - **Review runtime and golden examples**：中型评审样例修复窄屏业务抽屉遮挡重新展开入口；黄金 PRD 就近补齐来源、指标、流程、集成、状态、规则与 AC 定义，不再以 dangling-reference WARN 冒充干净样例。README 的角色价值、快速入口、生命周期、三种表面、门禁与边界均增加紧邻英文说明，并删除重复的 GitHub 表格入口。
-- **Validation**：Kimi K3 与 DeepSeek V4 Pro 在相同脱敏材料上完成 CRM/AI Native 四角色冷读；修复前反例分别被候选门禁拦截 13 项与 14 项，修复后两组正例均为 `PASS / blockers=0 / gaps=0`。独立 Codex Coding Agent 只读 CRM 正例完成有界服务实现，主代理复跑 25/25 自动化测试通过。评审运行时聚焦回归 35/35 通过；此前 fixture 创建前的 23 个错误经正常 Windows 临时目录权限复跑确认属于 ACL 环境伪失败。完整发布门禁、Skill Creator、运行包和安全扫描结果见 Release Notes。
+- **Validation**：Kimi K3 与 DeepSeek V4 Pro 在相同脱敏材料上完成 CRM/AI Native 四角色冷读；修复前反例分别被候选门禁拦截 13 项与 14 项，修复后两组正例均为 `PASS / blockers=0 / gaps=0`。独立 Codex Coding Agent 只读 CRM 正例完成有界服务实现，主代理复跑 25/25 自动化测试通过。当前评审工作台专项 31/31、全量 pytest 84/84；此前 fixture 创建前的权限错误经宿主临时目录复跑确认属于 Windows ACL 环境伪失败。两个本地主安装目录均升级为 5.4.9 并通过结构校验；评审后“1—4 修改、5 删除、6 新增”正例在安装版 CLI 下 PASS，标号断链反例按预期 BLOCKED，浏览器证明 marker/card/target 双向同步与业务动作隔离。完整发布门禁、Skill Creator、运行包和安全扫描结果见 Release Notes。
 - **Evidence boundary**：上述证据证明确定性合同、模型冷读和有界 Coding Agent 实现，不证明真人团队完整盲审、真实数据库/接口/IAM、AI 模型效果、性能、安全、客户签认或生产稳定性。AI Native 本轮未执行盲实现；CRM 原始评测工件在 390px 下仍有 63px 横向溢出，未包装成公共运行时已全面解决。
+- **Human-first review projection patch（同版本）**：R1/R2 右栏收敛为“总览 / 功能与流转 / 边界与验收”。复杂模块在总览展示核心流程并高亮当前页面；功能点默认使用自然语言，前端、后端与测试细节按需展开；边界页只在跨页、跨角色、跨系统或关键状态流转时显示状态/数据图，并配少量可执行正反例。稳定 ID、字段枚举与技术链路移入默认收起的“技术追溯”，简单 CRUD 不机械画图。
+- **Review-change lifecycle patch（同版本）**：评审后的“修改、删除、新增标注”必须先进入 `CHG-*` 与澄清决定，再同步 PRD、语义覆盖分母、ReviewPoint Declaration、DOM marker/card/target、验收与回归。被删除的稳定身份保留在变更记录中但退出新基线分母；新增项取得新稳定身份；可见序号按新 Declaration 重排，不能把序号当永久业务 ID。旧 baseline 的评审记录和分享定位不得静默复用于新 baseline。
 
 ## 5.4.8 - 2026-08-26
 

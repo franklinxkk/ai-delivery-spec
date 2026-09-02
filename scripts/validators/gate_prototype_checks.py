@@ -524,7 +524,7 @@ def _unreachable_hidden_surfaces(tag_source: str, scripts: str) -> list[str]:
 
 
 class _ReviewFinalParser(HTMLParser):
-    """Collect the context-scoped 5.4.7/5.4.8 review projection."""
+    """Collect the context-scoped 5.4.7-5.4.9 review projection."""
 
     _VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
 
@@ -534,6 +534,13 @@ class _ReviewFinalParser(HTMLParser):
         self.context_stack: list[tuple[int, str]] = []
         self.active_cards: list[dict[str, object]] = []
         self.active_semantics: list[dict[str, object]] = []
+        self.workspace_depths: list[int] = []
+        self.trace_depths: list[int] = []
+        self.tab_stack: list[tuple[int, str]] = []
+        self.active_traces: list[dict[str, object]] = []
+        self.role_detail_stack: list[tuple[int, str]] = []
+        self.active_role_details: list[dict[str, object]] = []
+        self.active_examples: list[dict[str, object]] = []
         self.context_roots: Counter[str] = Counter()
         self.markers: list[dict[str, str]] = []
         self.cards: list[dict[str, str]] = []
@@ -546,6 +553,14 @@ class _ReviewFinalParser(HTMLParser):
         self.unbound_metric_like: Counter[str] = Counter()
         self.content_owners: list[tuple[str, str]] = []
         self.workspace_roots: list[dict[str, str]] = []
+        self.primary_review_text: list[str] = []
+        self.technical_traces: list[dict[str, object]] = []
+        self.role_details: list[dict[str, object]] = []
+        self.role_detail_text: dict[tuple[str, str], str] = {}
+        self.diagrams: list[dict[str, str]] = []
+        self.flow_context_nodes: list[dict[str, str]] = []
+        self.acceptance_examples: list[dict[str, str]] = []
+        self.acceptance_example_text: dict[str, str] = {}
 
     @staticmethod
     def _hidden(attrs: dict[str, str], parent_hidden: bool, tag: str) -> bool:
@@ -597,6 +612,75 @@ class _ReviewFinalParser(HTMLParser):
 
         if "data-review-workspace" in attr_map:
             self.workspace_roots.append(attr_map)
+            self.workspace_depths.append(depth)
+        tab_name = attr_map.get("data-review-tab", "").casefold()
+        if tab_name:
+            self.tab_stack.append((depth, tab_name))
+
+        if "data-review-trace" in attr_map:
+            record: dict[str, object] = {
+                "depth": depth,
+                "open": "open" in attr_map,
+                "text": [],
+            }
+            self.technical_traces.append(record)
+            self.active_traces.append(record)
+            self.trace_depths.append(depth)
+
+        detail_for = attr_map.get("data-review-detail-for", "").upper()
+        if "data-review-role-details" in attr_map:
+            record = {
+                "point": detail_for,
+                "open": "open" in attr_map,
+                "roles": set(),
+            }
+            self.role_details.append(record)
+            self.role_detail_stack.append((depth, detail_for))
+        role_detail = attr_map.get("data-review-role-detail", "").casefold()
+        if role_detail:
+            detail_point = self.role_detail_stack[-1][1] if self.role_detail_stack else ""
+            if self.role_details:
+                self.role_details[-1]["roles"].add(role_detail)  # type: ignore[union-attr]
+            self.active_role_details.append({
+                "depth": depth,
+                "point": detail_point,
+                "role": role_detail,
+                "text": [],
+            })
+
+        diagram_ref = attr_map.get("data-review-diagram", "").upper()
+        if diagram_ref:
+            self.diagrams.append({
+                "ref": diagram_ref,
+                "type": attr_map.get("data-review-diagram-type", "").casefold(),
+                "owner": attr_map.get("data-review-diagram-owner", "").casefold(),
+                "tab": self.tab_stack[-1][1] if self.tab_stack else "",
+                "context": attr_map.get("data-review-context", active_context).upper(),
+                "visible": str(not hidden).lower(),
+            })
+        flow_context = attr_map.get("data-review-flow-context", "").upper()
+        if flow_context:
+            self.flow_context_nodes.append({
+                "diagram": attr_map.get("data-review-diagram-ref", "").upper(),
+                "context": flow_context,
+                "current": attr_map.get("data-flow-current", "").casefold(),
+                "visible": str(not hidden).lower(),
+            })
+
+        example_ref = attr_map.get("data-review-example", "").upper()
+        if example_ref:
+            record = {
+                "depth": depth,
+                "ref": example_ref,
+                "kind": attr_map.get("data-review-example-kind", "").casefold(),
+                "context": attr_map.get("data-review-context", active_context).upper(),
+                "acceptance": attr_map.get("data-review-acceptance-ref", "").upper(),
+                "tab": self.tab_stack[-1][1] if self.tab_stack else "",
+                "visible": str(not hidden).lower(),
+                "text": [],
+            }
+            self.acceptance_examples.append({key: str(value) for key, value in record.items() if key not in {"depth", "text"}})
+            self.active_examples.append(record)
 
         testid = attr_map.get("data-testid", "")
         if (
@@ -669,12 +753,22 @@ class _ReviewFinalParser(HTMLParser):
     def handle_data(self, data: str) -> None:
         if not data.strip():
             return
+        text = data.strip()
+        current_hidden = self.stack[-1][1] if self.stack else False
+        if self.workspace_depths and not self.trace_depths and not current_hidden:
+            self.primary_review_text.append(text)
+        for record in self.active_traces:
+            record["text"].append(text)  # type: ignore[union-attr]
+        for record in self.active_role_details:
+            record["text"].append(text)  # type: ignore[union-attr]
+        for record in self.active_examples:
+            record["text"].append(text)  # type: ignore[union-attr]
         for record in self.active_cards:
             if not bool(record["hidden"]):
-                record["text"].append(data.strip())  # type: ignore[union-attr]
+                record["text"].append(text)  # type: ignore[union-attr]
         for record in self.active_semantics:
             if not bool(record["hidden"]):
-                record["text"].append(data.strip())  # type: ignore[union-attr]
+                record["text"].append(text)  # type: ignore[union-attr]
 
     def handle_endtag(self, tag: str) -> None:
         closing = tag.casefold()
@@ -700,6 +794,29 @@ class _ReviewFinalParser(HTMLParser):
             text = " ".join(str(item) for item in record["text"])
             self.semantic_text[ref] = f"{self.semantic_text.get(ref, '')} {text}".strip()
         self.active_semantics = remaining_semantics
+        remaining_role_details: list[dict[str, object]] = []
+        for record in self.active_role_details:
+            if int(record["depth"]) < closing_depth:
+                remaining_role_details.append(record)
+                continue
+            key = (str(record["point"]), str(record["role"]))
+            text = " ".join(str(item) for item in record["text"])
+            self.role_detail_text[key] = f"{self.role_detail_text.get(key, '')} {text}".strip()
+        self.active_role_details = remaining_role_details
+        remaining_examples: list[dict[str, object]] = []
+        for record in self.active_examples:
+            if int(record["depth"]) < closing_depth:
+                remaining_examples.append(record)
+                continue
+            ref = str(record["ref"])
+            text = " ".join(str(item) for item in record["text"])
+            self.acceptance_example_text[ref] = f"{self.acceptance_example_text.get(ref, '')} {text}".strip()
+        self.active_examples = remaining_examples
+        self.active_traces = [record for record in self.active_traces if int(record["depth"]) < closing_depth]
+        self.trace_depths = [depth for depth in self.trace_depths if depth < closing_depth]
+        self.role_detail_stack = [item for item in self.role_detail_stack if item[0] < closing_depth]
+        self.tab_stack = [item for item in self.tab_stack if item[0] < closing_depth]
+        self.workspace_depths = [depth for depth in self.workspace_depths if depth < closing_depth]
         self.context_stack = [item for item in self.context_stack if item[0] < closing_depth]
         self.stack = self.stack[:index]
 
@@ -769,7 +886,7 @@ class PrototypeChecks:
         scripts: str,
         document: dict[str, object],
     ) -> set[str]:
-        """Validate the context-driven 5.4.7/5.4.8 human review projection.
+        """Validate the context-driven 5.4.7-5.4.9 human review projection.
 
         Static checks prove declaration integrity and the presence of runtime
         mechanisms. Product-fingerprint invariance, overlay ordering, target
@@ -858,7 +975,7 @@ class PrototypeChecks:
         if len(projection.workspace_roots) != 1:
             self.add(
                 "BLOCK", "PROTO-REVIEW-CONTEXT-CONTRACT", path,
-                "5.4.7 Final/5.4.8 评审合同必须且只能有一个 data-review-workspace 根",
+                "5.4.7 Final—5.4.9 评审合同必须且只能有一个 data-review-workspace 根",
                 str(len(projection.workspace_roots)),
                 affected_consumers=("frontend", "qa"),
             )
@@ -932,12 +1049,306 @@ class PrototypeChecks:
             )
             for item in semantic_items
         ]
-        if str(document.get("contract_revision", "")).upper() in {"RC2", "RC3"}:
+        if schema_version == "5.4.9":
+            human_contract = document.get("human_projection_contract") or {}
+            human_contract = human_contract if isinstance(human_contract, dict) else {}
+            primary_text = " ".join(projection.primary_review_text)
+            leaked_ids = sorted(set(re.findall(
+                r"\b(?:REQ|SRC|DEC|ROLE|FLOW|STEP|VIEW|REG|ACT|UIACT|ENT|FLD|METRIC|RULE|STM|STATE|API|EVT|INT|AC|TEST|EVD|UNK|MOD|XCT|EDGE|RVP|SCOV|DIAG)-[A-Z0-9-]+\b",
+                primary_text,
+                re.I,
+            )))
+            leaked_terms = []
+            for term in human_contract.get("technical_terms", []) or []:
+                raw_term = str(term)
+                if raw_term and re.search(rf"(?<![\w-]){re.escape(raw_term)}(?![\w-])", primary_text):
+                    leaked_terms.append(raw_term)
+            if leaked_ids or leaked_terms:
+                detail = ", ".join([*leaked_ids[:8], *leaked_terms[:8]])
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-HUMAN-COPY-LEAK", path,
+                    "人类主阅读区泄露稳定 ID、字段名或机器枚举；这些内容只能进入默认收起的技术追溯",
+                    detail,
+                    affected_consumers=("product", "frontend", "backend", "qa"),
+                    related_refs=tuple(leaked_ids[:50]),
+                )
+
+            if len(projection.technical_traces) != 1:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-TECHNICAL-TRACE", path,
+                    "5.4.9 评审态必须且只能有一个默认收起的技术追溯区",
+                    f"count={len(projection.technical_traces)}",
+                    affected_consumers=("frontend", "backend", "qa", "coding_agent"),
+                )
+                trace_text = ""
+            else:
+                trace = projection.technical_traces[0]
+                if bool(trace.get("open")):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-TECHNICAL-TRACE", path,
+                        "技术追溯必须默认收起，不能抢占人类主阅读面",
+                        workspace_id,
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+                trace_text = " ".join(str(item) for item in trace.get("text", []) or [])
+            trace_refs = sorted(set(re.findall(
+                r"\b[A-Z][A-Z0-9]*-[A-Z0-9-]+\b",
+                json.dumps(document, ensure_ascii=False),
+            )))
+            missing_trace_refs = [ref for ref in trace_refs if ref not in trace_text]
+            missing_trace_terms = [
+                str(term) for term in human_contract.get("technical_terms", []) or []
+                if str(term) not in trace_text
+            ]
+            if missing_trace_refs or missing_trace_terms:
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-TECHNICAL-TRACE", path,
+                    "技术追溯没有覆盖 manifest 中的稳定 ID、字段名或机器枚举",
+                    ", ".join([*missing_trace_refs[:8], *missing_trace_terms[:8]]),
+                    affected_consumers=("frontend", "backend", "qa", "coding_agent"),
+                    related_refs=tuple(missing_trace_refs[:50]),
+                )
+
+            details_by_point: dict[str, list[dict[str, object]]] = defaultdict(list)
+            for detail in projection.role_details:
+                details_by_point[str(detail.get("point", "")).upper()].append(detail)
+            for point in point_items:
+                point_ref = str(point.get("ref", "")).upper()
+                detail_contract = point.get("implementation_detail") or {}
+                detail_contract = detail_contract if isinstance(detail_contract, dict) else {}
+                if detail_contract.get("required") is not True:
+                    continue
+                surfaces = details_by_point.get(point_ref, [])
+                if len(surfaces) != 1:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-ROLE-DETAIL", path,
+                        "需要实施展开的评审点必须且只能有一个默认收起的前端/后端/测试详情",
+                        f"{point_ref}: count={len(surfaces)}",
+                        affected_consumers=("frontend", "backend", "qa"), related_refs=(point_ref,),
+                    )
+                    continue
+                detail = surfaces[0]
+                if bool(detail.get("open")):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-ROLE-DETAIL", path,
+                        "实施详情必须默认收起，由读者按需展开",
+                        point_ref,
+                        affected_consumers=("product", "frontend", "backend", "qa"), related_refs=(point_ref,),
+                    )
+                expected_roles = {"frontend", "backend", "qa"}
+                actual_roles = {str(item) for item in detail.get("roles", set())}
+                if actual_roles != expected_roles:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-ROLE-DETAIL", path,
+                        "实施详情必须同时覆盖前端实现、后端处理和测试验收",
+                        f"{point_ref}: {', '.join(sorted(actual_roles)) or 'missing'}",
+                        affected_consumers=("frontend", "backend", "qa"), related_refs=(point_ref,),
+                    )
+                for role in sorted(expected_roles):
+                    role_text = projection.role_detail_text.get((point_ref, role), "")
+                    if len(role_text.strip()) < 12 or re.search(r"\{[^{}]+\}|\b(?:TBD|TODO)\b|待补充|待完善", role_text, re.I):
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-ROLE-DETAIL", path,
+                            "前端/后端/测试展开项必须是可独立执行的自然语言说明，不能留空或占位",
+                            f"{point_ref}/{role}",
+                            affected_consumers=(role,), related_refs=(point_ref,),
+                        )
+
+            diagram_contract = document.get("diagram_contract") or {}
+            diagram_contract = diagram_contract if isinstance(diagram_contract, dict) else {}
+            decisions = [item for item in diagram_contract.get("decisions", []) or [] if isinstance(item, dict)]
+            diagram_items = [item for item in diagram_contract.get("diagrams", []) or [] if isinstance(item, dict)]
+            decision_contexts = [str(item.get("context_ref", "")).upper() for item in decisions]
+            diagram_refs = [str(item.get("diagram_ref", "")).upper() for item in diagram_items]
+            if len(decision_contexts) != len(set(decision_contexts)) or set(decision_contexts) != set(contexts):
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-DIAGRAM-DECISION", path,
+                    "每个 CurrentContext 必须且只能有一条画图/不画图决定",
+                    f"declared={sorted(set(decision_contexts))}; contexts={sorted(contexts)}",
+                    affected_consumers=("product", "frontend", "backend", "qa"),
+                )
+            if len(diagram_refs) != len(set(diagram_refs)):
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-DIAGRAM-DECISION", path,
+                    "diagram_contract 存在重复 DIAG-*",
+                    workspace_id,
+                    affected_consumers=("product", "frontend", "qa"),
+                )
+            diagram_by_ref = {str(item.get("diagram_ref", "")).upper(): item for item in diagram_items}
+            expected_types_by_driver = {
+                "cross_page": {"core_flow"},
+                "cross_role": {"core_flow"},
+                "cross_system": {"core_flow", "data_flow"},
+                "three_plus_dependent_steps": {"core_flow"},
+                "critical_state_transition": {"state"},
+            }
+            semantic_types_for_context: dict[str, set[str]] = defaultdict(set)
+            for semantic in semantic_items:
+                semantic_types_for_context[str(semantic.get("owner_context_ref", "")).upper()].add(
+                    str(semantic.get("semantic_type", ""))
+                )
+            complex_contexts: set[str] = set()
+            for decision in decisions:
+                context_ref = str(decision.get("context_ref", "")).upper()
+                drivers = {str(item) for item in decision.get("complexity_drivers", []) or []}
+                context = contexts.get(context_ref, {})
+                inferred_drivers: set[str] = set()
+                if (
+                    str(context.get("context_type", "")) != "VIEW"
+                    or bool(context.get("secondary_context_refs", []) or [])
+                ):
+                    inferred_drivers.add("cross_page")
+                surface_types = {str(item) for item in context.get("surface_types", []) or []}
+                semantic_types_here = semantic_types_for_context.get(context_ref, set())
+                if "workflow" in surface_types or "state_transition" in semantic_types_here:
+                    inferred_drivers.add("critical_state_transition")
+                if semantic_types_here & {"event_handoff", "role_path"}:
+                    inferred_drivers.add("cross_role")
+                if not inferred_drivers.issubset(drivers):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-DIAGRAM-DECISION", path,
+                        "页面合同和语义账本已经触发复杂图，不能在 diagram_contract 中降级为简单 CRUD",
+                        f"{context_ref}: missing={sorted(inferred_drivers - drivers)}",
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+                declared_types = {str(item) for item in decision.get("required_types", []) or []}
+                expected_types: set[str] = set()
+                for driver in drivers:
+                    expected_types.update(expected_types_by_driver.get(driver, set()))
+                if drivers == {"simple_crud"}:
+                    expected_types = set()
+                elif "simple_crud" in drivers:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-DIAGRAM-DECISION", path,
+                        "simple_crud 不能与复杂度触发条件同时声明",
+                        context_ref,
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+                if expected_types:
+                    complex_contexts.add(context_ref)
+                if declared_types != expected_types:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-DIAGRAM-DECISION", path,
+                        "画图类型必须由复杂度触发条件精确推导，既不能漏图也不能给简单 CRUD 堆图",
+                        f"{context_ref}: expected={sorted(expected_types)} actual={sorted(declared_types)}",
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+                refs = [str(item).upper() for item in decision.get("diagram_refs", []) or []]
+                actual_types = {
+                    str(diagram_by_ref.get(ref, {}).get("diagram_type", ""))
+                    for ref in refs if ref in diagram_by_ref
+                }
+                if set(refs) - set(diagram_by_ref) or actual_types != declared_types:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-DIAGRAM-DECISION", path,
+                        "Context 的 diagram_refs 必须完整解析到所需图类型",
+                        context_ref,
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+
+            dom_diagrams = {item.get("ref", ""): item for item in projection.diagrams}
+            if len(dom_diagrams) != len(projection.diagrams) or set(dom_diagrams) != set(diagram_by_ref):
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-DIAGRAM-VISIBLE", path,
+                    "每张声明的图必须在人类评审区恰好出现一次，且不得出现未声明图",
+                    f"manifest={sorted(diagram_by_ref)} dom={sorted(dom_diagrams)}",
+                    affected_consumers=("product", "frontend", "backend", "qa"),
+                )
+            for diagram_ref, item in diagram_by_ref.items():
+                dom = dom_diagrams.get(diagram_ref, {})
+                diagram_type = str(item.get("diagram_type", ""))
+                owner_tab = str(item.get("owner_tab", ""))
+                if dom and (dom.get("type") != diagram_type or dom.get("owner") != owner_tab or dom.get("tab") != owner_tab):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-DIAGRAM-VISIBLE", path,
+                        "图必须位于声明页签并显示正确类型",
+                        f"{diagram_ref}/{diagram_type}/{owner_tab}",
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+                if diagram_type != "core_flow":
+                    continue
+                nodes = [node for node in projection.flow_context_nodes if node.get("diagram") == diagram_ref]
+                node_contexts = [str(node.get("context", "")) for node in nodes]
+                expected_contexts = {str(ref).upper() for ref in item.get("context_refs", []) or []}
+                current_nodes = [node for node in nodes if node.get("current") == "true"]
+                if set(node_contexts) != expected_contexts or len(node_contexts) != len(set(node_contexts)):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-DIAGRAM-CONTEXT", path,
+                        "核心流程图必须逐一映射声明的页面/业务浮层 Context",
+                        diagram_ref,
+                        affected_consumers=("product", "frontend", "qa"),
+                    )
+                if len(current_nodes) != 1 or current_nodes[0].get("context") != initial_context:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-DIAGRAM-CONTEXT", path,
+                        "核心流程图必须唯一高亮当前页面，并与初始 CurrentContext 一致",
+                        diagram_ref,
+                        affected_consumers=("product", "frontend", "qa"),
+                    )
+            if any(str(item.get("diagram_type", "")) == "core_flow" for item in diagram_items):
+                if "syncReviewDiagramContext" not in scripts or "data-flow-current" not in scripts:
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-DIAGRAM-CONTEXT", path,
+                        "核心流程图缺少随 CurrentContext 更新当前节点高亮的运行时机制",
+                        workspace_id,
+                        affected_consumers=("product", "frontend", "qa"),
+                    )
+
+            example_items = [item for item in document.get("acceptance_examples", []) or [] if isinstance(item, dict)]
+            example_refs = [str(item.get("example_ref", "")).upper() for item in example_items]
+            dom_examples = {item.get("ref", ""): item for item in projection.acceptance_examples}
+            if len(example_refs) != len(set(example_refs)) or len(dom_examples) != len(projection.acceptance_examples) or set(example_refs) != set(dom_examples):
+                self.add(
+                    "BLOCK", "PROTO-REVIEW-EXECUTABLE-EXAMPLE", path,
+                    "声明的少量正反例必须在边界与验收中各出现一次，且不得出现孤儿样例",
+                    f"manifest={sorted(set(example_refs))}; dom={sorted(dom_examples)}",
+                    affected_consumers=("product", "frontend", "backend", "qa"),
+                )
+            examples_by_context: dict[str, list[dict[str, object]]] = defaultdict(list)
+            for item in example_items:
+                ref = str(item.get("example_ref", "")).upper()
+                context_ref = str(item.get("owner_context_ref", "")).upper()
+                examples_by_context[context_ref].append(item)
+                dom = dom_examples.get(ref, {})
+                if dom and (
+                    dom.get("kind") != str(item.get("kind", ""))
+                    or dom.get("context") != context_ref
+                    or dom.get("acceptance") != str(item.get("acceptance_ref", "")).upper()
+                    or dom.get("tab") != "boundary_acceptance"
+                ):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-EXECUTABLE-EXAMPLE", path,
+                        "正反例必须位于边界与验收，并与 Context、类型和 AC 一致",
+                        ref,
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+                text = projection.acceptance_example_text.get(ref, "")
+                for field in ("precondition", "action", "expected_visible_result", "expected_domain_result"):
+                    value = str(item.get(field, "") or "")
+                    if value and value not in text:
+                        self.add(
+                            "BLOCK", "PROTO-REVIEW-EXECUTABLE-EXAMPLE", path,
+                            "正反例必须把前提、动作、可见结果和业务结果投影为可执行自然语言",
+                            f"{ref}/{field}",
+                            affected_consumers=("product", "frontend", "backend", "qa"),
+                        )
+                        break
+            for context_ref in sorted(complex_contexts):
+                context_examples = examples_by_context.get(context_ref, [])
+                kinds = {str(item.get("kind", "")) for item in context_examples}
+                if not {"positive", "negative"}.issubset(kinds) or not (2 <= len(context_examples) <= 6):
+                    self.add(
+                        "BLOCK", "PROTO-REVIEW-EXECUTABLE-EXAMPLE", path,
+                        "每个复杂 Context 只保留 2—6 条可直接执行的样例，且至少一正一反",
+                        f"{context_ref}: count={len(context_examples)} kinds={sorted(kinds)}",
+                        affected_consumers=("product", "frontend", "backend", "qa"),
+                    )
+        if str(document.get("contract_revision", "")).upper() in {"RC2", "RC3", "RC4"}:
             legacy_record_ids = sorted(point_id for point_id in point_ids if not point_id.startswith("RVP-"))
             if legacy_record_ids:
                 self.add(
                     "BLOCK", "PROTO-REVIEW-TRUTH-ID", path,
-                    "RC2/RC3 的评审记录 ID 必须使用 RVP-*，并通过 subject_ref 单独引用业务事实",
+                    "RC2—RC4 的评审记录 ID 必须使用 RVP-*，并通过 subject_ref 单独引用业务事实",
                     ", ".join(legacy_record_ids[:8]),
                     affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
                 )
@@ -953,7 +1364,7 @@ class PrototypeChecks:
                 "candidate_review_points 存在重复 candidate_id，防漏结果不可审计", workspace_id,
                 affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
             )
-        if schema_version == "5.4.8" and (
+        if schema_version in {"5.4.8", "5.4.9"} and (
             len(semantic_ids) != len(set(semantic_ids))
             or len(semantic_keys) != len(set(semantic_keys))
         ):
@@ -1118,7 +1529,7 @@ class PrototypeChecks:
                 affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
             )
 
-        if schema_version == "5.4.8":
+        if schema_version in {"5.4.8", "5.4.9"}:
             page_contracts = self._page_contracts(raw)
             semantic_by_context: dict[str, list[dict[str, object]]] = defaultdict(list)
             for item in semantic_items:
@@ -1170,7 +1581,7 @@ class PrototypeChecks:
                 if page_contract is None:
                     self.add(
                         "BLOCK", "PROTO-REVIEW-PAGE-CONTRACT-MISSING", path,
-                        "5.4.8 的每个评审 VIEW 必须有 PAGE-CONTRACT，避免模型从页面外观缩减功能分母",
+                        "5.4.8 起的每个评审 VIEW 必须有 PAGE-CONTRACT，避免模型从页面外观缩减功能分母",
                         context_ref,
                         affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
                     )
@@ -1412,9 +1823,9 @@ class PrototypeChecks:
             )
 
         ownership = {
-            "overview": {"background_problem", "goals_success", "roles", "scope", "main_chain", "change_summary", "risk_summary"},
+            "overview": {"background_problem", "goals_success", "roles", "scope", "main_chain", "core_flow_diagram", "change_summary", "risk_summary"},
             "function_flow": {"current_context", "business_duty", "upstream_downstream", "review_points", "visible_domain_results", "data_event_summary"},
-            "boundary_acceptance": {"rules", "permissions", "state_machines", "metric_calculations", "exceptions_recovery", "acceptance_tests", "open_items"},
+            "boundary_acceptance": {"rules", "permissions", "state_machines", "data_flow_diagram", "metric_calculations", "exceptions_recovery", "acceptance_tests", "acceptance_examples", "open_items"},
         }
         owner_counts = Counter(item[0] for item in projection.content_owners)
         for content, owner in projection.content_owners:
@@ -1436,7 +1847,7 @@ class PrototypeChecks:
                 "goals_success", "scope", "main_chain", "current_context",
                 "review_points", "visible_domain_results", "rules", "acceptance_tests", "open_items",
             }
-            if schema_version == "5.4.8":
+            if schema_version in {"5.4.8", "5.4.9"}:
                 semantic_types = {str(item.get("semantic_type", "")) for item in semantic_items}
                 if "metric" in semantic_types:
                     minimum_content.add("metric_calculations")
@@ -1940,7 +2351,7 @@ class PrototypeChecks:
                     "检测到旧式评审叠加：可继续视检，但未形成 CurrentContext、声明分母、三页签与产品指纹合同",
                     affected_consumers=("product", "frontend", "backend", "qa"),
                 )
-        elif review_workspace is not None and str(review_workspace.get("schema_version", "")) in {"5.4.7-final", "5.4.8"}:
+        elif review_workspace is not None and str(review_workspace.get("schema_version", "")) in {"5.4.7-final", "5.4.8", "5.4.9"}:
             declared_review_markers = self._check_review_workspace_final(
                 path, raw, tag_source, scripts, review_workspace,
             )
@@ -2597,7 +3008,7 @@ class PrototypeChecks:
             and level in {"L2", "L3", "L4"}
             and not (
                 isinstance(review_workspace, dict)
-                and str(review_workspace.get("schema_version", "")) in {"5.4.7-final", "5.4.8"}
+                and str(review_workspace.get("schema_version", "")) in {"5.4.7-final", "5.4.8", "5.4.9"}
             )
         ):
             review_ids = [

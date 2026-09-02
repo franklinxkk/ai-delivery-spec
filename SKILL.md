@@ -57,9 +57,9 @@ description: Use for creating, changing, reviewing, reverse-engineering or accep
 
 实时对话先交付判断，不展示内部 YAML/ID。持久化只在跨会话、跨角色、审计、变更或工具校验时发生。默认最小主产物：frame/problem brief；explore/solution sketch；clarify/requirement brief；specify/需求卡或统一 PRD；review/baseline 复用同一规格并绑定签署、版本/hash；change/acceptance 回链当前基线。Product Truth 只在多投影、反复变更、血缘或强审计确有需要时启用。
 
-客户演示/确认默认产品态；评审态只在用户要求或首次交开发前确认后生成。它遵守 `Review Explains, Product Operates`：左侧是完整产品，右侧只解释当前页面/业务浮层；R1/R2 固定“总览 / 功能与流转 / 边界与验收”。每个页面和二级浮层从 PRD、Stage 0 与锚点建立语义账本；影响实现/验收的动作、字段规则、指标、状态、权限、写入、交接、异常和角色路径必须映射同 Context 的正式评审点，或有来源地声明不适用。简单项可一句话/规则组，关键口径不得省略。`review_contexts` 是评审点分母，语义账本是完整性分母；Candidate 只防漏，评审动作不得改变 Product Fingerprint。机器模型保留在同 hash 的 PRD 与结构化 handoff。生成前完整读取 `references/review-workspace.md`。
+客户演示/确认默认产品态；评审态只在用户要求或首次交开发前确认后生成，左侧完整产品、右侧解释当前页面/浮层；R1/R2 固定“总览 / 功能与流转 / 边界与验收”。从基线与锚点建立语义账本；影响实施验收的动作、字段、指标、状态、权限、写入、交接和异常必须映射当前 Context，或声明不适用。跨页/角色/系统或三步以上依赖才画核心流程并高亮当前页；状态/数据流图按复杂度触发。正文先用自然语言，复杂点再收起前端/后端/测试详情；ID、字段原名和枚举只进收起的技术追溯；简单 CRUD 不机械画图。`review_contexts` 是评审点分母，语义账本是完整性分母；Candidate 只防漏，评审动作不得改变 Product Fingerprint。生成前读取 `references/review-workspace.md`。
 
-Candidate 与 Declaration 物理分离且 `subject_ref` 不重叠；观察只生成带理由的 `candidate_review_points`，不得自动晋级。正式 RVP 的 subject/source/precondition/result/boundary/AC 必须解析到 PRD；纯观察使用 `PROTO-OBS-* + gap + prototype_inferred`，禁止伪造已确认事实。每张指标卡冻结对象、公式、时间窗、过滤/去重、权威源、刷新、空值/失败、精度和下钻；工作流覆盖迁移、角色守卫、非法路径与恢复；二级弹窗/抽屉是独立 CurrentContext。
+机器投影使用结构化 handoff。Candidate 与 Declaration 物理分离且 `subject_ref` 不重叠；观察只生成带理由的 `candidate_review_points`，不得自动晋级。正式 RVP 的 subject/source/precondition/result/boundary/AC 必须解析到 PRD；纯观察使用 `PROTO-OBS-* + gap + prototype_inferred`，禁止伪造已确认事实。每张指标卡冻结对象、公式、时间窗、过滤/去重、权威源、刷新、空值/失败、精度和下钻；工作流覆盖迁移、角色守卫、非法路径与恢复；二级弹窗/抽屉是独立 CurrentContext。
 
 评审态不得把真实导航降级成静态装饰。每个 `VIEW-*` 必须绑定唯一可见菜单路径，或说明为什么是扫码页、H5 独立页等无菜单入口；页面切换同步活动菜单、父级展开、路由、面包屑、标题和 `CurrentContext`。业务浮层继承父页面位置，只改变浮层 `CurrentContext`。任何静态假菜单、位置漂移或评审动作改变产品位置都阻断交付。
 

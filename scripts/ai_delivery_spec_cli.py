@@ -713,7 +713,7 @@ def status_report(args: argparse.Namespace) -> int:
         },
         "known_limitations": [
             "five domain methods have owner-attested production practice; all built-in packs pass deterministic contract checks but fresh-agent/expert maturity remains separate",
-            "v5.4.8 semantic-coverage and review-workspace probes are deterministic; isolated no-skill comparison, fresh-agent repetitions and versioned user feedback remain separate evidence",
+            "v5.4.9 semantic-coverage, human-projection, and review-workspace probes are deterministic; isolated no-skill comparison, fresh-agent repetitions, and versioned user feedback remain separate evidence",
             "domain expert, customer, production, legal, safety, and financial correctness are not proven",
             "deterministic fixtures and private brownfield calibration expose method gaps but do not prove implementation or customer acceptance",
         ],
