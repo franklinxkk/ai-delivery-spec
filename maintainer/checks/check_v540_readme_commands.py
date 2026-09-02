@@ -12,6 +12,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 CLI = ROOT / "scripts" / "ai_delivery_spec_cli.py"
 README = (ROOT / "README.md").read_text(encoding="utf-8")
+SKILL = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+TROUBLESHOOTING = (ROOT / "references" / "troubleshooting.md").read_text(encoding="utf-8")
 MINIMAL = ROOT / "examples" / "minimal-v5"
 MINIMAL_README = (MINIMAL / "README.md").read_text(encoding="utf-8")
 MINIMAL_CARD = MINIMAL / "requirement-card.md"
@@ -42,6 +44,13 @@ if "requirements/changes/CHG-001.yaml" in README or "requirements/changes/CHG-CO
 for marker in ("route-stage", "ADS:*", "resume_context", "两个本地依赖"):
     if marker not in README:
         failures.append(f"README misses progressive-disclosure marker: {marker}")
+if "[避坑指南与 FAQ](references/troubleshooting.md)" not in README:
+    failures.append("README does not expose the pitfall guide from onboarding")
+if "避坑、FAQ 或故障" not in SKILL:
+    failures.append("SKILL routing does not load troubleshooting for pitfall/FAQ requests")
+for marker in ("## 高频避坑指南", "## 集中 FAQ", "## 反模式"):
+    if marker not in TROUBLESHOOTING:
+        failures.append(f"troubleshooting misses consolidated guidance: {marker}")
 
 badge_match = re.search(r"version-([0-9]+\.[0-9]+\.[0-9]+)-", README)
 expected_version = badge_match.group(1) if badge_match else None

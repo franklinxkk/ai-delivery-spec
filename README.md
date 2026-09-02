@@ -18,10 +18,11 @@
 | 平台 / Platform | 当前数据 / Current signal | 详情 / Details |
 |---|---:|---|
 | ClawHub | **2,200+ 次下载/使用 / downloads & uses** | [版本、下载量与安全审计 / Versions, usage and security audit](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec) |
-| SkillHub | **4.8 / 5** | [评分与安全扫描报告 / Rating and security scan](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec) |
+| SkillHub | **4.7 / 5** | [评分与安全扫描报告 / Rating and security scan](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec) |
 
-> 社区数据核对于 2026-08-28，会随平台实时变化。如果它帮你少开一次“补规则”的会，欢迎到 [GitHub 点个 Star ⭐](https://github.com/franklinxkk/ai-delivery-spec)。  
-> **English:** Community figures were checked on 2026-08-28 and may change. If the Skill saves your team one rule-repair meeting, please consider giving the project a [GitHub Star ⭐](https://github.com/franklinxkk/ai-delivery-spec).
+> 社区数据核对于 2026-09-02，会随平台实时变化。如果它帮你少开一次“补规则”的会，欢迎到 [GitHub 点个 Star ⭐](https://github.com/franklinxkk/ai-delivery-spec)。
+>
+> **English:** Community figures were checked on 2026-09-02 and may change. If the Skill saves your team one rule-repair meeting, please consider giving the project a [GitHub Star ⭐](https://github.com/franklinxkk/ai-delivery-spec).
 
 ## 它先解决谁的什么关键问题｜Who It Helps and Why
 
@@ -69,6 +70,10 @@ openclaw skills install @franklinxkk/ai-delivery-spec
 
 四个入口是意图别名，不是四套新流程。部分宿主会在消息到达模型前拦截未知命令，因此不宣称跨宿主原生注册；此时改用 `/ai-delivery-spec /dig …`、`$ai-delivery-spec /dig …`，或直接说“使用 ai-delivery-spec 深度澄清这个需求”。  
 **English:** These are intent aliases, not four separate workflows. Some hosts intercept unknown slash commands before the model sees them. In that case, use an explicit Skill form such as `/ai-delivery-spec /dig …` or `$ai-delivery-spec /dig …`, or simply say “Use ai-delivery-spec to clarify this requirement deeply.” Native registration is not claimed across all hosts.
+
+> **第一次深入使用前 / Before deeper use:** 花 3 分钟扫一遍[避坑指南与 FAQ](references/troubleshooting.md)，先避开“简单需求跑重流程、P0 未关闭就冒充基线、默认生成评审态、静态 PASS 冒充真实验收”等高频错误；不需要通读全部参考文档。
+>
+> Spend three minutes on the [Pitfall Guide and FAQ](references/troubleshooting.md) before team handoff. It prevents the most common mistakes without requiring you to read every reference.
 
 ### 3. 它会自动控制轻重｜It Automatically Controls Delivery Weight
 

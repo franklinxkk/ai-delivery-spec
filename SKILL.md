@@ -48,7 +48,7 @@ description: Use for creating, changing, reviewing, reverse-engineering or accep
 | 可见评审投影（仅确认后） | `references/review-workspace.md` |
 | 变更、追溯、验收 | `references/change-acceptance.md` |
 | 大输入、切片、Agent 交接 | `references/context.md` |
-| 工具适配或故障 | `references/tool-adapters.md` / `references/troubleshooting.md` |
+| 工具适配、避坑、FAQ 或故障 | `references/tool-adapters.md` / `references/troubleshooting.md` |
 | 领域证据 | `scripts/query_domain.py --domain <pack> --section "<heading>"` |
 
 不要加载 README、`maintainer/`、全部模板/示例/领域包或整个仓库。材料规模、链路数量或上下文预算触发切片时读取 `references/context.md`，不要用固定文件大小机械升级。细反例只进脱敏维护回归，不注入日常上下文。

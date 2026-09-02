@@ -27,6 +27,7 @@ release_evidence:
     browser_review_linkage: marker_card_target_bidirectional_passed
     release_gate: passed
     public_quickstart_and_badcases: passed
+    pitfall_guide_discoverability: readme_skill_route_and_sections_passed
     trace_input_badcases: passed
     runtime_package_check: 115_source_files
     maintainer_budget: 55_files_under_475000_bytes

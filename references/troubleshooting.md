@@ -1,7 +1,29 @@
-# 排障、恢复与反模式 / Troubleshooting, Recovery And Anti-Patterns
+# 避坑、FAQ、排障与恢复 / Pitfalls, FAQ, Troubleshooting And Recovery
 
-仅在命令失败、大任务中断或用户询问阻断原因时加载本文件。Ultra-Light 或 Standard
-顺利执行时不要加载，避免无谓占用上下文。
+用户询问“怎么正确使用、有哪些坑、为什么被阻断、如何恢复”，或准备把产物交给团队但不确定是否误用时，
+加载本文件。普通 `direct` / `standard` 任务顺利执行时不要自动加载，避免无谓占用上下文。
+
+Load this file when the user asks how to use the Skill correctly, wants a pitfall/FAQ check, needs a gate diagnosis,
+or must recover interrupted work. Do not load it automatically for an ordinary successful task.
+
+## 高频避坑指南｜Pitfall Guide
+
+这张表是入口索引，不是第二套需求合同；具体规则以“去哪里看”所指文档为准。
+Use this table as a routing index, not as a duplicate contract. Follow the linked reference for authoritative details.
+
+| 高频误用 / Pitfall | 为什么有问题 / Why it fails | 正确动作 / Correct action | 去哪里看 / Read |
+|---|---|---|---|
+| 小改也跑完整生命周期<br>Running the full lifecycle for a small edit | 工件和澄清成本超过改动风险<br>Process cost exceeds change risk | 走 `direct`，只交差异、边界、正反验收和未证明项<br>Use `direct`; deliver only the bounded delta and acceptance | `references/stages.md` |
+| 一句话要 HTML，却停在需求清单<br>Stopping at a checklist after the user asked for HTML | 把中间澄清误当最终目标<br>Clarification replaced the requested outcome | 记住原型停止点，分批关闭原型阶段 P0 后继续；只有用户明确允许才先画概念候选<br>Keep the prototype target; close blocking P0s, then continue | `SKILL.md` §2；`references/stages.md` |
+| 把未知指标、权限或规则写成已确认<br>Turning unknown metrics, permissions, or rules into facts | 流畅文本掩盖了业务决策缺口<br>Fluent prose hides a missing decision | 登记 `UNK-*`、责任人、影响、阻断阶段和退路，不替用户猜值<br>Record an owned unknown and fallback; never invent the value | `references/discover.md`；`references/specify.md` |
+| 默认生成评审态或用注释破坏产品态<br>Generating review mode by default or damaging product mode | 客户确认与研发交接是不同任务<br>Confirmation and engineering handoff are different jobs | 默认产品态；用户明确要求或交开发前确认后再加评审投影<br>Default to product mode; add review projection only after request/confirmation | `references/prototype.md`；`references/review-workspace.md` |
+| 普通项目过早启用 Product Truth<br>Enabling Product Truth too early | 多分片治理会吞掉简单需求的收益<br>Fragment governance overwhelms simple work | 只有持续变更、多投影、血缘或强审计确有需要时启用<br>Use it only for sustained change, multiple projections, lineage, or strong audit | `references/stages.md`；本文件“Product Truth 长任务避免死锁” |
+| 分别维护“人类 PRD”和“AI PRD”<br>Maintaining separate human and AI PRDs | 同一规则会漂移，双方都不再可信<br>The two truths inevitably drift | 一份权威基线，同源投影人类正文、工程附录和机器 handoff<br>Keep one authority and derive human, engineering, and machine views | `references/specify.md` |
+| 为过门禁补空标题、假 ID 或假按钮<br>Adding empty sections, fake IDs, or fake controls to pass a gate | 结构变绿但业务仍不可实施<br>Structure turns green while behavior remains undefined | 回到来源或责任人补真实语义；无法确认就保留 GAP/UNK<br>Fix the source contract or keep an explicit gap/unknown | 本文件“三分钟恢复”；`references/specify.md` |
+| 把静态 PASS 当成已实现、合规或已验收<br>Treating static PASS as implementation, compliance, or acceptance | 证据等级被越级宣传<br>Evidence is overstated | 报告命令、退出码和 `not_proven`，按需补浏览器、真实系统、领域或客户证据<br>Report the gate and its limits; add higher evidence only when executed | `references/change-acceptance.md` |
+| 评审后直接改序号或复用旧基线记录<br>Renumbering points or reusing old-baseline review records | 可见序号不是稳定业务身份，历史意见会串线<br>Visible numbers are not stable identities | 先建 `CHG-*`；修改保留稳定 ID，删除退出新分母，新增取得新 ID，记录按 baseline 隔离<br>Version the change and isolate review records by baseline | `references/review-workspace.md`；`references/change-acceptance.md` |
+| 把内置领域包当成当前项目权威<br>Treating a built-in domain pack as project authority | 法规、标准和现场规则可能已变化或不适用<br>Sources may be stale or inapplicable | 核对适用范围、发布日期和当前权威源；冲突时保留证据状态并让责任人决定<br>Verify applicability and current authority; never let a pack override project evidence | `references/discover.md`；领域包来源登记 |
+| 一次加载 README、全部参考和全部领域包<br>Loading every document and domain pack at once | 上下文被历史细节挤占，弱模型更易漏执行<br>Context is crowded and execution degrades | 只读取当前阶段、风险和领域所需切片<br>Load only the slice required by the current stage and domain | `SKILL.md` §3；`references/context.md` |
 
 ## 三分钟恢复
 
