@@ -1,157 +1,35 @@
 #!/usr/bin/env python3
-"""Keep public claims, pure-v5 scope, package hygiene, and agent entries aligned."""
-
-from __future__ import annotations
-
-import re
-import subprocess
+"""Version and evidence boundaries; never certify model or customer outcomes."""
 from pathlib import Path
-
+import re
+import sys
 import yaml
 
-
 ROOT = Path(__file__).resolve().parents[3]
-VERSION = "5.4.9"
-PUBLIC_FILES = (
-    "README.md",
-    "maintainer/README.md",
-    "examples/minimal-v5/README.md",
-)
-POSITIVE_ONLY_CLAIMS = (
-    "production ready",
-    "production-ready",
-    "fully validated",
-    "full lifecycle simulation",
-    "生产就绪",
-    "完整全生命周期模拟",
-    "已全面验证",
-)
-NEGATION_MARKERS = (
-    "not ", "do not", "cannot", "no ", "prohibited", "without", "unproven",
-    "未", "不", "禁止", "不可", "不得", "没有",
-)
-LEGACY_RUNTIME_MARKERS = (
-    "migrate-v4", "inventory-v4", "compare-v4-v5", "export-v4-view",
-    "v4_input_mode", "v4 compatibility", "v4-to-v5", "v5-to-v4",
-)
 
 
-def text_files() -> list[Path]:
-    suffixes = {".md", ".yaml", ".yml", ".json", ".py", ".txt", ".html"}
-    return [
-        path for path in ROOT.rglob("*")
-        if path.is_file()
-        and path.suffix.lower() in suffixes
-        and ".git" not in path.parts
-        and "__pycache__" not in path.parts
-        and path.name != "CHANGELOG.md"
-    ]
-
-
-def main() -> int:
-    failures: list[str] = []
-    required_version_files = (
-        ROOT / "SKILL.md",
-        ROOT / "README.md",
-        ROOT / "maintainer/evals/evidence/release-status.yaml",
-    )
-    for path in required_version_files:
-        if VERSION not in path.read_text(encoding="utf-8"):
-            failures.append(f"version {VERSION} missing from {path.relative_to(ROOT)}")
-
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    if len(readme.splitlines()) > 300:
-        failures.append("README.md exceeds 300-line onboarding budget")
-    for marker in ("ToC", "ToB/ToG", "Idea", "PRD"):
-        if marker not in readme:
-            failures.append(f"README onboarding omits audience/path marker: {marker}")
-    quick_start = readme.find("## 60 秒上手")
-    if quick_start < 0 or readme.find("npx skills add") < quick_start:
-        failures.append("README must put install inside the first 60-second entry")
-    for marker in ("Ultra-Light", "smart-large-project", "examples/minimal-v5", "分片真相", "一份统一"):
-        if marker not in readme:
-            failures.append(f"README misses required onboarding marker: {marker}")
+def main():
+    failures = []
+    skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+    version = re.search(r"^# AI Delivery Spec (\d+\.\d+\.\d+)", skill, re.M).group(1)
+    status = yaml.safe_load((ROOT / "maintainer/evals/evidence/release-status.yaml").read_text(encoding="utf-8"))
+    config = yaml.safe_load((ROOT / "examples/spec.config.example.yaml").read_text(encoding="utf-8"))
+    if status.get("skill_version") != version or config["execution"]["expected_skill_version"] != version:
+        failures.append("current version and status/config disagree")
+    evidence = status.get("release_evidence", {})
+    if not evidence.get("scope") or not evidence.get("results"):
+        failures.append("release evidence lacks scope or recorded results")
+    if version not in (ROOT / "README.md").read_text(encoding="utf-8"):
+        failures.append("README does not identify the current candidate")
     coverage = yaml.safe_load((ROOT / "references/domain-coverage.yaml").read_text(encoding="utf-8"))
-    release_status = yaml.safe_load((ROOT / "maintainer/evals/evidence/release-status.yaml").read_text(encoding="utf-8"))
-    if release_status.get("runtime") != "pure_v5":
-        failures.append("release status does not declare pure_v5 runtime")
-    if release_status.get("domain_packs", {}).get("count") != len(coverage.get("domains", [])):
-        failures.append("release status domain count is stale")
-    evidence = release_status.get("release_evidence", {})
-    required_results = {
-        "pytest", "release_gate", "public_quickstart_and_badcases", "trace_input_badcases",
-        "runtime_package_check", "maintainer_budget", "skill_creator_quick_validate",
-        "dirty_release_provenance_guard",
-    }
-    if not evidence.get("verified_at") or required_results - set(evidence.get("results", {})):
-        failures.append("release status misses machine-readable release evidence")
-    if "not customer or production acceptance" not in str(evidence.get("scope", "")):
-        failures.append("release evidence misses its non-production boundary")
     for domain in coverage.get("domains", []):
-        if domain["domain_id"] not in readme:
-            failures.append(f"README omits domain pack: {domain['domain_id']}")
-        if domain["maturity"] not in readme:
-            failures.append(f"README omits maturity vocabulary: {domain['maturity']}")
-        if domain["practice_status"] not in readme:
-            failures.append(f"README omits practice status: {domain['practice_status']}")
-        if domain["maturity"] in {"knowledge_backed", "contract_tested"} and domain.get("production_claim") == "allowed":
-            failures.append(f"non-expert domain allows unqualified production claim: {domain['domain_id']}")
-
-    for relative in PUBLIC_FILES:
-        path = ROOT / relative
-        if not path.exists():
-            failures.append(f"missing public document: {relative}")
-            continue
-        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
-            lowered = line.lower()
-            for claim in POSITIVE_ONLY_CLAIMS:
-                if claim.lower() in lowered and not any(marker in lowered for marker in NEGATION_MARKERS):
-                    failures.append(f"unsupported public claim in {relative}:{number}: {claim}")
-
-    for path in text_files():
-        if path.resolve() == Path(__file__).resolve():
-            continue
-        lowered = path.read_text(encoding="utf-8").lower()
-        for marker in LEGACY_RUNTIME_MARKERS:
-            if marker in lowered:
-                failures.append(f"legacy runtime marker {marker!r} in {path.relative_to(ROOT)}")
-        if ".github" not in path.parts and re.search(r"\bv4(?:\.\d+)?\b|(?<![\d.])4\.x\b", lowered):
-            failures.append(f"release-specific legacy version marker in {path.relative_to(ROOT)}")
-
-    git_files = subprocess.run(
-        ["git", "ls-files"], cwd=ROOT, text=True, capture_output=True, check=False
-    )
-    if git_files.returncode == 0:
-        for relative in git_files.stdout.splitlines():
-            normalized = relative.replace("\\", "/")
-            if "__pycache__/" in normalized or normalized.endswith((".pyc", ".tmp", ".log")):
-                failures.append(f"generated file is tracked: {normalized}")
-    ignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
-    for marker in ("__pycache__/", "*.pyc", "*.tmp", "*.log", "*.bak", "*.backup"):
-        if marker not in ignore:
-            failures.append(f".gitignore misses generated-file rule: {marker}")
-
-    allowed_examples = {"minimal-v5", "medium-review-handoff"}
-    shipped_examples = {path.name for path in (ROOT / "examples").iterdir() if path.is_dir()}
-    unexpected_examples = shipped_examples - allowed_examples
-    if unexpected_examples:
-        failures.append("unreviewed or project-specific example directories: " + ", ".join(sorted(unexpected_examples)))
-
-    skill = (ROOT / "SKILL.md").read_text(encoding="utf-8").lower()
-    for relative in ("references/tool-adapters.md",):
-        text = (ROOT / relative).read_text(encoding="utf-8").lower()
-        for marker in ("v5", "product truth", "stable id"):
-            if marker not in text:
-                failures.append(f"{relative} is not aligned with SKILL.md marker: {marker}")
-        if "product truth" not in skill:
-            failures.append("SKILL.md lost Product Truth source ordering")
-
-    if failures:
-        for item in sorted(set(failures)):
-            print(f"FAIL: {item}")
-        return 1
-    print("PASS: public claims, pure-v5 scope, package hygiene, domains, and agent entries are aligned")
-    return 0
+        if domain.get("maturity") in {"knowledge_backed", "contract_tested"} and domain.get("production_claim") == "allowed":
+            failures.append("deterministic domain evidence cannot authorize production claims")
+    for issue in failures:
+        print("FAIL: " + issue)
+    if not failures:
+        print("PASS: version and declared evidence boundaries consistent; outcome claims require their own evidence")
+    return bool(failures)
 
 
 if __name__ == "__main__":

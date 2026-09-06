@@ -34,7 +34,8 @@ def test_h2_uses_full_h3_subtree() -> None:
 def test_todo_inside_stable_id_is_not_unknown_marker() -> None:
     gate = Gate()
     raw = '---\nopen_p0_unknown_ids: []\n---\n## 模块\nREG-RPT-TODO 是待办区域。'
-    gate._check_unknowns(Path('prd.md'), raw, gate._frontmatter(raw), stage='specify', scope_refs=set())
+    gate = MemoryGate({'prd.md': raw})
+    gate.check_prd(Path('prd.md'), stage='specify')
     assert 'PRD-UNTRACKED-UNKNOWN' not in codes(gate)
 
 def test_uiact_is_allowed_without_business_ac() -> None:
@@ -74,7 +75,8 @@ def test_css_scans_unstyled_controls_and_tiny_primary_text() -> None:
 def test_state_columns_reject_api_ids() -> None:
     gate = Gate()
     raw = 'REQ-DEMO-001 AC-DEMO-001\n| 当前状态 | 动作 | 下一状态 |\n|---|---|---|\n| 待处理 | 复检 | API-RISK-RECHECK 复检 |\n'
-    gate._check_testability(Path('PRD.md'), raw, {}, 'L2')
+    gate = MemoryGate({'PRD.md': raw})
+    gate.check_prd(Path('PRD.md'))
     assert 'PRD-STATE-SEMANTIC-POLLUTION' in codes(gate)
 
 def stage0_chain_document() -> dict:

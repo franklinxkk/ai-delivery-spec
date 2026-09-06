@@ -1,50 +1,7 @@
 interface:
-  display_name: "AI Delivery Spec｜需求管理内核"
-  short_description: "Requirement management for human & AI｜人机共用需求管理"
-  default_prompt: >
-    Use $ai-delivery-spec at the current stage, follow the user's language, and
-    stop at the target. For a bounded reversible low-risk change, use a quick
-    change: no lifecycle files; return delta, boundaries, positive/negative
-    acceptance, and unproven items. Escalate only for state, data,
-    permission, integration, compliance/safety, migration, AI-writeback,
-    handoff, or audit risk. / 使用 $ai-delivery-spec 从当前阶段进入并跟随用户语言；
-    单点可逆低风险需求直接快速小改，不建流程文件，只说明差异、边界、正反验收和未证明项；
-    仅按状态、数据、权限、集成、合规安全、迁移、AI写回、交接或审计风险升级。
-    Treat /ads, /dig, /prd and /proto as lightweight intent aliases when present;
-    they route into the same artifacts and gates rather than separate workflows.
-
-inputs:
-  intent_shortcut:
-    enum: ["auto", "ads", "dig", "prd", "proto"]
-    default: "auto"
-  entry_stage:
-    enum: ["auto", "frame", "explore", "intake", "clarify", "specify", "review", "baseline", "change", "acceptance"]
-    default: "auto"
-  target_stage:
-    enum: ["auto", "frame", "explore", "intake", "clarify", "specify", "review", "baseline", "change", "acceptance"]
-    default: "auto"
-  artifact_type:
-    enum: ["problem_brief", "solution_sketch", "intake", "requirement_brief", "unified_prd", "prototype", "review", "baseline", "change", "traceability", "acceptance"]
-  projection:
-    enum: ["unified_prd", "requirement_card", "prototype", "qa_acceptance", "customer_contract", "machine_annex"]
-    default: "unified_prd"
-  delivery_tier:
-    enum: ["L0", "L1", "L2", "L3", "L4"]
-  delivery_shape:
-    enum: ["auto", "requirement_card", "unified_prd", "governed_truth"]
-  assurance_profile:
-    enum: ["auto", "bounded", "standard", "high_risk", "safety_critical"]
-
-outputs:
-  required_final_fields:
-    - intake_decision
-    - requirement_stage
-    - artifact_scope
-    - mode_and_tier
-    - triggered_gates
-    - updated_artifacts
-    - verification
-    - completion_state
+  display_name: "AI Delivery Spec｜需求判断与交付"
+  short_description: "Decide and specify requirements with scoped evidence"
+  default_prompt: "使用 $ai-delivery-spec 完成当前需求任务，交付最小完整的业务合同，并按受影响范围说明决定、未知与验证证据。"
 
 policy:
   allow_implicit_invocation: true

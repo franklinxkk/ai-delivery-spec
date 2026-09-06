@@ -56,6 +56,7 @@ def extract_seed_refs(document: dict[str, Any]) -> list[str]:
         seeds = []
     if not isinstance(seeds, list) or any(not isinstance(item, str) or not item.strip() for item in seeds):
         raise ChangeContractError("request.seed_refs must be an array of non-empty stable IDs")
+    seeds = list(seeds)
     if not seeds:
         for group, index, item in iter_impact_objects(document):
             ref = item.get("ref")

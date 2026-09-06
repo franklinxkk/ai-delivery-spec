@@ -56,7 +56,7 @@ from validators.validate_coding_agent_contract import (
     STRUCTURED_AC_FIELDS,
     has_any,
 )
-from validators.validate_prd_quality import LEVELS, TERMS
+LEVELS = ("L0", "L1", "L2", "L3", "L4")  # Legacy specialized-tool compatibility only.
 from validators.validate_prd_semantics import run_semantic_checks
 from gate_handoff_checks import HandoffChecks
 from gate_prd_checks import PRDChecks
@@ -126,16 +126,16 @@ def not_proven_for(gate: "Gate", language: str = "zh-CN") -> list[str]:
     if gate.metrics.get("prototype_browser_evidence"):
         items.remove(NOT_PROVEN_BY_STATIC_GATE_EN[1] if english else NOT_PROVEN_BY_STATIC_GATE[1])
         items.append(
-            "The browser ARUN proves recorded interactions only; uncovered visual, accessibility and responsive behavior remains unproven"
+            "A browser ARUN is declared with resolvable references; this command does not independently reproduce interactions or authenticate the record"
             if english else
-            "浏览器 ARUN 已证明其记录范围内的交互结果；未覆盖的视觉、可访问性与多端适配仍未证明"
+            "已提供浏览器 ARUN 声明及可解析引用；本命令未独立重现交互或认证记录，视觉、可访问性与多端适配仍需实际验证"
         )
     if gate.metrics.get("acceptance_run_conclusive"):
         items.remove(NOT_PROVEN_BY_STATIC_GATE_EN[4] if english else NOT_PROVEN_BY_STATIC_GATE[4])
         items.append(
-            "The supplied ARUN has executable signed evidence; acceptance scope outside that record remains unproven"
+            "The supplied ARUN declares execution and sign-off with resolvable references; execution and signer authenticity have not been independently verified"
             if english else
-            "已提供的 ARUN 已执行并形成可解析签认证据；未纳入该记录的验收范围仍未证明"
+            "已提供 ARUN 的执行/签收声明及可解析引用；本命令未独立核实执行与签署真实性，记录外验收范围也未证明"
         )
     return items
 
@@ -589,6 +589,7 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
 }
 
 PREFIX_GUIDANCE: tuple[tuple[str, str, str], ...] = (
+    ("SPEC-", "当前声明、范围归属或证据记录有待核实。", "按技术明细修复对应声明；缺少实际决定/证据时保留缺口，不为通过门禁编造来源。"),
     ("CUSTOM-", "项目本地扩展规则无效或未满足。", "检查 custom/validators 下的声明式 YAML；只允许正则规则，不执行本地 Python。"),
     ("CUST-", "项目本地需求规范未满足。", "按本地规则的 message 与 ref 修复工件，必要时由团队规范负责人调整规则。"),
     ("AUTH-", "需求来源或写入面存在未裁决冲突。", "由解释责任人创建 DEC-CONFLICT-*，限定适用范围并重新投影受影响工件。"),
@@ -730,6 +731,7 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-JS-SYNTAX": ("The prototype contains invalid JavaScript.", "Repair the referenced script and verify closing script/body/html tags."),
 }
 EN_PREFIX_GUIDANCE: tuple[tuple[str, str, str], ...] = (
+    ("SPEC-", "The current declaration, scope or evidence needs review.", "Repair the named declaration; keep missing decisions/evidence open instead of inventing authority."),
     ("CUSTOM-", "A project-local validation rule is invalid or unmet.", "Repair the declarative YAML rule; local Python validators are not executed."),
     ("CUST-", "A project-local requirement rule is unmet.", "Repair the referenced artifact contract or have the rule owner revise the local rule."),
     ("AUTH-", "Requirement authority or write ownership is unresolved.", "Create a scoped DEC-CONFLICT-* owned by the accountable decision maker."),
@@ -828,6 +830,7 @@ def english_guidance_for(code: str) -> tuple[str, str]:
 
 
 REPAIR_EXAMPLES: tuple[tuple[str, str], ...] = (
+    ("SPEC-", "只复核 finding.ref 涉及的范围、来源及版本；proposed 不能冒充 confirmed，旧评阅不能证明新基线。"),
     ("INTAKE-SCHEMA", "cp references/templates/requirement-intake-template.yaml intake.yaml，补齐 artifact: requirement_intake、stage: intake、source_refs: [SRC-*]、value_evidence 等必填字段。"),
     ("PROTO-DEMO-SCAFFOLDING-VISIBLE", "删除 <div>验收场景</div> 这类演示文案块，改为真实业务空态文案，如 <p>暂无待办事项</p>。"),
     ("PROTO-VISIBLE-COMPARISON-UNESCAPED", "把可见文案中的 0 < 比例 ≤ 100 写为 0 &lt; 比例 ≤ 100，并在浏览器中核对完整显示。"),
@@ -1298,7 +1301,7 @@ def main() -> int:
     parser.add_argument("--inventory", type=Path, help="Stage 0 brownfield inventory YAML")
     parser.add_argument("--manifest", type=Path, help="Agent handoff manifest YAML")
     parser.add_argument("--acceptance-run", type=Path, action="append", help="Executed ARUN-* YAML; repeat when prototype AC evidence is split")
-    parser.add_argument("--level", choices=["auto", *LEVELS], default="L2")
+    parser.add_argument("--level", choices=["auto", *LEVELS], default="auto")
     parser.add_argument("--stage", choices=list(STAGE_ORDER), default="baseline")
     parser.add_argument("--scope-ref", action="append", default=[], help="Limit stage/P0 evaluation to one stable-ID scope; repeat as needed")
     parser.add_argument("--domain", action="append", default=[], help="当前工件适用的领域 ID；用于隔离 custom 规则，可重复")

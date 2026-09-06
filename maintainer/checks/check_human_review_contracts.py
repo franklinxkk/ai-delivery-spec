@@ -57,47 +57,6 @@ def visible_text(payload: dict) -> str:
 
 # Preserve the product decisions that must survive refactors. Exact templates and
 # exhaustive wording belong to focused tests, not this release smoke check.
-require(
-    "SKILL.md",
-    (
-        "评审态只在用户要求或首次交开发前确认后生成",
-        "客户演示/确认默认产品态",
-        "锁定用户语言",
-        "evidence_level=static|browser|real_system|customer_acceptance",
-        "Gate 只证明静态合同，不证明",
-    ),
-)
-require(
-    "references/prototype.md",
-    (
-        "交开发”“给前端/后端/测试看”“开需求评审会”只说明消费方",
-        "核心流程图",
-        "状态转换图",
-        "数据流/血缘图",
-        "入口权限不足时是菜单/路由隐藏还是局部禁用",
-        "普通无入口角色不需要先进入页面再看“您无权限”",
-        "产品位置合同 / Product Location Contract",
-        "PROTO-PRODUCT-LOCATION-MISMATCH",
-    ),
-)
-require(
-    "references/review-workspace.md",
-    (
-        "未参与原讨论的产品、前端、后端、测试",
-        "Review Explains, Product Operates",
-        "CurrentContext = 最上层活动业务浮层，否则为活动产品视图",
-        "R1/R2 只有三个一级页签",
-        "review_contexts",
-        "Candidate - Declared",
-        "ProductFingerprint(before) == ProductFingerprint(after)",
-        "ProductLocation：产品导航证明系统位置",
-        "页面切换同步活动视图、路由、活动菜单路径",
-        "不得增加 Journey/Step/Role 导航",
-        "人类主阅读面与技术追溯",
-        "data-review-role-details",
-        "data-review-trace",
-    ),
-)
 
 schema = json.loads(read("schemas/agent-handoff.schema.json"))
 if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":

@@ -1,48 +1,10 @@
-schema_version: 5.4.0
+schema_version: 5.5.0
 artifact: requirement_intake
 stage: intake
-requirement_id: REQ-CORE-001
-title: "{requirement title}"
-outcome: "{observable customer or business result}"
-owner: "{accountable product owner}"
-document_language: zh-CN # 默认跟随用户当前请求；显式要求可覆盖
-source_refs: [SRC-REQ-001]
-artifact_mode: prd # direct | card | prd；决定主产物深度
-risk_facets: [] # 只列已触发风险，不从 L0-L4 推断
-evidence_level: static # static | browser | real_system | customer_acceptance；只写已取得证据上限
-value: medium
-priority: P2
-complexity:
-  band: M # S | M | L | XL；只表达相对复杂度，不替代研发估时
-  dimensions: [] # 例如 integration、state、data、security、migration
-target_iteration: "{target iteration or unassigned}"
-dependencies: [] # 只登记依赖对象/决策，不虚构日期和工期
-value_evidence:
-  - "{customer evidence, policy, metric or approved decision}"
-roles: [ROLE-PRIMARY]
-modules: [MOD-PRIMARY]
-integrations: []
-states: []
-cross_role_handoffs: []
-data_submission: false
-data_reporting: false
-metric_caliber: false
-batch_io: false
-approval: false
-audit_required: false
-irreversible_write: false
-version_compatibility: false
-reversible: false
-cross_module_state: false
-sensitive_data: false
-compliance: false
-migration: false
-customer_acceptance: false
-ai_behavior: false
-ai_centrality: none # none | incidental | supporting | core
-ai_write_scope: none # none | read_only | draft_only | consequential_write
-ai_reversible: true
-ai_human_gate: true
-urgent: false
-blocked_dependency: false
-ambiguity: high
+title: "{本次需要达成的结果}"
+# 只填已知事实。没有优先级、负责人、迭代或口径时不要制造默认值。
+# artifact_mode: direct # direct | card | prd；呈现方式与风险、治理分开
+# priority: P1 # 仅保留用户/项目已定优先级
+# risk_facets: [state] # 标签只是诊断输入，缺标签不证明没有风险
+# governed_truth_requested: true # 只有明确需要机器治理产物时填写
+# source_refs: [SRC-USER]

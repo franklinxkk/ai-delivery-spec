@@ -1,145 +1,39 @@
-# 上下文、组合与 Agent 交接 / Context, Composition And Agent Handoff
+# 大任务、上下文与交接
 
-任务极小、多模块、强监管、存量改造或接近上下文上限时加载。上下文是注意力预算，不是资料仓库；
-Agent 工作包只投影同一需求基线，不能形成新的业务权威。
+材料多、跨会话或多方协作时按需读取。上下文只保留当前决定需要的事实；摘要用于导航，不能替代原始依据。
 
-## 两类不同预算 / Two Different Budgets
+## 切片与恢复
 
-仓库预算保证 Skill 可维护，运行时预算决定某个任务加载什么。`SKILL.md` 130行和阶段参考500行
-不是模型 Token 上限。加载大型领域包或 Product Truth 前，使用
-`schemas/context-plan.schema.json` 和 `scripts/plan_context.py` 生成 Context Plan。
+先登记来源、版本、授权决定与本轮范围，再按角色端到端路径或可独立实施的业务切片读取。不要按任意字符截断关键权限、状态、指标、恢复或验收。材料仍放不下就分批推进，不能把尚未读取的部分记为已核实。
 
-## 分类信号 / Classification Signals
+检查点记录目标、来源/版本、已完成产物、有效决定、未决依赖和精确下一步。长任务按有用里程碑更新；明确小改不建检查点，已有持久记录可直接复用。恢复时核实当前文件和版本；出现并行编辑，限定冲突范围再合并，不覆盖别人的决定。压缩保留未完成范围，不把阶段进展包装成最终完成。
 
-优先使用结构化证据，而非关键词：需求阶段、交付形态、保证强度、项目形态；模块/角色/流程/
-动作/状态/集成/P0 AC 数量；监管来源和治理档案；受限字段、多租户、金钱/安全/隐私后果；
-AI写回、历史兼容、并存、补偿、恢复；开放 P0 未知项或冲突。
+多文件 Truth 只在确有机器消费者需要时使用；按模块有界生成、校验引用、修复并重验，再编译。大型 PRD 同样可按业务切片编写，同一事实只维护一处。
 
-关键词只能提示需要发现的问题，不能自行证明监管属性、选择领域包或提高领域成熟度。
+## 按需取领域与结构化资料
 
-## 运行时档案 / Runtime Profiles
-
-| 档案 | 默认行为 |
-|---|---|
-| minimal | 核心 Skill + 0或1个阶段参考；无必要不加载领域包 |
-| standard | 1—2个阶段参考和1个匹配领域包 |
-| regulated | 相关阶段、权威来源、具理由的领域包和 Human Gate |
-| large_program | 按模块/流程/变更分片，检索切片而非整图加载 |
-
-档案是运行建议，不代表可以扩大模型上下文。
-
-## 超限规则 / Overflow Rules
-
-1. 先预留系统和输出 Token；
-2. 不得静默截断 P0规则、监管断言、权限、状态转换、失败行为、验收、兼容或恢复；
-3. 用 `scripts/query_product_truth.py` 按稳定 ID/模块查询；
-4. 参考/领域限制是批次限制，需要的包应记录并后续检索，不能从范围消失；
-5. 安全完整切片仍放不下时，拆交付或因缺证据返回 BLOCKED；
-6. 摘要只用于导航，不能代替权威来源或 Product Truth 对象；
-7. 到 `warn_at_ratio`（建议70%）时明确选择：检索 ID切片、写 compaction manifest、拆交付或阻断；
-8. 不生成巨型 Product Truth。每次写一个 `truth/fragments/MOD-*.yaml`，校验、保存检查点后再编译；
-   完整 AI Coding PRD 同样按章节切片，合同索引闭合后再组装。
-
-compaction manifest 必须列出保留优先级和延期 ID，不能借压缩静默丢行为。
-
-## 澄清后的快速通道 / Fast Lane After Clarification
-
-来源优先级、范围和 P0 决策已批准时，不重启发现或重写摘要。冻结合同索引，只加载当前模块/
-流程 ID，写对应 Truth/PRD 切片，局部校验、保存检查点后继续。这是大型完整 PRD 的默认路径。
-项目覆盖写入可选且版本化的 `spec.config.yaml`，并用 schema 校验。
-
-## 复杂度不等于成熟度 / Complexity Is Not Maturity
-
-上下文/保证档案描述当前项目，领域成熟度描述可复用领域包的证据。自动分类可以选择更强门禁，
-但绝不能把 knowledge-backed/contract-tested 自动晋升为 behavioral、expert-reviewed 或 audited。
-
-## 检查点与微门禁 / Checkpoint And Micro-Gate Protocol
-
-长任务、恢复、监管、审计或正式验收使用检查点，防止会话上下文丢失已批准决定；检查点不管理
-Sprint、代码、发布或运营。
-
-- 每个需求阶段前载入最近已验证检查点；
-- 尚无规格时使用 Discovery Contract；
-- 编辑工作合同并生成新快照，快照本身不可修改；
-- hash 链只能检测本地变化，不能替代要求更高的外部签署。
+先依据真实项目和有权来源确认领域约束。“客户”“审批”“报表”等词不自动决定加载哪个领域。领域知识是候选参考，包的成熟度不是项目验收证据。
 
 ```powershell
-python scripts/manage_execution_state.py create --truth product-truth.yaml --config spec.config.yaml --installed-skill C:/path/to/ai-delivery-spec/SKILL.md --execution-id EXEC-PROJECT-001 --output evidence/state-000.yaml
-python scripts/manage_execution_state.py verify --state evidence/state-000.yaml
-python scripts/manage_execution_state.py gate --state evidence/state-000.yaml --gate-id contract_traceability --projection requirements/PRD.md --output gate-contract.yaml
+python scripts/query_domain.py --domain oa
+python scripts/query_product_truth.py --help
+python scripts/plan_context.py --help
 ```
 
-有效门禁覆盖版本/环境、复杂度/领域证据、上下文存续、发现就绪、合同追溯、审计访问和回退风险。
-必要门禁通过后每次只推进一个需求阶段，并保留上一检查点；中断后只从 hash/锚点仍有效的状态恢复。
+复杂项目可用 context-plan Schema/plan_context 估算切片，工具预算属于执行建议。没有必要时不新增 Context Plan 文件或全量领域审查。
 
-高风险失败必须 BLOCKED。已声明的验证器中断只有在配置允许的低风险策略下，才能形成显式人工
-评审缺口，永远不能静默 PASS。链接缺失、门禁过期、范围降级或版本漂移阻断受影响基线。
+## 给研发、测试与 Coding Agent 的交接
 
-## 组合与横切责任 / Composition And Cross-Cutting Ownership
+交接的价值是接收者无需补猜关键业务选择。为本次范围提供目标、稳定引用、输入输出、业务规则/状态、权威数据、权限、失败恢复、验收和禁止推断项；技术方案仍由研发负责。规则在来源里写一次，交接引用原位置及版本。
 
-只组合真实触发的能力、治理和领域知识。“审批、AI、客户、报表”等通用词本身不能选择 OA、
-AI-native、CRM 或 data-product。两个领域包共享对象、状态、事件、权限、规则、指标或失败路径时，
-登记 canonical owner、映射、生产者/消费者、优先级、重试/补偿和对账。领域包可收紧权限，
-不能扩张所属业务域的权威。
+多个输出注明源版本及已更新/待同步范围。手工投影不能静默覆盖权威基线；新决定使相关旧验收证据失效时标明具体范围。多人接力时写清工作边界和依赖负责人，未知负责人保持未知。
 
-## 智能大项目分轮 / Smart Large-Project Rounds
+需要长期机器执行时使用 [handoff 模板](templates/agent-handoff-manifest-template.yaml)；
+需要强追溯快照时使用 execution-state 工具。这些是明确选择的高级合同，不能反向变成日常 PRD 的必填项。
 
-超过8个输入、50万可解析字符，或盘点发现至少8模块、12页面、200稳定对象时自动分轮。
-Round 0 建立来源/权威清单；后续按端到端角色纵切，通常每轮最多3个大型来源、2个模块、40个
-主要 ID。每轮保存持久检查点，最后执行一次跨模块门禁。
-
-禁止按前端/后端横切、单轮重建巨型 Product Truth，或把中间分轮包装成最终完成。
-
-原型类任务还有更早的切片信号：任一来源超过 100KB、三个以上重型 HTML/Axure 页面，或单次改动
-横跨多个视图时，同时加载本文件与 `references/prototype.md`。先记录来源权威、页面、动作、处理器、
-指标、状态和开放项，再按端到端角色路径或稳定 ID 切片。只有用户已确认可见评审模式时，三个以上
-重型页面才允许进入分页/懒加载评审容器；材料很大本身不构成自动生成评审模式的授权。
-
-Stage 0 的对象计数或结构 PASS 不证明主链可达。对每条进入本轮范围的核心链，逐步核对“上一步实际产出
-的对象/状态/版本/身份键”是否满足下一动作守卫；再核对失败、退回、重试和补偿能否回到可达入口。无法
-从源码、运行证据或权威决定确认时登记 `UNK-*`，不能因两个按钮分别可点击就宣称端到端闭环。
-结构化盘点使用 `critical_chains` 与 `reachability_breaks`；旧台账可先以 GAP 兼容，但一旦声明链路，空断裂
-清单不能掩盖未评估或 unknown/broken 的 link/recovery。Stage 0 只记录观察事实和缺口，不替产品决定目标规则。
-
-## Agent 交接投影 / Agent Handoff Projection
-
-长时间 AI Coding 只按 `schemas/agent-handoff.schema.json` 生成已触发工作包：
-
-- 根 `AGENTS.md`：权威、稳定全局守卫、路由、命令和变更协议；引用 PRD而不复制所有规则；
-- `MOD-*`：一个可独立负责的模块纵切，含输入输出、直接依赖、`STEP-*` 实施步骤引用、AC和 `qa_projection`；
-- `XCT-*`：影响至少两个模块的 RBAC、多租户、审计、血缘、AI运行时或其他横切规则；
-- `EDGE-*`：生产者/消费者对象或状态交接、映射、重试、对账和AC；
-- `HANDOFF-*`：发送/接收双方、已确认基线和返回问题/提案。
-
-所有活动工作包绑定同一 baseline version/hash、责任人、范围和 AC。`ready_for_implementation`
-还必须引用工程团队维护的 `engineering_baseline_ref`。模块 Agent 只加载根摘要、一个模块包、
-直接 XCT/EDGE 和测试，不加载全项目；它可返回 `REV-*` 或变更提案，但不能直接修改业务基线。
-Qoder/Claude/Cursor/Codex 规则只是控制面的投影，不能复制出不同业务 ID。
-
-当实现存在不可从 PRD 推断的环境、权限或安全边界时，只在同一 manifest 中增加可选
-`execution_constraints`，不新建“执行阶段”或第二份需求合同：
-
-```yaml
-execution_constraints:
-  baseline_ref: ENG-BASELINE-001
-  protected_surfaces: []
-  allowed_actions: []
-  forbidden_actions: []
-  environment_refs: []
-  secret_refs: [] # 只写 SECRET-* 或密钥系统引用，绝不写原值
-  required_evidence: []
-  rollback_owner: "{accountable human}"
+```powershell
+python scripts/manage_execution_state.py --help
+python scripts/ai_delivery_spec_cli.py gate --profile handoff --prd PRD.md --prototype app.html --manifest handoff.yaml
 ```
 
-这里记录“实现不能越过什么、要拿什么证据”，不写 Sprint、命令流水账、数据库方案或部署步骤。
-约束必须回链已批准业务/工程来源；`forbidden_actions` 优先于 Agent 自主性，`secret_refs` 不得被
-展开到提示词、日志、代码或测试夹具。
-
-可见评审工作台是随产品 `CurrentContext` 变化的人类解释层，不替产品导航，也不是 Agent 的第五个
-角色镜头。Agent 从 manifest 取得当前 packet 与 `STEP/AC` 引用，再解析同 hash 的 PRD/Truth 切片和
-工程基线；评审 HTML 仅可用于定位 `VIEW/REG/ACT` 和可见状态，不得从人类摘要反推出新规则。handoff
-缺失或 hash 漂移时返回 GAP，不能退回“通读评审原型后自行实现”。
-
-每个 `XCT-*` 正文至少声明：影响模块、全局不变量、执行点、例外与失败处理和对应 `AC-*`。
-只有“权限/审计见全局规则”的空壳不能进入 ready_for_implementation，门禁返回
-`HANDOFF-XCT-INCOMPLETE`。
+执行边界只引用环境、权限与凭据引用，凭据不写入产物。写入/部署/外部消息由用户真实授权和相应工具约束决定；需求批准本身不能授权所有工程动作。接收方反馈区分需求缺失、来源错误、投影漂移、实现偏差和环境问题，回写正确的责任层。

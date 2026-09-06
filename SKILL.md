@@ -1,94 +1,52 @@
 ---
 name: ai-delivery-spec
-description: Use for creating, changing, reviewing, reverse-engineering or accepting requirements, PRDs, prototypes, competitor material or existing systems, including any small UI, field, column, tab, dropdown or legacy-HTML change. Supports /ads, /dig, /prd and /proto intent shortcuts where the host routes them. Always invoke regardless of size or clarity. Deliver the smallest complete, reviewable, implementable, traceable and testable artifact at the target stage. 中文：用于任何新增、修改、评审、反推或验收需求、PRD、原型、竞品或存量系统；写/改一个小功能、加字段/列/页签/下拉或旧 HTML 小改也必须调用；支持 /ads、/dig、/prd、/proto 意图快捷入口。按目标阶段交付最小完整、可评审实施追溯验收的产物。
+description: Create, clarify, review or change requirements, PRDs and interactive prototypes, including small UI edits and existing systems. Align business behavior, authority, acceptance and change impact. 中文：用于需求判断、澄清、PRD、原型、变更与验收；清晰小改直接完成，复杂问题按需深入。
 ---
 
-# AI Delivery Spec 5.4.9 — Requirement Management Kernel｜人机共用需求管理内核
+# AI Delivery Spec 5.5.0 — 需求判断与交付
 
-让业务、产品、设计、前后端、架构、测试、合规和 Coding Agent 从需求任一阶段进入，共用一条产品事实主线，取得当前所需的最小合格产物后离开；用户明确要求端到端时持续到目标完成。
+帮助用户作出当前需要的产品决定，让实施者准确理解，并在变更后保持有效。跟随用户语言；代码、字段和稳定 ID 保留原名。
 
-锁定用户语言并贯穿对话与产物，除非明确要求才双语；稳定 ID、代码、API、字段、Schema、公式不翻译。YAML/JSON 可保留机器键，须附同语言摘要。Gate 只证明静态合同，不证明业务正确、浏览器行为、真实实现或客户验收。
+## 从当前目标进入
 
-## 0. 四个轻量入口
+识别用户要解决问题、比较方案、明确规则、获得原型，还是审查已有改变。已有决定直接继承；不因模板要求重复批准。`/ads`、`/dig`、`/prd`、`/proto` 只表达意图，宿主是否支持裸命令由实际能力决定。
 
-`/ads`、`/dig`、`/prd`、`/proto` 是同一需求内核的意图别名，不创建四套流程或四类新产物。宿主支持原生斜杠命令时可直接路由；若宿主拦截未知命令，使用其显式 Skill 形式（如 `/ai-delivery-spec /dig …`、`$ai-delivery-spec /dig …`）或自然语言“帮我深挖需求/直接写 PRD/生成原型”。不得宣称四个裸别名已在所有宿主原生注册。
+明确局部小改：读取相关基线，直接完成差异、继承边界、正反验收和未证明事项；没有关键未知就不提问、不建生命周期文件。复杂或模糊任务才读取对应参考，不默认走全流程。
 
-| 入口 | 默认行为 |
+| 当前需要 | 按需读取 |
 |---|---|
-| `/ads` | 通用入口。识别当前材料、风险和目标，选择最轻路径，只问真正阻断目标的 P0。 |
-| `/dig` | 深挖澄清。一次只问一个最能改变结果的问题，显示进度；按战略、系统、行为心理、反方挑战四个镜头自适应追问，仍写回现有 Requirement Brief、DEC/UNK/ASM，不生成独立“拷问报告”。 |
-| `/prd` | 目标直达 specify。资料足够时直接生成需求卡或统一 PRD；开放 P0 阻断时先澄清，关闭后自动返回 PRD，不重跑无关阶段。 |
-| `/proto` | 目标直达可实施产品原型。先关闭原型阶段 P0；只有用户明确要求概念候选才带假设先画。默认产品态，研发评审投影仍按既有规则确认一次。 |
+| 判断问题、比较方案、澄清 | [discover.md](references/discover.md) |
+| 明确业务行为与可实施规格 | [specify.md](references/specify.md) |
+| 存量盘点、生成或修改可操作原型 | [prototype.md](references/prototype.md) |
+| 用户需要双态评审 | [review-workspace.md](references/review-workspace.md) |
+| 准入、处置、责任与基线 | [lifecycle.md](references/lifecycle.md) |
+| 变更、交接反馈或验收 | [change-acceptance.md](references/change-acceptance.md) |
+| 多文件、大上下文或跨会话 | [context.md](references/context.md) |
+| 机器路由、模板或检查命令 | [stages.md](references/stages.md) |
 
-四镜头不是固定问卷：战略看目标/价值/非目标，系统看角色/权威/状态/副作用，行为心理只看可观察动机与误用、不做诊断，反方挑战关键假设与退路。P0 全部关闭或由具名责任人接受风险且有退路后停止；概念候选保留 GAP。
+不预加载维护实验、全部模板或领域包。领域约束从有权来源核实；已有领域材料只按当前问题检索，不照抄成项目真相。
 
-## 1. 先选最轻工作深度
+## 保持业务含义与决定权
 
-- `direct`：来源明确、局部、可逆，不改变跨模块状态、数据权威、权限/指标、迁移、法规安全或高影响 AI 写回。直接交付差异、边界、正反验收和未证明事项；无未知则零澄清，不建生命周期文件。未给出的可逆表现只可继承已核实的存量惯例；未读到基线时列为非阻断 GAP，不能写成精确规则。
-- `standard`：跨角色/页面/模块，或存在状态、数据、异常、集成和正式交接。使用需求卡或统一 PRD，按适用切面闭环。
-- `governed`：强审计、多次变更/多投影、敏感/受监管、不可逆副作用或复杂跨系统权威。启用 Product Truth、正式评审/基线、变更和证据治理中真正需要的部分。
+- 分清已核实事实、授权决定、观察、建议和未知。来源按主题、版本和授权范围判断；原型行为不自动成为产品规则。
+- 最新有效决定覆盖同主题旧内容。文档待同步、旧评审待复验不使该决定重新变成待批准。真正超出授权或存在冲突时只处理相应范围。
+- 建议暂缓、不做、缩范围写回现有产物；未获处置权不得改变需求状态。记录理由、依据和复议条件；已获授权不重复询问。
+- 未定规则保持未定。退路可以限制执行，不能借“保守默认”选定补考、口径、权限或晚到数据政策。未知只阻断依赖它的交付。
 
-工作深度、风险切面和证据等级必须正交记录：`artifact_mode=direct|card|prd`；`risk_facets=[]`；`evidence_level=static|browser|real_system|customer_acceptance`。旧 `L0-L4` 仅为工具兼容映射，不再让一个数字同时冒充文档、风险、原型和验收等级。详见 `references/stages.md`。
+## 最小充分规格
 
-## 2. 识别进入点与停止点
+实施者仍可能作出互不兼容的关键业务选择时，补足该处语义；技术实现保留合理空间。说明行为前提、允许者、业务结果、失败恢复及可判验收。按实际风险补状态、权限、指标、外部数据或历史对象约定，不按角色数或旧等级加长文档。
 
-内部识别 `entry_stage` 与 `target_stage`。工作站为 `frame → explore → intake → clarify → specify → review → baseline`，基线可进入 `change` 或 `acceptance`；正式 `REQ-*` 从 intake 开始。阶段是路由地图，不是执行清单。
+一条业务事实只在一个位置人工定义；页面、流程、原型说明与交接引用同一含义。业务审批记录和需求评审记录是不同对象；审核通过是发布前提时，不擅自合并成自动发布。
 
-显式目标和否定约束最高优先；已有证据不重跑。目标模糊时先在一轮内完成“发散选项 → 推荐聚焦 → 深化关键链路”，再只问会改变范围、权威、风险或验收的决策。一句话要求 HTML/原型时，默认目标是**可实施产品原型**而不是立即猜完页面：先说明“目标已记住、当前还缺什么”，用决策树持续关闭会阻断原型的 P0；澄清和详细需求只是中间工作，不能停在需求清单或无解释地不出 HTML。只有用户明确说“先看效果/概念原型/低保真/允许合理假设/先画再聊”时，才可先交带假设与 GAP 的概念候选；它不得标为基线、可开发、已评审或已验收。P0 未知项必须有责任人、影响范围、阻断阶段和退路；到达阻断阶段前不得伪装闭合。
+对关键规则选少量业务反例；标签缺失不能掩盖内容中的风险。接收者复述一致还须核对来源，不能以模型多数票证明正确。明确小改不附加全角色冷读报告。
 
-## 3. 每次只加载一个有效切片
+## 变更与完成
 
-| 当前任务 | 只读取 |
-|---|---|
-| 阶段、轻重、交接、断点 | `references/stages.md` |
-| 来源、竞品、现状、澄清 | `references/discover.md` |
-| 准入、评审、基线、责任 | `references/lifecycle.md` |
-| PRD、字段、规则、指标、接口 | `references/specify.md` |
-| Stage 0、页面合同、原型、视觉 | `references/prototype.md` |
-| 可见评审投影（仅确认后） | `references/review-workspace.md` |
-| 变更、追溯、验收 | `references/change-acceptance.md` |
-| 大输入、切片、Agent 交接 | `references/context.md` |
-| 工具适配、避坑、FAQ 或故障 | `references/tool-adapters.md` / `references/troubleshooting.md` |
-| 领域证据 | `scripts/query_domain.py --domain <pack> --section "<heading>"` |
+存量原型先盘点受影响页面、角色、入口、动作/处理器、状态、实体、数据源和 Mock 边界；保护未经取消的基线功能与视觉约定。产品态默认可操作；双态评审按用户需要启用。
 
-不要加载 README、`maintainer/`、全部模板/示例/领域包或整个仓库。材料规模、链路数量或上下文预算触发切片时读取 `references/context.md`，不要用固定文件大小机械升级。细反例只进脱敏维护回归，不注入日常上下文。
+关键变更找到写入者、读取者、指标、入口、旧对象和受影响证据。候选依赖与核实结果分开，核实依赖不等于批准修改。多方修改前核对当前基线，不能静默覆盖漂移。
 
-## 4. 一条事实主线，按需投影
+达到用户目标就停止。检查只在需要的里程碑执行，不默认 full/handoff。静态、语义评阅、浏览器、真实系统与业务签署分别说明范围、版本及结果；没运行写未运行。小范围通过不代表全项目完成，建议被采纳不代表实现已验收。
 
-实时对话先交付判断，不展示内部 YAML/ID。持久化只在跨会话、跨角色、审计、变更或工具校验时发生。默认最小主产物：frame/problem brief；explore/solution sketch；clarify/requirement brief；specify/需求卡或统一 PRD；review/baseline 复用同一规格并绑定签署、版本/hash；change/acceptance 回链当前基线。Product Truth 只在多投影、反复变更、血缘或强审计确有需要时启用。
-
-客户演示/确认默认产品态；评审态只在用户要求或首次交开发前确认后生成，左侧完整产品、右侧解释当前页面/浮层；R1/R2 固定“总览 / 功能与流转 / 边界与验收”。从基线与锚点建立语义账本；影响实施验收的动作、字段、指标、状态、权限、写入、交接和异常必须映射当前 Context，或声明不适用。跨页/角色/系统或三步以上依赖才画核心流程并高亮当前页；状态/数据流图按复杂度触发。正文先用自然语言，复杂点再收起前端/后端/测试详情；ID、字段原名和枚举只进收起的技术追溯；简单 CRUD 不机械画图。`review_contexts` 是评审点分母，语义账本是完整性分母；Candidate 只防漏，评审动作不得改变 Product Fingerprint。生成前读取 `references/review-workspace.md`。
-
-机器投影使用结构化 handoff。Candidate 与 Declaration 物理分离且 `subject_ref` 不重叠；观察只生成带理由的 `candidate_review_points`，不得自动晋级。正式 RVP 的 subject/source/precondition/result/boundary/AC 必须解析到 PRD；纯观察使用 `PROTO-OBS-* + gap + prototype_inferred`，禁止伪造已确认事实。每张指标卡冻结对象、公式、时间窗、过滤/去重、权威源、刷新、空值/失败、精度和下钻；工作流覆盖迁移、角色守卫、非法路径与恢复；二级弹窗/抽屉是独立 CurrentContext。
-
-评审态不得把真实导航降级成静态装饰。每个 `VIEW-*` 必须绑定唯一可见菜单路径，或说明为什么是扫码页、H5 独立页等无菜单入口；页面切换同步活动菜单、父级展开、路由、面包屑、标题和 `CurrentContext`。业务浮层继承父页面位置，只改变浮层 `CurrentContext`。任何静态假菜单、位置漂移或评审动作改变产品位置都阻断交付。
-
-同一产物只有一个评审事实面；`UIACT-REVIEW-*` 与业务 `ACT-*` 隔离。有 UI 落点的 RVP 在真实目标旁显示同号 marker，右侧不得出现没有左侧落点的“1/2/3”；点击任一侧时 marker、卡片、目标同步框选定位。动态重绘只恢复当前 Context 标号。浏览器须证明标号不碰撞/越界、桌面业务浮层不盖评审栏、窄屏切换可恢复；右栏只放摘要与按需详情。
-
-CurrentContext 必须由 manifest 的 detection 合同统一解析最上层业务浮层，不为单个原型硬编码特例。标号解析只允许 `CurrentContextRoot` 内当前可见且恰好一个目标；零个显示 unresolved，多个 BLOCK ambiguous，禁止取第一个或回退到 Context Root。`target_mode=context_root` 只允许 `VIEW/REG` 页面方向标号；`ACT/FLD/METRIC/STATE` 必须 `selector_exactly_one`。收起与展开、产品/评审切换、页签、记录、导入导出和分享都要跑双向浏览器验收；Fingerprint 违规必须进入可失败 Gate，不能只 `console.error`。分享链接必须在打开时校验 baseline 并恢复产品上下文/页签/评审点；R1/R2 冷读不得写不适用，未执行保持 pending/blocked。无法自动重开业务浮层时明确 GAP。
-
-存量系统先做 Stage 0：页面、角色、入口、动作/处理器、状态、实体、字段/指标、数据源、代表数据和关键链可达性。未经批准不得丢失基线功能，也不得新增角色、页面、实体、审批、指标、状态或技术伪精确。权限、外部数据方向、指标口径、复杂流程/状态/数据流的详细合同按对应参考执行。
-
-## 5. 来源、未知与安全
-
-来源先分权威与用途：业务机会、产品决定、工程约束、评测任务、合同/法规、存量观察和推断不能互相替代。读取材料时先扫描凭据、令牌、私钥、个人/客户敏感信息；发现后停止复制和公开处理，只保留脱敏副本、内容 hash 与 `SECRET-*` 引用，原值进入受控密钥系统或隔离区。来源冲突形成具名决定，不能按文件更新或详细程度擅选权威。
-
-规格按模块纵切：目标 → 角色旅程 → 页面/数据 → 规则/状态 → 指标 → 异常恢复 → 验收；横切权限、接口/事件、审计、兼容和 NFR 只在适用时加入。每个 `REQ-*` 绑定来源、行为、规则、AC、测试和证据并支持双向追溯；缺语义时人和 Agent 返回 GAP，禁止发明。
-
-已基线需求投影给 Coding Agent 时，可在现有 handoff 中附 `execution_constraints`：受保护表面、允许/禁止动作、环境/密钥引用、必需证据和回滚责任人。它约束实现，不新增研发阶段，也不把部署、运维或项目管理纳入本 Skill。
-
-## 6. 门禁与完成
-
-静态门禁只在里程碑运行，修复后重跑。开放 P0/P1 不得称开发就绪或完整验收；单产物 PASS 不等于交付闭环。声称 `PASS` 前运行 `gate --profile ...`，报告命令、退出码与 `not_proven`；语法检查不得替代门禁。最终运行 full/handoff 门禁。
-
-```bash
-python scripts/ai_delivery_spec_cli.py gate --profile clarify --artifact requirement-brief.md
-python scripts/ai_delivery_spec_cli.py gate --profile prd --prd PRD.md
-python scripts/ai_delivery_spec_cli.py gate --profile full --prd PRD.md --prototype app.html --manifest handoff.yaml
-```
-
-统一状态保持 `PASS`、`REVIEW_COMPLETE_WITH_GAPS`、`BLOCKED_BY_P0_UNKNOWN`、`BLOCKED`。模板使用语言无关 `<!-- ADS:* -->` 锚点；断点保存相对路径、阶段和 SHA-256，漂移、缺失或路径越界必须阻断。
-
-## 7. 边界
-
-本 Skill 管问题定义、方案探索、需求准入、澄清、统一规格、原型、评审基线、变更影响、追溯与需求验收。Sprint、估时/排期、编码、源码管理、CI/CD、部署、监控和运营属于下游；这里只记录必要引用。私有扩展不得静默覆盖绑定规则或联网外发。任何“最好/生产可用/客户已验收”主张都必须有独立、可复现且边界清楚的对照证据。
+本 Skill 管需求及其产物；工程方案、排期、编码、部署和运营由相应工作流负责，只接收必要反馈与证据。私人材料与凭据不进入公共示例；外部写入遵守用户实际授权。

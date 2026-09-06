@@ -18,15 +18,16 @@ from quality_gate import Gate, result_payload  # noqa: E402
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("document", type=Path)
-    parser.add_argument("--level", choices=["L0", "L1", "L2", "L3", "L4"], default="L2")
+    parser.add_argument("--level", choices=["auto", "L0", "L1", "L2", "L3", "L4"], default="auto")
     parser.add_argument("--stage", default="baseline")
+    parser.add_argument("--scope-ref", action="append", default=[])
     args = parser.parse_args()
 
     gate = Gate()
     if not args.document.is_file():
         gate.add("BLOCK", "GATE-NOT-FILE", args.document, "输入 PRD 不存在")
     else:
-        gate.check_prd(args.document, args.level, stage=args.stage)
+        gate.check_prd(args.document, args.level, stage=args.stage, scope_refs=tuple(args.scope_ref))
     payload = result_payload(gate, "prd")
     for item in gate.findings:
         print(f"{item.severity} {item.code} [{item.ref}]: {item.message}")

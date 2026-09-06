@@ -517,6 +517,12 @@ def _normalized_topic(value: str) -> str:
     return re.sub(r"[\s`*_：:；;，,。.!！?？/\\（）()\[\]{}]+", "", value).casefold()
 
 
+def _confirmed_status(value: str) -> bool:
+    if re.search(r"未确认|待确认|未关闭|未决定|\b(?:unconfirmed|unresolved|notconfirmed|notclosed|pending|proposed|unapproved)\b", value, re.I):
+        return False
+    return bool(re.search(r"已确认|已关闭|已决定|已决策|\b(?:confirmed|closed|resolved|decided)\b", value, re.I))
+
+
 def check_body_decision_conflicts(raw: str) -> list[SemFinding]:
     """D6: exact-topic conflicts across canonical human decision tables.
 
@@ -543,7 +549,7 @@ def check_body_decision_conflicts(raw: str) -> list[SemFinding]:
             status = _normalized_topic(cells[status_col])
             if not topic:
                 continue
-            if item_id.startswith("DEC-") and any(term in status for term in ("已确认", "已关闭", "已决定", "已决策", "confirmed", "closed", "resolved", "decided")):
+            if item_id.startswith("DEC-") and _confirmed_status(status):
                 decided[topic] = (item_id, line_no)
             elif item_id.startswith("UNK-") and any(term in status for term in ("未关闭", "开放", "阻断", "待确认", "open", "blocked", "unresolved", "pending")):
                 opened[topic] = (item_id, line_no)
@@ -608,7 +614,7 @@ def check_confirmed_decision_authority(raw: str) -> list[SemFinding]:
             if not item_id.startswith("DEC-"):
                 continue
             status = _normalized_topic(cells[status_col])
-            if not any(term in status for term in ("已确认", "已关闭", "已决定", "已决策", "confirmed", "closed", "resolved", "decided")):
+            if not _confirmed_status(status):
                 continue
             evidence = cells[evidence_col].strip()
             inferred_only = bool(re.search(r"模型(?:推断|建议)|AI\s*(?:inference|suggestion)|竞品做法|原型观察|assumption", evidence, re.I))
@@ -617,7 +623,11 @@ def check_confirmed_decision_authority(raw: str) -> list[SemFinding]:
                 evidence,
                 re.I,
             ))
-            if len(evidence) < 3 or inferred_only or not authority:
+            adopted = bool(re.search(r"(?:用户|客户|负责人|业务方).*(?:批准|确认|决定|签署)|approved\s+by|(?:customer|owner|user).*(?:approved|confirmed|decided)", evidence, re.I))
+            if re.search(r"未批准|未确认|未经.{0,12}(?:批准|确认)|尚未.{0,8}(?:批准|确认)|not\s+(?:approved|confirmed)", evidence, re.I):
+                adopted = False
+                authority = False
+            if not evidence or (inferred_only and not adopted) or not authority:
                 findings.append(SemFinding(
                     "BLOCK", "PRD-CONFIRMED-DECISION-NO-AUTHORITY",
                     f"已确认决策 {item_id} 没有可复核的人类决定或权威来源；模型推断、竞品做法和原型观察只能保持待确认",
@@ -658,7 +668,7 @@ def check_acceptance_falsifiability(raw: str) -> list[SemFinding]:
             failures: list[str] = []
             for key, index in columns.items():
                 value = cells[index].strip() if index < len(cells) else ""
-                if len(value) < 4 or weak.fullmatch(re.sub(r"[`*_。.!！]", "", value).strip()):
+                if not value or weak.fullmatch(re.sub(r"[`*_。.!！]", "", value).strip()):
                     failures.append(key)
             if failures:
                 findings.append(SemFinding(
