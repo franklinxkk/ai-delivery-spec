@@ -255,19 +255,33 @@ def table_cells(line: str) -> list[str]:
     return [cell.strip().strip("`") for cell in line.strip().strip("|").split("|")]
 
 
+def contract_token(value: object) -> str:
+    """Accept the templates' translated labels with an explicit machine token."""
+    raw = str(value or "").strip().casefold()
+    match = re.fullmatch(r"[^()（）]*[（(]\s*`?([a-z_]+)`?\s*[）)]", raw)
+    token = match[1] if match else raw.strip("`")
+    return {"待关闭": "open", "待确认": "open", "未关闭": "open", "待处理": "open",
+            "已关闭": "closed", "已解决": "resolved", "已取代": "superseded"}.get(token, token)
+
+
+OPEN_UNKNOWN = {"open", "pending", "blocked"}
+CLOSED_UNKNOWN = {"closed", "resolved", "superseded"}
+
+
 def unknown_rows(text: str) -> list[dict[str, str]]:
     aliases = {
         "id": {"id", "编号"}, "priority": {"优先级", "priority"},
         "owner": {"责任人", "owner"}, "blocks_stage": {"blocks_stage", "阻断阶段"},
         "reversal": {"回退路径", "回退/缩范围路径", "回退/缩范围", "reversal path", "fallback"},
         "status": {"状态", "status"},
+        "resolution_ref": {"resolution_ref", "关闭依据", "解决依据", "决策/证据", "证据", "resolution"},
     }
     lines = text.splitlines()
     results: list[dict[str, str]] = []
     for index in range(len(lines) - 2):
         if not lines[index].lstrip().startswith("|") or not re.match(r"^\s*\|?\s*:?-{3,}", lines[index + 1]):
             continue
-        headers = [cell.casefold() for cell in table_cells(lines[index])]
+        headers = [contract_token(cell) for cell in table_cells(lines[index])]
         positions = {
             key: next((pos for pos, header in enumerate(headers) if header in names), -1)
             for key, names in aliases.items()
@@ -275,11 +289,16 @@ def unknown_rows(text: str) -> list[dict[str, str]]:
         cursor = index + 2
         while cursor < len(lines) and lines[cursor].lstrip().startswith("|"):
             cells = table_cells(lines[cursor])
-            row_id = next((cell.upper() for cell in cells if re.fullmatch(r"UNK-[A-Z0-9-]+", cell, re.I)), "")
+            id_position = positions["id"] if positions["id"] >= 0 else 0
+            id_cell = cells[id_position] if id_position < len(cells) else ""
+            row_id = id_cell.upper() if re.fullmatch(r"UNK-[A-Z0-9-]+", id_cell, re.I) else ""
             if row_id:
-                row = {"id": row_id}
+                row = {"id": row_id, "line": str(cursor + 1)}
                 for key, pos in positions.items():
-                    row[key] = cells[pos] if 0 <= pos < len(cells) else ""
+                    if key != "id":
+                        row[key] = cells[pos] if 0 <= pos < len(cells) else ""
+                for key in ("status", "blocks_stage"):
+                    row[key] = contract_token(row[key])
                 results.append(row)
             cursor += 1
     if results:
@@ -297,13 +316,19 @@ def unknown_rows(text: str) -> list[dict[str, str]]:
 
 
 def is_open(status: str) -> bool:
-    return status.strip().casefold() in {"open", "pending", "待确认", "未关闭", "待处理"}
+    return contract_token(status) in OPEN_UNKNOWN
 
 
 def validate_unknowns(artifact: Artifact, current_stage: str) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
     for row in unknown_rows(artifact.text):
+        status = contract_token(row.get("status", ""))
+        if status not in OPEN_UNKNOWN | CLOSED_UNKNOWN:
+            findings.append(finding("BLOCK", "CLARIFY-UNKNOWN-STATUS", artifact.path, f"{row['id']} 未声明有效的未知项状态：{status}", "使用 open/pending/blocked 或 closed/resolved/superseded；未知状态不能视为关闭。"))
+            continue
         if not is_open(row.get("status", "")):
+            if not row.get("resolution_ref", "").strip() or row["resolution_ref"].strip() in {"-", "无", "待补", "N/A"}:
+                findings.append(finding("BLOCK", "CLARIFY-UNKNOWN-CLOSURE", artifact.path, f"{row['id']} 关闭但没有解决依据", "引用已解决该问题的决定或证据；填写 closed 不等于已经解决。"))
             continue
         missing = [key for key in ("owner", "blocks_stage", "reversal") if not row.get(key, "").strip()]
         if missing:
@@ -312,7 +337,7 @@ def validate_unknowns(artifact: Artifact, current_stage: str) -> list[dict[str, 
                 f"{row['id']} 缺少 {', '.join(missing)}", "补齐责任人、blocks_stage、回退/缩范围路径和状态。",
             ))
             continue
-        blocks_stage = row["blocks_stage"].strip().casefold()
+        blocks_stage = contract_token(row["blocks_stage"])
         if blocks_stage not in GOVERNED_INDEX:
             findings.append(finding("BLOCK", "CLARIFY-UNKNOWN-STAGE", artifact.path, f"{row['id']} 的 blocks_stage 无效：{blocks_stage}", f"使用：{', '.join(GOVERNED_ORDER)}。"))
             continue
@@ -321,6 +346,8 @@ def validate_unknowns(artifact: Artifact, current_stage: str) -> list[dict[str, 
             findings.append(finding("P0_UNKNOWN", "CLARIFY-P0-UNKNOWN", artifact.path, f"{row['id']} 已阻断 {current_stage}", "由责任人关闭，或记录安全缩范围/回退路径。"))
         elif priority == "P0":
             findings.append(finding("GAP", "CLARIFY-P0-NOT-YET-BLOCKING", artifact.path, f"{row['id']} 必须在 {blocks_stage} 前关闭", "保留责任人和回退路径，并在 blocks_stage 前关闭。"))
+        elif GOVERNED_INDEX[current_stage] >= GOVERNED_INDEX[blocks_stage]:
+            findings.append(finding("BLOCK", "CLARIFY-UNKNOWN-BLOCKING", artifact.path, f"{row['id']} 已到达阻断阶段 {blocks_stage}", "解决依赖决定或明确缩小交付范围；优先级不能覆盖阻断阶段。"))
         else:
             findings.append(finding("GAP", "CLARIFY-UNKNOWN-OPEN", artifact.path, f"{row['id']} 仍未关闭", "按责任人与 blocks_stage 跟踪关闭，不得静默推断。"))
     return findings

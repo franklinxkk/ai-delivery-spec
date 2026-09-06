@@ -851,6 +851,18 @@ def test_v549_lightweight_human_projection_passes(tmp_path: Path) -> None:
     assert not {code for code in codes if code.startswith("PROTO-REVIEW-")}
 
 
+def test_simple_drawer_is_not_forced_into_a_cross_page_workflow(tmp_path: Path) -> None:
+    document = manifest_v549("1" * 64)
+    decision = document["diagram_contract"]["decisions"][1]
+    decision.update(complexity_drivers=["simple_crud"], required_types=[], diagram_refs=[],
+                    not_required_reason="当前记录的一步确认，不形成跨页业务依赖")
+    document["acceptance_examples"] = [item for item in document["acceptance_examples"]
+                                       if item["owner_context_ref"] != "DRAWER-X"]
+    codes = v549_codes(tmp_path, document)
+    assert "PROTO-REVIEW-DIAGRAM-DECISION" not in codes
+    assert "PROTO-REVIEW-EXECUTABLE-EXAMPLE" not in codes
+
+
 def test_v549_human_projection_adversarial_failures_are_blocked(tmp_path: Path) -> None:
     document = manifest_v549("1" * 64)
     base = review_html_v549(document)

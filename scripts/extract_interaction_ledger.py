@@ -29,11 +29,11 @@ def unique(items):
 
 
 def attr_values(html: str, attr: str):
-    pattern = re.compile(rf"""{attr}\s*=\s*["']([^"']+)["']""", re.I)
-    return pattern.findall(html)
+    return [row[attr] for row in extract_attrs(html, [attr]) if attr in row]
 
 
 def extract_attrs(html: str, attrs):
+    html = re.sub(r"<!--.*?-->|<script\b[^>]*\btype\s*=\s*['\"]application/(?:ld\+)?json['\"][^>]*>.*?</script\s*>", "", html, flags=re.I | re.S)
     tag_pattern = re.compile(r"<([a-zA-Z][\w:-]*)([^>]*)>", re.S)
     rows = []
     for tag, raw_attrs in tag_pattern.findall(html):
@@ -64,6 +64,11 @@ def extract_handler_actions(source: str) -> list[str]:
         r"\[\s*[\"']((?:ACT|UIACT)-[A-Z0-9-]+)[\"']\s*\]\s*=",
     )
     found: set[str] = set()
+    # Follow a local action-read binding instead of prescribing a variable name.
+    aliases = re.findall(r"\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*[\w.$]+\s*(?:\.dataset\.action|\.getAttribute\(\s*['\"]data-action['\"]\s*\))", source)
+    for alias in aliases:
+        pattern = rf"\b{re.escape(alias)}\s*={{2,3}}\s*['\"]((?:ACT|UIACT)-[A-Z0-9-]+)['\"]"
+        found.update(item.upper() for item in re.findall(pattern, source, re.I))
     for pattern in patterns:
         found.update(item.upper() for item in re.findall(pattern, source, re.I))
     registry_blocks: list[str] = []

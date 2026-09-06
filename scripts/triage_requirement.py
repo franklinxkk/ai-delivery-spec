@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 import yaml
 from requirement_contract import route, load_declarations
+from scan_requirement_ambiguity import scan
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -26,6 +27,14 @@ def recommend(doc: dict) -> dict:
     result = route(doc)
     advice = "clarify" if doc.get("ambiguity") == "high" else "accept"
     reasons = []
+    questions = result["content_review"]["findings"]
+    lexical = scan("\n".join(doc[k] for k in ("title", "description", "behavior") if isinstance(doc.get(k), str)))
+    generic_goal = bool(re.fullmatch(r"(?:做个|做一个|建设|搭建|优化)(?:一个|个)?系统|优化体验|提升效率", str(doc.get("title", "")).strip("。！？.! "))) and not doc.get("description")
+    if questions or lexical or generic_goal:
+        advice = "clarify"
+        reasons.extend(item["action"] for item in questions)
+        if (lexical or generic_goal) and not questions:
+            reasons.append("目标措辞尚有不明确之处；仅澄清会改变范围、授权或验收的部分")
     if doc.get("duplicate_of") or doc.get("out_of_product_boundary"):
         advice = "reject"
         reasons.append("已声明重复或越界；核对来源与授权后才能实际处置")
@@ -39,6 +48,7 @@ def recommend(doc: dict) -> dict:
         "document_language": doc.get("document_language") or ("zh-CN" if re.search(r"[\u4e00-\u9fff]", str(doc.get("title", ""))) else "en"),
         "recommendation": advice, "decision_status": "proposed", "reasons": reasons,
         "lifecycle_mutated": False,
+        "clarification_candidates": questions or lexical,
     })
     return result
 

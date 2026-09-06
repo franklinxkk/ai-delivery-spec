@@ -34,6 +34,8 @@ python scripts/ai_delivery_spec_cli.py gate --profile full --requirement require
 
 `--scope-ref` 只限制已明确归属的未知/审查范围。无归属的风险不能被过滤掉。静态 PASS 仅说明已检查声明未发现阻断；GAP 与未执行证据继续保留，不表示业务、浏览器或客户验收。
 
+`gate --profile prd --stage frame|explore` 可检查自由文本的分析结论；省略阶段仍按 baseline。triage 从已给文本返回风险候选和待澄清问题，不能完整解析自然语言的所有排除范围；若候选已明确属于另一需求，应保留其归属并继续当前目标，不照单追问。
+
 旧 frame/explore/clarify 的机器锚点检查与复杂 Truth/评审工具仍可显式调用；自由探索默认不被旧模板合同约束。用到对应工具时读取其 `--help` 和 Schema，不加载所有模板。
 
 兼容入口 `scripts/validators/validate_prd_quality.py` 与 `scripts/validators/validate_unified_prd.py` 可手动执行，均复用当前 PRD 内核。

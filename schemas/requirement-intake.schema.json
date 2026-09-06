@@ -226,7 +226,9 @@
         "none",
         "read_only",
         "draft_only",
-        "consequential_write"
+        "consequential_write",
+        "execute",
+        "write_back"
       ]
     },
     "ai_reversible": {

@@ -54,13 +54,16 @@ class PRDChecks:
             except (yaml.YAMLError, ValueError) as exc:
                 self.add("BLOCK", "PRD-FRONTMATTER", path, str(exc))
                 return
-            body = "".join(lines[end + 1:])
+            body = "\n" * (end + 1) + "".join(lines[end + 1:])
+        ownership = line_scopes(raw) if scope_refs else {}
+        if scope_refs:
+            body = "\n".join(line if not ownership.get(n) or ownership[n] & set(scope_refs) else ""
+                             for n, line in enumerate(body.splitlines(), 1))
         findings, routing = check_spec(metadata, body, stage=stage, scope=scope_refs, legacy_level=level)
         self.metrics["routing"] = routing
         self.metrics["document_language"] = metadata.get("document_language", "")
         for finding in findings:
             self.add(finding["severity"], finding["code"], path, finding["message"], finding["ref"])
-        ownership = line_scopes(raw) if scope_refs else {}
         excluded, unlocated = 0, 0
         for item in run_semantic_checks(raw):
             severity, code, message = item.severity, item.code, item.message

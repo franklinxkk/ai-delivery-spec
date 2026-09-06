@@ -51,12 +51,17 @@ def extract_seed_refs(document: dict[str, Any]) -> list[str]:
     request = document.get("request", {})
     if not isinstance(request, dict):
         raise ChangeContractError("request must be an object")
-    seeds = request.get("seed_refs", [])
-    if seeds is None:
-        seeds = []
-    if not isinstance(seeds, list) or any(not isinstance(item, str) or not item.strip() for item in seeds):
-        raise ChangeContractError("request.seed_refs must be an array of non-empty stable IDs")
-    seeds = list(seeds)
+    supplied = []
+    for label, owner in (("seed_refs", document), ("request.seed_refs", request)):
+        if "seed_refs" not in owner:
+            continue
+        value = owner["seed_refs"]
+        if not isinstance(value, list) or any(not isinstance(item, str) or not item.strip() for item in value):
+            raise ChangeContractError(label + " must be an array of non-empty stable IDs")
+        supplied.append(list(dict.fromkeys(item.strip() for item in value)))
+    if len(supplied) == 2 and set(supplied[0]) != set(supplied[1]):
+        raise ChangeContractError("seed_refs conflicts with request.seed_refs; choose one explicit scope")
+    seeds = list(supplied[0]) if supplied else []
     if not seeds:
         for group, index, item in iter_impact_objects(document):
             ref = item.get("ref")
@@ -66,5 +71,5 @@ def extract_seed_refs(document: dict[str, Any]) -> list[str]:
                 raise ChangeContractError(f"impacts.{group}[{index}].ref must be a non-empty stable ID")
             seeds.append(ref.strip())
     if not seeds:
-        raise ChangeContractError("change contains no request.seed_refs or structured impact refs")
+        raise ChangeContractError("change contains no seed_refs, request.seed_refs or structured impact refs")
     return list(dict.fromkeys(item.strip() for item in seeds))

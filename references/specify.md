@@ -25,6 +25,10 @@
 
 标签只是辅助索引，内容出现风险但 risk_facets 缺失时仍需审查。高影响规则逐条查，其他取代表对象，并写明未覆盖范围。两个接收者一致也可能共同理解错，须核对来源和独立反例。
 
+正文抽查先找“两个实施者会在哪里作出不同业务选择”，再找同主题、同版本、同对象的明确答案。审批状态本身不自动要求退回恢复；只有实际出现拒绝、退回、失败或写入副作用才查对应恢复。AI 只读/草稿与自动写入分别判断；置信度不等于完成率，检索相关性不等于授权，来源凭证有效不等于内容为真。领域包只能提示检查维度，不能替项目决定取值、阈值和政策。
+
+用户明确要求“审核通过后自动发布”时，应继承自动发布决定，核实必要的权限、触发和失败边界；不能借“审批不等于发布”的检查原则反改为人工发布或重新询问已决问题。
+
 业务审批与需求评审是两个对象；审批理由不能塞入 baseline/context/point 的需求确认记录。接收方确认一条需求规则也不代表运行中的业务对象已批准。
 
 ## 可选机器声明
@@ -51,7 +55,9 @@ semantic_reviews: []
 
 声明经过结构检查不证明授权真实性。unknowns 的关闭绑定 resolution_ref/source_refs；风险接受另写其授权与当前执行边界，不能只改成 closed。需要审查记录时，在同一规格或现有 ARUN/EVD 中保留类别、对象范围、来源、版本、评阅者、结果、证据。支持类别为 state_authority、metric_definition、recovery、null_stale、permission_boundary、change_propagation；未执行用 not_run，不适用说明理由。
 
-`semantic_reviews` 的 pass 需要 scope_refs、source_refs、reviewer、baseline_version 和 evidence_ref；not_applicable 需范围、理由、评阅者及当前版本。检查范围由 --scope-ref 或 requirement_ids/scope_refs 指定；一个对象的通过不能覆盖另一个对象。工具检查声明与版本，不替人核实自然语言和签署。外部实际结果使用 [验收合同](change-acceptance.md)。
+未知可只维护正文表格，支持模板的 `待关闭（open）` 与 `需求基线（baseline）` 写法；未知状态不得被当成已关闭，关闭需引用解决依据。若与 YAML 重复，两处必须一致。需要证明授权时，实际打开被引用来源，核对决定人、原话/记录、主题、范围和时间；仅有 `SRC-*`、会议名称或具名 actor 仍属于来源声明，脚本不能鉴伪。
+
+`semantic_reviews` 的 pass 需要 scope_refs、source_refs、reviewer、baseline_version 和 evidence_ref；not_applicable 需范围、理由、评阅者及当前版本。检查范围由 --scope-ref 或 requirement_ids/scope_refs 指定；一个对象的通过不能覆盖另一个对象。正文疑点独立于记录检查：核实是缺决定、适用范围不同还是工具误报，再修改规则或在原处记录理由，不能只补一个 pass。外部实际结果使用 [验收合同](change-acceptance.md)。
 
 ## 交接的充分性
 

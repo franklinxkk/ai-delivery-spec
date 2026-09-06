@@ -92,6 +92,8 @@ STATUSES = {
     3: "BLOCKED_BY_P0_UNKNOWN",
 }
 STAGE_ORDER = {
+    "frame": -2,
+    "explore": -1,
     "inventory": 0,
     "clarify": 1,
     "specify": 2,
@@ -464,7 +466,8 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-REVIEW-LAYOUT-NONOVERLAP": ("评审区可能覆盖或压坏产品主操作区。", "桌面参与布局并可折叠/调宽；用浏览器证明业务浮层和反馈高于评审区。"),
     "PROTO-REVIEW-OVERLAY-DETECTION": ("业务浮层探测缺失或 topmost 解析有歧义。", "优先产品 Context Event，再用声明探测；MutationObserver 只触发重新解析。"),
     "PROTO-REVIEW-TARGET-RESOLUTION": ("评审目标没有在 CurrentContextRoot 内得到唯一可见结果。", "只在当前上下文查找，0 个 unresolved，多于 1 个 BLOCK；禁止全局取第一个。"),
-    "PROTO-REVIEW-TARGET-MODE-INVALID": ("评审点用整页 Context Root 逃避精确目标解析。", "context_root 只用于 VIEW/REG 页面方向标号；ACT/FLD/METRIC/STATE 必须 selector_exactly_one。"),
+    "PROTO-REVIEW-TARGET-MODE-INVALID": ("评审点 target_mode 缺失、无效或不适用于该对象。", "声明正确 target_mode；context_root 仅用于 VIEW/REG，其他对象使用 selector_exactly_one。"),
+    "PROTO-REVIEW-WORKSPACE-SCHEMA": ("评审 manifest 的字段或结构不符合已声明合同。", "按 JSON 路径修复 manifest 的缺失、类型或多余字段；参考 schemas/review-workspace.schema.json 和包内示例。"),
     "PROTO-REVIEW-SUBJECT-UNRESOLVED": ("ReviewPoint.subject_ref 不在本次权威 PRD 基线中。", "把该业务事实定义并追溯到当前 PRD，或降为 PROTO-OBS-* Candidate GAP，禁止伪造稳定 ID。"),
     "PROTO-REVIEW-SOURCE-UNRESOLVED": ("ReviewPoint.source_refs 引用了本次权威 PRD 基线中不存在的来源或决定。", "补齐真实 SRC/DEC/REQ 定义与来源登记，或撤销已确认声明。"),
     "PROTO-REVIEW-AC-UNRESOLVED": ("ReviewPoint.acceptance_refs 引用了本次权威 PRD 基线中不存在的验收标准。", "在当前 PRD 机器可读验收中定义该 AC，或移除错误引用。"),
@@ -694,7 +697,8 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-REVIEW-LAYOUT-NONOVERLAP": ("The review surface may cover or damage the primary product workspace.", "Make the desktop surface participate in layout and prove business overlays and feedback remain above it in a browser."),
     "PROTO-REVIEW-OVERLAY-DETECTION": ("Business-overlay detection is missing or topmost resolution is ambiguous.", "Prefer Product Context Events, then declared detection; MutationObserver may only request re-resolution."),
     "PROTO-REVIEW-TARGET-RESOLUTION": ("A review target is not exactly one visible node within CurrentContextRoot.", "Resolve only inside the current context: zero is unresolved and multiple is blocking; never take a global first match."),
-    "PROTO-REVIEW-TARGET-MODE-INVALID": ("A review point uses the whole Context Root to bypass exact target resolution.", "Use context_root only for VIEW/REG direction markers; ACT/FLD/METRIC/STATE must use selector_exactly_one."),
+    "PROTO-REVIEW-TARGET-MODE-INVALID": ("target_mode is missing, invalid or inapplicable to this subject.", "Declare the correct mode; context_root is only for VIEW/REG, other subjects need selector_exactly_one."),
+    "PROTO-REVIEW-WORKSPACE-SCHEMA": ("The review manifest does not meet its declared schema.", "Repair the manifest field at the reported JSON path using the review-workspace schema and bundled example."),
     "PROTO-REVIEW-SUBJECT-UNRESOLVED": ("ReviewPoint.subject_ref does not resolve in the supplied authoritative PRD baseline.", "Define and trace the fact in the current PRD, or keep it as a PROTO-OBS-* Candidate GAP instead of inventing a stable ID."),
     "PROTO-REVIEW-SOURCE-UNRESOLVED": ("ReviewPoint.source_refs cites a source or decision absent from the supplied PRD baseline.", "Add the real SRC/DEC/REQ definition and source register entry, or revoke the confirmed claim."),
     "PROTO-REVIEW-AC-UNRESOLVED": ("ReviewPoint.acceptance_refs cites an AC absent from the supplied PRD baseline.", "Define the AC in the current PRD machine-readable acceptance contract or remove the invalid reference."),

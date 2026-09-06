@@ -1193,11 +1193,9 @@ class PrototypeChecks:
                 drivers = {str(item) for item in decision.get("complexity_drivers", []) or []}
                 context = contexts.get(context_ref, {})
                 inferred_drivers: set[str] = set()
-                if (
-                    str(context.get("context_type", "")) != "VIEW"
-                    or bool(context.get("secondary_context_refs", []) or [])
-                ):
-                    inferred_drivers.add("cross_page")
+                # An overlay is a location, not by itself a cross-page business
+                # dependency. Actual declared drivers and state/role semantics
+                # still require their diagrams and counterexamples.
                 surface_types = {str(item) for item in context.get("surface_types", []) or []}
                 semantic_types_here = semantic_types_for_context.get(context_ref, set())
                 if "workflow" in surface_types or "state_transition" in semantic_types_here:
@@ -3168,8 +3166,9 @@ class PrototypeChecks:
         }
         has_listener = bool(re.search(r"addEventListener\s*\(\s*['\"](?:click|change|submit|input)['\"]", scripts, re.I))
         reads_action = bool(re.search(r"dataset\.action|getAttribute\s*\(\s*['\"]data-action['\"]|closest\s*\(\s*['\"]\[data-action\]", scripts, re.I))
+        recognized_handlers = set(extract_handler_actions(scripts))
         for action in actions:
-            dispatch_evidence = bool(re.search(
+            dispatch_evidence = action.upper() in recognized_handlers or bool(re.search(
                 rf"(?:case\s+['\"]{re.escape(action)}['\"]|(?:action|actionId)\s*===?\s*['\"]{re.escape(action)}['\"]|['\"]{re.escape(action)}['\"]\s*:|\.set\s*\(\s*['\"]{re.escape(action)}['\"]|\[\s*['\"]{re.escape(action)}['\"]\s*\]\s*=)",
                 scripts,
                 re.I,

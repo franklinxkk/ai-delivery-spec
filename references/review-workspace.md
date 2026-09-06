@@ -3,6 +3,10 @@
 仅在用户明确确认评审版后加载。先读取 `prototype.md`；本文件只定义人类评审投影，不改变 PRD、
 Product Truth、结构化 handoff 或验收证据的权威边界。
 
+5.5.0 继续读取 `5.4.9 / RC4` 评审合同；这是子合同版本，不是 Skill 版本漂移。正式 manifest 以 `schemas/review-workspace.schema.json` 为准。下面的 DOM 片段仅解释绑定方式，不是完整可直接过门禁的实现。
+
+图的触发依据业务依赖：仅有弹窗、抽屉或 secondary_context 不自动等于跨页业务链，也不因此强制每个只读浮层补流程图和正反例。实际状态迁移、跨角色交接及显式复杂度仍需对应图与验收。
+
 > **Review Explains, Product Operates.** 左侧始终是完整可操作产品；右侧只解释真实产品动作产生的当前
 > 上下文。Context 定位置，Declaration 定评审点分母，Semantic Coverage 定功能完整性分母，Candidate Diff 防漏，Fingerprint 定副作用边界，
 > Layout + Detection 保证真实可运行，Target Resolution 防绑错，Review Record 防丢结论。
@@ -135,6 +139,8 @@ ReviewPoint。每个适用项必须在人类右栏恰好出现一次最小说明
 一句最小充分说明；`gap` 还必须绑定 `UNK-*`，P0/关键 P1 阻断完整交接；`not_applicable` 必须有来源和
 理由且不能占用右栏。一个 ReviewPoint 只在语义项对象、规则、结果和验收等价时才可合并多项；不能用
 “页面入口”“核心操作”“处理结果”三个泛化点代替页面功能。
+
+`coverage_id` 与 `(owner_context_ref, subject_ref)` 各自唯一；同一对象的多个语义维度在该记录内说明。`gap` 语义项只能映射业务状态同为 `gap` 的评审点，不能借 confirmed 的卡片覆盖未定规则。
 
 每个 `VIEW-*` 必须用 `PAGE-CONTRACT` 的 `surfaces` 与 Context 的 `surface_types` 双向对齐。声明
 `metrics` 就必须逐项存在 `METRIC-*` 语义；声明 `workflow` 就必须有状态流转；声明 `drawer_form` 就
@@ -272,6 +278,8 @@ Expected ProductLocation 另行逐字段 diff。违规必须进入 `window.__ADS
   转化为 REV/GAP/DEC/CHG，但不能直接覆盖 Product Truth。
 
 ## 11. Manifest 与 DOM 最小合同
+
+`baseline.hash` 对 UTF-8 文本读取后的内容计算 SHA-256，通用换行会归一化为 LF，再编码 UTF-8；它不是原文件字节哈希。包完整性哈希另按原始字节计算，二者不能混用。页签之外还需实际提供 `data-review-progress`、`data-review-progress-denominator`、`data-review-share-locator`、`data-review-records`，并按 Schema/诊断核对 PAGE-CONTRACT、内容 owner 与语义分母；不要靠补无关 DOM 锚点修复 JSON 字段错误。
 
 HTML 内嵌唯一 `<script type="application/json" id="review-workspace-manifest">`，按
 `schemas/review-workspace.schema.json` 登记合同，不复制 PRD 正文。

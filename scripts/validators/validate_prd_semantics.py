@@ -287,8 +287,8 @@ def check_dangling_refs(raw: str) -> list[SemFinding]:
         else:
             first = sites[0][0]
             findings.append(SemFinding(
-                "WARN", "PRD-DANGLING-REF",
-                f"引用了未显式定义的 ID {token}（非导航式引用，降级 WARN）；若为笔误请修正，否则补定义位",
+                "INFO", "PRD-DANGLING-REF",
+                f"本文件未定义非导航式引用 {token}；可沿已有权威来源定位，无需为检查重复建立定义表",
                 f"{token}@line {first}",
             ))
     for token in sorted(set(defined) - set(referenced)):

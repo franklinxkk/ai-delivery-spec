@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 from typing import Any
 import yaml
+from scan_requirement_ambiguity import inspect_content, prose_lines
+from stage_contract import unknown_rows, contract_token, OPEN_UNKNOWN, CLOSED_UNKNOWN
 
 
 def load_declarations(raw: str) -> dict:
@@ -42,7 +44,7 @@ RISK_SIGNALS = {
 CATEGORIES = {
     "state_authority": {"state", "authority"},
     "metric_definition": {"metric"},
-    "recovery": {"state", "integration", "batch", "irreversible", "irreversible_ai_write"},
+    "recovery": {"integration", "batch", "irreversible", "irreversible_ai_write"},
     "null_stale": {"metric", "integration"},
     "permission_boundary": {"permission", "privacy"},
     "change_propagation": {"migration"},
@@ -55,7 +57,7 @@ def string_list(value: Any, *, nonempty: bool = False) -> bool:
     return isinstance(value, list) and all(isinstance(v, str) and v.strip() for v in value) and (bool(value) or not nonempty)
 
 
-def route(doc: dict[str, Any], legacy_level: str = "auto") -> dict[str, Any]:
+def route(doc: dict[str, Any], legacy_level: str = "auto", *, body: str = "") -> dict[str, Any]:
     errors: list[str] = []
     notes: list[str] = []
     if "priority" in doc and doc["priority"] not in (None, "P0", "P1", "P2", "P3"):
@@ -79,8 +81,13 @@ def route(doc: dict[str, Any], legacy_level: str = "auto") -> dict[str, Any]:
     for facet, keys in RISK_SIGNALS.items():
         if any(doc.get(key) for key in keys):
             risks.add(facet)
-    if doc.get("ai_behavior") and doc.get("ai_write_scope") not in ("none", "read_only", "draft_only"):
+    ai_scope = doc.get("ai_write_scope")
+    if ai_scope is not None and ai_scope not in ("none", "read_only", "draft_only", "consequential_write", "execute", "write_back"):
+        errors.append("ai_write_scope must be none, read_only, draft_only, consequential_write, execute or write_back")
+    if ai_scope in ("consequential_write", "execute", "write_back"):
         risks.add("irreversible_ai_write")
+    elif doc.get("ai_behavior") and ai_scope is None:
+        notes.append("AI write scope is undeclared; this is not evidence of consequential execution")
     if doc.get("reversible") is False:
         risks.add("irreversible")
     extra = risks - RISK_SIGNALS.keys()
@@ -112,10 +119,15 @@ def route(doc: dict[str, Any], legacy_level: str = "auto") -> dict[str, Any]:
         categories.add("null_stale")
     if doc.get("change") or doc.get("seed_refs"):
         categories.add("change_propagation")
+    declared_risks = sorted(risks)
+    content = inspect_content(body or "\n".join(doc[k] for k in ("title", "description", "request", "behavior") if isinstance(doc.get(k), str)))
+    risks.update(content["risk_facets"])
     return {
         "schema_version": VERSION, "artifact_mode": mode, "risk_facets": sorted(risks),
         "governed": governed, "semantic_review_categories": sorted(categories),
         "priority": doc.get("priority"), "notes": notes, "errors": errors,
+        "declared_risk_facets": declared_risks, "content_risk_candidates": content["risk_facets"],
+        "content_review": content,
         "evidence_policy": "per_claim_scope_version", "authority": "recommendation_only",
         "not_proven": ["natural-language risk completeness", "business authorization", "implementation", "customer acceptance"],
     }
@@ -123,7 +135,7 @@ def route(doc: dict[str, Any], legacy_level: str = "auto") -> dict[str, Any]:
 
 def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope: tuple[str, ...] = (), legacy_level: str = "auto") -> tuple[list[dict], dict]:
     findings: list[dict] = []
-    resolved = route(doc, legacy_level)
+    resolved = route(doc, legacy_level, body=body)
 
     def add(severity: str, code: str, message: str, ref: str = ""):
         findings.append(dict(severity=severity, code=code, message=message, ref=ref))
@@ -132,6 +144,8 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
         add("BLOCK", "SPEC-ROUTE-CONFLICT", error)
     for note in resolved["notes"]:
         add("INFO", "SPEC-ROUTE-NOTE", note)
+    for item in resolved["content_review"]["findings"]:
+        add("GAP", "SPEC-CONTENT-" + item["kind"].upper(), item["action"] + " 正文：" + item["text"], "@line " + str(item["line"]))
     if stage not in STAGES:
         add("BLOCK", "SPEC-STAGE", "Unknown target stage", str(stage))
     if not body.strip():
@@ -200,16 +214,34 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
             add("BLOCK", "SPEC-DISPOSITION-NOT-AUTHORIZED", "A proposal cannot change the requirement lifecycle")
         if isinstance(disposition, dict) and (not all(isinstance(disposition.get(k), str) and disposition[k].strip() for k in ("outcome", "reason")) or not string_list(disposition.get("scope_refs"), nonempty=True)):
             add("BLOCK", "SPEC-DISPOSITION-CONTENT", "Disposition needs outcome, reason and applicable scope")
-    unknowns = objects("unknowns")
+    unknowns = list(objects("unknowns"))
+    # Read the human table as an alternative to metadata, not as an obligation
+    # to maintain a second copy. A decorated template token has the same meaning.
+    known = {u.get("id"): u for u in unknowns if isinstance(u.get("id"), str)}
+    for row in unknown_rows("\n".join(prose_lines(body))):
+        if row["id"] in known:
+            existing = known[row["id"]]
+            if relevant(existing):
+                for key in ("status", "priority", "blocks_stage"):
+                    if key in existing and row.get(key) and contract_token(row[key]) != contract_token(existing[key]):
+                        add("BLOCK", "PRD-UNKNOWN-METADATA-DRIFT", "Human and structured unknown declarations disagree: " + key, row["id"])
+            continue
+        unknowns.append(row)
     for unknown in unknowns:
         if not relevant(unknown):
             continue
-        if unknown.get("status") in ("resolved", "closed", "superseded"):
-            if not unknown.get("resolution_ref") and not unknown.get("source_refs"):
+        status = contract_token(unknown.get("status"))
+        if status not in OPEN_UNKNOWN | CLOSED_UNKNOWN:
+            add("BLOCK", "SPEC-UNKNOWN-STATUS", "Use an explicit open/pending/blocked or closed/resolved/superseded status", str(unknown.get("id", "")))
+            continue
+        if status in CLOSED_UNKNOWN:
+            closure = unknown.get("resolution_ref")
+            if (not isinstance(closure, str) or not closure.strip() or closure.strip() in ("-", "无", "待补", "N/A")) and not string_list(unknown.get("source_refs"), nonempty=True):
                 add("BLOCK", "SPEC-UNKNOWN-CLOSURE", "Closed unknown needs a resolution/decision/source reference", str(unknown.get("id", "")))
             continue
         stop = unknown.get("blocks_stage", "baseline")
         stops = stop if isinstance(stop, list) else [stop]
+        stops = [contract_token(s) for s in stops]
         if any(not isinstance(s, str) or (s not in STAGES and s != "none") for s in stops):
             add("BLOCK", "SPEC-UNKNOWN-STAGE", "Unrecognized blocking stage", str(unknown.get("id", "")))
             continue

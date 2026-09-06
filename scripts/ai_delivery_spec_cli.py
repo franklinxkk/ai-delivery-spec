@@ -795,7 +795,11 @@ def route_stage(args: argparse.Namespace) -> int:
 
 
 def query_domain(args: argparse.Namespace) -> int:
-    values = ["--domain", args.domain, "--format", args.format]
+    values = ["--format", args.format, "--limit", str(args.limit)]
+    if args.domain:
+        values.extend(["--domain", args.domain])
+    if args.search is not None:
+        values.extend(["--search", args.search])
     if args.custom_root:
         values.extend(["--custom-root", str(args.custom_root)])
     for section in args.section:
@@ -1114,7 +1118,7 @@ def main() -> int:
     gate.add_argument("--acceptance-run", type=Path, action="append", help=gate_help("Executed ARUN-*; repeat to close L3/L4 browser evidence", "已执行的 ARUN-*；L3/L4 原型据此闭合浏览器证据"))
     gate.add_argument("--review-record", type=Path, help=gate_help("Optional review record YAML; validates sign-off closure", "可选评审记录 YAML；用于校验签署闭环"))
     gate.add_argument("--level", choices=["auto", "L0", "L1", "L2", "L3", "L4"], default="auto")
-    gate.add_argument("--stage", choices=["inventory", "clarify", "specify", "review", "baseline", "prototype", "implementation", "acceptance", "closed"], default="baseline")
+    gate.add_argument("--stage", choices=["frame", "explore", "inventory", "clarify", "specify", "review", "baseline", "prototype", "implementation", "acceptance", "closed"], default="baseline")
     gate.add_argument("--scope-ref", action="append", default=[])
     gate.add_argument("--domain", action="append", default=[], help=gate_help("Active domain ID for scoped custom rules; repeat as needed", "当前工件适用的领域 ID；用于隔离私有规则，可重复"))
     gate.add_argument("--format", choices=["concise", "json"], default="concise")
@@ -1156,7 +1160,9 @@ def main() -> int:
     query.set_defaults(func=query_truth)
 
     domain = sub.add_parser("query-domain", help="Load one compact domain record or exact section")
-    domain.add_argument("--domain", required=True)
+    domain.add_argument("--domain")
+    domain.add_argument("--search")
+    domain.add_argument("--limit", type=int, default=12)
     domain.add_argument("--format", choices=["yaml", "markdown"], default="yaml")
     domain.add_argument("--section", action="append", default=[])
     domain.add_argument("--custom-root", type=Path, default=Path("custom"))
@@ -1190,7 +1196,7 @@ def main() -> int:
     candidate_assess.add_argument("--output", type=Path)
     candidate_assess.set_defaults(func=assess_candidate)
 
-    triage = sub.add_parser("triage", help="Recommend requirement intake decision, priority, mode and tier")
+    triage = sub.add_parser("triage", help="Recommend intake disposition and artifact mode; surface declared and content risk candidates")
     triage.add_argument("--input", type=Path, required=True)
     triage.add_argument("--format", choices=["markdown", "yaml", "json"], default="markdown")
     triage.add_argument("--output", type=Path)

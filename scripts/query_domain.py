@@ -23,6 +23,12 @@ VENDOR_AUTHORITY_TYPES = {
     "vendor_whitepaper", "vendor_product_docs", "vendor_case_library", "vendor_open_source",
 }
 EFFECT_CLASSES = {"binding_baseline", "design_guidance", "product_pattern", "change_watch"}
+SECTION_ALIASES = {
+    "指标": "Metric / Indicator Governance", "指标口径": "Metric / Indicator Governance",
+    "状态机": "State Machines", "核心流程": "Core Workflows",
+    "角色路径": "Role Path Patterns", "验收清单": "Acceptance Checklist",
+    "隐私约束": "Policy / Privacy Constraints", "测试场景": "Domain Test Scenarios",
+}
 
 
 def stale(last_verified_at: object, refresh_days: object) -> bool:
@@ -60,6 +66,7 @@ def select_sections(raw: str, requested: list[str]) -> tuple[list[str], list[str
     selected: list[str] = []
     missing: list[str] = []
     for name in requested:
+        name = SECTION_ALIASES.get(name.strip(), name.strip())
         index = next(
             (idx for idx, (_level, title, _start) in enumerate(headings) if title.casefold() == name.casefold()),
             None,
@@ -85,12 +92,20 @@ def main() -> int:
         sys.stdout.reconfigure(encoding="utf-8")
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--domain", required=True)
+    parser.add_argument("--domain")
+    parser.add_argument("--search", help="Find a literal keyword across official packs, or the explicitly selected domains")
+    parser.add_argument("--limit", type=int, default=12)
     parser.add_argument("--format", choices=["yaml", "markdown"], default="yaml")
     parser.add_argument("--source-detail", choices=["compact", "full"], default="compact")
     parser.add_argument("--section", action="append", default=[], help="Load only an exact ##/### heading; repeat as needed")
     parser.add_argument("--custom-root", type=Path, default=Path("custom"), help="本地私有扩展目录")
     args = parser.parse_args()
+    if not args.domain and not args.search:
+        parser.error("provide --domain or --search")
+    if args.search is not None and (not args.search.strip() or not 1 <= args.limit <= 50):
+        parser.error("--search must be nonempty; --limit must be 1..50")
+    if args.search and args.section:
+        parser.error("search locates candidate sections; select --section in a separate call")
 
     catalog = yaml.safe_load(CATALOG.read_text(encoding="utf-8"))
     sources = yaml.safe_load(SOURCE_CATALOG.read_text(encoding="utf-8"))
@@ -106,7 +121,8 @@ def main() -> int:
     } if isinstance(custom_config, dict) else {}
 
     records: list[dict[str, object]] = []
-    for domain_id in [item.strip() for item in args.domain.split("+") if item.strip()]:
+    domain_ids = [item.strip() for item in args.domain.split("+") if item.strip()] if args.domain else list(official)
+    for domain_id in domain_ids:
         item = official.get(domain_id)
         if item is not None:
             domain_sources = [source for source in sources.get("sources", []) if domain_id in source.get("domains", [])]
@@ -188,6 +204,18 @@ def main() -> int:
             "product_pattern/change_watch 只能启发方案或触发复核，不能生成硬要求；"
             "其他来源仍须核验项目辖区、适用对象、合同引用与生效状态"
         )
+        if args.search:
+            section = ""
+            matches = []
+            for number, line in enumerate(knowledge_path.read_text(encoding="utf-8").splitlines(), 1):
+                heading = re.match(r"^#{2,3}\s+(.+)", line)
+                if heading:
+                    section = heading[1].strip()
+                if args.search.casefold() in line.casefold():
+                    matches.append({"domain_id": domain_id, "section": section, "line": number,
+                                    "knowledge_file": record["knowledge_file"], "excerpt": line.strip()[:300],
+                                    "status": "candidate", "origin": record["origin"]})
+            record["search_hits"] = matches
         if args.section:
             knowledge_text = knowledge_path.read_text(encoding="utf-8")
             selected, missing = select_sections(knowledge_text, args.section)
@@ -205,16 +233,32 @@ def main() -> int:
             record["selected_sections"] = selected
         records.append(record)
 
+    if args.search:
+        hits = [hit for record in records for hit in record.get("search_hits", [])]
+        payload = {"query": args.search, "searched_domains": domain_ids, "total_matches": len(hits),
+                   "truncated": len(hits) > args.limit, "hits": hits[:args.limit],
+                   "source_usage_rule": "检索命中只是候选。读取章节及来源边界，核实项目适用性；不能自动生成已批准规则。"}
+        if args.format == "yaml":
+            print(yaml.safe_dump(payload, allow_unicode=True, sort_keys=False), end="")
+        else:
+            print(f"# 领域检索：{args.search}\n\n{payload['source_usage_rule']}\n")
+            for hit in hits[:args.limit]:
+                print(f"- {hit['domain_id']} / {hit['section']}，第 {hit['line']} 行：{hit['excerpt']}")
+            print(f"\n匹配 {len(hits)}；显示 {min(len(hits), args.limit)}。")
+        return 0
+
     if args.section:
         if args.format == "yaml":
             slices = [
-                {"domain_id": record["domain_id"], "selected_sections": record.get("selected_sections", [])}
+                {key: record.get(key) for key in ("domain_id", "origin", "maturity", "practice_status", "production_claim", "source_refresh_warning", "source_usage_rule", "selected_sections")}
                 for record in records
             ]
             payload: object = slices[0] if len(slices) == 1 else {"domains": slices}
             print(yaml.safe_dump(payload, allow_unicode=True, sort_keys=False), end="")
         else:
             for index, record in enumerate(records):
+                print(f"<!-- {record['domain_id']} | maturity={record['maturity']} | practice={record['practice_status']} | production_claim={record['production_claim']} -->")
+                print(f"> {record['source_usage_rule']}" + (f"；{record['source_refresh_warning']}" if record['source_refresh_warning'] else "") + "\n")
                 if len(records) > 1:
                     if index:
                         print()
