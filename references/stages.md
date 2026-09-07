@@ -40,3 +40,16 @@ python scripts/ai_delivery_spec_cli.py gate --profile full --requirement require
 
 兼容入口 `scripts/validators/validate_prd_quality.py` 与 `scripts/validators/validate_unified_prd.py` 可手动执行，均复用当前 PRD 内核。
 局部正文检查只按明确的 REQ 标题/表格归属排除范围外项；无法定位的疑点保留 GAP，不能把它当成本次已核实阻断，也不能声称已覆盖。
+
+## 领域检索
+
+行业规则问题先从内置切片及来源目录取得核实起点；中英文提问执行同一路径。命中只证明存在相关线索，不证明适用或现行有效。例：
+
+```bash
+python scripts/ai_delivery_spec_cli.py query-domain --search "安全考核" --format yaml
+python scripts/ai_delivery_spec_cli.py query-domain --domain medical-hospital-it --section "Policy / Privacy Constraints" --source-detail full --language en-US --format yaml
+```
+
+按问题读取命中领域的相关段落及 `references/domains/domain-sources.yaml` 中对应来源。无命中再检索外部来源；需要当前法规结论时，已有命中也须核对发布机关原文、修订替代关系、辖区及适用对象。外部检索的旧页面不能无说明地覆盖目录中的较新基线；目录本身也可能过时，无法核实就保留版本未知。
+
+回答跟随用户语言，法规名称和引用可保留原文。区分法定义务、项目授权规则与设计建议；把义务转成行为验收时，不把上传证明、冻结整个账号等可替代实现升级为法规要求。限制权限要对应受约束的对象和动作，不随意扩大范围。

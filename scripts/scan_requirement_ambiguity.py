@@ -95,6 +95,18 @@ def inspect_content(text: str) -> dict:
         start = max([j for j in headings if j <= i] or [0])
         end = min([j for j in headings if j > i] or [len(lines)])
         context = "\n".join(lines[max(start, i - 3):min(end, i + 5)])[:1600]
+        # A selected business policy is not proof of an unauthorized decision.
+        # Without evidence of an unresolved choice, only ask for its basis.
+        if (re.search(r"补考|成绩|学分|费率|晚到数据|历史数据|retake|resit|score|credit|late.arriv|historical data", line, re.I)
+                and re.search(r"取(?:最新|最早|最高|最低)|默认(?:取|按)|一律按|us(?:e|es|ing)\s+(?:the\s+)?(?:latest|earliest|highest|lowest)", line, re.I)
+                and not re.search(r"禁止|不得|不能|不应|do not|must not|never|建议|候选|propos|option", line, re.I)):
+            undecided = re.search(r"未决|未定|待定|尚未(?:决定|确定)|待确认|undecided|unresolved|not yet (?:decided|approved)", context, re.I)
+            basis = re.search(r"(?:依据|按|经|已批准|已确认|approved|according to).{0,45}(?:DEC-|SRC-|批准|确认|policy|decision)", context, re.I)
+            if undecided or not basis:
+                add("undecided-policy" if undecided else "policy-basis", "decision", set(), i, line,
+                    "核对取值政策的授权依据与未决状态；取最新/最高等选择不能仅因被称为默认而成立。 Check the policy's approved basis; a default label does not resolve an open decision.")
+                if not undecided:
+                    findings[-1]["severity"] = "WARN"
         if (re.search(r"尚未(?:决定|确定|选择)|待确认|待定|待裁决|未决定|待.{0,12}(?:业务|负责人).{0,8}决定", line)
                 and re.search(r"策略|规则|口径|权限|时点|范围|重试|超时|负责人|是否|取值|阈值|决定|字段", line)
                 and not re.match(r"\s*\|\s*`?UNK-", line)

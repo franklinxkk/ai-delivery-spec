@@ -1,6 +1,6 @@
 ---
 name: ai-delivery-spec
-description: Create, clarify, review or change requirements, PRDs and interactive prototypes, including small UI edits and existing systems. Align business behavior, authority, acceptance and change impact. 中文：用于需求判断、澄清、PRD、原型、变更与验收；清晰小改直接完成，复杂问题按需深入。
+description: Clarify, create, review or change product, service and office workflow requirements, PRDs and interactive prototypes. Use for vague goals, process improvements, spreadsheet/form rules, small UI edits and changes to existing systems, even without the word requirement. 中文：产品、服务及办公流程的需求判断、深挖澄清、PRD、原型、变更与验收；一句话想法、表单/表格规则和微小改动也适用。明确的纯翻译、排版、抄录或既定步骤执行由对应工具直接处理。
 ---
 
 # AI Delivery Spec 5.5.0 — 需求判断与交付
@@ -15,6 +15,8 @@ description: Create, clarify, review or change requirements, PRDs and interactiv
 
 明确局部小改：读取相关基线，直接完成差异、继承边界、正反验收和未证明事项；没有关键未知就不提问、不建生命周期文件。复杂或模糊任务才读取对应参考，不默认走全流程。
 
+办公任务涉及目标取舍、业务口径、权限或流程改变时同样适用；完成必要澄清后交给文档、表格或自动化工具执行。纯格式整理或既定步骤执行直接使用对应工具，不为命中本 Skill 制造问题。
+
 | 当前需要 | 按需读取 |
 |---|---|
 | 判断问题、比较方案、澄清 | [discover.md](references/discover.md) |
@@ -26,7 +28,7 @@ description: Create, clarify, review or change requirements, PRDs and interactiv
 | 多文件、大上下文或跨会话 | [context.md](references/context.md) |
 | 机器路由、模板或检查命令 | [stages.md](references/stages.md) |
 
-不预加载维护实验、全部模板或领域包。领域约束从有权来源核实；已有领域材料只按当前问题检索，不照抄成项目真相。
+不预加载全部模板或领域包。涉及行业规则，先按 [领域检索指引](references/stages.md#领域检索) 取当前问题切片和来源基线，再核实有权原文及版本；中英文同样执行。语言不决定法域，来源须匹配辖区与适用对象，不能照抄成项目真相。
 
 ## 保持业务含义与决定权
 

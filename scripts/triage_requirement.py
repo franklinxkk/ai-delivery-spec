@@ -28,11 +28,12 @@ def recommend(doc: dict) -> dict:
     advice = "clarify" if doc.get("ambiguity") == "high" else "accept"
     reasons = []
     questions = result["content_review"]["findings"]
+    required_questions = [item for item in questions if item.get("severity") != "WARN"]
     lexical = scan("\n".join(doc[k] for k in ("title", "description", "behavior") if isinstance(doc.get(k), str)))
     generic_goal = bool(re.fullmatch(r"(?:做个|做一个|建设|搭建|优化)(?:一个|个)?系统|优化体验|提升效率", str(doc.get("title", "")).strip("。！？.! "))) and not doc.get("description")
-    if questions or lexical or generic_goal:
+    if required_questions or lexical or generic_goal:
         advice = "clarify"
-        reasons.extend(item["action"] for item in questions)
+        reasons.extend(item["action"] for item in required_questions)
         if (lexical or generic_goal) and not questions:
             reasons.append("目标措辞尚有不明确之处；仅澄清会改变范围、授权或验收的部分")
     if doc.get("duplicate_of") or doc.get("out_of_product_boundary"):

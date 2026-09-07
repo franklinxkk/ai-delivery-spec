@@ -84,6 +84,19 @@ def select_sections(raw: str, requested: list[str]) -> tuple[list[str], list[str
     return selected, missing
 
 
+def search_terms(query: str, aliases: dict) -> list[str]:
+    """Keep the literal query; expand known terms without inventing translations."""
+    query = query.strip()
+    terms = [query]
+    for key, values in aliases.items():
+        if not isinstance(key, str) or not isinstance(values, list) or not all(isinstance(v, str) for v in values):
+            continue
+        group = [key, *values]
+        if key in query or any(query.casefold() == term.casefold() for term in group):
+            terms.extend(group)
+    return list(dict.fromkeys(terms))
+
+
 def main() -> int:
     # Domain records intentionally contain multilingual source titles and gaps.
     # Emit a deterministic UTF-8 stream even when a Windows host exposes a
@@ -93,10 +106,11 @@ def main() -> int:
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--domain")
-    parser.add_argument("--search", help="Find a literal keyword across official packs, or the explicitly selected domains")
+    parser.add_argument("--search", help="Find literal keywords and curated Chinese/English aliases across packs")
     parser.add_argument("--limit", type=int, default=12)
     parser.add_argument("--format", choices=["yaml", "markdown"], default="yaml")
     parser.add_argument("--source-detail", choices=["compact", "full"], default="compact")
+    parser.add_argument("--language", choices=["auto", "zh-CN", "en-US"], default="auto")
     parser.add_argument("--section", action="append", default=[], help="Load only an exact ##/### heading; repeat as needed")
     parser.add_argument("--custom-root", type=Path, default=Path("custom"), help="本地私有扩展目录")
     args = parser.parse_args()
@@ -109,6 +123,13 @@ def main() -> int:
 
     catalog = yaml.safe_load(CATALOG.read_text(encoding="utf-8"))
     sources = yaml.safe_load(SOURCE_CATALOG.read_text(encoding="utf-8"))
+    terms = search_terms(args.search, catalog.get("search_aliases", {})) if args.search else []
+    english = args.language == "en-US" or (args.language == "auto" and not re.search(r"[\u4e00-\u9fff]", (args.search or "") + " ".join(args.section)))
+    usage_rule = (
+        "Search hits and domain patterns are candidates, not approved project rules. Verify jurisdiction, covered entities, effective version and authority; response language does not determine jurisdiction."
+        if english else
+        "检索命中与领域经验只是候选，不是项目已批准规则。核实法域、适用对象、生效版本与来源权威；提问语言不决定适用法域。"
+    )
     official = {item["domain_id"]: item for item in catalog.get("domains", [])}
     custom_root = args.custom_root.resolve()
     custom_config = {}
@@ -139,11 +160,15 @@ def main() -> int:
                 "known_gaps": item.get("known_gaps", []),
                 "production_claim": item.get("production_claim", "prohibited"),
                 "last_verified_at": item.get("last_verified_at"),
+                "source_catalog": "references/domains/domain-sources.yaml",
+                "jurisdictions": sorted({str(s["jurisdiction"]) for s in domain_sources if s.get("jurisdiction")}),
             }
             if args.source_detail == "full":
                 record["source_refs"] = [
                     {
                         "id": source["id"], "title": source["title"],
+                        "url": source.get("url"), "jurisdiction": source.get("jurisdiction"),
+                        "applicability": source.get("applicability"), "status": source.get("status"),
                         "effect_class": effect_class(source), "binding_use": binding_use(source),
                         "last_verified_at": source.get("last_verified_at"), "refresh_days": source.get("refresh_days"),
                         "stale": stale(source.get("last_verified_at"), source.get("refresh_days")),
@@ -190,20 +215,21 @@ def main() -> int:
                 "known_gaps": item.get("known_gaps", []),
                 "production_claim": item.get("production_claim", "local_only"),
                 "owner": item.get("owner"),
+                "jurisdictions": item.get("jurisdictions", []),
             }
             if not knowledge_path.is_file():
                 print(f"FAIL: local domain knowledge file not found: {knowledge_path}")
                 return 1
         record["source_refresh_warning"] = (
-            "存在超过刷新周期或缺少日期的来源；使用其作约束前必须重新核验"
+            ("Some sources are stale or undated; recheck them before using them as constraints." if english else
+             "存在超过刷新周期或缺少日期的来源；使用其作约束前必须重新核验")
             if record.get("stale_source_refs") or any(
                 source.get("stale") for source in record.get("source_refs", []) if isinstance(source, dict)
             ) else None
         )
-        record["source_usage_rule"] = (
-            "product_pattern/change_watch 只能启发方案或触发复核，不能生成硬要求；"
-            "其他来源仍须核验项目辖区、适用对象、合同引用与生效状态"
-        )
+        record["source_usage_rule"] = usage_rule + (
+            " product_pattern/change_watch cannot establish binding requirements."
+            if english else " product_pattern/change_watch 不能生成硬要求。")
         if args.search:
             section = ""
             matches = []
@@ -211,10 +237,13 @@ def main() -> int:
                 heading = re.match(r"^#{2,3}\s+(.+)", line)
                 if heading:
                     section = heading[1].strip()
-                if args.search.casefold() in line.casefold():
+                matched = [term for term in terms if term.casefold() in line.casefold()]
+                if matched:
                     matches.append({"domain_id": domain_id, "section": section, "line": number,
                                     "knowledge_file": record["knowledge_file"], "excerpt": line.strip()[:300],
-                                    "status": "candidate", "origin": record["origin"]})
+                                    "status": "candidate", "origin": record["origin"],
+                                    "matched_terms": matched,
+                                    "match_type": "literal" if args.search.casefold() in line.casefold() else "alias"})
             record["search_hits"] = matches
         if args.section:
             knowledge_text = knowledge_path.read_text(encoding="utf-8")
@@ -235,22 +264,25 @@ def main() -> int:
 
     if args.search:
         hits = [hit for record in records for hit in record.get("search_hits", [])]
+        hits.sort(key=lambda hit: hit["match_type"] != "literal")
         payload = {"query": args.search, "searched_domains": domain_ids, "total_matches": len(hits),
+                   "expanded_terms": terms, "retrieval": "literal_with_curated_aliases",
                    "truncated": len(hits) > args.limit, "hits": hits[:args.limit],
-                   "source_usage_rule": "检索命中只是候选。读取章节及来源边界，核实项目适用性；不能自动生成已批准规则。"}
+                   "source_usage_rule": usage_rule}
         if args.format == "yaml":
             print(yaml.safe_dump(payload, allow_unicode=True, sort_keys=False), end="")
         else:
-            print(f"# 领域检索：{args.search}\n\n{payload['source_usage_rule']}\n")
+            print(f"# {'Domain search' if english else '领域检索'}: {args.search}\n\n{payload['source_usage_rule']}\n")
+            print(f"{'Search terms' if english else '检索词'}: {', '.join(terms)}\n")
             for hit in hits[:args.limit]:
-                print(f"- {hit['domain_id']} / {hit['section']}，第 {hit['line']} 行：{hit['excerpt']}")
-            print(f"\n匹配 {len(hits)}；显示 {min(len(hits), args.limit)}。")
+                print(f"- {hit['domain_id']} / {hit['section']} [{hit['line']}, {hit['match_type']}]: {hit['excerpt']}")
+            print(f"\n{'Matches / shown' if english else '匹配 / 显示'}: {len(hits)} / {min(len(hits), args.limit)}")
         return 0
 
     if args.section:
         if args.format == "yaml":
             slices = [
-                {key: record.get(key) for key in ("domain_id", "origin", "maturity", "practice_status", "production_claim", "source_refresh_warning", "source_usage_rule", "selected_sections")}
+                {key: record.get(key) for key in ("domain_id", "origin", "maturity", "practice_status", "production_claim", "jurisdictions", "source_catalog", "source_refs", "source_refresh_warning", "source_usage_rule", "selected_sections")}
                 for record in records
             ]
             payload: object = slices[0] if len(slices) == 1 else {"domains": slices}

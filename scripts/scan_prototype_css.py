@@ -105,7 +105,9 @@ def _scan_html(text: str, css: str) -> list[dict[str, str]]:
 
     nav_pages: dict[str, int] = {}
     for element in parser.elements:
-        if not element["page"]:
+        # Navigation items can have arbitrary class names (e.g. nav-order).
+        # Count containers, never the interactive children within them.
+        if not element["page"] or element["tag"] in INTERACTIVE_TAGS or element["action"]:
             continue
         is_nav_container = any(
             NAV_CONTAINER_CLASS.search(token) and not NAV_ITEM_CLASS.search(token)

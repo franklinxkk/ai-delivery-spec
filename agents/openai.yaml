@@ -1,7 +1,7 @@
 interface:
   display_name: "AI Delivery Spec｜需求判断与交付"
-  short_description: "Decide and specify requirements with scoped evidence"
-  default_prompt: "使用 $ai-delivery-spec 完成当前需求任务，交付最小完整的业务合同，并按受影响范围说明决定、未知与验证证据。"
+  short_description: "Clarify product and office needs, from small edits to PRDs"
+  default_prompt: "使用 $ai-delivery-spec 处理当前产品或办公流程需求，清晰小改直接完成；关键业务选择未定时先澄清，再交付当前所需结果与验证边界。"
 
 policy:
   allow_implicit_invocation: true

@@ -138,14 +138,16 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
     resolved = route(doc, legacy_level, body=body)
 
     def add(severity: str, code: str, message: str, ref: str = ""):
-        findings.append(dict(severity=severity, code=code, message=message, ref=ref))
+        finding = dict(severity=severity, code=code, message=message, ref=ref)
+        if finding not in findings:
+            findings.append(finding)
 
     for error in resolved["errors"]:
         add("BLOCK", "SPEC-ROUTE-CONFLICT", error)
     for note in resolved["notes"]:
         add("INFO", "SPEC-ROUTE-NOTE", note)
     for item in resolved["content_review"]["findings"]:
-        add("GAP", "SPEC-CONTENT-" + item["kind"].upper(), item["action"] + " 正文：" + item["text"], "@line " + str(item["line"]))
+        add(item.get("severity", "GAP"), "SPEC-CONTENT-" + item["kind"].upper(), item["action"] + " 正文：" + item["text"], "@line " + str(item["line"]))
     if stage not in STAGES:
         add("BLOCK", "SPEC-STAGE", "Unknown target stage", str(stage))
     if not body.strip():
@@ -227,6 +229,7 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
                         add("BLOCK", "PRD-UNKNOWN-METADATA-DRIFT", "Human and structured unknown declarations disagree: " + key, row["id"])
             continue
         unknowns.append(row)
+        known[row["id"]] = row
     for unknown in unknowns:
         if not relevant(unknown):
             continue

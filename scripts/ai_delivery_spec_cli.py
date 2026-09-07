@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -518,17 +519,20 @@ def run_check(args: argparse.Namespace) -> int:
             cwd=ROOT,
             text=True,
             encoding="utf-8",
+            errors="replace",
+            env={**os.environ, "PYTHONIOENCODING": "utf-8"},
             capture_output=True,
         )
         if config_result.returncode:
-            failures.append("spec config self-check failed: " + (config_result.stdout + config_result.stderr).strip())
+            failures.append("spec config self-check failed: " + ((config_result.stdout or "") + (config_result.stderr or "")).strip())
         if args.product_truth:
             truth_result = subprocess.run(
                 [sys.executable, str(ROOT / "scripts" / "validators" / "validate_product_truth.py"), str(args.product_truth)],
-                cwd=Path.cwd(), text=True, encoding="utf-8", capture_output=True,
+                cwd=Path.cwd(), text=True, encoding="utf-8", errors="replace",
+                env={**os.environ, "PYTHONIOENCODING": "utf-8"}, capture_output=True,
             )
             if truth_result.returncode:
-                failures.append("product truth validation failed: " + (truth_result.stdout + truth_result.stderr).strip())
+                failures.append("product truth validation failed: " + ((truth_result.stdout or "") + (truth_result.stderr or "")).strip())
         if failures:
             print(f"BLOCKED: runtime fast check found {len(failures)} issue(s)")
             for failure in failures:
@@ -795,7 +799,8 @@ def route_stage(args: argparse.Namespace) -> int:
 
 
 def query_domain(args: argparse.Namespace) -> int:
-    values = ["--format", args.format, "--limit", str(args.limit)]
+    values = ["--format", args.format, "--limit", str(args.limit),
+              "--language", args.language, "--source-detail", args.source_detail]
     if args.domain:
         values.extend(["--domain", args.domain])
     if args.search is not None:
@@ -1159,11 +1164,13 @@ def main() -> int:
     query.add_argument("--output", type=Path, required=True)
     query.set_defaults(func=query_truth)
 
-    domain = sub.add_parser("query-domain", help="Load one compact domain record or exact section")
+    domain = sub.add_parser("query-domain", help="Search Chinese/English domain terms or load a scoped source/section")
     domain.add_argument("--domain")
     domain.add_argument("--search")
     domain.add_argument("--limit", type=int, default=12)
     domain.add_argument("--format", choices=["yaml", "markdown"], default="yaml")
+    domain.add_argument("--language", choices=["auto", "zh-CN", "en-US"], default="auto")
+    domain.add_argument("--source-detail", choices=["compact", "full"], default="compact")
     domain.add_argument("--section", action="append", default=[])
     domain.add_argument("--custom-root", type=Path, default=Path("custom"))
     domain.set_defaults(func=query_domain)

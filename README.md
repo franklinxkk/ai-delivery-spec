@@ -73,8 +73,11 @@ Repository and community channels update separately; check the installed package
 | **做可操作原型** | “使用 ai-delivery-spec：基于这份 PRD 做可操作的产品原型，覆盖主路径和关键失败结果。” |
 | **改现有需求或系统** | “使用 ai-delivery-spec：审核和发布要拆开，梳理旧对象、相关页面、权限和验收受到的影响。” |
 | **评审与交接** | “使用 ai-delivery-spec：站在研发和测试接收者角度审查这份规格，找出仍要靠猜的关键业务选择。” |
+| **办公流程与表格规则** | “使用 ai-delivery-spec：报销登记表要自动标出超期项，先帮我明确起算日、例外和责任人，再交给表格工具实现。” |
 
 熟悉后可用 `/ads`（通用）、`/dig`（澄清）、`/prd`（规格）、`/proto`（原型）表达意图。它们是否可作为裸命令由宿主决定；自然语言入口始终可以表达相同任务。
+
+不必说出“需求”才使用它。办公中的目标、规则、权限或流程改变也可以进入；明确的翻译、排版、抄录等任务由对应工具直接完成。隐式命中取决于宿主与模型，需要稳定调用时显式写出技能名。
 
 ## 谁会最先用上它
 
@@ -141,8 +144,11 @@ Attach an existing PRD, screenshot, HTML prototype, customer feedback or change 
 | **Create an interactive prototype** | “Use ai-delivery-spec: build a working product prototype from this PRD, including the main path and key failure outcomes.” |
 | **Change an existing system** | “Use ai-delivery-spec: separate approval from publishing. Identify affected existing records, screens, permissions and acceptance criteria.” |
 | **Review or hand off** | “Use ai-delivery-spec: review this specification as an engineering and QA receiver. Find critical business choices that still require guessing.” |
+| **Office workflows and spreadsheet rules** | “Use ai-delivery-spec: flag overdue reimbursements in this tracker. Clarify the start date, exceptions and responsible person before the spreadsheet tool implements it.” |
 
 `/ads`, `/dig`, `/prd` and `/proto` are intent shortcuts for general work, clarification, specification and prototyping. Native slash-command support depends on the host; the natural-language prompts above express the same tasks.
+
+You do not need to say “requirement.” Changes to office goals, rules, permissions or workflows also apply. Straightforward translation, formatting and transcription can go directly to their tools. Implicit selection depends on the host and model; name the skill explicitly when you need a reliable invocation.
 
 ### Who it helps
 
@@ -182,6 +188,9 @@ Clear local edits can be completed directly. Complex work loads only the relevan
 领域资料按需读取，其经验与成熟度见覆盖表；项目规则仍须核实来源和适用性。<br>
 Domain references load on demand. The coverage file records their evidence and maturity; project rules still need applicable, authoritative sources.
 
+中英文关键词通过小型术语表检索同一份领域原文。回答跟随用户语言，法规名称与来源保留原文；中国法规、其他法域和国际标准分别核实，不能按提问语言选择适用法律。<br>
+Chinese and English terms search the same source text through a curated glossary. Responses follow your language while preserving original source titles. Verify Chinese law, other jurisdictions and international standards separately; language does not select the applicable law.
+
 <details>
 <summary><strong>可选检查工具与命令｜Optional checks and commands</strong></summary>
 
@@ -202,7 +211,9 @@ Use these as needed; replace `analysis.md`, `app.html` and `old-app.html` with y
 ```bash
 python scripts/ai_delivery_spec_cli.py gate --profile prd --prd analysis.md --stage explore
 python scripts/ai_delivery_spec_cli.py query-domain --search confidence --limit 8
+python scripts/ai_delivery_spec_cli.py query-domain --search 完成率 --limit 8
 python scripts/ai_delivery_spec_cli.py query-domain --domain ai-native --section "Metric / Indicator Governance"
+python scripts/ai_delivery_spec_cli.py query-domain --domain medical-hospital-it --section "Policy / Privacy Constraints" --source-detail full --language en-US
 python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app.html --prototype-baseline old-app.html
 ```
 
@@ -210,6 +221,9 @@ python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app.
 - **风险 / Risk**：`triage` 读取声明和部分正文线索，只给建议；未声明 `ai_write_scope` 表示未知，正文自动写回风险仍会独立提示。 / Triage returns advice using declarations and bounded text cues. Missing `ai_write_scope` means unknown; write-back cues are checked separately.
 - **变更 / Impact**：`impact` 接受顶层 `seed_refs: [REQ-A]` 或 `request.seed_refs`，同时给出时必须一致。图上的相关对象先作为候选核实。 / Impact accepts either seed location; both must agree if supplied. Related graph objects remain candidates until their dependencies are verified.
 - **领域 / Domains**：也可用 `--section 指标`。搜索命中是候选线索，不能直接变成项目已批准规则。 / Chinese section aliases are supported. Search hits are leads, not approved project rules.
+
+搜索结果给出扩展词、原文位置及 literal/alias 命中方式；它是有界关键词检索，未命中也可能只是术语表未覆盖。`--source-detail full` 可查看来源 URL、法域及适用范围，原文章节不会由脚本自动翻译。<br>
+Results show expanded terms, source locations and literal/alias matches. This is bounded keyword retrieval; zero hits may mean a vocabulary gap. `--source-detail full` exposes source URLs, jurisdictions and applicability. The script preserves source passages without automatically translating them.
 
 </details>
 
@@ -219,6 +233,9 @@ python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app.
 5.4.x 产物可继续读取，稳定 ID 和已批准事实保留。`artifact_mode` 使用 `direct/card/prd`；旧 L0–L4 在 PRD 中只作呈现提示，不能覆盖显式模式或自动提高风险、证据要求。专业原型、评审、Truth、handoff 与执行状态工具保留其版本化 Schema，不自动迁移旧产物，也不成为日常任务的默认依赖。
 
 5.4.x artifacts remain readable with stable IDs and approved facts preserved. `artifact_mode` uses `direct/card/prd`; legacy tiers are presentation hints in PRDs. Specialized prototype, review, Truth, handoff and execution-state tools retain their versioned schemas and remain optional. Old artifacts are not automatically migrated.
+
+旧未知项状态 `partial`、`in_progress` 及“部分关闭/部分解决”按 `open` 理解：只要仍有未决部分，就按其依赖范围与阻断阶段处理。同一未知项的相同诊断合并，冲突声明仍保留。其他未识别状态必须明确迁移，不能被当作关闭。<br>
+Legacy `partial`, `in_progress` and equivalent Chinese partial-resolution labels are treated as `open`. Remaining decisions retain their scope and blocking stage. Repeated identical findings are merged; conflicting declarations remain visible. Other unknown status values require explicit migration and never count as closed.
 
 接入脚本需注意：5.5 triage 使用 `recommendation / artifact_mode / risk_facets / governed`，移除旧 tier/mode 推导结果键；旧 Markdown PRD 入口复用新内核，退出码可能改变；旧 `validate_prd_quality.py --domain-rules` 已退役，领域约束通过显式 custom gate 或领域工具处理。
 
@@ -232,6 +249,9 @@ Script consumers: update to the triage keys above. Old derived tier/mode output 
 正文检查对状态权威、指标口径、恢复路径、空值/陈旧、权限边界与变更传播做有界抽查，返回带位置的待核实 GAP。填写评阅 pass 不能覆盖正文疑点。`PASS` 只表示实际执行的确定性检查未发现对应阻断或缺口；业务语义、来源授权、浏览器交互、真实实现和客户验收仍需各自的证据。
 
 Text checks sample known ambiguity patterns in state authority, metrics, recovery, null/stale values, permissions and change propagation. Findings are located GAPs for review; a declared review pass cannot suppress them. A deterministic `PASS` covers only the checks executed. Business meaning, source authority, browser behavior, implementation and customer acceptance require their own evidence.
+
+对“补考成绩取最新”等取值政策，依据未显式出现时只给 WARN 提示；附近同时存在未决声明才给 GAP。提示不能鉴定授权真伪，也不要求为每个界面默认值补决策表。<br>
+For selected policies such as using the latest retake score, an absent explicit basis produces a WARN advisory; a nearby unresolved decision produces a GAP. This does not authenticate authority or require decision tables for ordinary UI defaults.
 
 本 Skill 管需求与其产物，连接工程反馈；排期、编码、部署与运营由相应工作流负责。公共反馈与示例请使用脱敏材料。<br>
 The skill manages requirements and their artifacts, incorporating engineering feedback. Scheduling, coding, deployment and operations belong to the relevant workflows. Use sanitized material in public examples and feedback.

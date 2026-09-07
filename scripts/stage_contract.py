@@ -261,6 +261,7 @@ def contract_token(value: object) -> str:
     match = re.fullmatch(r"[^()（）]*[（(]\s*`?([a-z_]+)`?\s*[）)]", raw)
     token = match[1] if match else raw.strip("`")
     return {"待关闭": "open", "待确认": "open", "未关闭": "open", "待处理": "open",
+            "partial": "open", "in_progress": "open", "部分关闭": "open", "部分解决": "open",
             "已关闭": "closed", "已解决": "resolved", "已取代": "superseded"}.get(token, token)
 
 
