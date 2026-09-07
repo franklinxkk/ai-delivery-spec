@@ -1,110 +1,265 @@
 # AI Delivery Spec 5.5.0
 
-帮助产品、业务、设计、研发与测试围绕同一业务含义协作：识别当前决定，交付最小完整规格，并管理变更后的有效性。
+**把需求想清楚，让产研接得住。**<br>
+**Clear product decisions. Requirements your team and AI can build on.**
 
-AI 能快速生成 PRD 和页面，但团队仍可能在开工后才发现：审批并不等于发布，统计对象并不一致，失败重试会重复写入。**本 Skill 把一句话、现有材料或变更，推进为业务能决定、设计能表达、研发能实施、测试能复现、Coding Agent 能接续的共同业务约定。** 一个有依据的“先验证、暂缓或不做”也可以完成当前分析目标。
+面向**产品经理与产研团队**的需求管理 Skill。从一句话、现有 PRD 或原型进入，帮你判断做什么、说清业务规则、做出可操作原型，并把变更交接给研发、测试与 Coding Agent。
 
-## 谁在什么时刻使用
+A requirements skill for **product managers and product teams**. Start with an idea, an existing PRD or a prototype. Clarify the decision, specify business behavior, create interactive prototypes and carry changes through to engineering, QA and coding agents.
 
-| 核心用户 | 当前需要 | 拿走什么 |
+[![ClawHub downloads: 2.4k](https://img.shields.io/badge/ClawHub-2.4k_downloads-2563eb)](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec)
+[![SkillHub score: 4.7/5](https://img.shields.io/badge/SkillHub-4.7%2F5-f59e0b)](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-64748b)](LICENSE)
+
+<sub>2026-09-07 · 维护者提供的社区快照 / Maintainer-reported snapshot · 最新数据见平台 / See listings for current figures.</sub>
+
+**[中文上手](#zh) · [English guide](#en) · [安装 / Install](#install) · [示例 / Examples](#examples) · [指南 / Guides](#resources) · [社区 / Community](#community)**
+
+<a id="install"></a>
+
+## 安装，开始第一条需求｜Install and start
+
+支持 Agent Skills 的宿主可通过 [Skills CLI](https://github.com/vercel-labs/skills) 安装，按提示选择你的 Agent。<br>
+Use the Skills CLI and select your agent when prompted:
+
+```bash
+npx skills add franklinxkk/ai-delivery-spec
+```
+
+安装后直接到 [中文上手](#zh) 或 [English guide](#en) 复制你的第一条任务。**日常使用不需要 Python。**<br>
+Then copy your first task from the Chinese or English guide. **Python is optional.**
+
+<sub>5.5.0 当前为本地候选；以上命令安装远端版本。试用 5.5.0 请使用对应候选 ZIP 包。 / 5.5.0 is a local candidate; the command installs the remote version. Use the matching candidate ZIP to try 5.5.0.</sub>
+
+<details>
+<summary>OpenClaw / ZIP 安装方式与版本说明｜Other installation options</summary>
+
+OpenClaw 用户也可使用 [ClawHub 页面提供的命令](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec)：<br>
+OpenClaw users can also use the command provided by the ClawHub listing:
+
+```bash
+openclaw skills install @franklinxkk/ai-delivery-spec
+```
+
+已有 ZIP 安装包？解压到宿主识别的 `ai-delivery-spec` 技能目录，让 `SKILL.md` 位于目录根部，再按宿主要求重新加载技能。<br>
+Have a ZIP package? Extract it into your host's `ai-delivery-spec` skill directory, with `SKILL.md` at its root, then reload skills as required by the host.
+
+仓库与社区各自更新版本，安装后请核对包内版本。<br>
+Repository and community channels update separately; check the installed package's version.
+
+</details>
+
+<a id="zh"></a>
+
+## 第一次用？复制一句话就能开始
+
+安装后，在 Agent 对话中输入这句话；也可以直接换成你的真实需求。
+
+```text
+使用 ai-delivery-spec：给现有列表增加“仅看当前有效”筛选，
+保留现有权限，把这次改动的规则和验收说明白。
+```
+
+你会得到这次修改的范围、筛选含义、正常与异常结果，以及可判断对错的验收条件。有已确认资料时直接沿用；存在关键未知时先指出需要谁决定。小改可以用一张需求卡或简短差异说明完成。
+
+**已有材料就一起给它。** PRD、截图、HTML、客户反馈或变更说明都可以作为起点；不同材料的事实与权威需要核实。资料读取、原型生成和验证能力取决于宿主实际提供的工具。
+
+### 选一句最像你现在的任务
+
+| 现在要做什么 | 可以直接这样说 |
+|---|---|
+| **想清楚值不值得做** | “使用 ai-delivery-spec：用户说流程太慢。先判断可能卡在哪里，给我能改变选择的最小验证。” |
+| **写清楚需求 / PRD** | “使用 ai-delivery-spec：基于这些已确认材料写 PRD，把角色、规则、异常和验收说明白。” |
+| **做可操作原型** | “使用 ai-delivery-spec：基于这份 PRD 做可操作的产品原型，覆盖主路径和关键失败结果。” |
+| **改现有需求或系统** | “使用 ai-delivery-spec：审核和发布要拆开，梳理旧对象、相关页面、权限和验收受到的影响。” |
+| **评审与交接** | “使用 ai-delivery-spec：站在研发和测试接收者角度审查这份规格，找出仍要靠猜的关键业务选择。” |
+
+熟悉后可用 `/ads`（通用）、`/dig`（澄清）、`/prd`（规格）、`/proto`（原型）表达意图。它们是否可作为裸命令由宿主决定；自然语言入口始终可以表达相同任务。
+
+## 谁会最先用上它
+
+| 核心用户 | 经常遇到的问题 | 这次能拿走什么 |
 |---|---|---|
-| 业务负责人、客户、产品经理 | 判断值不值得做、收敛范围 | 问题证据、选择、最小验证和待授权决定 |
-| 产品、设计 | 把规则变为可理解、可操作的体验 | 同源规格与产品态原型，含真实状态和失败路径 |
-| 前后端研发、Coding Agent | 实施或接续已有工作 | 已定规则、数据权威、守卫、副作用、边界与稳定引用；工程细节按项目需要补 |
-| QA、评审人、验收方 | 找分歧、验证改变 | 关键反例、变更消费者、实际证据及尚未证明的范围 |
+| **初级产品经理** | 收到一句需求，不知道该问什么、写到多细 | 关键问题、范围与边界、能开始评审的需求卡或 PRD |
+| **中高级产品 / 产品负责人** | 需求都合理，但优先做什么、跨模块如何一致还没定 | 问题证据、方案取舍、最小验证、当前决定与变更影响 |
+| **业务 / 售前 / 实施 / 设计** | 客户说法、业务规则和页面体验之间有断层 | 可确认的业务行为、可操作的产品原型、待决定事项 |
+| **前端研发** | 页面有了，入口、状态、权限和失败反馈仍不明确 | 与规格一致的交互路径、状态结果与验收条件 |
+| **后端 / 架构** | 同一句话会推导出不同口径、状态或写入方式 | 数据权威、允许的状态变化、副作用、恢复与集成边界 |
+| **QA / 验收方** | “显示正确”无法变成可重复的验收 | 正反例、权限与边界场景、变更回归范围和证据缺口 |
+| **Coding Agent** | 换个会话就丢背景，或自行补出业务政策 | 当前有效规则、来源与稳定引用、未知及可接续的任务范围 |
 
-这些是同一条用户链的不同读法，不要求每个角色各写一套文档。团队已有资料可直接进入当前阶段；不必先选择等级，也不必从零补齐生命周期。
+适用于 ToC 产品、ToB/ToG 业务系统及 AI Native 场景。这些角色共用同一份业务约定，各自按需要读取；已有 PRD、需求系统和批准基线可以继续作为权威位置。
 
-本工作区为 5.5.0 候选。公开仓库或已安装版本以实际版本为准；本地构建不代表已发布。
+## 5.5.0，重点把这三件事做好
 
-## 使用
+**1. 更快找到当前要决定什么。** 从目标、受影响的人和事实出发，比较方案与最小验证。有依据的“先验证、暂缓、缩范围或不做”也可以完成分析；改变需求状态仍取决于实际授权。
 
-把安装包解压到宿主识别的 `ai-delivery-spec` 技能目录，使 `SKILL.md` 位于目录根部；保留需要的旧版本备份。无需 Python 即可使用核心指引。运行检查工具时使用 Python 3.10+：
+**2. 让最小规格足以被准确接收。** “审批通过后可发布”需要区分发布资格和发布动作；“字段可空”需要说明空值含义；“重新提交”需要说明原单还是新单。只补会造成关键业务分歧的地方，保留合理的工程实现空间。
 
-```powershell
+**3. 变更之后，相关产物仍然说同一件事。** 沿写入者、读取者、入口、指标和旧对象找具体依赖；区分候选影响与已核实影响，让 PRD、原型和交接引用同一规则。
+
+清晰小改直接完成；复杂需求按问题深入。工作量跟随当前目标，不要求先选 L0–L4、跑完整生命周期或填完全部模板。产品态原型默认可操作；需要面向产研的双态评审时，再开启评审标记与工作区。
+
+<a id="examples"></a>
+
+## 先看两个实际产物｜See the outputs
+
+| 示例 / Example | 看什么 / What to look for |
+|---|---|
+| **[最小需求卡 / Minimal requirement card](examples/minimal-v5/requirement-card.md)** · [运行说明 / Run it](examples/minimal-v5/README.md) | 给列表增加筛选：范围、权限、时间含义、异常和验收如何写在一起。 / A list filter with scope, permissions, time semantics, failure behavior and acceptance. |
+| **[交互评审原型 / Interactive review prototype](examples/medium-review-handoff/review-prototype.html)** | 下载或从安装包中用浏览器打开，体验产品界面与评审定位。适合需要双态协作的场景；是上手示例，未覆盖完整发布验收。 / Open the HTML locally to explore the product and review views. An onboarding example for dual-mode collaboration, with limited release-validation coverage. |
+
+### 常见的开始方式
+
+- **只有一句话**：先判断问题与缺失决定；无需先准备整套文档。
+- **已有 PRD 或存量 HTML**：读取相关基线，从当前阶段继续，保留已有有效决定与未取消的功能。
+- **只想改一个字段或按钮**：直接交付相关差异与验收，不为局部修改重写整个系统。
+- **需要正式产研评审**：使用同源 PRD、原型及按需交接；评审态仅在你需要时启用。
+- **有行业或 AI Native 需求**：按问题查找领域资料，再用项目有权来源确认适用规则。
+
+<a id="en"></a>
+
+## English guide
+
+**Start with the work you have.** After [installing the skill](#install), paste this into your agent or replace it with your own task:
+
+```text
+Use ai-delivery-spec: add an "Active only" filter to the existing list.
+Preserve its permissions, and specify the rules and acceptance criteria for this change.
+```
+
+Expect the change scope, filter meaning, success and failure behavior, and testable acceptance criteria. Confirmed material carries forward. Missing business decisions stay explicit. A small change may need only a requirement card or a short change note.
+
+Attach an existing PRD, screenshot, HTML prototype, customer feedback or change request if you have one. The skill checks how each source relates to the decision. File access, prototype creation and validation depend on your host's available tools.
+
+### Choose your starting point
+
+| Your task | A prompt to copy |
+|---|---|
+| **Decide whether to build** | “Use ai-delivery-spec: users say this workflow is slow. Identify plausible causes and the smallest validation that would change our choice.” |
+| **Write requirements / a PRD** | “Use ai-delivery-spec: turn these confirmed materials into a PRD with roles, rules, exceptions and acceptance criteria.” |
+| **Create an interactive prototype** | “Use ai-delivery-spec: build a working product prototype from this PRD, including the main path and key failure outcomes.” |
+| **Change an existing system** | “Use ai-delivery-spec: separate approval from publishing. Identify affected existing records, screens, permissions and acceptance criteria.” |
+| **Review or hand off** | “Use ai-delivery-spec: review this specification as an engineering and QA receiver. Find critical business choices that still require guessing.” |
+
+`/ads`, `/dig`, `/prd` and `/proto` are intent shortcuts for general work, clarification, specification and prototyping. Native slash-command support depends on the host; the natural-language prompts above express the same tasks.
+
+### Who it helps
+
+| Role | What you can take into the next conversation |
+|---|---|
+| **Junior PM** | The questions that matter, bounded scope and a reviewable card or PRD. |
+| **Senior PM / product lead** | Problem evidence, options, a minimal validation, current decisions and change impact. |
+| **Business / presales / delivery / design** | Business behavior to confirm, an interactive product prototype and explicit open decisions. |
+| **Frontend engineer** | Interaction paths, permissions, visible states and success/failure outcomes. |
+| **Backend engineer / architect** | Data authority, allowed transitions, side effects, recovery and integration boundaries. |
+| **QA / acceptance reviewer** | Positive and negative cases, boundary scenarios, regression scope and missing evidence. |
+| **Coding agent** | Current rules, source references, unresolved decisions and a scope it can resume. |
+
+For consumer products, business and government systems, and AI-native workflows. These roles share one business agreement. Existing approved PRDs or requirement systems can remain the authoritative location.
+
+### What 5.5.0 focuses on
+
+1. **Find the decision that matters now.** Start with the outcome, affected people and facts. Compare options and the smallest useful validation. A supported recommendation to investigate, defer, reduce scope or decline can complete the analysis; changing requirement status still requires the relevant authority.
+2. **Make a small specification sufficient.** “May publish after approval” leaves a question about what triggers publication. “Nullable” needs a meaning for the empty value. “Resubmit” needs to identify the original or a new record. Resolve critical business ambiguity while leaving legitimate engineering choices open.
+3. **Keep meaning consistent through change.** Follow concrete dependencies across writers, readers, entry points, metrics and existing records. Separate candidate impact from verified impact, and keep the PRD, prototype and handoff tied to the same rule.
+
+Clear local edits can be completed directly. Complex work loads only the relevant guidance. You do not need to select a delivery tier or fill every template. Existing materials let you enter at the current stage. Product prototypes are interactive by default; review markers and a dual-mode workspace are optional. [Explore the examples ↑](#examples)
+
+<a id="resources"></a>
+
+## 按需深入｜Go deeper when needed
+
+| 当前需要 / Need | 入口 / Guide |
+|---|---|
+| 判断问题、澄清、比较方案 / Problem framing and options | [澄清与探索 / Discovery](references/discover.md) |
+| 写规则、做需求处置、维护基线 / Specification and decisions | [可实施规格 / Specification](references/specify.md) · [需求处置 / Lifecycle](references/lifecycle.md) |
+| 存量盘点、交互原型、双态评审 / Prototypes and reviews | [原型 / Prototyping](references/prototype.md) · [评审工作区 / Review workspace](references/review-workspace.md) |
+| 变更、验收、跨会话接续 / Changes, acceptance and continuity | [变更与验收 / Change and acceptance](references/change-acceptance.md) · [上下文 / Context](references/context.md) |
+| 交通、CRM、OA、数仓、教育、医疗、媒资知识、AI Native / Domain knowledge | [领域覆盖与证据 / Domain coverage](references/domain-coverage.yaml) |
+| 命令、宿主适配与排错 / Tools and troubleshooting | [阶段与工具 / Stages](references/stages.md) · [宿主适配 / Adapters](references/tool-adapters.md) · [排错 / Troubleshooting](references/troubleshooting.md) |
+
+领域资料按需读取，其经验与成熟度见覆盖表；项目规则仍须核实来源和适用性。<br>
+Domain references load on demand. The coverage file records their evidence and maturity; project rules still need applicable, authoritative sources.
+
+<details>
+<summary><strong>可选检查工具与命令｜Optional checks and commands</strong></summary>
+
+在技能目录内运行，使用 Python 3.10+。这些是交付检查工具；日常澄清与小改可直接在对话中完成。<br>
+Run from the skill directory with Python 3.10+. Use these tools at relevant delivery checkpoints; everyday clarification and small edits can stay in the conversation.
+
+```bash
 python -m pip install -r scripts/requirements.txt
 python scripts/ai_delivery_spec_cli.py version
 python scripts/ai_delivery_spec_cli.py check
-```
-
-在支持技能的宿主中直接提出任务，或明确调用 `$ai-delivery-spec`：
-
-- “给现有列表增加一个筛选，保留现有权限，直接交付。”
-- “这个问题是否值得做？给我能改变选择的最小验证。”
-- “把审核与发布拆开，说明旧对象、消费者和验收受到什么影响。”
-- “基于现有 HTML 做可操作原型；需要双态时再增加评审投影。”
-
-`/ads`、`/dig`、`/prd`、`/proto` 是意图别名；不保证宿主注册了裸命令。只要消息能到达模型，即可用自然语言表达同一目标。
-
-## 5.5.0 的取舍
-
-| 保留的价值 | 减少的义务 |
-|---|---|
-| 事实、观察、建议、授权决定和未知分开 | 已有用户决定不反复确认 |
-| 当前范围的关键业务语义与正反验收 | 不按 L0–L4、角色数或风险自动加长文档 |
-| 按主张、范围和版本记录证据 | 不用全局证据等级代替具体证明 |
-| 变更依赖路径与旧对象处理 | 图遍历结果只列候选，不自动扩大已批范围 |
-| 同一事实多输出、按需交接 | 不默认全流程、全模板、双态或 full/handoff |
-| 六类语义抽查与真实接收验证 | 不用固定标题、章节数或模型多数票证明完整 |
-
-六类抽查覆盖状态权威、指标口径、恢复路径、空值/陈旧、权限边界和变更传播。脚本对声明及部分常见正文分歧作有界检查；正文疑点返回带位置和问题的 GAP，填写评阅 pass 不能覆盖它。未命中不证明语义完整，来源名称也不证明授权真实。
-
-## 从小改开始
-
-```powershell
 python scripts/ai_delivery_spec_cli.py triage --input examples/minimal-v5/intake.yaml --format json
 python scripts/ai_delivery_spec_cli.py gate --profile prd --prd examples/minimal-v5/requirement-card.md --stage specify
 ```
 
-`triage` 只给建议，不修改优先级或生命周期。明确小改本身不要求先运行脚本。
-它读取 title/description/behavior 等已有文本，区分声明风险和正文候选；仍不能完整理解任意自然语言。`ai_write_scope` 未声明表示未知，不默认升级为执行；正文出现自动写回仍会独立提示。
-`PASS` 只表示所执行的确定性检查未发现阻断/缺口，不能证明全部业务、交互、实现或客户验收。
-风险标签遗漏也不能证明内容无风险。
+按任务需要使用以下命令；`analysis.md`、`app.html`、`old-app.html` 换为你的文件：<br>
+Use these as needed; replace `analysis.md`, `app.html` and `old-app.html` with your files:
 
-## 按需深入
-
-- [当前目标与工具](references/stages.md)：路由、停止点、局部 gate。
-- [澄清与方案判断](references/discover.md)、[可实施规格](references/specify.md)、[需求处置与基线](references/lifecycle.md)。
-- [可操作原型](references/prototype.md)、[可选双态评审合同](references/review-workspace.md)。
-- [变更与验收](references/change-acceptance.md)、[上下文与交接](references/context.md)。
-- [排错与专业工具](references/troubleshooting.md)、[宿主适配](references/tool-adapters.md)。
-- [中型交互评审示例](examples/medium-review-handoff/review-prototype.html)用于明确需要评审态时；它的复杂度不是小改最低门槛，也不是完整发布夹具。
-
-### 常用的进一步操作
-
-```powershell
-# 分析建议已形成、实施决定仍未知：按分析阶段检查，不冒充可开发基线
+```bash
 python scripts/ai_delivery_spec_cli.py gate --profile prd --prd analysis.md --stage explore
-# 查找领域线索，再读具体章节；英文领域正文可使用 confidence 等原文关键词
 python scripts/ai_delivery_spec_cli.py query-domain --search confidence --limit 8
-python scripts/ai_delivery_spec_cli.py query-domain --domain ai-native --section 指标
-# 修改存量原型时比较旧文件，区分旧问题与本次回归
+python scripts/ai_delivery_spec_cli.py query-domain --domain ai-native --section "Metric / Indicator Governance"
 python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app.html --prototype-baseline old-app.html
 ```
 
-不传 `--stage` 时 gate 保留 `baseline` 默认值；建议暂缓不会自动降低检查阶段。分析可完成并保留实施 GAP，只有获权才能改变需求生命周期。领域搜索命中是候选，章节中的行业经验不是项目已批准规则。
+- **阶段 / Stage**：分析建议用 `explore` 检查；不传 `--stage` 仍默认 `baseline`。建议暂缓不会自动降低检查阶段或改变需求状态。 / Use `explore` for analysis. Omitting `--stage` retains the `baseline` default; a deferral recommendation does not change the stage or lifecycle.
+- **风险 / Risk**：`triage` 读取声明和部分正文线索，只给建议；未声明 `ai_write_scope` 表示未知，正文自动写回风险仍会独立提示。 / Triage returns advice using declarations and bounded text cues. Missing `ai_write_scope` means unknown; write-back cues are checked separately.
+- **变更 / Impact**：`impact` 接受顶层 `seed_refs: [REQ-A]` 或 `request.seed_refs`，同时给出时必须一致。图上的相关对象先作为候选核实。 / Impact accepts either seed location; both must agree if supplied. Related graph objects remain candidates until their dependencies are verified.
+- **领域 / Domains**：也可用 `--section 指标`。搜索命中是候选线索，不能直接变成项目已批准规则。 / Chinese section aliases are supported. Search hits are leads, not approved project rules.
 
-`impact` 的最小输入可用顶层 `seed_refs: [REQ-A]`，也兼容正式包中的 `request.seed_refs`；二者同时给出时必须一致。图上的相关对象仍是候选，需要核实具体依赖后才进入正式变更范围。
+</details>
 
-## 兼容边界
+<details>
+<summary><strong>从 5.4.x 升级｜Upgrading from 5.4.x</strong></summary>
 
-5.4.x 原始产物可以继续读取，稳定 ID 和已批准事实保留。新的 `artifact_mode` 选择 direct/card/prd；旧 L0–L4 在 PRD 中只作呈现提示，不能覆盖显式模式或提高风险/证据等级。矛盾的显式模式仍报错。
+5.4.x 产物可继续读取，稳定 ID 和已批准事实保留。`artifact_mode` 使用 `direct/card/prd`；旧 L0–L4 在 PRD 中只作呈现提示，不能覆盖显式模式或自动提高风险、证据要求。专业原型、评审、Truth、handoff 与执行状态工具保留其版本化 Schema，不自动迁移旧产物，也不成为日常任务的默认依赖。
 
-专业原型、评审工作区、Truth、handoff、执行状态等工具保留其版本化 Schema 和既有严格合同；不自动迁移旧产物。它们不是日常需求的默认依赖。旧 Markdown PRD 兼容入口使用同一个 5.5 检查内核，退出码与原有章节型门禁可能不同。
+5.4.x artifacts remain readable with stable IDs and approved facts preserved. `artifact_mode` uses `direct/card/prd`; legacy tiers are presentation hints in PRDs. Specialized prototype, review, Truth, handoff and execution-state tools retain their versioned schemas and remain optional. Old artifacts are not automatically migrated.
 
-5.5 triage 输出采用 `recommendation / artifact_mode / risk_facets / governed`；移除旧的 tier/mode 推导结果键。消费旧输出的脚本需要调整。旧 `validate_prd_quality.py --domain-rules` 关键词检查已退役，领域约束使用显式 custom gate/领域工具。
+接入脚本需注意：5.5 triage 使用 `recommendation / artifact_mode / risk_facets / governed`，移除旧 tier/mode 推导结果键；旧 Markdown PRD 入口复用新内核，退出码可能改变；旧 `validate_prd_quality.py --domain-rules` 已退役，领域约束通过显式 custom gate 或领域工具处理。
 
-## 验证与维护
+Script consumers: update to the triage keys above. Old derived tier/mode output keys are removed; legacy Markdown PRD entry points share the new engine, so exit codes may differ. The old `--domain-rules` keyword check is retired; use explicit custom gates or domain tools. See the [changelog](CHANGELOG.md) for version history.
 
-```powershell
+</details>
+
+<details>
+<summary><strong>检查能证明什么；如何维护｜Evidence and maintenance</strong></summary>
+
+正文检查对状态权威、指标口径、恢复路径、空值/陈旧、权限边界与变更传播做有界抽查，返回带位置的待核实 GAP。填写评阅 pass 不能覆盖正文疑点。`PASS` 只表示实际执行的确定性检查未发现对应阻断或缺口；业务语义、来源授权、浏览器交互、真实实现和客户验收仍需各自的证据。
+
+Text checks sample known ambiguity patterns in state authority, metrics, recovery, null/stale values, permissions and change propagation. Findings are located GAPs for review; a declared review pass cannot suppress them. A deterministic `PASS` covers only the checks executed. Business meaning, source authority, browser behavior, implementation and customer acceptance require their own evidence.
+
+本 Skill 管需求与其产物，连接工程反馈；排期、编码、部署与运营由相应工作流负责。公共反馈与示例请使用脱敏材料。<br>
+The skill manages requirements and their artifacts, incorporating engineering feedback. Scheduling, coding, deployment and operations belong to the relevant workflows. Use sanitized material in public examples and feedback.
+
+维护者可在**完整源码仓库**运行以下命令；构建发布包要求干净 Git 来源。运行包不包含 `maintainer/`，其中 `check` 只检查实际携带的文件与契约。<br>
+Maintainers can run these commands in the **full source repository**. Release packaging requires a clean Git source. Runtime packages exclude `maintainer/`; their `check` covers the files and contracts actually shipped.
+
+```bash
 python -m pip install "pytest>=8,<9"
 python scripts/ai_delivery_spec_cli.py check --profile release
 python maintainer/tools/build_runtime_package.py --release --check --output dist/ai-delivery-spec-5.5.0.zip
 ```
 
-最后一条要求干净 Git 来源。维护实验、私有样本及凭据不进入运行包。
-源码中的 `maintainer/README.md` 记录验证范围和规则删减；运行包不包含维护实验目录，`check` 在运行包中只验证其实际携带的文件和契约。
+</details>
 
-**English:** A lean requirements skill for current product decisions, precise business behavior, scoped evidence and change impact. Simple changes stay simple; specialized tools are explicit. Deterministic checks do not prove business correctness, implementation or customer acceptance.
+<a id="community"></a>
 
-许可证：[Apache 2.0](LICENSE)。
+## 一起把需求做得更清楚｜Join the community
+
+欢迎**中文或英文**提问、反馈真实使用问题、分享脱敏案例、完善翻译或贡献领域知识。复现材料、预期与实际差异，会帮助我们判断该修模型指引、工具还是示例。
+
+**Chinese and English** questions, bug reports, sanitized examples, translations and domain contributions are welcome. Reproduction steps and expected-versus-observed behavior help identify what needs to change.
+
+- **[GitHub Issues：反馈与交流 / Feedback and questions](https://github.com/franklinxkk/ai-delivery-spec/issues)**
+- **[ClawHub：社区安装入口 / Community listing](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec)** · **[SkillHub：中文社区入口 / Chinese community listing](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)**
+- **[参与贡献 / Contributing](https://github.com/franklinxkk/ai-delivery-spec/blob/main/.github/CONTRIBUTING.md)** · **[版本记录 / Changelog](CHANGELOG.md)**
+
+如果它帮助你澄清了一条需求、发现一次关键分歧，欢迎给项目一个 **[Star ⭐](https://github.com/franklinxkk/ai-delivery-spec)**，让更多产研同伴找到它。<br>
+If it helped clarify a requirement or expose a critical ambiguity, a **[Star ⭐](https://github.com/franklinxkk/ai-delivery-spec)** helps more product teams discover it.
+
+[Apache 2.0](LICENSE) · [返回顶部 / Back to top](#ai-delivery-spec-550)
