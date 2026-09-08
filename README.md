@@ -1,11 +1,11 @@
 # AI Delivery Spec 5.5.0
 
-**把需求做成可体验的产品定义，让产研与 AI 据此开发。**<br>
-**Turn requirements into product definitions you can try, review and hand to engineers or AI.**
+**帮你管清需求，让产研和 AI 少猜、少漏、少返工。**<br>
+**Manage requirements with less guesswork, fewer omissions and less rework—for your team and AI.**
 
-面向**产研团队与 AI Agent**的需求管理与交付 Skill。从一句话、存量材料或变更进入，先厘清目标与关键取舍，再按当前任务，将产品定义落到 **PRD 的业务规则、原型的操作与反馈、验收的可判定结果**。业务与设计能体验和确认，研发与 AI 有依据实现，测试有依据验证；未决事项与授权边界明确保留。
+面向**产研团队与 AI Agent**的需求管理内核，以 Skill 形式使用。从一句话、现有材料或变更进入，帮你定清该做什么、交代清楚业务规则、找出改动影响。按当前任务生成或维护需求卡、PRD、可操作原型与验收条件，让接手者知道依据什么做、哪些还没定。
 
-A requirements management and delivery skill for **product teams and AI agents**. Start with an idea, existing material or a change. Clarify goals and trade-offs, then use the artifacts the task needs: **business rules in a PRD, interactions in a working prototype and observable acceptance criteria**. Stakeholders can try and review the intended behavior; engineers, QA and AI agents can implement and verify it with explicit open decisions and authority boundaries.
+A requirements management core for **product teams and AI agents**, delivered as a skill. Start with an idea, existing material or a change. Decide what needs doing, make business rules clear and identify change impacts. Create or update only the requirement cards, PRDs, interactive prototypes and acceptance criteria the task needs, so whoever takes over knows what to work from and what remains undecided.
 
 [![ClawHub downloads: 2.4k](https://img.shields.io/badge/ClawHub-2.4k_downloads-2563eb)](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec)
 [![SkillHub AI score: 4.7/5](https://img.shields.io/badge/SkillHub_AI-4.7%2F5-f59e0b)](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)
