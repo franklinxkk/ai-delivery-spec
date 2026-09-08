@@ -8,10 +8,13 @@
 A requirements skill for **product managers and product teams**. Start with an idea, an existing PRD or a prototype. Clarify the decision, specify business behavior, create interactive prototypes and carry changes through to engineering, QA and coding agents.
 
 [![ClawHub downloads: 2.4k](https://img.shields.io/badge/ClawHub-2.4k_downloads-2563eb)](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec)
-[![SkillHub score: 4.7/5](https://img.shields.io/badge/SkillHub-4.7%2F5-f59e0b)](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)
+[![SkillHub AI score: 4.7/5](https://img.shields.io/badge/SkillHub_AI-4.7%2F5-f59e0b)](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-64748b)](LICENSE)
 
-<sub>2026-09-07 · 维护者提供的社区快照 / Maintainer-reported snapshot · 最新数据见平台 / See listings for current figures.</sub>
+<sub>2026-09-08 社区快照：ClawHub 2,431 次下载；SkillHub 4.7/5 为 v5.4.8 历史 AI 评分，非 5.5.0 新评测。 / Community snapshot: 2,431 ClawHub downloads; SkillHub's 4.7/5 is a historical AI rating of v5.4.8, not a new evaluation of 5.5.0.</sub>
+
+**例如：“审批通过后可发布”——是自动发布，还是取得发布资格？** 把这一类会让研发做出不同结果的分歧说清楚，落到规则、原型和验收里。[先看一张需求卡](examples/minimal-v5/requirement-card.md)，或到[中英社区](#community)交流你的实际场景。<br>
+**“May publish after approval”—automatic publication, or permission to publish?** Resolve the business choice before it becomes conflicting implementations. [See a small requirement card](examples/minimal-v5/requirement-card.md), or [join in Chinese or English](#community).
 
 **[中文上手](#zh) · [English guide](#en) · [安装 / Install](#install) · [示例 / Examples](#examples) · [指南 / Guides](#resources) · [社区 / Community](#community)**
 
@@ -29,7 +32,7 @@ npx skills add franklinxkk/ai-delivery-spec
 安装后直接到 [中文上手](#zh) 或 [English guide](#en) 复制你的第一条任务。**日常使用不需要 Python。**<br>
 Then copy your first task from the Chinese or English guide. **Python is optional.**
 
-<sub>5.5.0 当前为本地候选；以上命令安装远端版本。试用 5.5.0 请使用对应候选 ZIP 包。 / 5.5.0 is a local candidate; the command installs the remote version. Use the matching candidate ZIP to try 5.5.0.</sub>
+<sub>5.5.0 当前为本地候选；以上命令安装远端版本。候选 ZIP 不会随本地修订自动更新，试用时核对包的修订说明。 / 5.5.0 is a local candidate; the command installs the remote version. Candidate ZIPs do not update with local revisions; check the package's revision notes before trying it.</sub>
 
 <details>
 <summary>OpenClaw / ZIP 安装方式与版本说明｜Other installation options</summary>
@@ -112,13 +115,15 @@ Repository and community channels update separately; check the installed package
 | **[最小需求卡 / Minimal requirement card](examples/minimal-v5/requirement-card.md)** · [运行说明 / Run it](examples/minimal-v5/README.md) | 给列表增加筛选：范围、权限、时间含义、异常和验收如何写在一起。 / A list filter with scope, permissions, time semantics, failure behavior and acceptance. |
 | **[交互评审原型 / Interactive review prototype](examples/medium-review-handoff/review-prototype.html)** | 下载或从安装包中用浏览器打开，体验产品界面与评审定位。适合需要双态协作的场景；是上手示例，未覆盖完整发布验收。 / Open the HTML locally to explore the product and review views. An onboarding example for dual-mode collaboration, with limited release-validation coverage. |
 
-### 常见的开始方式
+<details>
+<summary><strong>常见问题：小改、存量材料、原型与验收｜Quick FAQ</strong></summary>
 
-- **只有一句话**：先判断问题与缺失决定；无需先准备整套文档。
-- **已有 PRD 或存量 HTML**：读取相关基线，从当前阶段继续，保留已有有效决定与未取消的功能。
-- **只想改一个字段或按钮**：直接交付相关差异与验收，不为局部修改重写整个系统。
-- **需要正式产研评审**：使用同源 PRD、原型及按需交接；评审态仅在你需要时启用。
-- **有行业或 AI Native 需求**：按问题查找领域资料，再用项目有权来源确认适用规则。
+- **只有一句话，或只改一个字段，也能用吗？** 能。明确小改直接交付差异与验收；模糊想法先找关键决定，不要求全套 PRD、等级或流程。 / **Can I start with an idea or one field?** Yes. Clear edits need a bounded change and acceptance; vague ideas need the relevant decision first.
+- **已有 PRD 或 HTML，要重做吗？** 读取相关基线，从当前阶段继续；继承有效决定并保护未取消的功能。 / **Must I rewrite existing work?** No. Continue from the relevant baseline, preserving valid decisions and existing scope.
+- **原型和评审态是否必交？** 按目标提供；需要原型时默认可操作产品态，双态评审按需启用。 / **Are prototypes and review mode mandatory?** They follow the task. Requested prototypes are interactive; dual-mode review is optional.
+- **检查 PASS 就能上线，领域资料能直接当政策吗？** 都不能。PASS 只覆盖已运行的检查；规则适用性、真实系统和验收各需证据。编码与上线交给相应工作流。 / **Does PASS authorize launch or adopting a domain policy?** No. Applicability, implementation and acceptance need their own evidence; coding and deployment use their respective workflows.
+
+</details>
 
 <a id="en"></a>
 
