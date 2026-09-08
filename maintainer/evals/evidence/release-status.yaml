@@ -29,11 +29,13 @@ trace_release_proxy:
   effectiveness_limit: deterministic/private calibration repaired gaps; blind A/B,
     token/time and human ratings remain incomplete
 release_evidence:
-  verified_at: '2026-09-06'
-  scope: 5.5.0 candidate local deterministic checks; not customer or production acceptance
+  verified_at: '2026-09-08'
+  scope: 5.5.0 release-source deterministic checks on Windows / Python 3.12.10;
+    not customer or production acceptance. Package provenance, CI and publication
+    are recorded in the versioned GitHub release.
   results:
-    pytest: 115_passed
-    new_requirements_regressions: 35_passed
+    pytest: 171_passed
+    requirements_regressions: included_in_full_suite
     release_gate: passed
     public_quickstart_and_badcases: passed
     runtime_package_check: 116_source_files_passed
@@ -42,7 +44,7 @@ release_evidence:
     independent_defect_rechecks: passed
     behavioral_comparison: single_task_artifacts_and_blinded_agent_reception_only
     installation: not_run
-    publication: not_run
+    publication: see_github_release_v5.5.0
 known_limitations:
 - contract tests do not prove fresh-agent/expert/production maturity
 - domain, legal, safety, financial, production and customer correctness remain not

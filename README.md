@@ -58,7 +58,7 @@ npx skills add franklinxkk/ai-delivery-spec
 安装后直接到 [中文上手](#zh) 或 [English guide](#en) 复制你的第一条任务。**日常使用不需要 Python。**<br>
 Then copy your first task from the Chinese or English guide. **Python is optional.**
 
-<sub>5.5.0 当前为本地候选；以上命令安装远端版本。候选 ZIP 不会随本地修订自动更新，试用时核对包的修订说明。 / 5.5.0 is a local candidate; the command installs the remote version. Candidate ZIPs do not update with local revisions; check the package's revision notes before trying it.</sub>
+<sub>固定版本安装包与校验值见 [5.5.0 Release](https://github.com/franklinxkk/ai-delivery-spec/releases/tag/v5.5.0)。以上命令从仓库安装；社区渠道可能更新较晚，请核对实际安装版本。 / Find the versioned package and checksum in the [5.5.0 release](https://github.com/franklinxkk/ai-delivery-spec/releases/tag/v5.5.0). The command installs from the repository; community channels may update later, so check the installed version.</sub>
 
 <details>
 <summary>ZIP 与宿主导入｜ZIP and host-native import</summary>
