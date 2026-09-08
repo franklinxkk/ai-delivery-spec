@@ -1,11 +1,11 @@
 # AI Delivery Spec 5.5.0
 
-**把需求想清楚，让产研接得住。**<br>
-**Clear product decisions. Requirements your team and AI can build on.**
+**让需求、原型与验收，在交接和变更中保持一致。**<br>
+**Keep requirements, prototypes and acceptance aligned through handoffs and change.**
 
-面向**产品经理与产研团队**的需求管理 Skill。从一句话、现有 PRD 或原型进入，帮你判断做什么、说清业务规则、做出可操作原型，并把变更交接给研发、测试与 Coding Agent。
+面向**产品、设计、研发、测试与 AI Agent**的需求管理与交付 Skill。从一句话、现有 PRD、原型或变更进入，把有效产品决定落实为可评审、可实施、可验收的业务约定，并让各角色与产物持续引用同一套规则。
 
-A requirements skill for **product managers and product teams**. Start with an idea, an existing PRD or a prototype. Clarify the decision, specify business behavior, create interactive prototypes and carry changes through to engineering, QA and coding agents.
+A requirements management and delivery skill for **product, design, engineering, QA and AI agents**. Turn ideas, existing specifications, prototypes or changes into reviewable business agreements, then carry the same rules through handoffs, implementation feedback and acceptance.
 
 [![ClawHub downloads: 2.4k](https://img.shields.io/badge/ClawHub-2.4k_downloads-2563eb)](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec)
 [![SkillHub AI score: 4.7/5](https://img.shields.io/badge/SkillHub_AI-4.7%2F5-f59e0b)](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)
@@ -13,17 +13,43 @@ A requirements skill for **product managers and product teams**. Start with an i
 
 <sub>2026-09-08 社区快照：ClawHub 2,431 次下载；SkillHub 4.7/5 为 v5.4.8 历史 AI 评分，非 5.5.0 新评测。 / Community snapshot: 2,431 ClawHub downloads; SkillHub's 4.7/5 is a historical AI rating of v5.4.8, not a new evaluation of 5.5.0.</sub>
 
-**例如：“审批通过后可发布”——是自动发布，还是取得发布资格？** 把这一类会让研发做出不同结果的分歧说清楚，落到规则、原型和验收里。[先看一张需求卡](examples/minimal-v5/requirement-card.md)，或到[中英社区](#community)交流你的实际场景。<br>
-**“May publish after approval”—automatic publication, or permission to publish?** Resolve the business choice before it becomes conflicting implementations. [See a small requirement card](examples/minimal-v5/requirement-card.md), or [join in Chinese or English](#community).
+**[角色价值 / Role value](#roles) · [中文上手](#zh) · [English guide](#en) · [安装 / Install](#install) · [示例 / Examples](#examples) · [指南 / Guides](#resources) · [中英社区 / Community](#community)**
 
-**[中文上手](#zh) · [English guide](#en) · [安装 / Install](#install) · [示例 / Examples](#examples) · [指南 / Guides](#resources) · [社区 / Community](#community)**
+<a id="roles"></a>
+
+## 各产研角色能得到什么
+
+| 核心用户 | 经常遇到的问题 | 这次能拿走什么 |
+|---|---|---|
+| **初级产品经理** | 收到一句需求，不知道该问什么、写到多细 | 关键问题、范围与边界、能开始评审的需求卡或 PRD |
+| **中高级产品 / 产品负责人** | 需求都合理，但优先做什么、跨模块如何一致还没定 | 问题证据、方案取舍、最小验证、当前决定与变更影响 |
+| **业务 / 售前 / 实施 / 设计** | 客户说法、业务规则和页面体验之间有断层 | 可确认的业务行为、可操作的产品原型、待决定事项 |
+| **前端研发** | 页面有了，入口、状态、权限和失败反馈仍不明确 | 与规格一致的交互路径、状态结果与验收条件 |
+| **后端 / 架构** | 同一句话会推导出不同口径、状态或写入方式 | 数据权威、允许的状态变化、副作用、恢复与集成边界 |
+| **QA / 验收方** | “显示正确”无法变成可重复的验收 | 正反例、权限与边界场景、变更回归范围和证据缺口 |
+| **Coding Agent** | 换个会话就丢背景，或自行补出业务政策 | 当前有效规则、来源与稳定引用、未知及可接续的任务范围 |
+
+适用于 ToC 产品、ToB/ToG 业务系统及 AI Native 场景。这些角色共用同一份业务约定，各自按需要读取；已有 PRD、需求系统和批准基线可以继续作为权威位置。
+
+## 从决定到交付，重点做好三件事
+
+**1. 更快找到当前要决定什么。** 从目标、受影响的人和事实出发，比较方案与最小验证。有依据的“先验证、暂缓、缩范围或不做”也可以完成分析；改变需求状态仍取决于实际授权。
+
+**2. 让最小规格足以被准确接收。** “审批通过后可发布”需要区分发布资格和发布动作；“字段可空”需要说明空值含义；“重新提交”需要说明原单还是新单。只补会造成关键业务分歧的地方，保留合理的工程实现空间。
+
+**3. 变更之后，相关产物仍然说同一件事。** 沿写入者、读取者、入口、指标和旧对象找具体依赖；区分候选影响与已核实影响，让 PRD、原型和交接引用同一规则。
+
+清晰小改直接完成；复杂需求按问题深入。工作量跟随当前目标，不要求先选 L0–L4、跑完整生命周期或填完全部模板。产品态原型默认可操作；需要面向产研的双态评审时，再开启评审标记与工作区。
 
 <a id="install"></a>
 
-## 安装，开始第一条需求｜Install and start
+## 安装到你的 Agent｜Install in your agent
 
-支持 Agent Skills 的宿主可通过 [Skills CLI](https://github.com/vercel-labs/skills) 安装，按提示选择你的 Agent。<br>
-Use the Skills CLI and select your agent when prompted:
+适用于能够加载 Agent Skills / `SKILL.md` 的**开发与办公 Agent**。安装、隐式调用、文件访问和浏览器能力由宿主提供，具体支持范围见[宿主适配](references/tool-adapters.md)。<br>
+Use it with **development and office agents** that load Agent Skills / `SKILL.md`. Installation, implicit invocation, file access and browser capabilities depend on the host; see [host adapters](references/tool-adapters.md).
+
+[Skills CLI](https://github.com/vercel-labs/skills) 支持的宿主可使用以下命令，按提示选择你的 Agent：<br>
+For hosts supported by the Skills CLI, run this command and select your agent:
 
 ```bash
 npx skills add franklinxkk/ai-delivery-spec
@@ -35,20 +61,13 @@ Then copy your first task from the Chinese or English guide. **Python is optiona
 <sub>5.5.0 当前为本地候选；以上命令安装远端版本。候选 ZIP 不会随本地修订自动更新，试用时核对包的修订说明。 / 5.5.0 is a local candidate; the command installs the remote version. Candidate ZIPs do not update with local revisions; check the package's revision notes before trying it.</sub>
 
 <details>
-<summary>OpenClaw / ZIP 安装方式与版本说明｜Other installation options</summary>
-
-OpenClaw 用户也可使用 [ClawHub 页面提供的命令](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec)：<br>
-OpenClaw users can also use the command provided by the ClawHub listing:
-
-```bash
-openclaw skills install @franklinxkk/ai-delivery-spec
-```
+<summary>ZIP 与宿主导入｜ZIP and host-native import</summary>
 
 已有 ZIP 安装包？解压到宿主识别的 `ai-delivery-spec` 技能目录，让 `SKILL.md` 位于目录根部，再按宿主要求重新加载技能。<br>
 Have a ZIP package? Extract it into your host's `ai-delivery-spec` skill directory, with `SKILL.md` at its root, then reload skills as required by the host.
 
-仓库与社区各自更新版本，安装后请核对包内版本。<br>
-Repository and community channels update separately; check the installed package's version.
+宿主提供技能导入界面时，也可按其说明导入目录或 ZIP。仓库与社区各自更新版本，安装后请核对包内版本。<br>
+If your host provides a skill-import interface, follow its instructions to import the directory or ZIP. Repository and community channels update separately; check the installed package's version.
 
 </details>
 
@@ -82,30 +101,6 @@ Repository and community channels update separately; check the installed package
 
 不必说出“需求”才使用它。办公中的目标、规则、权限或流程改变也可以进入；明确的翻译、排版、抄录等任务由对应工具直接完成。隐式命中取决于宿主与模型，需要稳定调用时显式写出技能名。
 
-## 谁会最先用上它
-
-| 核心用户 | 经常遇到的问题 | 这次能拿走什么 |
-|---|---|---|
-| **初级产品经理** | 收到一句需求，不知道该问什么、写到多细 | 关键问题、范围与边界、能开始评审的需求卡或 PRD |
-| **中高级产品 / 产品负责人** | 需求都合理，但优先做什么、跨模块如何一致还没定 | 问题证据、方案取舍、最小验证、当前决定与变更影响 |
-| **业务 / 售前 / 实施 / 设计** | 客户说法、业务规则和页面体验之间有断层 | 可确认的业务行为、可操作的产品原型、待决定事项 |
-| **前端研发** | 页面有了，入口、状态、权限和失败反馈仍不明确 | 与规格一致的交互路径、状态结果与验收条件 |
-| **后端 / 架构** | 同一句话会推导出不同口径、状态或写入方式 | 数据权威、允许的状态变化、副作用、恢复与集成边界 |
-| **QA / 验收方** | “显示正确”无法变成可重复的验收 | 正反例、权限与边界场景、变更回归范围和证据缺口 |
-| **Coding Agent** | 换个会话就丢背景，或自行补出业务政策 | 当前有效规则、来源与稳定引用、未知及可接续的任务范围 |
-
-适用于 ToC 产品、ToB/ToG 业务系统及 AI Native 场景。这些角色共用同一份业务约定，各自按需要读取；已有 PRD、需求系统和批准基线可以继续作为权威位置。
-
-## 5.5.0，重点把这三件事做好
-
-**1. 更快找到当前要决定什么。** 从目标、受影响的人和事实出发，比较方案与最小验证。有依据的“先验证、暂缓、缩范围或不做”也可以完成分析；改变需求状态仍取决于实际授权。
-
-**2. 让最小规格足以被准确接收。** “审批通过后可发布”需要区分发布资格和发布动作；“字段可空”需要说明空值含义；“重新提交”需要说明原单还是新单。只补会造成关键业务分歧的地方，保留合理的工程实现空间。
-
-**3. 变更之后，相关产物仍然说同一件事。** 沿写入者、读取者、入口、指标和旧对象找具体依赖；区分候选影响与已核实影响，让 PRD、原型和交接引用同一规则。
-
-清晰小改直接完成；复杂需求按问题深入。工作量跟随当前目标，不要求先选 L0–L4、跑完整生命周期或填完全部模板。产品态原型默认可操作；需要面向产研的双态评审时，再开启评审标记与工作区。
-
 <a id="examples"></a>
 
 ## 先看两个实际产物｜See the outputs
@@ -128,6 +123,30 @@ Repository and community channels update separately; check the installed package
 <a id="en"></a>
 
 ## English guide
+
+### Value for your role
+
+| Role | What you can take into the next conversation |
+|---|---|
+| **Junior PM** | The questions that matter, bounded scope and a reviewable card or PRD. |
+| **Senior PM / product lead** | Problem evidence, options, a minimal validation, current decisions and change impact. |
+| **Business / presales / delivery / design** | Business behavior to confirm, an interactive product prototype and explicit open decisions. |
+| **Frontend engineer** | Interaction paths, permissions, visible states and success/failure outcomes. |
+| **Backend engineer / architect** | Data authority, allowed transitions, side effects, recovery and integration boundaries. |
+| **QA / acceptance reviewer** | Positive and negative cases, boundary scenarios, regression scope and missing evidence. |
+| **Coding agent** | Current rules, source references, unresolved decisions and a scope it can resume. |
+
+For consumer products, business and government systems, and AI-native workflows. These roles share one business agreement. Existing approved PRDs or requirement systems can remain the authoritative location.
+
+### What 5.5.0 focuses on
+
+1. **Find the decision that matters now.** Start with the outcome, affected people and facts. Compare options and the smallest useful validation. A supported recommendation to investigate, defer, reduce scope or decline can complete the analysis; changing requirement status still requires the relevant authority.
+2. **Make a small specification sufficient.** “May publish after approval” leaves a question about what triggers publication. “Nullable” needs a meaning for the empty value. “Resubmit” needs to identify the original or a new record. Resolve critical business ambiguity while leaving legitimate engineering choices open.
+3. **Keep meaning consistent through change.** Follow concrete dependencies across writers, readers, entry points, metrics and existing records. Separate candidate impact from verified impact, and keep the PRD, prototype and handoff tied to the same rule.
+
+Clear local edits can be completed directly. Complex work loads only the relevant guidance. You do not need to select a delivery tier or fill every template. Existing materials let you enter at the current stage. Product prototypes are interactive by default; review markers and a dual-mode workspace are optional. [Explore the examples ↑](#examples)
+
+### Quick start
 
 **Start with the work you have.** After [installing the skill](#install), paste this into your agent or replace it with your own task:
 
@@ -154,28 +173,6 @@ Attach an existing PRD, screenshot, HTML prototype, customer feedback or change 
 `/ads`, `/dig`, `/prd` and `/proto` are intent shortcuts for general work, clarification, specification and prototyping. Native slash-command support depends on the host; the natural-language prompts above express the same tasks.
 
 You do not need to say “requirement.” Changes to office goals, rules, permissions or workflows also apply. Straightforward translation, formatting and transcription can go directly to their tools. Implicit selection depends on the host and model; name the skill explicitly when you need a reliable invocation.
-
-### Who it helps
-
-| Role | What you can take into the next conversation |
-|---|---|
-| **Junior PM** | The questions that matter, bounded scope and a reviewable card or PRD. |
-| **Senior PM / product lead** | Problem evidence, options, a minimal validation, current decisions and change impact. |
-| **Business / presales / delivery / design** | Business behavior to confirm, an interactive product prototype and explicit open decisions. |
-| **Frontend engineer** | Interaction paths, permissions, visible states and success/failure outcomes. |
-| **Backend engineer / architect** | Data authority, allowed transitions, side effects, recovery and integration boundaries. |
-| **QA / acceptance reviewer** | Positive and negative cases, boundary scenarios, regression scope and missing evidence. |
-| **Coding agent** | Current rules, source references, unresolved decisions and a scope it can resume. |
-
-For consumer products, business and government systems, and AI-native workflows. These roles share one business agreement. Existing approved PRDs or requirement systems can remain the authoritative location.
-
-### What 5.5.0 focuses on
-
-1. **Find the decision that matters now.** Start with the outcome, affected people and facts. Compare options and the smallest useful validation. A supported recommendation to investigate, defer, reduce scope or decline can complete the analysis; changing requirement status still requires the relevant authority.
-2. **Make a small specification sufficient.** “May publish after approval” leaves a question about what triggers publication. “Nullable” needs a meaning for the empty value. “Resubmit” needs to identify the original or a new record. Resolve critical business ambiguity while leaving legitimate engineering choices open.
-3. **Keep meaning consistent through change.** Follow concrete dependencies across writers, readers, entry points, metrics and existing records. Separate candidate impact from verified impact, and keep the PRD, prototype and handoff tied to the same rule.
-
-Clear local edits can be completed directly. Complex work loads only the relevant guidance. You do not need to select a delivery tier or fill every template. Existing materials let you enter at the current stage. Product prototypes are interactive by default; review markers and a dual-mode workspace are optional. [Explore the examples ↑](#examples)
 
 <a id="resources"></a>
 
