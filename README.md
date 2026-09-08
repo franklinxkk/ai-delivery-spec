@@ -1,11 +1,11 @@
 # AI Delivery Spec 5.5.0
 
-**让需求、原型与验收，在交接和变更中保持一致。**<br>
-**Keep requirements, prototypes and acceptance aligned through handoffs and change.**
+**把需求做成可体验的产品定义，让产研与 AI 据此开发。**<br>
+**Turn requirements into product definitions you can try, review and hand to engineers or AI.**
 
-面向**产品、设计、研发、测试与 AI Agent**的需求管理与交付 Skill。从一句话、现有 PRD、原型或变更进入，把有效产品决定落实为可评审、可实施、可验收的业务约定，并让各角色与产物持续引用同一套规则。
+面向**产研团队与 AI Agent**的需求管理与交付 Skill。从一句话、存量材料或变更进入，先厘清目标与关键取舍，再按当前任务，将产品定义落到 **PRD 的业务规则、原型的操作与反馈、验收的可判定结果**。业务与设计能体验和确认，研发与 AI 有依据实现，测试有依据验证；未决事项与授权边界明确保留。
 
-A requirements management and delivery skill for **product, design, engineering, QA and AI agents**. Turn ideas, existing specifications, prototypes or changes into reviewable business agreements, then carry the same rules through handoffs, implementation feedback and acceptance.
+A requirements management and delivery skill for **product teams and AI agents**. Start with an idea, existing material or a change. Clarify goals and trade-offs, then use the artifacts the task needs: **business rules in a PRD, interactions in a working prototype and observable acceptance criteria**. Stakeholders can try and review the intended behavior; engineers, QA and AI agents can implement and verify it with explicit open decisions and authority boundaries.
 
 [![ClawHub downloads: 2.4k](https://img.shields.io/badge/ClawHub-2.4k_downloads-2563eb)](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec)
 [![SkillHub AI score: 4.7/5](https://img.shields.io/badge/SkillHub_AI-4.7%2F5-f59e0b)](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)
@@ -35,7 +35,7 @@ A requirements management and delivery skill for **product, design, engineering,
 
 **1. 更快找到当前要决定什么。** 从目标、受影响的人和事实出发，比较方案与最小验证。有依据的“先验证、暂缓、缩范围或不做”也可以完成分析；改变需求状态仍取决于实际授权。
 
-**2. 让最小规格足以被准确接收。** “审批通过后可发布”需要区分发布资格和发布动作；“字段可空”需要说明空值含义；“重新提交”需要说明原单还是新单。只补会造成关键业务分歧的地方，保留合理的工程实现空间。
+**2. 让规格可以体验，让评审有具体落点。** PRD 说明业务规则，原型呈现操作与结果，验收条件判断是否符合约定。“审批通过后可发布”要在规则、按钮行为与验收中区分发布资格和发布动作。需要双态评审时，可以边操作产品，边在当前页面旁查看规则、边界与验收依据。只补影响关键业务选择的内容，保留合理的工程实现空间。
 
 **3. 变更之后，相关产物仍然说同一件事。** 沿写入者、读取者、入口、指标和旧对象找具体依赖；区分候选影响与已核实影响，让 PRD、原型和交接引用同一规则。
 
@@ -141,7 +141,7 @@ For consumer products, business and government systems, and AI-native workflows.
 ### What 5.5.0 focuses on
 
 1. **Find the decision that matters now.** Start with the outcome, affected people and facts. Compare options and the smallest useful validation. A supported recommendation to investigate, defer, reduce scope or decline can complete the analysis; changing requirement status still requires the relevant authority.
-2. **Make a small specification sufficient.** “May publish after approval” leaves a question about what triggers publication. “Nullable” needs a meaning for the empty value. “Resubmit” needs to identify the original or a new record. Resolve critical business ambiguity while leaving legitimate engineering choices open.
+2. **Make the specification tangible and the review concrete.** The PRD explains business rules, the prototype demonstrates interactions and outcomes, and acceptance criteria define how to judge them. “May publish after approval” must distinguish permission from publication in the rule, button behavior and acceptance case. Optional dual-mode review places rules, boundaries and acceptance beside the current product context while you operate it. Resolve critical business choices while leaving legitimate engineering choices open.
 3. **Keep meaning consistent through change.** Follow concrete dependencies across writers, readers, entry points, metrics and existing records. Separate candidate impact from verified impact, and keep the PRD, prototype and handoff tied to the same rule.
 
 Clear local edits can be completed directly. Complex work loads only the relevant guidance. You do not need to select a delivery tier or fill every template. Existing materials let you enter at the current stage. Product prototypes are interactive by default; review markers and a dual-mode workspace are optional. [Explore the examples ↑](#examples)
