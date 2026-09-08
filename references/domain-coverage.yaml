@@ -1,6 +1,14 @@
 schema_version: 5.1.1
 # Retrieval aliases only; a match never establishes project applicability.
 search_aliases:
+  台账: [ledger]
+  报销: [reimbursement, expense claim, expense workflow]
+  里程: [mileage]
+  里程碑: [milestone]
+  活跃: [active customer, active enterprise, active user]
+  活跃客户: [active customer]
+  活跃企业: [active enterprise]
+  活跃用户: [active user]
   合同: [contract]
   商机: [opportunity, opportunities]
   客户: [customer]

@@ -225,6 +225,9 @@ python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app.
 搜索结果给出扩展词、原文位置及 literal/alias 命中方式；它是有界关键词检索，未命中也可能只是术语表未覆盖。`--source-detail full` 可查看来源 URL、法域及适用范围，原文章节不会由脚本自动翻译。<br>
 Results show expanded terms, source locations and literal/alias matches. This is bounded keyword retrieval; zero hits may mean a vocabulary gap. `--source-detail full` exposes source URLs, jurisdictions and applicability. The script preserves source passages without automatically translating them.
 
+常用中文词可检索已有台账、报销和里程知识；“活跃”按客户/企业/用户相关短语召回，不等同于所有 `active` 状态。账本也保留 JS 动态声明候选及来源；候选进入盘点不代表已经渲染，门禁保留相应 GAP。UNK 表头未被识别时提示定位问题；显式无效状态、无依据关闭与真实冲突仍分别检查。<br>
+Chinese ledger, reimbursement and mileage queries retrieve existing domain passages. Activity terms target relevant customer, enterprise or user phrases. Interaction ledgers retain JS declaration candidates with their origins; unresolved rendering remains a GAP. Unlocated unknown-status columns are distinguished from explicitly invalid statuses, unsupported closure and conflicting declarations.
+
 </details>
 
 <details>

@@ -90,6 +90,10 @@ def inspect_content(text: str) -> dict:
                          "advisory": True})
 
     for i, line in enumerate(lines):
+        if re.match(r"^\s*(?:>|[-*]\s*)?(?:说明|检查记录|门禁结果|扫描结果|诊断记录)[：:]", line) and re.search(r"(?:SPEC|PROTO)-", line) and re.search(r"gap|block|finding|诊断", line, re.I):
+            # A report about earlier diagnostics is not another product rule.
+            # Keep any following sentence so real behavior is still checked.
+            line = line.partition("。")[2]
         if not line.strip() or re.match(r"^#{1,6}\s|^\s*(?:>|[-*]\s*)?(?:错误示例|反例[：:]|禁止|不得|不应)", line):
             continue
         start = max([j for j in headings if j <= i] or [0])
@@ -100,28 +104,33 @@ def inspect_content(text: str) -> dict:
         if (re.search(r"补考|成绩|学分|费率|晚到数据|历史数据|retake|resit|score|credit|late.arriv|historical data", line, re.I)
                 and re.search(r"取(?:最新|最早|最高|最低)|默认(?:取|按)|一律按|us(?:e|es|ing)\s+(?:the\s+)?(?:latest|earliest|highest|lowest)", line, re.I)
                 and not re.search(r"禁止|不得|不能|不应|do not|must not|never|建议|候选|propos|option", line, re.I)):
-            undecided = re.search(r"未决|未定|待定|尚未(?:决定|确定)|待确认|undecided|unresolved|not yet (?:decided|approved)", context, re.I)
-            basis = re.search(r"(?:依据|按|经|已批准|已确认|approved|according to).{0,45}(?:DEC-|SRC-|批准|确认|policy|decision)", context, re.I)
+            undecided = re.search(r"未决|未定|待定|尚未(?:最终|正式)?(?:决定|确定)|待确认|undecided|unresolved|not yet (?:decided|approved)", context, re.I)
+            basis = re.search(r"(?:依据|按|经|已批准|已确认|approved|according to).{0,45}(?:DEC-|SRC-|批准|确认|policy|decision)|已(?:由|经)[^。；\n]{1,16}(?:确认|批准|决定)", context, re.I)
             if undecided or not basis:
                 add("undecided-policy" if undecided else "policy-basis", "decision", set(), i, line,
                     "核对取值政策的授权依据与未决状态；取最新/最高等选择不能仅因被称为默认而成立。 Check the policy's approved basis; a default label does not resolve an open decision.")
                 if not undecided:
                     findings[-1]["severity"] = "WARN"
-        if (re.search(r"尚未(?:决定|确定|选择)|待确认|待定|待裁决|未决定|待.{0,12}(?:业务|负责人).{0,8}决定", line)
-                and re.search(r"策略|规则|口径|权限|时点|范围|重试|超时|负责人|是否|取值|阈值|决定|字段", line)
+        decision_subject = r"策略|规则|口径|权限|时点|范围|重试|超时|负责人|是否|取值|阈值|字段"
+        decision_pending = r"尚未(?:最终|正式)?(?:决定|确定|选择)|待确认|待定|待裁决|未决定"
+        # Bind the pending phrase to a decision, not an unrelated status enum.
+        if (re.search(rf"(?:{decision_subject})[^。；|/\n]{{0,14}}(?:{decision_pending})|(?:{decision_pending})\s*[：:]?\s*(?:{decision_subject})|待.{{0,12}}(?:业务|负责人).{{0,8}}决定", line)
                 and not re.match(r"\s*\|\s*`?UNK-", line)
                 and not re.search(r"已(?:确认|决定|裁决|关闭)|不在本次范围|不影响本次|仅.{0,8}(?:提示|显示).{0,8}待确认", line)):
             add("open-decision", "decision", set(), i, line, "正文存在未决定事项；说明依赖范围、决定人和阻断阶段，不能据此宣称该行为已可实施。")
         if re.search(r"无法同时(?:成立|满足)|尚未解决.{0,6}冲突|相互矛盾", line):
             add("unresolved-conflict", "decision", set(), i, line, "正文声明了尚不相容的规则或验收结果；解决适用条件或优先关系后再作实施结论。")
         for kind, category, facets, trigger, guard, action in probes:
+            if kind == "null-meaning" and re.search(r"oldValue|修改前", line) and re.search(r"新增类型为空", line):
+                continue  # A newly created record has no before-value.
             if kind == "metric-population" and re.match(r"^#{1,6}.*(?:范围|目标|scope|goal)", lines[start], re.I):
                 continue  # A scope reference does not redefine the metric contract.
             if re.search(trigger, line, re.I):
                 risks.update(facets)
                 if not re.search(guard, context, re.I):
                     add(kind, category, facets, i, line, action)
-        if re.search(r"(?:AI|模型|智能体|agent|置信度).{0,70}(?:自动|直接|无需人工).{0,50}(?:发信|发送|创建|新建|更新|修改|保存|写回|删除|支付|退款|扣款|执行)|自动.{0,15}给客户.{0,8}(?:发信|发送)", line, re.I):
+        ai_actor = r"(?<![A-Za-z0-9_-])(?:AI(?!\s*(?:coding|编程|开发))|LLM|模型|智能体|agent|置信度)(?![A-Za-z0-9_-])"
+        if re.search(ai_actor + r"[^。；;\n]{0,70}(?:自动|直接|无需人工)[^。；;\n]{0,50}(?:发信|发送|创建|新建|更新|修改|保存|写回|删除|支付|退款|扣款|执行)|自动.{0,15}给客户.{0,8}(?:发信|发送)", line, re.I):
             if not re.search(r"(?:禁止|不允许|不会|不|不得)(?:自动|直接)|仅.{0,12}(?:草稿|建议)|draft.only", line, re.I):
                 risks.add("irreversible_ai_write")
                 guards = (r"授权|允许.{0,20}(?:范围|对象)|权限范围", r"回退|撤销|补偿|停止|人工接管|重试|幂等")

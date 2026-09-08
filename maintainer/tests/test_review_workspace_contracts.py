@@ -1006,6 +1006,11 @@ def test_v549_review_feedback_modify_delete_add_is_a_versioned_change(tmp_path: 
     missing_codes = {item.code for item in html_gate(tmp_path / "review-after-missing-marker.html", missing_new_marker).findings}
     assert "PROTO-REVIEW-POINT-COVERAGE" in missing_codes
 
+    missing_card = after_raw.replace('data-review-point="RVP-RULE-006"', '', 1)
+    findings = html_gate(tmp_path / "review-after-unlocated-card.html", missing_card).findings
+    assert any(item.code == "PROTO-REVIEW-POINT-COVERAGE" and item.ref == "RVP-RULE-006" for item in findings)
+    assert not any(item.code == "PROTO-REVIEW-STATUS-AXES" and "RVP-RULE-006" in item.ref for item in findings)
+
 
 def test_v549_prd_semantic_escape_hatches_are_blocked() -> None:
     raw = """# 需求

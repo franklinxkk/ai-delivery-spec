@@ -38,12 +38,12 @@ class _PrototypeHTMLParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self.elements: list[dict[str, object]] = []
-        self._stack: list[tuple[str, str]] = []
+        self._stack: list[tuple[str, str, int]] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         self._record(tag, attrs)
         if tag not in VOID_TAGS:
-            self._stack.append((tag, dict(attrs).get("data-testid") or ""))
+            self._stack.append((tag, dict(attrs).get("data-testid") or "", len(self.elements) - 1))
 
     def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         self._record(tag, attrs)
@@ -56,12 +56,14 @@ class _PrototypeHTMLParser(HTMLParser):
 
     def _record(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         data = dict(attrs)
-        page = next((testid for _, testid in reversed(self._stack) if testid.startswith("page-")), "")
+        page = next((testid for _, testid, _ in reversed(self._stack) if testid.startswith("page-")), "")
         self.elements.append({
             "tag": tag,
             "classes": (data.get("class") or "").split(),
             "testid": data.get("data-testid") or "",
             "action": "data-action" in data,
+            "role": data.get("role") or "",
+            "ancestors": [index for _, _, index in self._stack],
             "page": page,
         })
 
@@ -104,16 +106,19 @@ def _scan_html(text: str, css: str) -> list[dict[str, str]]:
         })
 
     nav_pages: dict[str, int] = {}
-    for element in parser.elements:
+    nav_containers: set[int] = set()
+    for index, element in enumerate(parser.elements):
         # Navigation items can have arbitrary class names (e.g. nav-order).
         # Count containers, never the interactive children within them.
-        if not element["page"] or element["tag"] in INTERACTIVE_TAGS or element["action"]:
+        if not element["page"] or element["tag"] in INTERACTIVE_TAGS or element["role"] in {"tab", "button", "link"}:
             continue
-        is_nav_container = any(
+        is_nav_container = element["tag"] == "nav" or element["role"] in {"navigation", "tablist"} or any(
             NAV_CONTAINER_CLASS.search(token) and not NAV_ITEM_CLASS.search(token)
             for token in element["classes"]
         ) or bool(NAV_TESTID.search(element["testid"]))
-        if is_nav_container:
+        nested = any(parent in nav_containers and parser.elements[parent]["page"] == element["page"] for parent in element["ancestors"])
+        if is_nav_container and not nested:
+            nav_containers.add(index)
             nav_pages[element["page"]] = nav_pages.get(element["page"], 0) + 1
     for page, count in nav_pages.items():
         if count >= 2:

@@ -16,6 +16,8 @@ import re
 import sys
 from pathlib import Path
 
+JS_SOURCE_TOKEN = re.compile(r'''"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`|//[^\n]*|/\*[\s\S]*?\*/''')
+
 
 def unique(items):
     seen = set()
@@ -29,11 +31,56 @@ def unique(items):
 
 
 def attr_values(html: str, attr: str):
-    return [row[attr] for row in extract_attrs(html, [attr]) if attr in row]
+    inventory = attribute_inventory(html, attr)
+    return inventory["template_values"] + [item["value"] for item in inventory["dynamic_candidates"]]
+
+
+def _without_non_executable_content(html: str) -> str:
+    html = re.sub(r"<!--.*?-->|<script\b[^>]*\btype\s*=\s*['\"]application/(?:ld\+)?json['\"][^>]*>.*?</script\s*>",
+                  lambda m: re.sub(r"[^\n]", " ", m[0]), html, flags=re.I | re.S)
+    return re.sub(r"(<script\b[^>]*>)(.*?)(</script\s*>)",
+                  lambda m: m[1] + JS_SOURCE_TOKEN.sub(lambda t: re.sub(r"[^\n]", " ", t[0]) if t[0].startswith(("//", "/*")) else t[0], m[2]) + m[3],
+                  html, flags=re.I | re.S)
+
+
+def attribute_inventory(html: str, attr: str) -> dict:
+    """Inventory templates and unresolved JS declarations without claiming DOM evidence."""
+    template_values = [row[attr] for row in extract_attrs(html, [attr]) if attr in row]
+    candidates = []
+    if attr not in {"data-action", "data-testid", "data-metric", "data-field", "data-bind", "data-state", "data-ac"}:
+        return {"template_values": template_values, "dynamic_candidates": candidates}
+    source = _without_non_executable_content(html)
+    tokens = JS_SOURCE_TOKEN
+    seen = set(template_values)
+
+    def add(value, offset, origin):
+        if value in seen or not re.fullmatch(r"[\w.:-]+", value):
+            return
+        seen.add(value)
+        candidates.append({"value": value, "line": html.count("\n", 0, offset) + 1,
+                           "origin": origin, "status": "candidate", "dom_verified": False})
+
+    for script in re.finditer(r"<script\b[^>]*>(.*?)</script\s*>", source, re.I | re.S):
+        code = script[1]
+        # Keep string contents; discard JS comments. This does not execute JS.
+        clean = tokens.sub(lambda m: " " * len(m[0]) if m[0].startswith(("//", "/*")) else m[0], code)
+        for token in tokens.finditer(clean):
+            if token[0][0] not in "\"'`":
+                continue
+            literal = re.sub(r'''\\(["'\\])''', r"\1", token[0][1:-1])
+            for match in re.finditer(rf'''(?<![\w:-]){re.escape(attr)}\s*=\s*(["'])([^"']+)\1''', literal, re.I):
+                add(match[2], script.start(1) + token.start(), "script_attribute_literal")
+        if attr == "data-action":
+            for match in re.finditer(r'''\b(?:act|button)\s*\(\s*['"]((?:ACT|UIACT)-[A-Z0-9-]+)['"]''', clean, re.I):
+                add(match[1], script.start(1) + match.start(), "render_call_literal")
+        if attr == "data-testid":
+            for match in re.finditer(r'''\btestid\s*:\s*['"]((?:page|modal|drawer|region)-[\w-]+)['"]''', clean, re.I):
+                add(match[1], script.start(1) + match.start(), "render_option_literal")
+    return {"template_values": template_values, "dynamic_candidates": candidates}
 
 
 def extract_attrs(html: str, attrs):
-    html = re.sub(r"<!--.*?-->|<script\b[^>]*\btype\s*=\s*['\"]application/(?:ld\+)?json['\"][^>]*>.*?</script\s*>", "", html, flags=re.I | re.S)
+    html = _without_non_executable_content(html)
     tag_pattern = re.compile(r"<([a-zA-Z][\w:-]*)([^>]*)>", re.S)
     rows = []
     for tag, raw_attrs in tag_pattern.findall(html):
@@ -46,7 +93,7 @@ def extract_attrs(html: str, attrs):
                     row[attr] = True
                     matched = True
                 continue
-            m = re.search(rf"""{attr}\s*=\s*["']([^"']+)["']""", raw_attrs, re.I)
+            m = re.search(rf"""(?<![\w:-]){re.escape(attr)}\s*=\s*["']([^"']+)["']""", raw_attrs, re.I)
             if m:
                 row[attr] = m.group(1)
                 matched = True
@@ -542,12 +589,17 @@ def main() -> int:
     data_metrics = attr_values(html, "data-metric")
     data_acceptance = attr_values(html, "data-ac")
     ids = attr_values(html, "id")
+    dynamic_declarations = {
+        attr: attribute_inventory(html, attr)["dynamic_candidates"]
+        for attr in ("data-action", "data-testid", "data-metric", "data-field", "data-bind", "data-state", "data-ac")
+    }
 
     functions = re.findall(r"\bfunction\s+([A-Za-z_$][\w$]*)\s*\(", html)
     arrow_assignments = re.findall(r"\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>", html)
     handler_actions = extract_handler_actions(html)
     dynamic_anchor_actions = extract_dynamic_anchor_actions(html)
-    dom_actions = {item.upper() for item in data_actions} | set(dynamic_anchor_actions)
+    # Candidates belong in the inventory, but do not prove a control exists.
+    dom_actions = {item.upper() for item in attribute_inventory(html, "data-action")["template_values"]} | set(dynamic_anchor_actions)
     orphan_handler_actions = sorted(set(handler_actions) - dom_actions)
     reachability = reachability_inventory(data_rows, html)
 
@@ -599,6 +651,7 @@ def main() -> int:
             "onclicks": len(onclicks),
             "ids": len(ids),
             "functions": len(set(functions + arrow_assignments)),
+            "dynamicDeclared": sum(len(items) for items in dynamic_declarations.values()),
         },
         "views": unique(view_candidates),
         "actions": unique(
@@ -611,6 +664,7 @@ def main() -> int:
         "fields": sorted(set(data_fields)),
         "binds": sorted(set(data_binds)),
         "metrics": sorted(set(data_metrics)),
+        "dynamicDeclarations": dynamic_declarations,
         "acceptanceRefs": sorted(set(data_acceptance)),
         "handlerActions": handler_actions,
         "dynamicAnchorActions": dynamic_anchor_actions,
@@ -620,6 +674,7 @@ def main() -> int:
         "functions": sorted(set(functions + arrow_assignments)),
         "notes": [
             "Static ledger only; verify dynamic routes and handlers in browser.",
+            "Inventories include dynamic declaration candidates, not proven rendered elements; dynamicDeclarations records origin and unresolved DOM evidence.",
             "orphanHandlerActions are registry entries with no source-template data-action; remove, restore the control, or document an approved deletion.",
             "reachability only blocks explicitly hidden roots with no static target; dynamic routing still needs browser evidence.",
             "stateSnapshot.stateChecksum protects high-value state/action/testid boundaries from lossy summarization.",

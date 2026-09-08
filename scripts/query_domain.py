@@ -92,9 +92,20 @@ def search_terms(query: str, aliases: dict) -> list[str]:
         if not isinstance(key, str) or not isinstance(values, list) or not all(isinstance(v, str) for v in values):
             continue
         group = [key, *values]
-        if key in query or any(query.casefold() == term.casefold() for term in group):
+        remainder = query
+        for longer in aliases:
+            if isinstance(longer, str) and longer != key and key in longer:
+                remainder = remainder.replace(longer, "")
+        if key in remainder or any(query.casefold() == term.casefold() for term in group):
             terms.extend(group)
     return list(dict.fromkeys(terms))
+
+
+def term_matches(term: str, line: str) -> bool:
+    if re.search(r"[a-zA-Z]", term):
+        # Avoid active/inactive and ledger/pledger collisions; allow plurals.
+        return bool(re.search(r"(?<![a-zA-Z0-9_])" + re.escape(term) + r"(?:s)?(?![a-zA-Z0-9_])", line, re.I))
+    return term.casefold() in line.casefold()
 
 
 def main() -> int:
@@ -237,7 +248,7 @@ def main() -> int:
                 heading = re.match(r"^#{2,3}\s+(.+)", line)
                 if heading:
                     section = heading[1].strip()
-                matched = [term for term in terms if term.casefold() in line.casefold()]
+                matched = [term for term in terms if term_matches(term, line)]
                 if matched:
                     matches.append({"domain_id": domain_id, "section": section, "line": number,
                                     "knowledge_file": record["knowledge_file"], "excerpt": line.strip()[:300],

@@ -24,6 +24,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 from scan_prototype_css import scan as scan_prototype_css
 from extract_interaction_ledger import (
+    attribute_inventory,
     extract_dynamic_anchor_actions,
     extract_handler_actions,
     inspect_runtime_action_assignments,
@@ -1888,7 +1889,7 @@ class PrototypeChecks:
             if marker_counts[point_ref] != expected_marker_count or card_counts[point_ref] != 1:
                 self.add(
                     "BLOCK", "PROTO-REVIEW-POINT-COVERAGE", path,
-                    "每个声明评审点必须有一张卡；需要 UI 落点时还必须恰好一个 marker", point_ref,
+                    "静态投影未满足每点一张卡及所需 marker 的数量合同；未解析到卡片不能直接断言其内容缺失，动态渲染须另行验证", point_ref,
                     affected_consumers=("product", "frontend", "qa", "coding_agent"),
                 )
             for item in [*([marker for marker in projection.markers if marker["ref"] == point_ref]), *([card for card in projection.cards if card["ref"] == point_ref])]:
@@ -1900,7 +1901,7 @@ class PrototypeChecks:
                     )
             card = next((item for item in projection.cards if item["ref"] == point_ref), {})
             for key in ("business_status", "verification_status", "evidence_origin"):
-                if card.get(key) != str(point.get(key, "")).casefold():
+                if card and card.get(key) != str(point.get(key, "")).casefold():
                     self.add(
                         "BLOCK", "PROTO-REVIEW-STATUS-AXES", path,
                         "ReviewPoint 卡片未同步显示业务状态、验证状态和证据来源", f"{point_ref}/{key}",
@@ -1908,7 +1909,7 @@ class PrototypeChecks:
                     )
             card_text = projection.card_text.get(point_ref, "")
             for visible_value in (str(point.get("title", "")), str(point.get("summary", ""))):
-                if visible_value and visible_value not in card_text:
+                if card and visible_value and visible_value not in card_text:
                     self.add(
                         "BLOCK", "PROTO-REVIEW-POINT-COVERAGE", path,
                         "ReviewPoint 的标题或连贯业务摘要只在 manifest 中存在，未在人类卡片可见", point_ref,
@@ -2212,7 +2213,16 @@ class PrototypeChecks:
         fields = sorted(set(re.findall(r"\bdata-(?:field|bind)\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
         metric_bindings = _metric_bindings(raw)
         metric_ids = [item[0] for item in metric_bindings]
-        metrics = sorted(set(metric_ids or re.findall(r"\bdata-metric\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
+        inventories = {attr: attribute_inventory(raw, attr) for attr in ("data-action", "data-testid", "data-metric")}
+        for attr, inventory in inventories.items():
+            pending = inventory["dynamic_candidates"]
+            if pending:
+                self.add("GAP", "PROTO-DYNAMIC-DECLARATIONS", path,
+                         f"{attr}: {len(pending)} JS declaration candidate(s) lack resolved template/DOM bindings; verify rendering and keep them in the inventory",
+                         ", ".join(item["value"] for item in pending[:12]))
+        bound_metrics = set(metric_ids) | set(inventories["data-metric"]["template_values"])
+        metrics = sorted(bound_metrics |
+                         {item["value"] for item in inventories["data-metric"]["dynamic_candidates"]})
         acceptance_refs = sorted(set(re.findall(r"\bdata-ac\s*=\s*['\"](AC-[A-Z0-9-]+)['\"]", tag_source, re.I)))
         page_testids = [item for item in testids if item.lower().startswith("page-")]
         region_testids = [item for item in testids if item.lower().startswith("region-")]
@@ -2236,7 +2246,8 @@ class PrototypeChecks:
                         action,
                         affected_consumers=("product", "frontend", "qa", "coding_agent"),
                     )
-            for metric in metrics:
+            # An unresolved string is a candidate, not a proven invalid binding.
+            for metric in sorted(bound_metrics):
                 if not re.fullmatch(r"METRIC-[A-Z0-9-]+", metric, re.I):
                     self.add("BLOCK", "PROTO-UNSTABLE-METRIC", path, "data-metric must bind a stable METRIC-* ID", metric)
             metric_counts = Counter(metric_ids)

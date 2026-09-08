@@ -216,17 +216,34 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
             add("BLOCK", "SPEC-DISPOSITION-NOT-AUTHORIZED", "A proposal cannot change the requirement lifecycle")
         if isinstance(disposition, dict) and (not all(isinstance(disposition.get(k), str) and disposition[k].strip() for k in ("outcome", "reason")) or not string_list(disposition.get("scope_refs"), nonempty=True)):
             add("BLOCK", "SPEC-DISPOSITION-CONTENT", "Disposition needs outcome, reason and applicable scope")
-    unknowns = list(objects("unknowns"))
+    unknowns = [dict(item, _origin="frontmatter unknowns", _fields=list(item)) for item in objects("unknowns")]
+    for item in unknowns:
+        item["_field_origins"] = {key: item["_origin"] for key in item["_fields"]}
     # Read the human table as an alternative to metadata, not as an obligation
     # to maintain a second copy. A decorated template token has the same meaning.
     known = {u.get("id"): u for u in unknowns if isinstance(u.get("id"), str)}
     for row in unknown_rows("\n".join(prose_lines(body))):
+        row.setdefault("_origin", "body legacy row")
+        row.setdefault("_fields", [key for key in row if not key.startswith("_")])
+        row["_field_origins"] = {key: row["_origin"] for key in row.get("_fields", [])}
         if row["id"] in known:
             existing = known[row["id"]]
             if relevant(existing):
                 for key in ("status", "priority", "blocks_stage"):
-                    if key in existing and row.get(key) and contract_token(row[key]) != contract_token(existing[key]):
-                        add("BLOCK", "PRD-UNKNOWN-METADATA-DRIFT", "Human and structured unknown declarations disagree: " + key, row["id"])
+                    if key in existing.get("_fields", existing) and key in row.get("_fields", row) and row.get(key) and existing.get(key):
+                        def comparable(value):
+                            values = value if isinstance(value, list) else [value]
+                            return sorted({"closed" if contract_token(v) in CLOSED_UNKNOWN else contract_token(v) for v in values})
+                        if comparable(row[key]) != comparable(existing[key]):
+                            add("BLOCK", "PRD-UNKNOWN-METADATA-DRIFT",
+                                f"{existing.get('_field_origins', {}).get(key, existing.get('_origin'))} vs {row.get('_origin')}: {key} differs ({existing[key]!r} vs {row[key]!r})", row["id"])
+                for key in row.get("_fields", []):
+                    if key not in existing.get("_fields", []) or not existing.get(key):
+                        existing[key] = row.get(key)
+                        existing["_fields"] = list(set(existing.get("_fields", [])) | {key})
+                        existing.setdefault("_field_origins", {})[key] = row["_origin"]
+                if existing.get("status"):
+                    existing["_status_unlocated"] = False
             continue
         unknowns.append(row)
         known[row["id"]] = row
@@ -234,6 +251,9 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
         if not relevant(unknown):
             continue
         status = contract_token(unknown.get("status"))
+        if unknown.get("_status_unlocated"):
+            add("GAP", "SPEC-UNKNOWN-STATUS-UNLOCATED", "Cannot locate status in " + str(unknown.get("_origin")) + "; verify the existing declaration, do not assume closed", str(unknown.get("id", "")))
+            continue
         if status not in OPEN_UNKNOWN | CLOSED_UNKNOWN:
             add("BLOCK", "SPEC-UNKNOWN-STATUS", "Use an explicit open/pending/blocked or closed/resolved/superseded status", str(unknown.get("id", "")))
             continue
@@ -252,7 +272,6 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
         add("BLOCK" if reached else "GAP", "SPEC-OPEN-DECISION", "Dependent decision remains open; fallback must not decide it", str(unknown.get("id", "")))
     # Legacy artifacts can repeat metadata; detect disagreement without requiring
     # duplicate authoring. New artifacts should maintain each fact only once.
-    by_id = {u["id"]: u for u in unknowns if isinstance(u.get("id"), str) and relevant(u)}
     headers = []
     for line in body.splitlines():
         if not line.strip().startswith("|"):
@@ -262,15 +281,9 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
         if not headers:
             headers = cells
             continue
-        ref = next((c for c in cells if c in by_id), None)
         for header, value in zip(headers, cells):
             if not scope and re.search(r"下一状态|next state", header, re.I) and re.search(r"API-[A-Z0-9-]+", value):
                 add("BLOCK", "PRD-STATE-SEMANTIC-POLLUTION", "Transition destination contains an API identifier")
-            if not ref:
-                continue
-            key = "priority" if re.search(r"优先级|priority", header, re.I) else "blocks_stage" if re.search(r"阻断|blocks.?stage", header, re.I) else "status" if re.search(r"状态|status", header, re.I) else None
-            if key and key in by_id[ref] and value in {"P0", "P1", "P2", "P3", "open", "blocked", "resolved", "closed", *STAGES} and value != by_id[ref][key]:
-                add("BLOCK", "PRD-UNKNOWN-METADATA-DRIFT", "Human and structured unknown declarations disagree: " + key, ref)
     for conflict in objects("source_conflicts"):
         if not relevant(conflict):
             continue

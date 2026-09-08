@@ -262,6 +262,7 @@ def contract_token(value: object) -> str:
     token = match[1] if match else raw.strip("`")
     return {"待关闭": "open", "待确认": "open", "未关闭": "open", "待处理": "open",
             "partial": "open", "in_progress": "open", "部分关闭": "open", "部分解决": "open",
+            "已搁置": "open", "搁置": "open", "deferred": "open",
             "已关闭": "closed", "已解决": "resolved", "已取代": "superseded"}.get(token, token)
 
 
@@ -269,16 +270,16 @@ OPEN_UNKNOWN = {"open", "pending", "blocked"}
 CLOSED_UNKNOWN = {"closed", "resolved", "superseded"}
 
 
-def unknown_rows(text: str) -> list[dict[str, str]]:
+def unknown_rows(text: str) -> list[dict[str, Any]]:
     aliases = {
-        "id": {"id", "编号"}, "priority": {"优先级", "priority"},
-        "owner": {"责任人", "owner"}, "blocks_stage": {"blocks_stage", "阻断阶段"},
+        "id": {"id", "编号", "unk/rev id", "unk id"}, "priority": {"优先级", "priority"},
+        "owner": {"责任人", "负责人", "owner"}, "blocks_stage": {"blocks_stage", "阻断阶段"},
         "reversal": {"回退路径", "回退/缩范围路径", "回退/缩范围", "reversal path", "fallback"},
-        "status": {"状态", "status"},
-        "resolution_ref": {"resolution_ref", "关闭依据", "解决依据", "决策/证据", "证据", "resolution"},
+        "status": {"状态", "status", "unk 状态", "unk状态"},
+        "resolution_ref": {"resolution_ref", "关闭依据", "解决依据", "决策/证据", "证据", "resolution", "关闭条件/结论"},
     }
     lines = text.splitlines()
-    results: list[dict[str, str]] = []
+    results: list[dict[str, Any]] = []
     for index in range(len(lines) - 2):
         if not lines[index].lstrip().startswith("|") or not re.match(r"^\s*\|?\s*:?-{3,}", lines[index + 1]):
             continue
@@ -294,12 +295,30 @@ def unknown_rows(text: str) -> list[dict[str, str]]:
             id_cell = cells[id_position] if id_position < len(cells) else ""
             row_id = id_cell.upper() if re.fullmatch(r"UNK-[A-Z0-9-]+", id_cell, re.I) else ""
             if row_id:
-                row = {"id": row_id, "line": str(cursor + 1)}
+                row = {"id": row_id, "line": str(cursor + 1), "_origin": f"body table row {cursor + 1}",
+                       "_fields": [key for key, pos in positions.items() if pos >= 0]}
                 for key, pos in positions.items():
-                    if key != "id":
-                        row[key] = cells[pos] if 0 <= pos < len(cells) else ""
+                    if key != "id" and 0 <= pos < len(cells):
+                        row[key] = cells[pos]
+                # “类型” may mean category, not status. Use it only when the
+                # cell actually contains a known unknown-lifecycle token.
+                mixed = {"类型", "结论/状态", "状态/结论", "结论·状态", "状态·结论"}
+                alternatives = [(pos, contract_token(cells[pos])) for pos, h in enumerate(headers)
+                                if h in mixed and pos < len(cells)]
+                recognized = [(pos, token) for pos, token in alternatives if token in OPEN_UNKNOWN | CLOSED_UNKNOWN]
+                if "status" not in row and recognized:
+                    row["status"] = recognized[0][1]
+                    row["_fields"].append("status")
+                if "resolution_ref" not in row:
+                    for pos, token in alternatives:
+                        if headers[pos] != "类型" and token not in OPEN_UNKNOWN | CLOSED_UNKNOWN and cells[pos].strip():
+                            row["resolution_ref"] = cells[pos]
+                            row["_fields"].append("resolution_ref")
+                            break
+                row["_status_unlocated"] = "status" not in row
                 for key in ("status", "blocks_stage"):
-                    row[key] = contract_token(row[key])
+                    if key in row:
+                        row[key] = contract_token(row[key])
                 results.append(row)
             cursor += 1
     if results:
@@ -324,6 +343,10 @@ def validate_unknowns(artifact: Artifact, current_stage: str) -> list[dict[str, 
     findings: list[dict[str, Any]] = []
     for row in unknown_rows(artifact.text):
         status = contract_token(row.get("status", ""))
+        if row.get("_status_unlocated"):
+            findings.append(finding("GAP", "CLARIFY-UNKNOWN-STATUS-UNLOCATED", artifact.path,
+                                    f"{row['id']}: cannot locate status in {row.get('_origin')}", "人工确认该未知项状态；解析不确定不能视为关闭。"))
+            continue
         if status not in OPEN_UNKNOWN | CLOSED_UNKNOWN:
             findings.append(finding("BLOCK", "CLARIFY-UNKNOWN-STATUS", artifact.path, f"{row['id']} 未声明有效的未知项状态：{status}", "使用 open/pending/blocked 或 closed/resolved/superseded；未知状态不能视为关闭。"))
             continue
