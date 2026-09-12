@@ -562,6 +562,7 @@ class _ReviewFinalParser(HTMLParser):
         self.flow_context_nodes: list[dict[str, str]] = []
         self.acceptance_examples: list[dict[str, str]] = []
         self.acceptance_example_text: dict[str, str] = {}
+        self.nonreading_depths: list[int] = []
 
     @staticmethod
     def _hidden(attrs: dict[str, str], parent_hidden: bool, tag: str) -> bool:
@@ -604,6 +605,8 @@ class _ReviewFinalParser(HTMLParser):
         hidden = self._hidden(attr_map, self.stack[-1][1] if self.stack else False, tag)
         self.stack.append((tag, hidden))
         depth = len(self.stack)
+        if self._hidden(attr_map, False, tag):
+            self.nonreading_depths.append(depth)
 
         context_ref = attr_map.get("data-review-context-root", "").upper()
         if context_ref:
@@ -761,9 +764,11 @@ class _ReviewFinalParser(HTMLParser):
         for record in self.active_traces:
             record["text"].append(text)  # type: ignore[union-attr]
         for record in self.active_role_details:
-            record["text"].append(text)  # type: ignore[union-attr]
+            if not any(level >= int(record["depth"]) for level in self.nonreading_depths):
+                record["text"].append(text)  # type: ignore[union-attr]
         for record in self.active_examples:
-            record["text"].append(text)  # type: ignore[union-attr]
+            if not any(level >= int(record["depth"]) for level in self.nonreading_depths):
+                record["text"].append(text)  # type: ignore[union-attr]
         for record in self.active_cards:
             if not bool(record["hidden"]):
                 record["text"].append(text)  # type: ignore[union-attr]
@@ -819,6 +824,7 @@ class _ReviewFinalParser(HTMLParser):
         self.tab_stack = [item for item in self.tab_stack if item[0] < closing_depth]
         self.workspace_depths = [depth for depth in self.workspace_depths if depth < closing_depth]
         self.context_stack = [item for item in self.context_stack if item[0] < closing_depth]
+        self.nonreading_depths = [depth for depth in self.nonreading_depths if depth < closing_depth]
         self.stack = self.stack[:index]
 
 

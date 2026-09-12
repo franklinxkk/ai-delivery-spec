@@ -155,9 +155,14 @@ class Finding:
     affected_consumers: tuple[str, ...] = ()
     related_refs: tuple[str, ...] = ()
     binding_source_refs: tuple[str, ...] = ()
+    message_en: str = ""
 
 
 FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
+    "SPEC-OPEN-DECISION": ("这项业务选择还没定，依赖它的行为不能按猜测实现。", "查看该 UNK 的影响范围与阻断阶段，找到所需来源或有权决定；不影响的部分可以继续，不必重写整份文档。"),
+    "SPEC-CONTENT": ("正文中可能还有两种不同的业务理解。", "先读指出的原句及其规则引用，核实是否已有答案；确有缺口才补决定，不要只添加一条评阅通过记录。"),
+    "SPEC-SEMANTIC-NOT-PROVEN": ("现有记录还不能证明这部分业务规则已被复核。", "按提示范围核对来源和关键反例，记录实际评阅结果；尚未评阅就保持缺口，不能补写虚构的通过。"),
+    "SPEC-REVIEW-LOCATION": ("工具未定位到这部分内容，不等于作者没有写。", "先在原文定位相应目标、行为或验收；可在已有内容处加 ADS 标记帮助定位，无须增加同义章节。"),
     "GATE-MISSING-INPUT": (
         "所选门禁缺少必需输入。",
         "按 finding 指示补充对应的 --requirement、--prd、--prototype、--inventory 或 --manifest 参数。",
@@ -610,6 +615,10 @@ PREFIX_GUIDANCE: tuple[tuple[str, str, str], ...] = (
 )
 
 EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
+    "SPEC-OPEN-DECISION": ("A business choice is still open; its dependent behavior cannot be implemented by guessing.", "Check this UNK's scope and blocking stage, then obtain the needed source or authorized decision. Unaffected work can continue."),
+    "SPEC-CONTENT": ("The text may still allow different business interpretations.", "Read the cited sentence and its rule references first. Resolve a real gap or record why the candidate does not apply; do not merely add a review pass."),
+    "SPEC-SEMANTIC-NOT-PROVEN": ("The records do not yet establish that this scope was reviewed.", "Review its sources and distinguishing counterexamples, then record the actual result. Do not fabricate a pass."),
+    "SPEC-REVIEW-LOCATION": ("The tool could not locate this content; that does not prove it is missing.", "Locate the existing goal, behavior or acceptance text. An ADS marker can help without adding a duplicate section."),
     "GATE-MISSING-INPUT": ("The selected gate is missing a required input.", "Provide the input named by the finding and rerun the same command."),
     "GATE-NOT-FILE": ("An input path is not a readable file.", "Correct the path, confirm the file exists, and rerun the same command."),
     "REQ-PARSE": ("The requirement register is not readable UTF-8 YAML.", "Repair YAML syntax or use the PRD profile for a Markdown artifact."),
@@ -803,6 +812,8 @@ def finding_code_match(code: str) -> str:
 
 
 def guidance_for(code: str) -> tuple[str, str]:
+    if code.startswith("SPEC-CONTENT-"):
+        return FINDING_GUIDANCE["SPEC-CONTENT"]
     """Return bounded, deterministic repair guidance for one finding code."""
     if _is_legacy_review_finding(code):
         return (
@@ -821,6 +832,8 @@ def guidance_for(code: str) -> tuple[str, str]:
 
 
 def english_guidance_for(code: str) -> tuple[str, str]:
+    if code.startswith("SPEC-CONTENT-"):
+        return EN_FINDING_GUIDANCE["SPEC-CONTENT"]
     if _is_legacy_review_finding(code):
         return (
             "This finding belongs to the deprecated 5.4.7 Preview review contract using Journey/STEP/Role or adaptive page modes.",
@@ -838,6 +851,8 @@ def english_guidance_for(code: str) -> tuple[str, str]:
 
 
 REPAIR_EXAMPLES: tuple[tuple[str, str], ...] = (
+    ("SPEC-OPEN-DECISION", "分期期数未决时，合同查询可继续；付款计划生成保持受阻，等待原约定或授权决定。不能默认一期。"),
+    ("SPEC-CONTENT-", "先核对原句是否已回答所问边界；若已在引用规则中写清，记录该位置；若未决定，保留未知及影响范围。"),
     ("SPEC-", "只复核 finding.ref 涉及的范围、来源及版本；proposed 不能冒充 confirmed，旧评阅不能证明新基线。"),
     ("INTAKE-SCHEMA", "cp references/templates/requirement-intake-template.yaml intake.yaml，补齐 artifact: requirement_intake、stage: intake、source_refs: [SRC-*]、value_evidence 等必填字段。"),
     ("PROTO-DEMO-SCAFFOLDING-VISIBLE", "删除 <div>验收场景</div> 这类演示文案块，改为真实业务空态文案，如 <p>暂无待办事项</p>。"),
@@ -884,6 +899,8 @@ def english_repair_example_for(code: str) -> str:
     if _is_legacy_review_finding(code):
         return "Remove legacy Journey/STEP/Role/page-mode controls and generate a 5.4.9/RC4 manifest driven by the real product CurrentContext, three tabs, and ReviewPoints."
     examples = (
+        ("SPEC-OPEN-DECISION", "If installment terms are undecided, contract lookup can proceed; payment-plan generation waits for the agreement or authorized decision. Do not default to one installment."),
+        ("SPEC-CONTENT-", "If a referenced rule already answers the question, record its location; otherwise retain the unknown and its dependent scope."),
         ("PRD-LANGUAGE", "Set document_language: en-US, translate human-facing headings and tables, and keep REQ/API/field names unchanged."),
         ("PRD-DUPLICATE-STABLE-ID-DEFINITION", "Keep one VIEW-RISK-LIST-001 definition row; elsewhere write 'See VIEW-RISK-LIST-001' instead of defining it again."),
         ("PRD-MODULE-SLICE", "Complete MOD-AUTH-001 with goal, paths, VIEW/FLD/ACT, RULE/STATE, METRIC, recovery, AC and UNK references."),
@@ -909,6 +926,8 @@ def _contains_cjk(value: str) -> bool:
 
 
 def _english_message(item: Finding) -> str:
+    if item.message_en:
+        return item.message_en
     if not _contains_cjk(item.message):
         return item.message
     if item.message.startswith("存量基线已存在"):
@@ -1048,6 +1067,7 @@ class Gate(PRDChecks, PrototypeChecks, HandoffChecks):
         affected_consumers: tuple[str, ...] = (),
         related_refs: tuple[str, ...] = (),
         binding_source_refs: tuple[str, ...] = (),
+        message_en: str = "",
     ) -> None:
         signature = (code, ref, message)
         if severity == "BLOCK" and code.startswith("PROTO-") and self.prototype_baseline_signatures[signature] > 0:
@@ -1075,6 +1095,7 @@ class Gate(PRDChecks, PrototypeChecks, HandoffChecks):
             affected_consumers=affected_consumers,
             related_refs=related_refs,
             binding_source_refs=binding_source_refs,
+            message_en=message_en,
         ))
 
     @staticmethod
@@ -1257,17 +1278,16 @@ def result_payload(gate: Gate, profile: str, retry_command: str = "", output_lan
 
 
 def diagnostic_roots(findings: list[Finding], limit: int) -> tuple[list[tuple[Finding, int]], int]:
-    """Compact by code while preferring a concrete representative over a template ref."""
-    first: dict[str, Finding] = {}
-    counts: dict[str, int] = {}
-    order: list[str] = []
+    """Compact repeated diagnostics; independent open decisions stay visible."""
+    first, counts, order = {}, {}, []
     for item in findings:
-        if item.code not in first:
-            first[item.code] = item
-            order.append(item.code)
-        elif _representative_ref_score(item.ref) > _representative_ref_score(first[item.code].ref):
-            first[item.code] = item
-        counts[item.code] = counts.get(item.code, 0) + 1
+        key = (item.code, item.ref if item.code == "SPEC-OPEN-DECISION" else "")
+        if key not in first:
+            first[key] = item
+            order.append(key)
+        elif _representative_ref_score(item.ref) > _representative_ref_score(first[key].ref):
+            first[key] = item
+        counts[key] = counts.get(key, 0) + 1
     selected = order[:max(limit, 0)]
     return [(first[code], counts[code]) for code in selected], len(order)
 
@@ -1649,6 +1669,13 @@ def main() -> int:
             f"p0_unknowns={summary['p0_unknowns']} gaps={summary['gaps']}"
         )
         english = output_language.casefold().startswith("en")
+        unknowns = gate.metrics.get("unknown_summary")
+        if unknowns:
+            counts = unknowns["counts"]
+            print(("Declared unknowns in scope" if english else "当前范围的已登记未知") +
+                  f": open={counts['open']} P0={counts['declared_open_p0']} blocking_now={counts['blocking_now']} " +
+                  f"priority_unspecified={counts['open_priority_unspecified']} status_unresolved={counts['status_unresolved']}")
+            print("p0_unknowns " + ("above counts legacy finding severity; it is not the count of open P0 decisions." if english else "仅为旧版诊断级别计数，不是未关闭 P0 决定数。"))
         print("NOT_PROVEN: " + ("; " if english else "；").join(payload["not_proven"]))
         labels = ("Cause", "Fix", "Example") if english else ("原因", "修复", "示例")
         actionable_findings = [item for item in gate.findings if item.severity != "INFO"]

@@ -24,6 +24,28 @@ PATTERNS = {
     "unspecified-actor": r"(?:相关人员|有关人员|管理员等|业务人员)(?![^。；\n]{0,18}(?:角色|权限|范围))",
 }
 
+CONTENT_QUESTIONS_EN = {
+    "publication": "Who publishes after approval, and when? Distinguish permission to publish from the publication event.",
+    "return-object": "After return, is the same record edited or a new one created? What happens to its ID, history and resubmission destination?",
+    "null-meaning": "Does null mean unknown, not applicable or not yet collected? How does it differ from zero in calculations?",
+    "metric-population": "Define the population, denominator, deduplication and time window, including departures and late data.",
+    "retry-result": "Could the failed request already have written data? How will a retry identify the existing result and avoid duplicate side effects?",
+    "state-ordinal": "Which filters, reports, interfaces and historical records consume the changed state identity? Verify each dependency.",
+    "rule-consumers": "Which consumers and historical interpretations depend on the changed definition? Verify the dependency before changing them.",
+    "deep-link": "Does every direct link or API call still check identity, object and data scope? Hiding a control does not prove authorization.",
+    "ai-write": "What authorizes this automatic write, limits its scope, and defines refusal, stopping and recovery? Confidence is not authorization.",
+    "relevance-authority": "Retrieval relevance cannot grant access or execution permission.",
+    "provenance-truth": "Valid provenance credentials do not prove the content is factually true.",
+    "confidence-outcome": "Define and verify model confidence separately from task completion or business success.",
+    "open-decision": "A business decision remains open. Identify its dependent scope, decision owner and blocking stage before claiming it is implementable.",
+    "unresolved-conflict": "Resolve the incompatible rules or expected results for this scope before claiming implementation readiness.",
+    "policy-basis": "Check the approved basis of this selection policy; calling it a default does not authorize it.",
+    "undecided-policy": "The selection policy is still unresolved. Locate an authorized decision before using the proposed default.",
+    "publication-conflict": "The same publication topic has different policies. Resolve their applicable conditions or supersession.",
+    "decision-conflict": "The same decision topic has incompatible policies. Resolve their scope or supersession from authority.",
+    "return-conflict": "The same section describes both reusing and replacing a returned record. Verify explicit branch conditions and object scope.",
+}
+
 
 def prose_lines(text: str) -> list[str]:
     """Mask metadata, fenced examples and comments while preserving line numbers."""
@@ -72,11 +94,11 @@ def inspect_content(text: str) -> dict:
     # Each probe names an actual decision fork, its trigger, and nearby evidence
     # that makes the fork explicit. Never turn a domain pattern into a policy.
     probes = [
-        ("publication", "state_authority", {"state"}, r"(?:审批|审核)通过.{0,15}(?:可|可以|允许)发布", r"(?:手动|人工|点击|定时|自动|发布人|发布角色|不立即|不会自动).{0,25}发布|发布.{0,20}(?:手动|人工|角色|时机)", "通过后谁在什么条件下发布？区分发布资格与实际发布事件。"),
-        ("return-object", "recovery", {"state"}, r"退回.{0,20}(?:重新|再次|重提|提交)", r"原单|原对象|新单|新对象|同一.{0,8}(?:ID|编号)|保留.{0,8}(?:ID|编号)", "退回后修改原对象还是新建？原编号、历史及再次提交去向如何处理？"),
+        ("publication", "state_authority", {"state"}, r"(?:审批|审核)通过.{0,15}(?:可|可以|允许)发布|\bapprov(?:al|ed)\b[^.;\n]{0,45}\b(?:can|may|eligible|allowed)\b[^.;\n]{0,25}\bpublish|\b(?:can|may|eligible|allowed)\b[^.;\n]{0,25}\bpublish[^.;\n]{0,25}\bafter approval\b", r"(?:手动|人工|点击|定时|自动|发布人|发布角色|不立即|不会自动).{0,25}发布|发布.{0,20}(?:手动|人工|角色|时机)|\b(?:manual(?:ly)?|automatic(?:ally)?|scheduled|publisher)\b[^.;\n]{0,35}\bpublish|\b(?:publish\w*|publication)\b[^.;\n]{0,35}\b(?:manual(?:ly)?|automatic(?:ally)?|scheduled|role)\b", "通过后谁在什么条件下发布？区分发布资格与实际发布事件。"),
+        ("return-object", "recovery", {"state"}, r"退回.{0,20}(?:重新|再次|重提|提交)|\breturn(?:ed)?\b[^.;\n]{0,50}\bresubmit|\bresubmit\w*\b[^.;\n]{0,35}\breturn(?:ed)?\b", r"原单|原对象|新单|新对象|同一.{0,8}(?:ID|编号)|保留.{0,8}(?:ID|编号)|\b(?:same|original|new)\s+(?:record|object|request|ID)\b|\b(?:keep|retain|preserve)\w*\s+(?:the\s+)?(?:ID|identifier)\b", "退回后修改原对象还是新建？原编号、历史及再次提交去向如何处理？"),
         ("null-meaning", "null_stale", set(), r"字段.{0,12}(?:可空|为空)|允许.{0,8}空值|未采集.{0,10}(?:按|计为|记为)\s*(?:数值\s*)?0", r"(?:空值|为空|未采集).{0,30}(?:表示|代表|区别|不等于|未知|不适用)|(?:不|不得|不能)按\s*0", "空值在此字段代表未知、不适用还是尚未采集？是否与零不同，如何参与计算？"),
         ("metric-population", "metric_definition", {"metric"}, r"完成率|通过率|离职率|活跃用户|completion rate|active users", r"分母|统计人群|纳入.{0,20}(?:用户|人员)|去重.{0,12}(?:用户|人员)|denominator|population", "说明统计对象、去重/时间窗和分母；离职、退出与晚到数据如何计入？"),
-        ("retry-result", "recovery", set(), r"(?:提交|保存|写入|支付)失败.{0,12}(?:重试|再试)", r"幂等|重复.{0,12}(?:不|防止)|未写入|已写入|保留.{0,10}输入|查询.{0,10}结果", "失败时是否已产生副作用？再次提交会重复写入吗，如何确认与恢复？"),
+        ("retry-result", "recovery", set(), r"(?:提交|保存|写入|支付)失败.{0,12}(?:重试|再试)|\b(?:submit|save|write|payment)\w*\b[^.;\n]{0,20}\bfail\w*\b[^.;\n]{0,25}\bretry|\bretry\b[^.;\n]{0,25}\bfailed\s+(?:submit|save|write|payment)", r"幂等|重复.{0,12}(?:不|防止)|未写入|已写入|保留.{0,10}输入|查询.{0,10}结果|\bidempot\w*|\b(?:avoid|prevent)\w*\s+duplicate|\balready\s+(?:written|saved|paid)|\bquery\w*[^.;\n]{0,20}\bresult", "失败时是否已产生副作用？再次提交会重复写入吗，如何确认与恢复？"),
         ("state-ordinal", "change_propagation", {"migration", "state"}, r"(?:已完成|状态).{0,35}第\s*[一二三四五六七八九十\d]+\s*(?:个)?(?:状)?态.{0,15}(?:改|变|调整)|(?:插入|新增).{0,10}状态.{0,20}(?:序号|编号)", r"稳定.{0,10}(?:键|编码|标识)|不使用.{0,10}(?:序号|顺序)|(?:消费者|筛选|报表|过滤).{0,30}(?:同步|映射|迁移|更新)", "状态序号改变会影响哪些筛选、报表、接口和历史对象？使用稳定含义并逐项核实消费者。"),
         ("rule-consumers", "change_propagation", {"migration"}, r"(?:定义|口径).{0,20}从.{0,50}(?:改为|调整为|变为)", r"(?:消费者|依赖|报表|看板).{0,30}(?:核实|验证|同步|保留|候选|回归)", "口径变更后哪些读写者、指标和历史解释可能受影响？先查依赖依据，再确认变更范围。"),
         ("deep-link", "permission_boundary", {"permission"}, r"深链|直链|/share/|/objects?/|复制链接|隐藏.{0,12}(?:按钮|入口)", r"服务端.{0,20}(?:校验|鉴权|权限)|(?:每次|所有|任何).{0,15}(?:入口|请求).{0,20}(?:鉴权|权限)|拒绝.{0,15}(?:跨租户|越权|他人)|server.side.{0,15}authoriz", "直达链接或直接调用是否仍检查身份、对象和数据范围？隐藏入口不能证明权限隔离。"),
@@ -87,7 +109,7 @@ def inspect_content(text: str) -> dict:
         categories.add(category)
         findings.append({"kind": kind, "category": category, "facets": sorted(facets), "line": index + 1,
                          "text": line.strip()[:240], "context": line.strip()[:240], "action": action,
-                         "advisory": True})
+                         "advisory": True, "action_en": CONTENT_QUESTIONS_EN.get(kind, "Review this candidate against the existing rule, scope and source before changing it.")})
 
     for i, line in enumerate(lines):
         if re.match(r"^\s*(?:>|[-*]\s*)?(?:说明|检查记录|门禁结果|扫描结果|诊断记录)[：:]", line) and re.search(r"(?:SPEC|PROTO)-", line) and re.search(r"gap|block|finding|诊断", line, re.I):
@@ -129,19 +151,19 @@ def inspect_content(text: str) -> dict:
                 risks.update(facets)
                 if not re.search(guard, context, re.I):
                     add(kind, category, facets, i, line, action)
-        ai_actor = r"(?<![A-Za-z0-9_-])(?:AI(?!\s*(?:coding|编程|开发))|LLM|模型|智能体|agent|置信度)(?![A-Za-z0-9_-])"
-        if re.search(ai_actor + r"[^。；;\n]{0,70}(?:自动|直接|无需人工)[^。；;\n]{0,50}(?:发信|发送|创建|新建|更新|修改|保存|写回|删除|支付|退款|扣款|执行)|自动.{0,15}给客户.{0,8}(?:发信|发送)", line, re.I):
-            if not re.search(r"(?:禁止|不允许|不会|不|不得)(?:自动|直接)|仅.{0,12}(?:草稿|建议)|draft.only", line, re.I):
+        ai_actor = r"(?<![A-Za-z0-9_-])(?:AI(?!\s*(?:coding|编程|开发))|LLM|模型|智能体|agent|置信度|confidence)(?![A-Za-z0-9_-])"
+        if re.search(ai_actor + r"[^。；;\n]{0,70}(?:自动|直接|无需人工|\bautomatically\b|\bdirectly\b)[^。；;\n]{0,50}(?:发信|发送|创建|新建|更新|修改|保存|写回|删除|支付|退款|扣款|执行|\b(?:send|email|create|update|save|write|delete|pay|refund|execute)\w*\b)|自动.{0,15}给客户.{0,8}(?:发信|发送)", line, re.I):
+            if not re.search(r"(?:禁止|不允许|不会|不|不得)(?:自动|直接)|仅.{0,12}(?:草稿|建议)|draft.only|\bonly\s+(?:produces?\s+)?drafts?\b|\b(?:not|never)\s+(?:automatically|directly)\b", line, re.I):
                 risks.add("irreversible_ai_write")
-                guards = (r"授权|允许.{0,20}(?:范围|对象)|权限范围", r"回退|撤销|补偿|停止|人工接管|重试|幂等")
-                if not all(re.search(g, context) for g in guards) or re.search(r"(?:无|没有|不能|不支持).{0,3}(?:回退|撤销|补偿|停止|人工接管)", context):
+                guards = (r"授权|允许.{0,20}(?:范围|对象)|权限范围|authoriz\w*|permission\s+scope", r"回退|撤销|补偿|停止|人工接管|重试|幂等|rollback|undo|compensat\w*|stop|human takeover|retry|idempot\w*")
+                if not all(re.search(g, context, re.I) for g in guards) or re.search(r"(?:无|没有|不能|不支持).{0,3}(?:回退|撤销|补偿|停止|人工接管)|\b(?:no|without)\s+(?:rollback|undo|recovery|compensation|stop)\b", context, re.I):
                     add("ai-write", "recovery", {"irreversible_ai_write"}, i, line, "自动写入的授权范围、触发/拒绝条件、副作用确认、停止与恢复是什么？置信度不是授权。")
         for kind, trigger, action in (
-            ("relevance-authority", r"相关性\s*(?:=|即|等于|视为).{0,8}授权|(?:相关|检索命中).{0,15}(?:即可|自动获得).{0,8}(?:权限|授权)", "相关性仅解释检索或排序，不能授予访问与执行权限。"),
-            ("provenance-truth", r"C2PA.{0,20}(?:有效|通过).{0,12}(?:=|即|等于|代表|说明|证明).{0,8}(?:为真|真实|事实)", "凭证有效说明可验证的来源/处理声明，不证明内容事实为真。"),
-            ("confidence-outcome", r"置信度.{0,12}(?:=|即|作为|当作|等于|就是).{0,8}(?:完成率|成功率|完成)", "模型置信度与任务完成/业务成功需分别定义、取证与验收。"),
+            ("relevance-authority", r"相关性\s*(?:=|即|等于|视为).{0,8}授权|(?:相关|检索命中).{0,15}(?:即可|自动获得).{0,8}(?:权限|授权)|\brelevance\s*(?:=|equals|grants|is)\s+(?:authorization|permission|access)\b", "相关性仅解释检索或排序，不能授予访问与执行权限。"),
+            ("provenance-truth", r"C2PA.{0,20}(?:有效|通过).{0,12}(?:=|即|等于|代表|说明|证明).{0,8}(?:为真|真实|事实)|\bvalid C2PA\b[^.;\n]{0,30}\b(?:proves?|means?|=)\s+(?:the\s+)?(?:content\s+is\s+)?(?:true|truth|factual)", "凭证有效说明可验证的来源/处理声明，不证明内容事实为真。"),
+            ("confidence-outcome", r"置信度.{0,12}(?:=|即|作为|当作|等于|就是).{0,8}(?:完成率|成功率|完成)|\bconfidence\s*(?:=|equals|is|as)\s+(?:the\s+)?(?:task\s+)?(?:completion|success)\s+rate\b", "模型置信度与任务完成/业务成功需分别定义、取证与验收。"),
         ):
-            if re.search(trigger, line, re.I) and not re.search(r"不(?:等于|代表|证明)|不能|≠", line):
+            if re.search(trigger, line, re.I) and not re.search(r"不(?:等于|代表|证明)|不能|≠|\b(?:not|never)\b", line, re.I):
                 add(kind, "permission_boundary" if kind == "relevance-authority" else "metric_definition", {"authority"}, i, line, action)
 
     # Same-topic DEC rows with incompatible publication policies need resolution,

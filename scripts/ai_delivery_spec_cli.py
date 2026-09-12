@@ -665,7 +665,7 @@ def status_report(args: argparse.Namespace) -> int:
         "trace_release_proxy": {
             "status": "historical_5.4.9_reference",
             "public_reference": "https://skillhub.cn/tutorials#trace-evaluation",
-            "boundary": "historical 5.4.9 local evidence checklist; not a SkillHub score or a 5.5.0 validation result",
+            "boundary": "historical 5.4.9 local evidence checklist; not a SkillHub score or a current-version validation result",
             "dimensions": {
                 "trust": "passed", "reliability": "passed", "adaptability": "passed",
                 "convention": "passed", "effectiveness": "partial",
@@ -678,7 +678,7 @@ def status_report(args: argparse.Namespace) -> int:
         },
         "known_limitations": [
             "five domain methods have owner-attested production practice; all built-in packs pass deterministic contract checks but fresh-agent/expert maturity remains separate",
-            "5.5.0 checks are deterministic declaration checks; behavioral comparison, human reception and long-term benefit require separate evidence",
+            "5.5 checks validate declarations and bounded text candidates; behavioral comparison, human reception and long-term benefit require separate evidence",
             "domain expert, customer, production, legal, safety, and financial correctness are not proven",
             "deterministic fixtures and private brownfield calibration expose method gaps but do not prove implementation or customer acceptance",
         ],

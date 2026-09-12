@@ -4,7 +4,7 @@ license: Apache-2.0
 description: Clarify, create, review or change product, service and office workflow requirements, PRDs and interactive prototypes. Use for vague goals, process improvements, spreadsheet/form rules, small UI edits and changes to existing systems, even without the word requirement. 中文：产品、服务及办公流程的需求判断、深挖澄清、PRD、原型、变更与验收；一句话想法、表单/表格规则和微小改动也适用。明确的纯翻译、排版、抄录或既定步骤执行由对应工具直接处理。
 ---
 
-# AI Delivery Spec 5.5.0 — 需求判断与交付
+# AI Delivery Spec 5.5.1 — 需求判断与交付
 
 帮助用户作出当前需要的产品决定，让实施者准确理解，并在变更后保持有效。跟随用户语言；代码、字段和稳定 ID 保留原名。
 

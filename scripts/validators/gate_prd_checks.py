@@ -61,9 +61,10 @@ class PRDChecks:
                              for n, line in enumerate(body.splitlines(), 1))
         findings, routing = check_spec(metadata, body, stage=stage, scope=scope_refs, legacy_level=level)
         self.metrics["routing"] = routing
+        self.metrics["unknown_summary"] = routing["unknown_summary"]
         self.metrics["document_language"] = metadata.get("document_language", "")
         for finding in findings:
-            self.add(finding["severity"], finding["code"], path, finding["message"], finding["ref"])
+            self.add(finding["severity"], finding["code"], path, finding["message"], finding["ref"], message_en=finding.get("message_en", ""))
         excluded, unlocated = 0, 0
         for item in run_semantic_checks(raw):
             severity, code, message = item.severity, item.code, item.message

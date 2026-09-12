@@ -1,6 +1,7 @@
 """Execute the public quickstart and controlled bad-input paths."""
 from pathlib import Path
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -15,7 +16,8 @@ def run(*args):
 def main():
     failures = []
     version = run("version")
-    if version.returncode or version.stdout.strip() != "5.5.0":
+    expected = re.search(r"^# AI Delivery Spec (\d+\.\d+\.\d+)", (ROOT / "SKILL.md").read_text(encoding="utf-8"), re.M).group(1)
+    if version.returncode or version.stdout.strip() != expected:
         failures.append("public version command failed")
     result = run("triage", "--input", "examples/minimal-v5/intake.yaml", "--format", "json")
     if result.returncode or json.loads(result.stdout).get("lifecycle_mutated") is not False:
@@ -23,7 +25,7 @@ def main():
     result = run("gate", "--profile", "prd", "--prd", "examples/minimal-v5/requirement-card.md", "--stage", "specify", "--format", "json")
     if result.returncode or json.loads(result.stdout)["status"] != "PASS":
         failures.append("public PRD quickstart failed: " + result.stdout + result.stderr)
-    with tempfile.TemporaryDirectory(prefix="ads550-readme-") as temp:
+    with tempfile.TemporaryDirectory(prefix="ads-readme-") as temp:
         path = Path(temp) / "bad.yaml"
         for raw in ("items: [", "- list", "artifact_mode: [prd]\ntitle: sample"):
             path.write_text(raw, encoding="utf-8")

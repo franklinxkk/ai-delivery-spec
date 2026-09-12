@@ -15,7 +15,7 @@
 
 `artifact_mode=direct|card|prd` 只选择阅读规模；`risk_facets` 触发业务检查。高风险小规则可以很短。显式治理请求独立保留，不被小规模覆盖。L0–L4 只作旧输入提示，不再作为补章节或风险证据的依据。
 
-分诊输入用 YAML/JSON 对象记录已有事实，最小可只含 title、artifact_mode；不要为调用工具发明 owner、迭代或价值。`triage` 只返回建议，不执行准入、拒绝、延期或优先级更新。
+分诊输入用 YAML/JSON 记录已有事实，可只含 title；不发明 owner、迭代或价值。`triage` 的 accept 只建议进入规格整理，不证明需求已清楚，也不改变状态或优先级。
 
 ```bash
 python scripts/ai_delivery_spec_cli.py triage --input intake.yaml --format json
@@ -38,12 +38,13 @@ python scripts/ai_delivery_spec_cli.py gate --profile full --requirement require
 
 旧 frame/explore/clarify 的机器锚点检查与复杂 Truth/评审工具仍可显式调用；自由探索默认不被旧模板合同约束。用到对应工具时读取其 `--help` 和 Schema，不加载所有模板。
 
-兼容入口 `scripts/validators/validate_prd_quality.py` 与 `scripts/validators/validate_unified_prd.py` 可手动执行，均复用当前 PRD 内核。
+JSON 的 `metrics.unknown_summary` 按范围/阶段去重统计已登记未知、显式 P0 与当前阻断；旧 `summary.p0_unknowns` 仅计同名诊断级别。
+兼容入口 `scripts/validators/validate_prd_quality.py`、`scripts/validators/validate_unified_prd.py` 可手动执行，复用当前内核。
 局部正文检查只按明确的 REQ 标题/表格归属排除范围外项；无法定位的疑点保留 GAP，不能把它当成本次已核实阻断，也不能声称已覆盖。
 
 ## 领域检索
 
-行业规则问题先从内置切片及来源目录取得核实起点；中英文提问执行同一路径。命中只证明存在相关线索，不证明适用或现行有效。例：
+行业问题先查内置切片和来源；中英文长句按已知业务短语检索，无法识别的仍按原文查。零命中可缩短业务词或选领域，不证明没有适用规则。例：
 
 ```bash
 python scripts/ai_delivery_spec_cli.py query-domain --search "安全考核" --format yaml

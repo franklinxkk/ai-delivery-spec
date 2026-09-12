@@ -25,7 +25,7 @@ def load_declarations(raw: str) -> dict:
         raise ValueError("Declaration root must be an object")
     return value
 
-VERSION = "5.5.0"
+VERSION = "5.5.1"
 MODES = {"direct", "card", "prd"}
 RISK_SIGNALS = {
     "state": ("states", "cross_module_state", "approval", "workflow"),
@@ -137,8 +137,10 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
     findings: list[dict] = []
     resolved = route(doc, legacy_level, body=body)
 
-    def add(severity: str, code: str, message: str, ref: str = ""):
+    def add(severity: str, code: str, message: str, ref: str = "", message_en: str = ""):
         finding = dict(severity=severity, code=code, message=message, ref=ref)
+        if message_en:
+            finding["message_en"] = message_en
         if finding not in findings:
             findings.append(finding)
 
@@ -147,7 +149,7 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
     for note in resolved["notes"]:
         add("INFO", "SPEC-ROUTE-NOTE", note)
     for item in resolved["content_review"]["findings"]:
-        add(item.get("severity", "GAP"), "SPEC-CONTENT-" + item["kind"].upper(), item["action"] + " 正文：" + item["text"], "@line " + str(item["line"]))
+        add(item.get("severity", "GAP"), "SPEC-CONTENT-" + item["kind"].upper(), item["action"] + " 正文：" + item["text"], "@line " + str(item["line"]), item["action_en"] + " Text: " + item["text"])
     if stage not in STAGES:
         add("BLOCK", "SPEC-STAGE", "Unknown target stage", str(stage))
     if not body.strip():
@@ -247,14 +249,19 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
             continue
         unknowns.append(row)
         known[row["id"]] = row
-    for unknown in unknowns:
+    buckets = {key: set() for key in ("open", "declared_open_p0", "open_priority_unspecified", "blocking_now", "status_unresolved", "invalid_blocking_stage", "out_of_scope")}
+    for index, unknown in enumerate(unknowns):
+        identity = str(unknown.get("id") or f"<unknown-row-{index + 1}>")
         if not relevant(unknown):
+            buckets["out_of_scope"].add(identity)
             continue
         status = contract_token(unknown.get("status"))
         if unknown.get("_status_unlocated"):
+            buckets["status_unresolved"].add(identity)
             add("GAP", "SPEC-UNKNOWN-STATUS-UNLOCATED", "Cannot locate status in " + str(unknown.get("_origin")) + "; verify the existing declaration, do not assume closed", str(unknown.get("id", "")))
             continue
         if status not in OPEN_UNKNOWN | CLOSED_UNKNOWN:
+            buckets["status_unresolved"].add(identity)
             add("BLOCK", "SPEC-UNKNOWN-STATUS", "Use an explicit open/pending/blocked or closed/resolved/superseded status", str(unknown.get("id", "")))
             continue
         if status in CLOSED_UNKNOWN:
@@ -262,14 +269,32 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
             if (not isinstance(closure, str) or not closure.strip() or closure.strip() in ("-", "无", "待补", "N/A")) and not string_list(unknown.get("source_refs"), nonempty=True):
                 add("BLOCK", "SPEC-UNKNOWN-CLOSURE", "Closed unknown needs a resolution/decision/source reference", str(unknown.get("id", "")))
             continue
+        buckets["open"].add(identity)
+        priority = contract_token(unknown.get("priority"))
+        if priority == "p0":
+            buckets["declared_open_p0"].add(identity)
+        elif priority not in ("p1", "p2", "p3"):
+            buckets["open_priority_unspecified"].add(identity)
         stop = unknown.get("blocks_stage", "baseline")
         stops = stop if isinstance(stop, list) else [stop]
         stops = [contract_token(s) for s in stops]
-        if any(not isinstance(s, str) or (s not in STAGES and s != "none") for s in stops):
+        if not stops or any(not isinstance(s, str) or (s not in STAGES and s != "none") for s in stops):
+            buckets["invalid_blocking_stage"].add(identity)
             add("BLOCK", "SPEC-UNKNOWN-STAGE", "Unrecognized blocking stage", str(unknown.get("id", "")))
             continue
         reached = any(STAGES.get(stage, 0) >= STAGES[s] for s in stops if s in STAGES)
-        add("BLOCK" if reached else "GAP", "SPEC-OPEN-DECISION", "Dependent decision remains open; fallback must not decide it", str(unknown.get("id", "")))
+        if reached:
+            buckets["blocking_now"].add(identity)
+        refs = unknown.get("affected_refs", unknown.get("scope_refs", []))
+        affected = ", ".join(refs) if string_list(refs, nonempty=True) else "scope not declared"
+        add("BLOCK" if reached else "GAP", "SPEC-OPEN-DECISION",
+            f"Open decision; affected: {affected}; blocks from: {', '.join(stops) or 'not declared'}; current stage: {stage}. Resolve the source or authorized decision before implementing the dependent behavior.", identity)
+    resolved["unknown_summary"] = {
+        "schema_version": 1, "stage": stage, "scope_refs": list(scope or []),
+        "counts": {key: len(ids) for key, ids in buckets.items()},
+        "refs": {key: sorted(ids) for key, ids in buckets.items()},
+        "counting_rule": "unique declared unknown IDs after merging metadata/body; buckets overlap; no inferred priority; declaration conflicts remain findings; source authenticity not proven",
+    }
     # Legacy artifacts can repeat metadata; detect disagreement without requiring
     # duplicate authoring. New artifacts should maintain each fact only once.
     headers = []

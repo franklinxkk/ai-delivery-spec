@@ -851,6 +851,30 @@ def test_v549_lightweight_human_projection_passes(tmp_path: Path) -> None:
     assert not {code for code in codes if code.startswith("PROTO-REVIEW-")}
 
 
+def test_review_role_details_cannot_be_satisfied_by_nonreading_text(tmp_path: Path) -> None:
+    base = review_html_v549(manifest_v549("1" * 64))
+    pattern = r'(<p data-review-role-detail="backend">)(.*?)(</p>)'
+    for index, wrapper in enumerate(("<span hidden>{}</span>", '<span style="display:none">{}</span>',
+                                     '<span aria-hidden="true">{}</span>', '<script type="text/plain">{}</script>',
+                                     "<template>{}</template>")):
+        hidden = re.sub(pattern, lambda match: match[1] + wrapper.format(match[2]) + match[3], base, count=1)
+        codes = {item.code for item in html_gate(tmp_path / f"hidden-role-{index}.html", hidden).findings}
+        assert "PROTO-REVIEW-ROLE-DETAIL" in codes
+    # Inactive tabs may be hidden until selected. Authored reading content is
+    # still available there, while a hidden payload inside the role is not.
+    parked = base.replace('<section data-review-tab="function_flow">', '<section data-review-tab="function_flow" hidden>')
+    gate = html_gate(tmp_path / "parked-tab.html", parked)
+    assert "PROTO-REVIEW-ROLE-DETAIL" not in {item.code for item in gate.findings}
+
+
+def test_review_acceptance_example_cannot_hide_its_expected_result(tmp_path: Path) -> None:
+    document = manifest_v549("1" * 64)
+    base = review_html_v549(document)
+    expected = document["acceptance_examples"][0]["expected_domain_result"]
+    raw = base.replace(f"<p>业务结果：{expected}</p>", f"<p>业务结果：<span hidden>{expected}</span></p>", 1)
+    assert "PROTO-REVIEW-EXECUTABLE-EXAMPLE" in {item.code for item in html_gate(tmp_path / "hidden-result.html", raw).findings}
+
+
 def test_simple_drawer_is_not_forced_into_a_cross_page_workflow(tmp_path: Path) -> None:
     document = manifest_v549("1" * 64)
     decision = document["diagram_contract"]["decisions"][1]

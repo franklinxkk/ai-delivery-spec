@@ -86,26 +86,41 @@ def select_sections(raw: str, requested: list[str]) -> tuple[list[str], list[str
 
 def search_terms(query: str, aliases: dict) -> list[str]:
     """Keep the literal query; expand known terms without inventing translations."""
-    query = query.strip()
-    terms = [query]
-    for key, values in aliases.items():
-        if not isinstance(key, str) or not isinstance(values, list) or not all(isinstance(v, str) for v in values):
-            continue
-        group = [key, *values]
-        remainder = query
-        for longer in aliases:
-            if isinstance(longer, str) and longer != key and key in longer:
-                remainder = remainder.replace(longer, "")
-        if key in remainder or any(query.casefold() == term.casefold() for term in group):
-            terms.extend(group)
+    terms = [query.strip()]
+    for group in search_concepts(query, aliases).values():
+        terms.extend(group)
     return list(dict.fromkeys(terms))
 
 
+def term_pattern(term: str) -> str:
+    literal = re.escape(term)
+    return r"(?<![a-zA-Z0-9_])" + literal + r"(?:s)?(?![a-zA-Z0-9_])" if re.search(r"[a-zA-Z]", term) else literal
+
+
+def search_concepts(query: str, aliases: dict) -> dict[str, list[str]]:
+    """Recognize curated phrases inside either language, longest phrase first.
+
+    Overlapping short aliases must not expand milestones into mileage or
+    active customers into all active entities. Unrelated words stay literal.
+    """
+    groups, candidates = {}, []
+    for key, values in aliases.items():
+        if not isinstance(key, str) or not key or not isinstance(values, list) or not all(isinstance(v, str) and v for v in values):
+            continue
+        groups[key] = list(dict.fromkeys([key, *values]))
+        for term in groups[key]:
+            for match in re.finditer(term_pattern(term), query, re.I):
+                candidates.append((match.start(), match.end(), key))
+    selected = []
+    for start, end, key in sorted(candidates, key=lambda item: (-(item[1] - item[0]), -len(item[2]), item[0])):
+        if any(start < b and end > a for a, b, _ in selected):
+            continue
+        selected.append((start, end, key))
+    return {key: groups[key] for _, _, key in sorted(selected)}
+
+
 def term_matches(term: str, line: str) -> bool:
-    if re.search(r"[a-zA-Z]", term):
-        # Avoid active/inactive and ledger/pledger collisions; allow plurals.
-        return bool(re.search(r"(?<![a-zA-Z0-9_])" + re.escape(term) + r"(?:s)?(?![a-zA-Z0-9_])", line, re.I))
-    return term.casefold() in line.casefold()
+    return bool(term and re.search(term_pattern(term), line, re.I))
 
 
 def main() -> int:
@@ -134,7 +149,9 @@ def main() -> int:
 
     catalog = yaml.safe_load(CATALOG.read_text(encoding="utf-8"))
     sources = yaml.safe_load(SOURCE_CATALOG.read_text(encoding="utf-8"))
-    terms = search_terms(args.search, catalog.get("search_aliases", {})) if args.search else []
+    aliases = catalog.get("search_aliases", {})
+    concepts = search_concepts(args.search, aliases) if args.search else {}
+    terms = search_terms(args.search, aliases) if args.search else []
     english = args.language == "en-US" or (args.language == "auto" and not re.search(r"[\u4e00-\u9fff]", (args.search or "") + " ".join(args.section)))
     usage_rule = (
         "Search hits and domain patterns are candidates, not approved project rules. Verify jurisdiction, covered entities, effective version and authority; response language does not determine jurisdiction."
@@ -254,7 +271,8 @@ def main() -> int:
                                     "knowledge_file": record["knowledge_file"], "excerpt": line.strip()[:300],
                                     "status": "candidate", "origin": record["origin"],
                                     "matched_terms": matched,
-                                    "match_type": "literal" if args.search.casefold() in line.casefold() else "alias"})
+                                    "matched_concepts": [key for key, group in concepts.items() if any(term_matches(term, line) for term in group)],
+                                    "match_type": "literal" if term_matches(args.search, line) else "alias"})
             record["search_hits"] = matches
         if args.section:
             knowledge_text = knowledge_path.read_text(encoding="utf-8")
@@ -275,9 +293,14 @@ def main() -> int:
 
     if args.search:
         hits = [hit for record in records for hit in record.get("search_hits", [])]
-        hits.sort(key=lambda hit: hit["match_type"] != "literal")
+        hits.sort(key=lambda hit: (hit["match_type"] != "literal", -len(hit["matched_concepts"])))
+        next_action = None if hits else (
+            "No local passage matched. Try a shorter business term, or use --domain <id> to inspect a relevant pack and its sections; no hit does not prove no applicable rule."
+            if english else
+            "本地语料未命中。尝试更短的业务词，或用 --domain <领域 ID> 查看相关包及章节；零命中不代表没有适用规则。")
         payload = {"query": args.search, "searched_domains": domain_ids, "total_matches": len(hits),
                    "expanded_terms": terms, "retrieval": "literal_with_curated_aliases",
+                   "matched_concepts": list(concepts), "next_action": next_action,
                    "truncated": len(hits) > args.limit, "hits": hits[:args.limit],
                    "source_usage_rule": usage_rule}
         if args.format == "yaml":
@@ -288,6 +311,8 @@ def main() -> int:
             for hit in hits[:args.limit]:
                 print(f"- {hit['domain_id']} / {hit['section']} [{hit['line']}, {hit['match_type']}]: {hit['excerpt']}")
             print(f"\n{'Matches / shown' if english else '匹配 / 显示'}: {len(hits)} / {min(len(hits), args.limit)}")
+            if next_action:
+                print(next_action)
         return 0
 
     if args.section:

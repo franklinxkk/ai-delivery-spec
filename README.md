@@ -1,4 +1,4 @@
-# AI Delivery Spec 5.5.0
+# AI Delivery Spec 5.5.1
 
 **帮你管清需求，让产研和 AI 少猜、少漏、少返工。**<br>
 **Manage requirements with less guesswork, fewer omissions and less rework—for your team and AI.**
@@ -11,7 +11,7 @@ A requirements management core for **product teams and AI agents**, delivered as
 [![SkillHub AI score: 4.7/5](https://img.shields.io/badge/SkillHub_AI-4.7%2F5-f59e0b)](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-64748b)](LICENSE)
 
-<sub>2026-09-08 社区快照：ClawHub 2,431 次下载；SkillHub 4.7/5 为 v5.4.8 历史 AI 评分，非 5.5.0 新评测。 / Community snapshot: 2,431 ClawHub downloads; SkillHub's 4.7/5 is a historical AI rating of v5.4.8, not a new evaluation of 5.5.0.</sub>
+<sub>2026-09-08 社区快照：ClawHub 2,431 次下载；SkillHub 4.7/5 为 v5.4.8 历史 AI 评分，非当前版本新评测。 / Community snapshot: 2,431 ClawHub downloads; SkillHub's 4.7/5 is a historical AI rating of v5.4.8, not a new evaluation of this release.</sub>
 
 **[角色价值 / Role value](#roles) · [中文上手](#zh) · [English guide](#en) · [安装 / Install](#install) · [示例 / Examples](#examples) · [指南 / Guides](#resources) · [中英社区 / Community](#community)**
 
@@ -58,7 +58,7 @@ npx skills add franklinxkk/ai-delivery-spec
 安装后直接到 [中文上手](#zh) 或 [English guide](#en) 复制你的第一条任务。**日常使用不需要 Python。**<br>
 Then copy your first task from the Chinese or English guide. **Python is optional.**
 
-<sub>固定版本安装包与校验值见 [5.5.0 Release](https://github.com/franklinxkk/ai-delivery-spec/releases/tag/v5.5.0)。以上命令从仓库安装；社区渠道可能更新较晚，请核对实际安装版本。 / Find the versioned package and checksum in the [5.5.0 release](https://github.com/franklinxkk/ai-delivery-spec/releases/tag/v5.5.0). The command installs from the repository; community channels may update later, so check the installed version.</sub>
+<sub>固定版本安装包与校验值见 [5.5.1 Release](https://github.com/franklinxkk/ai-delivery-spec/releases/tag/v5.5.1)。以上命令从仓库安装；社区渠道可能更新较晚，请核对实际安装版本。 / Find the versioned package and checksum in the [5.5.1 release](https://github.com/franklinxkk/ai-delivery-spec/releases/tag/v5.5.1). The command installs from the repository; community channels may update later, so check the installed version.</sub>
 
 <details>
 <summary>ZIP 与宿主导入｜ZIP and host-native import</summary>
@@ -138,7 +138,7 @@ If your host provides a skill-import interface, follow its instructions to impor
 
 For consumer products, business and government systems, and AI-native workflows. These roles share one business agreement. Existing approved PRDs or requirement systems can remain the authoritative location.
 
-### What 5.5.0 focuses on
+### What 5.5 focuses on
 
 1. **Find the decision that matters now.** Start with the outcome, affected people and facts. Compare options and the smallest useful validation. A supported recommendation to investigate, defer, reduce scope or decline can complete the analysis; changing requirement status still requires the relevant authority.
 2. **Make the specification tangible and the review concrete.** The PRD explains business rules, the prototype demonstrates interactions and outcomes, and acceptance criteria define how to judge them. “May publish after approval” must distinguish permission from publication in the rule, button behavior and acceptance case. Optional dual-mode review places rules, boundaries and acceptance beside the current product context while you operate it. Resolve critical business choices while leaving legitimate engineering choices open.
@@ -267,7 +267,7 @@ Maintainers can run these commands in the **full source repository**. Release pa
 ```bash
 python -m pip install "pytest>=8,<9"
 python scripts/ai_delivery_spec_cli.py check --profile release
-python maintainer/tools/build_runtime_package.py --release --check --output dist/ai-delivery-spec-5.5.0.zip
+python maintainer/tools/build_runtime_package.py --release --check --output dist/ai-delivery-spec-5.5.1.zip
 ```
 
 </details>
