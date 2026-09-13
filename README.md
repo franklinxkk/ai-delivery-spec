@@ -7,11 +7,11 @@
 
 A requirements management core for **product teams and AI agents**, delivered as a skill. Start with an idea, existing material or a change. Decide what needs doing, make business rules clear and identify change impacts. Create or update only the requirement cards, PRDs, interactive prototypes and acceptance criteria the task needs, so whoever takes over knows what to work from and what remains undecided.
 
-[![ClawHub downloads: 2.4k](https://img.shields.io/badge/ClawHub-2.4k_downloads-2563eb)](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec)
+[![ClawHub downloads: 2.6k](https://img.shields.io/badge/ClawHub-2.6k_downloads-2563eb)](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec)
 [![SkillHub AI score: 4.7/5](https://img.shields.io/badge/SkillHub_AI-4.7%2F5-f59e0b)](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-64748b)](LICENSE)
 
-<sub>2026-09-08 社区快照：ClawHub 2,431 次下载；SkillHub 4.7/5 为 v5.4.8 历史 AI 评分，非当前版本新评测。 / Community snapshot: 2,431 ClawHub downloads; SkillHub's 4.7/5 is a historical AI rating of v5.4.8, not a new evaluation of this release.</sub>
+<sub>2026-09-13 社区快照：ClawHub 约 2.6k 次下载；SkillHub 4.7/5 为 v5.4.8 历史 AI 评分，非当前版本新评测。 / Community snapshot: approximately 2.6k ClawHub downloads; SkillHub's 4.7/5 is a historical AI rating of v5.4.8, not a new evaluation of this release.</sub>
 
 **[角色价值 / Role value](#roles) · [中文上手](#zh) · [English guide](#en) · [安装 / Install](#install) · [示例 / Examples](#examples) · [指南 / Guides](#resources) · [中英社区 / Community](#community)**
 
