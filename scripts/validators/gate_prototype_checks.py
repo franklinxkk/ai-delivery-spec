@@ -902,6 +902,15 @@ class PrototypeChecks:
         preflight_workspace = document.get("workspace") or {}
         preflight_workspace = preflight_workspace if isinstance(preflight_workspace, dict) else {}
         preflight_level = str(preflight_workspace.get("review_level", ""))
+        full_workspace = preflight_level in {"R1", "R2"}
+        progress_required = full_workspace or "progress_contract" in document or bool(re.search(r"\bdata-review-progress(?:\s|=|>)", tag_source))
+        share_required = full_workspace or "share_contract" in document or bool(re.search(r"UIACT-REVIEW-SHARE|\bdata-review-share-locator(?:\s|=|>)", tag_source))
+        records_required = full_workspace or progress_required or "review_record_contract" in document or bool(re.search(r"UIACT-REVIEW-(?:RECORD|EXPORT|IMPORT)|\bdata-review-records(?:\s|=|>)", tag_source))
+        for required_feature, field in ((progress_required, "progress_contract"), (share_required, "share_contract"), (records_required, "review_record_contract")):
+            if required_feature and field not in document:
+                self.add("BLOCK", "PROTO-REVIEW-WORKSPACE-SCHEMA", path,
+                         "已声明或展示的评审能力必须提供对应合同", field,
+                         affected_consumers=("product", "frontend", "qa"))
         for point in document.get("review_points", []) or []:
             if not isinstance(point, dict):
                 continue
@@ -935,7 +944,7 @@ class PrototypeChecks:
                 affected_consumers=("product", "frontend", "backend", "qa"),
             )
         preflight_share = document.get("share_contract") or {}
-        if isinstance(preflight_share, dict) and preflight_share.get("hydrate_on_load") is not True:
+        if share_required and isinstance(preflight_share, dict) and preflight_share.get("hydrate_on_load") is not True:
             self.add(
                 "BLOCK", "PROTO-REVIEW-SHARE-LOCATOR", path,
                 "正式分享定位必须在打开时恢复 baseline、Context、ReviewPoint 和页签",
@@ -1968,6 +1977,13 @@ class PrototypeChecks:
             )
 
         event_name = str((document.get("context_contract") or {}).get("product_context_event", "")) if isinstance(document.get("context_contract"), dict) else ""
+        event_aliases = re.findall(
+            r"\b(?:const|let|var)\s+(\w+)\s*=\s*['\"]" + re.escape(event_name) + r"['\"]", scripts,
+        ) if event_name else []
+        event_arguments = [r"['\"]" + re.escape(event_name) + r"['\"]", *map(re.escape, event_aliases)]
+        has_context_listener = bool(event_name and re.search(
+            r"addEventListener\s*\(\s*(?:" + "|".join(event_arguments) + r")\s*,", scripts,
+        ))
         runtime_contracts = {
             "PROTO-PRODUCT-LOCATION-MISMATCH": (
                 "resolveProductLocation" in scripts
@@ -1985,8 +2001,10 @@ class PrototypeChecks:
                 and "PROTO-REVIEW-PRODUCT-FINGERPRINT-INVARIANT" in scripts
             ),
             "PROTO-REVIEW-OVERLAY-DETECTION": (
-                bool(event_name and event_name in scripts and re.search(r"addEventListener", scripts))
-                and "MutationObserver" in scripts and "resolveCurrentContext" in scripts
+                has_context_listener
+                # Product Context Events are the preferred source. An observer
+                # is optional; requiring one encouraged self-triggering loops.
+                and "resolveCurrentContext" in scripts
                 and "PROTO-REVIEW-OVERLAY-UNDECLARED" in scripts
             ),
             "PROTO-REVIEW-TARGET-RESOLUTION": (
@@ -2007,12 +2025,12 @@ class PrototypeChecks:
                 ))
             ),
             "PROTO-REVIEW-SHARE-LOCATOR": (
-                bool(re.search(r"URLSearchParams|location\.hash", scripts))
+                not share_required or (bool(re.search(r"URLSearchParams|location\.hash", scripts))
                 and all(item in scripts for item in ("baseline_ref", "context_ref", "review_point_ref", "active_tab"))
-                and "hydrateLocator" in scripts
+                and "hydrateLocator" in scripts)
             ),
             "PROTO-REVIEW-RECORD-PERSISTENCE": (
-                "localStorage" in scripts and "JSON.stringify" in scripts and "JSON.parse" in scripts
+                not records_required or ("localStorage" in scripts and "JSON.stringify" in scripts and "JSON.parse" in scripts)
             ),
         }
         for code, passed in runtime_contracts.items():
@@ -2027,9 +2045,12 @@ class PrototypeChecks:
             item.upper() for item in re.findall(r"\bdata-action\s*=\s*['\"](UIACT-REVIEW-[A-Z0-9-]+)['\"]", tag_source, re.I)
         }
         required_actions = {
-            "UIACT-REVIEW-SELECT", "UIACT-REVIEW-TOGGLE", "UIACT-REVIEW-SHARE",
-            "UIACT-REVIEW-RECORD", "UIACT-REVIEW-EXPORT", "UIACT-REVIEW-IMPORT",
+            "UIACT-REVIEW-SELECT", "UIACT-REVIEW-TOGGLE",
         }
+        if share_required:
+            required_actions.add("UIACT-REVIEW-SHARE")
+        if records_required:
+            required_actions |= {"UIACT-REVIEW-RECORD", "UIACT-REVIEW-EXPORT", "UIACT-REVIEW-IMPORT"}
         if review_level in {"R1", "R2"}:
             required_actions |= {"UIACT-REVIEW-TAB", "UIACT-REVIEW-COMPACT"}
         missing_actions = sorted(required_actions - review_actions)
@@ -2055,13 +2076,17 @@ class PrototypeChecks:
 
         progress_tag = next((tag for tag in re.findall(r"<[A-Za-z][^>]*>", tag_source, re.S) if re.search(r"\bdata-review-progress(?:\s*=|\s|>)", tag, re.I)), "")
         denominator_match = re.search(r"\bdata-review-progress-denominator\s*=\s*['\"](\d+)['\"]", progress_tag, re.I)
-        if not denominator_match or int(denominator_match.group(1)) != len(points):
+        if progress_required and (not denominator_match or int(denominator_match.group(1)) != len(points)):
             self.add(
                 "BLOCK", "PROTO-REVIEW-PROGRESS-DENOMINATOR", path,
                 "可见评审进度分母必须等于全部适用的声明 ReviewPoint，浏览不改变分母", f"expected={len(points)}",
                 affected_consumers=("product", "frontend", "qa"),
             )
         for attribute in ("data-review-share-locator", "data-review-records"):
+            if attribute == "data-review-share-locator" and not share_required:
+                continue
+            if attribute == "data-review-records" and not records_required:
+                continue
             if not re.search(rf"\b{re.escape(attribute)}(?:\s*=|\s|>)", tag_source, re.I):
                 self.add(
                     "BLOCK", "PROTO-REVIEW-SHARE-LOCATOR" if "share" in attribute else "PROTO-REVIEW-RECORD-PERSISTENCE",
@@ -2339,7 +2364,10 @@ class PrototypeChecks:
                     affected_consumers=("product", "backend", "qa", "coding_agent"),
                     related_refs=(metric_match.group(1).upper(),),
                 )
+        requested_workspace = getattr(self, "require_review_workspace", False)
         review_surface = bool(
+            requested_workspace
+            or
             re.search(r"\bdata-review-id\s*=|\bdata-review-role\s*=|\bclass\s*=\s*['\"][^'\"]*\breview-mode\b", tag_source, re.I)
             or re.search(r"\bdata-testid\s*=\s*['\"](?:region|drawer)-REVIEW-", tag_source, re.I)
             or re.search(r"\bdata-review-workspace\s*=", tag_source, re.I)
@@ -2349,7 +2377,7 @@ class PrototypeChecks:
         declared_review_markers: set[str] = set()
         explicit_workspace = bool(re.search(r"\bdata-review-workspace\s*=", tag_source, re.I))
         if review_surface and review_workspace is None:
-            if explicit_workspace or review_workspace_error not in {None, "missing"}:
+            if requested_workspace or explicit_workspace or review_workspace_error not in {None, "missing"}:
                 self.add(
                     "BLOCK", "PROTO-REVIEW-WORKSPACE-MANIFEST-INVALID", path,
                     "评审工作台缺少唯一、可解析的内嵌 review-workspace-manifest",

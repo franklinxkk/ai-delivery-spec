@@ -68,7 +68,7 @@ def current_version() -> str:
 
 
 def validate_runtime_manifest(root: Path, expected_skill_version: str | None = None) -> list[str]:
-    """Validate the manifest contract and its closed set of runtime files."""
+    """Verify shipped sources; tolerate bytecode produced for declared modules."""
     manifest_path = root / "runtime-manifest.json"
     if not manifest_path.is_file():
         return ["runtime-manifest.json is missing"]
@@ -145,6 +145,15 @@ def validate_runtime_manifest(root: Path, expected_skill_version: str | None = N
                 actual[path.relative_to(root).as_posix()] = path
     except OSError as exc:
         failures.append(f"runtime files cannot be inventoried: {exc}")
+    # Normal imports create caches after installation. Only exempt the standard
+    # cache of a module in this manifest; arbitrary extra scripts still fail.
+    for relative in list(actual):
+        cached = PurePosixPath(relative)
+        match = re.fullmatch(r"(.+)\.(?:cpython-\d+|pypy\d+)(?:\.opt-\d+)?\.pyc", cached.name)
+        if cached.parent.name == "__pycache__" and match:
+            source = (cached.parent.parent / (match.group(1) + ".py")).as_posix()
+            if source in declared and relative not in declared:
+                del actual[relative]
     missing_paths = sorted(set(declared) - set(actual))
     extra_paths = sorted(set(actual) - set(declared))
     if missing_paths:
@@ -764,6 +773,8 @@ def quality_gate(args: argparse.Namespace) -> int:
     ]
     for scope_ref in args.scope_ref:
         values.extend(["--scope-ref", scope_ref])
+    if args.require_review_workspace:
+        values.append("--require-review-workspace")
     for domain in args.domain:
         values.extend(["--domain", domain])
     if args.custom_root:
@@ -1118,6 +1129,7 @@ def main() -> int:
     gate.add_argument("--prd", type=Path)
     gate.add_argument("--prototype", type=Path, action="append", help="Repeat for admin/H5/multi-surface prototypes")
     gate.add_argument("--prototype-baseline", type=Path, help=gate_help("Existing HTML baseline; inherited issues become GAP while new regressions still block", "存量 HTML 基线；相同旧问题降为 GAP，本次新增回归仍阻断"))
+    gate.add_argument("--require-review-workspace", action="store_true", help=gate_help("The requested deliverable includes a review workspace; a plain prototype cannot satisfy it", "本次明确交付评审态；缺少评审合同不能以普通原型检查通过代替"))
     gate.add_argument("--inventory", type=Path, help="Stage 0 brownfield inventory YAML")
     gate.add_argument("--manifest", type=Path, help="Agent handoff manifest YAML")
     gate.add_argument("--acceptance-run", type=Path, action="append", help=gate_help("Executed ARUN-*; repeat to close L3/L4 browser evidence", "已执行的 ARUN-*；L3/L4 原型据此闭合浏览器证据"))

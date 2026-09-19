@@ -22,9 +22,6 @@
     "product_effect_contract",
     "target_resolution",
     "selection_contract",
-    "progress_contract",
-    "share_contract",
-    "review_record_contract",
     "cold_read_contract",
     "unknown_refs",
     "machine_handoff",
@@ -400,6 +397,7 @@
         "required": ["workspace"]
       },
       "then": {
+        "required": ["progress_contract", "share_contract", "review_record_contract"],
         "properties": {
           "cold_read_contract": {
             "properties": {

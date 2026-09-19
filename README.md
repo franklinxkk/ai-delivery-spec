@@ -1,4 +1,4 @@
-# AI Delivery Spec 5.5.1
+# AI Delivery Spec 5.5.2
 
 **帮你管清需求，让产研和 AI 少猜、少漏、少返工。**<br>
 **Manage requirements with less guesswork, fewer omissions and less rework—for your team and AI.**
@@ -58,7 +58,7 @@ npx skills add franklinxkk/ai-delivery-spec
 安装后直接到 [中文上手](#zh) 或 [English guide](#en) 复制你的第一条任务。**日常使用不需要 Python。**<br>
 Then copy your first task from the Chinese or English guide. **Python is optional.**
 
-<sub>固定版本安装包与校验值见 [5.5.1 Release](https://github.com/franklinxkk/ai-delivery-spec/releases/tag/v5.5.1)。以上命令从仓库安装；社区渠道可能更新较晚，请核对实际安装版本。 / Find the versioned package and checksum in the [5.5.1 release](https://github.com/franklinxkk/ai-delivery-spec/releases/tag/v5.5.1). The command installs from the repository; community channels may update later, so check the installed version.</sub>
+<sub>公开发布包与校验值见 [Releases](https://github.com/franklinxkk/ai-delivery-spec/releases)。仓库候选与社区渠道可能处于不同版本，请核对实际安装版本。 / Find published packages and checksums in [Releases](https://github.com/franklinxkk/ai-delivery-spec/releases). Repository candidates and community channels may differ; check the installed version.</sub>
 
 <details>
 <summary>ZIP 与宿主导入｜ZIP and host-native import</summary>
@@ -108,7 +108,8 @@ If your host provides a skill-import interface, follow its instructions to impor
 | 示例 / Example | 看什么 / What to look for |
 |---|---|
 | **[最小需求卡 / Minimal requirement card](examples/minimal-v5/requirement-card.md)** · [运行说明 / Run it](examples/minimal-v5/README.md) | 给列表增加筛选：范围、权限、时间含义、异常和验收如何写在一起。 / A list filter with scope, permissions, time semantics, failure behavior and acceptance. |
-| **[交互评审原型 / Interactive review prototype](examples/medium-review-handoff/review-prototype.html)** | 下载或从安装包中用浏览器打开，体验产品界面与评审定位。适合需要双态协作的场景；是上手示例，未覆盖完整发布验收。 / Open the HTML locally to explore the product and review views. An onboarding example for dual-mode collaboration, with limited release-validation coverage. |
+| **[模块化 PRD / Modular PRD](examples/medium-review-handoff/requirement.md)** | 两个业务模块各自写清入口、权限、状态、失败恢复和正反用例，附产品、前端、后端、测试的阅读入口。 / Two complete business slices with role entry points, guards, recovery and executable acceptance examples. |
+| **[交互评审原型 / Interactive review prototype](examples/medium-review-handoff/review-prototype.html)** | 本地打开即可操作工单指派与完成，查看就近实现要点、评审定位和独立记录；绑定上述 PRD。虚构教学数据，仅模拟业务服务。 / Open locally to assign and complete work orders, inspect implementation notes and record reviews separately. Bound to the PRD above; fictional data and a local service simulator. |
 
 <details>
 <summary><strong>常见问题：小改、存量材料、原型与验收｜Quick FAQ</strong></summary>
@@ -267,8 +268,10 @@ Maintainers can run these commands in the **full source repository**. Release pa
 ```bash
 python -m pip install "pytest>=8,<9"
 python scripts/ai_delivery_spec_cli.py check --profile release
-python maintainer/tools/build_runtime_package.py --release --check --output dist/ai-delivery-spec-5.5.1.zip
+python maintainer/tools/build_runtime_package.py --release --check --output dist/ai-delivery-spec-5.5.2.zip
 ```
+
+兼容验证入口 `scripts/validators/validate_prd_quality.py`、`scripts/validators/validate_unified_prd.py` 可手动执行，复用当前内核。 / These legacy validators remain available for manual execution.
 
 </details>
 
@@ -287,4 +290,4 @@ python maintainer/tools/build_runtime_package.py --release --check --output dist
 如果它帮助你澄清了一条需求、发现一次关键分歧，欢迎给项目一个 **[Star ⭐](https://github.com/franklinxkk/ai-delivery-spec)**，让更多产研同伴找到它。<br>
 If it helped clarify a requirement or expose a critical ambiguity, a **[Star ⭐](https://github.com/franklinxkk/ai-delivery-spec)** helps more product teams discover it.
 
-[Apache 2.0](LICENSE) · [返回顶部 / Back to top](#ai-delivery-spec-550)
+[Apache 2.0](LICENSE) · [返回顶部 / Back to top](#ai-delivery-spec-552)

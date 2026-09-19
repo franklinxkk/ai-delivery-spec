@@ -33,10 +33,18 @@ def recommend(doc: dict) -> dict:
     required_questions = [item for item in questions if item.get("severity") != "WARN"]
     lexical = scan("\n".join(doc[k] for k in ("title", "description", "behavior") if isinstance(doc.get(k), str)))
     generic_goal = bool(re.fullmatch(r"(?:做个|做一个|建设|搭建|优化)(?:一个|个)?系统|优化体验|提升效率|(?:please\s+)?build\s+(?:me\s+)?(?:a|an)\s+(?:system|app)|improve\s+(?:the\s+)?(?:experience|efficiency)", str(doc.get("title", "")).strip("。！？.! "), re.I)) and not doc.get("description")
-    if required_questions or lexical or generic_goal:
+    # Bounded cues for a complaint with no task, not a general NLP classifier.
+    # Concrete instructions elsewhere in the input take precedence over tone.
+    title = str(doc.get("title", "")).strip()
+    complaint = bool(re.search(r"(?:太烂|太差|难用|不想说|随便吧|你们看着办|\b(?:terrible|awful|useless|whatever)\b)", title, re.I))
+    action_cue = re.search(r"(?:新增|增加|添加|改为|改成|删除|取消|修复|显示|筛选|导出|需要|希望|请|\b(?:add|remove|change|fix|show|filter|export|need|please)\b)", title, re.I)
+    no_task_complaint = complaint and not action_cue and not any(doc.get(key) for key in ("description", "behavior", "goal", "expected_behavior"))
+    if required_questions or lexical or generic_goal or no_task_complaint:
         advice = "clarify"
         reasons.extend(item["action_en"] if english else item["action"] for item in required_questions)
-        if (lexical or generic_goal) and not questions:
+        if no_task_complaint:
+            reasons.append("The feedback does not yet identify a concrete change." if english else "反馈尚未说明具体要改善的事情")
+        elif (lexical or generic_goal) and not questions:
             reasons.append("The goal still leaves choices open; clarify only what changes scope, authority or acceptance." if english else "目标措辞尚有不明确之处；仅澄清会改变范围、授权或验收的部分")
     if doc.get("duplicate_of") or doc.get("out_of_product_boundary"):
         advice = "reject"

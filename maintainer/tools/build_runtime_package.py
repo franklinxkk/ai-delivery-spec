@@ -141,7 +141,9 @@ def main() -> int:
         "source_worktree_dirty": source_worktree_dirty,
         "files": [file_record(path) for path in files],
     }
-    temp = ROOT / "build" / f"runtime-package-{os.getpid()}"
+    temp = (ROOT / "build" / f"runtime-package-{os.getpid()}").resolve()
+    if temp.parent != (ROOT / "build").resolve():
+        raise ValueError("runtime package staging path escaped build directory")
     shutil.rmtree(temp, ignore_errors=True)
     temp.mkdir(parents=True, exist_ok=True)
     try:

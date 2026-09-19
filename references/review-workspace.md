@@ -3,7 +3,7 @@
 仅在用户明确确认评审版后加载。先读取 `prototype.md`；本文件只定义人类评审投影，不改变 PRD、
 Product Truth、结构化 handoff 或验收证据的权威边界。
 
-5.5.1 继续读取 `5.4.9 / RC4` 评审合同；这是子合同版本，不是 Skill 版本漂移。正式 manifest 以 `schemas/review-workspace.schema.json` 为准。下面的 DOM 片段仅解释绑定方式，不是完整可直接过门禁的实现。
+5.5.2 继续读取 `5.4.9 / RC4` 评审合同；这是子合同版本，不是 Skill 版本漂移。正式 manifest 以 `schemas/review-workspace.schema.json` 为准。下面的 DOM 片段仅解释绑定方式，不是完整可直接过门禁的实现。
 
 图的触发依据业务依赖：仅有弹窗、抽屉或 secondary_context 不自动等于跨页业务链，也不因此强制每个只读浮层补流程图和正反例。实际状态迁移、跨角色交接及显式复杂度仍需对应图与验收。
 
@@ -27,6 +27,8 @@ R1/R2 只有三个一级页签：
 不得新增 Journey、Step Focus、Page、Acceptance 或产品/前端/后端/测试角色一级模式。复杂度只增加
 页签内信息深度，不增加导航维度。R0 快速评审可不渲染三个可见页签，但仍必须声明
 `CurrentContext`、`review_contexts` 分母并保证纯评审动作不改变 Product Fingerprint。
+
+5.5.2 的 R0 在用户仅需就近说明时，可省略 `progress_contract`、`share_contract`、`review_record_contract` 及对应功能，不为过门禁增建签署工作台。R0 若声明或展示分享、记录或确认进度，仍须兑现相应合同；确认进度依赖真实记录，浏览不计确认。R1/R2 保留这三项要求。旧检查器对轻量 R0 仍可能要求全量合同，需使用 5.5.2 检查；既有完整合同继续兼容。此裁剪不取消范围/语义覆盖、上下文、精确目标、角色说明或无业务副作用。
 
 ## 2. CurrentContext：产品决定评审位置
 
@@ -63,13 +65,15 @@ R1/R2 只有三个一级页签：
 
 ## 3. 三个页签各自拥有事实
 
+构建起点见 [可运行工作台](../examples/medium-review-handoff/review-prototype.html) 与其 [业务规格](../examples/medium-review-handoff/requirement.md)。先按当前项目映射业务对象、规则和范围，再替换内容；不要从门禁代码逆向拼装工作台。
+
 | 页签 | 唯一负责的完整内容 |
 |---|---|
 | 总览 | 背景/问题、目标与成功信号、角色表、范围/非目标、主链、变更摘要、P0/P1 摘要；复杂模块显示核心流程图并高亮 CurrentContext |
 | 功能与流转 | CurrentContext、当前业务职责、上下游、带同号 marker 的自然语言说明、可见/领域结果；复杂评审点按需展开前端实现、后端处理、测试验收 |
 | 边界与验收 | 详细规则、权限、指标、异常/恢复/幂等、少量正反例；按触发条件显示状态转换图或数据流图；最后提供默认收起的技术追溯 |
 
-其他页签只能摘要并引用，不得复制完整正文。一个内容域只能有一个 owner；同一规则、状态机、指标公式
+其他页签可摘要、定位或按需展开 owner 的同源内容，不另维护规则；当前动作旁应能读懂必要边界和验收。一个内容域只能有一个 owner；同一规则、状态机、指标公式
 或验收正文在多个页签重复出现时记录 `PROTO-REVIEW-TAB-OWNERSHIP`。流程图、状态图和数据流图只在
 确实满足 `prototype.md` 的触发条件时出现：总览显示核心流程和当前页面，功能与流转显示当前上下游，
 边界与验收持有详细状态/数据/规则合同。简单单页 CRUD 的 `diagram_contract` 明确记录不画图理由，
@@ -260,6 +264,8 @@ Product Fingerprint 至少覆盖：活动视图、路由、活动菜单路径、
 Overlay Stack、选中业务对象、业务状态，以及表单值、
 checked/disabled、筛选、分页、选择集合的稳定 hash。Review Fingerprint 单独记录活动页签、当前评审点、
 面板宽度/折叠、评审记录等评审状态。
+
+`selection_hash` 仅是业务对象选择集合，绝不是被点中的评审编号。marker 用独立定位层或目标内部不占位的锚点，不能作为 Grid/Flex 的业务兄弟项挤走卡片。正文、浮层、不同窗口尺寸下分别看实际呈现，数据指纹相等不证明布局未受影响。
 
 每个 `UIACT-REVIEW-*` 执行前后必须满足 `ProductFingerprint(before) == ProductFingerprint(after)`；
 只有真实 `ACT-*` 可以改变产品指纹，随后评审层重新解析 CurrentContext。静态扫描到点击/路由代码只能

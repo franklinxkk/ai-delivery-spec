@@ -4,17 +4,17 @@
 
 ## 先确定本次真实范围
 
-一句话要原型仍以交付原型为终点。明确小改直接处理相关页面；业务决定不足只澄清阻断部分，可继续部分先做。评审已有原型默认分析；修改原型按用户授权执行。
+一句话要原型仍须交原型；明确小改直接做，缺决定只澄清受阻部分。评审默认分析，修改按授权执行。
 
 存量 Stage 0 只盘点本次受影响的页面、角色/入口、动作和最终处理器、状态、实体/字段/指标、权威数据源与 Mock 覆盖。多份或大文件先建索引，再按路径读取，避免只读标题和前半段。区分“实际观察到”“推断”“目标要求”。
 
 关键链需核对上一步实际输出的对象、状态、版本及身份键能否进入下一入口、满足下一守卫；退回/重试也应能走回可达路径。两个按钮各自可点不能证明闭环。最终生效处理器可能覆盖前面定义，须核对真实执行路径。
 
-需要机器盘点时才使用 [Stage 0 模板](templates/stage0-inventory-template.yaml) 与相应 gate；轻改可用简短盘点，无须全项目台账。
+机器盘点可用 [Stage 0 模板](templates/stage0-inventory-template.yaml)；轻改只需简短盘点。
 
 ## 产品态与评审态
 
-默认交付可操作产品态。用户已要求双态、评审抽屉或逐项评审时，按 [review-workspace.md](review-workspace.md) 构建同一产品事实的评审投影；普通演示不为了模板额外询问评审偏好。
+默认可操作产品态。要求双态、评审抽屉或逐项评审时，按 [review-workspace.md](review-workspace.md)，以 [可运行样例](../examples/medium-review-handoff/review-prototype.html) 起步；先理解样例业务与本项目的差异，不能继承样例政策。普通演示不额外询问评审偏好。
 
 双态共用产品页面、状态和动作，不复制另一套业务实现。评审选择、高亮、说明展开不能改变产品业务数据。业务审批记录与需求评审记录分别建模。高级评审工具仍校验现有 CurrentContext、RVP 与声明分母合同；只有启用该功能时才承担相应结构要求。
 
@@ -30,22 +30,23 @@
 - 弹窗和抽屉由真实入口打开，带当前业务对象上下文；不靠孤立展示页面宣称可达。
 - 外部 iframe 只在真实集成需要时使用，声明来源、信任边界与失败退路；外部页面可打开不等于业务集成已验证。
 
-未决规则可以在评审层说明。产品层按已批准的限制行为处理；“冻结指标”“取最新成绩”“自动补偿”若本身决定业务含义，就不能擅定为默认退路。已有专业未知项注册器可以继续使用；未知负责人尚未指定时诚实写未指定，不虚构责任分配。
+未决在评审层说明；产品层只实现获批边界，不擅定“冻结指标”“取最新”“自动补偿”等业务退路。未知可沿用原注册器，负责人缺失写未指定。
 
 ## 保护范围与验证
 
-改动前后比较本次相关角色路径、页面/动作/处理器、状态结果及数据边界。未经取消的功能不能因重写而消失。用户要全量原型时，代表路径的成功不能代替全量范围完成。
+按用户要求及基线核对角色路径、页面/动作/处理器、状态、数据和视觉；已有 PAGE-CONTRACT 可直接作为范围输入。全量范围逐项有落点或授权取消，不能用已生成 marker 自定分母；抽样是验证方式，不是缩减交付的授权。
 
 跨模块主链、受守卫状态、多系统数据流分别按需给最小有用流程图、状态图、数据流图；简单 CRUD 不堆图。图、正文与实际交互的状态和对象必须一致。
 
-至少执行当前改动所需的脚本语法/文件完整性检查和关键交互验证；有浏览器时检查实际可操作性、视觉一致性与需要的响应式。无浏览器时如实说明未验证，不把静态 gate 当点击证据。检查只对当前来源版本和记录范围有效。
+执行脚本语法与关键交互验证；浏览器检查加载、实际入口/浮层/返回、状态恢复及常用尺寸视觉。评审 marker 不占业务 Grid/Flex 槽位；动态观察只做必要更新，反复操作须收敛，不靠存在 busy 字样证明。无浏览器保留未验证，不能声明可运行交付已验收。
 
 可选工具：
 
 ```powershell
 python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app.html
 python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app-new.html --prototype-baseline app-old.html
+python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype review.html --prd PRD.md --stage specify --require-review-workspace
 python scripts/scan_prototype_css.py app.html
 ```
 
-专业 prototype/handoff gate 的 L0–L4 参数仍用于旧锚点/兼容强度，不能决定需求篇幅、业务风险或证据等级。默认不跑 handoff/full；明确结构化交接才按 [context.md](context.md) 准备同源切片与对应门禁。
+评审交付用 `--require-review-workspace`；有同源 PRD 就传 `--prd` 核对，沿用原型则传基线。L0–L4 仅作旧锚点兼容强度，不决定篇幅或风险。无需另建 handoff manifest，只有长期机器协作才按 [context.md](context.md) 使用高级合同。

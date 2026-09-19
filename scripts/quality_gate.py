@@ -1326,6 +1326,7 @@ def main() -> int:
     parser.add_argument("--prd", type=Path, help="unified PRD Markdown")
     parser.add_argument("--prototype", type=Path, action="append", help="HTML prototype; repeat for admin/H5/multi-surface handoff")
     parser.add_argument("--prototype-baseline", type=Path, help="Optional previous HTML baseline; inherited prototype blockers become gaps, new regressions still block")
+    parser.add_argument("--require-review-workspace", action="store_true", help="Require the requested review workspace contract, even when the HTML omits review declarations")
     parser.add_argument("--inventory", type=Path, help="Stage 0 brownfield inventory YAML")
     parser.add_argument("--manifest", type=Path, help="Agent handoff manifest YAML")
     parser.add_argument("--acceptance-run", type=Path, action="append", help="Executed ARUN-* YAML; repeat when prototype AC evidence is split")
@@ -1339,6 +1340,8 @@ def main() -> int:
     parser.add_argument("--max-findings", type=int, default=20)
     parser.add_argument("--custom-root", type=Path, help="项目本地私有扩展目录；默认自动发现当前目录 custom/")
     args = parser.parse_args()
+    if args.require_review_workspace and args.profile not in {"prototype", "handoff", "full"}:
+        parser.error("--require-review-workspace requires a prototype, handoff or full profile")
     explicit_prototype_handoff = args.profile == "prototype" and args.prd is not None
     required = {
         "requirement": ("requirement",),
@@ -1350,6 +1353,8 @@ def main() -> int:
         "agent_handoff": ("manifest",),
     }[args.profile]
     gate = Gate()
+    gate.require_review_workspace = args.require_review_workspace
+    gate.metrics["review_workspace_required"] = args.require_review_workspace
     prototype_level = "L2" if args.level == "auto" else args.level
     if args.prototype_baseline:
         if not args.prototype_baseline.is_file():
@@ -1361,6 +1366,7 @@ def main() -> int:
                 (item.code, item.ref, item.message)
                 for item in baseline_gate.findings
                 if item.severity == "BLOCK" and item.code.startswith("PROTO-")
+                and not (args.require_review_workspace and item.code.startswith("PROTO-REVIEW-"))
             )
             baseline_raw = baseline_gate.read(args.prototype_baseline)
             gate.metrics.update({

@@ -25,7 +25,7 @@ def load_declarations(raw: str) -> dict:
         raise ValueError("Declaration root must be an object")
     return value
 
-VERSION = "5.5.1"
+VERSION = "5.5.2"
 MODES = {"direct", "card", "prd"}
 RISK_SIGNALS = {
     "state": ("states", "cross_module_state", "approval", "workflow"),

@@ -1,5 +1,5 @@
 schema_version: 5.3.0
-skill_version: 5.5.1
+skill_version: 5.5.2
 runtime: pure_v5
 domain_packs:
   count: 8
@@ -28,22 +28,22 @@ trace_release_proxy:
   effectiveness_limit: deterministic/private calibration repaired gaps; blind A/B,
     token/time and human ratings remain incomplete
 release_evidence:
-  verified_at: '2026-09-13'
-  scope: 5.5.1 release-source checks on Windows / Python 3.12.10;
-    not customer or production acceptance. Package provenance, CI and publication
-    are recorded in the versioned GitHub release.
+  verified_at: '2026-09-19'
+  scope: 5.5.2 local candidate checks on Windows / Python 3.12.10;
+    not customer or production acceptance. Public release is not performed.
   results:
-    pytest: 200_passed
-    requirements_regressions: 27_new_targeted_cases_passed
-    review_regressions: 33_passed_in_full_suite_including_2_new_tests
+    pytest: 207_passed
+    requirements_regressions: 7_new_targeted_cases_passed
+    review_regressions: shipped_example_bound_gate_zero_block_zero_gap_and_37_browser_checks_passed
     release_gate: passed
     public_quickstart_and_badcases: passed
-    runtime_package_check: 116_source_files_and_extracted_self_checks_passed
+    runtime_package_check: preflight_117_sources_passed_clean_final_identity_in_manifest
     skill_creator_quick_validate: passed_with_explicit_utf8
-    independent_forward_test: three_artifacts_reviewed_final_agent_summary_interrupted_by_quota
-    behavioral_comparison: historical_5.5.0_paired_trials_not_a_5.5.1_effect_size
-    installation: not_run
-    publication: see_github_release_v5.5.1
+    independent_forward_test: four_tasks_three_groups_artifacts_reviewed_interrupted_runs_disclosed
+    behavioral_comparison: local_readability_gain_observed_no_stable_effect_size
+    generated_candidate_followup: 18_browser_checks_passed_gate_42_block_6_gap_not_qualified_handoff
+    installation: isolated_preflight_5_commands_passed_after_normal_imports_global_not_run
+    publication: not_run
 known_limitations:
 - contract tests do not prove fresh-agent/expert/production maturity
 - domain, legal, safety, financial, production and customer correctness remain not

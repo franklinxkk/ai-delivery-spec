@@ -1,161 +1,221 @@
-<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>服务工单驾驶舱｜中等评审态样例</title>
-  <style>
-    :root{--brand:#5b5ce2;--brand-soft:#eeefff;--ink:#172033;--muted:#6b7280;--line:#e7eaf0;--canvas:#f5f7fb;--good:#16a36a;--warn:#e79022;--danger:#e24c4b;--review:390px}
-    *{box-sizing:border-box} body{margin:0;font:14px/1.55 Inter,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);background:var(--canvas)}
-    button,select{font:inherit} button{cursor:pointer}.app{min-height:100vh;display:grid;grid-template-columns:208px minmax(0,1fr) var(--review);transition:grid-template-columns .22s ease}
-    .app.review-collapsed{grid-template-columns:208px minmax(0,1fr) 0}.sidebar{background:#14213d;color:#dce5f7;padding:22px 14px;position:sticky;top:0;height:100vh}
-    .brand{font-weight:800;font-size:17px;color:#fff;margin:0 10px 26px}.menu{display:grid;gap:6px}.menu button{border:0;background:transparent;color:inherit;text-align:left;border-radius:9px;padding:11px 12px}.menu button.active{background:#3346a6;color:#fff}.menu small{display:block;color:#9fb0cf;margin:22px 12px 6px}
-    .main{min-width:0;padding:22px 26px 48px}.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.crumb{color:var(--muted);font-size:13px}.top-actions{display:flex;gap:8px}.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 13px;color:var(--ink)}.btn.primary{border-color:var(--brand);background:var(--brand);color:#fff}
-    h1{font-size:24px;margin:6px 0 3px}h2{font-size:16px;margin:0}.subtitle{color:var(--muted);margin:0}.filters{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin:18px 0}.filters select{border:1px solid var(--line);border-radius:8px;padding:8px 30px 8px 10px;background:#fff}
-    .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.metric{position:relative;background:#fff;border:1px solid var(--line);border-radius:13px;padding:17px;min-height:116px}.metric .label{color:var(--muted)}.metric strong{display:block;font-size:27px;margin:8px 0 2px}.metric .delta{font-size:12px;color:var(--good)}
-    .section-head{display:flex;justify-content:space-between;align-items:center;margin:24px 0 10px}.legend{font-size:12px;color:var(--muted)}.board{display:grid;grid-template-columns:repeat(4,minmax(210px,1fr));gap:12px;overflow:auto;padding-bottom:8px}.lane{background:#eef1f6;border-radius:13px;padding:12px;min-height:360px}.lane-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}.count{background:#fff;color:var(--muted);border-radius:99px;padding:1px 8px}
-    .ticket{position:relative;background:#fff;border:1px solid var(--line);border-radius:10px;padding:13px;margin-bottom:9px;box-shadow:0 3px 12px rgba(18,33,62,.04)}.ticket:hover{border-color:#b8baf4}.ticket h3{font-size:14px;margin:0 0 8px}.ticket-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}.tag{display:inline-block;border-radius:5px;padding:2px 6px;background:#fff1df;color:#b86500;font-size:12px;margin-bottom:7px}
-    .marker{position:absolute;top:-9px;right:-8px;width:25px;height:25px;border:2px solid #fff;border-radius:50%;background:var(--brand);color:#fff;font-weight:800;box-shadow:0 3px 10px rgba(91,92,226,.35);z-index:3}.marker.static{position:relative;top:auto;right:auto;flex:0 0 auto}.review-selected,[data-review-target-selected="true"]{outline:3px solid rgba(91,92,226,.42);outline-offset:3px}.marker[aria-current=true],.review-card[aria-current=true]{background:var(--brand-soft);color:var(--brand);border-color:var(--brand)}
-    .review{min-width:0;background:#fff;border-left:1px solid var(--line);height:100vh;position:sticky;top:0;overflow:auto;transition:opacity .16s ease}.review-collapsed .review{opacity:0;pointer-events:none;overflow:hidden}.review-inner{padding:18px}.review-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.review-head h2{font-size:18px}.context{color:var(--brand);font-size:12px;margin-top:3px}.close{border:0;background:#f1f3f7;border-radius:7px;width:30px;height:30px}.review-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:16px 0}.review-tabs button{border:0;border-radius:7px;background:#f1f3f7;padding:8px 3px;color:var(--muted)}.review-tabs button.active{background:var(--brand-soft);color:var(--brand);font-weight:700}.tab{display:none}.tab.active{display:block}.summary{background:#f8f9fc;border-radius:10px;padding:11px;margin-bottom:11px;font-size:13px}.review-list:not([hidden]){display:grid;gap:8px}.review-list[hidden]{display:none}.review-card{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px;display:grid;grid-template-columns:25px 1fr;gap:9px;color:var(--ink)}.review-card .num{width:25px;height:25px;border-radius:50%;display:grid;place-items:center;background:var(--brand);color:#fff;font-weight:800}.review-card strong{display:block;margin-bottom:3px}.review-card p{margin:0;color:#4b5563;font-size:13px}.review-card .meta{margin-top:5px;color:#8a91a0;font-size:11px}.note{border-left:3px solid var(--warn);background:#fff8ed;padding:9px 10px;margin:9px 0;color:#77501d;font-size:12px}.coverage{width:100%;border-collapse:collapse;font-size:12px}.coverage th,.coverage td{border-bottom:1px solid var(--line);padding:7px;text-align:left}.ok{color:var(--good);font-weight:700}.not-proven{color:var(--danger)}
-    .review-launch{position:fixed;right:18px;top:18px;z-index:45;display:none;border:0;border-radius:9px;background:var(--brand);color:#fff;padding:9px 13px;box-shadow:0 5px 18px rgba(91,92,226,.35)}.app.review-collapsed ~ .review-launch{display:block}
-    .drawer-mask{position:fixed;left:208px;right:var(--review);top:0;bottom:0;background:rgba(15,23,42,.34);display:none;z-index:30}.drawer-mask.open{display:block}.drawer{position:absolute;right:0;top:0;height:100%;width:min(620px,92vw);background:#fff;box-shadow:-16px 0 40px rgba(15,23,42,.14);padding:22px;overflow:auto}.drawer-head{display:flex;justify-content:space-between;align-items:start;border-bottom:1px solid var(--line);padding-bottom:14px}.drawer-head button{border:0;background:#f2f4f7;border-radius:7px;width:30px;height:30px}.origin{background:#f7f8fb;border-radius:10px;padding:11px;margin:15px 0}.form-row{position:relative;margin:15px 0}.form-row label{display:block;font-weight:700;margin-bottom:6px}.form-row input,.form-row textarea,.form-row select{width:100%;border:1px solid #cfd5df;border-radius:8px;padding:9px}.form-row textarea{min-height:82px;resize:vertical}.drawer-actions{display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--line);padding-top:14px}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#172033;color:#fff;border-radius:8px;padding:9px 14px;display:none;z-index:50}.toast.show{display:block}
-    .review-card .meta{display:none}.review-card details{grid-column:2;margin-top:7px}.review-card summary,.technical-trace summary{cursor:pointer;color:var(--brand);font-size:12px}.role-grid{display:grid;gap:5px;margin-top:7px;padding:8px;background:#f8f9fc;border-radius:8px;font-size:12px}.flow{display:flex;align-items:center;gap:6px;overflow:auto;padding:9px 0 13px}.flow-node{min-width:82px;border:1px solid var(--line);border-radius:9px;padding:8px;text-align:center;background:#fff;font-size:12px}.flow-node[data-flow-current="true"]{border-color:var(--brand);background:var(--brand-soft);color:var(--brand);font-weight:700}.flow-arrow{color:#9aa1ae}.example{border:1px solid var(--line);border-radius:9px;padding:9px;margin:8px 0;font-size:12px}.example.good{border-left:3px solid var(--good)}.example.bad{border-left:3px solid var(--danger)}.technical-trace{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}.technical-trace pre{white-space:pre-wrap;font-size:11px;color:#667085;background:#f8f9fc;padding:8px;border-radius:7px}
-    @media(max-width:1100px){.app{grid-template-columns:76px minmax(0,1fr) var(--review)}.app.review-collapsed{grid-template-columns:76px minmax(0,1fr) 0}.brand{font-size:0}.brand:after{content:"OPS";font-size:15px}.menu button{font-size:0}.menu button:before{content:"•";font-size:20px}.metrics{grid-template-columns:repeat(2,1fr)}.drawer-mask{left:76px}}
-    @media(max-width:760px){.app,.app.review-collapsed{display:block}.sidebar{display:none}.main{padding:16px}.review{position:fixed;inset:0;z-index:40}.review-collapsed .review{display:none}.metrics{grid-template-columns:1fr}.review-launch{top:auto;bottom:18px}.filters{align-items:stretch;flex-direction:column}.drawer-mask{inset:0}}
-  </style>
-</head>
-<body>
-  <div class="app" id="app" data-state="board_ready">
-    <aside class="sidebar">
-      <div class="brand">ServiceOps 中台</div>
-      <nav class="menu" aria-label="主菜单">
-        <small>经营分析</small>
-        <button class="active" data-action="ACT-NAV-DASH">响应驾驶舱</button>
-        <button data-action="ACT-NAV-CUSTOMER">客户视图</button>
-        <small>服务协同</small>
-        <button data-action="ACT-NAV-TICKET">服务工单</button>
-        <button data-action="ACT-NAV-ITERATION">需求迭代</button>
-      </nav>
-    </aside>
+<!doctype html><html lang="zh-CN"><head><title>设备维修工单 · 评审样例</title><meta name="viewport" content="width=device-width, initial-scale=1"><meta charset="UTF-8"><style>:root{font-family:system-ui,"Microsoft YaHei",sans-serif;color:#1b2c3b;background:#f3f6fa;--review-width:420px}*{box-sizing:border-box}body{margin:0;display:grid;grid-template-columns:minmax(0,1fr) var(--review-width);min-height:100vh}body.ads-collapsed{grid-template-columns:1fr}[hidden]{display:none}#product{padding:32px;min-width:0;max-width:1200px;width:100%;margin:auto;margin-top:0}header{border-bottom:1px solid #d9e1eb;margin-bottom:24px;padding-bottom:18px}h1{font-size:32px;margin:8px 0}h2{font-size:22px}small{color:#597083;letter-spacing:1px}button,select,input,textarea{font:inherit}button{border:1px solid #c7d3e0;background:white;border-radius:7px;padding:9px 13px;cursor:pointer;color:#194058}button:hover{background:#e7eef8}button:disabled{opacity:.48;cursor:not-allowed}button.active,[aria-current=true]{background:#e0ebff;border-color:#517dc7}label{display:block;margin:12px 0}input,select,textarea{padding:9px;border:1px solid #bbcbdc;border-radius:6px;max-width:100%}textarea{display:block;width:100%;resize:vertical}.toolbar,.actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:18px 0}.order-card{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:24px;background:white;border:1px solid #d9e1eb;border-radius:12px;margin-top:20px}.anchor-wrap{position:relative;display:inline-block}.marker{position:absolute;right:-10px;top:-13px;width:23px;height:23px;padding:0;border-radius:50%;background:#e1eaff;border:1px solid #426ed4;font-size:12px;z-index:1}.ads-collapsed .marker{display:none}#drawer{background:white;border:2px solid #7e9abb;border-radius:12px;padding:24px;margin-top:24px}#feedback{padding:14px;background:#e8eff7;border-radius:8px;white-space:pre-wrap}#audit{white-space:pre-wrap;font-size:12px}#breadcrumb{font-size:13px;color:#587187}.muted{font-size:12px;color:#697988}[data-review-workspace]{min-width:0;border-left:1px solid #c8d3e2;background:white;padding:20px;height:100vh;position:sticky;top:0;overflow:auto;resize:horizontal}.ads-collapsed [data-review-workspace]{display:none}[data-review-workspace] nav{display:flex;gap:4px;flex-wrap:wrap}[data-review-workspace] nav button{font-size:13px;padding:8px}[data-review-workspace]>button{font-size:12px;margin:4px 3px;padding:7px}[data-review-workspace] h3{font-size:17px;margin:6px 0}[data-review-point]{border:1px solid #cfdaeb;padding:13px;border-radius:8px;margin:14px 0;cursor:pointer}[data-review-point] p,[data-review-tab] p{line-height:1.7;font-size:14px}[data-review-role-details]{border-top:1px solid #d9e0eb;padding-top:10px}[data-review-role-detail]{background:#f3f6fb;padding:8px}summary{cursor:pointer}[data-review-example]{padding:12px;background:#f1f5fb;margin:12px 0;border-radius:6px}[data-review-target-selected=true]{outline:3px solid #576dda;outline-offset:4px}[data-flow-current=true]{border-left:4px solid #3b6fc8;background:#e6efff;padding:8px}figure{margin:14px 0}figure div{padding:8px}figcaption{font-weight:600}fieldset{border:1px solid #d2ddea;border-radius:8px;margin-top:12px}#review-message{display:block;white-space:pre-wrap;color:#75491e;padding:8px}#review-json{font-size:12px;min-height:60px}[data-review-progress]{font-size:13px;padding:8px;color:#3c6382}.compact-review #product{display:none}.compact-review{display:block}.compact-review [data-review-workspace]{width:100%;height:100vh;resize:none}@media(max-width:850px){body{display:block}#product{padding:18px}[data-review-workspace]{display:none;width:100%;height:100vh;resize:none}.compact-review [data-review-workspace]{display:block}.compact-review #product{display:none}.order-card{gap:12px;padding:18px}.toolbar{gap:8px}.marker{right:-6px}}
+</style></head><body class="ads-collapsed">
+      <div id="product"><header><small>FIELD SERVICE / 虚构教学样例</small><h1>设备维护</h1><p>工单指派到完成 · 本地模拟，不连接真实系统</p></header>
+<nav><button class="active" data-action="ACT-X-NAVIGATE" data-view-target="VIEW-X">工单列表</button></nav>
+<p id="breadcrumb">设备维护 / 工单列表</p><h2 id="page-title">工单列表</h2>
+<div class="toolbar"><label>模拟身份 <select id="actor"><option value="dispatcher">调度员</option><option value="lin">林工</option><option value="chen">陈工</option></select></label><button id="reset">重置工单</button><button data-action="UIACT-REVIEW-TOGGLE" data-ads-act="expand">打开评审说明</button></div>
+<!-- PAGE-CONTRACT: VIEW-X; primary=list; layout=composite; surfaces=list,drawer_form -->
+<main data-testid="page-VIEW-X" data-review-context-root="VIEW-X" data-review-context-type="VIEW">
+<label>当前工单 <select id="work-order"><option value="001">001 · 水泵异响</option><option value="002">002 · 风机振动</option></select></label>
+<section class="order-card"><div><small>当前工单</small><h2 id="order-name"></h2><p id="order-status" data-domain-state data-state="pending"></p></div><div><small>维修员</small><h3 id="assignee"></h3><p id="result-note"></p></div></section>
+<div class="actions"><span class="anchor-wrap"><button data-action="ACT-X-SUBMIT" data-ac="AC-X-SUBMIT">指派给林工</button><button class="marker" data-action="UIACT-REVIEW-SELECT" data-review-ref="RVP-VIEW-SUBMIT" data-review-context="VIEW-X" data-review-number="1" aria-current="false">1</button></span><button id="open-detail" data-target="drawer">打开详情</button></div></main>
+<section id="drawer" hidden role="dialog" aria-label="工单详情" data-testid="drawer-DRAWER-X" data-review-context-root="DRAWER-X" data-review-context-type="DRAWER"><h2>工单详情</h2><p id="detail-summary"></p><label>完成说明（去除首尾空白后 1—100 字符）<textarea id="completion-note" rows="4"></textarea></label><div class="actions"><span class="anchor-wrap"><button data-action="ACT-X-CONFIRM" data-ac="AC-X-CONFIRM">完成工单</button><button class="marker" data-action="UIACT-REVIEW-SELECT" data-review-ref="RVP-DRAWER-CONFIRM" data-review-context="DRAWER-X" data-review-number="1" aria-current="false">1</button></span><button id="refresh-order">刷新工单</button><button id="close-detail">返回列表</button></div><button id="simulate-conflict" class="muted">模拟别人更新版本（测试工具）</button></section>
+<p id="feedback" role="status">请选择工单后操作。</p><details><summary>查看本地模拟审计</summary><pre id="audit"></pre></details></div><aside data-review-workspace="REVIEW-X" data-review-level="R1"
+        data-review-active-tab="overview" data-review-current-context="VIEW-X"
+        data-review-current-context-control="read-only" data-review-layout="participate-in-layout"
+        data-review-overlay-product-ui="false" data-review-resizable="true" data-review-collapsible="true">
+        <p data-review-product-location>系统位置：设备维护 / 工单列表</p>
 
-    <!-- PAGE-CONTRACT: VIEW-BOARD-001; primary=dashboard; layout=composite; surfaces=filters,metrics,workflow,drawer_form -->
-    <main class="main" data-testid="page-VIEW-BOARD-001" data-review-context-root="VIEW-BOARD-001" data-review-context-type="VIEW">
-      <div class="topbar">
-        <div><div class="crumb">经营分析 / 响应驾驶舱</div><h1>服务响应驾驶舱</h1><p class="subtitle">从异常发现到需求交付的统一响应视图</p></div>
-        <div class="top-actions"><button class="btn" data-action="ACT-EXPORT">导出</button><button class="btn primary" data-action="ACT-CREATE">新建工单</button></div>
-      </div>
-
-      <section class="filters" data-review-anchor="ACT-FILTER-001">
-        <button class="marker" data-review-ref="RVP-FILTER" aria-current="true">1</button>
-        <select aria-label="时间范围"><option>近 30 天</option><option>本月</option><option>本季度</option></select>
-        <select aria-label="服务团队"><option>全部服务团队</option><option>一线客服组</option><option>产品支持组</option></select>
-        <button class="btn primary" data-action="ACT-FILTER-001">查询</button><button class="btn" data-action="ACT-RESET">重置</button>
+      <nav><button data-action="UIACT-REVIEW-TAB" data-review-tab-target="overview">总览</button><button data-action="UIACT-REVIEW-TAB" data-review-tab-target="function_flow">功能与流转</button><button data-action="UIACT-REVIEW-TAB" data-review-tab-target="boundary_acceptance">边界与验收</button></nav>
+      <section data-review-tab="overview">
+        <div data-review-content="goals_success" data-review-owner-tab="overview">调度到完成，工单、执行人与审计保持一致。</div>
+        <div data-review-content="scope" data-review-owner-tab="overview">仅指派和完成；不含创建、撤销、转派、费用或生产后端。</div>
+        <div data-review-content="main_chain" data-review-owner-tab="overview">列表指派 → 当前工单详情 → 完成返回列表。</div><div data-review-content="core_flow_diagram" data-review-owner-tab="overview">
+      <figure data-review-diagram="DIAG-X-CORE" data-review-diagram-type="core_flow" data-review-diagram-owner="overview" data-review-context="VIEW-X">
+        <figcaption>工单指派与完成</figcaption>
+        <div data-review-flow-context="VIEW-X" data-review-diagram-ref="DIAG-X-CORE" data-flow-current="true">调度员在工单列表指派（当前页面）</div>
+        <div>维修员接手已指派工单</div>
+        <div data-review-flow-context="DRAWER-X" data-review-diagram-ref="DIAG-X-CORE" data-flow-current="false">维修员填写说明，完成后返回列表</div>
+      </figure>
+    </div>
       </section>
-
-      <section class="metrics" aria-label="响应指标">
-        <article class="metric" data-metric="METRIC-DUE-001" data-review-anchor="METRIC-DUE-001"><button class="marker" data-review-ref="RVP-METRIC-DUE">2</button><span class="label">待响应</span><strong>18</strong><span class="delta">较昨日 -3</span></article>
-        <article class="metric" data-metric="METRIC-SLA-001" data-review-anchor="METRIC-SLA-001"><button class="marker" data-review-ref="RVP-METRIC-SLA">3</button><span class="label">按时响应率</span><strong>92.6%</strong><span class="delta">较上期 +2.1%</span></article>
-        <article class="metric" data-metric="METRIC-WIP-001" data-review-anchor="METRIC-WIP-001"><button class="marker" data-review-ref="RVP-METRIC-WIP">4</button><span class="label">处理中</span><strong>31</strong><span class="delta">其中 6 条临近 SLA</span></article>
-        <article class="metric" data-metric="METRIC-CLOSED-001" data-review-anchor="METRIC-CLOSED-001"><button class="marker" data-review-ref="RVP-METRIC-CLOSED">5</button><span class="label">已关闭</span><strong>126</strong><span class="delta">近 30 天</span></article>
+      <section data-review-tab="function_flow">
+        <div data-review-content="current_context" data-review-owner-tab="function_flow">说明随当前列表或工单详情同步；仅阅读不改变业务。</div>
+        <div data-review-content="review_points" data-review-owner-tab="function_flow"><article data-action="UIACT-REVIEW-SELECT" data-review-point="RVP-VIEW-SUBMIT" data-review-context="VIEW-X" data-review-number="1" data-review-business-status="confirmed" data-review-verification-status="not_run" data-review-evidence-origin="explicit_source" aria-current="false"><h3>指派给林工</h3><p>调度员对待处理工单指派林工。校验身份、状态和版本后，一次写入执行人、已指派状态、版本及审计；失败不写入，刷新后由用户重试。</p><details data-review-role-details data-review-detail-for="RVP-VIEW-SUBMIT"><summary>查看实现与验收要点</summary>
+          <p data-review-role-detail="frontend">前端：仅调度员且当前工单待处理时启用指派；版本拒绝后保留选择，明确提示刷新。</p>
+          <p data-review-role-detail="backend">后端：从认证身份取调度权限，对同一工单检查待处理与读取版本；原子写执行人、状态、版本和一次审计。</p>
+          <p data-review-role-detail="qa">测试：独立重置后分别执行正常指派、仅身份变化、重复指派；逐一核对版本和审计数量。</p>
+        </details><p>业务：已确认 · 验证：未执行 · 来源：明确来源</p></article><article data-action="UIACT-REVIEW-SELECT" data-review-point="RVP-DRAWER-CONFIRM" data-review-context="DRAWER-X" data-review-number="1" data-review-business-status="confirmed" data-review-verification-status="not_run" data-review-evidence-origin="explicit_source" aria-current="false"><h3>完成工单</h3><p>仅被指派维修员可完成。说明去除首尾空白后须有 1—100 个字符；校验身份、状态、版本和说明后一次保存，关闭详情并更新原列表。失败保留输入，不产生完成审计。</p><details data-review-role-details data-review-detail-for="RVP-DRAWER-CONFIRM"><summary>查看实现与验收要点</summary>
+          <p data-review-role-detail="frontend">前端：详情属于当前工单；失败保留完成说明，成功关闭并刷新列表。刷新版本不能清空用户说明。</p>
+          <p data-review-role-detail="backend">后端：校验认证身份等于执行人、已指派状态、版本及修剪后的说明长度；全通过才原子完成。</p>
+          <p data-review-role-detail="qa">测试：分别构造无权、空白、101 字符、旧版本和重复提交，确保拒绝原因正确且无成功副作用。</p>
+        </details><p>业务：已确认 · 验证：未执行 · 来源：明确来源</p></article></div>
+        <p data-review-semantic-ref="SCOV-VIEW-SUBMIT" data-review-semantic-owner="function_flow" data-review-context="VIEW-X">调度员对待处理工单指派林工。校验身份、状态和版本后，一次写入执行人、已指派状态、版本及审计；失败不写入，刷新后由用户重试。</p>
+        <div data-review-content="visible_domain_results" data-review-owner-tab="function_flow">指派显示执行人；完成显示说明。两者各写一条成功审计，失败无业务副作用。</div>
       </section>
-
-      <div class="section-head" data-review-anchor="RULE-FLOW-001"><div><h2>需求迭代流转</h2><span class="legend">点击卡片查看任务拆解与验收</span></div><button class="marker static" data-review-ref="RVP-FLOW">6</button></div>
-      <section class="board" aria-label="需求流转泳道">
-        <div class="lane"><div class="lane-head"><b>待响应</b><span class="count">3</span></div>
-          <article class="ticket" tabindex="0" data-action="ACT-OPEN-TASK" data-ticket="DMD-024" data-review-anchor="ACT-OPEN-TASK-001"><button class="marker" data-review-ref="RVP-TASK-OPEN">7</button><span class="tag">P1 · 客户工单</span><h3>批量导入失败需要错误明细</h3><div class="ticket-meta"><span>客服一组</span><span>剩余 2h</span></div></article>
-          <article class="ticket" tabindex="0" data-action="ACT-OPEN-TASK" data-ticket="DMD-027"><h3>消息通知增加已读状态</h3><div class="ticket-meta"><span>客服二组</span><span>剩余 6h</span></div></article>
-        </div>
-        <div class="lane"><div class="lane-head"><b>分析中</b><span class="count">2</span></div><article class="ticket"><span class="tag">P1 · 产品分析</span><h3>工单升级后自动关联需求</h3><div class="ticket-meta"><span>产品 A</span><span>今日</span></div></article></div>
-        <div class="lane"><div class="lane-head"><b>待排期</b><span class="count">4</span></div><article class="ticket"><span class="tag">P2 · 待评估</span><h3>客户健康度增加服务指标</h3><div class="ticket-meta"><span>产品 B</span><span>v2.6</span></div></article></div>
-        <div class="lane"><div class="lane-head"><b>开发中</b><span class="count">3</span></div><article class="ticket"><span class="tag">P0 · 联调中</span><h3>回款异常自动生成响应任务</h3><div class="ticket-meta"><span>版本负责人</span><span>68%</span></div></article></div>
+      <section data-review-tab="boundary_acceptance">
+        <div data-review-content="rules" data-review-owner-tab="boundary_acceptance">调度员只能指派待处理工单；被指派维修员才能完成。旧版本或非法输入拒绝后保留输入。</div>
+        <p data-review-semantic-ref="SCOV-DRAWER-CONFIRM" data-review-semantic-owner="boundary_acceptance" data-review-context="DRAWER-X">仅被指派维修员可完成。说明去除首尾空白后须有 1—100 个字符；校验身份、状态、版本和说明后一次保存，关闭详情并更新原列表。失败保留输入，不产生完成审计。</p>
+        <div data-review-content="acceptance_tests" data-review-owner-tab="boundary_acceptance">每个反例先满足其他条件，仅改变待测条件。其他用例见配套规格模块表。</div>
+        <div data-review-content="acceptance_examples" data-review-owner-tab="boundary_acceptance"><article data-review-example="TEST-X-VIEW-POS" data-review-example-kind="positive" data-review-context="VIEW-X" data-review-acceptance-ref="AC-X-SUBMIT"><b>正向样例</b><p>前提：重置后，调度员选中待处理、版本 1 的工单 001</p><p>动作：点击指派给林工</p><p>页面结果：显示已指派和林工</p><p>业务结果：工单版本 2，恰好一条指派审计</p></article><article data-review-example="TEST-X-VIEW-NEG" data-review-example-kind="negative" data-review-context="VIEW-X" data-review-acceptance-ref="AC-X-SUBMIT"><b>反向样例</b><p>前提：重置后，仅把调用身份改为林工，工单仍待处理、版本 1</p><p>动作：直接请求指派</p><p>页面结果：提示仅调度员可指派</p><p>业务结果：工单、版本和审计均不变</p></article><article data-review-example="TEST-X-DRAWER-POS" data-review-example-kind="positive" data-review-context="DRAWER-X" data-review-acceptance-ref="AC-X-CONFIRM"><b>正向样例</b><p>前提：独立重置并合法指派给林工；林工打开详情，填入更换轴承，试运行正常</p><p>动作：点击完成工单</p><p>页面结果：抽屉关闭，列表显示已完成和说明</p><p>业务结果：同一工单版本 3，累计两条审计</p></article><article data-review-example="TEST-X-DRAWER-NEG" data-review-example-kind="negative" data-review-context="DRAWER-X" data-review-acceptance-ref="AC-X-CONFIRM"><b>反向样例</b><p>前提：合法指派给林工，填入有效说明后模拟版本更新</p><p>动作：继续完成旧版本工单</p><p>页面结果：提示刷新，抽屉及输入保留；刷新后由用户重试</p><p>业务结果：不覆盖新版本，不追加完成审计</p></article></div><details data-review-trace><summary>技术追溯</summary><p>AC-X-CONFIRM / AC-X-SUBMIT / ACT-X-CONFIRM / ACT-X-SUBMIT / DIAG-X-CORE / DRAWER-X / EVT-SAVED / REG-RESULT / REQ-X / REVIEW-X / ROLE-OPERATOR / RULE-DUPLICATE / RULE-READY / RVP-DRAWER-CONFIRM / RVP-VIEW-SUBMIT / SCOV-DRAWER-CONFIRM / SCOV-VIEW-SUBMIT / SRC-X / STATE-SAVED / TEST-X-DRAWER-NEG / TEST-X-DRAWER-POS / TEST-X-VIEW-NEG / TEST-X-VIEW-POS / VIEW-X</p><p>baseline_ref / context_ref / review_point_ref / active_tab</p></details><div data-review-content="open_items" data-review-owner-tab="boundary_acceptance">本例业务约定已写清。真实认证、数据库事务、多人并发和客户验收未验证。</div>
       </section>
-    </main>
+      <button data-action="UIACT-REVIEW-TOGGLE" data-ads-act="collapse">收起说明</button>
+      <button data-action="UIACT-REVIEW-TOGGLE" data-ads-act="expand">展开说明</button>
+      <button data-action="UIACT-REVIEW-SHARE" data-review-share-locator>复制定位</button>
+      <button data-action="UIACT-REVIEW-RECORD">提交评审结论</button>
+      <button data-action="UIACT-REVIEW-EXPORT">导出记录</button>
+      <button data-action="UIACT-REVIEW-IMPORT">导入记录</button>
+      <button data-action="UIACT-REVIEW-COMPACT">切换全屏</button>
+      <div data-review-progress data-review-progress-denominator="2" data-review-progress-resolved="0">0/2</div>
+      <fieldset id="record-editor"><legend>评审结论（与业务状态独立）</legend><label>评阅者 <input id="reviewer" placeholder="姓名或团队"></label><label>结论 <select id="disposition"><option value="confirmed">确认</option><option value="accepted_with_gap">接受缺口</option><option value="blocked">阻塞</option></select></label><label>依据 / 缺口 <textarea id="comment"></textarea></label></fieldset><div data-review-records></div><textarea id="review-json" aria-label="评审记录导入导出 JSON" placeholder="导出内容或粘贴要导入的记录"></textarea><output id="review-message" role="status"></output>
+      </aside>
+      <script type="application/json" id="review-workspace-manifest">{"schema_version": "5.4.9", "contract_revision": "RC4", "workspace_id": "REVIEW-X", "language": "zh-CN", "baseline": {"version": "1.0", "hash": "26e0ccde7e385ad26fab543147817929f4cab302c06aa2195d8797d670544dba", "requirement_ref": "requirement.md"}, "workspace": {"review_level": "R1", "default_tab": "overview", "initial_context_ref": "VIEW-X"}, "tabs": ["overview", "function_flow", "boundary_acceptance"], "context_contract": {"resolution": "topmost_business_overlay_else_active_view", "allowed_types": ["VIEW", "MODAL", "DRAWER", "POPOVER"], "current_context_control": "read_only", "resolution_priority": ["product_context_event", "declared_detection_contract", "mutation_observer_reresolve_only"], "product_context_event": "product-context-change"}, "product_location_contract": {"view_policy": "exactly_one_active_entry_or_declared_exempt", "overlay_policy": "inherit_parent_view_location", "synchronized_fields": ["active_view", "route", "active_menu_path", "expanded_menu_ancestors", "breadcrumb", "page_title", "current_context"], "review_actions_preserve_location": true, "mismatch_result": "block"}, "review_contexts": [{"context_ref": "VIEW-X", "context_type": "VIEW", "title": "工单列表", "detection": {"type": "product_state_equals", "target": "activeView", "expected": "VIEW-X", "overlay_priority": 0}, "product_location": {"navigation_mode": "menu_bound", "menu_path": ["设备维护", "工单列表"], "active_entry_selector": "[data-view-target='VIEW-X']", "route_ref": "VIEW-X", "breadcrumb": ["设备维护", "工单列表"], "page_title": "工单列表", "parent_view_ref": null, "exemption_reason": null}, "surface_types": ["list", "drawer_form"], "secondary_context_refs": ["DRAWER-X"], "review_point_refs": ["RVP-VIEW-SUBMIT"]}, {"context_ref": "DRAWER-X", "context_type": "DRAWER", "title": "工单详情", "detection": {"type": "selector_visible", "target": "[data-review-context-root='DRAWER-X']", "expected": true, "overlay_priority": 10}, "product_location": {"navigation_mode": "inherit_parent", "menu_path": ["设备维护", "工单列表"], "active_entry_selector": "[data-view-target='VIEW-X']", "route_ref": "VIEW-X#DRAWER-X", "breadcrumb": ["设备维护", "工单列表", "工单详情"], "page_title": "工单详情", "parent_view_ref": "VIEW-X", "exemption_reason": null}, "surface_types": ["form"], "secondary_context_refs": [], "review_point_refs": ["RVP-DRAWER-CONFIRM"]}], "review_points": [{"ref": "RVP-VIEW-SUBMIT", "subject_ref": "ACT-X-SUBMIT", "owner_context_ref": "VIEW-X", "marker_required": true, "target_ref": "ACT-X-SUBMIT", "target_selector": "[data-action='ACT-X-SUBMIT']", "target_mode": "selector_exactly_one", "title": "指派给林工", "business_status": "confirmed", "verification_status": "not_run", "evidence_origin": "explicit_source", "evidence_refs": [], "summary": "调度员对待处理工单指派林工。校验身份、状态和版本后，一次写入执行人、已指派状态、版本及审计；失败不写入，刷新后由用户重试。", "actor_refs": ["ROLE-OPERATOR"], "precondition_refs": ["RULE-READY"], "visible_result_refs": ["REG-RESULT"], "domain_result_refs": ["STATE-SAVED", "EVT-SAVED"], "boundary_refs": ["RULE-DUPLICATE"], "acceptance_refs": ["AC-X-SUBMIT"], "source_refs": ["SRC-X", "REQ-X"], "implementation_detail": {"required": true, "reason": "该动作会写入业务对象并影响后续页面结果", "roles": ["frontend", "backend", "qa"]}}, {"ref": "RVP-DRAWER-CONFIRM", "subject_ref": "ACT-X-CONFIRM", "owner_context_ref": "DRAWER-X", "marker_required": true, "target_ref": "ACT-X-CONFIRM", "target_selector": "[data-action='ACT-X-CONFIRM']", "target_mode": "selector_exactly_one", "title": "完成工单", "business_status": "confirmed", "verification_status": "not_run", "evidence_origin": "explicit_source", "evidence_refs": [], "summary": "仅被指派维修员可完成。说明去除首尾空白后须有 1—100 个字符；校验身份、状态、版本和说明后一次保存，关闭详情并更新原列表。失败保留输入，不产生完成审计。", "actor_refs": ["ROLE-OPERATOR"], "precondition_refs": ["RULE-READY"], "visible_result_refs": ["REG-RESULT"], "domain_result_refs": ["STATE-SAVED", "EVT-SAVED"], "boundary_refs": ["RULE-DUPLICATE"], "acceptance_refs": ["AC-X-CONFIRM"], "source_refs": ["SRC-X", "REQ-X"], "implementation_detail": {"required": true, "reason": "该动作会写入业务对象并影响后续页面结果", "roles": ["frontend", "backend", "qa"]}}], "candidate_review_points": [], "candidate_diff_contract": {"enabled": true, "auto_promote_to_declared": false, "candidate_sources": ["product_truth", "page_contracts", "stable_anchors"], "high_risk_omission": "block"}, "semantic_coverage_contract": {"denominator": "all_implementation_acceptance_relevant_semantic_items", "source_layers": ["prd_page_contracts", "stable_anchors", "cold_read"], "critical_coverage": 1, "simple_projection": "one_sentence_or_rule_equivalent_group", "uncovered_result": "gap_or_block_never_silent"}, "semantic_coverage_items": [{"coverage_id": "SCOV-VIEW-SUBMIT", "subject_ref": "ACT-X-SUBMIT", "owner_context_ref": "VIEW-X", "semantic_type": "action", "criticality": "P1", "label": "指派给林工", "source_refs": ["REQ-X", "ACT-X-SUBMIT"], "ui_grounded": true, "target_ref": "ACT-X-SUBMIT", "coverage_status": "covered", "review_point_refs": ["RVP-VIEW-SUBMIT"], "human_summary": "调度员对待处理工单指派林工。校验身份、状态和版本后，一次写入执行人、已指派状态、版本及审计；失败不写入，刷新后由用户重试。", "detail_owner": "function_flow", "unknown_ref": null, "not_applicable_reason": null}, {"coverage_id": "SCOV-DRAWER-CONFIRM", "subject_ref": "ACT-X-CONFIRM", "owner_context_ref": "DRAWER-X", "semantic_type": "data_write", "criticality": "P0", "label": "完成工单", "source_refs": ["REQ-X", "ACT-X-CONFIRM"], "ui_grounded": true, "target_ref": "ACT-X-CONFIRM", "coverage_status": "covered", "review_point_refs": ["RVP-DRAWER-CONFIRM"], "human_summary": "仅被指派维修员可完成。说明去除首尾空白后须有 1—100 个字符；校验身份、状态、版本和说明后一次保存，关闭详情并更新原列表。失败保留输入，不产生完成审计。", "detail_owner": "boundary_acceptance", "unknown_ref": null, "not_applicable_reason": null}], "layout_contract": {"desktop_mode": "participate_in_layout", "overlay_product_ui": false, "resizable": true, "collapsible": true, "compact_mode": "product_review_fullscreen_switcher"}, "product_effect_contract": {"review_actions_preserve_product_fingerprint": true, "product_fingerprint_fields": ["active_view", "route", "active_menu_path", "expanded_menu_ancestors", "breadcrumb", "page_title", "overlay_stack", "selected_business_object", "business_state", "form_values_hash", "checked_hash", "disabled_hash", "filter_hash", "pagination_hash", "selection_hash"], "review_fingerprint_separate": true}, "target_resolution": {"scope": "current_context_root", "visible_only": true, "cardinality": "exactly_one", "zero_result": "unresolved", "multiple_result": "block_ambiguous"}, "selection_contract": {"ui_grounded_points_require_marker": true, "interaction": "bidirectional_marker_card_target", "selected_surfaces": ["marker", "card", "target"], "target_selected_attribute": "data-review-target-selected", "target_focus_style": "visible_focus_ring"}, "progress_contract": {"denominator": "declared_applicable_review_points", "resolved_states": ["confirmed", "accepted_with_gap"], "navigation_advances_progress": false}, "share_contract": {"locator_fields": ["baseline_ref", "context_ref", "review_point_ref", "active_tab"], "forbidden_locator_fields": ["journey", "step", "role"], "hydrate_on_load": true}, "review_record_contract": {"persistence_required": true, "key_fields": ["baseline_ref", "context_ref", "review_point_ref"], "dispositions": ["unreviewed", "confirmed", "accepted_with_gap", "blocked"], "static_fallback": ["localStorage", "json_export", "json_import"], "baseline_mismatch": "do_not_reuse"}, "cold_read_contract": {"required_for": ["R1", "R2"], "participant_roles": ["product", "frontend", "backend", "qa"], "time_limit_seconds": 180, "declared_point_recall_min": 0.8, "critical_point_recall": 1, "status": "pending", "evidence_refs": []}, "unknown_refs": [], "machine_handoff": {"status": "not_requested", "manifest_ref": null, "packet_refs": [], "gap_refs": []}, "not_proven": ["静态合同不证明浏览器行为、真实系统实现或客户验收。"], "human_projection_contract": {"primary_copy": "business_natural_language", "stable_ids_visibility": "collapsed_technical_trace_only", "field_enums_visibility": "collapsed_technical_trace_only", "implementation_detail_mode": "progressive_disclosure", "implementation_detail_roles": ["frontend", "backend", "qa"], "technical_terms": ["baseline_ref", "context_ref", "review_point_ref", "active_tab"]}, "diagram_contract": {"simple_crud_policy": "not_required", "decisions": [{"context_ref": "VIEW-X", "complexity_drivers": ["cross_page", "cross_role"], "required_types": ["core_flow"], "diagram_refs": ["DIAG-X-CORE"], "not_required_reason": null}, {"context_ref": "DRAWER-X", "complexity_drivers": ["cross_page"], "required_types": ["core_flow"], "diagram_refs": ["DIAG-X-CORE"], "not_required_reason": null}], "diagrams": [{"diagram_ref": "DIAG-X-CORE", "diagram_type": "core_flow", "owner_tab": "overview", "title": "工单指派与完成", "context_refs": ["VIEW-X", "DRAWER-X"], "current_context_highlight": true}]}, "acceptance_examples": [{"example_ref": "TEST-X-VIEW-POS", "owner_context_ref": "VIEW-X", "kind": "positive", "precondition": "重置后，调度员选中待处理、版本 1 的工单 001", "action": "点击指派给林工", "expected_visible_result": "显示已指派和林工", "expected_domain_result": "工单版本 2，恰好一条指派审计", "acceptance_ref": "AC-X-SUBMIT"}, {"example_ref": "TEST-X-VIEW-NEG", "owner_context_ref": "VIEW-X", "kind": "negative", "precondition": "重置后，仅把调用身份改为林工，工单仍待处理、版本 1", "action": "直接请求指派", "expected_visible_result": "提示仅调度员可指派", "expected_domain_result": "工单、版本和审计均不变", "acceptance_ref": "AC-X-SUBMIT"}, {"example_ref": "TEST-X-DRAWER-POS", "owner_context_ref": "DRAWER-X", "kind": "positive", "precondition": "独立重置并合法指派给林工；林工打开详情，填入更换轴承，试运行正常", "action": "点击完成工单", "expected_visible_result": "抽屉关闭，列表显示已完成和说明", "expected_domain_result": "同一工单版本 3，累计两条审计", "acceptance_ref": "AC-X-CONFIRM"}, {"example_ref": "TEST-X-DRAWER-NEG", "owner_context_ref": "DRAWER-X", "kind": "negative", "precondition": "合法指派给林工，填入有效说明后模拟版本更新", "action": "继续完成旧版本工单", "expected_visible_result": "提示刷新，抽屉及输入保留；刷新后由用户重试", "expected_domain_result": "不覆盖新版本，不追加完成审计", "acceptance_ref": "AC-X-CONFIRM"}]}</script>
 
-    <aside class="review" data-demo-review-workspace="REVIEW-MEDIUM-001" data-review-current-context="VIEW-BOARD-001">
-      <div class="review-inner">
-        <div class="review-head"><div><h2>评审说明</h2><div class="context" id="contextLabel">当前：响应驾驶舱</div></div><button class="close" data-action="UIACT-REVIEW-TOGGLE" data-ads-act="collapse" aria-label="收起评审说明">×</button></div>
-        <div class="review-tabs"><button class="active" data-tab="overview">总览</button><button data-tab="function">功能与流转</button><button data-tab="boundary">边界与验收</button></div>
-        <section class="tab active" data-tab-panel="overview"><div class="summary"><b>本页目标</b><br>让负责人发现服务压力，从异常工单进入需求分析、任务拆解与交付验证。</div><b>当前模块核心流程</b><div class="flow" aria-label="当前模块核心流程"><div class="flow-node" data-flow-context="VIEW-BOARD-001" data-flow-current="true">响应驾驶舱<br>当前页面</div><span class="flow-arrow">→</span><div class="flow-node">异常工单</div><span class="flow-arrow">→</span><div class="flow-node">需求分析</div><span class="flow-arrow">→</span><div class="flow-node" data-flow-context="DRAWER-TASK-001" data-flow-current="false">任务拆解</div><span class="flow-arrow">→</span><div class="flow-node">开发验证</div></div><table class="coverage"><tr><th>覆盖对象</th><th>状态</th></tr><tr><td>筛选、指标与泳道</td><td class="ok">已说明</td></tr><tr><td>任务拆解抽屉</td><td class="ok">已说明</td></tr><tr><td>真实接口与生产数据</td><td class="not-proven">未证明</td></tr></table><div class="note">本样例演示评审信息组织与交互。筛选、指标计算、状态流转、权限和服务端保存仍是规则示意；未绑定完整 PRD，不能作为已验证的开发交接。</div></section>
-        <section class="tab" data-tab-panel="function"><div class="review-list" id="viewCards">
-          <button class="review-card" data-review-point="RVP-FILTER" aria-current="true"><span class="num">1</span><span><strong>筛选作用域</strong><p>时间与团队筛选同时作用于四个指标和当前泳道；查询更新页面，重置恢复“近 30 天 / 全部团队”。</p></span></button>
-          <button class="review-card" data-review-point="RVP-METRIC-DUE"><span class="num">2</span><span><strong>待响应</strong><p>状态为“待响应”且未删除的工单数；查询失败显示“加载失败”，不能显示为 0。</p></span></button>
-          <article class="review-card" data-review-point="RVP-METRIC-SLA"><span class="num">3</span><span><strong>按时响应率</strong><p>首次响应未超过承诺截止时间的已响应工单数 ÷ 已响应工单数，保留 1 位小数；没有已响应工单时显示“—”。</p></span><details><summary>查看实现与验收要点</summary><div class="role-grid"><span><b>前端：</b>分母为零显示“—”，加载失败不得回落为 0。</span><span><b>后端：</b>统一按首次响应时间和承诺截止时间计算。</span><span><b>测试：</b>覆盖正常、分母为零、跨截止时间和查询失败。</span></div></details></article>
-          <button class="review-card" data-review-point="RVP-METRIC-WIP"><span class="num">4</span><span><strong>处理中</strong><p>当前处于处理中的未删除工单数；下方提示其中距承诺截止不足 4 小时的数量。</p></span></button>
-          <button class="review-card" data-review-point="RVP-METRIC-CLOSED"><span class="num">5</span><span><strong>已关闭</strong><p>按实际关闭时间归入筛选范围；重新打开的工单不再计入已关闭。</p></span></button>
-          <article class="review-card" data-review-point="RVP-FLOW"><span class="num">6</span><span><strong>需求流转</strong><p>需求依次经过待响应、分析中、待排期、开发中和已完成；每次流转都要满足角色与前置条件并留下记录。</p></span><details><summary>查看实现与验收要点</summary><div class="role-grid"><span><b>前端：</b>只展示当前允许的动作，失败后卡片留在原泳道。</span><span><b>后端：</b>再次校验当前状态、角色和版本，成功后记录流转轨迹。</span><span><b>测试：</b>覆盖合法流转、越级流转、无权限流转和并发更新。</span></div></details></article>
-          <article class="review-card" data-review-point="RVP-TASK-OPEN"><span class="num">7</span><span><strong>打开任务拆解</strong><p>点击需求卡打开对应任务抽屉，并保留当前菜单、筛选和滚动位置；关闭后回到原卡片。</p></span></article>
-        </div><div class="review-list" id="drawerCards" hidden>
-          <button class="review-card" data-review-point="RVP-TASK-TITLE"><span class="num">1</span><span><strong>任务标题</strong><p>必填，去除首尾空格后 1—100 字；同一需求下有同名任务时提示，但允许继续保存。</p></span></button>
-          <button class="review-card" data-review-point="RVP-TASK-OWNER"><span class="num">2</span><span><strong>责任人与验收</strong><p>责任人和可观察的验收结果都必填；只有产品角色可以新增，其他角色只读。</p></span></button>
-          <article class="review-card" data-review-point="RVP-TASK-SAVE"><span class="num">3</span><span><strong>保存任务</strong><p>校验通过后保存任务并追加操作记录；失败时抽屉不关闭、输入不丢失，并给出可供排查的错误编号。</p></span><details><summary>查看实现与验收要点</summary><div class="role-grid"><span><b>前端：</b>提交中防重复点击；失败保留表单内容和焦点。</span><span><b>后端：</b>校验权限与需求版本，保存任务和操作记录必须同成同败。</span><span><b>测试：</b>核对成功写入、重复提交、无权限和服务失败四类结果。</span></div></details></article>
-        </div></section>
-        <section class="tab" data-tab-panel="boundary"><div class="summary"><b>关键状态转换</b><div class="flow"><div class="flow-node">待响应</div><span class="flow-arrow">→</span><div class="flow-node">分析中</div><span class="flow-arrow">→</span><div class="flow-node">待排期</div><span class="flow-arrow">→</span><div class="flow-node">开发中</div><span class="flow-arrow">→</span><div class="flow-node">已完成</div></div>不允许跳级；退回必须填写原因并保留原流转记录。</div><div class="summary"><b>权限与恢复</b><br>无权限动作不展示，接口仍须校验。指标失败不能伪装为 0；流转失败不移动卡片；保存失败保留输入。</div><div class="example good"><b>正向验收</b><br>产品在“分析中”需求上补齐责任人和验收结果后提交：页面进入“待排期”，后台新增一条流转记录。</div><div class="example bad"><b>反向验收</b><br>客服尝试把“分析中”需求直接改为“开发中”：页面不移动卡片，后台不改状态，并记录拒绝原因。</div><div class="summary"><b>验收证据</b><br>本样例尚未执行真实接口验证。交付时至少提供接口响应、流转记录、权限反例和浏览器端到端证据。</div><details class="technical-trace" data-review-trace><summary>技术追溯（开发联查时展开）</summary><pre>页面与动作：VIEW-BOARD-001 / DRAWER-TASK-001 / ACT-FILTER-001 / ACT-OPEN-TASK-001 / ACT-TASK-ADD-001<br>评审与规则：RVP-FILTER / RVP-METRIC-SLA / RVP-FLOW / RULE-FLOW-001 / AC-TASK-001<br>字段与状态：FIELD-TASK-TITLE / FIELD-OWNER / FIELD-AC / recordStatus / saved</pre></details></section>
-      </div>
-    </aside>
-  </div>
-
-  <button class="review-launch" data-action="UIACT-REVIEW-TOGGLE" data-ads-act="expand">评审说明</button>
-
-  <div class="drawer-mask" id="drawerMask" role="dialog" aria-modal="true" aria-label="任务拆解" data-testid="drawer-DRAWER-TASK-001" data-review-context-root="DRAWER-TASK-001" data-review-context-type="DRAWER">
-    <section class="drawer">
-      <div class="drawer-head"><div><div class="crumb">需求 DMD-024 / 任务拆解</div><h2>批量导入失败需要错误明细</h2></div><button data-action="ACT-CLOSE-TASK" aria-label="关闭">×</button></div>
-      <div class="origin"><b>来源工单：</b>TKT-1028 · 当前状态：分析中<br><span class="subtitle">原问题：批量导入遇到错误时只显示失败，无法定位具体行。</span></div>
-      <div class="form-row" data-review-anchor="FIELD-TASK-TITLE"><button class="marker" data-review-ref="RVP-TASK-TITLE">1</button><label for="taskTitle">任务标题</label><input id="taskTitle" maxlength="100" value="返回逐行错误明细"></div>
-      <div class="form-row" data-review-anchor="FIELD-TASK-OWNER"><button class="marker" data-review-ref="RVP-TASK-OWNER">2</button><label for="owner">责任人</label><select id="owner"><option>前端 A</option><option>后端 B</option></select><label for="acceptance" style="margin-top:12px">验收标准</label><textarea id="acceptance">上传包含 3 条错误数据的文件后，页面逐行展示行号、字段和错误原因；正确数据不受影响。</textarea></div>
-      <div class="drawer-actions" data-review-anchor="ACT-TASK-ADD-001"><button class="marker static" data-review-ref="RVP-TASK-SAVE">3</button><button class="btn" data-action="ACT-CLOSE-TASK">取消</button><button class="btn primary" data-action="ACT-TASK-ADD-001">保存任务</button></div>
-    </section>
-  </div>
-  <div class="toast" id="toast">任务已保存（教学样例：未连接真实接口）</div>
-
-  <script>
-    const app=document.getElementById('app');
-    const drawer=document.getElementById('drawerMask');
-    const contextLabel=document.getElementById('contextLabel');
-    const viewCards=document.getElementById('viewCards');
-    const drawerCards=document.getElementById('drawerCards');
-    const actionRegistry={
-      'ACT-NAV-DASH':showDemoResult,'ACT-NAV-CUSTOMER':showDemoResult,'ACT-NAV-TICKET':showDemoResult,'ACT-NAV-ITERATION':showDemoResult,
-      'ACT-EXPORT':showDemoResult,'ACT-CREATE':showDemoResult,'ACT-FILTER-001':showDemoResult,'ACT-RESET':showDemoResult,
-      'ACT-OPEN-TASK':openDrawer,'ACT-CLOSE-TASK':closeDrawer,'ACT-TASK-ADD-001':saveTask,
-      'UIACT-REVIEW-TOGGLE':toggleReview
-    };
-    const targetByPoint={
-      'RVP-FILTER':'ACT-FILTER-001','RVP-METRIC-DUE':'METRIC-DUE-001','RVP-METRIC-SLA':'METRIC-SLA-001','RVP-METRIC-WIP':'METRIC-WIP-001','RVP-METRIC-CLOSED':'METRIC-CLOSED-001','RVP-FLOW':'RULE-FLOW-001','RVP-TASK-OPEN':'ACT-OPEN-TASK-001','RVP-TASK-TITLE':'FIELD-TASK-TITLE','RVP-TASK-OWNER':'FIELD-TASK-OWNER','RVP-TASK-SAVE':'ACT-TASK-ADD-001'
-    };
-    function setContext(kind){
-      const isDrawer=kind==='drawer';
-      document.querySelector('[data-demo-review-workspace]').dataset.reviewCurrentContext=isDrawer?'DRAWER-TASK-001':'VIEW-BOARD-001';
-      contextLabel.textContent=isDrawer?'当前：任务拆解抽屉':'当前：响应驾驶舱';
-      document.querySelectorAll('[data-flow-context]').forEach(node=>node.dataset.flowCurrent=String(node.dataset.flowContext===(isDrawer?'DRAWER-TASK-001':'VIEW-BOARD-001')));
-      viewCards.hidden=isDrawer;drawerCards.hidden=!isDrawer;
-    }
-    function focusReviewTarget(ref){
-      document.querySelectorAll('.review-selected').forEach(n=>n.classList.remove('review-selected'));
-      document.querySelectorAll('[data-review-target-selected="true"]').forEach(n=>n.removeAttribute('data-review-target-selected'));
-      document.querySelectorAll('[aria-current=true]').forEach(n=>n.setAttribute('aria-current','false'));
-      const target=document.querySelector(`[data-review-anchor="${targetByPoint[ref]}"]`);
-      const marker=document.querySelector(`.marker[data-review-ref="${ref}"]`);
-      const card=document.querySelector(`.review-card[data-review-point="${ref}"]`);
-      [target,marker,card].filter(Boolean).forEach(n=>{n.classList.add('review-selected');n.setAttribute('aria-current','true')});
-      if(target)target.setAttribute('data-review-target-selected','true');
-      if(target)target.scrollIntoView({behavior:'smooth',block:'center'});
-      if(card)card.scrollIntoView({behavior:'smooth',block:'nearest'});
-    }
-    function selectPoint(ref){focusReviewTarget(ref)}
-    function openDrawer(){drawer.classList.add('open');app.dataset.state='task_editing';setContext('drawer');document.querySelector('[data-tab="function"]').click()}
-    function closeDrawer(){drawer.classList.remove('open');app.dataset.state='board_ready';setContext('view')}
-    function toggleReview(node){app.classList.toggle('review-collapsed',node.dataset.adsAct==='collapse')}
-    function showToast(message){const toast=document.getElementById('toast');toast.textContent=message;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1600)}
-    function showDemoResult(node){app.dataset.state=node.dataset.action==='ACT-FILTER-001'?'filter_applied':'action_recorded';showToast(node.dataset.action==='ACT-FILTER-001'?'已按当前条件刷新（教学样例）':'教学样例：该动作未连接真实服务')}
-    function saveTask(){app.dataset.state='task_saved';showToast('任务已保存（教学样例：未连接真实接口）')}
-    document.addEventListener('click',event=>{
-      const marker=event.target.closest('[data-review-ref]');if(marker){selectPoint(marker.dataset.reviewRef);return}
-      const card=event.target.closest('[data-review-point]');if(card){selectPoint(card.dataset.reviewPoint);return}
-      const tab=event.target.closest('[data-tab]');if(tab){document.querySelectorAll('[data-tab]').forEach(n=>n.classList.toggle('active',n===tab));document.querySelectorAll('[data-tab-panel]').forEach(n=>n.classList.toggle('active',n.dataset.tabPanel===tab.dataset.tab));return}
-      const node=event.target.closest('[data-action]');if(!node)return;
-      const handler=actionRegistry[node.dataset.action];if(handler)handler(node);
-    });
-    document.addEventListener('keydown',event=>{if(event.key==='Escape'&&drawer.classList.contains('open'))closeDrawer()});
-  </script>
-</body>
-</html>
+    <script>'use strict';
+const manifest=JSON.parse(document.getElementById('review-workspace-manifest').textContent);
+const q=s=>document.querySelector(s), all=s=>[...document.querySelectorAll(s)];
+const productContextEvent='product-context-change';
+const names={dispatcher:'调度员',lin:'林工',chen:'陈工'}, states={pending:'待处理',assigned:'已指派',closed:'已完成'};
+const seed=()=>({orders:[{id:'001',name:'水泵异响',status:'pending',assignee:null,note:'',version:1},{id:'002',name:'风机振动',status:'assigned',assignee:'chen',note:'',version:1}],audit:[]});
+let database=seed(), activeView='VIEW-X', selectedBusinessObject='001', actor='dispatcher', readVersion=1;
+let review={point:null,tab:'overview',context:'VIEW-X',positions:{}}, records=[];
+const dbKey='ads-demo-work-orders-v1', recordKey='ads-review:'+manifest.baseline.hash;
+const baselineRef=manifest.baseline.hash;
+window.__ADS_REVIEW_GATE__={status:'not_run',violations:[],checks:0};
+function fail(code){window.__ADS_REVIEW_GATE__.status='failed';window.__ADS_REVIEW_GATE__.violations.push(code);throw new Error(code)}
+function say(text){q('#feedback').textContent=text}
+function reviewSay(text){q('#review-message').textContent=text}
+function currentOrder(){return database.orders.find(x=>x.id===selectedBusinessObject)}
+function saveDatabase(){try{localStorage.setItem(dbKey,JSON.stringify(database));return true}catch(e){say('当前仅在内存中更新；浏览器存储失败，刷新会丢失。');return false}}
+try{const stored=JSON.parse(localStorage.getItem(dbKey)||'null');if(stored&&Array.isArray(stored.orders)&&Array.isArray(stored.audit)&&stored.orders.length===2&&stored.orders.every(x=>['001','002'].includes(x.id)&&states[x.status]&&Number.isInteger(x.version)))database=stored}catch(e){say('无法恢复本地数据，使用初始示例。')}
+// Local service simulator. A production service must derive actor from authentication.
+function request(action,input={}){
+ const cmd={id:selectedBusinessObject,actor,version:readVersion,note:q('#completion-note').value,...input};
+ const row=database.orders.find(x=>x.id===cmd.id);
+ const reject=message=>({ok:false,message});
+ if(!row)return reject('工单不存在');
+ if(action==='assign'){
+  if(cmd.actor!=='dispatcher')return reject('仅调度员可指派');
+  if(row.status!=='pending')return reject('当前状态不能指派');
+ }else if(action==='complete'){
+  if(cmd.actor!==row.assignee)return reject('仅被指派维修员可完成');
+  if(row.status!=='assigned')return reject('当前状态不能完成');
+ }else return reject('未支持的业务动作');
+ if(cmd.version!==row.version)return reject('工单已更新，请刷新后重试');
+ const note=String(cmd.note||'').trim();
+ if(action==='complete'&&(!note||[...note].length>100))return reject(!note?'请填写完成说明':'完成说明不能超过 100 个字符');
+ // All guards precede all mutations; one synchronous transaction in this mock.
+ if(action==='assign'){row.assignee='lin';row.status='assigned'}else{row.note=note;row.status='closed'}
+ row.version++;database.audit.push({order:row.id,actor:cmd.actor,action,time:new Date().toISOString(),version:row.version});
+ return {ok:true,message:action==='assign'?'指派成功':'工单已完成'};
+}
+function renderProduct(){
+ const row=currentOrder(), drawer=!q('#drawer').hidden;
+ q('#order-name').textContent=row.id+' · '+row.name;
+ q('#order-status').textContent=states[row.status]+' · 版本 '+row.version;
+ q('#order-status').dataset.state=row.status;
+ q('#assignee').textContent=names[row.assignee]||'尚未指派';
+ q('#result-note').textContent=row.note||'尚无完成说明';
+ q('#detail-summary').textContent=row.id+' · '+row.name+' / '+states[row.status]+' / '+(names[row.assignee]||'尚未指派');
+ q('[data-action="ACT-X-SUBMIT"]').disabled=actor!=='dispatcher'||row.status!=='pending';
+ q('[data-action="ACT-X-CONFIRM"]').disabled=actor!==row.assignee||row.status!=='assigned';
+ q('#completion-note').readOnly=row.status!=='assigned'||actor!==row.assignee;
+ q('#breadcrumb').textContent='设备维护 / 工单列表'+(drawer?' / 工单详情':'');
+ q('#page-title').textContent=drawer?'工单详情':'工单列表';
+ q('#audit').textContent=JSON.stringify(database.audit,null,2);
+ q('#work-order').value=selectedBusinessObject;q('#actor').value=actor;
+ window.dispatchEvent(new Event(productContextEvent));
+}
+function applyBusiness(action){const result=request(action);say(result.message);if(result.ok){readVersion=currentOrder().version;if(action==='complete')q('#drawer').hidden=true;saveDatabase()}renderProduct();return result}
+function openDetail(){q('#drawer').hidden=false;readVersion=currentOrder().version;q('#completion-note').value=currentOrder().note;renderProduct()}
+function resolveCurrentContext(){return q('#drawer').hidden?activeView:'DRAWER-X'}
+const PROTO_REVIEW_OVERLAY_UNDECLARED='PROTO-REVIEW-OVERLAY-UNDECLARED';
+function resolveProductLocation(){
+ const context=resolveCurrentContext(), expected=manifest.review_contexts.find(x=>x.context_ref===context).product_location;
+ const observed={active_view:activeView,route:activeView+(context==='DRAWER-X'?'#DRAWER-X':''),active_menu_path:['设备维护',q('[data-view-target].active')?.textContent],expanded_menu_ancestors:['设备维护'],breadcrumb:q('#breadcrumb').textContent.split(' / '),page_title:q('#page-title').textContent,current_context:context};
+ const diff={};for(const [key,field] of [['active_menu_path','menu_path'],['breadcrumb','breadcrumb'],['page_title','page_title'],['route','route_ref']])if(JSON.stringify(observed[key])!==JSON.stringify(expected[field]))diff[key]={observed:observed[key],expected:expected[field]};
+ return {observed,expected,diff,...observed};
+}
+function syncProductLocation(){return resolveProductLocation()}
+function assertProductLocationSynchronized(){const location=syncProductLocation();if(Object.keys(location.diff).length)fail('PROTO-PRODUCT-LOCATION-MISMATCH');return location}
+function captureProductFingerprint(){
+ const p=q('#product'), location=resolveProductLocation();
+ return JSON.stringify({active_view:activeView,route:location.route,active_menu_path:location.active_menu_path,expanded_menu_ancestors:location.expanded_menu_ancestors,breadcrumb:location.breadcrumb,page_title:location.page_title,overlay_stack:q('#drawer').hidden?[]:['DRAWER-X'],selected_business_object:selectedBusinessObject,business_state:database,
+ form_values_hash:[...p.querySelectorAll('input,select,textarea')].map(n=>[n.id,n.value]),checked_hash:[...p.querySelectorAll('input')].map(n=>[n.id,n.checked]),disabled_hash:[...p.querySelectorAll('button:not([data-action^="UIACT-REVIEW-"]),input,select,textarea')].map(n=>[n.id||n.dataset.action,n.disabled,n.readOnly]),filter_hash:null,pagination_hash:null,selection_hash:selectedBusinessObject,actor});
+}
+function captureReviewFingerprint(){return JSON.stringify({review,records,collapsed:document.body.classList.contains('ads-collapsed')})}
+function assertProductFingerprintInvariant(before,after){if(before!==after)fail('PROTO-REVIEW-PRODUCT-FINGERPRINT-INVARIANT')}
+function runReviewAction(handler){const before=captureProductFingerprint();try{assertProductLocationSynchronized();handler();assertProductFingerprintInvariant(before,captureProductFingerprint());captureReviewFingerprint();window.__ADS_REVIEW_GATE__.checks++;if(!window.__ADS_REVIEW_GATE__.violations.length)window.__ADS_REVIEW_GATE__.status='passed'}catch(e){reviewSay(e.message);throw e}}
+function currentContextRoot(){return q(`[data-review-context-root="${resolveCurrentContext()}"]`)}
+function isTargetVisible(node){return !node.closest('[hidden]')&&getComputedStyle(node).display!=='none'&&node.getClientRects().length>0}
+function resolveReviewTarget(selector){const compact=document.body.classList.contains('compact-review');document.body.classList.remove('compact-review');try{const nodes=[...currentContextRoot().querySelectorAll(selector)].filter(isTargetVisible);if(nodes.length===0)fail('PROTO-REVIEW-TARGET-UNRESOLVED');if(nodes.length>1)fail('PROTO-REVIEW-TARGET-AMBIGUOUS');return nodes[0]}finally{document.body.classList.toggle('compact-review',compact)}}
+function focusReviewTarget(pointRef,selector){
+ const target=resolveReviewTarget(selector);
+ all('[data-review-target-selected]').forEach(n=>n.removeAttribute('data-review-target-selected'));
+ all('[data-review-ref],[data-review-point]').forEach(n=>n.setAttribute('aria-current',String((n.dataset.reviewRef||n.dataset.reviewPoint)===pointRef)));
+ target.setAttribute('data-review-target-selected','true');review.point=pointRef;
+}
+function syncReviewDiagramContext(context){all('[data-review-flow-context]').forEach(n=>n.setAttribute('data-flow-current',String(n.dataset.reviewFlowContext===context)))}
+function renderReview(){
+ const context=resolveCurrentContext(), w=q('[data-review-workspace]');
+ w.dataset.reviewCurrentContext=context;w.dataset.reviewActiveTab=review.tab;
+ q('[data-review-product-location]').textContent='系统位置：'+q('#breadcrumb').textContent;
+ all('[data-review-tab]').forEach(n=>n.hidden=n.dataset.reviewTab!==review.tab);
+ all('[data-review-tab-target]').forEach(n=>n.setAttribute('aria-current',String(n.dataset.reviewTabTarget===review.tab)));
+ all('[data-review-point],[data-review-example],[data-review-semantic-ref]').forEach(n=>n.hidden=n.dataset.reviewContext!==context);
+ syncReviewDiagramContext(context);
+ const count=records.filter(x=>['confirmed','accepted_with_gap'].includes(x.disposition)).length;
+ q('[data-review-progress]').dataset.reviewProgressResolved=count;
+ q('[data-review-progress]').textContent=`已处理 ${count} / ${manifest.review_points.length}；浏览不计确认`;
+ q('[data-review-records]').textContent=records.length?records.map(x=>manifest.review_points.find(p=>p.ref===x.review_point_ref)?.title+'：'+({'confirmed':'确认','accepted_with_gap':'接受缺口','blocked':'阻塞'}[x.disposition])+' / '+x.reviewer+' / '+x.comment).join('\n'):'尚无评审结论';
+}
+window.addEventListener(productContextEvent,()=>{
+ assertProductLocationSynchronized();const context=resolveCurrentContext(),workspace=q('[data-review-workspace]');
+ if(context!==review.context){
+  review.positions[review.context]={point:review.point,tab:review.tab,scroll:workspace.scrollTop};
+  const saved=review.positions[context]||{point:null,tab:'overview',scroll:0};
+  review.context=context;review.point=saved.point;review.tab=saved.tab;
+  all('[data-review-target-selected]').forEach(n=>n.removeAttribute('data-review-target-selected'));
+  all('[data-review-ref],[data-review-point]').forEach(n=>n.setAttribute('aria-current','false'));
+  renderReview();
+  const point=manifest.review_points.find(x=>x.ref===saved.point&&x.owner_context_ref===context);
+  if(point)focusReviewTarget(point.ref,point.target_selector);
+  workspace.scrollTop=saved.scroll;
+ }else renderReview();
+});
+function saveReviewRecords(value){localStorage.setItem(recordKey,JSON.stringify(value));records=value}
+function validRecords(value){return Array.isArray(value)&&value.length<=manifest.review_points.length&&new Set(value.map(x=>x.review_point_ref)).size===value.length&&value.every(x=>x.baseline_ref===baselineRef&&manifest.review_points.some(p=>p.ref===x.review_point_ref&&p.owner_context_ref===x.context_ref)&&['confirmed','accepted_with_gap','blocked'].includes(x.disposition)&&typeof x.reviewer==='string'&&x.reviewer.trim()&&typeof x.comment==='string'&&x.comment.trim())}
+function loadReviewRecords(){try{const value=JSON.parse(localStorage.getItem(recordKey)||'[]');if(validRecords(value))records=value;else reviewSay('记录无效或基线不匹配，未复用。')}catch(e){reviewSay('无法读取评审记录，可使用 JSON 导入导出。')}}
+function selectPoint(node){
+ const ref=node.dataset.reviewRef||node.dataset.reviewPoint, point=manifest.review_points.find(x=>x.ref===ref);
+ if(!point||point.owner_context_ref!==resolveCurrentContext())return;
+ document.body.classList.remove('ads-collapsed');
+ // Resolve the product target before switching compact presentation.
+ focusReviewTarget(ref,point.target_selector);review.tab='function_flow';
+ if(innerWidth<=850)document.body.classList.add('compact-review');renderReview();
+}
+function shareLocator(){const url=new URL(location.href);url.hash=new URLSearchParams({baseline_ref:baselineRef,context_ref:resolveCurrentContext(),review_point_ref:review.point||'',active_tab:review.tab}).toString();reviewSay(url.toString());return url.toString()}
+function hydrateLocator(){
+ const value=new URLSearchParams(location.hash.slice(1));if(!value.size)return;
+ if(value.get('baseline_ref')!==baselineRef){reviewSay('定位基线不匹配，未载入。');return}
+ const context=value.get('context_ref');if(!manifest.review_contexts.some(x=>x.context_ref===context))return;
+ // Initial hydration may navigate; review clicks after hydration may not.
+ q('#drawer').hidden=context!=='DRAWER-X';renderProduct();
+ const point=manifest.review_points.find(x=>x.ref===value.get('review_point_ref')&&x.owner_context_ref===context);
+ document.body.classList.remove('ads-collapsed');if(point)focusReviewTarget(point.ref,point.target_selector);
+ review.tab=manifest.tabs.includes(value.get('active_tab'))?value.get('active_tab'):'overview';
+ if(innerWidth<=850)document.body.classList.add('compact-review');renderReview();
+}
+const actionRegistry={
+ 'ACT-X-NAVIGATE':()=>{q('#drawer').hidden=true;renderProduct()},
+ 'ACT-X-SUBMIT':()=>applyBusiness('assign'), 'ACT-X-CONFIRM':()=>applyBusiness('complete'),
+ 'UIACT-REVIEW-SELECT':selectPoint,
+ 'UIACT-REVIEW-TAB':node=>{review.tab=node.dataset.reviewTabTarget;renderReview()},
+ 'UIACT-REVIEW-TOGGLE':node=>{const collapse=node.dataset.adsAct==='collapse';document.body.classList.toggle('ads-collapsed',collapse);document.body.classList.toggle('compact-review',!collapse&&innerWidth<=850)},
+ 'UIACT-REVIEW-COMPACT':()=>document.body.classList.toggle('compact-review'),
+ 'UIACT-REVIEW-SHARE':shareLocator,
+ 'UIACT-REVIEW-RECORD':()=>{if(!review.point)return reviewSay('请先选择当前页面的评审点。');const reviewer=q('#reviewer').value.trim(),comment=q('#comment').value.trim();if(!reviewer||!comment)return reviewSay('请填写评阅者和依据或缺口。');const value=records.filter(x=>x.review_point_ref!==review.point);value.push({baseline_ref:baselineRef,context_ref:resolveCurrentContext(),review_point_ref:review.point,disposition:q('#disposition').value,reviewer,comment,time:new Date().toISOString()});try{saveReviewRecords(value);reviewSay('评审结论已保存。');renderReview()}catch(e){q('#review-json').value=JSON.stringify(value,null,2);reviewSay('本地保存失败，请复制 JSON 保存；尚未计入已保存进度。')}},
+ 'UIACT-REVIEW-EXPORT':()=>{q('#review-json').value=JSON.stringify(records,null,2);reviewSay('请复制下方 JSON 保存。')},
+ 'UIACT-REVIEW-IMPORT':()=>{try{const value=JSON.parse(q('#review-json').value);if(!validRecords(value))throw new Error('内容不合法或基线不匹配');saveReviewRecords(value);renderReview();reviewSay('记录已导入。')}catch(e){reviewSay('未导入：'+e.message)}}
+};
+document.addEventListener('click',event=>{const node=event.target.closest('[data-action]');if(!node||event.target.closest('[data-review-role-details]'))return;const handler=actionRegistry[node.dataset.action];if(!handler)return;if(node.dataset.action.startsWith('UIACT-REVIEW-'))runReviewAction(()=>handler(node));else handler(node)});
+q('#actor').addEventListener('change',e=>{actor=e.target.value;renderProduct()});
+q('#work-order').addEventListener('change',e=>{selectedBusinessObject=e.target.value;readVersion=currentOrder().version;q('#drawer').hidden=true;q('#completion-note').value='';renderProduct()});
+q('#open-detail').onclick=openDetail;q('#close-detail').onclick=()=>{q('#drawer').hidden=true;renderProduct()};
+q('#refresh-order').onclick=()=>{readVersion=currentOrder().version;renderProduct();say('已读取最新版本，说明已保留，请重新确认。')};
+q('#simulate-conflict').onclick=()=>{currentOrder().version++;saveDatabase();renderProduct();say('已模拟版本更新；当前表单仍使用旧版本。')};
+q('#reset').onclick=()=>{database=seed();selectedBusinessObject='001';actor='dispatcher';readVersion=1;q('#drawer').hidden=true;q('#completion-note').value='';saveDatabase();renderProduct();say('业务数据已重置；评审记录独立保留。')};
+const widthControl=document.createElement('label');widthControl.textContent='说明宽度 ';const range=document.createElement('input');range.type='range';range.min='340';range.max='640';range.value='420';range.setAttribute('aria-label','评审说明宽度');widthControl.append(range);q('[data-review-workspace]').prepend(widthControl);range.oninput=()=>runReviewAction(()=>document.documentElement.style.setProperty('--review-width',range.value+'px'));
+window.__demo={request,snapshot:()=>structuredClone(database),fingerprint:captureProductFingerprint,shareLocator,resolveReviewTarget};
+loadReviewRecords();renderProduct();hydrateLocator();
+</script></body></html>

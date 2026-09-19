@@ -4,7 +4,7 @@ license: Apache-2.0
 description: Clarify, create, review or change product, service and office workflow requirements, PRDs and interactive prototypes. Use for vague goals, process improvements, spreadsheet/form rules, small UI edits and changes to existing systems, even without the word requirement. 中文：产品、服务及办公流程的需求判断、深挖澄清、PRD、原型、变更与验收；一句话想法、表单/表格规则和微小改动也适用。明确的纯翻译、排版、抄录或既定步骤执行由对应工具直接处理。
 ---
 
-# AI Delivery Spec 5.5.1 — 需求判断与交付
+# AI Delivery Spec 5.5.2 — 需求判断与交付
 
 帮助用户作出当前需要的产品决定，让实施者准确理解，并在变更后保持有效。跟随用户语言；代码、字段和稳定 ID 保留原名。
 
@@ -21,7 +21,7 @@ description: Clarify, create, review or change product, service and office workf
 | 当前需要 | 按需读取 |
 |---|---|
 | 判断问题、比较方案、澄清 | [discover.md](references/discover.md) |
-| 明确业务行为与可实施规格 | [specify.md](references/specify.md) |
+| 轻量规格、正式 PRD 与模块交接 | [specify.md](references/specify.md) |
 | 存量盘点、生成或修改可操作原型 | [prototype.md](references/prototype.md) |
 | 用户需要双态评审 | [review-workspace.md](references/review-workspace.md) |
 | 准入、处置、责任与基线 | [lifecycle.md](references/lifecycle.md) |
@@ -42,7 +42,7 @@ description: Clarify, create, review or change product, service and office workf
 
 实施者仍可能作出互不兼容的关键业务选择时，补足该处语义；技术实现保留合理空间。说明行为前提、允许者、业务结果、失败恢复及可判验收。按实际风险补状态、权限、指标、外部数据或历史对象约定，不按角色数或旧等级加长文档。
 
-一条业务事实只在一个位置人工定义；页面、流程、原型说明与交接引用同一含义。业务审批记录和需求评审记录是不同对象；审核通过是发布前提时，不擅自合并成自动发布。
+事实只在一处人工定义，模块内就近引用或展开，使接收者连续读懂任务。业务审批和需求评审是不同对象；审核通过仅为发布前提时，不擅自合并成自动发布。
 
 对关键规则选少量业务反例；标签缺失不能掩盖内容中的风险。接收者复述一致还须核对来源，不能以模型多数票证明正确。明确小改不附加全角色冷读报告。
 
