@@ -393,7 +393,7 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     ),
     "PROTO-ORPHAN-HANDLER": (
         "动作注册表保留了没有源模板入口的处理器，存量交互可能在迭代中丢失。",
-        "恢复对应 data-action 控件、删除确认无用的死代码，或将批准移除记录到原型锁；不要只让处理器留在脚本中。",
+        "恢复对应 data-action 控件；确认无用或已有删除授权时，同步移除死处理器，并在现有变更记录中注明理由与来源。",
     ),
     "PROTO-UNREACHABLE-VIEW": (
         "页面、弹窗或抽屉被显式隐藏，但没有静态可发现的入口或路由。",
@@ -425,11 +425,11 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     ),
     "PROTO-REVIEW-LINKAGE-MISSING": (
         "评审编号与右侧说明卡没有稳定双向关联。",
-        "两侧使用相同 data-review-id，或在目标卡上声明同值 data-review-target，并补浏览器双向定位证据。",
+        "RC4 使用 marker 的 data-review-ref 关联卡片 data-review-point，并匹配 context/number；旧格式 data-review-id 只作迁移诊断。补浏览器双向定位证据。",
     ),
     "PROTO-REVIEW-SELECTION-NOT-SYNCED": (
         "评审编号点击后没有可验证的左右同步选中状态。",
-        "处理器读取 data-review-id，同时更新两侧 aria-current/选中样式，并用 ARUN-* 证明点击、滚动和框选。",
+        "RC4 处理器读取 data-review-ref/data-review-point，更新两侧 aria-current 及目标框选；旧式 data-review-id 不应用于新工作台。实际验证点击与滚动。",
     ),
     "PROTO-REVIEW-LENS-COSMETIC": (
         "共识/前端/后端/测试镜头只有按钮外观变化，没有角色所需内容差异。",
@@ -675,8 +675,8 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-DYNAMIC-METRIC-ID-REUSE": ("A dynamic metric factory reuses one fixed METRIC-* for multiple runtime labels.", "Pass a stable metric ID per defined metric or render from a metric-definition map."),
     "PROTO-UNKNOWN-CONTRACT-INCOMPLETE": ("A prototype labels an UNK-* without an owned and closable lifecycle contract.", "Add priority, owner, blocks_stage, affected_refs and fallback to every data-unk or registry entry; clarify material unknowns before review."),
     "PROTO-UNKNOWN-CONFIRMED-CONFLICT": ("One prototype object is simultaneously marked confirmed and bound to an open UNK-*.", "Resolve it from a DEC/source: remove the current unknown contract when confirmed, or remove confirmed while keeping the owned gap contract."),
-    "PROTO-REVIEW-LINKAGE-MISSING": ("Review markers and note cards have no stable bidirectional link.", "Share data-review-id on both sides or use a matching data-review-target, then execute a browser ARUN-* proof."),
-    "PROTO-REVIEW-SELECTION-NOT-SYNCED": ("Review marker clicks do not expose a synchronized selection state.", "Read data-review-id, update aria-current on both sides, and prove click, scroll and highlight behavior in a browser."),
+    "PROTO-REVIEW-LINKAGE-MISSING": ("Review markers and note cards have no stable bidirectional link.", "For RC4, link marker data-review-ref to card data-review-point with matching context/number; data-review-id is legacy migration syntax. Verify both directions in a browser."),
+    "PROTO-REVIEW-SELECTION-NOT-SYNCED": ("Review marker clicks do not expose a synchronized selection state.", "Read RC4 data-review-ref/data-review-point, update aria-current on both sides and the target outline, and verify click/scroll behavior. Do not add legacy data-review-id to a new workspace."),
     "PROTO-REVIEW-LENS-COSMETIC": ("Role lenses change controls but have no role-specific content projection.", "Bind data-review-role controls to matching data-review-lens content without changing shared facts."),
     "PROTO-REVIEW-WORKSPACE-LEGACY": ("The legacy review overlay has no CurrentContext, declared denominator, three-tab projection, or product-effect boundary.", "Preserve the operable product and migrate to a context-driven Overview / Function & Flow / Boundary & Acceptance projection with a baseline-bound manifest."),
     "PROTO-REVIEW-WORKSPACE-MANIFEST-INVALID": ("The review workspace has no unique parseable projection manifest.", "Embed one application/json review-workspace-manifest and validate it against the review-workspace schema."),
@@ -877,7 +877,7 @@ REPAIR_EXAMPLES: tuple[tuple[str, str], ...] = (
     ("PROTO-BROWSER-EVIDENCE", "python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app.html --level L3 --acceptance-run acceptance/ARUN-PROTOTYPE-001.yaml"),
     ("PROTO-DYNAMIC-ANCHOR", "在模板源码直接写 data-action=\"ACT-COURSE-SAVE\"，不要用 'data-' + 'action' 拼接。"),
     ("PROTO-UNHANDLED-ACTION", "actionRegistry['ACT-COURSE-SAVE'] = saveCourse，并让处理器更新 data-state 或页面数据。"),
-    ("PROTO-ORPHAN-HANDLER", "actionRegistry['ACT-COURSE-SAVE'] 存在时，源模板也应有 data-action=\"ACT-COURSE-SAVE\"；若功能已批准删除，则同时删除处理器并记录 approved_removals。"),
+    ("PROTO-ORPHAN-HANDLER", "actionRegistry['ACT-COURSE-SAVE'] 存在时，源模板也应有 data-action=\"ACT-COURSE-SAVE\"；若功能已批准删除，同步删除处理器，并在已有变更记录注明删除来源。"),
     ("PROTO-UNREACHABLE-VIEW", "为隐藏抽屉增加 data-testid=\"drawer-VIEW-DETAIL\"，并由 data-action=\"ACT-DETAIL-OPEN\" 的处理器显式打开。"),
     ("PROTO-REVIEW-UIACTION-NAMESPACE", "把 data-action=\"ACT-REVIEW-TOGGLE\" 改为 data-action=\"UIACT-REVIEW-TOGGLE\"。"),
     ("PROTO-DYNAMIC-CLASS-POLLUTION", "使用 class=\"sev sev-high\"；通过 cell.textContent = description 写入已转义说明，不把 description 拼入 class。"),
@@ -1699,6 +1699,7 @@ def main() -> int:
                 f"ROOT_GROUPS shown={len(roots)} unique={unique_count} "
                 f"repeated_findings_compacted={len(actionable_findings) - len(roots)}"
             )
+            print("DETAILS: --format json --diagnostics full (all finding refs; group ref is one example)")
             hidden_groups = unique_count - len(roots)
             if hidden_groups > 0:
                 print(f"... {hidden_groups} additional root groups; rerun with --format json")

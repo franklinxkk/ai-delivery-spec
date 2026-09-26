@@ -6,7 +6,7 @@ import re
 import sys
 from pathlib import Path
 import yaml
-from requirement_contract import route, load_declarations
+from requirement_contract import route, load_declarations, intake_text
 from scan_requirement_ambiguity import scan
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -25,20 +25,22 @@ def load(path: Path) -> dict:
 
 def recommend(doc: dict) -> dict:
     result = route(doc)
-    language = doc.get("document_language") or ("zh-CN" if re.search(r"[\u4e00-\u9fff]", str(doc.get("title", ""))) else "en")
+    narrative = intake_text(doc)
+    detail = intake_text(doc, include_title=False)
+    language = doc.get("document_language") or ("zh-CN" if re.search(r"[\u4e00-\u9fff]", narrative) else "en")
     english = str(language).casefold().startswith("en")
     advice = "clarify" if doc.get("ambiguity") == "high" else "accept"
     reasons = []
     questions = result["content_review"]["findings"]
     required_questions = [item for item in questions if item.get("severity") != "WARN"]
-    lexical = scan("\n".join(doc[k] for k in ("title", "description", "behavior") if isinstance(doc.get(k), str)))
-    generic_goal = bool(re.fullmatch(r"(?:做个|做一个|建设|搭建|优化)(?:一个|个)?系统|优化体验|提升效率|(?:please\s+)?build\s+(?:me\s+)?(?:a|an)\s+(?:system|app)|improve\s+(?:the\s+)?(?:experience|efficiency)", str(doc.get("title", "")).strip("。！？.! "), re.I)) and not doc.get("description")
+    lexical = scan(narrative)
+    generic_goal = bool(re.fullmatch(r"(?:做个|做一个|建设|搭建|优化)(?:一个|个)?系统|优化体验|提升效率|(?:please\s+)?build\s+(?:me\s+)?(?:a|an)\s+(?:system|app)|improve\s+(?:the\s+)?(?:experience|efficiency)", str(doc.get("title", "")).strip("。！？.! "), re.I)) and not detail
     # Bounded cues for a complaint with no task, not a general NLP classifier.
     # Concrete instructions elsewhere in the input take precedence over tone.
     title = str(doc.get("title", "")).strip()
     complaint = bool(re.search(r"(?:太烂|太差|难用|不想说|随便吧|你们看着办|\b(?:terrible|awful|useless|whatever)\b)", title, re.I))
     action_cue = re.search(r"(?:新增|增加|添加|改为|改成|删除|取消|修复|显示|筛选|导出|需要|希望|请|\b(?:add|remove|change|fix|show|filter|export|need|please)\b)", title, re.I)
-    no_task_complaint = complaint and not action_cue and not any(doc.get(key) for key in ("description", "behavior", "goal", "expected_behavior"))
+    no_task_complaint = complaint and not action_cue and not detail
     if required_questions or lexical or generic_goal or no_task_complaint:
         advice = "clarify"
         reasons.extend(item["action_en"] if english else item["action"] for item in required_questions)
@@ -67,6 +69,11 @@ def recommend(doc: dict) -> dict:
         "clarification_candidates": questions or lexical,
         "next_questions": next_questions,
     })
+    band = result["complexity_band"]
+    if band:
+        result["complexity_advice"] = (
+            f"Declared complexity {band} informs planning. Artifact form still follows the requested deliverable and affected behavior; this band does not set priority or prove risk coverage."
+            if english else f"已声明复杂度 {band}，用于工作规划。产物形式仍按约定交付物和受影响行为选择；该分档不决定优先级，也不证明风险已覆盖。")
     return result
 
 
@@ -81,6 +88,8 @@ def render_markdown(result: dict) -> str:
     mode = {"direct": ("直接完成必要差异", "direct change"), "card": ("简短需求卡", "short requirement card"), "prd": ("按业务切片组织的 PRD", "PRD organized by business slice")}[result["artifact_mode"]][int(english)]
     lines = ["# " + ("Requirement routing" if english else "需求处理建议"), "", advice, "",
              ("Suggested artifact: " if english else "建议产物：") + mode + ".", ""]
+    if result.get("complexity_advice"):
+        lines += [result["complexity_advice"], ""]
     if result["next_questions"]:
         lines += [("Start with the applicable questions below; reuse answers already in your sources." if english else "先处理下面适用的问题；已有来源回答过的直接继承。"), ""]
         lines += ["- " + question for question in result["next_questions"][:3]]

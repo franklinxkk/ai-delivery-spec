@@ -251,13 +251,20 @@ def body_has_content(body: str) -> bool:
     return bool(payload)  # Placeholder text counts as draft content and is reported separately as GAP.
 
 
+def _plain_cell(value: str) -> str:
+    value = value.strip()
+    while (match := re.fullmatch(r"(\*\*|__|`+|\*)(.+)\1", value, re.S)):
+        value = match[2].strip()
+    return value
+
+
 def table_cells(line: str) -> list[str]:
-    return [cell.strip().strip("`") for cell in line.strip().strip("|").split("|")]
+    return [_plain_cell(cell) for cell in line.strip().strip("|").split("|")]
 
 
 def contract_token(value: object) -> str:
     """Accept the templates' translated labels with an explicit machine token."""
-    raw = str(value or "").strip().casefold()
+    raw = _plain_cell(str(value or "")).casefold()
     match = re.fullmatch(r"[^()（）]*[（(]\s*`?([a-z_]+)`?\s*[）)]", raw)
     token = match[1] if match else raw.strip("`")
     return {"待关闭": "open", "待确认": "open", "未关闭": "open", "待处理": "open",
@@ -274,16 +281,17 @@ def unknown_rows(text: str) -> list[dict[str, Any]]:
     aliases = {
         "id": {"id", "编号", "unk/rev id", "unk id"}, "priority": {"优先级", "priority"},
         "owner": {"责任人", "负责人", "owner"}, "blocks_stage": {"blocks_stage", "阻断阶段"},
+        "affected_refs": {"affected_refs", "scope_refs", "影响范围", "受影响引用"},
         "reversal": {"回退路径", "回退/缩范围路径", "回退/缩范围", "reversal path", "fallback"},
         "status": {"状态", "status", "unk 状态", "unk状态"},
-        "resolution_ref": {"resolution_ref", "关闭依据", "解决依据", "决策/证据", "证据", "resolution", "关闭条件/结论"},
+        "resolution_ref": {"resolution_ref", "关闭依据", "解决依据", "决策/证据", "决议/来源", "证据", "resolution", "关闭条件/结论"},
     }
     lines = text.splitlines()
     results: list[dict[str, Any]] = []
     for index in range(len(lines) - 2):
         if not lines[index].lstrip().startswith("|") or not re.match(r"^\s*\|?\s*:?-{3,}", lines[index + 1]):
             continue
-        headers = [contract_token(cell) for cell in table_cells(lines[index])]
+        headers = [re.sub(r"\s*/\s*", "/", contract_token(cell)) for cell in table_cells(lines[index])]
         positions = {
             key: next((pos for pos, header in enumerate(headers) if header in names), -1)
             for key, names in aliases.items()
@@ -300,6 +308,12 @@ def unknown_rows(text: str) -> list[dict[str, Any]]:
                 for key, pos in positions.items():
                     if key != "id" and 0 <= pos < len(cells):
                         row[key] = cells[pos]
+                if "affected_refs" in row:
+                    # Explicit references only; never infer scope from the issue text.
+                    value = str(row["affected_refs"]).strip().strip("`")
+                    row["affected_refs"] = [part.strip(" \t`\"'") for part in
+                                            re.split(r"[,，;；\s]+", value.strip("[]"))
+                                            if part.strip(" \t`\"'") not in {"", "-", "无", "N/A"}]
                 # “类型” may mean category, not status. Use it only when the
                 # cell actually contains a known unknown-lifecycle token.
                 mixed = {"类型", "结论/状态", "状态/结论", "结论·状态", "状态·结论"}

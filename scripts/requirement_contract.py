@@ -35,7 +35,8 @@ RISK_SIGNALS = {
     "permission": ("tenant_isolation", "permissions"),
     "privacy": ("sensitive_data",),
     "regulated": ("compliance", "clinical", "safety_critical"),
-    "migration": ("migration", "version_compatibility"),
+    "migration": ("migration",),
+    "compatibility": ("version_compatibility",),
     "irreversible": ("irreversible_write", "money"),
     "irreversible_ai_write": ("consequential_ai_write",),
     "strong_audit": ("strong_audit", "audit_required"),
@@ -47,7 +48,7 @@ CATEGORIES = {
     "recovery": {"integration", "batch", "irreversible", "irreversible_ai_write"},
     "null_stale": {"metric", "integration"},
     "permission_boundary": {"permission", "privacy"},
-    "change_propagation": {"migration"},
+    "change_propagation": {"migration", "compatibility"},
 }
 STAGES = {s: n for n, s in enumerate(("frame", "explore", "intake", "clarify", "specify", "prototype", "review", "baseline", "implementation", "acceptance", "closed"))}
 STAGES["inventory"] = -1
@@ -55,6 +56,46 @@ STAGES["inventory"] = -1
 
 def string_list(value: Any, *, nonempty: bool = False) -> bool:
     return isinstance(value, list) and all(isinstance(v, str) and v.strip() for v in value) and (bool(value) or not nonempty)
+
+
+INTAKE_TEXT_FIELDS = (
+    "title", "description", "request", "behavior", "brief", "outcome",
+    "value_evidence", "goal", "problem", "current_behavior", "expected_behavior",
+)
+NARRATIVE_KEYS = set(INTAKE_TEXT_FIELDS) | {
+    "text", "summary", "content", "details", "rationale", "observation",
+    "facts", "items", "proposal", "scope", "acceptance", "constraints",
+}
+
+
+def intake_text(doc: dict[str, Any], *, include_title: bool = True) -> str:
+    """Read known narrative slots, not IDs, source references or metadata.
+
+    Structured prose may be a list or use named text wrappers. Unknown mapping
+    keys are not recursively scanned just because their values contain words.
+    """
+    parts: list[str] = []
+    active: set[int] = set()
+
+    def visit(value: Any):
+        if isinstance(value, str):
+            if value.strip() and not re.fullmatch(r"(?:SRC|REQ|DEC|EVD|ROLE|MOD|UNK)-[A-Z0-9-]+", value.strip(), re.I):
+                parts.append(value.strip())
+        elif isinstance(value, (list, dict)) and id(value) not in active:
+            active.add(id(value))
+            if isinstance(value, list):
+                for child in value:
+                    visit(child)
+            else:
+                for key, child in value.items():
+                    if key in NARRATIVE_KEYS:
+                        visit(child)
+            active.remove(id(value))
+
+    for key in INTAKE_TEXT_FIELDS:
+        if include_title or key != "title":
+            visit(doc.get(key))
+    return "\n".join(dict.fromkeys(parts))
 
 
 def route(doc: dict[str, Any], legacy_level: str = "auto", *, body: str = "") -> dict[str, Any]:
@@ -113,6 +154,12 @@ def route(doc: dict[str, Any], legacy_level: str = "auto", *, body: str = "") ->
             notes.append("Legacy level is only a presentation hint, never a risk or evidence decision")
     if not mode:
         mode = mapped or {"L0": "direct", "L1": "card", "L2": "prd", "L3": "prd", "L4": "prd"}.get(level) or "card"
+    complexity = doc.get("complexity")
+    complexity_band = complexity.get("band") if isinstance(complexity, dict) else None
+    if complexity_band in ("S", "M", "L", "XL"):
+        notes.append(f"Declared complexity band {complexity_band} informs planning; it does not determine artifact mode, priority or prove risk coverage")
+    else:
+        complexity_band = None
     governed = bool(doc.get("governed_truth_requested") is True or shape == "governed_truth" or doc.get("governed") is True)
     categories = {name for name, facets in CATEGORIES.items() if facets & risks}
     if doc.get("nullable_fields") or doc.get("stale_data"):
@@ -120,12 +167,13 @@ def route(doc: dict[str, Any], legacy_level: str = "auto", *, body: str = "") ->
     if doc.get("change") or doc.get("seed_refs"):
         categories.add("change_propagation")
     declared_risks = sorted(risks)
-    content = inspect_content(body or "\n".join(doc[k] for k in ("title", "description", "request", "behavior") if isinstance(doc.get(k), str)))
+    content = inspect_content(body or intake_text(doc))
     risks.update(content["risk_facets"])
     return {
         "schema_version": VERSION, "artifact_mode": mode, "risk_facets": sorted(risks),
         "governed": governed, "semantic_review_categories": sorted(categories),
         "priority": doc.get("priority"), "notes": notes, "errors": errors,
+        "complexity_band": complexity_band,
         "declared_risk_facets": declared_risks, "content_risk_candidates": content["risk_facets"],
         "content_review": content,
         "evidence_policy": "per_claim_scope_version", "authority": "recommendation_only",

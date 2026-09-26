@@ -63,6 +63,7 @@ class _PrototypeHTMLParser(HTMLParser):
             "testid": data.get("data-testid") or "",
             "action": "data-action" in data,
             "role": data.get("role") or "",
+            "control_type": (data.get("type") or "").lower(),
             "ancestors": [index for _, _, index in self._stack],
             "page": page,
         })
@@ -97,12 +98,18 @@ def _scan_html(text: str, css: str) -> list[dict[str, str]]:
                     "detail": f"interactive element class '{cls}' has no rule covering it in <style>",
                 })
 
-    actions = [element for element in parser.elements if element["action"]]
+    # data-action also binds form changes. Equal select/input styling is not
+    # evidence that primary and secondary command buttons lack hierarchy.
+    actions = [element for element in parser.elements if element["action"] and (
+        element["tag"] in {"button", "a"}
+        or element["role"] in {"button", "link"}
+        or (element["tag"] == "input" and element["control_type"] in {"button", "submit", "reset"})
+    )]
     if len(actions) >= 3 and len({tuple(sorted(element["classes"])) for element in actions}) == 1:
         findings.append({
             "kind": "flat-button-hierarchy",
             "selector": _element_id(actions[0]),
-            "detail": f"{len(actions)} data-action elements share the identical class combination; distinguish primary and secondary actions",
+            "detail": f"{len(actions)} command controls share the identical class combination; distinguish primary and secondary actions",
         })
 
     nav_pages: dict[str, int] = {}

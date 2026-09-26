@@ -82,6 +82,60 @@ def prose_lines(text: str) -> list[str]:
     return result
 
 
+def _affirmative_match(text: str, pattern: str) -> bool:
+    """Reject a guard/policy that is locally negated or still only proposed."""
+    for match in re.finditer(pattern, text, re.I):
+        prefix = re.split(r"[。；;，,|\n]|但是|而是|但|而", text[:match.start()])[-1]
+        if not re.search(r"不(?:能|可|会|必|需|须|得|应|允许)?|无(?:需|须)|尚未|未(?:曾|能|予以)?(?:拒绝|检查|校验|验证|实现)|禁止|待确认|计划|建议", prefix[-16:] + match[0]):
+            return True
+    return False
+
+
+def _explicit_deep_link_guard(line: str) -> bool:
+    # Bind the check to this link/request and require both caller and object
+    # scope. A role-name mention or an unrelated nearby rule is not a guard.
+    denied = _affirmative_match(line, r"(?:深链|直链|直接请求)(?:(?!未|没有|不|待)[^。；;|\n]){0,24}(?:返回拒绝|访问拒绝|拒绝|403)")
+    return denied or _affirmative_match(
+        line,
+        r"(?:深链|直链|直接请求|实际请求)[^。；;|\n]{0,18}"
+        r"(?:检查|校验|验证)[^。；;|\n]{0,12}(?:身份|角色|权限)"
+        r"[^。；;|\n]{0,16}(?:对象|数据)(?:访问|归属)?范围",
+    )
+
+
+def _return_conflict(block: str) -> bool:
+    """Compare affirmative return paths, not every creation in a section.
+
+    These remain bounded probes: explicit object names distinguish independent
+    paths; an unnamed path cannot disprove a conflict with a named one.
+    """
+    policies = []
+    for sentence in re.split(r"[。；;|\n]", block):
+        returned = re.search(r"退回(?!历史|记录|原因)", sentence)
+        if not returned:
+            continue
+        prefix = sentence[:returned.start()].strip().strip("“”\" ")
+        subject = prefix if re.fullmatch(r"[\w-]{1,20}(?:单|申请|请求|对象|记录)", prefix) else ""
+        path = sentence[returned.start():]
+        reuse = _affirmative_match(path, r"(?:编辑|修改|保留|沿用).{0,8}(?:原单|原对象)|(?:原单|原对象).{0,8}(?:编辑|修改|保留|沿用)")
+        replace = _affirmative_match(path, r"新单|新对象|(?:新建|创建|复制)(?:新的?|一个)?(?:申请|单据|对象|记录|工单)|(?:原单|原对象).{0,8}(?:关闭|作废)|(?:关闭|作废).{0,8}(?:原单|原对象)")
+        if reuse or replace:
+            policies.append((subject, reuse, replace, sentence))
+    for subject, reuse, _, sentence in policies:
+        if not reuse:
+            continue
+        for other_subject, _, replace, other_sentence in policies:
+            distinct_subjects = (subject and other_subject and subject != other_subject
+                                 and not subject.endswith(other_subject) and not other_subject.endswith(subject))
+            if not replace or distinct_subjects:
+                continue
+            # An explicit conditional split applies to these return paths only.
+            paired = sentence if sentence == other_sentence else sentence + "\n" + other_sentence
+            if not re.search(r"(?:如果|若|当).{0,30}(?:否则|分别)|(?:类型|场景).{0,20}(?:分别|不同)", paired):
+                return True
+    return False
+
+
 def inspect_content(text: str) -> dict:
     """Bounded Chinese/English probes, never an NLP completeness or truth proof.
 
@@ -95,7 +149,7 @@ def inspect_content(text: str) -> dict:
     # that makes the fork explicit. Never turn a domain pattern into a policy.
     probes = [
         ("publication", "state_authority", {"state"}, r"(?:审批|审核)通过.{0,15}(?:可|可以|允许)发布|\bapprov(?:al|ed)\b[^.;\n]{0,45}\b(?:can|may|eligible|allowed)\b[^.;\n]{0,25}\bpublish|\b(?:can|may|eligible|allowed)\b[^.;\n]{0,25}\bpublish[^.;\n]{0,25}\bafter approval\b", r"(?:手动|人工|点击|定时|自动|发布人|发布角色|不立即|不会自动).{0,25}发布|发布.{0,20}(?:手动|人工|角色|时机)|\b(?:manual(?:ly)?|automatic(?:ally)?|scheduled|publisher)\b[^.;\n]{0,35}\bpublish|\b(?:publish\w*|publication)\b[^.;\n]{0,35}\b(?:manual(?:ly)?|automatic(?:ally)?|scheduled|role)\b", "通过后谁在什么条件下发布？区分发布资格与实际发布事件。"),
-        ("return-object", "recovery", {"state"}, r"退回.{0,20}(?:重新|再次|重提|提交)|\breturn(?:ed)?\b[^.;\n]{0,50}\bresubmit|\bresubmit\w*\b[^.;\n]{0,35}\breturn(?:ed)?\b", r"原单|原对象|新单|新对象|同一.{0,8}(?:ID|编号)|保留.{0,8}(?:ID|编号)|\b(?:same|original|new)\s+(?:record|object|request|ID)\b|\b(?:keep|retain|preserve)\w*\s+(?:the\s+)?(?:ID|identifier)\b", "退回后修改原对象还是新建？原编号、历史及再次提交去向如何处理？"),
+        ("return-object", "recovery", {"state"}, r"退回(?!历史|记录|原因)[^。；;|\n]{0,20}(?:重新|再次|重提|提交)|\breturn(?:ed)?\b[^.;\n]{0,50}\bresubmit|\bresubmit\w*\b[^.;\n]{0,35}\breturn(?:ed)?\b", r"原单|原对象|新单|新对象|同一.{0,8}(?:ID|编号)|保留.{0,8}(?:ID|编号)|\b(?:same|original|new)\s+(?:record|object|request|ID)\b|\b(?:keep|retain|preserve)\w*\s+(?:the\s+)?(?:ID|identifier)\b", "退回后修改原对象还是新建？原编号、历史及再次提交去向如何处理？"),
         ("null-meaning", "null_stale", set(), r"字段.{0,12}(?:可空|为空)|允许.{0,8}空值|未采集.{0,10}(?:按|计为|记为)\s*(?:数值\s*)?0", r"(?:空值|为空|未采集).{0,30}(?:表示|代表|区别|不等于|未知|不适用)|(?:不|不得|不能)按\s*0", "空值在此字段代表未知、不适用还是尚未采集？是否与零不同，如何参与计算？"),
         ("metric-population", "metric_definition", {"metric"}, r"完成率|通过率|离职率|活跃用户|completion rate|active users", r"分母|统计人群|纳入.{0,20}(?:用户|人员)|去重.{0,12}(?:用户|人员)|denominator|population", "说明统计对象、去重/时间窗和分母；离职、退出与晚到数据如何计入？"),
         ("retry-result", "recovery", set(), r"(?:提交|保存|写入|支付)失败.{0,12}(?:重试|再试)|\b(?:submit|save|write|payment)\w*\b[^.;\n]{0,20}\bfail\w*\b[^.;\n]{0,25}\bretry|\bretry\b[^.;\n]{0,25}\bfailed\s+(?:submit|save|write|payment)", r"幂等|重复.{0,12}(?:不|防止)|未写入|已写入|保留.{0,10}输入|查询.{0,10}结果|\bidempot\w*|\b(?:avoid|prevent)\w*\s+duplicate|\balready\s+(?:written|saved|paid)|\bquery\w*[^.;\n]{0,20}\bresult", "失败时是否已产生副作用？再次提交会重复写入吗，如何确认与恢复？"),
@@ -149,7 +203,18 @@ def inspect_content(text: str) -> dict:
                 continue  # A scope reference does not redefine the metric contract.
             if re.search(trigger, line, re.I):
                 risks.update(facets)
-                if not re.search(guard, context, re.I):
+                guarded = bool(re.search(guard, context, re.I))
+                if kind == "return-object":
+                    guarded = guarded or _affirmative_match(context, r"(?:仍用|沿用|保留)原\s*(?:ID|编号|合同号)|(?:ID\s*[/与和]\s*号|编号|合同号)不变")
+                    # A field row can itself state stable identity throughout
+                    # return/resubmit; it need not repeat a recovery chapter.
+                    identity_row = re.match(r"^\s*\|[^|]*(?:编号|身份|\bID\b)[^|]*\|", line, re.I)
+                    guarded = guarded or bool(identity_row and _affirmative_match(
+                        line, r"退回[^。；;|\n]{0,24}(?:全过程沿用|始终保留|始终不变)"))
+                if kind == "deep-link":
+                    guarded = (_affirmative_match(context, guard) or _explicit_deep_link_guard(line)
+                               or _affirmative_match(line, r"服务端[^。；;|\n]{0,8}验证[^。；;|\n]{0,8}身份[^。；;|\n]{0,8}对象范围"))
+                if not guarded:
                     add(kind, category, facets, i, line, action)
         ai_actor = r"(?<![A-Za-z0-9_-])(?:AI(?!\s*(?:coding|编程|开发))|LLM|模型|智能体|agent|置信度|confidence)(?![A-Za-z0-9_-])"
         if re.search(ai_actor + r"[^。；;\n]{0,70}(?:自动|直接|无需人工|\bautomatically\b|\bdirectly\b)[^。；;\n]{0,50}(?:发信|发送|创建|新建|更新|修改|保存|写回|删除|支付|退款|扣款|执行|\b(?:send|email|create|update|save|write|delete|pay|refund|execute)\w*\b)|自动.{0,15}给客户.{0,8}(?:发信|发送)", line, re.I):
@@ -197,9 +262,8 @@ def inspect_content(text: str) -> dict:
     rule_sections = [i for i in headings if re.match(r"^#{1,2}\s", lines[i])]
     for start, end in zip([0, *rule_sections], [*rule_sections, len(lines)]):
         block = "\n".join(lines[start:end])
-        if re.search(r"退回.{0,40}(?:原单|原对象)|原单.{0,20}(?:编辑|修改)", block) and re.search(r"退回.{0,50}(?:新单|新对象|新建)|原单.{0,20}关闭", block):
-            if not re.search(r"(?:如果|若|当).{0,30}(?:否则|分别)|(?:类型|场景).{0,20}(?:分别|不同)", block):
-                add("return-conflict", "recovery", {"state"}, start, block, "同一段出现退回保留原单与关闭/新建两种路径；核实是否有明确分支条件和适用对象。")
+        if _return_conflict(block):
+            add("return-conflict", "recovery", {"state"}, start, block, "同一段出现退回保留原单与关闭/新建两种路径；核实是否有明确分支条件和适用对象。")
     return {"risk_facets": sorted(risks), "review_categories": sorted(categories), "findings": findings,
             "coverage": "bounded_probes; absence_of_findings_is_not_semantic_proof"}
 

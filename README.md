@@ -111,6 +111,9 @@ If your host provides a skill-import interface, follow its instructions to impor
 | **[模块化 PRD / Modular PRD](examples/medium-review-handoff/requirement.md)** | 两个业务模块各自写清入口、权限、状态、失败恢复和正反用例，附产品、前端、后端、测试的阅读入口。 / Two complete business slices with role entry points, guards, recovery and executable acceptance examples. |
 | **[交互评审原型 / Interactive review prototype](examples/medium-review-handoff/review-prototype.html)** | 本地打开即可操作工单指派与完成，查看就近实现要点、评审定位和独立记录；绑定上述 PRD。虚构教学数据，仅模拟业务服务。 / Open locally to assign and complete work orders, inspect implementation notes and record reviews separately. Bound to the PRD above; fictional data and a local service simulator. |
 
+需要从可运行起点改写评审原型，可用[示例构建器](references/review-workspace.md)拆分编辑后合成单 HTML，并自动绑定 PRD 摘要。它提供工作样例，不会自动生成你的业务或证明需求已验收。<br>
+The [example builder](references/review-workspace.md) splits the working review example into editable files and rebuilds one HTML bound to its PRD. It is a starting point, not automatic business generation or acceptance evidence.
+
 <details>
 <summary><strong>常见问题：小改、存量材料、原型与验收｜Quick FAQ</strong></summary>
 

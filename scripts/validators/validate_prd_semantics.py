@@ -152,16 +152,20 @@ def _collect_ids(raw: str) -> tuple[dict[str, tuple[int, str]], dict[str, list[t
             defined[token] = (line_no, kind)
 
     in_fence = False
+    fence_kind = ''
+    ref_indent: int | None = None
     offset = 0
     table_header: list[str] = []  # 当前表格表头单元格
     for index, line in enumerate(lines):
         line_no = index + 1
         stripped = line.strip()
-        if stripped.startswith("```") or stripped.startswith("~~~"):
-            in_fence = not in_fence
-            continue
         line_start = offset
         offset += len(line) + 1
+        if stripped.startswith("```") or stripped.startswith("~~~"):
+            in_fence = not in_fence
+            fence_kind = stripped.lstrip('`~').strip().lower() if in_fence else ''
+            ref_indent = None
+            continue
         in_frontmatter = line_start < fm_end
         is_table = stripped.startswith("|") and not in_fence
 
@@ -175,11 +179,11 @@ def _collect_ids(raw: str) -> tuple[dict[str, tuple[int, str]], dict[str, list[t
         for match in ID_RE.finditer(line):
             token = match.group(0)
             tail = line[match.end():match.end() + 2]
-            if tail.startswith("*") or tail.startswith("-*"):
+            if tail.startswith("-*") or (tail.startswith("*") and not line[:match.start()].endswith('*')):
                 continue  # 通配家族引用（ACT-DIFF-*），不参与判定
             occurrences.append((token, match.start(), match.end()))
             occurrences.extend(_expand_slash(token, line, match.end()))
-        if not occurrences:
+        if not occurrences and not (in_fence and fence_kind in {'yaml', 'yml', 'json'}):
             continue
         for token, _s, _e in occurrences:
             occurrence_lines.setdefault(token, []).append(line_no)
@@ -189,8 +193,23 @@ def _collect_ids(raw: str) -> tuple[dict[str, tuple[int, str]], dict[str, list[t
                 define(token, line_no, "registry")
             continue
         if in_fence:
-            for machine in re.finditer(rf"^\s*-?\s*id:\s*['\"]?((?:{_FAMILY})-[A-Z0-9][A-Z0-9_-]*)", line):
-                define(machine.group(1).rstrip("-"), line_no, "registry")
+            # Structured appendices carry real links; arbitrary example code does not.
+            # Only explicit reference keys (including multiline YAML lists) count.
+            if fence_kind in {'yaml', 'yml', 'json'}:
+                machine = re.search(rf'''(?:^\s*-?\s*|[{{,]\s*)["']?id["']?\s*:\s*['"]?((?:{_FAMILY})-[A-Z0-9][A-Z0-9_-]*)''', line)
+                if machine:
+                    define(machine[1].rstrip('-'), line_no, 'registry')
+                ref_key = re.search(r'''["']?(?:[a-z_]*_refs?|refs?|requirement_ids)["']?\s*:\s*''', line)
+                indent = len(line) - len(line.lstrip())
+                continuation = ref_indent is not None and indent > ref_indent
+                if ref_key:
+                    ref_indent = indent
+                elif stripped and not continuation:
+                    ref_indent = None
+                if ref_key or continuation:
+                    for token, start, _end in occurrences:
+                        if not ref_key or start >= ref_key.end():
+                            referenced.setdefault(token, []).append((line_no, False))
             continue
 
         # 定义位判定（按出现位置）；表格列规则与注解规则相互独立。
@@ -247,10 +266,10 @@ def _collect_ids(raw: str) -> tuple[dict[str, tuple[int, str]], dict[str, list[t
         for token, start, end in occurrences:
             if start in def_spans:
                 continue
-            if any(lo <= start < hi for lo, hi in backtick_spans):
-                continue  # 行内代码字面量：跨文件外部引用（intake/stage0 登记册等），豁免
-            prefix = line[max(0, start - 30):start]
+            prefix = line[max(0, start - 30):start].rstrip('`* ')
             is_nav = bool(NAV_RE.search(prefix))
+            if any(lo <= start < hi for lo, hi in backtick_spans) and not is_nav:
+                continue  # 行内代码字面量：跨文件外部引用（intake/stage0 登记册等），豁免
             referenced.setdefault(token, []).append((line_no, is_nav))
 
     # 仅在示例行出现且未定义的 ID 整体豁免（格式举例，如 COR-ENTERPRISE_DATA-001）。
@@ -798,6 +817,8 @@ def check_enum_cardinality(raw: str) -> list[SemFinding]:
         if len(claims) != 1:
             continue
         claim = claims[0]
+        if re.match(r"^\s*#{1,6}\s*(?:附录|章节|Appendix)\s*$", line[:claim.start()], re.I):
+            continue  # “附录 3 类目覆盖度” uses a section number, not a count.
         claimed = int(claim.group(1)) if claim.group(1).isdigit() else CN_NUM[claim.group(1)]
         if not 2 <= claimed <= 12:
             continue

@@ -7,6 +7,22 @@ Product Truth、结构化 handoff 或验收证据的权威边界。
 
 图的触发依据业务依赖：仅有弹窗、抽屉或 secondary_context 不自动等于跨页业务链，也不因此强制每个只读浮层补流程图和正反例。实际状态迁移、跨角色交接及显式复杂度仍需对应图与验收。
 
+先选使用方式：R0 用于当前功能的就近说明；R1 用于正式团队评审，包含三页签、记录/分享/进度与冷读；R2 为旧项目保留值，当前检查与 R1 相同，不暗含额外文档。新项目选 R0 或 R1；业务复杂不自动升级。三者都保留业务覆盖、真实上下文、准确定位、角色说明和无业务副作用。L0–L4 是另一条旧锚点兼容轴。
+
+## 可生成起点
+
+```powershell
+python scripts/build_review_workspace.py init --output review-project
+python scripts/build_review_workspace.py build --project review-project
+python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype review-project/prototype.html --prd review-project/requirement.md --stage specify --require-review-workspace
+```
+
+`init` 从已验证样例拆出可编辑的 PRD、页面/说明、样式、运行脚本和 manifest，`EDITING.md` 给编辑位置。它仍是设备维修教学业务，须替换成项目事实；不是空白项目过检证明。`build` 只拼接本地片段、绑定真实 PRD 的规范文本 hash、清空旧验证结论，输出离线单 HTML；不生成业务政策、不代替 gate/浏览器。大文件分块编辑后构建，避免单次输出截断；不能先写巨型 manifest 再缩业务来迁就它。
+
+生成顺序：先用一个完整任务写清“谁从哪进入 → 输入与条件 → 成功变化与下一入口 → 拒绝/恢复”，在 PRD 和产品上走通；再在对应动作旁展开同源说明和角色要点，最后映射上下文/评审点/语义项。先确认这一纵向切片能被接手，再扩其他模块。每个模块读完应知道如何做和如何判断对错，而不是只知道去哪里查 ID。
+
+机器字段查 `schemas/review-workspace.schema.json` 对应段，不必通读校验器：`baseline` 绑定来源；`review_contexts` 定页面/浮层；`review_points` 定动作说明；`semantic_coverage` 防字段/指标/系统规则漏项；`acceptance_examples` 定可执行输入与页面/业务结果。稳定 ID 的后缀用大写字母、数字、连字符，不用下划线。语义项为 gap 时，关联点须是 gap/pending_decision，不能仍宣称 confirmed；图按实际跨页/跨角色、状态及数据依赖选择，不能只为弹窗补图。
+
 > **Review Explains, Product Operates.** 左侧始终是完整可操作产品；右侧只解释真实产品动作产生的当前
 > 上下文。Context 定位置，Declaration 定评审点分母，Semantic Coverage 定功能完整性分母，Candidate Diff 防漏，Fingerprint 定副作用边界，
 > Layout + Detection 保证真实可运行，Target Resolution 防绑错，Review Record 防丢结论。
@@ -275,6 +291,8 @@ Expected ProductLocation 另行逐字段 diff。违规必须进入 `window.__ADS
 
 ## 10. 分享、进度与评审记录
 
+本节功能对 R1/R2 必需；R0 仅在启用对应功能时适用。未启用时不生成按钮、空记录或假进度。
+
 - 分享定位只包含 `baseline_ref + context_ref + optional review_point_ref + active_tab`，不包含
   Journey/Step/Role；`hydrate_on_load` 固定为 true。首次 hydration 先由产品路由落到目标 Context，再建立初始产品指纹；之后所有
   纯评审动作仍满足不变量。
@@ -318,10 +336,9 @@ HTML 内嵌唯一 `<script type="application/json" id="review-workspace-manifest
 ```
 
 选中时，marker 与 card 同步 `aria-current="true"`，真实目标同步
-`data-review-target-selected="true"` 并显示焦点环。根容器还须提供页签切换、窄屏切换、分享、进度和记录入口。所有纯评审动作使用
+`data-review-target-selected="true"` 并显示焦点环。根容器按实际启用功能提供页签、窄屏、分享、进度和记录入口。所有纯评审动作使用
 `UIACT-REVIEW-*`；产品动作继续使用 `ACT-*`。marker、card、manifest 三方的 context/ref/number 必须
-一致。可移交的稳定动作至少包括 `UIACT-REVIEW-SELECT/TOGGLE/SHARE/RECORD/EXPORT/IMPORT`；
-R1/R2 另有 `UIACT-REVIEW-TAB/COMPACT`。实现可复用统一 dispatcher，但每项仍须有可见结果。
+一致。基本动作是 `UIACT-REVIEW-SELECT/TOGGLE`；启用分享增加 `SHARE`，启用记录增加 `RECORD/EXPORT/IMPORT`（均沿用 `UIACT-REVIEW-` 前缀）。R1/R2 包含上述全部功能及 `TAB/COMPACT`。实现可复用统一 dispatcher，但每项仍须有可见结果。
 
 ## 12. 浏览器 ARUN 必测清单
 
@@ -374,11 +391,13 @@ GAP 和证据。失败应修复信息投影、上下文或文字
 
 旧五模式评审态迁移时：删除 Journey/Focus/Page/Acceptance 与角色一级切换；保留完整产品 DOM、动作
 和状态仓；将 STEP/角色包内容合并回三个页签；按真实 VIEW/Overlay 建 `review_contexts`；重新生成
-当前上下文编号；补 Candidate Diff、Fingerprint、分享、进度和持久化记录；最后执行浏览器 ARUN 与冷读。
+当前上下文编号；补 Candidate Diff、Fingerprint 及当前等级/实际启用的分享、进度和持久化记录；最后执行适用的浏览器 ARUN 与冷读。
+
+大规模存量分批顺序：先保留并回归产品路径 → 映射真实页面/浮层上下文 → 每条核心链补规则与角色说明 → 再补候选/语义映射和运行验证。批次写明已覆盖、待覆盖与源分母；不能把已完成子集说成全量。当前 manifest 的评审级别是工作区级，不支持同一工作区随意混用 R0/R1；可分独立范围交工作区并保留原产品全范围，不未经授权删页。ARUN 可复用已有浏览器测试产生的真实证据，不要求手写第二套点击日志；未执行项保留未执行。
 
 完成必须同时满足：需求内核无回归；CurrentContext 可确定；ProductLocation 与菜单/路由/标题同步；声明评审点唯一且分母稳定；R1/R2 只有三
 页签；纯评审动作产品指纹不变；Candidate Diff 不自动晋级；布局不遮挡；Overlay 可探测；目标在当前
-上下文唯一；评审记录可持久化且不跨 baseline 污染；页面只有一个评审事实面；评审事件与业务事件隔离；
+上下文唯一；启用的评审记录可持久化且不跨 baseline 污染；页面只有一个评审事实面；评审事件与业务事件隔离；
 动态重绘后标号恢复且只显示当前 Context；标号可见、避碰、不越界；业务浮层不覆盖评审区；
 PAGE-CONTRACT、语义分母、右栏最小说明和 marker 映射闭合；指标、工作流、二级 Context 与核心角色
 路径无静默遗漏。任何一项缺失都不得包装为 5.4.9 完整评审交接。

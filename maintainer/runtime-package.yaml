@@ -1,6 +1,6 @@
 schema_version: 5.3.0
-# One runnable review HTML and its readable, bound PRD replace the unbound guide.
-max_files: 117
+# One deterministic starter builder avoids repeated runtime/hash reconstruction.
+max_files: 118
 include:
   - SKILL.md
   - README.md

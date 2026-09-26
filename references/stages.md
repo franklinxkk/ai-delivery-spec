@@ -36,7 +36,7 @@ python scripts/ai_delivery_spec_cli.py gate --profile full --requirement require
 
 `gate --profile prd --stage frame|explore` 可检查自由文本的分析结论；省略阶段仍按 baseline。triage 从已给文本返回风险候选和待澄清问题，不能完整解析自然语言的所有排除范围；若候选已明确属于另一需求，应保留其归属并继续当前目标，不照单追问。
 
-旧阶段锚点与复杂 Truth/评审工具可显式调用；使用时读 `--help` 和 Schema，自由探索不受旧模板约束。
+审批、表单、权限、指标等复用 [需求模式](patterns/common-requirement-patterns.yaml) 的相关条目；实时协作才读 [实时合同](patterns/realtime-contract.md)。模式提供问题与反例，不替项目决定。旧专业工具按需查 `--help` 和 Schema；子合同版本不必等于 Skill 版本。
 
 JSON `metrics.unknown_summary` 按范围/阶段去重；旧 `summary.p0_unknowns` 仅计同名诊断。兼容 PRD 验证入口复用当前内核。无法定位归属的疑点保留 GAP，不算已核实阻断或已覆盖。
 

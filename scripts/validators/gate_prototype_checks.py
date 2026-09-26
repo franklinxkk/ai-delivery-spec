@@ -83,6 +83,31 @@ def _visible_text(raw: str) -> str:
     return re.sub(r"<[^>]+>", " ", text)
 
 
+class _StaticAnchorParser(HTMLParser):
+    """Count document nodes, never markup strings used to redraw those nodes."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.testids = []
+        self.inert_depth = 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "template":
+            self.inert_depth += 1
+        if not self.inert_depth:
+            value = dict(attrs).get("data-testid")
+            if value:
+                self.testids.append(value)
+
+    def handle_startendtag(self, tag, attrs):
+        if tag != "template":
+            self.handle_starttag(tag, attrs)
+
+    def handle_endtag(self, tag):
+        if tag == "template" and self.inert_depth:
+            self.inert_depth -= 1
+
+
 class _ReviewStatusParser(HTMLParser):
     """Collect status axes only when their element and ancestors are visible."""
 
@@ -534,6 +559,7 @@ class _ReviewFinalParser(HTMLParser):
         self.stack: list[tuple[str, bool]] = []
         self.context_stack: list[tuple[int, str]] = []
         self.active_cards: list[dict[str, object]] = []
+        self.reading_stack: list[bool] = []
         self.active_semantics: list[dict[str, object]] = []
         self.workspace_depths: list[int] = []
         self.trace_depths: list[int] = []
@@ -603,6 +629,15 @@ class _ReviewFinalParser(HTMLParser):
         tag = tag.casefold()
         attr_map = {str(key).casefold(): str(value or "") for key, value in attrs}
         hidden = self._hidden(attr_map, self.stack[-1][1] if self.stack else False, tag)
+        reading_attrs = dict(attr_map)
+        if (self.workspace_depths and tag in {'section', 'div'}
+                and attr_map.get('data-review-tab') in {'overview', 'function_flow', 'boundary_acceptance'}):
+            # Inactive tabs are authored reading surfaces, not concealed payloads.
+            # Reachability still needs runtime verification; nested hidden content is excluded.
+            reading_attrs.pop('hidden', None)
+            reading_attrs.pop('aria-hidden', None)
+        reading_hidden = self._hidden(reading_attrs, self.reading_stack[-1] if self.reading_stack else False, tag)
+        self.reading_stack.append(reading_hidden)
         self.stack.append((tag, hidden))
         depth = len(self.stack)
         if self._hidden(attr_map, False, tag):
@@ -719,7 +754,7 @@ class _ReviewFinalParser(HTMLParser):
                 "visible": str(not hidden).lower(),
             }
             self.cards.append(record)
-            self.active_cards.append({"depth": depth, "ref": point_ref, "text": [], "hidden": hidden})
+            self.active_cards.append({"depth": depth, "ref": point_ref, "text": [], "hidden": reading_hidden})
 
         semantic_ref = attr_map.get("data-review-semantic-ref", "").upper()
         if re.fullmatch(r"SCOV-[A-Z0-9-]+", semantic_ref):
@@ -730,7 +765,7 @@ class _ReviewFinalParser(HTMLParser):
                 "visible": str(not hidden).lower(),
             }
             self.semantic_surfaces.append(semantic_record)
-            self.active_semantics.append({"depth": depth, "ref": semantic_ref, "text": [], "hidden": hidden})
+            self.active_semantics.append({"depth": depth, "ref": semantic_ref, "text": [], "hidden": reading_hidden})
 
         content = attr_map.get("data-review-content", "").casefold()
         owner = attr_map.get("data-review-owner-tab", "").casefold()
@@ -770,10 +805,10 @@ class _ReviewFinalParser(HTMLParser):
             if not any(level >= int(record["depth"]) for level in self.nonreading_depths):
                 record["text"].append(text)  # type: ignore[union-attr]
         for record in self.active_cards:
-            if not bool(record["hidden"]):
+            if not bool(record["hidden"]) and not (self.reading_stack and self.reading_stack[-1]):
                 record["text"].append(text)  # type: ignore[union-attr]
         for record in self.active_semantics:
-            if not bool(record["hidden"]):
+            if not bool(record["hidden"]) and not (self.reading_stack and self.reading_stack[-1]):
                 record["text"].append(text)  # type: ignore[union-attr]
 
     def handle_endtag(self, tag: str) -> None:
@@ -826,6 +861,7 @@ class _ReviewFinalParser(HTMLParser):
         self.context_stack = [item for item in self.context_stack if item[0] < closing_depth]
         self.nonreading_depths = [depth for depth in self.nonreading_depths if depth < closing_depth]
         self.stack = self.stack[:index]
+        self.reading_stack = self.reading_stack[:index]
 
 
 def _review_final_projection(raw: str) -> _ReviewFinalParser:
@@ -1300,7 +1336,7 @@ class PrototypeChecks:
                         affected_consumers=("product", "frontend", "qa"),
                     )
             if any(str(item.get("diagram_type", "")) == "core_flow" for item in diagram_items):
-                if "syncReviewDiagramContext" not in scripts or "data-flow-current" not in scripts:
+                if "syncReviewDiagramContext" not in scripts or not re.search(r"data-flow-current|\.dataset\.flowCurrent\b", scripts):
                     self.add(
                         "BLOCK", "PROTO-REVIEW-DIAGRAM-CONTEXT", path,
                         "核心流程图缺少随 CurrentContext 更新当前节点高亮的运行时机制",
@@ -2260,9 +2296,11 @@ class PrototypeChecks:
         self.prototype_acceptance_refs.update(item.upper() for item in acceptance_refs)
         if not page_testids:
             self.add("BLOCK" if actions or level in {"L2", "L3", "L4"} else "GAP", "PROTO-NO-PAGE-ANCHOR", path, "no page-* data-testid root was found")
-        for duplicate in sorted(item for item, count in Counter(testids).items() if count > 1 and item.lower().startswith("page-")):
+        static_anchors = _StaticAnchorParser()
+        static_anchors.feed(raw)
+        for duplicate in sorted(item for item, count in Counter(static_anchors.testids).items() if count > 1 and item.lower().startswith("page-")):
             self.add("BLOCK", "PROTO-DUPLICATE-PAGE", path, "page data-testid must be unique", duplicate)
-        for duplicate in sorted(item for item, count in Counter(testids).items() if count > 1 and item.lower().startswith("region-")):
+        for duplicate in sorted(item for item, count in Counter(static_anchors.testids).items() if count > 1 and item.lower().startswith("region-")):
             self.add("BLOCK", "PROTO-DUPLICATE-REGION", path, "region data-testid must be unique", duplicate)
         if level in {"L2", "L3", "L4"}:
             for action in actions:
@@ -3130,7 +3168,7 @@ class PrototypeChecks:
             self.add(
                 "BLOCK", "PROTO-UNSTABLE-ACTION", path,
                 "data-action 模板值无法静态解析为唯一稳定动作",
-                related[0] if related else "data-action template",
+                str(placeholder),
                 related_refs=related,
             )
         orphan_handler_actions = sorted(handler_actions - {item.upper() for item in actions} - dynamic_anchor_actions)
@@ -3286,6 +3324,7 @@ class PrototypeChecks:
         self.metrics.update({
             "prototype_pages": len(page_testids),
             "prototype_regions": len(region_testids),
+            "prototype_duplicate_anchor_scope": "static_document_nodes; runtime template composition requires browser verification",
             "prototype_actions": len(actions),
             "prototype_dynamic_action_candidates": len(script_action_candidates),
             "prototype_action_inventory_total": len({item.upper() for item in actions} | dynamic_anchor_actions),

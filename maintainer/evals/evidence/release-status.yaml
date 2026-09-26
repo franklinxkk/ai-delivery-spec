@@ -28,23 +28,24 @@ trace_release_proxy:
   effectiveness_limit: deterministic/private calibration repaired gaps; blind A/B,
     token/time and human ratings remain incomplete
 release_evidence:
-  verified_at: '2026-09-19'
+  verified_at: '2026-09-27'
   scope: 5.5.2 local candidate checks on Windows / Python 3.12.10;
     not customer or production acceptance. Public release is not performed.
   results:
-    pytest: 207_passed
-    requirements_regressions: 7_new_targeted_cases_passed
-    review_regressions: shipped_example_bound_gate_zero_block_zero_gap_and_37_browser_checks_passed
+    pytest: 296_passed
+    requirements_regressions: 89_cases_added_since_september_19_baseline
+    review_regressions: built_example_37_browser_checks_passed
     release_gate: passed
     public_quickstart_and_badcases: passed
-    runtime_package_check: preflight_117_sources_passed_clean_final_identity_in_manifest
+    runtime_package_check: 118_source_budget_clean_final_identity_in_manifest
     skill_creator_quick_validate: passed_with_explicit_utf8
     independent_forward_test: four_tasks_three_groups_artifacts_reviewed_interrupted_runs_disclosed
     behavioral_comparison: local_readability_gain_observed_no_stable_effect_size
-    generated_candidate_followup: 18_browser_checks_passed_gate_42_block_6_gap_not_qualified_handoff
+    generated_candidate_followup: expense_repair_18_browser_checks_passed_scoped_gate_zero_block_zero_gap_future_unknown_preserved
     installation: isolated_preflight_5_commands_passed_after_normal_imports_global_not_run
     publication: not_run
 known_limitations:
+- CRM native outputs and assisted repairs are separate; one case does not establish cross-model stability
 - contract tests do not prove fresh-agent/expert/production maturity
 - domain, legal, safety, financial, production and customer correctness remain not
   proven

@@ -16,9 +16,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--executable')
+    parser.add_argument('--source', type=Path, default=ROOT/'examples/medium-review-handoff/review-prototype.html',
+                        help='Example-compatible built HTML to exercise the same behavioral contract')
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
-    source = ROOT/'examples/medium-review-handoff/review-prototype.html'
+    source = args.source.resolve()
     checks, errors = [], []
 
     def check(name, value):
