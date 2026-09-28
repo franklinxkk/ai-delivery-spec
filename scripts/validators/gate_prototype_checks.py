@@ -554,8 +554,25 @@ class _ReviewFinalParser(HTMLParser):
 
     _VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
 
-    def __init__(self) -> None:
+    def __init__(self, document: dict | None = None) -> None:
         super().__init__(convert_charrefs=True)
+        document = document or {}
+        self.workspace_id = str(document.get('workspace_id', ''))
+        workspace = document.get('workspace') or {}
+        self.initial_context = str(workspace.get('initial_context_ref', '')) if isinstance(workspace, dict) else ''
+        contexts = document.get('review_contexts') or []
+        declared = {str(item.get('context_ref', '')) for item in contexts if isinstance(item, dict)} if isinstance(contexts, list) else set()
+        self.authored_surfaces: dict[tuple[str, str], str] = {}
+        for collection, attr, ref_key in (
+            ('review_points', 'data-review-point', 'ref'),
+            ('semantic_coverage_items', 'data-review-semantic-ref', 'coverage_id'),
+            ('acceptance_examples', 'data-review-example', 'example_ref'),
+        ):
+            items = document.get(collection) or []
+            for item in items if isinstance(items, list) else []:
+                owner = item.get('owner_context_ref') if isinstance(item, dict) else None
+                if isinstance(owner, str) and owner in declared:
+                    self.authored_surfaces[(attr, str(item.get(ref_key, '')))] = owner
         self.stack: list[tuple[str, bool]] = []
         self.context_stack: list[tuple[int, str]] = []
         self.active_cards: list[dict[str, object]] = []
@@ -636,11 +653,22 @@ class _ReviewFinalParser(HTMLParser):
             # Reachability still needs runtime verification; nested hidden content is excluded.
             reading_attrs.pop('hidden', None)
             reading_attrs.pop('aria-hidden', None)
+        if (self.workspace_depths and self.initial_context and self.workspace_id
+                and self.workspace_roots[-1].get('data-review-workspace') == self.workspace_id):
+            owner = attr_map.get('data-review-context', '')
+            if owner and owner != self.initial_context and any(
+                self.authored_surfaces.get((attr, attr_map.get(attr, ''))) == owner
+                for attr in ('data-review-point', 'data-review-semantic-ref', 'data-review-example')
+            ):
+                # An explicitly bound inactive context is authored text, not
+                # proof of runtime visibility. Do not unhide its children,
+                # arbitrary wrappers, CSS hiding or the initial context.
+                reading_attrs.pop('hidden', None)
         reading_hidden = self._hidden(reading_attrs, self.reading_stack[-1] if self.reading_stack else False, tag)
         self.reading_stack.append(reading_hidden)
         self.stack.append((tag, hidden))
         depth = len(self.stack)
-        if self._hidden(attr_map, False, tag):
+        if self._hidden(reading_attrs, False, tag):
             self.nonreading_depths.append(depth)
 
         context_ref = attr_map.get("data-review-context-root", "").upper()
@@ -865,7 +893,8 @@ class _ReviewFinalParser(HTMLParser):
 
 
 def _review_final_projection(raw: str) -> _ReviewFinalParser:
-    parser = _ReviewFinalParser()
+    document, _ = _review_workspace_document(raw)
+    parser = _ReviewFinalParser(document)
     try:
         parser.feed(raw)
         parser.close()

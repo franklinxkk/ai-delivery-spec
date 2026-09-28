@@ -315,8 +315,8 @@ def check_dangling_refs(raw: str) -> list[SemFinding]:
         if kind != "prose":
             continue  # 登记册式定义（frontmatter/字典表/事件列/枚举）天然无前向引用，不报告
         findings.append(SemFinding(
-            "WARN", "PRD-ORPHAN-DEF",
-            f"{token} 只有定义、正文无引用；若已废弃请移除，否则在正文/追溯中引用",
+            "INFO", "PRD-ORPHAN-DEF",
+            f"{token} 在本文件只有定义、无引用；单文件检查不能判断跨产物使用或持续跟踪价值，不要求补引用或删编号",
             f"{token}@line {first_line}",
         ))
     return findings

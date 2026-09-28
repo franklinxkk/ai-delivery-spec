@@ -41,6 +41,9 @@ A requirements management core for **product teams and AI agents**, delivered as
 
 清晰小改直接完成；复杂需求按问题深入。工作量跟随当前目标，不要求先选 L0–L4、跑完整生命周期或填完全部模板。产品态原型默认可操作；需要面向产研的双态评审时，再开启评审标记与工作区。
 
+**先把业务讲清、操作走通，再补必要的追溯。** PRD 标题用业务名称，编号放在引用位置；快速原型不先搭全套评审设施。已定规则、待决影响和研发可自行选择的实现分别说清，避免把“有待决记录”误当成“已经可以开发”。<br>
+**Explain the business and make the task work before adding traceability.** Use business titles, keep IDs in references, and distinguish settled behavior, unresolved dependencies and engineering choices. A recorded question is not implementation readiness.
+
 <a id="install"></a>
 
 ## 安装到你的 Agent｜Install in your agent

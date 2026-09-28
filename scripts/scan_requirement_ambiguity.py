@@ -95,9 +95,20 @@ def _explicit_deep_link_guard(line: str) -> bool:
     # Bind the check to this link/request and require both caller and object
     # scope. A role-name mention or an unrelated nearby rule is not a guard.
     denied = _affirmative_match(line, r"(?:深链|直链|直接请求)(?:(?!未|没有|不|待)[^。；;|\n]){0,24}(?:返回拒绝|访问拒绝|拒绝|403)")
-    return denied or _affirmative_match(
+    # A server check may precede the sentence applying it to direct links.
+    # Require caller AND object/data scope; a backend toast or a closed-state
+    # response alone does not establish authorization.
+    server_guard = _affirmative_match(
         line,
-        r"(?:深链|直链|直接请求|实际请求)[^。；;|\n]{0,18}"
+        r"服务端[^。；;|\n]{0,12}(?:检查|校验|验证)"
+        r"[^。；;|\n]{0,12}(?:身份|角色|权限)"
+        r"[^。；;|\n]{0,18}(?:对象(?:访问|归属)?范围|数据范围)",
+    )
+    if re.search(r"(?:是否|计划|建议|拟|待)[^。；;|\n]{0,18}服务端|服务端[^。；;|\n]{0,12}是否[^。；;|\n]{0,6}(?:检查|校验|验证)", line):
+        return False
+    return denied or server_guard or _affirmative_match(
+        line,
+        r"(?:深链|直链|直接请求|直接调用|实际请求)[^。；;|\n]{0,18}"
         r"(?:检查|校验|验证)[^。；;|\n]{0,12}(?:身份|角色|权限)"
         r"[^。；;|\n]{0,16}(?:对象|数据)(?:访问|归属)?范围",
     )
