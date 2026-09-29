@@ -1967,9 +1967,19 @@ class PrototypeChecks:
                 )
             expected_marker_count = 1 if marker_required else 0
             if marker_counts[point_ref] != expected_marker_count or card_counts[point_ref] != 1:
+                # A role/state-dependent control in an inactive context may not
+                # exist in the initial DOM. Absence is unresolved coverage, not
+                # evidence that its runtime marker is missing. Never relax a
+                # visible target, duplicate marker, or missing explanation card.
+                deferred_target = (
+                    marker_required and marker_counts[point_ref] == 0
+                    and card_counts[point_ref] == 1 and context_ref != initial_context
+                    and projection.targets[context_ref][str(point.get("target_ref", "") or "").upper()] == 0
+                )
                 self.add(
-                    "BLOCK", "PROTO-REVIEW-POINT-COVERAGE", path,
-                    "静态投影未满足每点一张卡及所需 marker 的数量合同；未解析到卡片不能直接断言其内容缺失，动态渲染须另行验证", point_ref,
+                    "GAP" if deferred_target else "BLOCK", "PROTO-REVIEW-POINT-COVERAGE", path,
+                    ("非初始上下文的目标与 marker 未出现在静态 DOM；需在适用角色/状态下验证目标、标记和说明绑定，不能据此声明通过"
+                     if deferred_target else "静态投影未满足每点一张卡及所需 marker 的数量合同；未解析到卡片不能直接断言其内容缺失，动态渲染须另行验证"), point_ref,
                     affected_consumers=("product", "frontend", "qa", "coding_agent"),
                 )
             for item in [*([marker for marker in projection.markers if marker["ref"] == point_ref]), *([card for card in projection.cards if card["ref"] == point_ref])]:
@@ -2014,8 +2024,9 @@ class PrototypeChecks:
                     )
 
         declared_targets = {
-            str(point.get("target_ref", "")).upper()
-            for point in point_items if point.get("target_ref")
+            str(point.get(key, "")).upper()
+            for point in point_items for key in ("target_ref", "subject_ref")
+            if point.get(key)
         }
         candidate_gap_refs: set[str] = set()
         candidate_block_refs: set[str] = set()
@@ -2024,7 +2035,16 @@ class PrototypeChecks:
             for target_ref in target_counts:
                 if target_ref in declared_targets or target_ref in candidate_subjects or target_ref.startswith("VIEW-"):
                     continue
-                if target_ref.startswith(("METRIC-", "STATE-")) or (target_ref.startswith("ACT-") and high_risk_action.search(target_ref)):
+                # Closing a UI surface may merely dismiss it. The name alone
+                # cannot establish a business-state write; retain an advisory.
+                ui_close_candidate = (
+                    target_ref.startswith("ACT-")
+                    and re.search(r"-(?:OVERLAY|DIALOG|DRAWER|MODAL)-CLOSE$", target_ref)
+                    and high_risk_action.findall(target_ref) == ["CLOSE"]
+                )
+                if ui_close_candidate:
+                    candidate_gap_refs.add(target_ref)
+                elif target_ref.startswith(("METRIC-", "STATE-")) or (target_ref.startswith("ACT-") and high_risk_action.search(target_ref)):
                     candidate_block_refs.add(target_ref)
                 elif target_ref.startswith(("ACT-", "FLD-", "REG-")):
                     candidate_gap_refs.add(target_ref)

@@ -69,7 +69,7 @@ domain-neutral.
 | binding_baseline | existing e-signature, official-document and electronic-archive rules remain the authority for signatures, issuance, integrity, transfer and preservation | preserve document authority, version, signer, hash, timestamp, correction and archive evidence across workflow changes |
 | design_guidance | `KS-OA-ARCHIVE-PLAN-2026` | prepare for more complete digital archive resources, governance, services and security without treating planning language as a feature mandate |
 | product_pattern | existing OA vendor and open-component evidence | learn object-centric low-code work, automation, AI assistance and collaborative views; vendor capability is not outcome or open-core proof |
-| change_watch | `KS-OA-ARCHIVE-STANDARD-GUIDE-2026` names single-copy archives, long-term preservation, data governance and AI topics; `KS-OA-OFFICE-AGENT-INTERFACE-DRAFT-2026` is only an office-agent interface standards-plan consultation | create a re-verification item for future standards; a project guide or consultation is not a final standard and cannot block delivery by itself |
+| change_watch | `KS-OA-ARCHIVE-STANDARD-GUIDE-2026` names single-copy archives, long-term preservation, data governance and AI topics | create a re-verification item for future standards; a project guide or consultation is not a final standard and cannot block delivery by itself |
 
 ### AI Transformation Horizon
 

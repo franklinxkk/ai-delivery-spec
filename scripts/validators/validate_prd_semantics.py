@@ -37,7 +37,7 @@ if hasattr(sys.stdout, "reconfigure"):
 ID_FAMILIES = (
     "FLOW", "STEP", "EDGE", "DFD", "RULE", "ACT", "STM", "STATE", "REQ", "MOD",
     "AC", "TEST", "UNK", "ASM", "DEC", "FLD", "METRIC", "EVT", "API", "INT",
-    "ROLE", "VIEW", "REG", "SRC", "EVD", "ARUN", "CHG", "REV", "REL", "ENT", "COR",
+    "ROLE", "VIEW", "DRAWER", "MODAL", "POPOVER", "REG", "SRC", "EVD", "ARUN", "CHG", "REV", "REL", "ENT", "COR",
 )
 _FAMILY = "|".join(ID_FAMILIES)
 ID_RE = re.compile(rf"(?<![A-Za-z0-9-])(?:{_FAMILY})-[A-Z0-9](?:[A-Z0-9_-]*[A-Z0-9])?")
