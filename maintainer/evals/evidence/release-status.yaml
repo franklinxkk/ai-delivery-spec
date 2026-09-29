@@ -28,12 +28,15 @@ trace_release_proxy:
   effectiveness_limit: deterministic/private calibration repaired gaps; blind A/B,
     token/time and human ratings remain incomplete
 release_evidence:
-  verified_at: '2026-09-27'
+  verified_at: '2026-09-30'
   scope: 5.5.2 local candidate checks on Windows / Python 3.12.10;
     not customer or production acceptance. Public release is not performed.
   results:
-    pytest: 296_passed
-    requirements_regressions: 89_cases_added_since_september_19_baseline
+    pytest: 361_passed
+    added_regressions_this_review: 28_bilingual_intake_and_retrieval_cases
+    bilingual_intake: 14_cases_expected_decisions
+    bilingual_retrieval: 16_queries_with_candidate_hits_across_8_domains
+    short_model_forward: 16_answers_reviewed_cli_abnormal_exit_and_unapproved_rule_expansion_disclosed
     review_regressions: built_example_37_browser_checks_passed
     release_gate: passed
     public_quickstart_and_badcases: passed

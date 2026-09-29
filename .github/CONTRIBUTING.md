@@ -3,6 +3,10 @@
 Contributions must improve reusable delivery behavior without inflating the
 default runtime or overstating validation.
 
+欢迎中文或英文反馈与贡献。提交问题时说明实际版本、宿主、脱敏输入、预期和实际结果；未执行的验证如实标注。领域建议请附适用法域和一手来源，不上传客户原文或凭据。
+
+Chinese and English contributions are welcome. Include the version, host, sanitized input, expected and observed behavior, and checks actually run. Domain proposals need jurisdiction and primary sources; keep private customer material and credentials out of public submissions.
+
 ## Before Opening A Change
 
 Classify the proposal:
@@ -22,8 +26,7 @@ Do not add a public file for a one-off project rule.
 
 ## Runtime Budget
 
-- Keep `SKILL.md` at or below 350 lines.
-- Keep stage references at or below 500 lines.
+- Keep `SKILL.md` at or below 2,500 characters and the combined daily stage references at or below 13,000 characters, as checked by `maintainer/tools/validators/validate_v5_architecture.py`.
 - Do not duplicate a rule across SKILL, reference, template, and README.
 - Load domain/profile/capability material only on explicit triggers.
 - Prefer Schema and deterministic validation over long format instructions.

@@ -38,7 +38,7 @@ def recommend(doc: dict) -> dict:
     # Bounded cues for a complaint with no task, not a general NLP classifier.
     # Concrete instructions elsewhere in the input take precedence over tone.
     title = str(doc.get("title", "")).strip()
-    complaint = bool(re.search(r"(?:太烂|太差|难用|不想说|随便吧|你们看着办|\b(?:terrible|awful|useless|whatever)\b)", title, re.I))
+    complaint = bool(re.search(r"(?:太烂|太差|难用|不想说|随便吧|你们看着办|\b(?:terrible|awful|useless|whatever)\b|\b(?:hard|difficult)\s+to\s+use\b)", title, re.I))
     action_cue = re.search(r"(?:新增|增加|添加|改为|改成|删除|取消|修复|显示|筛选|导出|需要|希望|请|\b(?:add|remove|change|fix|show|filter|export|need|please)\b)", title, re.I)
     no_task_complaint = complaint and not action_cue and not detail
     if required_questions or lexical or generic_goal or no_task_complaint:

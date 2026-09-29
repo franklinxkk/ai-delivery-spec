@@ -19,7 +19,7 @@ PATTERNS = {
     "vague-quantity": r"(?:适量|若干|一定数量|大量|少量|较多|尽量)",
     "vague-time": r"(?:及时|尽快|实时处理|稍后|定期)(?![^。；\n]{0,16}\d)",
     "open-list": r"(?:等等|等功能|等场景|诸如此类)",
-    "undefined-default": r"(?:默认|自动)(?![^。；\n]{0,24}(?:为|条件|规则|当|若|由))",
+    "undefined-default": r"(?:默认|自动)(?!\s*(?:仍(?:然)?(?:为|按)?|为)?\s*(?:升序|降序)(?:排列|排序)?(?:[，,。；;\n]|$))(?![^。；\n]{0,24}(?:为|条件|(?<!相关)规则|当|若|由))",
     "unbounded-config": r"(?:灵活配置|可配置|按需配置)(?![^。；\n]{0,24}(?:配置项|范围|权限|规则))",
     "unspecified-actor": r"(?:相关人员|有关人员|管理员等|业务人员)(?![^。；\n]{0,18}(?:角色|权限|范围))",
 }
@@ -162,7 +162,7 @@ def inspect_content(text: str) -> dict:
         ("publication", "state_authority", {"state"}, r"(?:审批|审核)通过.{0,15}(?:可|可以|允许)发布|\bapprov(?:al|ed)\b[^.;\n]{0,45}\b(?:can|may|eligible|allowed)\b[^.;\n]{0,25}\bpublish|\b(?:can|may|eligible|allowed)\b[^.;\n]{0,25}\bpublish[^.;\n]{0,25}\bafter approval\b", r"(?:手动|人工|点击|定时|自动|发布人|发布角色|不立即|不会自动).{0,25}发布|发布.{0,20}(?:手动|人工|角色|时机)|\b(?:manual(?:ly)?|automatic(?:ally)?|scheduled|publisher)\b[^.;\n]{0,35}\bpublish|\b(?:publish\w*|publication)\b[^.;\n]{0,35}\b(?:manual(?:ly)?|automatic(?:ally)?|scheduled|role)\b", "通过后谁在什么条件下发布？区分发布资格与实际发布事件。"),
         ("return-object", "recovery", {"state"}, r"退回(?!历史|记录|原因)[^。；;|\n]{0,20}(?:重新|再次|重提|提交)|\breturn(?:ed)?\b[^.;\n]{0,50}\bresubmit|\bresubmit\w*\b[^.;\n]{0,35}\breturn(?:ed)?\b", r"原单|原对象|新单|新对象|同一.{0,8}(?:ID|编号)|保留.{0,8}(?:ID|编号)|\b(?:same|original|new)\s+(?:record|object|request|ID)\b|\b(?:keep|retain|preserve)\w*\s+(?:the\s+)?(?:ID|identifier)\b", "退回后修改原对象还是新建？原编号、历史及再次提交去向如何处理？"),
         ("null-meaning", "null_stale", set(), r"字段.{0,12}(?:可空|为空)|允许.{0,8}空值|未采集.{0,10}(?:按|计为|记为)\s*(?:数值\s*)?0", r"(?:空值|为空|未采集).{0,30}(?:表示|代表|区别|不等于|未知|不适用)|(?:不|不得|不能)按\s*0", "空值在此字段代表未知、不适用还是尚未采集？是否与零不同，如何参与计算？"),
-        ("metric-population", "metric_definition", {"metric"}, r"完成率|通过率|离职率|活跃用户|completion rate|active users", r"分母|统计人群|纳入.{0,20}(?:用户|人员)|去重.{0,12}(?:用户|人员)|denominator|population", "说明统计对象、去重/时间窗和分母；离职、退出与晚到数据如何计入？"),
+        ("metric-population", "metric_definition", {"metric"}, r"完成率|通过率|离职率|活跃用户|completion rate|pass rate|active users|\b(?:employee|staff)\s+turnover\b|\bturnover\b(?=[^.;\n]{0,100}\b(?:employee|staff|departures)\b)", r"分母|统计人群|纳入.{0,20}(?:用户|人员)|去重.{0,12}(?:用户|人员)|denominator|population", "说明统计对象、去重/时间窗和分母；离职、退出与晚到数据如何计入？"),
         ("retry-result", "recovery", set(), r"(?:提交|保存|写入|支付)失败.{0,12}(?:重试|再试)|\b(?:submit|save|write|payment)\w*\b[^.;\n]{0,20}\bfail\w*\b[^.;\n]{0,25}\bretry|\bretry\b[^.;\n]{0,25}\bfailed\s+(?:submit|save|write|payment)", r"幂等|重复.{0,12}(?:不|防止)|未写入|已写入|保留.{0,10}输入|查询.{0,10}结果|\bidempot\w*|\b(?:avoid|prevent)\w*\s+duplicate|\balready\s+(?:written|saved|paid)|\bquery\w*[^.;\n]{0,20}\bresult", "失败时是否已产生副作用？再次提交会重复写入吗，如何确认与恢复？"),
         ("state-ordinal", "change_propagation", {"migration", "state"}, r"(?:已完成|状态).{0,35}第\s*[一二三四五六七八九十\d]+\s*(?:个)?(?:状)?态.{0,15}(?:改|变|调整)|(?:插入|新增).{0,10}状态.{0,20}(?:序号|编号)", r"稳定.{0,10}(?:键|编码|标识)|不使用.{0,10}(?:序号|顺序)|(?:消费者|筛选|报表|过滤).{0,30}(?:同步|映射|迁移|更新)", "状态序号改变会影响哪些筛选、报表、接口和历史对象？使用稳定含义并逐项核实消费者。"),
         ("rule-consumers", "change_propagation", {"migration"}, r"(?:定义|口径).{0,20}从.{0,50}(?:改为|调整为|变为)", r"(?:消费者|依赖|报表|看板).{0,30}(?:核实|验证|同步|保留|候选|回归)", "口径变更后哪些读写者、指标和历史解释可能受影响？先查依赖依据，再确认变更范围。"),
@@ -228,7 +228,10 @@ def inspect_content(text: str) -> dict:
                 if not guarded:
                     add(kind, category, facets, i, line, action)
         ai_actor = r"(?<![A-Za-z0-9_-])(?:AI(?!\s*(?:coding|编程|开发))|LLM|模型|智能体|agent|置信度|confidence)(?![A-Za-z0-9_-])"
-        if re.search(ai_actor + r"[^。；;\n]{0,70}(?:自动|直接|无需人工|\bautomatically\b|\bdirectly\b)[^。；;\n]{0,50}(?:发信|发送|创建|新建|更新|修改|保存|写回|删除|支付|退款|扣款|执行|\b(?:send|email|create|update|save|write|delete|pay|refund|execute)\w*\b)|自动.{0,15}给客户.{0,8}(?:发信|发送)", line, re.I):
+        automatic_write = r"(?:自动|直接|无需人工|\bautomatically\b|\bdirectly\b)[^。；;\n]{0,50}(?:发信|发送|创建|新建|更新|修改|保存|写回|删除|支付|退款|扣款|执行|\b(?:send|email|create|update|save|write|delete|pay|refund|execute)\w*\b)"
+        # The confidence/AI cue may follow the action in the same sentence.
+        # Keep ordinary non-AI automation and explicit draft/negative cases out.
+        if re.search(ai_actor + r"[^。；;\n]{0,70}" + automatic_write + "|" + automatic_write + r"[^。；;.\n]{0,90}" + ai_actor + r"|自动.{0,15}给客户.{0,8}(?:发信|发送)", line, re.I):
             if not re.search(r"(?:禁止|不允许|不会|不|不得)(?:自动|直接)|仅.{0,12}(?:草稿|建议)|draft.only|\bonly\s+(?:produces?\s+)?drafts?\b|\b(?:not|never)\s+(?:automatically|directly)\b", line, re.I):
                 risks.add("irreversible_ai_write")
                 guards = (r"授权|允许.{0,20}(?:范围|对象)|权限范围|authoriz\w*|permission\s+scope", r"回退|撤销|补偿|停止|人工接管|重试|幂等|rollback|undo|compensat\w*|stop|human takeover|retry|idempot\w*")

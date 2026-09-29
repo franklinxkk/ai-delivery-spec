@@ -13,7 +13,7 @@ A requirements management core for **product teams and AI agents**, delivered as
 
 <sub>2026-09-13 社区快照：ClawHub 约 2.6k 次下载；SkillHub 4.7/5 为 v5.4.8 历史 AI 评分，非当前版本新评测。 / Community snapshot: approximately 2.6k ClawHub downloads; SkillHub's 4.7/5 is a historical AI rating of v5.4.8, not a new evaluation of this release.</sub>
 
-**[角色价值 / Role value](#roles) · [中文上手](#zh) · [English guide](#en) · [安装 / Install](#install) · [示例 / Examples](#examples) · [指南 / Guides](#resources) · [中英社区 / Community](#community)**
+**[角色价值 / Role value](#roles) · [中文上手](#zh) · [English guide](#en) · [四个快捷入口 / Shortcuts](#shortcuts) · [安装 / Install](#install) · [示例 / Examples](#examples) · [中英社区 / Community](#community)**
 
 <a id="roles"></a>
 
@@ -81,8 +81,9 @@ If your host provides a skill-import interface, follow its instructions to impor
 安装后，在 Agent 对话中输入这句话；也可以直接换成你的真实需求。
 
 ```text
-使用 ai-delivery-spec：给现有列表增加“仅看当前有效”筛选，
-保留现有权限，把这次改动的规则和验收说明白。
+使用 ai-delivery-spec：给现有列表增加“仅看已启用”筛选，
+沿用系统已有的启用状态，默认显示全部，保留现有权限。
+把这次改动的规则和验收说明白。
 ```
 
 你会得到这次修改的范围、筛选含义、正常与异常结果，以及可判断对错的验收条件。有已确认资料时直接沿用；存在关键未知时先指出需要谁决定。小改可以用一张需求卡或简短差异说明完成。
@@ -100,13 +101,28 @@ If your host provides a skill-import interface, follow its instructions to impor
 | **评审与交接** | “使用 ai-delivery-spec：站在研发和测试接收者角度审查这份规格，找出仍要靠猜的关键业务选择。” |
 | **办公流程与表格规则** | “使用 ai-delivery-spec：报销登记表要自动标出超期项，先帮我明确起算日、例外和责任人，再交给表格工具实现。” |
 
-熟悉后可用 `/ads`（通用）、`/dig`（澄清）、`/prd`（规格）、`/proto`（原型）表达意图。它们是否可作为裸命令由宿主决定；自然语言入口始终可以表达相同任务。
+<a id="shortcuts"></a>
+
+### 四个快捷入口怎么用｜Four intent shortcuts
+
+**它们是对话中的意图简写。** 将下面任一句发给已加载技能的 Agent，附上相关材料或路径。安装技能是否同时注册裸斜杠命令取决于宿主；如果 `/dig` 等被宿主拦截，直接使用表中的带技能名写法。它们不是终端命令，也不对应四套独立流程。<br>
+**These are conversation shortcuts.** Send a prompt below to an agent with the skill loaded, together with relevant materials or paths. Native slash registration depends on the host; if a bare shortcut is intercepted, use the explicit skill-name prompt below. These are not shell commands or four separate workflows.
+
+| 入口 / Intent | 复制使用 / Copy and adapt | 当前结果 / Expected result |
+|---|---|---|
+| **`/ads` · 通用 / General** | `使用 ai-delivery-spec，以 /ads 处理：给现有列表增加按创建日期排序，保留权限。`<br>`Use ai-delivery-spec with /ads: add sorting by creation date to the existing list, preserving permissions.` | 从当前任务进入，完成必要差异与验收。 / Start at the relevant stage; deliver the change and acceptance needed. |
+| **`/dig` · 深挖 / Discover** | `使用 ai-delivery-spec，以 /dig 处理：客户说合同审批太慢，帮我找到真正的问题和最小验证。`<br>`Use ai-delivery-spec with /dig: customers say contract approval is slow. Help identify the problem and the smallest useful validation.` | 找关键决定，澄清会改变选择的问题；足够后回到用户目标。 / Clarify decisions that change the choice, then continue toward the requested outcome. |
+| **`/prd` · 规格 / Specify** | `使用 ai-delivery-spec，以 /prd 处理：基于附件中的已确认规则编写 PRD，按业务模块写清正常、拒绝与恢复。`<br>`Use ai-delivery-spec with /prd: write a PRD from the attached confirmed rules, organizing success, rejection and recovery by business module.` | 可读业务约定、待决影响及验收；小改可用需求卡。 / Readable business rules, unresolved impacts and acceptance; small changes can use a card. |
+| **`/proto` · 原型 / Prototype** | `使用 ai-delivery-spec，以 /proto 处理：基于这份 PRD 做可操作原型，并为研发测试提供当前页面的评审说明。`<br>`Use ai-delivery-spec with /proto: build an interactive prototype from this PRD, with contextual review notes for engineering and QA.` | 可操作产品态；明确需要时提供就近评审说明。 / A working product view, with contextual review notes when requested. |
+
+不知道选哪个就用 `/ads` 或直接说任务。单独写 `/prd`、`/proto` 不会替你确定业务规则；已有决定直接继承，只澄清真正影响交付的缺口。<br>
+If unsure, use `/ads` or describe the task. A shortcut does not decide business policy for you; existing decisions carry forward, and only material gaps need clarification.
 
 不必说出“需求”才使用它。办公中的目标、规则、权限或流程改变也可以进入；明确的翻译、排版、抄录等任务由对应工具直接完成。隐式命中取决于宿主与模型，需要稳定调用时显式写出技能名。
 
 <a id="examples"></a>
 
-## 先看两个实际产物｜See the outputs
+## 先看实际产物｜See the outputs
 
 | 示例 / Example | 看什么 / What to look for |
 |---|---|
@@ -158,8 +174,9 @@ Clear local edits can be completed directly. Complex work loads only the relevan
 **Start with the work you have.** After [installing the skill](#install), paste this into your agent or replace it with your own task:
 
 ```text
-Use ai-delivery-spec: add an "Active only" filter to the existing list.
-Preserve its permissions, and specify the rules and acceptance criteria for this change.
+Use ai-delivery-spec: add an "Enabled only" filter to the existing list.
+Reuse the existing enabled status, show all records by default, and preserve permissions.
+Specify the rules and acceptance criteria for this change.
 ```
 
 Expect the change scope, filter meaning, success and failure behavior, and testable acceptance criteria. Confirmed material carries forward. Missing business decisions stay explicit. A small change may need only a requirement card or a short change note.
@@ -177,7 +194,7 @@ Attach an existing PRD, screenshot, HTML prototype, customer feedback or change 
 | **Review or hand off** | “Use ai-delivery-spec: review this specification as an engineering and QA receiver. Find critical business choices that still require guessing.” |
 | **Office workflows and spreadsheet rules** | “Use ai-delivery-spec: flag overdue reimbursements in this tracker. Clarify the start date, exceptions and responsible person before the spreadsheet tool implements it.” |
 
-`/ads`, `/dig`, `/prd` and `/proto` are intent shortcuts for general work, clarification, specification and prototyping. Native slash-command support depends on the host; the natural-language prompts above express the same tasks.
+Use the [four bilingual shortcut prompts](#shortcuts) for `/ads` (general), `/dig` (discovery), `/prd` (specification) and `/proto` (prototyping). Native slash-command support depends on the host; the explicit skill-name prompts work as conversation requests without requiring separate shortcut registration.
 
 You do not need to say “requirement.” Changes to office goals, rules, permissions or workflows also apply. Straightforward translation, formatting and transcription can go directly to their tools. Implicit selection depends on the host and model; name the skill explicitly when you need a reliable invocation.
 
