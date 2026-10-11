@@ -25,6 +25,7 @@ TRUSTED_HOST_SUFFIXES = (
     "saac.gov.cn",
     "hl7.org",
     "dicomstandard.org",
+    "dicom.nema.org",
     "w3.org",
     "openlineage.io",
     "json-schema.org",

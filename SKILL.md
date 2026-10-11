@@ -1,10 +1,10 @@
 ---
 name: ai-delivery-spec
-license: Apache-2.0
+license: MIT
 description: Clarify, create, review or change product, service and office workflow requirements, PRDs and interactive prototypes. Use for vague goals, process improvements, spreadsheet/form rules, small UI edits and changes to existing systems, even without the word requirement. 中文：产品、服务及办公流程的需求判断、深挖澄清、PRD、原型、变更与验收；一句话想法、表单/表格规则和微小改动也适用。明确的纯翻译、排版、抄录或既定步骤执行由对应工具直接处理。
 ---
 
-# AI Delivery Spec 5.5.2 — 需求判断与交付
+# AI Delivery Spec 5.5.3 — 需求判断与交付
 
 帮助用户管清需求，让产研和 AI 少猜、少漏、少返工。跟随用户语言；代码、字段和已有稳定 ID 保留原名。
 
@@ -44,7 +44,7 @@ description: Clarify, create, review or change product, service and office workf
 
 实施者仍可能作出互不兼容的关键业务选择时，补足该处语义；技术实现保留合理空间。说明行为前提、允许者、业务结果、失败恢复及可判验收。按实际风险补状态、权限、指标、外部数据或历史对象约定，不按角色数或旧等级加长文档。
 
-事实只在一处人工定义，模块内就近引用或展开，使接收者连续读懂任务。业务审批和需求评审是不同对象；审核通过仅为发布前提时，不擅自合并成自动发布。
+事实只在一处人工定义，模块内连续展开。多轮合并先核对同主题旧条目再回填，不靠追加说明覆盖矛盾。业务审批与需求评审不同；审核仅为发布前提时不合并成自动发布。
 
 关键规则用能区分错误实现的反例验证；标签缺失不能掩盖风险，模型一致不能代替来源。小改不附加全角色报告。
 

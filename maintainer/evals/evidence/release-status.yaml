@@ -1,5 +1,5 @@
 schema_version: 5.3.0
-skill_version: 5.5.2
+skill_version: 5.5.3
 runtime: pure_v5
 domain_packs:
   count: 8
@@ -28,26 +28,26 @@ trace_release_proxy:
   effectiveness_limit: deterministic/private calibration repaired gaps; blind A/B,
     token/time and human ratings remain incomplete
 release_evidence:
-  verified_at: '2026-09-30'
-  scope: 5.5.2 local candidate checks on Windows / Python 3.12.10;
+  verified_at: '2026-10-11'
+  scope: 5.5.3 local candidate checks on Windows / Python 3.12.10;
     not customer or production acceptance. Public release is not performed.
   results:
-    pytest: 361_passed
-    added_regressions_this_review: 28_bilingual_intake_and_retrieval_cases
-    bilingual_intake: 14_cases_expected_decisions
-    bilingual_retrieval: 16_queries_with_candidate_hits_across_8_domains
-    short_model_forward: 16_answers_reviewed_cli_abnormal_exit_and_unapproved_rule_expansion_disclosed
-    review_regressions: built_example_37_browser_checks_passed
-    release_gate: passed
+    pytest: 389_passed_in_77.49s
+    added_regressions_this_review: 28_contract_example_checks_passed_included_in_total
+    review_regressions: browser_not_rerun_no_browser_artifact_changes
+    release_gate: exit_1_five_existing_domain_sources_stale_other_checks_passed
     public_quickstart_and_badcases: passed
-    runtime_package_check: 118_source_budget_clean_final_identity_in_manifest
-    skill_creator_quick_validate: passed_with_explicit_utf8
-    independent_forward_test: four_tasks_three_groups_artifacts_reviewed_interrupted_runs_disclosed
-    behavioral_comparison: local_readability_gain_observed_no_stable_effect_size
-    generated_candidate_followup: expense_repair_18_browser_checks_passed_scoped_gate_zero_block_zero_gap_future_unknown_preserved
-    installation: isolated_preflight_5_commands_passed_after_normal_imports_global_not_run
+    runtime_package_check: passed_118_source_files_no_zip
+    skill_creator_quick_validate: passed
+    independent_forward_test: three_tasks_three_groups_outputs_retained_parent_review_only
+    independent_code_review: three_reproduced_defects_repaired_and_retested
+    behavioral_comparison: no_stable_benefit_proven_single_synthetic_run_not_blind
+    installation: not_run
     publication: not_run
 known_limitations:
+- Five existing domain source originals could not be retrieved; freshness gate remains failed
+- Independent receiver scoring stopped at host quota; parent review is not a blind assessment
+- Single-run synthetic forward calibration does not establish stable benefit or human handoff quality
 - CRM native outputs and assisted repairs are separate; one case does not establish cross-model stability
 - contract tests do not prove fresh-agent/expert/production maturity
 - domain, legal, safety, financial, production and customer correctness remain not

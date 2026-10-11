@@ -8,7 +8,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'scripts'))
-from ai_delivery_spec_cli import validate_runtime_manifest
+from ai_delivery_spec_cli import validate_runtime_manifest, current_version
 from triage_requirement import recommend
 from quality_gate import Gate
 from test_review_workspace_contracts import manifest, review_html, manifest_v549, review_html_v549
@@ -56,7 +56,7 @@ def test_used_runtime_accepts_only_cache_of_declared_sources(tmp_path):
     source.parent.mkdir()
     source.write_text('VALUE = 7\n', encoding='utf-8')
     data = source.read_bytes()
-    manifest = {'schema_version': '5.3.0', 'skill_version': '5.5.2',
+    manifest = {'schema_version': '5.3.0', 'skill_version': current_version(),
                 'source_commit': 'uncommitted-dirty', 'source_worktree_dirty': True,
                 'files': [{'path': 'scripts/sample.py', 'size': len(data), 'sha256': hashlib.sha256(data).hexdigest()}]}
     (tmp_path / 'runtime-manifest.json').write_text(json.dumps(manifest), encoding='utf-8')

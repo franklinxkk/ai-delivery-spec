@@ -68,7 +68,7 @@ sources:
     applicability: personal information processing
     product_mapping: purpose, minimum necessary, consent/legal basis, rights, security, cross-border
     claim_limit: Verify role, jurisdiction, processing purpose, information type and legal basis for the project; the source does not make every media operation consent-only.
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
   - id: KS-COMMON-DSL
     domains: [common, medical-hospital-it, education-it, data-product, ai-native, media-knowledge]
@@ -82,7 +82,7 @@ sources:
     applicability: data processing, classification, risk, incident and security obligations
     product_mapping: data classification, responsibility, lifecycle, incident and audit
     claim_limit: Verify project jurisdiction, data classification and applicable obligations before creating a hard stop.
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
 
   - id: KS-TRAFFIC-INSPECTION-2025
@@ -96,7 +96,7 @@ sources:
     jurisdiction: China
     applicability: transport-related enterprise administrative inspection
     product_mapping: inspection templates, item evidence, enterprise/regulator alignment
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
   - id: KS-TRAFFIC-PRACTITIONERS-2026
     domains: [traffic]
@@ -109,7 +109,7 @@ sources:
     jurisdiction: China
     applicability: road transport practitioners and qualification lifecycle
     product_mapping: practitioner file, qualification, validity, renewal and audit
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
   - id: KS-TRAFFIC-DANGEROUS-2026
     domains: [traffic]
@@ -122,7 +122,7 @@ sources:
     jurisdiction: China
     applicability: dangerous-goods road transport
     product_mapping: enterprise, vehicle, driver/escort, cargo, waybill, checks and human release
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
   - id: KS-TRAFFIC-TRAINING-2026
     domains: [traffic]
@@ -135,7 +135,7 @@ sources:
     jurisdiction: China
     applicability: driver training institutions, coaches, trainees, class hours and training lifecycle
     product_mapping: training institution, coach/trainee, class-hour, exam and archive
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
 
   - id: KS-EDU-DIGITAL-CAMPUS
@@ -228,20 +228,20 @@ sources:
     jurisdiction: global
     applicability: health data exchange where the project adopts FHIR
     product_mapping: resource/API/profile/version/conformance contract
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
   - id: KS-MEDICAL-DICOM-CURRENT
     domains: [medical-hospital-it]
-    title: DICOM Current Edition
+    title: DICOM Current Edition (2026d as verified)
     issuer: NEMA/MITA
     authority_type: interoperability_standard
     effect_class: design_guidance
-    url: https://www.dicomstandard.org/current/
+    url: https://dicom.nema.org/medical/dicom/current/output/html/part01.html
     status: continuously_updated
     jurisdiction: global
     applicability: medical imaging interoperability where DICOM is used
     product_mapping: image object, exchange, web services, security and conformance
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
 
   - id: KS-OA-ESIGN
@@ -250,12 +250,12 @@ sources:
     issuer: 全国人民代表大会常务委员会
     authority_type: law
     effect_class: binding_baseline
-    url: https://www.npc.gov.cn/zgrdw/npc/xinwen/2019-05/07/content_2086835.htm
+    url: https://www.miit.gov.cn/jgsj/zfs/fl/art/2022/art_e3f623f70c23497e88a941170093446a.html
     status: active_as_verified
     jurisdiction: China
     applicability: electronic signatures and data messages within statutory scope
     product_mapping: signature applicability, reliability, evidence and exclusion boundary
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
   - id: KS-OA-OFFICIAL-DOC
     domains: [oa]
@@ -268,7 +268,7 @@ sources:
     jurisdiction: China
     applicability: party/government official-document processing
     product_mapping: document types, processing, issue/receipt, circulation and archive
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
   - id: KS-OA-ARCHIVE-39362
     domains: [oa]
@@ -415,7 +415,7 @@ sources:
     jurisdiction: global
     applicability: job/run/dataset lineage event interoperability
     product_mapping: run, job, dataset, facets, schema version and extensibility
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
   - id: KS-DATA-JSON-SCHEMA-2020
     domains: [data-product, common]
@@ -625,11 +625,11 @@ sources:
     authority_type: framework
     effect_class: design_guidance
     url: https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-ai-rmf-10
-    status: current_with_revision_underway
+    status: published_version_as_verified
     jurisdiction: United States / voluntary global reference
     applicability: voluntary AI risk management reference
     product_mapping: govern, map, measure and manage AI risk
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
   - id: KS-AI-CHINA-LABEL-2025
     domains: [ai-native, media-knowledge]
@@ -643,7 +643,7 @@ sources:
     applicability: AI-generated/synthesized content labeling within stated scope
     product_mapping: explicit/implicit labeling, content metadata and platform responsibility
     claim_limit: Apply only after verifying that the service and generated or synthesized content fall within the rule; labeling does not prove truth, ownership or lawful reuse.
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
   - id: KS-AI-CHINA-ANTHROPOMORPHIC-2026
     domains: [ai-native]
@@ -654,9 +654,9 @@ sources:
     url: https://www.cac.gov.cn/2026-04/10/c_1777558395078289.htm
     status: active_as_verified
     jurisdiction: China
-    applicability: anthropomorphic AI interaction services within stated scope
+    applicability: anthropomorphic AI services with sustained emotional interaction within stated scope; excludes ordinary work, learning and Q&A services without that interaction
     product_mapping: user protection, disclosure, dependency risk, content/service governance
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
 
   - id: KS-CAP-BPMN-202
@@ -687,16 +687,16 @@ sources:
     refresh_days: 180
   - id: KS-CAP-OPENAPI-32
     domains: [capability-integration]
-    title: OpenAPI Specification 3.2.0
+    title: OpenAPI Specification 3.2.1
     issuer: OpenAPI Initiative
     authority_type: specification
     effect_class: design_guidance
-    url: https://spec.openapis.org/oas/latest.html
+    url: https://spec.openapis.org/oas/v3.2.1.html
     status: current_published_version_as_verified
     jurisdiction: global
     applicability: HTTP API description where OpenAPI is selected and tooling supports the version
     product_mapping: human/machine API contract, documentation, generation and testing
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
   - id: KS-CAP-ASYNCAPI-31
     domains: [capability-integration]
@@ -704,12 +704,12 @@ sources:
     issuer: AsyncAPI Initiative
     authority_type: specification
     effect_class: design_guidance
-    url: https://www.asyncapi.com/docs/reference/specification/latest
+    url: https://www.asyncapi.com/docs/reference/specification/v3.1.0
     status: current_published_version_as_verified
     jurisdiction: global
     applicability: message-driven API description where AsyncAPI is selected
     product_mapping: channel, operation, message, binding and event contract
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
   - id: KS-CAP-CLOUDEVENTS
     domains: [capability-integration]
@@ -722,7 +722,7 @@ sources:
     jurisdiction: global
     applicability: portable event envelope where CloudEvents is selected
     product_mapping: event identity, source, type, time, subject and data envelope
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
 
   # 2026-08-10 systematic refresh: transport

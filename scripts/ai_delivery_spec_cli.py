@@ -635,6 +635,11 @@ def build_trace(args: argparse.Namespace) -> int:
     return run_script("build_traceability_ledger.py", ["--truth", str(args.truth), "--output", str(args.output), "--baseline-version", args.baseline_version])
 
 
+def check_examples(args: argparse.Namespace) -> int:
+    return run_script("validators/validate_projection_consistency.py",
+                      ["--examples", str(args.input), "--format", args.format])
+
+
 def status_report(args: argparse.Namespace) -> int:
     evals_dir = MAINTAINER_DIR / "evals"
     if not evals_dir.is_dir():
@@ -1115,6 +1120,11 @@ def main() -> int:
     distribution.add_argument("--language", choices=["zh-CN", "en-US"], default="zh-CN")
     distribution.add_argument("--max-issues", type=int, default=20, help="0 keeps every issue; default caps context output at 20")
     distribution.set_defaults(func=check_distribution)
+
+    examples = sub.add_parser("check-examples", help="Validate declared local JSON Schema examples and negative rejection reasons; not business acceptance")
+    examples.add_argument("--input", type=Path, required=True)
+    examples.add_argument("--format", choices=["text", "json"], default="text")
+    examples.set_defaults(func=check_examples)
 
     check = sub.add_parser("check", help="Run fast release-risk checks by default; use --profile release for the full assurance suite")
     check.add_argument("--profile", choices=["fast", "release"], default="fast")

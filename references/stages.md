@@ -1,6 +1,6 @@
 # 当前目标与工具
 
-阶段是进入点和停止点，允许直接进入，不要求顺次通过。明确小改可在回复或已有产物中完成，不需要 YAML、登记册或 Gate 才能工作。
+阶段是进入点和停止点，可直接进入。小改可在回复或已有产物完成，无须 YAML、登记册或 Gate。
 
 | 目标 | 当前交付与停止 |
 |---|---|
@@ -13,9 +13,9 @@
 
 ## 工具只在有用时运行
 
-`artifact_mode=direct|card|prd` 只选择阅读规模；`risk_facets` 触发业务检查。高风险小规则可以很短。显式治理请求独立保留，不被小规模覆盖。L0–L4 只作旧输入提示，不再作为补章节或风险证据的依据。
+`artifact_mode=direct|card|prd` 选择阅读规模，`risk_facets` 触发检查；短规则也可高风险。显式治理独立保留，L0–L4旧提示不用于补章节或证明风险。
 
-分诊输入用 YAML/JSON 记录已有事实，可只含 title；不发明 owner、迭代或价值。`triage` 的 accept 只建议进入规格整理，不证明需求已清楚，也不改变状态或优先级。
+分诊可只含title，不发明owner、迭代或价值。`triage` accept只建议整理规格，不证明已澄清，不改变状态或优先级。
 
 ```bash
 python scripts/ai_delivery_spec_cli.py triage --input intake.yaml --format json
@@ -24,21 +24,25 @@ python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app.
 python scripts/ai_delivery_spec_cli.py impact --truth product-truth.yaml --change change.yaml
 ```
 
-正式工程交接确需机器 manifest 时，才使用现有 handoff/Truth Schema。full 是显式组合检查，要求以下已存在输入，不是每次任务的终点：
+确需机器交接才用 handoff/Truth。full 组合已有输入，不是每次任务的终点：
 
 ```bash
 python scripts/ai_delivery_spec_cli.py gate --profile full --requirement requirement-register.yaml --prd PRD.md --prototype app.html --manifest handoff.yaml
 ```
 
-`gate --profile prd` 接受自由标题 Markdown；`ADS:scope/behavior/acceptance` 可辅助定位，不要求固定章数、附录、表格比例或具体 API 路径。无法定位自由文本时返回待评阅范围，不推断业务内容缺失。frontmatter 如使用，必须是合法对象；5.5 声明见 [specify.md](specify.md)。
+PRD gate 接受自由标题；`ADS:scope/behavior/acceptance` 辅助定位，不强制章数、附录、表格比例或API路径。无法定位返回待评阅范围，不断言内容缺失。frontmatter 若用须是合法对象，见 [specify.md](specify.md)。
 
-`--scope-ref` 只限制已明确归属的未知/审查范围。无归属的风险不能被过滤掉。静态 PASS 仅说明已检查声明未发现阻断；GAP 与未执行证据继续保留，不表示业务、浏览器或客户验收。
+`--scope-ref` 仅限制已明确归属的未知/审查，不过滤无归属风险。静态 PASS 只说明指定声明未发现阻断；GAP与未执行证据保留，不代表业务/浏览器/客户验收。
 
-`gate --profile prd --stage frame|explore` 可检查自由文本的分析结论；省略阶段仍按 baseline。triage 从已给文本返回风险候选和待澄清问题，不能完整解析自然语言的所有排除范围；若候选已明确属于另一需求，应保留其归属并继续当前目标，不照单追问。
+`gate --profile prd --stage frame|explore` 检查分析结论，省略阶段按baseline。triage不能解析全部排除条件；候选已明确属于另一需求时保留归属、继续当前目标，不照单追问。
 
 审批、表单、权限、指标等复用 [需求模式](patterns/common-requirement-patterns.yaml) 的相关条目；实时协作才读 [实时合同](patterns/realtime-contract.md)。模式提供问题与反例，不替项目决定。旧专业工具按需查 `--help` 和 Schema；子合同版本不必等于 Skill 版本。
 
-JSON `metrics.unknown_summary` 按范围/阶段去重；旧 `summary.p0_unknowns` 仅计同名诊断。兼容 PRD 验证入口复用当前内核。无法定位归属的疑点保留 GAP，不算已核实阻断或已覆盖。
+`metrics.unknown_summary` 按范围/阶段去重；旧 `summary.p0_unknowns` 只计同名诊断。兼容入口复用当前内核；无归属疑点仍为GAP，不是已核实阻断或覆盖。
+
+## 契约样例校验
+
+已有机器契约需联调时，按需执行 `python scripts/ai_delivery_spec_cli.py check-examples --input cases.yaml --format json`。复用权威Schema及正反样例，核对拒绝原因；不自动加入PRD gate。输入、边界及退出码见 [用法](../README.md#契约样例校验--contract-examples)。它不证明自然语言一致性或运行行为，工具失败不能当合法拒绝。
 
 ## 领域检索
 

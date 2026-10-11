@@ -1,4 +1,4 @@
-# AI Delivery Spec 5.5.2
+# AI Delivery Spec 5.5.3
 
 **帮你管清需求，让产研和 AI 少猜、少漏、少返工。**<br>
 **Manage requirements with less guesswork, fewer omissions and less rework—for your team and AI.**
@@ -9,7 +9,7 @@ A requirements management core for **product teams and AI agents**, delivered as
 
 [![ClawHub downloads: 2.6k](https://img.shields.io/badge/ClawHub-2.6k_downloads-2563eb)](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec)
 [![SkillHub AI score: 4.7/5](https://img.shields.io/badge/SkillHub_AI-4.7%2F5-f59e0b)](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-64748b)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-64748b)](LICENSE)
 
 <sub>2026-09-13 社区快照：ClawHub 约 2.6k 次下载；SkillHub 4.7/5 为 v5.4.8 历史 AI 评分，非当前版本新评测。 / Community snapshot: approximately 2.6k ClawHub downloads; SkillHub's 4.7/5 is a historical AI rating of v5.4.8, not a new evaluation of this release.</sub>
 
@@ -257,7 +257,42 @@ Chinese ledger, reimbursement and mileage queries retrieve existing domain passa
 </details>
 
 <details>
-<summary><strong>从 5.4.x 升级｜Upgrading from 5.4.x</strong></summary>
+<summary><strong>契约样例校验与升级｜Contract examples and upgrading</strong></summary>
+
+### 契约样例校验 / Contract examples
+
+5.5.3 对复杂交接增加模块冷读、合并稿原位修订和配置变值验证；小改仍保持轻量。已有机器契约要用于联调或 AI Coding 时，可选择校验其实际样例，不必为普通 PRD 新建机器清单。<br>
+5.5.3 strengthens module handoff, in-place reconciliation of merged specifications, and configuration-to-behavior checks. Small changes remain lightweight. Example checking is optional for existing machine contracts; ordinary PRDs do not need a new manifest.
+
+本地验证：389项测试通过；5条既有领域来源原文未能重新取得，完整release检查仍未通过。详见[5.5.3验证记录](maintainer/evals/evidence/v553-validation.md)，本地源码不代表已发布或已更新安装。<br>
+Local validation: 389 tests pass; five existing domain sources could not be retrieved for renewal, so the full release gate remains failed. See the [5.5.3 evidence](maintainer/evals/evidence/v553-validation.md). Local source changes do not imply publication or installation.
+
+```bash
+python scripts/ai_delivery_spec_cli.py check-examples --input cases.yaml --format json
+```
+
+`cases.yaml` 引用同目录及其子目录内已有 JSON 文件，不复制一套权威定义。Schema 根须声明 `https://json-schema.org/draft/2020-12/schema`。支持根Schema或 `#/$defs/Input` 等 JSON Pointer、文件内 `$ref` 与标准格式检查；不获取外部Schema。<br>
+Reference existing local JSON schemas and instance files under the manifest directory. Schemas must declare Draft 2020-12. Root schemas, JSON Pointer fragments, internal references and standard format validation are supported; external schemas are not retrieved.
+
+```yaml
+contracts:
+  - id: input
+    schema: model.json#/$defs/Input
+    cases:
+      - {id: valid, instance: good.json, valid: true}
+      - id: missing
+        instance: missing.json
+        valid: false
+        error: {keyword: required, instance_path: ""}
+```
+
+每组至少一个正例和一个负例。负例既要被拒绝，也须匹配声明的关键字及实例路径；例如缺必填发生在根对象时路径为 `""`，字段类型错误可能在 `/period`。不支持的format、缺少格式校验依赖、重复键及读取/解析失败均返回INVALID，不算负例通过。<br>
+Each contract needs a positive and a negative example. A negative must match both the validation keyword and instance JSON Pointer, not merely fail somehow. Root-level missing-required errors use `""`; a field type error may use `/period`. Unsupported formats, missing format dependencies, duplicate keys and input/resolution failures return INVALID, never an expected rejection.
+
+退出码：`0`=列出样例符合预期；`1`=结果或拒绝原因不符；`2`=输入/Schema/解析错误。输出保留实际校验数、结果和输入文件 SHA-256，不输出样例值。它不证明未列出数据、正文语义、权限实现或运行行为；不自动并入 PRD gate。<br>
+Exit codes: `0` for conforming declared examples, `1` for mismatched outcomes/reasons, `2` for invalid inputs, schemas or resolution. Reports include executed results and input hashes, not instance values. This does not prove unlisted cases, prose semantics, authorization implementation or runtime behavior, and is not automatically added to PRD gates.
+
+### 从 5.4.x 升级 / Upgrading from 5.4.x
 
 5.4.x 产物可继续读取，稳定 ID 和已批准事实保留。`artifact_mode` 使用 `direct/card/prd`；旧 L0–L4 在 PRD 中只作呈现提示，不能覆盖显式模式或自动提高风险、证据要求。专业原型、评审、Truth、handoff 与执行状态工具保留其版本化 Schema，不自动迁移旧产物，也不成为日常任务的默认依赖。
 
@@ -291,7 +326,7 @@ Maintainers can run these commands in the **full source repository**. Release pa
 ```bash
 python -m pip install "pytest>=8,<9"
 python scripts/ai_delivery_spec_cli.py check --profile release
-python maintainer/tools/build_runtime_package.py --release --check --output dist/ai-delivery-spec-5.5.2.zip
+python maintainer/tools/build_runtime_package.py --release --check --output dist/ai-delivery-spec-5.5.3.zip
 ```
 
 兼容验证入口 `scripts/validators/validate_prd_quality.py`、`scripts/validators/validate_unified_prd.py` 可手动执行，复用当前内核。 / These legacy validators remain available for manual execution.
@@ -313,4 +348,7 @@ python maintainer/tools/build_runtime_package.py --release --check --output dist
 如果它帮助你澄清了一条需求、发现一次关键分歧，欢迎给项目一个 **[Star ⭐](https://github.com/franklinxkk/ai-delivery-spec)**，让更多产研同伴找到它。<br>
 If it helped clarify a requirement or expose a critical ambiguity, a **[Star ⭐](https://github.com/franklinxkk/ai-delivery-spec)** helps more product teams discover it.
 
-[Apache 2.0](LICENSE) · [返回顶部 / Back to top](#ai-delivery-spec-552)
+5.5.3 按维护者决定改为 [MIT](LICENSE)，保留原版权署名；历史版本按各自发布时附带的许可证识别，第三方材料的独立声明不由此替换。许可证正文采用 [OSI MIT 标准文本](https://opensource.org/license/mit)。<br>
+Version 5.5.3 uses [MIT](LICENSE) at the maintainer's direction, preserving the copyright attribution. Historical artifacts retain their accompanying license notices; third-party notices are not replaced. The license follows the [OSI MIT text](https://opensource.org/license/mit).
+
+[MIT](LICENSE) · [返回顶部 / Back to top](#ai-delivery-spec-553)
