@@ -81,7 +81,7 @@ domains:
       knowledge: sourced
       scenarios: project_sampled
       contract_eval: passed
-      behavioral_eval: not_run
+      behavioral_eval: partial
       expert_review: not_reviewed
     maturity: contract_tested
     practice_status: production_practiced
@@ -106,7 +106,13 @@ domains:
         location: maintainer/evals/domain-fixtures.yaml#FX-TRAFFIC-RISK-CLOSE
         status: passed
         owner: domain maintainer
+      - id: EV-DOM-TRAFFIC-STAGE-SEMANTIC
+        kind: behavioral_eval
+        location: maintainer/evals/evidence/v553-domain-review.md
+        status: current
+        owner: independent agents and parent semantic reviewer
     known_gaps:
+      - 2026-10-11 bounded synthetic stage review is not full generation, browser, expert or production validation; maturity remains contract_tested.
       - National source coverage was refreshed through 2026-08-10, including separate current passenger and dangerous-goods safety-management baselines; provincial/local implementation, project procurement and customer source-system rules remain project-specific.
       - Nine-industry depth has not been behaviorally evaluated.
     last_verified_at: "2026-08-29T00:00:00+08:00"
@@ -122,7 +128,7 @@ domains:
       knowledge: sourced
       scenarios: mocked
       contract_eval: passed
-      behavioral_eval: not_run
+      behavioral_eval: partial
       expert_review: not_reviewed
     maturity: contract_tested
     practice_status: production_practiced
@@ -147,7 +153,13 @@ domains:
         location: maintainer/evals/domain-fixtures.yaml#FX-CRM-LEAD-REVENUE
         status: passed
         owner: domain maintainer
+      - id: EV-DOM-CRM-STAGE-SEMANTIC
+        kind: behavioral_eval
+        location: maintainer/evals/evidence/v553-domain-review.md
+        status: current
+        owner: independent agents and parent semantic reviewer
     known_gaps:
+      - 2026-10-11 bounded synthetic stage review is not full generation, browser, expert or production validation; maturity remains contract_tested.
       - CPQ, complex account hierarchy, customer success, and partner conflict need deeper evaluation.
       - Current fixtures are evaluation inputs, not production evidence; Microsoft, Salesforce and HubSpot sources are vendor product patterns, not independent outcome proof.
     last_verified_at: "2026-08-29T00:00:00+08:00"
@@ -163,7 +175,7 @@ domains:
       knowledge: sourced
       scenarios: project_sampled
       contract_eval: passed
-      behavioral_eval: not_run
+      behavioral_eval: partial
       expert_review: not_reviewed
     maturity: contract_tested
     practice_status: production_practiced
@@ -188,7 +200,13 @@ domains:
         location: maintainer/evals/domain-fixtures.yaml#FX-EDU-COURSE-VERSION
         status: passed
         owner: domain maintainer
+      - id: EV-DOM-EDUCATION-IT-STAGE-SEMANTIC
+        kind: behavioral_eval
+        location: maintainer/evals/evidence/v553-domain-review.md
+        status: current
+        owner: independent agents and parent semantic reviewer
     known_gaps:
+      - 2026-10-11 bounded synthetic stage review is not full generation, browser, expert or production validation; maturity remains contract_tested.
       - Current knowledge is higher-education heavy.
       - Vocational education, enterprise training, one-book-one-code, channel authorization, and content rights require deeper coverage.
       - The exact national term “AI教育三进战略” was not verified from a primary source and must remain an unknown until its issuer/document is supplied.
@@ -205,7 +223,7 @@ domains:
       knowledge: sourced
       scenarios: mocked
       contract_eval: passed
-      behavioral_eval: not_run
+      behavioral_eval: partial
       expert_review: not_reviewed
     maturity: contract_tested
     practice_status: knowledge_only
@@ -245,7 +263,13 @@ domains:
         location: maintainer/evals/domain-fixtures.yaml#FX-OA-APPROVAL-RECALL
         status: passed
         owner: domain maintainer
+      - id: EV-DOM-OA-STAGE-SEMANTIC
+        kind: behavioral_eval
+        location: maintainer/evals/evidence/v553-domain-review.md
+        status: current
+        owner: independent agents and parent semantic reviewer
     known_gaps:
+      - 2026-10-11 bounded synthetic stage review is not full generation, browser, expert or production validation; maturity remains contract_tested.
       - Vendor whitepapers and cases are product/scenario evidence, not independent outcome proof or project truth.
       - DingTalk and Feishu public repositories validate exact SDK/demo/integration components only, not core-product open-source status.
       - OA pack still needs fresh-agent behavioral runs and accountable OA practitioner review before behavior_validated or expert_reviewed promotion.
@@ -263,7 +287,7 @@ domains:
       knowledge: sourced
       scenarios: mocked
       contract_eval: passed
-      behavioral_eval: not_run
+      behavioral_eval: partial
       expert_review: not_reviewed
     maturity: contract_tested
     practice_status: knowledge_only
@@ -283,7 +307,13 @@ domains:
         location: maintainer/evals/domain-fixtures.yaml#FX-MEDICAL-ORDER-CANCEL
         status: passed
         owner: domain maintainer
+      - id: EV-DOM-MEDICAL-HOSPITAL-IT-STAGE-SEMANTIC
+        kind: behavioral_eval
+        location: maintainer/evals/evidence/v553-domain-review.md
+        status: current
+        owner: independent agents and parent semantic reviewer
     known_gaps:
+      - 2026-10-11 bounded synthetic stage review is not full generation, browser, expert or production validation; maturity remains contract_tested.
       - High-risk clinical, legal, interoperability, privacy, and local-policy assertions require accountable review.
       - No production claim is allowed from simulated scenarios.
       - A consolidated “数智医院” evaluation transition has not been verified in a publicly accessible NHC replacement standard; preserve it as change watch only.
@@ -300,7 +330,7 @@ domains:
       knowledge: sourced
       scenarios: mocked
       contract_eval: passed
-      behavioral_eval: not_run
+      behavioral_eval: partial
       expert_review: not_reviewed
     maturity: contract_tested
     practice_status: production_practiced
@@ -325,7 +355,13 @@ domains:
         location: maintainer/evals/domain-fixtures.yaml#FX-DATA-METRIC-VERSION
         status: passed
         owner: domain maintainer
+      - id: EV-DOM-DATA-PRODUCT-STAGE-SEMANTIC
+        kind: behavioral_eval
+        location: maintainer/evals/evidence/v553-domain-review.md
+        status: current
+        owner: independent agents and parent semantic reviewer
     known_gaps:
+      - 2026-10-11 bounded synthetic stage review is not full generation, browser, expert or production validation; maturity remains contract_tested.
       - Formal provenance, digital-contract and OpenLineage mappings need executable examples.
       - Regional implementation details, sector rules, price/settlement, accounting judgment and cross-border applicability remain project evidence.
       - Fresh-agent behavior, data-domain expert review and production correctness are not proven by the expanded knowledge or static contracts.
@@ -343,7 +379,7 @@ domains:
       knowledge: sourced
       scenarios: mocked
       contract_eval: passed
-      behavioral_eval: not_run
+      behavioral_eval: partial
       expert_review: not_reviewed
     maturity: contract_tested
     practice_status: production_practiced
@@ -368,7 +404,13 @@ domains:
         location: maintainer/evals/domain-fixtures.yaml#FX-AI-TOOL-DENIAL
         status: passed
         owner: domain maintainer
+      - id: EV-DOM-AI-NATIVE-STAGE-SEMANTIC
+        kind: behavioral_eval
+        location: maintainer/evals/evidence/v553-domain-review.md
+        status: current
+        owner: independent agents and parent semantic reviewer
     known_gaps:
+      - 2026-10-11 bounded synthetic stage review is not full generation, browser, expert or production validation; maturity remains contract_tested.
       - Agent delegation, identity, memory governance, prompt injection, red-team, GB/Z 185 profiles and MCP 2026-07-28 migration need executable evaluations.
       - NIST initiatives and China agent-security standard projects are change-watch sources, not final binding standards.
     last_verified_at: "2026-08-29T00:00:00+08:00"
@@ -384,7 +426,7 @@ domains:
       knowledge: sourced
       scenarios: mocked
       contract_eval: passed
-      behavioral_eval: not_run
+      behavioral_eval: partial
       expert_review: not_reviewed
     maturity: contract_tested
     practice_status: knowledge_only
@@ -404,7 +446,13 @@ domains:
         location: maintainer/evals/domain-fixtures.yaml#FX-MEDIA-MOMENT-AUTHORIZATION
         status: passed
         owner: domain maintainer
+      - id: EV-DOM-MEDIA-KNOWLEDGE-STAGE-SEMANTIC
+        kind: behavioral_eval
+        location: maintainer/evals/evidence/v553-domain-review.md
+        status: current
+        owner: independent agents and parent semantic reviewer
     known_gaps:
+      - 2026-10-11 bounded synthetic stage review is not full generation, browser, expert or production validation; maturity remains contract_tested.
       - Fresh-agent behavior and accountable media-archivist, rights and privacy expert review have not run.
       - Project contracts, source systems, jurisdictions, languages, media corpus and downstream use remain project evidence.
       - Vendor product patterns do not prove project recall, precision, localization, latency, cost, safety or production suitability.

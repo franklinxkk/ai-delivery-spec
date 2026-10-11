@@ -30,6 +30,8 @@ domain-neutral.
 - Multi-Module PRD Quality Gate
 - Acceptance Checklist
 
+> Use only the slices relevant to the project. State arrows and YAML/field lists below are design sketches, not executable schemas or a complete workflow. Instantiate the normal, exception and recovery paths, guards, data owner, permissions and version effects before handoff. A pattern does not override an authorized project decision or create a legal obligation. Where confidence is useful, declare its measurement and limits; do not invent a calibrated score from model self-report.
+
 ## Domain Purpose
 
 - Business outcome: make work items, approvals, documents, meetings, tasks,
@@ -258,7 +260,7 @@ ai_office_context_source:
   allowed_ai_use: search | summarize | draft | classify | propose_action
   prohibited_ai_use:
   citation_required: true
-  human_gate_required: true
+  human_gate_required: true | false  # resolve per action and authorized policy; not a default
   audit_fields: [trace_id, user_id, role_id, object_id, source_version, used_at]
 ```
 
@@ -356,14 +358,12 @@ Mobile rules:
   document, approval opinion, finance, HR, legal, or meeting content.
 - Permission isolation: org_permission_scope must cover menu, action, data,
   field, document level, export, mobile, API, and AI context retrieval.
-- Approval accountability: workflow_human_gate is mandatory for approval,
-  rejection, issue, seal/signature, payment, HR, performance, and archive.
+- Approval accountability: define workflow_human_gate for consequential approvals, official issue, seal/signature, payments and personnel-right decisions according to applicable authority. Do not add individual human approval to explicitly authorized routine routing, indexing or ordinary archiving. Approval that is a prerequisite for publication does not itself execute publication.
 - Document integrity: issued, sealed, signed, or archived documents use
   versioned correction/withdrawal, not silent overwrite.
-- E-signature: certificate status, signer identity, file hash, timestamp,
-  revocation, and verification evidence are required.
-- Export and watermark: sensitive export needs permission, watermark, reason,
-  audit, and retention/deletion rule.
+- E-signature: establish the applicable signing method, signer authority, integrity and verification evidence. Where PKI/CA is adopted, check certificate validity/revocation and the required hash/time evidence; CA is not a universal requirement for every electronic signature.
+- Archive transformation: KS-OA-EARCHIVE-2024 article 17 specifies signature-information handling for Party/government electronic official documents; other organizations may refer to it. Implement the applicable archive rendition with the required seal graphic and original/version association and verification evidence. Do not silently overwrite source evidence or impose that scope on every enterprise file.
+- Sensitive export needs permission, purpose, audit and a retention/deletion rule; watermarking follows the applicable protection policy rather than an assumed universal mandate.
 - AI boundary: AI suggestions require citation, confidence/quality boundary,
   forbidden write scope, fallback, and review record.
 - Test/shadow data: automated tests must not create real approval, seal,
@@ -384,7 +384,7 @@ Mobile rules:
 | OA-006 | Employee asks AI to summarize a confidential document outside scope | AI refuses or hides source; access is audited |
 | OA-007 | Mobile manager approves during weak network | draft opinion is preserved; final approval waits for server validation |
 | OA-008 | Workflow definition changes while old instances are running | old instances continue on snapshot version; new submits use new version |
-| OA-009 | E-signature certificate is expired | signing is blocked and routed to certificate renewal/manual handling |
+| OA-009 | PKI/CA signing certificate is expired | signing is blocked and routed to certificate renewal/manual handling |
 | OA-010 | Browser test submits a real approval path | request uses shadow/test mode; no production workflow/seal/payment side effect remains |
 | OA-011 | Submitter recalls while parallel approvers are processing, then resubmits | recall uses a configured state guard; stale approvals are rejected; new run/version, opinions and prior audit remain traceable |
 

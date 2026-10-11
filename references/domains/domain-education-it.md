@@ -26,6 +26,8 @@ This module is distilled from multi-year higher-education informationization mat
 - Evaluation Profile
 - Acceptance Checklist
 
+> Use only the slices relevant to the project. State arrows and YAML/field lists below are design sketches, not executable schemas or a complete workflow. Instantiate the normal, exception and recovery paths, guards, data owner, permissions and version effects before handoff. A pattern does not override an authorized project decision or create a legal obligation. Where confidence is useful, declare its measurement and limits; do not invent a calibrated score from model self-report.
+
 ## Domain Purpose
 
 - Business outcome: make university teaching, learning, student growth, research activity, campus service, quality diagnosis, professional construction, and data governance visible, serviceable, measurable, and continuously improvable.
@@ -340,6 +342,9 @@ Common categories:
 
 ## Policy / Privacy Constraints
 
+- KS-EDU-CLASSIFICATION-0661 (JY/T 0661—2025, effective 2026-02-18) applies to the stated education-data scope; it excludes state-secret data and directs health and other sector data to their applicable industry requirements. A campus location does not make every dataset ordinary education data.
+- Distinguish authorized automatic practice feedback/objective scoring from official grades, credit, graduation or disciplinary decisions. The latter retain institutional authority and required review; do not add per-answer human approval to an already authorized low-risk exercise.
+
 - Student personal, academic, financial-aid, counseling, health, dorm, employment, and disciplinary data follow least privilege, masking, retention, and audit rules.
 - Mental-health and counseling AI can provide triage hints or conversation assistance only; diagnosis, crisis level, and intervention decision require authorized human/professional accountability.
 - Grades, credits, graduation eligibility, awards/aid/sanctions, and teacher evaluation conclusions require human approval and audit evidence.
@@ -397,7 +402,7 @@ Mocked matrices and simulated reviewers cannot satisfy expert review or audit.
 
 ## Acceptance Checklist
 
-- [ ] All 15 domain module sections are present.
+- [ ] Relevant domain slices and their applicability are explicit; the pack structure is not a mandatory PRD outline.
 - [ ] Academic affairs, student affairs, research management, teaching quality, professional construction, one-stop service, data governance, and AI assistant boundaries are explicit when relevant.
 - [ ] Student, teacher, course, teaching class, score, service case, classroom evaluation, OBE achievement, research project/fund/output, data resource, and indicator lifecycles are defined.
 - [ ] Authoritative source, owner department, freshness, and conflict-resolution rule are named for cross-system data.

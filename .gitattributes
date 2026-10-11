@@ -4,3 +4,5 @@
 *.jpeg binary
 *.gif binary
 *.pdf binary
+# Preserve collected model-output bytes so their recorded SHA-256 remains valid.
+maintainer/evals/evidence/domain-stage-review-*.json -text

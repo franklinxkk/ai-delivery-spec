@@ -1,0 +1,29 @@
+{
+  "scope": "Oracle/fixture ambiguity corrected; original model judgments were justified. Initial outputs and score are retained.",
+  "original_cases_sha256": "3ae97e333aeb6ce203fd73390d792fe897a9309c93ca50d854876f72692e1868",
+  "changes": [
+    {
+      "id": "traffic-01-D",
+      "original_proposal": "平台将自动决定疑似疲劳车辆是否继续营运；企业没有说明谁有停运、放行决定权。",
+      "original_expected": "clarify",
+      "actual_initial": "revise",
+      "adjudicated_initial": "revise",
+      "reason": "原条目既缺责任人，又明确违反题面的人类决策边界；应修订的已知冲突不能仅标为未知。",
+      "revised_proposal": "平台仅生成疑似疲劳提示并交授权人员决策，但需求要求把任务送到具体停运、放行负责人；企业尚未明确谁负责这些决定。",
+      "revised_expected": "clarify"
+    },
+    {
+      "id": "medical-hospital-it-05-D",
+      "original_proposal": "客户要声明全国所有医院流程均适用同一SOP，但现有证据只有一家医院的制度。",
+      "original_expected": "clarify",
+      "actual_initial": "revise",
+      "adjudicated_initial": "revise",
+      "reason": "原条目要求宣称全国通用，单院证据已足以否定该声明；修订声明与确认扩大范围应区分。",
+      "revised_proposal": "下一阶段要扩到另一家医院；当前只有首家医院SOP，另一家适用制度和流程差异尚未取得，要求明确跨院适配范围。",
+      "revised_expected": "clarify"
+    }
+  ],
+  "revised_cases_sha256": "c1b399c2cac1bb6f4ebe70f3673abf3b19bf0e9745ed6e18a9c2c9c5b241eee5",
+  "original_line_endings": "CRLF; json.dumps ensure_ascii=False indent=2 plus final newline",
+  "original_reconstruction_verified": true
+}

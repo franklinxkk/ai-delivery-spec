@@ -3,7 +3,7 @@
 Source authority and freshness metadata: `references/domains/domain-sources.yaml`.
 Coverage and maturity: `references/domain-coverage.yaml`.
 
-Use this replaceable domain module for 运管、交通监管、道路运输企业安全生产、交通安全 SaaS、两客一危、普货、站场、维修、驾培、租赁、数据集市和指标库产品. A replacement `domain-*.md` must preserve the same 15 section headings used here and in `domain-module-template.md`.
+Use this replaceable domain module for 运管、交通监管、道路运输企业安全生产、交通安全 SaaS、两客一危、普货、站场、维修、驾培、租赁、数据集市和指标库产品. A replacement `domain-*.md` must preserve the core section headings used here and in `domain-module-template.md`.
 
 ## Contents
 
@@ -23,6 +23,8 @@ Use this replaceable domain module for 运管、交通监管、道路运输企�
 - Domain Test Scenarios
 - Evaluation Profile
 - Acceptance Checklist
+
+> Use only the slices relevant to the project. State arrows and YAML/field lists below are design sketches, not executable schemas or a complete workflow. Instantiate the normal, exception and recovery paths, guards, data owner, permissions and version effects before handoff. A pattern does not override an authorized project decision or create a legal obligation. Where confidence is useful, declare its measurement and limits; do not invent a calibrated score from model self-report.
 
 ## Domain Purpose
 
@@ -177,11 +179,15 @@ events:
 OnboardingProcess: draft -> reviewing -> testing -> training -> internship_or_probation -> pending_approval -> active | rejected | archived
 TrainingTask: draft -> published -> learning -> exam_pending -> completed | failed | overdue | cancelled
 PreTripBriefing: created -> pushed -> acknowledged -> effective | expired | exception_reported
-VehicleTripCheck: created -> submitted -> exception_pending -> fault_created -> closed | returned
+VehicleTripCheck: created -> submitted -> completed (no defect, required evidence valid)
+VehicleTripCheck: submitted -> exception_pending -> disposition_recorded -> closed | returned
+Fault: created -> assigned -> repairing -> pending_verification -> closed | returned
+Fault closure links to the original check; it neither erases its defect evidence nor automatically authorizes release to duty.
 ScenicLedger: draft -> in_progress -> submitted -> reviewed -> printable_archived | returned
 ScenicPeakPlan: draft -> published -> active -> reviewed -> archived
 Alert: created -> pending_review -> assigned -> processing -> closed | escalated
-Inspection: draft -> inspecting -> pending_rectification -> pending_acceptance -> qualified
+Inspection: draft -> inspecting -> qualified (no issue, authorized confirmation)
+Inspection: inspecting -> pending_rectification -> pending_acceptance -> qualified
 Inspection: pending_acceptance -> pending_rectification (returned)
 HiddenDanger: reported -> rectifying -> pending_acceptance -> accepted
 HiddenDanger: pending_acceptance -> rectifying (rejected)
@@ -360,10 +366,10 @@ Scenic/tourism passenger transport should normally stay inside this traffic doma
 3. Driver lifecycle: candidate -> qualification review -> written/road/interview/medical/psychological checks where applicable -> onboarding/training -> internship/probation/substitute -> approval -> active duty -> transfer/resignation/archive.
 4. Training and education: target population -> course/task assignment -> learning/exam -> evidence capture -> overdue handling -> compliance report. Treat training as an entry workflow, not the whole product.
 5. Qualification management: enterprise/person/vehicle certificate registration -> OCR/import -> validity and missing-item rule check -> reminder/task -> renewal evidence -> audit.
-6. Pre-trip safety briefing and vehicle trip check: dispatch or task trigger -> mobile acknowledgement/check -> exception capture -> fault/hidden-danger relation -> closure and evidence archive.
+6. Pre-trip safety briefing and vehicle trip check: trigger -> mobile acknowledgement/check -> normal completion or exception disposition -> linked fault/hidden-danger work where needed -> evidence archive; release-to-duty authority remains distinct.
 7. Dual prevention: risk source -> risk classification/control measure -> hidden-danger investigation -> rectification task -> acceptance/return -> statistics and report.
 8. Dangerous goods sample path: vehicle/driver/escort/cargo/tank/e-waybill/context -> AI/rule pre-check -> missing or conflict item -> human confirmation -> task/stop-risk suggestion -> evidence archive.
-9. Safety inspection: create -> field/online execution -> evidence/signatures -> classify issue -> issue rectification -> enterprise submission -> accept/return -> archive.
+9. Safety inspection: create -> execute -> evidence/signatures -> no-issue conclusion or issue/rectification -> enterprise submission where needed -> accept/return -> archive.
 10. Special campaign: publish scope/deadline -> enterprises self-check/report -> rectification -> regulator/enterprise progress review -> summary.
 11. Report delivery: select/create template -> validate indicators -> create period task -> fill missing fields -> review/return -> freeze/export.
 12. Old system migration: freeze usage/ARR/renewal/customer tier baseline -> classify keep/upgrade/retire modules -> pilot customers -> data migration -> adoption tracking -> commercial upgrade.
@@ -468,7 +474,7 @@ Mocked matrices and simulated reviewers cannot satisfy expert review or audit.
 
 ## Acceptance Checklist
 
-- [ ] All 15 domain module sections are present.
+- [ ] Relevant domain slices and their applicability are explicit; the pack structure is not a mandatory PRD outline.
 - [ ] Regulator-facing and enterprise-facing product modes are separated where relevant.
 - [ ] Road transport nine-industry scope is explicit, with common platform, configurable template, and independent module boundaries.
 - [ ] Scenic/tourism transport overlays identify source checks, passenger-flow/dispatch context, route/weather risk, maintenance prevention, role training, printable ledgers, AI human-review boundaries, and benchmark output without hardcoding one customer.

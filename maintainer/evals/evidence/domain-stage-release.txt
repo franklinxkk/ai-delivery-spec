@@ -1,0 +1,59 @@
+2026-10-11 final full release check; exit 0. Workstation absolute paths normalized below.
+PASS: entry 2489/2500 chars; daily references 12990/13000; routes, schemas and UI metadata valid
+PASS: spec config is valid (examples\spec.config.example.yaml)
+PASS: 8 domain packs have evidence-bounded maturity and >=2 domain fixtures: {'traffic': 'contract_tested', 'crm': 'contract_tested', 'education-it': 'contract_tested', 'oa': 'contract_tested', 'medical-hospital-it': 'contract_tested', 'data-product': 'contract_tested', 'ai-native': 'contract_tested', 'media-knowledge': 'contract_tested'}
+PASS: version and declared evidence boundaries consistent; outcome claims require their own evidence
+PASS: public version/triage/PRD commands execute; invalid input is rejected cleanly
+........................................................................ [ 18%]
+........................................................................ [ 36%]
+........................................................................ [ 54%]
+........................................................................ [ 72%]
+........................................................................ [ 90%]
+.......................................                                  [100%]
+399 passed in 59.40s
+PASS: 99 sources
+PASS: token-free domain contract regression covers 8 packs and 19 scenario invariants; no behavioral/expert/production claim is implied
+PASS: Requirement Pattern Library contains 17 reusable governed patterns
+PASS: review opt-in, language projection, inherited debt, context-driven human review and machine handoff boundaries hold
+PASS: requirement checkpoints, contract rebinding, gates, scoped retrieval, stage advance, and version-drift blocking work
+PASS: Project Domain Capsule is structured, project-scoped, and honest (3 entities, 3 scenarios)
+PASS: 1 capsules have isolated namespaces, variables, and write slots
+PASS: Change Package CHG-TRAFFIC-PRACTITIONER-2026 is schema-valid with honest status=proposed/not_run
+PASS: Product Truth is schema-valid and reference-closed (76 stable IDs, 4 requirements, 4 features, 6 acceptance paths)
+PASS: projection references 51 known Product Truth IDs and invents none (unified-prd.md)
+INFO: maintainer/tools/validators/validate_v5_architecture.py (ai_delivery_spec_cli.py: maintainer-only 可选依赖，已豁免)
+INFO: maintainer/tools/validators/validate_domain_coverage.py (ai_delivery_spec_cli.py: maintainer-only 可选依赖，已豁免)
+INFO: maintainer/tools/validators/validate_release_claims.py (ai_delivery_spec_cli.py: maintainer-only 可选依赖，已豁免)
+INFO: maintainer/checks/check_v540_readme_commands.py (ai_delivery_spec_cli.py: maintainer-only 可选依赖，已豁免)
+INFO: maintainer/tests (ai_delivery_spec_cli.py: maintainer-only 可选依赖，已豁免)
+INFO: maintainer/tools/validators/validate_domain_sources.py (ai_delivery_spec_cli.py: maintainer-only 可选依赖，已豁免)
+INFO: maintainer/tools/validators/validate_domain_contracts.py (ai_delivery_spec_cli.py: maintainer-only 可选依赖，已豁免)
+INFO: maintainer/checks/check_human_review_contracts.py (ai_delivery_spec_cli.py: maintainer-only 可选依赖，已豁免)
+INFO: maintainer/checks/check_execution_state.py (ai_delivery_spec_cli.py: maintainer-only 可选依赖，已豁免)
+INFO: maintainer/examples/generic-energy-capsule-v5/project-domain-capsule.yaml (ai_delivery_spec_cli.py: maintainer-only 可选依赖，已豁免)
+INFO: maintainer/examples/traffic-regulatory-change-v5/change-package.yaml (ai_delivery_spec_cli.py: maintainer-only 可选依赖，已豁免)
+INFO: maintainer/examples/publishing-learning-v5/delivery/truth/product-truth.yaml (ai_delivery_spec_cli.py: maintainer-only 可选依赖，已豁免)
+INFO: maintainer/examples/publishing-learning-v5/delivery/projections/unified-prd.md (ai_delivery_spec_cli.py: maintainer-only 可选依赖，已豁免)
+INFO: maintainer/evals/domain-fixtures.yaml (ai_delivery_spec_cli.py: maintainer-only 可选依赖，已豁免)
+INFO: maintainer/evals/eval-catalog.yaml (ai_delivery_spec_cli.py: maintainer-only 可选依赖，已豁免)
+INFO: maintainer (ai_delivery_spec_cli.py: maintainer-only 可选依赖，已豁免)
+PASS: release package paths resolve (16 maintainer-only references exempted)
+PASS: every validator is wired into gate/CLI or explicitly marked manual
++ <PYTHON> maintainer/tools/validators/validate_v5_architecture.py
++ <PYTHON> scripts/validators/validate_spec_config.py examples/spec.config.example.yaml
++ <PYTHON> maintainer/tools/validators/validate_domain_coverage.py
++ <PYTHON> maintainer/tools/validators/validate_release_claims.py
++ <PYTHON> maintainer/checks/check_v540_readme_commands.py
++ <PYTHON> -m pytest maintainer/tests -q -p no:cacheprovider
++ <PYTHON> maintainer/tools/validators/validate_domain_sources.py
++ <PYTHON> maintainer/tools/validators/validate_domain_contracts.py
++ <PYTHON> scripts/validators/validate_requirement_patterns.py references/patterns/common-requirement-patterns.yaml
++ <PYTHON> maintainer/checks/check_human_review_contracts.py
++ <PYTHON> maintainer/checks/check_execution_state.py
++ <PYTHON> scripts/validators/validate_project_domain_capsule.py maintainer/examples/generic-energy-capsule-v5/project-domain-capsule.yaml
++ <PYTHON> scripts/validators/validate_capsule_composition.py --capsule maintainer/examples/generic-energy-capsule-v5/project-domain-capsule.yaml
++ <PYTHON> scripts/validators/validate_change_package.py maintainer/examples/traffic-regulatory-change-v5/change-package.yaml
++ <PYTHON> scripts/validators/validate_product_truth.py maintainer/examples/publishing-learning-v5/delivery/truth/product-truth.yaml
++ <PYTHON> scripts/validators/validate_projection_consistency.py --truth maintainer/examples/publishing-learning-v5/delivery/truth/product-truth.yaml --projection maintainer/examples/publishing-learning-v5/delivery/projections/unified-prd.md
++ <PYTHON> scripts/validators/validate_release_package.py
++ <PYTHON> scripts/validators/validate_validator_wiring.py

@@ -27,6 +27,8 @@ This file validates that the domain module contract can migrate beyond traffic s
 - Multi-Module PRD Quality Gate
 - Acceptance Checklist
 
+> Use only the slices relevant to the project. State arrows and YAML/field lists below are design sketches, not executable schemas or a complete workflow. Instantiate the normal, exception and recovery paths, guards, data owner, permissions and version effects before handoff. A pattern does not override an authorized project decision or create a legal obligation. Where confidence is useful, declare its measurement and limits; do not invent a calibrated score from model self-report.
+
 ## Domain Purpose
 
 - Business outcome: prevent missed opportunities, delayed customer responses, unresolved issues, and invisible product feedback.
@@ -37,11 +39,8 @@ This file validates that the domain module contract can migrate beyond traffic s
 - Capability scope may include marketing lead acquisition, SFA pipeline,
   Customer 360, CPQ/quotation, contract/payment, service tickets, customer
   success/renewal, partner/channel operations, and product-feedback loops.
-- Product Truth must lock module/view/region/action ownership when CRM spans
-  lead, opportunity, customer, ticket, contract, payment, multiple roles, or a
-  cross-module lifecycle.
-- Keep shared CRM fields canonical as `FLD-*`; projections show only relevant
-  scenario, state, rule, permission, exception, and acceptance differences.
+- Identify authoritative objects and module/action ownership across the in-scope lifecycle in the existing specification. Use Product Truth only when a machine consumer needs it.
+- Define shared fields once and reference them; reuse existing IDs rather than requiring a new field dictionary. Views explain only relevant scenario, state, permission and exception differences.
 
 ### Current Baseline and Change Watch (verified 2026-08-29)
 
@@ -57,7 +56,7 @@ This file validates that the domain module contract can migrate beyond traffic s
 |---|---|---|
 | CRM role | passive system of record -> customer/revenue/service system of action | every AI action resolves to a customer object, lifecycle state, owner, deadline and observable result |
 | context | scattered notes -> permissioned longitudinal customer memory | distinguish recorded facts, inferred intent, stale data and external signals; preserve source links |
-| execution | next-best-action text -> bounded research, follow-up drafting, routing, renewal/service playbooks and exception escalation | discount, contract, payment, customer commitment and final issue closure retain accountable human gates |
+| execution | next-best-action text -> bounded research, follow-up drafting, routing, renewal/service playbooks and exception escalation | binding financial, contract and customer-right decisions retain accountable authority; routine reversible actions may follow explicitly authorized automation rules |
 | learning loop | activity count -> conversion, response, retention, service resolution and override evidence | do not optimize spammy outreach or hide agent failure behind generated activity |
 
 ## First-Principles Domain Lens
@@ -71,7 +70,7 @@ operating response, not from a list of tables or fashionable AI features.
 | Response accountability | Who must respond, by when, and what closes the response? | SLA task, owner, close guard, and audit are explicit |
 | Customer truth | Which module is the source of truth for customer, contact, contract, ticket, and follow-up facts? | Customer 360 can explain every aggregate with source links |
 | Exception closure | Which stuck, overdue, rejected, lost, or escalated case must be visible to a manager? | alert/response task links to the business object and real closure action |
-| Boundary of automation | Which sales, finance, service, or roadmap actions cannot be automatic? | payment, contract approval, final commitment, and ticket closure keep human gates |
+| Boundary of automation | Which sales, finance, service, or roadmap actions cannot be automatic? | identify required human gates for financial/contract commitments and disputed closure; state separately which routine actions may be automated |
 | Domain breadth | Which CRM family is in scope: SFA, service, customer success, CPQ, campaign, channel, data/BI, AI assistant? | included/deferred modules and external systems are explicit |
 
 ## Vocabulary
@@ -234,10 +233,9 @@ Demand: new -> reviewed -> scheduled -> released | rejected
 - customer contacts and contract amounts are masked by role;
 - export requires audit;
 - cross-tenant/customer access requires explicit authorization;
-- AI suggestions must show source and confidence;
-- AI cannot confirm payment, approve contract, or close customer issue without human confirmation.
-- AI cannot approve quote discounts, decide churn status, modify payment amount,
-  or publish product roadmap commitments without accountable human approval.
+- AI suggestions show sources and uncertainty; a confidence number requires a declared basis.
+- AI cannot invent payment confirmation, approve binding contract/discount commitments, alter confirmed financial amounts or publish roadmap promises without accountable authorization and required human approval.
+- Routine classification, routing or undisputed consultation closure may be automated when the project explicitly authorizes the trigger, evidence, exception and reopen path. Reading a message is not confirmation of resolution; disputed/rights-affecting closure stays with the responsible role. Risk prediction is not an authoritative churn decision.
 
 ## Domain Test Scenarios
 
@@ -285,10 +283,8 @@ Mocked matrices and simulated reviewers cannot satisfy expert review or audit.
 - [ ] Every SLA exception has owner, action, and closure rule.
 - [ ] Customer 360 shows business data, not only metadata.
 - [ ] Role/data isolation is explicit.
-- [ ] AI suggestions remain suggestions unless explicitly human-approved.
-- [ ] If CRM spans multiple modules or roles, Product Truth locks shared
-      objects, state owners, views, actions, events, permissions, and flows.
-- [ ] Common CRM fields use canonical `FLD-*` definitions; projections do not
-      duplicate or redefine them.
+- [ ] AI execution follows explicit authorization; required human gates and routine automation exceptions are distinguishable.
+- [ ] Shared objects, state owners, actions, events, permissions and flows have one authoritative definition; Product Truth is optional unless a consumer requires it.
+- [ ] Shared field definitions are referenced without conflicting copies.
 - [ ] Coding-agent delivery package paths are explicit when implementation by
       Claude Code, Cursor, Codex, or Copilot is expected.

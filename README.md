@@ -264,8 +264,8 @@ Chinese ledger, reimbursement and mileage queries retrieve existing domain passa
 5.5.3 对复杂交接增加模块冷读、合并稿原位修订和配置变值验证；小改仍保持轻量。已有机器契约要用于联调或 AI Coding 时，可选择校验其实际样例，不必为普通 PRD 新建机器清单。<br>
 5.5.3 strengthens module handoff, in-place reconciliation of merged specifications, and configuration-to-behavior checks. Small changes remain lightweight. Example checking is optional for existing machine contracts; ordinary PRDs do not need a new manifest.
 
-本地验证：389项测试通过；5条既有领域来源原文未能重新取得，完整release检查仍未通过。详见[5.5.3验证记录](maintainer/evals/evidence/v553-validation.md)，本地源码不代表已发布或已更新安装。<br>
-Local validation: 389 tests pass; five existing domain sources could not be retrieved for renewal, so the full release gate remains failed. See the [5.5.3 evidence](maintainer/evals/evidence/v553-validation.md). Local source changes do not imply publication or installation.
+本地验证：完整release检查通过，399项测试通过；此前5项来源已通过权威替代全文交叉核对。8领域、6阶段的192项合成条目已独立审阅，原始分歧与复核边界见[领域复核记录](maintainer/evals/evidence/v553-domain-review.md)。不代表真实系统、专家或客户验收，也未发布或更新安装。<br>
+Local validation: the full release gate and 399 tests pass; five previously inaccessible sources were cross-checked through authoritative full-text alternatives. Independent reviewers examined 192 synthetic items across eight domains and six stage routes; see [scope, disagreements and evidence](maintainer/evals/evidence/v553-domain-review.md). This is not system, expert or customer acceptance, publication or installation.
 
 ```bash
 python scripts/ai_delivery_spec_cli.py check-examples --input cases.yaml --format json

@@ -26,6 +26,8 @@ This module is intentionally broader than a data mart checklist. It treats data 
 - Evaluation Profile
 - Acceptance Checklist
 
+> Use only the slices relevant to the project. State arrows and YAML/field lists below are design sketches, not executable schemas or a complete workflow. Instantiate the normal, exception and recovery paths, guards, data owner, permissions and version effects before handoff. A pattern does not override an authorized project decision or create a legal obligation. Where confidence is useful, declare its measurement and limits; do not invent a calibrated score from model self-report.
+
 ## Domain Purpose
 
 AI+Data PRDs must specify how raw, distributed, and often untrusted data becomes governed, explainable, searchable, analyzable, and actionable. The product contract is not just a dataset, report, or agent conversation. It is the full operating chain:
@@ -179,13 +181,20 @@ draft -> connected -> syncing -> active -> degraded -> suspended -> retired
 syncing -> failed -> syncing
 ```
 
-Pipeline:
+Pipeline definition (versioned configuration):
 
 ```text
-draft -> test_run -> scheduled -> running -> succeeded
-running -> failed -> retrying -> running
-scheduled -> paused -> scheduled
+draft -> tested -> active -> paused -> active | retired
 ```
+
+Pipeline run (one execution; retries preserve their attempts):
+
+```text
+created -> running -> succeeded | failed | cancelled
+failed -> retry_scheduled -> running
+```
+
+Keep definition version, run ID, source checkpoint, attempt, event time and outcome traceable. A successful run neither retires the definition nor overwrites a previous run. Late arrival is not the same as a duplicate event.
 
 Data asset:
 
@@ -231,7 +240,7 @@ AI dataset:
     quality_review -> rejected -> processing/labeling
     released/in_use -> contamination_hold -> corrected_new_version
 
-Every state transition must define role/tool permission, data/right/purpose guard, quality/freshness guard, audit event, notification, retry/idempotency, affected consumers, and rollback or correction behavior.
+For each in-scope transition, define authority, preconditions, resulting data/state and failure recovery. Where relevant, add quality/freshness, event/notification, retry/idempotency, affected consumers and correction behavior; explain an important non-applicable facet rather than inventing a notification or impossible rollback.
 
 ## Metric / Indicator Governance
 
@@ -318,13 +327,14 @@ dataset status. For every released dataset version, specify:
 | splits | train/validation/test/preference/benchmark purpose, isolation key, leakage and contamination checks |
 | quality and fitness | intrinsic quality plus model/scenario benchmark, threshold, failure slices, bias/safety tests and reviewer |
 | release and lineage | immutable version, parent/derived datasets, sample hash, code/rule version, model consumers and retirement |
-| feedback | application/evaluation signal, sampling criteria, human approval, label correction and target next version |
+| feedback | signal, authorized sampling/acceptance policy, human review where required, label correction and target next version |
 | value | public/operational/commercial outcome, baseline, cost, attributable benefit and renewal/exit decision |
 
 SFT, preference optimization, DPO, reward learning and reinforcement-learning
 datasets require separate schemas and quality evidence. Production conversations
-or user feedback never enter training automatically; collection purpose,
-authorization, filtering, approval and versioned lineage must be explicit.
+or user feedback do not enter training merely because they were collected. Establish
+permitted purpose, rights, filtering, acceptance/release authority and versioned lineage;
+approved automated selection is possible within that scope and does not mutate held-out evaluation.
 
 Minimum AI data runtime contract:
 
@@ -447,7 +457,7 @@ data_agent_contract:
 - Keep public-data resource registration, data-property registration, accounting recognition, appraisal/valuation, authorization, transaction and financing as linked but separately accountable decisions.
 - Do not directly or indirectly release uncontrolled non-public raw public data into the market; deliver approved products/services through the confirmed environment and scope.
 - Bind every participant and use to purpose, product, action, quantity, time, location, onward-transfer, retention, revocation and audit rules; a download permission alone is not a usage contract.
-- Training, validation, testing, preference and application-feedback data require provenance, rights, purpose, isolation and version lineage. Production feedback is opt-in/authorized and human-gated before dataset inclusion.
+- Training, validation, testing, preference and application-feedback data require provenance, rights, purpose, isolation and version lineage. Production feedback requires a valid purpose/right basis and governed inclusion; consent where applicable and human review where required by risk or policy. Authorized automated selection does not waive release controls or held-out isolation.
 - Protect held-out evaluation from training contamination, including retrieval corpora, synthetic derivatives, cached prompts, agent memory and human feedback.
 - Copyright/license, personal information, trade secrets, state/public interest, export/cross-border and sector rules are project-specific P0 questions; a dataset card does not cure an unlawful source.
 - Model performance gain does not by itself prove data-product value. Tie renewal, price or public benefit claims to an agreed baseline, measurement window and attribution boundary.

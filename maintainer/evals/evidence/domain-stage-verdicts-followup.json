@@ -1,0 +1,149 @@
+{
+  "scope": "Verdict comparison only; semantic reasons need separate review. No runtime/expert/production claim.",
+  "semantic_review": "not_performed_by_this_tool",
+  "total": 12,
+  "matched": 12,
+  "mismatched": 0,
+  "results": [
+    {
+      "id": "traffic-01-A",
+      "domain": "traffic",
+      "stage": "frame/explore",
+      "expected": "accept",
+      "actual": "accept",
+      "verdict_match": true,
+      "reason": "先用实际告警和处置记录识别漏报、误报及等待环节，再选择提醒或分派试点，能检验是否缩短有权人员响应时间；保留人工安全决策，符合本轮只定试点目标的范围。",
+      "criterion": "在题面范围内成立；不要新增未经要求的审批、系统或证明。",
+      "reviewer": "domain_review_c / ai-delivery-spec 5.5.3 / followup"
+    },
+    {
+      "id": "traffic-01-B",
+      "domain": "traffic",
+      "stage": "frame/explore",
+      "expected": "revise",
+      "actual": "revise",
+      "verdict_match": true,
+      "reason": "告警减少也可能源于漏报、监测中断或阈值变化，不能单独证明风险降低。应结合漏报误报、发现至授权处置的时长及处置证据评价试点，不把告警数量作为唯一安全结果。",
+      "criterion": "告警量下降可能是漏报；不能替代风险或处置效果。",
+      "reviewer": "domain_review_c / ai-delivery-spec 5.5.3 / followup"
+    },
+    {
+      "id": "traffic-01-C",
+      "domain": "traffic",
+      "stage": "frame/explore",
+      "expected": "revise",
+      "actual": "revise",
+      "verdict_match": true,
+      "reason": "自动认定重大隐患和处罚超出试点目标，且违反安全决定由企业授权人员负责的已定边界。应改为AI提供疑点和证据、辅助提醒或派单，最终认定及处置由有权人员决定。",
+      "criterion": "目标越过授权与法定职责，建议不是处罚决定。",
+      "reviewer": "domain_review_c / ai-delivery-spec 5.5.3 / followup"
+    },
+    {
+      "id": "traffic-01-D",
+      "domain": "traffic",
+      "stage": "frame/explore",
+      "expected": "clarify",
+      "actual": "clarify",
+      "verdict_match": true,
+      "reason": "疑似疲劳提示本身已有边界，但任务要送达具体停运或放行负责人，缺少责任映射就无法保证送给有权决策者。需企业明确这两类决定的责任人与授权范围；仅限制具体任务路由，提示生成及现状抽样可继续。",
+      "criterion": "先确认安全责任主体及有权动作；可继续分析告警质量。",
+      "reviewer": "domain_review_c / ai-delivery-spec 5.5.3 / followup"
+    },
+    {
+      "id": "medical-hospital-it-02-A",
+      "domain": "medical-hospital-it",
+      "stage": "intake/clarify",
+      "expected": "revise",
+      "actual": "revise",
+      "verdict_match": true,
+      "reason": "一次同意不能自动覆盖不同目的、公开传播和长期训练，且已知研究只获准指定去标识化字段。应逐目的核实合法基础、必要同意及许可字段，现有研究继续遵守已批范围，不自动放行新增用途。",
+      "criterion": "同意与目的/范围绑定，不能无限扩展。",
+      "reviewer": "domain_review_c / ai-delivery-spec 5.5.3 / followup"
+    },
+    {
+      "id": "medical-hospital-it-02-B",
+      "domain": "medical-hospital-it",
+      "stage": "intake/clarify",
+      "expected": "revise",
+      "actual": "revise",
+      "verdict_match": true,
+      "reason": "去掉姓名不证明其他识别线索已处理，也不证明研究符合免审条件；AI无权仅据此决定免审。应核对适用条件和全部相关事实，由有权机构流程形成适用性判断，并保留其他数据使用约束。",
+      "criterion": "去标识化不等于匿名化或自动满足豁免，需适用性与责任审查。",
+      "reviewer": "domain_review_c / ai-delivery-spec 5.5.3 / followup"
+    },
+    {
+      "id": "medical-hospital-it-02-C",
+      "domain": "medical-hospital-it",
+      "stage": "intake/clarify",
+      "expected": "clarify",
+      "actual": "clarify",
+      "verdict_match": true,
+      "reason": "有免审声明但无条件核实和责任确认，无法确定该研究应走审查还是免审确认路径。需确认由谁依据哪些条件及证据作出适用性判断；仅限制该研究依赖免审的处理，已获批准的研究仍按原字段范围推进。",
+      "criterion": "确认豁免适用及机构责任程序，不自动批准也不规定所有研究绝不能豁免。",
+      "reviewer": "domain_review_c / ai-delivery-spec 5.5.3 / followup"
+    },
+    {
+      "id": "medical-hospital-it-02-D",
+      "domain": "medical-hospital-it",
+      "stage": "intake/clarify",
+      "expected": "accept",
+      "actual": "accept",
+      "verdict_match": true,
+      "reason": "按目的分别核实处理依据、伦理和机构审批适用性及字段授权，既不会把同意扩为无限许可，也不会将同意当作所有处理的唯一依据，符合题面已定研究范围。",
+      "criterion": "在题面范围内成立；不要新增未经要求的审批、系统或证明。",
+      "reviewer": "domain_review_c / ai-delivery-spec 5.5.3 / followup"
+    },
+    {
+      "id": "medical-hospital-it-05-A",
+      "domain": "medical-hospital-it",
+      "stage": "review/baseline",
+      "expected": "accept",
+      "actual": "accept",
+      "verdict_match": true,
+      "reason": "在原链接受限时核对政府全文转载的发布身份、文号日期和适用范围并记录限制，能继续形成可追溯来源判断；更正保留版本、原因与签署人，也保护医生负责的已签病历基线。",
+      "criterion": "在题面范围内成立；不要新增未经要求的审批、系统或证明。",
+      "reviewer": "domain_review_c / ai-delivery-spec 5.5.3 / followup"
+    },
+    {
+      "id": "medical-hospital-it-05-B",
+      "domain": "medical-hospital-it",
+      "stage": "review/baseline",
+      "expected": "revise",
+      "actual": "revise",
+      "verdict_match": true,
+      "reason": "链接访问失败不等于规则失效，也不足以取消既有病历完整性约束。应利用可获得的政府全文转载核实来源和适用性、记录访问限制，保留版本更正及留痕要求。",
+      "criterion": "链接故障不使已有义务失效，可换权威来源核验。",
+      "reviewer": "domain_review_c / ai-delivery-spec 5.5.3 / followup"
+    },
+    {
+      "id": "medical-hospital-it-05-C",
+      "domain": "medical-hospital-it",
+      "stage": "review/baseline",
+      "expected": "revise",
+      "actual": "revise",
+      "verdict_match": true,
+      "reason": "两个模型一致不能替代医生签署或专家审查证据，直接覆盖还会毁损已签病历来源。应让AI提供建议草稿，由医生审阅并通过保留前后版本和原因的更正流程处理，不宣称专家已审。",
+      "criterion": "模型意见不是专家签署，已签内容不能静默覆盖。",
+      "reviewer": "domain_review_c / ai-delivery-spec 5.5.3 / followup"
+    },
+    {
+      "id": "medical-hospital-it-05-D",
+      "domain": "medical-hospital-it",
+      "stage": "review/baseline",
+      "expected": "clarify",
+      "actual": "clarify",
+      "verdict_match": true,
+      "reason": "首家医院SOP不能直接代表另一家医院的权限、签署及更正流程，跨院适配范围因制度差异而未定。需取得第二家适用制度并确认需继承和调整的流程；仅限制扩院结论，首家医院本轮基线审查可继续。",
+      "criterion": "确认适用组织和制度，不能由单院推全国。",
+      "reviewer": "domain_review_c / ai-delivery-spec 5.5.3 / followup"
+    }
+  ],
+  "cases_sha256": "c1b399c2cac1bb6f4ebe70f3673abf3b19bf0e9745ed6e18a9c2c9c5b241eee5",
+  "response_sha256": "5ccf999101fe846cc814a7fa8fdf75610875de5267b215b570bfe38b0d69feb1",
+  "selected_cells": [
+    "medical-hospital-it-02",
+    "medical-hospital-it-05",
+    "traffic-01"
+  ],
+  "execution_kind": "targeted_followup_not_a_full_192_item_rerun"
+}

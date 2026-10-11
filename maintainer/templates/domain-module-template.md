@@ -21,6 +21,7 @@ A valid domain module must preserve these section types:
 
 ```text
 domain purpose
+first-principles domain lens
 domain vocabulary
 aggregates/entities
 domain events
@@ -41,6 +42,21 @@ Also add metadata to `references/domain-coverage.yaml`, source records to
 `references/domains/domain-sources.yaml`, and scenarios to `maintainer/evals/eval-catalog.yaml`.
 New packs start as `knowledge_backed` only after source and gap checks pass;
 otherwise keep them outside the built-in domain index.
+
+Pack headings organize reusable knowledge; they are not a mandatory project PRD outline.
+State arrows and abbreviated payloads are design sketches, not complete workflows or
+executable schemas. State the applicable normal, exception and recovery paths and
+distinguish legal obligations, project decisions and optional patterns. Do not turn
+a sample human gate, signature technology or approval-body name into a universal rule.
+
+For a broad pack revision, use the six current stage routes in `references/stages.md`
+to check legal controls, plausible wrong implementations and unresolved decisions.
+The maintained [domain-stage suite](../evals/domain-stage-cases.md) covers all built-in
+packs. Freeze raw tasks and separate expected decisions before independent execution;
+compare actual outputs and review their reasons. Keyword anchors, verdict agreement,
+model behavior, expert judgment and real application tests are different evidence.
+For a narrow correction, rerun affected cases and dependencies instead of requiring
+the full matrix for every user's project.
 
 ## Domain Module Skeleton
 

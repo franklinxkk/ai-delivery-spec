@@ -3,6 +3,7 @@ last_catalog_review: 2026-08-29
 policy:
   primary_sources_only_for_binding_claims: true
   model_memory_is_authority: false
+  verification_fallback: Official republication or an attributable institutional full-text copy may supplement an inaccessible issuer URL when title, document number, version, date and scope are cross-checked against issuer or government records. Record the actual evidence and access limit; a search snippet alone does not prove a full-text review.
   copy_full_protected_standard: false
   draft_can_create_hard_stop_rule: false
   product_pattern_can_create_requirement: false
@@ -175,9 +176,12 @@ sources:
     jurisdiction: China
     applicability: education data classification and grading
     product_mapping: data inventory, classification, protection and authorization profiles
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
-
+    verification_evidence:
+      full_text_url: https://www.sic.gov.cn/sic/83/260/0115/2c97b8cb-95c74996-019b-bee6c236-6cab.pdf
+      corroboration_url: https://www.sic.gov.cn/sic/83/260/0115/20260115074354798016661_pc.html
+      method_and_limit: Full PDF from a drafting institution plus its official publication notice; matched JY/T 0661-2025, title, 2025-12-18 issue and 2026-02-18 effect date. Checked education scope, state-secret exclusion and sector-data boundary; issuer URL inaccessible.
   - id: KS-MEDICAL-EMR-2017
     domains: [medical-hospital-it]
     title: 电子病历应用管理规范（试行）
@@ -189,8 +193,12 @@ sources:
     jurisdiction: China
     applicability: medical-institution electronic medical record creation, modification, use, storage and management
     product_mapping: signed record, amendment, trace, terminology, sharing and security
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
+    verification_evidence:
+      full_text_url: https://www.beijing.gov.cn/zhengce/zhengcefagui/201905/t20190522_59868.html
+      corroboration_url: https://www.nca.gov.cn/sca/ztpd/2017-04/19/content_1012650.shtml
+      method_and_limit: Government full-text republication matched notice 2017 No.8 and issuer/date; official interpretation corroborates identity. Checked record trace, identity/permissions and conditional electronic signature; canonical retrieval failed.
   - id: KS-MEDICAL-EMR-2025
     domains: [medical-hospital-it]
     title: 关于进一步加强医疗机构电子病历信息使用管理的通知
@@ -202,8 +210,11 @@ sources:
     jurisdiction: China
     applicability: medical-institution EMR information use and permission management
     product_mapping: role/permission, creation, modification, storage, transfer and accountability
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
+    verification_evidence:
+      full_text_url: https://app.www.gov.cn/govdata/gov/202507/01/531972/article.html
+      method_and_limit: Government full-text republication attributed to NHC; matched 2025 No.262 notice and date. Checked use permissions, operation logs, sharing authorization and incoming-record verification; canonical retrieval failed.
   - id: KS-MEDICAL-CYBERSECURITY-2022
     domains: [medical-hospital-it]
     title: 医疗卫生机构网络安全管理办法
@@ -215,8 +226,12 @@ sources:
     jurisdiction: China
     applicability: medical and health institution network/data security
     product_mapping: classification, annual assessment, access, logs, lifecycle, cross-border and face data
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
+    verification_evidence:
+      full_text_url: https://app.www.gov.cn/govdata/gov/202208/31/488953/article.html
+      corroboration_url: https://www.zhonglou.gov.cn/html/czzl/2022/OKJILIOP_1114/19084.html
+      method_and_limit: Government full-text republication matched 2022 No.29 and 2022-08-08 notice; government catalog corroborates active identity. Checked article 3 scope and lifecycle responsibility; canonical retrieval failed.
   - id: KS-MEDICAL-FHIR-R5
     domains: [medical-hospital-it]
     title: HL7 FHIR R5
@@ -294,9 +309,12 @@ sources:
     jurisdiction: China
     applicability: electronic archive management within stated scope
     product_mapping: collection, transfer, storage, use, security and responsibility
-    last_verified_at: 2026-07-11
+    last_verified_at: 2026-10-11
     refresh_days: 90
-
+    verification_evidence:
+      full_text_url: https://dag.ecust.edu.cn/2024/1030/c6867a171867/page.htm
+      corroboration_url: https://big5.www.gov.cn/gate/big5/www.gov.cn/gongbao/2024/issue_11746/202412/content_6991650.html
+      method_and_limit: University archive full text (38 articles) cross-checked with issuer notice and State Council Gazette search index; Order 22, 2024-09-14, effective 2024-11-01. Checked article 17 signing/archive scope. Gazette direct retrieval and issuer originals unavailable; not confused with the separate government-service archive rules.
   - id: KS-OA-WEAVER-WHITEPAPER
     domains: [oa]
     title: Weaver e-cology Product Whitepaper
@@ -1395,3 +1413,21 @@ sources:
     claim_limit: The opinion establishes policy direction and design concerns; it does not by itself make every proposed standard or product pattern a binding project requirement.
     last_verified_at: 2026-08-29
     refresh_days: 90
+  - id: KS-MEDICAL-ETHICS-2023
+    domains: [medical-hospital-it]
+    title: 涉及人的生命科学和医学研究伦理审查办法
+    issuer: 国家卫生健康委等部门
+    authority_type: departmental_rule
+    effect_class: binding_baseline
+    url: https://www.nhc.gov.cn/wjw/c100375/202302/902b4a1dc3af4aba862a6387e6e376dc.shtml
+    status: active
+    jurisdiction: China
+    applicability: life-science and medical research involving humans within the stated institutional and activity scope
+    product_mapping: ethics applicability, review responsibility, documented exemption conditions, informed consent and ongoing oversight
+    claim_limit: Article 32 provides limited exemption conditions; de-identification alone is not automatic exemption and other data-use obligations remain.
+    last_verified_at: 2026-10-11
+    refresh_days: 90
+    verification_evidence:
+      full_text_url: https://www.szns.gov.cn/nsqsfj/gkmlpt/content/10/10510/mpost_10510979.html
+      corroboration_url: https://www.nhc.gov.cn/qjjys/c100015/202302/687d51e0d215464590b87d7e2246c720.shtml
+      method_and_limit: Government full-text republication plus issuer notice/interpretation; matched 2023-02-18 instrument and article 32. Applicable exemption must be confirmed by the accountable institutional process, not a model.

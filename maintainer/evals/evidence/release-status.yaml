@@ -32,23 +32,27 @@ release_evidence:
   scope: 5.5.3 local candidate checks on Windows / Python 3.12.10;
     not customer or production acceptance. Public release is not performed.
   results:
-    pytest: 389_passed_in_77.49s
+    pytest: 399_passed_in_59.40s
     added_regressions_this_review: 28_contract_example_checks_passed_included_in_total
     review_regressions: browser_not_rerun_no_browser_artifact_changes
-    release_gate: exit_1_five_existing_domain_sources_stale_other_checks_passed
+    release_gate: exit_0_after_authoritative_alternative_source_review
     public_quickstart_and_badcases: passed
     runtime_package_check: passed_118_source_files_no_zip
     skill_creator_quick_validate: passed
     independent_forward_test: three_tasks_three_groups_outputs_retained_parent_review_only
     independent_code_review: three_reproduced_defects_repaired_and_retested
     behavioral_comparison: no_stable_benefit_proven_single_synthetic_run_not_blind
+    domain_stage_review: 192_independent_items_190_initial_verdict_matches_2_oracle_ambiguities_retained
+    domain_stage_followup: 12_of_12_verdict_matches_parent_reasons_reviewed_not_full_rerun
+    domain_sources: 99_registry_records_pass_five_previous_blockers_resolved
+    new_harness_regressions: 10_passed_included_in_pytest_total
     installation: not_run
     publication: not_run
 known_limitations:
-- Five existing domain source originals could not be retrieved; freshness gate remains failed
-- Independent receiver scoring stopped at host quota; parent review is not a blind assessment
+- Five original source URLs remain inaccessible; attributed full-text alternatives and corroboration resolved the freshness gate; not a fresh full-text audit of all 99 sources
+- Earlier three-task comparison receiver scoring stopped at host quota; its parent review is not blind. The later domain-stage run is separately recorded with independent inputs and parent adjudication.
 - Single-run synthetic forward calibration does not establish stable benefit or human handoff quality
 - CRM native outputs and assisted repairs are separate; one case does not establish cross-model stability
-- contract tests do not prove fresh-agent/expert/production maturity
+- Contract tests and bounded candidate-review behavior do not prove full-generation, expert or production maturity
 - domain, legal, safety, financial, production and customer correctness remain not
   proven

@@ -23,6 +23,8 @@ Does not apply when:
 - the request is ordinary document RAG with no image/audio/video time or space
   anchoring.
 
+> Use only the slices relevant to the project. State arrows and YAML/field lists below are design sketches, not executable schemas or a complete workflow. Instantiate the normal, exception and recovery paths, guards, data owner, permissions and version effects before handoff. A pattern does not override an authorized project decision or create a legal obligation. Where confidence is useful, declare its measurement and limits; do not invent a calibrated score from model self-report.
+
 ## Domain Purpose
 
 - Business outcome: turn dark media inventory into governed assets, searchable
@@ -305,6 +307,8 @@ or train permission.
   `data-state` and `data-field`; timed targets include stable asset/segment IDs.
 
 ## Policy / Privacy Constraints
+
+- Apply withdrawal to the affected purpose, action, subject and derivatives. An independent valid retention/legal-hold basis may require restricted evidence retention; retaining an original does not authorize new use under a revoked license. Record the scope and accountable disposition instead of indiscriminate deletion or continued reuse.
 
 - File possession, public availability or successful download does not prove the
   right to view, copy, transform, publish, train, identify or redistribute.

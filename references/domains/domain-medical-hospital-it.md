@@ -35,6 +35,8 @@ before PRD signoff.
 - Evaluation Profile
 - Acceptance Checklist
 
+> Use only the slices relevant to the project. State arrows and YAML/field lists below are design sketches, not executable schemas or a complete workflow. Instantiate the normal, exception and recovery paths, guards, data owner, permissions and version effects before handoff. A pattern does not override an authorized project decision or create a legal obligation. Where confidence is useful, declare its measurement and limits; do not invent a calibrated score from model self-report.
+
 ## Domain Purpose
 
 - Business outcome: improve clinical, nursing, quality, infection-control,
@@ -140,13 +142,13 @@ events:
   ClinicalOrderExecuted:
     payload: { order_id, executor_id, execution_time, evidence_ref }
   MedicalRecordSigned:
-    payload: { record_id, encounter_id, signer_id, ca_signature_id, signed_at }
+    payload: { record_id, encounter_id, signer_id, signature_evidence_id, signed_at }
   LabCriticalValuePublished:
     payload: { report_id, patient_id, item_code, value, published_at }
   CriticalValueAcknowledged:
     payload: { report_id, ack_user_id, action_taken, ack_at }
   ImagingReportSigned:
-    payload: { study_id, report_id, radiologist_id, ca_signature_id, signed_at }
+    payload: { study_id, report_id, radiologist_id, signature_evidence_id, signed_at }
   PrescriptionReviewed:
     payload: { prescription_id, pharmacist_id, result, issue_codes, reviewed_at }
   QualityIssueDetected:
@@ -182,7 +184,8 @@ Prescription: doctor_signed | pharmacist_reviewed -> cancelled
 
 QualityEvent: detected -> assigned -> rectifying -> verified -> closed
 InfectionAlert: detected -> notified -> acknowledged -> resolved
-ResearchDataRequest: applied -> ethics_approved -> data_committee_approved -> desensitized -> delivered -> closed
+ResearchDataRequest: applied -> applicability_reviewed -> ethics_cleared -> data_use_approved -> prepared -> delivered -> closed
+Ethics clearance records approval or a documented applicable exemption; the institution defines the accountable review authority, not necessarily a body named data committee.
 AIRecommendation: generated -> shown_to_clinician -> accepted | modified | rejected
 AIRecommendation: generated -> suppressed_low_confidence | suppressed_policy_block
 ```
@@ -225,8 +228,8 @@ permission scope, empty/error state, denominator, exclusion rule, and owner.
 | NIS nursing records | nursing risk reminder and care-plan context | nurse role scope and shift handoff audit |
 | QMS / infection-control rules | quality and infection alerts | rule owner and latest approved rule version required |
 | Guidelines / pathway knowledge base | non-binding suggestion and patient education draft | version/date/source must be visible; outdated source cannot be used silently |
-| Patient consent and authorization | privacy and online service boundary | consent state must be checked before sensitive data use |
-| Research cohort/data mart | research screening and extraction | ethics/data approval, de-identification, and export audit required |
+| Legal basis, patient consent and authorization | purpose-specific privacy and service boundary | verify the lawful basis; check consent where legally required and the permitted purpose/fields in every case |
+| Research cohort/data mart | research screening and extraction | applicable ethics clearance, institutional data-use approval, required privacy treatment and export audit |
 
 Context-source contract:
 
@@ -265,7 +268,7 @@ medical_ai_context_source:
 | Internet follow-up | patient request -> identity/consent -> doctor review -> prescription/education -> payment/delivery | first-visit prohibition where applicable, unsupported disease, missing consent, refund/cancellation |
 | Quality issue management | rule detection/manual issue -> assign -> rectify -> verify -> close | disputed issue, overdue rectification, repeated defect, department transfer |
 | Infection alert handling | risk detected -> notify -> acknowledge -> isolate/intervene -> resolve | policy block, false positive, cross-department patient transfer |
-| Research data request | apply -> ethics approval -> data approval -> de-identify -> deliver -> audit close | missing approval, excessive scope, re-identification risk, export failure |
+| Research data request | apply -> ethics applicability/clearance -> data-use approval -> required privacy treatment -> deliver -> audit close | unsupported exemption, missing required approval, excessive scope, re-identification risk, export failure |
 
 ## Role Path Patterns
 
@@ -274,11 +277,11 @@ medical_ai_context_source:
 | Doctor | patient list -> encounter detail -> record/order/prescription -> sign -> follow-up | department scope, patient identity, unsigned draft, AI suggestion review |
 | Nurse | ward list -> patient detail -> nursing task -> execution evidence -> handoff | shift, executor, time, evidence, exception escalation |
 | Pharmacist | prescription queue -> review -> pass/return/intervene -> audit | rule reason, communication record, final responsibility |
-| Imaging doctor | worklist -> image/report -> AI draft comparison -> edit -> sign/publish | AI draft boundary, prior image access, CA signature |
+| Imaging doctor | worklist -> image/report -> AI draft comparison -> edit -> sign/publish | AI draft boundary, prior image access, adopted signature method and verification |
 | Lab doctor/technician | sample/result -> review -> critical value publish -> acknowledgement tracking | critical threshold, reviewer, notification chain |
 | Quality manager | rule dashboard -> issue detail -> assignment -> verification -> department ranking | rule version, appeal, evidence, overdue |
 | Infection-control staff | alert dashboard -> patient/department context -> intervention -> closure | cross-department notification and traceability |
-| Researcher | cohort request -> approval status -> de-identified dataset -> usage record | ethics approval, data minimization, export audit |
+| Researcher | cohort request -> clearance status -> permitted dataset -> usage record | applicable ethics clearance, data minimization, export audit |
 | Patient/family | app/internet hospital -> appointment/follow-up/report/education -> payment/feedback | consent, identity, accessibility, message timing |
 | Hospital administrator | dashboard -> drill-down -> department action -> review | indicator caliber, source freshness, permission scope |
 
@@ -318,10 +321,9 @@ Mobile/field rules:
   responsibilities.
 - Medical record integrity: signed/archived content uses versioned amendment
   with reason and audit trail.
-- Consent and authorization: patient-facing and research flows must check
-  consent/authorization before sensitive data use.
-- Research and export: ethics/data approval, de-identification, export purpose,
-  recipient, retention, and deletion/return evidence must be recorded.
+- Lawful basis and authorization: verify the purpose-specific legal basis and permitted scope for diagnosis/treatment, research and patient services. Where consent is legally required, check the applicable consent; do not make consent the sole legal basis or treat one consent as unlimited permission.
+- Research and export: record ethics-review applicability, the responsible institutional data-use authority, required privacy treatment, export purpose, recipient, retention and deletion/return evidence. KS-MEDICAL-ETHICS-2023 article 32 provides limited exemption conditions, not a blanket waiver for de-identified data. An accountable applicability decision is required; AI cannot self-exempt a study. An exemption does not remove other lawful-basis and data-use obligations.
+- Signature evidence follows the adopted valid method; PKI/CA-specific checks apply when that method is used.
 - Integration safety: do not design direct uncontrolled writes to HIS/EMR/LIS/
   PACS databases. Use approved integration gateway/API/message bus with idempotency,
   retry, audit, and rollback/compensation rules.
