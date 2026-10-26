@@ -52,7 +52,7 @@ core section headings used here and in `domain-module-template.md`.
 | design_guidance | `KS-AI-AGENT-IMPLEMENTATION-2026` adds current agent policy direction; `KS-AI-GBZ185-SERIES-2026` covers agent architecture, identity, description, discovery, interaction and tool calling; `KS-AI-MCP-2026-07-28` resets MCP around a stateless core and formal extensions | declare policy applicability, protocol/profile versions, identity/authority, capability metadata, discovery, auth, tool side effects, compatibility and migration tests instead of saying only “supports agents/MCP” |
 | binding_baseline | existing privacy, data-security, AI-content-labeling and anthropomorphic-interaction rules remain applicable by product scenario | resolve whether content, interaction, personal data and high-impact writeback rules apply; keep accountable human gates and audit evidence |
 | change_watch | `KS-AI-NIST-AGENT-STANDARDS-2026` and `KS-AI-AGENT-SECURITY-DRAFT-2026` signal stronger identity, permission, tool, data, log and shutdown controls | use them for threat modeling and re-verification only; initiatives, consultations and draft projects cannot create a compliance hard stop |
-| compatibility guard | MCP 2026-07-28 deprecates legacy lifecycle/SSE features with a migration window | never silently break older clients; record supported versions, deprecated paths, fallback and coexistence evidence |
+| compatibility guard | the official versioning page still lists MCP 2026-07-28 as current; deprecated features remain supported during their stated transition | never silently break older clients; record supported versions, deprecated paths, fallback and coexistence evidence; protocol status does not prove a particular SDK or host has migrated |
 
 ### AI Transformation Horizon
 
@@ -105,7 +105,7 @@ Durable AI-native trend map:
 | Tool | callable system/API/function with permission and side-effect scope | tool registry |
 | Prompt | versioned instruction/context template | prompt registry |
 | RAG Context | retrieved document, record, vector result, or knowledge snippet | retrieval/index service |
-| Human Gate | required review/approval before publish, send, write, or close | workflow policy |
+| Human Gate | review/approval before an action only where the applicable authority or workflow policy requires it; not a default approval for every publish, send, write, or close | applicable policy and authorized scope |
 | Golden Case | versioned evaluation example with expected behavior | eval set |
 | Anchor Case | stable calibration case used to detect model/prompt/tool drift before normal eval | eval set |
 | Refusal | safe response when request is unsupported, unsafe, or unauthorized | policy/rule set |
@@ -188,10 +188,12 @@ Rules:
 
 - Every launch claim needs an eval set, baseline, threshold, sample size, and
   owner.
-- Any model, prompt, retrieval, tool, or schema change must run Anchor-Cases
-  before normal golden/adversarial evaluation. Anchor failure means the eval
-  baseline is not comparable and must stop release as `REVIEW_COMPLETE_WITH_GAPS`.
-- AI-core modules require P0 smoke, P1 regression, and adversarial cases.
+- After a model, prompt, retrieval, tool or schema change, select checks for
+  the affected quality, permission and side-effect risks. Stable anchor cases
+  can detect baseline drift; separate a changed benchmark from a product
+  regression and resolve that difference before making a comparison claim.
+  Follow the project's authorized release criteria rather than imposing fixed
+  P0/P1 labels, evaluation order or a Skill lifecycle state.
 - Production monitoring must connect run traces to user feedback and incidents.
 - Metrics must segment by model/prompt/tool/context version.
 
@@ -222,7 +224,7 @@ Rules:
 1. Opportunity shaping: user pain -> AI centrality -> manual fallback ->
    success metric -> risk class -> PRD profile.
 2. Agent specification: goal -> allowed context -> allowed tools -> write scope
-   -> human gate -> eval set -> trace fields.
+   -> determine any required human review -> eval set -> trace fields.
 3. Runtime answer: user request -> permission check -> context retrieval ->
    model/tool execution -> citation/refusal -> human gate when needed -> output.
 4. Tool writeback: proposed action -> policy check -> reviewer approval where required ->
@@ -269,9 +271,12 @@ Rules:
   missing, stale, unauthorized, or contradicted.
 - Prompt, context, trace, and feedback retention must follow privacy and data
   deletion/export policy.
-- Autonomous writeback is forbidden for high-impact actions unless the PRD
-  explicitly defines policy, human gate, eval, rollback, and on-call ownership.
-- Test agents must use shadow data or mocked tools for write paths.
+- High-impact writeback needs explicit authorized scope, applicable review conditions,
+  validation, recovery and accountable ownership. Do not infer a per-action human
+  approval when the applicable policy already authorizes bounded automation.
+- Test write paths use mocks, shadow data, or an explicitly authorized isolated test
+  environment; mock-only tests do not establish real integration behavior. Test
+  permission does not authorize unrequested production writes.
 
 ## Domain Test Scenarios
 
@@ -322,8 +327,9 @@ Mocked matrices and simulated reviewers cannot satisfy expert review or audit.
 - [ ] Agent/tool/write scopes and human gates are explicit.
 - [ ] Context sources have freshness, permission, citation, and reliability rules.
 - [ ] Eval sets, thresholds, baselines, and owners exist before AI-core launch.
-- [ ] Anchor-Cases run before golden/adversarial eval after model, prompt,
-      retrieval, tool, schema, or context changes.
+- [ ] Affected quality, permission and side-effect checks run after relevant
+      changes; benchmark drift and product regression are distinguished before
+      comparing results or applying the project's release criteria.
 - [ ] Refusal, fallback, rollback, incident, and post-launch review paths are defined.
 - [ ] High-impact decisions keep authorized human accountability.
 - [ ] Delegated work has explicit lifecycle, liveness, cancellation, duplicate-execution prevention and one terminal result owner.

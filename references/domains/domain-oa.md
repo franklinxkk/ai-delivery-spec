@@ -57,12 +57,11 @@ domain-neutral.
   official document, meeting, calendar, task/supervision, knowledge, cloud docs,
   low-code forms, data/reporting, helpdesk, HR/expense/legal integrations,
   mobile office, e-signature, and AI office assistant.
-- When the core Product Truth scale/audit threshold is met, Product Truth must
-  lock module/view/region/action ownership when OA spans
-  multiple modules, roles, PC/mobile surfaces, or todo -> workflow -> document
-  -> archive lifecycles.
-- Keep organization, user, workflow-node, document, and archive fields canonical
-  as `FLD-*`; projections add only relevant differences.
+- Keep object, field and action meaning consistent across modules, roles and
+  todo -> workflow -> document -> archive lifecycles. Reuse the existing
+  specification and stable identifiers; use Product Truth or machine field IDs
+  only when an actual consumer or authorized governance workflow needs them.
+  Multiple modules or surfaces alone do not require a new machine artifact.
 
 ### Current Baseline and Change Watch (verified 2026-08-29)
 
@@ -87,7 +86,7 @@ Durable judgment: AI office is becoming the organization's **system of action**;
 | runtime | foreground session -> local/cloud managed runtimes for long tasks and event triggers | sandbox, secret isolation, checkpoints, trace, cancellation, retry and human takeover are required |
 | business model | OA seats/modules -> seats + governed compute + skill/connector ecosystem + measurable work outcomes | avoid lock-in by keeping portable work objects, APIs/protocols, evidence and export/exit paths |
 
-`KS-OA-WORKBUDDY-WMA-2026`, `KS-OA-QWEN-WORK-2026` and `KS-OA-FEISHU-DOUBAO-2026` support this product-pattern direction. They do not prove organizational merger, universal superiority or customer outcome.
+`KS-OA-WORKBUDDY-WMA-2026`, `KS-OA-QWEN-WORK-2026` and `KS-OA-FEISHU-DOUBAO-2026` support this product-pattern direction. Check their dated source and edition/client limits before making an availability claim: a whitelist beta, a forecast release and a dated scenario article do not establish general availability or customer outcomes.
 
 ## First-Principles Domain Lens
 
@@ -430,10 +429,8 @@ Mocked matrices and simulated reviewers cannot satisfy expert review or audit.
       gate, forbidden write scope, fallback, and linked tests.
 - [ ] PC+mobile state consistency and weak-network behavior are defined when
       mobile is in scope.
-- [ ] Common OA fields use canonical `FLD-*` definitions; projections do not
-      duplicate unchanged definitions.
-- [ ] When the core scale/audit threshold is met, Product Truth is locked before
-  projections when scope spans multiple
-      modules, roles, or surfaces.
+- [ ] Common OA facts are defined once with existing stable identifiers;
+      projections state only relevant differences. Product Truth and `FLD-*`
+      identifiers are used only when the selected delivery needs them.
 - [ ] Coding-agent delivery package paths are explicit when implementation by
       Claude Code, Cursor, Codex, or Copilot is expected.

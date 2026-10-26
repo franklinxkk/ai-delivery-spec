@@ -193,6 +193,10 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
         "可见规则中的比较符未安全编码，浏览器会把部分公式误解析为标签并吞掉文字。",
         "把正文中的 < 和 > 分别写为 &lt; 和 &gt;，或通过 textContent 安全写入；随后在浏览器中逐字核对 PRD 规则。",
     ),
+    "PROTO-CSS-IMPORTANT-POLLUTION": (
+        "!important 表明级联覆盖；静态声明本身不能证明功能或可用性损坏。",
+        "按 ref 核对命中元素、覆盖范围及默认、错误、焦点、隐藏状态；保留合理覆盖，只修有证据的干扰，并记录浏览器结果。",
+    ),
     "PROTO-NESTED-PRODUCT-IFRAME": (
         "原型用本地 iframe 嵌套另一个 HTML 页面，静态门禁无法证明嵌套页的交互合同。",
         "把嵌套页内容并入当前原型的 page-VIEW-* 结构，或作为独立原型文件一并提交门禁。",
@@ -615,6 +619,10 @@ PREFIX_GUIDANCE: tuple[tuple[str, str, str], ...] = (
 )
 
 EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
+    "PROTO-CSS-IMPORTANT-POLLUTION": (
+        "An !important declaration overrides the cascade; its presence alone does not prove a functional or usability defect.",
+        "Review matched elements, scope and default/error/focus/hidden states at ref. Keep justified overrides, fix evidenced interference, and record browser results.",
+    ),
     "SPEC-OPEN-DECISION": ("A business choice is still open; its dependent behavior cannot be implemented by guessing.", "Check this UNK's scope and blocking stage, then obtain the needed source or authorized decision. Unaffected work can continue."),
     "SPEC-CONTENT": ("The text may still allow different business interpretations.", "Read the cited sentence and its rule references first. Resolve a real gap or record why the candidate does not apply; do not merely add a review pass."),
     "SPEC-SEMANTIC-NOT-PROVEN": ("The records do not yet establish that this scope was reviewed.", "Review its sources and distinguishing counterexamples, then record the actual result. Do not fabricate a pass."),
@@ -851,6 +859,7 @@ def english_guidance_for(code: str) -> tuple[str, str]:
 
 
 REPAIR_EXAMPLES: tuple[tuple[str, str], ...] = (
+    ("PROTO-CSS-IMPORTANT-POLLUTION", '例如 [aria-invalid="true"] 的错误边框覆盖：核对非法输入变红、纠正后恢复及焦点 outline 仍可见；据实际影响决定保留或调整。'),
     ("SPEC-OPEN-DECISION", "分期期数未决时，合同查询可继续；付款计划生成保持受阻，等待原约定或授权决定。不能默认一期。"),
     ("SPEC-CONTENT-", "先核对原句是否已回答所问边界；若已在引用规则中写清，记录该位置；若未决定，保留未知及影响范围。"),
     ("SPEC-", "只复核 finding.ref 涉及的范围、来源及版本；proposed 不能冒充 confirmed，旧评阅不能证明新基线。"),
@@ -899,6 +908,7 @@ def english_repair_example_for(code: str) -> str:
     if _is_legacy_review_finding(code):
         return "Remove legacy Journey/STEP/Role/page-mode controls and generate a 5.4.9/RC4 manifest driven by the real product CurrentContext, three tabs, and ReviewPoints."
     examples = (
+        ("PROTO-CSS-IMPORTANT-POLLUTION", 'For an [aria-invalid="true"] border override, verify the invalid border, correction/reset and visible focus outline; keep or adjust it based on the observed effect.'),
         ("SPEC-OPEN-DECISION", "If installment terms are undecided, contract lookup can proceed; payment-plan generation waits for the agreement or authorized decision. Do not default to one installment."),
         ("SPEC-CONTENT-", "If a referenced rule already answers the question, record its location; otherwise retain the unknown and its dependent scope."),
         ("PRD-LANGUAGE", "Set document_language: en-US, translate human-facing headings and tables, and keep REQ/API/field names unchanged."),

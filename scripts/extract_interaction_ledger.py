@@ -144,9 +144,10 @@ def extract_handler_actions(source: str) -> list[str]:
 
 
 def _mask_javascript_literals(source: str) -> str:
-    """Mask strings/comments while preserving offsets and executable braces."""
+    """Mask strings/comments/regexes, preserving offsets and executable braces."""
     masked = list(source)
     index = 0
+    regex_allowed = True
     while index < len(source):
         char = source[index]
         if char in {"'", '"', "`"}:
@@ -168,6 +169,7 @@ def _mask_javascript_literals(source: str) -> str:
                 if current not in "\r\n":
                     masked[index] = " "
                 index += 1
+            regex_allowed = False
             continue
         if source.startswith("//", index):
             masked[index:index + 2] = [" ", " "]
@@ -188,6 +190,45 @@ def _mask_javascript_literals(source: str) -> str:
                     masked[index] = " "
                 index += 1
             continue
+        if char == "/" and regex_allowed:
+            # A regex can contain quotes, comment-like text and braces. Treating
+            # those as JS strings/comments hides real bindings after /["']/g.
+            start = index
+            index += 1
+            in_class = False
+            while index < len(source):
+                current = source[index]
+                if current == "\\":
+                    index += 2
+                    continue
+                if current == "[":
+                    in_class = True
+                elif current == "]":
+                    in_class = False
+                elif current == "/" and not in_class:
+                    index += 1
+                    while index < len(source) and source[index].isalpha():
+                        index += 1
+                    break
+                if current in "\r\n":
+                    break  # Invalid regex syntax is handled by Node, not guessed.
+                index += 1
+            for position in range(start, min(index, len(source))):
+                if source[position] not in "\r\n":
+                    masked[position] = " "
+            regex_allowed = False
+            continue
+        if char.isalpha() or char in "_$":
+            token = re.match(r"[\w$]+", source[index:])
+            if token:
+                regex_allowed = token[0] in {"return", "throw", "case", "delete", "void", "typeof", "instanceof", "in", "of", "yield", "await", "new"}
+                index += len(token[0])
+                continue
+        if source[index:index + 2] in {"++", "--"}:
+            index += 2
+            continue
+        if not char.isspace():
+            regex_allowed = char in "=(:,[!&|?{;~+-*%^<>/"
         index += 1
     return "".join(masked)
 

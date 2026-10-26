@@ -347,7 +347,7 @@ Common categories:
 
 - Student personal, academic, financial-aid, counseling, health, dorm, employment, and disciplinary data follow least privilege, masking, retention, and audit rules.
 - Mental-health and counseling AI can provide triage hints or conversation assistance only; diagnosis, crisis level, and intervention decision require authorized human/professional accountability.
-- Grades, credits, graduation eligibility, awards/aid/sanctions, and teacher evaluation conclusions require human approval and audit evidence.
+- Official grades, credits, graduation eligibility, awards/aid/sanctions, and teacher evaluation conclusions remain within institutional decision authority and applicable review/audit rules. Explicitly authorized objective scoring or calculation does not require per-item human approval unless the applicable source or institutional policy requires it; disputes and exceptions need accountable review.
 - Classroom audio/video/image use requires clear purpose, role access, retention period, and display/export control.
 - Research project, fund, contract, IP, ethics/integrity, and transformation data require confidentiality level, owner, proof attachment, finance/audit boundary, and export approval.
 - OBE/accreditation, 双高, and audit-evaluation evidence must distinguish draft analysis from official school evidence; published evidence is versioned and cannot be silently overwritten.

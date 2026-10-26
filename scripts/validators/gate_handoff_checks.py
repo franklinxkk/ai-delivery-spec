@@ -821,10 +821,19 @@ class HandoffChecks:
                 self.add("BLOCK", "HANDOFF-PACKET-HASH-DRIFT", path, "工作包内容哈希已漂移", packet_id)
             if packet_id not in packet_raw:
                 self.add("BLOCK", "HANDOFF-PACKET-ID-MISSING", path, "工作包正文未声明自身 ID", packet_id)
-            if not any(str(ref) in packet_raw for ref in packet.get("scope_refs", []) or []):
-                self.add("BLOCK", "HANDOFF-PACKET-SCOPE-MISSING", path, "工作包正文没有任何声明的 scope_refs", packet_id)
-            if not any(str(ref) in packet_raw for ref in packet.get("acceptance_refs", []) or []):
-                self.add("BLOCK", "HANDOFF-PACKET-AC-MISSING", path, "工作包正文没有任何 acceptance_refs", packet_id)
+            # Explicit handoff declarations must all be locatable. A valid hash
+            # or one surviving reference cannot establish the other references.
+            baseline_defined = collect_defined_ids(requirement_raw) if requirement_raw else set()
+            for field, code in (("scope_refs", "HANDOFF-PACKET-SCOPE-MISSING"),
+                                ("acceptance_refs", "HANDOFF-PACKET-AC-MISSING")):
+                refs = [str(ref).upper() for ref in packet.get(field, []) or []]
+                for ref in refs:
+                    if not re.search(r"(?<![A-Z0-9-])" + re.escape(ref) + r"(?![A-Z0-9-])", packet_raw, re.I):
+                        self.add("BLOCK", code, path, "工作包正文缺少声明的引用", f"{packet_id}->{ref}")
+                    if requirement_raw and ref not in baseline_defined:
+                        self.add("BLOCK", "HANDOFF-REF-NOT-IN-PRD", path,
+                                 "声明引用未定位到需求基线的定义位；不要为凑包另造空标签",
+                                 f"{packet_id}->{ref}")
             packet_steps = {
                 str(ref).upper()
                 for ref in packet.get("implementation_step_refs", []) or []

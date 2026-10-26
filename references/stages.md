@@ -24,13 +24,15 @@ python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype app.
 python scripts/ai_delivery_spec_cli.py impact --truth product-truth.yaml --change change.yaml
 ```
 
-确需机器交接才用 handoff/Truth。full 组合已有输入，不是每次任务的终点：
+确需机器交接才用 handoff/Truth。full 只组合已有输入，不是每次任务的终点。已有对应文件时可复制：
 
 ```bash
-python scripts/ai_delivery_spec_cli.py gate --profile full --requirement requirement-register.yaml --prd PRD.md --prototype app.html --manifest handoff.yaml
+python scripts/ai_delivery_spec_cli.py gate --profile full --requirement requirement.yaml --prd requirement.md --prototype app.html --format json
 ```
 
-PRD gate 接受自由标题；`ADS:scope/behavior/acceptance` 辅助定位，不强制章数、附录、表格比例或API路径。无法定位返回待评阅范围，不断言内容缺失。frontmatter 若用须是合法对象，见 [specify.md](specify.md)。
+按需删改路径；完整参数查 `gate --help`。
+
+PRD gate 接受自由标题；`ADS:scope/behavior/acceptance` 辅助定位，不强制章数、附录、表格比例或API路径。无法定位返回待评阅范围，不断言内容缺失。frontmatter 可省略；使用时须为 YAML 对象。写法见 [PRD 模板](templates/unified-requirement-prd-template.md)，选用字段的校验见[声明规则](../scripts/requirement_contract.py)与[解析器](../scripts/validators/gate_prd_checks.py)；不要求固定字段集合。
 
 `--scope-ref` 仅限制已明确归属的未知/审查，不过滤无归属风险。静态 PASS 只说明指定声明未发现阻断；GAP与未执行证据保留，不代表业务/浏览器/客户验收。
 

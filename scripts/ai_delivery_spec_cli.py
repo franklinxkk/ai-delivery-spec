@@ -618,7 +618,7 @@ def query_truth(args: argparse.Namespace) -> int:
 
 
 def triage_requirement(args: argparse.Namespace) -> int:
-    values = [str(args.input), "--format", args.format]
+    values = [str(args.input), "--format", args.format, "--language", args.language]
     if args.output:
         values.extend(["--output", str(args.output)])
     return run_script("triage_requirement.py", values)
@@ -1229,6 +1229,8 @@ def main() -> int:
     triage.add_argument("--input", type=Path, required=True)
     triage.add_argument("--format", choices=["markdown", "yaml", "json"], default="markdown")
     triage.add_argument("--output", type=Path)
+    triage.add_argument("--language", choices=["auto", "zh-CN", "en-US"], default="auto",
+                        help="Output language; auto follows valid task input")
     triage.set_defaults(func=triage_requirement)
 
     impact = sub.add_parser("impact", help="Analyze bidirectional change impact from seed IDs")

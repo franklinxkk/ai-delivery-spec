@@ -11,24 +11,90 @@ from scan_requirement_ambiguity import scan
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
+
+
+class TriageInputError(ValueError):
+    """Controlled diagnostics never retain a parser message or input excerpt."""
+
+    def __init__(self, reason: str, language: str = "zh-CN", line: int | None = None, column: int | None = None):
+        super().__init__(reason)
+        self.reason, self.language, self.line, self.column = reason, language, line, column
+
+
+def input_error_language(raw: str) -> str:
+    declared = re.search(r"(?m)^\s*document_language:\s*['\"]?(en(?:-[A-Za-z]+)?|zh(?:-[A-Za-z]+)?)(?=['\"\s#]|$)", raw, re.I)
+    if declared:
+        return "en-US" if declared[1].casefold().startswith("en") else "zh-CN"
+    # With no readable language declaration, broken input cannot reliably supply
+    # a task language. Use the CLI's Chinese default; English callers can select
+    # --language en-US explicitly.
+    return "zh-CN"
 
 
 def load(path: Path) -> dict:
     try:
-        value = load_declarations(path.read_text(encoding="utf-8-sig"))
-    except (OSError, UnicodeError, yaml.YAMLError) as exc:
-        raise ValueError("Use a readable YAML/JSON object containing known task facts: " + str(exc)) from exc
-    if not isinstance(value, dict):
-        raise ValueError("Input must be a YAML/JSON object; no lifecycle scaffold is required")
+        raw = path.read_text(encoding="utf-8-sig")
+    except UnicodeError:
+        raise TriageInputError("encoding") from None
+    except FileNotFoundError:
+        raise TriageInputError("missing") from None
+    except PermissionError:
+        raise TriageInputError("permission") from None
+    except OSError:
+        raise TriageInputError("unreadable") from None
+    language = input_error_language(raw)
+    if not raw.strip():
+        raise TriageInputError("empty", language)
+    try:
+        value = load_declarations(raw)
+    except yaml.YAMLError as exc:
+        mark = getattr(exc, "problem_mark", None)
+        raise TriageInputError("syntax", language,
+                               mark.line + 1 if mark else None, mark.column + 1 if mark else None) from None
+    except ValueError as exc:
+        reason = "keys" if str(exc) == "Declaration keys must be unique strings" else "object"
+        raise TriageInputError(reason, language) from None
     return value
 
 
-def recommend(doc: dict) -> dict:
+def render_input_error(path: Path, error: TriageInputError, language: str = "auto") -> str:
+    english = (error.language if language == "auto" else language) == "en-US"
+    reasons = {
+        "missing": ("找不到输入文件", "Input file not found"),
+        "permission": ("没有读取输入文件的权限", "Input file is not readable with the current permissions"),
+        "unreadable": ("输入路径不可读取或不是普通文件", "Input path is unreadable or is not a regular file"),
+        "encoding": ("输入不是有效的 UTF-8 文本", "Input is not valid UTF-8 text"),
+        "empty": ("输入为空", "Input is empty"),
+        "syntax": ("YAML/JSON 语法无效", "Invalid YAML/JSON syntax"),
+        "keys": ("对象中的键必须是唯一的字符串", "Object keys must be unique strings"),
+        "object": ("输入根节点必须是 YAML/JSON 对象，不能是列表或标量", "Input root must be a YAML/JSON object, not a list or scalar"),
+    }
+    reason = reasons[error.reason][int(english)]
+    if error.line is not None:
+        reason += (f" at line {error.line}, column {error.column}" if english else
+                   f"（第 {error.line} 行，第 {error.column} 列）")
+    if error.reason in {"missing", "permission", "unreadable"}:
+        step = "Check the input path and read permissions, then run again." if english else "核对输入路径及读取权限后重新运行。"
+    elif error.reason == "encoding":
+        step = "Save the input as UTF-8, then run again." if english else "将输入保存为 UTF-8 后重新运行。"
+    elif error.reason == "syntax":
+        step = "Check brackets, quotes and indentation at the reported position, then run again." if english else "检查所示位置的括号、引号和缩进后重新运行。"
+    else:
+        step = "Provide a YAML/JSON object with known task facts, then run again; no lifecycle scaffold is required." if english else "使用 YAML/JSON 对象填写已知任务事实后重新运行；无需生命周期模板。"
+    limit = "No routing recommendation was produced." if english else "本次未形成业务处置建议。"
+    return (f"BLOCKED TRIAGE-INPUT: input {path}: {reason}. Next: {step} {limit}" if english else
+            f"BLOCKED TRIAGE-INPUT: 输入 {path}：{reason}。下一步：{step}{limit}")
+
+
+def recommend(doc: dict, output_language: str = "auto") -> dict:
     result = route(doc)
     narrative = intake_text(doc)
     detail = intake_text(doc, include_title=False)
     language = doc.get("document_language") or ("zh-CN" if re.search(r"[\u4e00-\u9fff]", narrative) else "en")
-    english = str(language).casefold().startswith("en")
+    language_for_output = ("en-US" if str(language).casefold().startswith("en") else "zh-CN") if output_language == "auto" else output_language
+    english = language_for_output == "en-US"
     advice = "clarify" if doc.get("ambiguity") == "high" else "accept"
     reasons = []
     questions = result["content_review"]["findings"]
@@ -64,6 +130,7 @@ def recommend(doc: dict) -> dict:
             "谁要完成什么事，现在遇到的具体问题是什么？")
     result.update({
         "document_language": language,
+        "output_language": language_for_output,
         "recommendation": advice, "decision_status": "proposed", "reasons": reasons,
         "lifecycle_mutated": False,
         "clarification_candidates": questions or lexical,
@@ -78,7 +145,7 @@ def recommend(doc: dict) -> dict:
 
 
 def render_markdown(result: dict) -> str:
-    english = str(result["document_language"]).casefold().startswith("en")
+    english = str(result.get("output_language", result["document_language"])).casefold().startswith("en")
     advice = {
         "accept": ("可以进入需求整理；本次扫描不证明信息已完整。", "Proceed to specification; this scan does not prove completeness."),
         "clarify": ("先澄清会改变实现的业务选择。", "Clarify the business choices that would change implementation."),
@@ -106,11 +173,13 @@ def main() -> int:
     parser.add_argument("input", type=Path)
     parser.add_argument("--format", choices=["markdown", "yaml", "json"], default="markdown")
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--language", choices=["auto", "zh-CN", "en-US"], default="auto",
+                        help="Output language; auto follows valid task input")
     args = parser.parse_args()
     try:
-        result = recommend(load(args.input))
-    except ValueError as exc:
-        print("BLOCKED TRIAGE-INPUT: " + str(exc), file=sys.stderr)
+        result = recommend(load(args.input), output_language=args.language)
+    except TriageInputError as exc:
+        print(render_input_error(args.input, exc, args.language), file=sys.stderr)
         return 2
     if args.format == "json":
         rendered = json.dumps(result, ensure_ascii=False, indent=2) + "\n"

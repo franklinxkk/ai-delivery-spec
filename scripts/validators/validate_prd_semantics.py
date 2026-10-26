@@ -218,6 +218,14 @@ def _collect_ids(raw: str) -> tuple[dict[str, tuple[int, str]], dict[str, list[t
         first_cell = cells[0].strip("`* ") if cells else ""
         list_lead = re.match(rf"^\s*[-*+]\s+(?:\*\*|__|`)?\s*((?:{_FAMILY})-[A-Z0-9][A-Z0-9_-]*)", line)
         machine_def = re.match(rf"^\s*-?\s*id:\s*['\"]?((?:{_FAMILY})-[A-Z0-9][A-Z0-9_-]*)", line)
+        # The current PRD template gives a scenario its ID on a labelled line.
+        # Anchor the label and capture only its value: "参见 AC-*" and IDs later
+        # in the same sentence must remain references, never definitions.
+        scenario_def = re.match(
+            r"^\s*(?:[-*+]\s+)?(?:\*\*|__)?场景编号(?:\*\*|__)?\s*[：:]\s*"
+            r"(?:\*\*|__|`)?(AC-[A-Z0-9][A-Z0-9_-]*[A-Z0-9]|AC-[A-Z0-9])(?=$|[^A-Z0-9_-])",
+            line,
+        )
         enum_ranges = [
             (line.index(marker) + len(marker), len(line))
             for marker in DEF_ENUM_MARKERS if marker in line
@@ -253,6 +261,8 @@ def _collect_ids(raw: str) -> tuple[dict[str, tuple[int, str]], dict[str, list[t
                 is_def = True
             if machine_def and machine_def.group(1).rstrip("-") == token:
                 is_def = True
+            if scenario_def and scenario_def.start(1) == start and scenario_def.group(1) == token:
+                is_def, kind = True, "registry"
             if end < len(line) and line[end] in "（(":
                 is_def = True  # ID（…）注解定义
             if re.search(rf"」\s*[（(][^（）()]{{0,60}}{re.escape(token)}\b", line):

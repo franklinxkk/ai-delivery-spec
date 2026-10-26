@@ -1,6 +1,6 @@
 schema_version: 5.3.0
-# One deterministic starter builder avoids repeated runtime/hash reconstruction.
-max_files: 118
+# One additional on-demand synthetic configuration case in 5.5.4; no runtime tool/schema growth.
+max_files: 119
 include:
   - SKILL.md
   - README.md

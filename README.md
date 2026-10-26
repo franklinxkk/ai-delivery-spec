@@ -1,48 +1,62 @@
-# AI Delivery Spec 5.5.3
+# AI Delivery Spec 5.5.5
 
-**帮你管清需求，让产研和 AI 少猜、少漏、少返工。**<br>
-**Manage requirements with less guesswork, fewer omissions and less rework—for your team and AI.**
+**AI 写代码越来越快，需求里的空白也会越来越快地变成代码。**
 
-面向**产研团队与 AI Agent**的需求管理内核，以 Skill 形式使用。从一句话、现有材料或变更进入，帮你定清该做什么、交代清楚业务规则、找出改动影响。按当前任务生成或维护需求卡、PRD、可操作原型与验收条件，让接手者知道依据什么做、哪些还没定。
+PRD 写了几十页，开发仍在问“什么时候能点、失败后怎么办”；原型看起来完整，配置却没有在后续页面生效；换一个 Coding Agent，又把没讨论过的规则补了一遍。如果这些问题熟悉，你需要一份团队和 AI 都能接着工作的需求。
 
-A requirements management core for **product teams and AI agents**, delivered as a skill. Start with an idea, existing material or a change. Decide what needs doing, make business rules clear and identify change impacts. Create or update only the requirement cards, PRDs, interactive prototypes and acceptance criteria the task needs, so whoever takes over knows what to work from and what remains undecided.
+**AI Delivery Spec 帮产品、业务和研发把需求讲清楚、把原型走通、把变更同步回去。** 从一句想法、已有 PRD、原型或客户反馈开始，保留已确认的决定，只追问真正影响实现的问题。小改交付清楚的差异，复杂系统按模块交付连续可读的规格与可操作原型。
 
-[![ClawHub downloads: 2.6k](https://img.shields.io/badge/ClawHub-2.6k_downloads-2563eb)](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec)
-[![SkillHub AI score: 4.7/5](https://img.shields.io/badge/SkillHub_AI-4.7%2F5-f59e0b)](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)
+*Turn unclear requirements into work your team and coding agents can follow. Keep decisions, interactions, recovery and acceptance together, without forcing every task through a full process.*
+
+[![ClawHub downloads: 3096](https://img.shields.io/badge/ClawHub-3%2C096_downloads-2563eb)](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec)
 [![License: MIT](https://img.shields.io/badge/License-MIT-64748b)](LICENSE)
 
-<sub>2026-09-13 社区快照：ClawHub 约 2.6k 次下载；SkillHub 4.7/5 为 v5.4.8 历史 AI 评分，非当前版本新评测。 / Community snapshot: approximately 2.6k ClawHub downloads; SkillHub's 4.7/5 is a historical AI rating of v5.4.8, not a new evaluation of this release.</sub>
+<sub>[ClawHub 公开统计](https://clawhub.ai/api/v1/skills/ai-delivery-spec)：2026-10-26 核实累计下载 3,096 次。下载量不代表验收质量。本仓库版本为 5.5.5，其他渠道版本可能不同，请核对实际安装包。</sub>
 
-**[角色价值 / Role value](#roles) · [中文上手](#zh) · [English guide](#en) · [四个快捷入口 / Shortcuts](#shortcuts) · [安装 / Install](#install) · [示例 / Examples](#examples) · [中英社区 / Community](#community)**
+**[适合谁](#roles) · [快速上手](#zh) · [快捷入口](#shortcuts) · [安装](#install) · [成品示例](#examples) · [English](#en)**
+
+## 从这些具体问题开始
+
+| 你正在遇到的问题 | 可以得到什么 |
+|---|---|
+| 一句话需求，不知道该问什么 | 目标、依据和会改变方案的关键未知，不为填模板追问已定事项 |
+| 字段、流程和按钮规则散落各处 | 模块内连续的输入、权限、动作、结果、异常与验收，减少翻找 |
+| 页面能展示，配置却没有生效 | 从入口到修改、保存、重开和消费的检查，用边界与反例找断点 |
+| 需求改后文档、原型、AI 实现各说各话 | 继承有效基线，找到受影响的写入、读取和旧对象并回填规则 |
+| AI 说全部通过，却只跑了语法检查 | 分清静态、模拟、浏览器、接口和业务验收，让结论有对应证据 |
+
+例如，“通知提交成功”可能指页面接受请求、接口返回成功，或取得正式业务编号。这里会把允许者、成功凭据、失败保留、结果未知和原请求恢复写在同一模块，再用原型和反例核对。它不代替你决定业务政策，不把演示数据当作上线验证。
 
 <a id="roles"></a>
 
-## 各产研角色能得到什么
+## 给谁用 交付什么
 
-| 核心用户 | 经常遇到的问题 | 这次能拿走什么 |
-|---|---|---|
-| **初级产品经理** | 收到一句需求，不知道该问什么、写到多细 | 关键问题、范围与边界、能开始评审的需求卡或 PRD |
-| **中高级产品 / 产品负责人** | 需求都合理，但优先做什么、跨模块如何一致还没定 | 问题证据、方案取舍、最小验证、当前决定与变更影响 |
-| **业务 / 售前 / 实施 / 设计** | 客户说法、业务规则和页面体验之间有断层 | 可确认的业务行为、可操作的产品原型、待决定事项 |
-| **前端研发** | 页面有了，入口、状态、权限和失败反馈仍不明确 | 与规格一致的交互路径、状态结果与验收条件 |
-| **后端 / 架构** | 同一句话会推导出不同口径、状态或写入方式 | 数据权威、允许的状态变化、副作用、恢复与集成边界 |
-| **QA / 验收方** | “显示正确”无法变成可重复的验收 | 正反例、权限与边界场景、变更回归范围和证据缺口 |
-| **Coding Agent** | 换个会话就丢背景，或自行补出业务政策 | 当前有效规则、来源与稳定引用、未知及可接续的任务范围 |
+| 使用者 | 可以拿走的结果 |
+|---|---|
+| 产品经理、产品负责人 | 关键问题与方案取舍，能连续阅读和评审的模块需求 |
+| 业务、售前、实施、设计 | 可确认的业务行为、字段与数据映射、可操作原型 |
+| 前端、后端、架构 | 入口、允许条件、状态与数据结果、依赖和恢复边界 |
+| 测试、验收方 | 有独立预期的正反例及变更后的验证范围 |
+| Coding Agent | 当前有效规则与可定位引用，明确的未知、边界和模块任务 |
 
-适用于 ToC 产品、ToB/ToG 业务系统及 AI Native 场景。这些角色共用同一份业务约定，各自按需要读取；已有 PRD、需求系统和批准基线可以继续作为权威位置。
+已有文档和系统可继续作为权威来源，不必迁移成另一套台账。交付册数、原型和评审态遵从项目目标；编号、检查命令和机器契约按需使用。
 
-## 从决定到交付，重点做好三件事
+**当前 PRD 写法：** 整体说明与通用约定在前；同一对象的字段用录入/展示场景表集中描述；页面动作就地写条件、权限、结果和恢复；截图、主流程与状态图靠近模块。机器规则和接口合同按需补充，不另写重复业务真值。参见[配置到消费示例](examples/configuration-to-consumption.md)与[PRD 骨架](references/templates/unified-requirement-prd-template.md)。
 
-**1. 更快找到当前要决定什么。** 从目标、受影响的人和事实出发，比较方案与最小验证。有依据的“先验证、暂缓、缩范围或不做”也可以完成分析；改变需求状态仍取决于实际授权。
+**日常只需选一种交付规模，不用挑遍模板目录。** / Choose one delivery size, not a stack of templates.
 
-**2. 让规格可以体验，让评审有具体落点。** PRD 说明业务规则，原型呈现操作与结果，验收条件判断是否符合约定。“审批通过后可发布”要在规则、按钮行为与验收中区分发布资格和发布动作。需要双态评审时，可以边操作产品，边在当前页面旁查看规则、边界与验收依据。只补影响关键业务选择的内容，保留合理的工程实现空间。
+| 当前任务 | 交付方式 |
+|---|---|
+| 规则已清楚的局部修改 | 直接回填原文和原型，说明差异与验收；无需新模板 |
+| 有边界的独立小需求 | [轻量需求卡](references/templates/prd-light-template.md)，可直接写在现有文档里 |
+| 复杂模块或完整产品 | [正式 PRD](references/templates/unified-requirement-prd-template.md)：字段、元素、流程与场景在模块内集中 |
+| 用户明确需要治理或机器联调 | 才选相应记录/合同模板，业务规则仍引用原模块，不重复抄写 |
 
-**3. 变更之后，相关产物仍然说同一件事。** 沿写入者、读取者、入口、指标和旧对象找具体依赖；区分候选影响与已核实影响，让 PRD、原型和交接引用同一规则。
+目录内另外四份 Markdown 是问题、澄清、方案和决策的可选过程材料；十三份 YAML 用于特定工具合同，不是十三份必交文档。小改、需求卡、正式 PRD 共享同一套业务事实，格式升级不重设政策，也不要求重新维护三份。原型按现有界面迭代，产品态与评审态是否并存由任务决定。Markdown 骨架不自带 Word 版式；生成 Word 后仍须实际渲染核对。
 
-清晰小改直接完成；复杂需求按问题深入。工作量跟随当前目标，不要求先选 L0–L4、跑完整生命周期或填完全部模板。产品态原型默认可操作；需要面向产研的双态评审时，再开启评审标记与工作区。
+Other Markdown files support optional analysis and decisions; YAML templates serve explicit tooling contracts. They are not an extra deliverable set. Expand the existing requirement when needed, preserving approved rules. Word layout still needs actual rendering.
 
-**先把业务讲清、操作走通，再补必要的追溯。** PRD 标题用业务名称，编号放在引用位置；快速原型不先搭全套评审设施。已定规则、待决影响和研发可自行选择的实现分别说清，避免把“有待决记录”误当成“已经可以开发”。<br>
-**Explain the business and make the task work before adding traceability.** Use business titles, keep IDs in references, and distinguish settled behavior, unresolved dependencies and engineering choices. A recorded question is not implementation readiness.
+**能力边界：** Skill 提供判断、写作和复核方法，不保证一次生成零缺陷。小样本对照不能证明稳定优于纯模型；真实研发接收和生产验收仍需实际证据。安装、文件、浏览器与工具执行能力由宿主提供。
 
 <a id="install"></a>
 
@@ -90,6 +104,9 @@ If your host provides a skill-import interface, follow its instructions to impor
 
 **已有材料就一起给它。** PRD、截图、HTML、客户反馈或变更说明都可以作为起点；不同材料的事实与权威需要核实。资料读取、原型生成和验证能力取决于宿主实际提供的工具。
 
+**不必先读完文件夹或学习命令。** 日常只需说清任务并提供已有材料，Agent 按当前任务读取需要的指南。想先看成品就打开下方模块化 PRD 示例；只有要运行确定性检查时才需要脚本环境。中文夹英文术语可直接使用，语言不决定适用地区或业务规则。<br>
+You do not need to read every file or learn commands first. Describe the task and provide existing material; the agent loads relevant guidance. Scripts are optional checks, and mixed-language wording does not determine jurisdiction or policy.
+
 ### 选一句最像你现在的任务
 
 | 现在要做什么 | 可以直接这样说 |
@@ -133,15 +150,16 @@ If unsure, use `/ads` or describe the task. A shortcut does not decide business 
 需要从可运行起点改写评审原型，可用[示例构建器](references/review-workspace.md)拆分编辑后合成单 HTML，并自动绑定 PRD 摘要。它提供工作样例，不会自动生成你的业务或证明需求已验收。<br>
 The [example builder](references/review-workspace.md) splits the working review example into editable files and rebuilds one HTML bound to its PRD. It is a starting point, not automatic business generation or acceptance evidence.
 
-<details>
-<summary><strong>常见问题：小改、存量材料、原型与验收｜Quick FAQ</strong></summary>
+## 常见问题｜Quick FAQ
 
 - **只有一句话，或只改一个字段，也能用吗？** 能。明确小改直接交付差异与验收；模糊想法先找关键决定，不要求全套 PRD、等级或流程。 / **Can I start with an idea or one field?** Yes. Clear edits need a bounded change and acceptance; vague ideas need the relevant decision first.
 - **已有 PRD 或 HTML，要重做吗？** 读取相关基线，从当前阶段继续；继承有效决定并保护未取消的功能。 / **Must I rewrite existing work?** No. Continue from the relevant baseline, preserving valid decisions and existing scope.
 - **原型和评审态是否必交？** 按目标提供；需要原型时默认可操作产品态，双态评审按需启用。 / **Are prototypes and review mode mandatory?** They follow the task. Requested prototypes are interactive; dual-mode review is optional.
 - **检查 PASS 就能上线，领域资料能直接当政策吗？** 都不能。PASS 只覆盖已运行的检查；规则适用性、真实系统和验收各需证据。编码与上线交给相应工作流。 / **Does PASS authorize launch or adopting a domain policy?** No. Applicability, implementation and acceptance need their own evidence; coding and deployment use their respective workflows.
+- **检查报错看不懂怎么办？** 把完整提示和被检查的文件交给 Agent，要求解释“哪里、为什么、下一步”，保留原错误码。`INVALID` 表示输入或读取有问题，不算业务负例通过；`GAP` 是待核实疑点，不能为消除提示编造规则。门禁代码可在技能目录运行 `python scripts/ai_delivery_spec_cli.py explain-finding 实际代码 --language zh-CN` 查看原因、修复方向和例子；把“实际代码”替换为输出中的完整代码。未知代码先核对版本，不能套用别的错误。 / **What if a diagnostic is unclear?** Ask the agent to explain location, cause and next action while retaining the code. Invalid input is not a passing negative test; a GAP needs review, not invented policy. The optional `explain-finding` command explains recognized gate codes.
+- **评审说某功能没有，应该马上加吗？** 先查实际交付文件、最终生效入口与后加载处理器；文字抽取未呈现图片，不代表原件没有图片。确认仍缺失后再修，旧报告只作线索。 / **Should every reported omission become a feature?** Verify the delivered file and effective handler first. Missing content in a text projection is not proof of absence in the original.
 
-</details>
+
 
 <a id="en"></a>
 
@@ -326,7 +344,7 @@ Maintainers can run these commands in the **full source repository**. Release pa
 ```bash
 python -m pip install "pytest>=8,<9"
 python scripts/ai_delivery_spec_cli.py check --profile release
-python maintainer/tools/build_runtime_package.py --release --check --output dist/ai-delivery-spec-5.5.3.zip
+python maintainer/tools/build_runtime_package.py --release --check --output dist/ai-delivery-spec-5.5.5.zip
 ```
 
 兼容验证入口 `scripts/validators/validate_prd_quality.py`、`scripts/validators/validate_unified_prd.py` 可手动执行，复用当前内核。 / These legacy validators remain available for manual execution.

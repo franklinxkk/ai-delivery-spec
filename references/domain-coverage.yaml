@@ -14,7 +14,7 @@ search_aliases:
   客户: [customer]
   支付: [payment]
   回款: [payment, collection]
-  审核: [approval, review]
+  审核: [review]
   审批: [approval]
   完成率: [completion rate, completion]
   置信度: [confidence]
@@ -464,6 +464,8 @@ domains:
 fallback:
   mode: project_domain_capsule
   rule: Missing a dedicated domain pack never blocks generic delivery.
+  generic_delivery_requires_capsule: false
+  required_outputs_apply_when: An optional machine-readable project domain capsule is selected; use only the relevant questions in ordinary generic delivery.
   required_outputs:
     - vocabulary
     - entities
@@ -473,6 +475,7 @@ fallback:
     - source_register
     - unknowns
     - scenario_fixtures
+  evidence_limit: Cross-industry mocks exercise general requirement reasoning; they do not create sourced sector knowledge, accountable expert coverage or regulatory applicability.
   assertion_policy:
     verified: attributable to an authoritative or accountable source
     inferred: plausible but awaiting owner confirmation

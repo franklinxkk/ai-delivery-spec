@@ -1,5 +1,5 @@
 schema_version: 5.3.0
-skill_version: 5.5.3
+skill_version: 5.5.5
 runtime: pure_v5
 domain_packs:
   count: 8
@@ -18,7 +18,8 @@ evaluation_assets:
 trace_release_proxy:
   status: historical_5.4.9_reference
   public_reference: https://skillhub.cn/tutorials#trace-evaluation
-  boundary: historical 5.4.9 local evidence checklist; not a SkillHub score or a current-version validation result
+  boundary: historical 5.4.9 local evidence checklist; not a SkillHub score or a current-version
+    validation result
   dimensions:
     trust: passed
     reliability: passed
@@ -28,9 +29,54 @@ trace_release_proxy:
   effectiveness_limit: deterministic/private calibration repaired gaps; blind A/B,
     token/time and human ratings remain incomplete
 release_evidence:
+  verified_at: '2026-10-26'
+  scope: 5.5.5 bounded cross-industry maintenance closure; deterministic tooling plus
+    synthetic model/UI evidence, not universal model or production certification
+  results:
+    pytest: 477_passed_15_subtests_48.72s
+    added_tests: 73
+    full_release: passed_release-closure
+    runtime_package_check: 119_sources_manifest_additional_clean_source_receipt_separate
+    domains: 8_packs_101_registry_records; bounded_source_sample_not_all_full_text
+    forward_text: 24_tasks_per_model_22_business_contexts_2_format_translation_controls;
+      reciprocal_review_and_attributed_repairs
+    entry_only: 4_holdouts_two_rounds_targeted_after_failures; not_controlled_benefit
+    browser: sol_P01_12_P02_15;deepseek_P01_initial_12_then_assisted_12_regression_plus_12_fault_and_boundary;deepseek_P02_initial_10pass_4fail_2not_verified;assisted_final_22pass
+    bundled_browser: 37_pass
+    robustness: 10_input_cases_expected_results
+    publication: not_uploaded
+    installation: separate_hash_receipt
+  evidence_boundary: Original failures, input clarification, partial static coverage,
+    model alias and settings changes retained; final assisted outputs are not first-pass
+    success. No all-industry expert, human acceptance, controlled A/B or production
+    claim.
+known_limitations:
+- This round uses bounded synthetic inputs. Both final DeepSeek prototype artifacts
+  include GPT-6.1-sol assistance; initial warning paths passed but later evidence
+  exposed impossible acceptance setup and swallowed persistence errors. Metric prototype
+  did not close independently. Fault injection is controlled browser evidence, not
+  real backend acceptance. Unequal harnesses are not a strict model benchmark.
+- 5.5.5 one-scenario comparison is not strictly blind. Single-run quick receiver tests
+  and project calibration do not establish stable benefit or human handoff quality.
+  Not all 101 sources were reread; 18 stale records were resolved within their documented
+  scope.
+- 5.5.4 behavior observed in two synthetic tasks only; no controlled comparative or
+  human receiver study.
+- Earlier three-task comparison receiver scoring stopped at host quota; its parent
+  review is not blind. The later domain-stage run is separately recorded with independent
+  inputs and parent adjudication.
+- Single-run synthetic forward calibration does not establish stable benefit or human
+  handoff quality
+- CRM native outputs and assisted repairs are separate; one case does not establish
+  cross-model stability
+- Contract tests and bounded candidate-review behavior do not prove full-generation,
+  expert or production maturity
+- domain, legal, safety, financial, production and customer correctness remain not
+  proven
+historical_553_release_evidence:
   verified_at: '2026-10-11'
-  scope: 5.5.3 local candidate checks on Windows / Python 3.12.10;
-    not customer or production acceptance. Public release is not performed.
+  scope: 5.5.3 local candidate checks on Windows / Python 3.12.10; not customer or
+    production acceptance. Public release is not performed.
   results:
     pytest: 399_passed_in_59.40s
     added_regressions_this_review: 28_contract_example_checks_passed_included_in_total
@@ -48,11 +94,54 @@ release_evidence:
     new_harness_regressions: 10_passed_included_in_pytest_total
     installation: not_run
     publication: not_run
-known_limitations:
-- Five original source URLs remain inaccessible; attributed full-text alternatives and corroboration resolved the freshness gate; not a fresh full-text audit of all 99 sources
-- Earlier three-task comparison receiver scoring stopped at host quota; its parent review is not blind. The later domain-stage run is separately recorded with independent inputs and parent adjudication.
-- Single-run synthetic forward calibration does not establish stable benefit or human handoff quality
-- CRM native outputs and assisted repairs are separate; one case does not establish cross-model stability
-- Contract tests and bounded candidate-review behavior do not prove full-generation, expert or production maturity
-- domain, legal, safety, financial, production and customer correctness remain not
-  proven
+historical_554_release_evidence:
+  verified_at: '2026-10-21'
+  scope: 5.5.4 local maintenance, isolated Python 3.12 on Windows. No public publication,
+    no customer acceptance.
+  results:
+    pytest: 399_passed_in_50.29s_final_isolated_run
+    fast_checks: passed
+    quick_validate: passed_with_PYTHONUTF8
+    forward_test: two_synthetic_tasks_parent_assessed_13_of_13; same_input_template_adaptation_also_13_of_13
+    runtime_package: 119_sources_pass_extracted_runtime_checks
+    installation: tracked_in_separate_local_install_receipt
+    behavioral_comparison: not_run_no_stable_benefit_claim
+    browser: not_run_no_executable_prototype_changed
+    publication: not_run
+historical_555_release_evidence:
+  verified_at: '2026-10-25'
+  scope: 5.5.5 local maintenance; reading guidance, template and example. No new tests,
+    installation, public release or customer acceptance.
+  results:
+    architecture: passed_2498_of_2500_entry_12611_of_13000_daily
+    fast_checks: passed_final_local_check
+    quick_validate: passed_with_PYTHONUTF8
+    existing_tests: 399_passed_in_47.49s_isolated_before_final_text_only_patch
+    execution_state: passed_final_with_parent_git_discovery_isolated
+    runtime_package_check: passed_119_source_files_manifest_additional
+    full_release: failed_historical_source_freshness_18_unresolved_not_rerun
+    full_release_environment_followup: original_parent_git_checkpoint_failures_closed_by_isolated_pytest_and_execution_state
+    forward_test: one_synthetic_case_independent_review_counts_1_0_0_original_output_preserved
+    forward_test_followup: example_and_guard_guidance_repaired_no_regeneration_claim
+    browser: not_run_skill_has_no_executable_prototype_change
+    publication: not_run
+  evidence_boundary: local project retains original logs and package verification;
+    full release did not pass.
+historical_555_publication_maintenance:
+  verified_at: '2026-10-26'
+  scope: 5.5.5 publication maintenance; final isolated full release checks; prior
+    bounded model evidence retained, not rerun or production acceptance
+  results:
+    pytest: 404_passed_final_isolated_release
+    added_tests: 0_this_maintenance_5_in_prior_same_version
+    runtime_package_check: 119_sources_manifest_additional
+    comparison: one_scenario_one_run_each_not_strict_blind; conflicts_control3_skill2;
+      no_stable_benefit_claim
+    quick_receiver: 16_function_cases_4_real_Edge_paths_passed
+    domain_sources: 101_registry_records_pass;18_stale_records_resolved_with_scoped_primary_evidence;other81_not_reread
+    full_release: passed_2026-10-26_final_isolated_run_404_tests_89.65s
+    installation: tracked_in_separate_receipt
+    publication: not_uploaded_this_maintenance_user_will_upload_package
+  evidence_boundary: Full release validates scripts, references and package structure.
+    Bounded generation/receiver evidence is retained locally; no stable relative benefit
+    or human receiver benefit is claimed.

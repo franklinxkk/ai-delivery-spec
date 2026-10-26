@@ -33,8 +33,8 @@ Use this replaceable domain module for 运管、交通监管、道路运输企�
 - Enterprise SaaS outcome: transform old menu-based systems into workflow-driven, industry-adapted, AI-assisted management. The durable product frame is `process transformation -> industry adaptation -> AI upgrade`.
 - Chinese trigger aliases: 道路运输九大行业、两客一危、危货运输、驾驶员全生命周期、教学培训、入职流程、人车企资质、双重预防、车辆三检、出车安全告诫、隐患排查整改、流程化改造、行业化适配、AI化升级.
 - Primary users: transport regulators, inspectors, enterprise owners/general managers, safety principals, safety managers, fleet/dispatch/maintenance staff, drivers, escorts, station staff, repair shop staff, driving school staff, platform administrators, sales/customer success.
-- Road transport industry coverage: urban public bus, taxi/ride-hailing, road passenger transport, international road passenger/freight transport, road freight including dangerous goods and network freight, road transport station operation, motor vehicle maintenance, driver training, small passenger car rental.
-- Scenic/tourism passenger transport is a road-passenger overlay, not a separate base domain: combine passenger operation, station/source checks, maintenance, driver/personnel training, dispatch/passenger-flow context, printable ledgers, and safety daily reports.
+- Illustrative industry segmentation: urban public bus, taxi/ride-hailing, road passenger transport, international road passenger/freight transport, road freight including dangerous goods and network freight, road transport station operation, motor vehicle maintenance, driver training, small passenger car rental. This is a reusable discovery list, not a universal statutory taxonomy or default complete project scope; preserve a project's authorized taxonomy in that project.
+- Scenic/tourism transport is an optional scenario slice. Verify its vehicle, road and operating regime before treating it as road passenger transport; select passenger operation, station/source checks, maintenance, training, dispatch, ledgers and daily reports only where the project needs them.
 - Sensitive areas: identity documents, employment records, certificates, vehicle location/trajectory, dangerous goods waybills, inspection evidence, training/exam records, enterprise operating data, and safety responsibility evidence.
 - AI may optimize: document extraction, certificate recognition, checklist matching, rule verification, risk hints, task generation, evidence completeness checks, training/course matching, rectification summary, management briefing, and customer migration analysis.
 - AI must not autonomously decide: punishment, license restriction, final major-hazard classification, final safety responsibility conclusion, forced service suspension, transport qualification revocation, or other binding regulated actions.
@@ -65,7 +65,7 @@ Traffic and road transport safety products start from accountable risk closure a
 | Regulated object | Which enterprise, vehicle, person, license, operation, inspection, danger, or report is governed? | authoritative master, jurisdiction, industry, owner, and data scope are explicit |
 | Daily execution | Which front-line behavior actually happens today: onboarding, training, pre-trip warning, trip check, dispatch, repair, inspection, rectification? | workflow state, assignee, deadline, evidence, exception, and retry path are visible |
 | Safety closure | What risk or hidden danger moves from detected to rectified/accepted? | state, deadline, evidence, reviewer, audit, and returned-round history are traceable |
-| Industry adaptation | Which of the nine road transport industries changes required fields, checks, certificates, roles, or workflow? | common platform + industry template boundary is explicit |
+| Industry adaptation | Which verified operating category changes fields, checks, certificates, roles, or workflow? | common platform + selected industry template boundary is explicit |
 | Scenic operation peak | How do passenger flow, weather, route risk, station checks, vehicle status, and driver readiness affect safe scenic transport today? | peak/holiday plan, low-disruption workflow, risk hint, dispatch relation, and printable ledger are traceable |
 | Standards authority | Which national law/policy, GB/GB-T, JT/JT-T/JTG, GA, DBxx/T, group, or customer rule applies? | source register and applicability/conflict status are explicit |
 | Human authority | Which enforcement, punishment, license, or safety responsibility decision needs accountable human approval? | AI/rules only suggest; final binding action is human-owned |
@@ -373,7 +373,7 @@ Scenic/tourism passenger transport should normally stay inside this traffic doma
 10. Special campaign: publish scope/deadline -> enterprises self-check/report -> rectification -> regulator/enterprise progress review -> summary.
 11. Report delivery: select/create template -> validate indicators -> create period task -> fill missing fields -> review/return -> freeze/export.
 12. Old system migration: freeze usage/ARR/renewal/customer tier baseline -> classify keep/upgrade/retire modules -> pilot customers -> data migration -> adoption tracking -> commercial upgrade.
-13. Scenic transport safety pilot: paper ledger/system exports -> field/form standardization -> P0 source connection (active-defense/GPS, source check, maintenance) -> printable ledger -> safety daily report -> driver/training/maintenance recommendations -> human review -> benchmark material.
+13. Optional scenic transport pilot: inspect current records -> select the required source/check/maintenance data -> validate the agreed operational flow -> produce the authorized ledger or report -> review exceptions and outcome evidence. Source priority, AI features and benchmark materials remain project choices.
 
 ## Role Path Patterns
 
@@ -399,7 +399,7 @@ Scenic/tourism passenger transport should normally stay inside this traffic doma
 - enterprise managers need dense operational lists with filters, saved views, scope label, status-driven actions, and export/report paths;
 - drivers and older front-line personnel need mobile/mini-program paths with large touch targets, minimal typing, voice/photo upload when useful, clear done/not-done state, and weak-network draft;
 - safety managers need today/this-week task boards: expiring certificates, overdue training, unchecked vehicles, unhandled alerts, pending rectification, and report due dates;
-- scenic transport pilots need low-disruption peak/holiday mode, printable ledger export, route/station filters, source-check status, and management daily-report entry points;
+- for a selected scenic transport scenario, test whether peak/holiday use, printable ledgers, route/station filters, source-check status or daily reports solve the actual user task before adding them;
 - detail drawer/page must show evidence, source, timestamp, rule version, human owner, and audit timeline;
 - AI suggestions must show why: matched rule, missing data, confidence, recommended task, and required human confirmation;
 - map only when spatial context is central; show stale/offline source state;
@@ -412,7 +412,7 @@ Scenic/tourism passenger transport should normally stay inside this traffic doma
 
 - Province/city/district/enterprise/tenant data isolation applies to list, detail, export, statistics, AI context, and embedded third-party pages.
 - Identity, phone, certificate, trajectory, dangerous-goods waybill, training/exam, and enforcement evidence follow least access, masking, retention, and audit rules.
-- AI recommendation shows source, confidence, missing context, and rule/model version.
+- AI recommendations show source, uncertainty, missing context, and rule/model version. A numeric confidence value needs a declared measurement basis and limits; do not invent one when unavailable.
 - Punishment, service restriction, major-hazard classification, release-to-duty hard decisions, and closure acceptance require authorized human accountability.
 - Test agents use shadow data or rollback-safe fixtures and must not pollute production statistics.
 - Reports and enforcement evidence retain immutable snapshots according to approved retention policy.
@@ -420,7 +420,7 @@ Scenic/tourism passenger transport should normally stay inside this traffic doma
 - Standards used by rules, AI answers, templates, inspections, and reports must cite issuer, region, effective date, version/status, and applicability.
 - When national, industry, local, group, and enterprise rules conflict, record the conflict and decision owner instead of silently choosing one.
 - Usage/adoption analytics may guide product and commercial decisions but must not be presented as legal compliance evidence without domain verification.
-- AI may cite and summarize current regulatory sources, but every compliance conclusion, release-to-duty decision, stop-operation suggestion, penalty-facing conclusion, or major-hidden-danger classification must expose source, confidence, missing context, and human confirmation owner.
+- AI may cite and summarize current regulatory sources, but every compliance conclusion, release-to-duty decision, stop-operation suggestion, penalty-facing conclusion, or major-hidden-danger classification must expose source, uncertainty, missing context, and human confirmation owner. Include numeric confidence only where its measurement and limits are defined.
 - Industry templates must separate nationally common requirements from provincial/local implementation details and customer-specific safety systems.
 
 ## Domain Test Scenarios
@@ -476,15 +476,15 @@ Mocked matrices and simulated reviewers cannot satisfy expert review or audit.
 
 - [ ] Relevant domain slices and their applicability are explicit; the pack structure is not a mandatory PRD outline.
 - [ ] Regulator-facing and enterprise-facing product modes are separated where relevant.
-- [ ] Road transport nine-industry scope is explicit, with common platform, configurable template, and independent module boundaries.
-- [ ] Scenic/tourism transport overlays identify source checks, passenger-flow/dispatch context, route/weather risk, maintenance prevention, role training, printable ledgers, AI human-review boundaries, and benchmark output without hardcoding one customer.
+- [ ] Selected operating categories and their authoritative basis are explicit, with common platform, configurable template and independent module boundaries.
+- [ ] If scenic/tourism transport is in scope, its applicable operating regime and selected workflow are verified; excluded modules and optional benchmark output do not become acceptance requirements.
 - [ ] Enterprise, vehicle, personnel, qualification, training, onboarding, trip check, warning, inspection, hidden-danger, alert, indicator, and report lifecycles are consistent.
 - [ ] Driver/personnel mobile paths are low-friction and testable for older/low-literacy users.
 - [ ] Organization, jurisdiction, enterprise, tenant, and role data isolation is enforced across UI, API, export, analytics, AI, and embedded systems.
 - [ ] Regulations, templates, indicators, rules, and AI outputs are versioned and traceable.
 - [ ] Laws, regulations, standards, inspection items, and AI rule tables record official source URL, issuer, document number, effective date, status, scope, last verification date, and human owner.
 - [ ] National, industry, provincial/local, group, and customer-specific standards are registered with issuer, region, effective date, status, applicability, and product-rule mapping when used.
-- [ ] Nine-industry templates map to the current regulatory baseline before PRD, prototype, rule-engine, checklist, or AI answer generation.
+- [ ] In-scope industry templates map to the applicable regulatory baseline before generating regulated rules, checklists or AI compliance conclusions.
 - [ ] Road passenger and dangerous-goods safety-management rules keep their applicability, document numbers and staffing/check logic separate.
 - [ ] Every binding regulated or safety-responsibility action has human accountability and audit evidence.
 - [ ] AI behavior is classified as extraction, rule matching, recommendation, drafting, or decision support; binding decisions remain human-owned.

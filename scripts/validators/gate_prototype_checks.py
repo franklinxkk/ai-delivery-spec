@@ -24,6 +24,9 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 from scan_prototype_css import scan as scan_prototype_css
 from extract_interaction_ledger import (
+    _javascript_brace_pairs,
+    _lexical_scope_at,
+    _mask_javascript_literals,
     attribute_inventory,
     extract_dynamic_anchor_actions,
     extract_handler_actions,
@@ -479,6 +482,185 @@ def _review_lens_coverage(raw: str) -> tuple[
 def _handler_actions(scripts: str) -> set[str]:
     """Extract action IDs from the shared interaction-ledger parser."""
     return set(extract_handler_actions(scripts))
+
+
+class _StaticActionTargets(HTMLParser):
+    """Keep actual nodes and ancestry for ID bindings and native form submit."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.nodes: list[tuple[str, dict[str, str], int | None, bool]] = []
+        self.stack: list[int] = []
+
+    def handle_starttag(self, tag, attrs):
+        parent = self.stack[-1] if self.stack else None
+        inert = tag in {"template", "script", "style"} or (parent is not None and self.nodes[parent][3])
+        self.nodes.append((tag, dict(attrs), parent, inert))
+        if tag not in _ReviewStatusParser._VOID_TAGS:
+            self.stack.append(len(self.nodes) - 1)
+
+    def handle_startendtag(self, tag, attrs):
+        self.handle_starttag(tag, attrs)
+        if tag not in _ReviewStatusParser._VOID_TAGS:
+            self.handle_endtag(tag)
+
+    def handle_endtag(self, tag):
+        for position in range(len(self.stack) - 1, -1, -1):
+            if self.nodes[self.stack[position]][0] == tag:
+                self.stack = self.stack[:position]
+                break
+
+
+def _id_bound_actions(raw: str, scripts: str) -> set[str]:
+    """Recognize explicit DOM-ID handlers without inventing action dispatch.
+
+    Only actual, uniquely identified nodes qualify. A thin ID helper must have
+    an exact getElementById body; unknown/reassigned/shadowed helpers do not.
+    Native submit belongs to its form, not every button under that form.
+    This remains static binding evidence, not proof that a handler ran.
+    """
+    parser = _StaticActionTargets()
+    parser.feed(raw)
+    ids: dict[str, list[int]] = defaultdict(list)
+    for index, (_tag, attrs, _parent, inert) in enumerate(parser.nodes):
+        if not inert and attrs.get("id"):
+            ids[attrs["id"]].append(index)
+    targets = {key: values[0] for key, values in ids.items() if len(values) == 1}
+    masked = _mask_javascript_literals(scripts)
+    braces = _javascript_brace_pairs(masked)
+    ident = r"[A-Za-z_$][\w$]*"
+    helpers: dict[str, tuple[int, int]] = {}
+    helper_patterns = (
+        rf"\bconst\s+({ident})\s*=\s*\(?\s*({ident})\s*\)?\s*=>\s*document\.getElementById\(\s*\2\s*\)(?=\s*[;,\r\n])",
+        rf"\bfunction\s+({ident})\s*\(\s*({ident})\s*\)\s*\{{\s*return\s+document\.getElementById\(\s*\2\s*\)\s*;?\s*\}}",
+    )
+    for pattern in helper_patterns:
+        for match in re.finditer(pattern, masked):
+            name = match[1]
+            writes = list(re.finditer(rf"(?<![\w$.]){re.escape(name)}\s*=(?!=|>)|\bfunction\s+{re.escape(name)}\s*\(", masked))
+            if len(writes) == 1:
+                helpers[name] = _lexical_scope_at(scripts, match.start())
+
+    def helper_visible(name: str, offset: int) -> bool:
+        lo, hi = helpers[name]
+        if not lo <= offset < hi:
+            return False
+        # A parameter may shadow a canonical helper within a nested callback.
+        for signature in re.finditer(r"(?:(?:function(?:\s+[\w$]+)?|catch)\s*\(([^()]*)\)|\(([^()]*)\)\s*=>)\s*\{", masked):
+            opening = signature.end() - 1
+            if opening < offset < braces.get(opening, -1):
+                if name in re.findall(ident, (signature[1] or signature[2] or "")):
+                    return False
+        arrow_parameter = re.compile(rf"(?<![\w$])(\([^(){{}};]*\)|{ident})\s*=>\s*(?!\{{)")
+        for arrow in arrow_parameter.finditer(masked, lo, offset):
+            if name in re.findall(ident, arrow[1]) and ";" not in masked[arrow.end():offset]:
+                return False
+        return True
+
+    def callback(offset: int, seen: frozenset[str] = frozenset()) -> tuple[str, str] | None:
+        tail = scripts[offset:]
+        head = re.match(rf"\s*(?:function(?:\s+{ident})?\s*\(([^()]*)\)|\(([^()]*)\)\s*=>|({ident})\s*=>)\s*", tail)
+        if head:
+            body_start = offset + head.end()
+            params = head[1] or head[2] or head[3] or ""
+            param = params.strip() if re.fullmatch(ident, params.strip()) else ""
+            if body_start < len(masked) and masked[body_start] == "{":
+                end = braces.get(body_start)
+                if end is not None and masked[body_start + 1:end].strip():
+                    return param, scripts[body_start + 1:end]
+            elif "=>" in head[0]:
+                end = re.search(r"[;\n]", masked[body_start:])
+                body = scripts[body_start:body_start + end.start()] if end else scripts[body_start:]
+                if _mask_javascript_literals(body).strip(" ),\t\r\n"):
+                    return param, body
+            return None
+        name_match = re.match(rf"\s*({ident})\s*(?=[,);]|$)", tail)
+        if not name_match or name_match[1] in seen:
+            return None
+        name = name_match[1]
+        declaration = re.search(rf"\bfunction\s+{re.escape(name)}\s*\(", masked)
+        if declaration:
+            return callback(declaration.start(), seen | {name})
+        declaration = re.search(rf"\bconst\s+{re.escape(name)}\s*=", masked)
+        return callback(declaration.end(), seen | {name}) if declaration else None
+
+    receiver = r"document(?:\.getElementById\(\s*['\"][^'\"]+['\"]\s*\))?"
+    if helpers:
+        receiver += r"|(?:" + "|".join(map(re.escape, helpers)) + r")\(\s*['\"][^'\"]+['\"]\s*\)"
+    binding = re.compile(
+        r"(?<![\w$.])(?P<receiver>" + receiver + r")\s*\.\s*(?:"
+        r"addEventListener\(\s*['\"](?P<event>click|change|input|submit|reset|cancel|keydown|keyup)['\"]\s*,"
+        r"|on(?P<property>click|change|input|submit|reset|cancel|keydown|keyup)\s*=)"
+    )
+    found: set[str] = set()
+
+    def add_node(index: int, event: str) -> None:
+        tag, attrs, _parent, inert = parser.nodes[index]
+        if inert:
+            return
+        if event in {"change", "input"} and tag not in {"input", "select", "textarea"}:
+            return
+        if event in {"submit", "reset"} and tag != "form":
+            return
+        if attrs.get("data-action"):
+            found.add(attrs["data-action"].upper())
+        if event != "submit" or tag != "form":
+            return
+        for child, (child_tag, child_attrs, parent, child_inert) in enumerate(parser.nodes):
+            if child_inert or not child_attrs.get("data-action"):
+                continue
+            control_type = (child_attrs.get("type") or ("submit" if child_tag == "button" else "text")).lower()
+            if child_tag not in {"button", "input"} or control_type not in {"submit", "image"}:
+                continue
+            if child_attrs.get("form"):
+                owner = targets.get(child_attrs["form"])
+            else:
+                while parent is not None and parser.nodes[parent][0] != "form":
+                    parent = parser.nodes[parent][2]
+                owner = parent
+            if owner == index:
+                found.add(child_attrs["data-action"].upper())
+
+    for match in binding.finditer(scripts):
+        if masked[match.start():match.start() + 1] != scripts[match.start():match.start() + 1]:
+            continue  # A commented/stringified listener is not executable evidence.
+        received = match["receiver"]
+        helper = received.split("(", 1)[0]
+        if helper in helpers and not helper_visible(helper, match.start()):
+            continue
+        bound = callback(match.end())
+        if bound is None:
+            continue
+        event = match["event"] or match["property"]
+        id_match = re.search(r"\(\s*['\"]([^'\"]+)['\"]\s*\)", received)
+        target = targets.get(id_match[1]) if id_match else None
+        if id_match and target is None:
+            continue
+        if target is not None:
+            add_node(target, event)
+        # A delegated ID branch is evidence only for a receiver-derived target,
+        # within this listener and inside its actual DOM container.
+        param, body = bound
+        if not param or event != "click":
+            continue
+        body_masked = _mask_javascript_literals(body)
+        aliases = [(re.escape(param) + r"\.target", "")]
+        aliases.extend((re.escape(m[1]), m[2]) for m in re.finditer(
+            rf"\b(?:const|let|var)\s+({ident})\s*=\s*{re.escape(param)}\.target\.closest\(\s*['\"]([a-z]+)['\"]\s*\)", body
+        ) if body_masked[m.start():m.start() + 1] == body[m.start():m.start() + 1])
+        for alias, tag_filter in aliases:
+            for branch in re.finditer(rf"(?<![\w$.]){alias}\.id\s*={{2,3}}\s*['\"]([^'\"]+)['\"]", body):
+                if body_masked[branch.start():branch.start() + 1] != body[branch.start():branch.start() + 1]:
+                    continue
+                child = targets.get(branch[1])
+                if child is None or (tag_filter and parser.nodes[child][0] != tag_filter):
+                    continue
+                parent = child
+                while parent is not None and parent != target:
+                    parent = parser.nodes[parent][2]
+                if target is None or parent == target:
+                    add_node(child, event)
+    return found
 
 
 def _unreachable_hidden_surfaces(tag_source: str, scripts: str) -> list[str]:
@@ -3299,13 +3481,14 @@ class PrototypeChecks:
         has_listener = bool(re.search(r"addEventListener\s*\(\s*['\"](?:click|change|submit|input)['\"]", scripts, re.I))
         reads_action = bool(re.search(r"dataset\.action|getAttribute\s*\(\s*['\"]data-action['\"]|closest\s*\(\s*['\"]\[data-action\]", scripts, re.I))
         recognized_handlers = set(extract_handler_actions(scripts))
+        id_bound_actions = _id_bound_actions(raw, scripts)
         for action in actions:
             dispatch_evidence = action.upper() in recognized_handlers or bool(re.search(
                 rf"(?:case\s+['\"]{re.escape(action)}['\"]|(?:action|actionId)\s*===?\s*['\"]{re.escape(action)}['\"]|['\"]{re.escape(action)}['\"]\s*:|\.set\s*\(\s*['\"]{re.escape(action)}['\"]|\[\s*['\"]{re.escape(action)}['\"]\s*\]\s*=)",
                 scripts,
                 re.I,
             ))
-            if action not in inline_action_tags and not (has_listener and reads_action and dispatch_evidence):
+            if action not in inline_action_tags and action.upper() not in id_bound_actions and not (has_listener and reads_action and dispatch_evidence):
                 self.add("BLOCK", "PROTO-UNHANDLED-ACTION", path, "no static event-handler evidence for data-action", action)
 
         durable_result = bool(re.search(
@@ -3344,7 +3527,20 @@ class PrototypeChecks:
         if external_css:
             css_scan_source += "\n<style>\n" + "\n".join(external_css) + "\n</style>"
         for css_finding in scan_prototype_css(css_scan_source):
-            self.add("BLOCK", "PROTO-CSS-" + css_finding["kind"].upper(), path, css_finding["detail"], css_finding["selector"])
+            # !important records a cascade override, not an observed defect.
+            # Keep its selector/declaration visible for review; concrete CSS
+            # violations and all other prototype failures retain their grades.
+            if css_finding["kind"] == "important-pollution":
+                self.add(
+                    "GAP", "PROTO-CSS-IMPORTANT-POLLUTION", path,
+                    "发现 !important 覆盖，需人工核对命中元素及默认、错误、焦点、隐藏状态的级联影响；"
+                    "单凭该声明不能判定交互损坏。声明：" + css_finding["detail"],
+                    css_finding["selector"],
+                    message_en="Review this !important override on its matched elements across default, error, focus and hidden states; "
+                    "the declaration alone does not prove an interaction defect. Declaration: " + css_finding["detail"],
+                )
+            else:
+                self.add("BLOCK", "PROTO-CSS-" + css_finding["kind"].upper(), path, css_finding["detail"], css_finding["selector"])
 
         if scripts.strip():
             node = shutil.which("node")

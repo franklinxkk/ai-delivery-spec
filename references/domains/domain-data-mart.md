@@ -223,11 +223,15 @@ Data agent:
     draft -> evaluated -> pilot -> production -> degraded -> disabled -> retired
     pilot/production -> rollback_pending -> previous_version
 
-Data registration:
+Data registration (separate the selected regime):
 
-    draft -> submitted -> accepted_for_review -> reviewing -> public_notice -> issued -> changed/renewed/transferred -> cancelled/expired
-    submitted/reviewing/public_notice -> returned/rejected
-    public_notice -> objection_pending -> reviewing
+    PublicResourceRegistration: draft -> submitted -> accepted -> formal_review -> public_notice -> query_code_issued
+    PublicResourceRegistration: submitted -> correction_requested -> resubmitted; public_notice -> objection_review -> terminated | query_code_issued
+    PublicResourceRegistration: query_code_issued -> changed | corrected | renewed | cancelled
+    DataPropertyRegistration: draft -> submitted -> accepted_for_review -> reviewing -> notice_or_authorized_exception -> credential_issued
+    DataPropertyRegistration: credential_issued -> transferred | changed | renewed | cancelled
+
+For `KS-DATA-PUBLIC-REGISTER-2025`, use the public-resource procedure and query code; do not add a property-transfer step. Article 5 distinguishes required and encouraged categories; also reconcile the authorized-operation registration duties and applicable local rules. The property sketch follows `KS-DATA-PROPERTY-REGISTER-2026` and remains conditional on full-text verification, including notice exceptions and objection handling. A common UI must preserve the selected regime's distinct states, result type and permitted actions.
 
 Authorization and trusted use:
 
@@ -390,7 +394,7 @@ data_agent_contract:
 | report/fill-in delivery | create template -> mark sys/ext -> set scope/period -> collect fill -> aggregate -> export/audit |
 | ChatBI enablement | prepare semantic model -> add glossary/examples -> evaluate golden questions -> authorize users -> monitor feedback |
 | data agent launch | define tools/write scope -> evaluate -> pilot -> monitor traces -> rollback/iterate |
-| public-data resource registration | inventory object -> prove provider/catalog/update/quality -> submit -> review/correct -> issue -> change/cancel |
+| public-data resource registration | establish required/encouraged applicability -> inventory/evidence -> submit -> acceptance/formal review/correction -> notice/objection -> query code -> change/correction/renewal/cancel |
 | data-property registration | choose type -> prove source/right boundary -> submit -> accept/review -> public notice/objection -> issue -> transfer/change/renew/cancel |
 | authorized operation | justify scenario/value -> approve plan -> select operator -> sign agreement -> register resource/product/service -> controlled delivery -> disclose/supervise/evaluate -> renew/exit |
 | trusted data use | onboard participant -> verify identity/qualification -> negotiate digital contract -> authorize purpose/action -> execute in controlled environment -> meter/audit -> settle/revoke |
@@ -455,6 +459,8 @@ data_agent_contract:
 - For ontology/action agents, define human accountability for consequential state changes.
 - For public-sector delivery, specify private deployment, network boundaries, domestic database/OS constraints, and external model/data-exit restrictions when applicable.
 - Keep public-data resource registration, data-property registration, accounting recognition, appraisal/valuation, authorization, transaction and financing as linked but separately accountable decisions.
+- Public-data authorized operation: determine direct application, application by reference and the public-utility procedure option under `KS-DATA-PUBLIC-AUTH-2025`. For the stated implementing/operating roles, `KS-DATA-PUBLIC-DISCLOSURE-2026` requires prior-year disclosure by the end of March through the applicable registration platform. Keep role-specific disclosures distinct; verify its annexes before defining all fields.
+- EU AI scope: read `KS-DATA-EU-AI-ACT-2024` together with `KS-DATA-EU-AI-AMEND-2026`. Article 10 has changed and high-risk application dates depend on Article 6 category; do not apply the original general 2026 date to all data-governance obligations. Resolve jurisdiction, role, classification and transition before deriving a project gate.
 - Do not directly or indirectly release uncontrolled non-public raw public data into the market; deliver approved products/services through the confirmed environment and scope.
 - Bind every participant and use to purpose, product, action, quantity, time, location, onward-transfer, retention, revocation and audit rules; a download permission alone is not a usage contract.
 - Training, validation, testing, preference and application-feedback data require provenance, rights, purpose, isolation and version lineage. Production feedback requires a valid purpose/right basis and governed inclusion; consent where applicable and human review where required by risk or policy. Authorized automated selection does not waive release controls or held-out isolation.
@@ -528,7 +534,7 @@ Mocked matrices and simulated reviewers cannot satisfy expert review or audit.
 - [ ] Every report/fill workflow declares sys/ext fields, validation, submit/review/return state, deadline, and audit.
 - [ ] Every Data Agent/ChatBI feature has allowed sources/tools, permission inheritance, citations, freshness handling, refusal rules, eval sets, and human gate.
 - [ ] Every insight-to-action flow identifies who is accountable for final business decision and what the agent may not write.
-- [ ] Every registration flow declares object/type, applicant/agent, source/right evidence, review/return/reject, notice/objection, credential validity, change/renewal/transfer/cancellation and audit.
+- [ ] Each in-scope registration flow identifies its legal regime and applicable applicant/object, evidence, review/return/reject, notice/objection or permitted exception, result type/validity, allowed change/correction/renewal/transfer/cancellation and audit; it does not inherit unsupported actions from another regime.
 - [ ] Every authorization operation declares approving/implementing/operating roles, resource-product-service scope, agreement/term, controlled environment, price/settlement, disclosure/supervision, evaluation and exit.
 - [ ] Every trusted use declares participant identity, product/purpose/action, digital contract, usage controls, metering/evidence, revocation and incident/liability path.
 - [ ] Every AI dataset version has intended use, provenance/right basis, population/coverage, processing, labeling, split isolation, quality/benchmark, risks/gaps, lineage, consumers and retirement.

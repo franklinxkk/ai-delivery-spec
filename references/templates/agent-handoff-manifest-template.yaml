@@ -15,5 +15,7 @@ baseline:
   version: 0.1-draft
   hash: "0000000000000000000000000000000000000000000000000000000000000000"
   requirement_ref: PRD.md
+# scope_refs/acceptance_refs 必须对应 requirement_ref 中真实定义；每项都进入相应包。
+# 内容哈希只核对漂移；业务反例与证据真实性由接收复核，不把空标签当语义。
 packets: []
 handoffs: []

@@ -93,8 +93,43 @@ def search_terms(query: str, aliases: dict) -> list[str]:
 
 
 def term_pattern(term: str) -> str:
-    literal = re.escape(term)
-    return r"(?<![a-zA-Z0-9_])" + literal + r"(?:s)?(?![a-zA-Z0-9_])" if re.search(r"[a-zA-Z]", term) else literal
+    if not re.fullmatch(r"[a-zA-Z0-9]+(?:[\s\-\u2010-\u2015]+[a-zA-Z0-9]+)*", term):
+        return re.escape(term)
+    # Match curated English phrases across spaces or hyphens, with bounded
+    # noun plurals. Do not stem arbitrary query words or match word fragments.
+    words = re.split(r"[\s\-\u2010-\u2015]+", term)
+    final = words[-1]
+    if re.search(r"[^aeiou]y$", final, re.I):
+        ending = re.escape(final[:-1]) + r"(?:y|ies)"
+    elif re.search(r"(?:ss|us|x|z|ch|sh)$", final, re.I):
+        ending = re.escape(final) + r"(?:es)?"
+    elif final.casefold().endswith("s"):
+        ending = re.escape(final)
+    else:
+        ending = re.escape(final) + r"(?:s)?"
+    literal = r"[\s\-\u2010-\u2015]+".join([*(re.escape(word) for word in words[:-1]), ending])
+    return r"(?<![a-zA-Z0-9_])" + literal + r"(?![a-zA-Z0-9_])"
+
+
+def generic_fallback(domain_id: str | None, available: list[str], english: bool, pack_available: bool | None = False) -> dict[str, object]:
+    """Offer the generic workflow without inventing an unsupported domain pack."""
+    return {
+        "mode": "generic_requirement_patterns",
+        "pattern_file": "references/patterns/common-requirement-patterns.yaml",
+        "requested_domain": domain_id,
+        "dedicated_pack_available": pack_available,
+        "available_domain_ids": available,
+        "next_action": (
+            "Check the available domain IDs for a spelling mismatch. If the sector is unsupported, continue with common requirement patterns and collect project vocabulary, actors, objects, behavior and sources as relevant; obtain current authoritative sector/jurisdiction sources before stating domain obligations."
+            if english else
+            "先核对可用领域 ID，排除拼写差异。确无专用包时可继续通用需求模式，按问题补充项目术语、角色、对象、行为与来源；陈述行业义务前需取得匹配行业和法域的当前有权来源。"
+        ),
+        "claim_limit": (
+            "No dedicated knowledge, expert review or regulatory applicability is established by this fallback or by a cross-industry mock."
+            if english else
+            "此退路及跨行业 Mock 均不证明已有专用领域知识、专家审查或法规适用。"
+        ),
+    }
 
 
 def search_concepts(query: str, aliases: dict) -> dict[str, list[str]]:
@@ -113,7 +148,9 @@ def search_concepts(query: str, aliases: dict) -> dict[str, list[str]]:
                 candidates.append((match.start(), match.end(), key))
     selected = []
     for start, end, key in sorted(candidates, key=lambda item: (-(item[1] - item[0]), -len(item[2]), item[0])):
-        if any(start < b and end > a for a, b, _ in selected):
+        # A contained short alias can be misleading (active vs active customer).
+        # Adjacent concepts may share a word: education data / data classification.
+        if any((a <= start and end <= b) or (start <= a and b <= end) for a, b, _ in selected):
             continue
         selected.append((start, end, key))
     return {key: groups[key] for _, _, key in sorted(selected)}
@@ -154,9 +191,9 @@ def main() -> int:
     terms = search_terms(args.search, aliases) if args.search else []
     english = args.language == "en-US" or (args.language == "auto" and not re.search(r"[\u4e00-\u9fff]", (args.search or "") + " ".join(args.section)))
     usage_rule = (
-        "Search hits and domain patterns are candidates, not approved project rules. Verify jurisdiction, covered entities, effective version and authority; response language does not determine jurisdiction."
+        "Search hits and domain patterns are candidates, not approved project rules. Verify jurisdiction, covered entities, effective version and authority; response language does not determine jurisdiction. origin=official identifies the Skill's built-in catalog, not government authority or binding force; inspect each source_ref's authority/effect class and original text."
         if english else
-        "检索命中与领域经验只是候选，不是项目已批准规则。核实法域、适用对象、生效版本与来源权威；提问语言不决定适用法域。"
+        "检索命中与领域经验只是候选，不是项目已批准规则。核实法域、适用对象、生效版本与来源权威；提问语言不决定适用法域。origin=official表示Skill内置目录，不代表政府权威或强制效力；须查看各source_ref的权威与效力分类并核对原文。"
     )
     official = {item["domain_id"]: item for item in catalog.get("domains", [])}
     custom_root = args.custom_root.resolve()
@@ -201,6 +238,7 @@ def main() -> int:
                         "last_verified_at": source.get("last_verified_at"), "refresh_days": source.get("refresh_days"),
                         "stale": stale(source.get("last_verified_at"), source.get("refresh_days")),
                         **({"claim_limit": source["claim_limit"]} if source.get("claim_limit") else {}),
+                        **({key: source[key] for key in ("verification_evidence", "verification_attempt") if source.get(key)}),
                     }
                     for source in domain_sources
                 ]
@@ -225,9 +263,19 @@ def main() -> int:
             if item is None and fallback.is_file():
                 item = {"domain_id": domain_id, "knowledge_file": f"domains/{domain_id}.md"}
             if item is None:
-                available = ", ".join(sorted({*official, *custom_domains}))
-                print(f"FAIL: unknown domain {domain_id!r}; available: {available}")
-                return 1
+                fallback_info = generic_fallback(domain_id, sorted({*official, *custom_domains}), english)
+                record = {"domain_id": domain_id, "origin": "generic_fallback",
+                          "knowledge_file": None, "maturity": "unsupported", "practice_status": "not_evaluated",
+                          "production_claim": "prohibited", "source_refs": [], "jurisdictions": [],
+                          "source_usage_rule": usage_rule, "source_refresh_warning": None,
+                          "fallback": fallback_info}
+                if args.search:
+                    record["search_hits"] = []
+                if args.section:
+                    record["selected_sections"] = []
+                    record["unavailable_sections"] = args.section
+                records.append(record)
+                continue
             knowledge_path = custom_root / str(item.get("knowledge_file", f"domains/{domain_id}.md"))
             record = {
                 "domain_id": domain_id,
@@ -303,6 +351,9 @@ def main() -> int:
                    "matched_concepts": list(concepts), "next_action": next_action,
                    "truncated": len(hits) > args.limit, "hits": hits[:args.limit],
                    "source_usage_rule": usage_rule}
+        if not hits:
+            availability = all(record["origin"] != "generic_fallback" for record in records) if args.domain else None
+            payload["fallback"] = generic_fallback(args.domain, sorted({*official, *custom_domains}), english, availability)
         if args.format == "yaml":
             print(yaml.safe_dump(payload, allow_unicode=True, sort_keys=False), end="")
         else:
@@ -313,12 +364,14 @@ def main() -> int:
             print(f"\n{'Matches / shown' if english else '匹配 / 显示'}: {len(hits)} / {min(len(hits), args.limit)}")
             if next_action:
                 print(next_action)
+                print(payload["fallback"]["next_action"])
+                print(payload["fallback"]["claim_limit"])
         return 0
 
     if args.section:
         if args.format == "yaml":
             slices = [
-                {key: record.get(key) for key in ("domain_id", "origin", "maturity", "practice_status", "production_claim", "jurisdictions", "source_catalog", "source_refs", "source_refresh_warning", "source_usage_rule", "selected_sections")}
+                {key: record.get(key) for key in ("domain_id", "origin", "knowledge_file", "maturity", "practice_status", "production_claim", "jurisdictions", "source_catalog", "source_refs", "source_refresh_warning", "source_usage_rule", "selected_sections", "unavailable_sections", "fallback") if key in record}
                 for record in records
             ]
             payload: object = slices[0] if len(slices) == 1 else {"domains": slices}
@@ -327,6 +380,8 @@ def main() -> int:
             for index, record in enumerate(records):
                 print(f"<!-- {record['domain_id']} | maturity={record['maturity']} | practice={record['practice_status']} | production_claim={record['production_claim']} -->")
                 print(f"> {record['source_usage_rule']}" + (f"；{record['source_refresh_warning']}" if record['source_refresh_warning'] else "") + "\n")
+                if record.get("fallback"):
+                    print(record["fallback"]["next_action"] + "\n" + record["fallback"]["claim_limit"] + "\n")
                 if len(records) > 1:
                     if index:
                         print()
@@ -353,6 +408,8 @@ def main() -> int:
             print(f"- Knowledge: {record['knowledge_file']}")
             print(f"- Maturity: {record['maturity']}")
             print(f"- Production claim: {record['production_claim']}")
+            if record.get("fallback"):
+                print(record["fallback"]["next_action"] + "\n" + record["fallback"]["claim_limit"])
             for section in record.get("selected_sections", []):
                 print("\n" + str(section))
     return 0
