@@ -6,7 +6,7 @@
 
 只有一句想法，不知道该问什么；PRD 写了几十页，开发仍在猜；需求改了一轮，文档、原型和 AI 实现又各说各话。
 
-**给你的 AI 一套产品工作方法：判断值不值得做，探索怎么做，把需求讲清楚，再跟进评审、变更与验收。** 从你当前的任务开始，面向产品、业务、设计、研发与测试，也为 Coding Agent 提供明确的业务依据。
+**让人和 AI，一起把产品做对。** AI Delivery Spec 帮助团队先判断什么值得做，再讲清要做成什么样，用实际结果检验原来的判断。面向产品、业务、设计、研发与测试，也为 Coding Agent 提供共同的需求依据。
 
 [![ClawHub: 3,139 downloads](https://img.shields.io/badge/ClawHub-3%2C139_downloads-2563eb)](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec)
 [![SkillHub: 4.6/5 for v5.5.5](https://img.shields.io/badge/SkillHub-4.6%2F5_%C2%B7_v5.5.5-15803d)](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)
@@ -54,31 +54,31 @@ npx skills add franklinxkk/ai-delivery-spec
 
 <a id="capabilities"></a>
 
-## 从想清楚，到交得出去
+## 让目标、需求与实际结果保持一致
 
-![AI Delivery Spec 能力示意：判断问题、比较方案、澄清规则、规格与原型、评审与验收；变更回到受影响的环节](examples/requirements-workflow.png)
+![AI Delivery Spec 产品决策循环：判断价值、选择方案、明确需求、验证结果；变更与反馈回到受影响的环节](examples/requirements-workflow.png)
 
-**任一阶段都能进入，小改不用走完整套流程。** 产品探索、已有系统和持续迭代都适用，覆盖 ToC、ToB/ToG 与 AI 原生产品。
+**判断有依据，协作有共识，结果可验证。** 人掌握目标、约束和关键决定；Skill 引导 AI 分析、澄清、表达和核验，让这些决定贯穿需求、原型及后续变更。
 
-### 先找到该解决的问题
+### 判断价值：什么问题值得解决？
 
-“加个按钮”“做个自动审批”往往只是候选解法。Skill 引导 AI 核对用户、场景、价值与证据，比较可行方案；需要时建议先验证、缩小范围或暂缓。已经确定的决定继续沿用，尚未确定的业务选择留给有权的人。
+“加个按钮”“做个自动审批”往往只是候选解法。先理解谁在什么场景遇到了什么问题，核对事实与影响；需要时建议先验证、缩小范围或暂缓。
 
-### 一个模块，读完就知道怎么做、怎么验
+### 选择方案：怎样做更合适？
 
-整体先交代目标、范围和模块关系；字段、计算、权限、动作、状态、异常与验收写回各自模块。开发不用拼读多张横向表，测试能据此准备有明确预期的数据。
+结合现有系统和约束比较方案，讲清收益、代价与取舍。已经确认的决定继续沿用，真正影响方案的未知才继续澄清；不会把示例或模型的默认选择当成业务决定。
 
-例如，“提交成功”要写清成功凭据；失败保留哪些输入；结果未知如何确认原请求。产品、研发、测试与 Coding Agent 共享这些约定。
+### 明确需求：要做成什么样？
 
-### 原型把关键行为演出来
+把决定写成人和 AI 都能据此工作的需求：字段、计算、权限、动作、状态、异常和验收集中在各自模块。沿用团队模板和设计规范，用可操作原型呈现关键行为，按需在页面或弹窗旁查看评审说明。[了解评审方式](references/review-workspace.md)
 
-从入口、填写、提交到结果和再次打开，检查配置是否真正生效，拒绝与恢复能否走通。沿用团队的组件与交互规范。
+例如，“提交成功”要有明确凭据；失败保留哪些输入；结果未知如何确认原请求。产品、研发、测试与 Coding Agent 共享这些约定。
 
-需要评审时，在当前页面或弹窗旁查看说明，流程图和大表格点击放大；产品界面保持可操作。评审态按需开启。[了解评审方式](references/review-workspace.md)
+### 验证结果：实际做对了吗？
 
-### 需求变了，相关产物一起跟上
+从原始目标和已确认规则建立预期，实际核对关键操作、拒绝与恢复路径；文档、原型彼此一致，还要检查它们是否一起理解错了。收到变更或验证反馈，回到受影响的决定与模块，同步修订、复验。
 
-先读当前基线，再找受影响的页面、角色、状态和数据，回到原位置修订。验证从原始约定建立预期，避免文档和原型一起写错；每项结论说明实际查到了哪一层。
+**从当前任务进入，不必走完整套流程。** 一句话想法、既定需求、存量系统与持续迭代都适用；小改保持轻量，已确认的信息持续复用。
 
 <a id="roles"></a>
 
@@ -125,7 +125,7 @@ npx skills add franklinxkk/ai-delivery-spec
 
 **AI writes code faster. Gaps in requirements become code faster, too.**
 
-AI Delivery Spec gives your agent a product workflow: understand the problem, compare solutions, clarify decisions, specify behavior, and follow through review, change and acceptance. Start with an idea, existing artifacts or a change request. Small changes stay small; approved decisions carry forward.
+**Help people and AI build the right product together.** AI Delivery Spec connects product decisions with requirements and verification: assess what is worth solving, compare approaches, define the expected behavior, and check actual results against the original intent. People retain the goals, constraints and key decisions. Start with an idea, existing artifacts or a change request; revisit affected decisions when feedback arrives. Small changes stay small, and approved decisions carry forward.
 
 Install with `npx skills add franklinxkk/ai-delivery-spec`, then try:
 
