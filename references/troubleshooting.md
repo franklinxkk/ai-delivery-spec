@@ -41,6 +41,8 @@ UNK 表支持 `| ID | 状态 | 关闭依据 |`：`UNK-X | closed | DEC-X`；粗�
 
 ## 兼容与升级
 
+手动执行 `python scripts/validators/validate_coding_agent_contract.py <PRD.md>` 默认采用当前 PRD 检查；只有明确复核历史附录合同时追加 `--legacy --level L2`。`--level L2` 单独使用不会恢复旧章节数/表格数门禁，`--domain-rules` 仅用于显式 legacy 模式。通常直接使用 `gate --profile prd` 即可，不必两套都跑。
+
 5.4.x 工件保留已批准业务事实。新版本不保证旧标题门禁、旧 triage 结果键或逐阶段脚手架的行为兼容。调用专业评审/Truth/handoff 时保留实际 Schema 版本，不把版本号改成 5.5.0 就当作完成迁移。
 
 高级 Schema 的结构通过不证明运行效果。外部链接存在、文件哈希匹配和签名字段完整也不能替代实际业务授权。详见 [当前工具](stages.md)、[变更与验收](change-acceptance.md)。

@@ -48,16 +48,10 @@ if str(VALIDATOR_DIR) not in sys.path:
     sys.path.insert(0, str(VALIDATOR_DIR))
 
 from scan_prototype_css import scan as scan_prototype_css
-from prd_structure import analyze as analyze_prd_structure
 from validate_acceptance_run import validate_evidence_refs
-from validators.validate_coding_agent_contract import (
-    BASE_AREAS,
-    ID_RULES,
-    STRUCTURED_AC_FIELDS,
-    has_any,
-)
 LEVELS = ("L0", "L1", "L2", "L3", "L4")  # Legacy specialized-tool compatibility only.
 from validators.validate_prd_semantics import run_semantic_checks
+from requirement_contract import SEMANTIC_REVIEW_GUIDANCE, semantic_review_guidance
 from gate_handoff_checks import HandoffChecks
 from gate_prd_checks import PRDChecks
 from gate_prototype_checks import PrototypeChecks, _balanced_javascript
@@ -68,23 +62,6 @@ REGISTER_SCHEMA = ROOT / "schemas" / "requirement-register.schema.json"
 INTAKE_SCHEMA = ROOT / "schemas" / "requirement-intake.schema.json"
 HANDOFF_SCHEMA = ROOT / "schemas" / "agent-handoff.schema.json"
 ACCEPTANCE_SCHEMA = ROOT / "schemas" / "acceptance-run.schema.json"
-MAIN_SECTION_ALIASES = (
-    ("背景/目标", (r"背景", r"目标", r"background", r"problem.+goal", r"objective")),
-    ("准入/范围", (r"需求准入", r"准入.*范围", r"intake.+scope", r"scope")),
-    ("角色", (r"角色", r"roles?", r"actors?")),
-    ("角色旅程", (r"角色旅程", r"用户旅程", r"role journey", r"user journey")),
-    ("业务流程/状态", (r"业务流程", r"状态机", r"business flow", r"workflow.+state")),
-    ("模块规格", (r"分模块功能需求", r"模块规格", r"module requirements?", r"module specification")),
-    ("验收", (r"验收方案", r"验收", r"acceptance plan", r"acceptance")),
-)
-ANNEX_SECTION_ALIASES = (
-    ("字段字典", (r"字段字典", r"field dictionary")),
-    ("规则/状态", (r"规则与状态", r"rules?.+state")),
-    ("API/事件", (r"api", r"接口", r"event.+integration")),
-    ("机器验收", (r"机器可读验收", r"machine-readable acceptance", r"structured acceptance")),
-    ("双向追溯", (r"双向追溯", r"bidirectional trace")),
-    ("禁止推断", (r"禁止推断", r"forbidden invention", r"do not infer")),
-)
 STATUSES = {
     0: "PASS",
     1: "REVIEW_COMPLETE_WITH_GAPS",
@@ -159,6 +136,22 @@ class Finding:
 
 
 FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
+    "PRD-PENDING-EXECUTION": (
+        "同一处既写业务选择待确认，又要求确认前按默认值执行，实施依据可能互相冲突。",
+        "按 ref 核对原句及授权来源。已有临时方案授权就注明来源并同步待决范围；否则取消依赖未决选择的执行承诺。反例和概念验证不应写成正式执行规则。",
+    ),
+    "PROTO-INLINE-NATIVE-COLLISION": (
+        "ref 所列内联处理器名称可能先解析为控件或 document 的原生成员，入口未必能调用应用函数。",
+        "从 ref 的行列、事件与处理器定位真实控件并实际点击验证；如冲突，改用指向应用函数的显式命名空间或事件监听器，再核对预期结果。只检查可定位的 DOM 及直接 HTML 写入字面量，不证明全部动态交互正确。",
+    ),
+    "PROTO-NO-DOMAIN-STATE": (
+        "已声明的业务写入/转换缺少可识别的静态变化线索，不是所有原型都必须持久写入。",
+        "按 ref 回到对应语义及来源核对实际结果。只读筛选/详情不需加写功能或技术字段；外部、动态实现保持待验证。此检查不消费写入运行证据，不能用评审面板可见性记录代替。",
+    ),
+    "PROTO-TRANSIENT-ONLY": (
+        "静态只识别到短暂反馈，尚不能确定动作是否兑现需求中的结果。",
+        "就地核对动作的可见结果；提示本身足够时说明适用范围，确需业务写入时检查实际变化和后续读取。不要把成功提示当成写入证据，也不要为只读功能新增持久化。",
+    ),
     "SPEC-OPEN-DECISION": ("这项业务选择还没定，依赖它的行为不能按猜测实现。", "查看该 UNK 的影响范围与阻断阶段，找到所需来源或有权决定；不影响的部分可以继续，不必重写整份文档。"),
     "SPEC-CONTENT": ("正文中可能还有两种不同的业务理解。", "先读指出的原句及其规则引用，核实是否已有答案；确有缺口才补决定，不要只添加一条评阅通过记录。"),
     "SPEC-SEMANTIC-NOT-PROVEN": ("现有记录还不能证明这部分业务规则已被复核。", "按提示范围核对来源和关键反例，记录实际评阅结果；尚未评阅就保持缺口，不能补写虚构的通过。"),
@@ -619,6 +612,22 @@ PREFIX_GUIDANCE: tuple[tuple[str, str, str], ...] = (
 )
 
 EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
+    "PRD-PENDING-EXECUTION": (
+        "The same passage leaves a choice pending yet requires execution with defaults before confirmation.",
+        "Check the passage and its authority at ref. Cite an authorized interim decision and clarify what remains open, or remove the unsupported execution promise. Keep counterexamples and concept-only assumptions distinct from implementation policy.",
+    ),
+    "PROTO-INLINE-NATIVE-COLLISION": (
+        "The inline handler named in ref may resolve to a native control or document member rather than the application function.",
+        "Click the control located by ref's line, column, event and handler. If it fails, bind the application function through an explicit namespace or event listener, then verify the expected result. This bounded check covers located DOM and direct HTML-write literals, not all dynamic interactions.",
+    ),
+    "PROTO-NO-DOMAIN-STATE": (
+        "An explicitly declared write/transition lacks a recognized static mutation mechanism; not every prototype requires persistence.",
+        "Inspect ref and its sources. Read-only filtering/details need no write feature or technical field. External/dynamic effects remain unverified; this check does not consume write-runtime evidence and review-panel visibility cannot prove a business write.",
+    ),
+    "PROTO-TRANSIENT-ONLY": (
+        "Only transient feedback was recognized; fulfillment of the specified outcome remains unproven.",
+        "Check the action's visible result. Explain when feedback alone is intended; inspect actual effects and subsequent reads when writes are required. A success toast is not write evidence, and read-only features need no added persistence.",
+    ),
     "PROTO-CSS-IMPORTANT-POLLUTION": (
         "An !important declaration overrides the cascade; its presence alone does not prove a functional or usability defect.",
         "Review matched elements, scope and default/error/focus/hidden states at ref. Keep justified overrides, fix evidenced interference, and record browser results.",
@@ -859,6 +868,7 @@ def english_guidance_for(code: str) -> tuple[str, str]:
 
 
 REPAIR_EXAMPLES: tuple[tuple[str, str], ...] = (
+    ("PROTO-INLINE-NATIVE-COLLISION", "例如把关闭抽屉绑定到 app.closeDrawer 或 addEventListener；不能不加核对地换成可能关闭浏览器窗口的 window.close。form 同样须明确指向应用函数；修复后点击原入口核对结果。"),
     ("PROTO-CSS-IMPORTANT-POLLUTION", '例如 [aria-invalid="true"] 的错误边框覆盖：核对非法输入变红、纠正后恢复及焦点 outline 仍可见；据实际影响决定保留或调整。'),
     ("SPEC-OPEN-DECISION", "分期期数未决时，合同查询可继续；付款计划生成保持受阻，等待原约定或授权决定。不能默认一期。"),
     ("SPEC-CONTENT-", "先核对原句是否已回答所问边界；若已在引用规则中写清，记录该位置；若未决定，保留未知及影响范围。"),
@@ -908,6 +918,7 @@ def english_repair_example_for(code: str) -> str:
     if _is_legacy_review_finding(code):
         return "Remove legacy Journey/STEP/Role/page-mode controls and generate a 5.4.9/RC4 manifest driven by the real product CurrentContext, three tabs, and ReviewPoints."
     examples = (
+        ("PROTO-INLINE-NATIVE-COLLISION", "For example, bind drawer closing to app.closeDrawer or addEventListener; do not blindly substitute window.close, which may close the browser window. Likewise, form must explicitly refer to the application function. Click the original control after repair."),
         ("PROTO-CSS-IMPORTANT-POLLUTION", 'For an [aria-invalid="true"] border override, verify the invalid border, correction/reset and visible focus outline; keep or adjust it based on the observed effect.'),
         ("SPEC-OPEN-DECISION", "If installment terms are undecided, contract lookup can proceed; payment-plan generation waits for the agreement or authorized decision. Do not default to one installment."),
         ("SPEC-CONTENT-", "If a referenced rule already answers the question, record its location; otherwise retain the unknown and its dependent scope."),
@@ -943,6 +954,12 @@ def _english_message(item: Finding) -> str:
     if item.message.startswith("存量基线已存在"):
         return f"Inherited baseline issue {item.code}; this run did not introduce a new regression."
     location = item.ref or Path(item.artifact).name
+    if item.code == "TRACE-LEDGER-SKIP":
+        return f"No traceability sidecar was found beside {location}; bidirectional trace closure was not checked."
+    if item.severity == "INFO":
+        return f"{item.code}: coverage note at {location}; no contract violation is asserted."
+    if item.severity in {"GAP", "WARN"}:
+        return f"{item.code}: review needed at {location}; see the cause and next action."
     return f"{item.code} contract failed at {location}."
 
 
@@ -974,6 +991,18 @@ def localized_finding(item: Finding, language: str) -> dict[str, Any]:
         "fix_en": en_fix,
         "repair_example_en": en_example,
     })
+    if item.code == "SPEC-SEMANTIC-NOT-PROVEN":
+        category = item.ref.partition(":")[0]
+        if category in SEMANTIC_REVIEW_GUIDANCE:
+            _, action_zh = semantic_review_guidance(category)
+            _, action_en = semantic_review_guidance(category, "en-US")
+            fix_zh = "回到本条 message 标明的范围和位置。" + action_zh
+            fix_en = "Return to the scope and location identified in this finding's message. " + action_en
+            example_zh = "就地记录本次核对的原句、来源、反例预期与实际结果及当前基线；来源未定位时先定位，不新建虚构规则 ID 或通过记录。"
+            example_en = "Record the reviewed statement, source, counterexample expectation and actual result against the current baseline in place. Locate missing sources first; do not invent rule IDs or a passing record."
+            record.update(how_to_fix=fix_en if english else fix_zh, fix_zh=fix_zh, fix_en=fix_en,
+                          repair_example=example_en if english else example_zh,
+                          repair_example_zh=example_zh, repair_example_en=example_en)
     return record
 
 
@@ -1278,6 +1307,7 @@ def result_payload(gate: Gate, profile: str, retry_command: str = "", output_lan
         "profile": profile,
         "output_language": output_language,
         "summary": {"blockers": blocks, "p0_unknowns": p0_unknowns, "gaps": gaps, "findings": len(gate.findings)},
+        "assessment": {"kind": "static_check", "label": ("Static checks complete; not business acceptance" if english else "静态检查完成；不代表业务验收通过")},
         "coverage": coverage,
         "not_proven": not_proven_for(gate, output_language),
         "retry_command": retry_command,
@@ -1336,6 +1366,7 @@ def main() -> int:
     parser.add_argument("--prd", type=Path, help="unified PRD Markdown")
     parser.add_argument("--prototype", type=Path, action="append", help="HTML prototype; repeat for admin/H5/multi-surface handoff")
     parser.add_argument("--prototype-baseline", type=Path, help="Optional previous HTML baseline; inherited prototype blockers become gaps, new regressions still block")
+    parser.add_argument("--review-runtime-evidence", type=Path, help="当前 HTML 指纹绑定的实际浏览器评审观察 JSON；不替代业务验收")
     parser.add_argument("--require-review-workspace", action="store_true", help="Require the requested review workspace contract, even when the HTML omits review declarations")
     parser.add_argument("--inventory", type=Path, help="Stage 0 brownfield inventory YAML")
     parser.add_argument("--manifest", type=Path, help="Agent handoff manifest YAML")
@@ -1363,6 +1394,7 @@ def main() -> int:
         "agent_handoff": ("manifest",),
     }[args.profile]
     gate = Gate()
+    gate.review_runtime_evidence = args.review_runtime_evidence
     gate.require_review_workspace = args.require_review_workspace
     gate.metrics["review_workspace_required"] = args.require_review_workspace
     prototype_level = "L2" if args.level == "auto" else args.level
@@ -1679,6 +1711,7 @@ def main() -> int:
         # console encoding; message_zh remains lossless after JSON decoding.
         print(json.dumps({key: value for key, value in payload.items() if key != "exit_code"}, ensure_ascii=True, indent=2))
     else:
+        print(payload["assessment"]["label"])
         summary = payload["summary"]
         print(
             f"{payload['status']} profile={args.profile} blockers={summary['blockers']} "

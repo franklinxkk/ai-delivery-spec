@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Deterministic v5.4 stage-artifact checks; never infer intent from prose."""
+"""Bounded stage-artifact checks; never infer intent or progress from prose."""
 
 from __future__ import annotations
 
@@ -37,15 +37,18 @@ GOVERNED_INDEX = {name: index for index, name in enumerate(GOVERNED_ORDER)}
 MAX_ARTIFACT_BYTES = 8 * 1024 * 1024
 TEXT_ARTIFACT_SUFFIXES = {".md", ".markdown", ".yaml", ".yml", ".json"}
 FRONTMATTER_REQUIRED_MESSAGE = (
-    "输入不含 YAML frontmatter，无法执行门禁校验。本产物未经任何自动校验，"
-    "导出为 docx/PDF 将永久失去机器可校验性。请在 markdown + frontmatter 形态下完成基线，再导出分发格式。"
+    "本阶段结构检查需要可读取的 Markdown 元数据或 YAML/JSON 声明，当前输入不满足该检查的输入格式。"
+    "这不代表正文无效，也不代表 Word/PDF 无法审查。"
 )
-FRONTMATTER_REQUIRED_FIX = "使用对应 5.4 模板在 markdown + frontmatter 形态下完成基线；docx/PDF 仅在基线后导出为分发副本。"
+FRONTMATTER_REQUIRED_FIX = "保留现有交付格式；若要运行本项结构检查，提供提取后核对过的文本及本阶段必要声明。PRD 正文可用 gate --profile prd 检查，Word/PDF 另核对版式和图片。无需为此重写需求。"
 EN_GUIDANCE = {
     "GATE-NOT-FILE": ("The artifact cannot be read.", "Check the path, UTF-8 encoding, binary content and size."),
-    "STAGE-NO-FRONTMATTER": ("The artifact is not Markdown with YAML front matter; machine checkability is lost.", "Baseline in Markdown + front matter first; export docx/PDF only as distribution copies."),
+    "STAGE-NO-FRONTMATTER": ("This structured stage check needs readable Markdown metadata or YAML/JSON declarations; the input format is unsupported by this check.", "Keep the delivery format. Supply verified extracted text and necessary declarations for this check, or use the PRD gate for prose; inspect Word/PDF layout and images separately. No rewrite is required."),
     "GATE-MISSING-INPUT": ("The selected profile has no artifact.", "Provide the main artifact for this stage."),
-    "STAGE-ARTIFACT-TYPE": ("The artifact type does not match this stage.", "Start from the corresponding v5.4 template and keep artifact/stage metadata."),
+    "STAGE-ARTIFACT-TYPE": ("The artifact type does not match this stage.", "Provide the matching existing artifact and declare its actual type/stage; templates are optional starting points."),
+    "ROUTE-SCOPE-AMBIGUOUS": ("The inputs contain unrelated project or requirement scopes.", "Route one current scope at a time, or supply the existing explicit relationship connecting these artifacts. Do not create lifecycle files solely for routing."),
+    "ROUTE-CYCLE-AMBIGUOUS": ("The current change/baseline cycle cannot be identified from the supplied references.", "Select the current cycle's existing artifacts, or clarify their baseline_version/target_version/change_ref relationship. An older acceptance is not evidence for a new change."),
+    "ROUTE-PREREQUISITE": ("The target lacks a prerequisite in the selected scope and baseline cycle.", "Supply the current requirement and relevant review/baseline references. Existing documents may carry these declarations; no separate lifecycle file is required."),
     "STAGE-ANCHOR-MISSING": ("A required ADS semantic anchor is missing.", "Add the named ADS anchor and real content; headings may stay in the document language."),
     "STAGE-PLACEHOLDER": ("The artifact still contains placeholders.", "Replace each placeholder with evidence, an owned assumption or an owned UNK-* item."),
     "CLARIFY-P0-UNKNOWN": ("An open P0 unknown blocks the current stage.", "Close it, narrow scope, or set its real blocks_stage and reversal path."),
@@ -118,7 +121,13 @@ def infer_legacy(path: Path, text: str) -> tuple[str, str]:
         ("solution_sketch", ("solution-sketch", "方案探索")),
         ("problem_brief", ("problem-brief", "问题简报")),
     )
-    sample = (name + "\n" + text[:16000]).casefold()
+    # References in a decision/inventory body are not its artifact identity.
+    if "decision-record" in name:
+        return "decision_record", "supporting"
+    if "stage0-inventory" in name:
+        return "stage0_inventory", "supporting"
+    title = next((line for line in text.splitlines() if re.match(r"^#\s+", line)), "")
+    sample = (name + "\n" + title).casefold()
     for kind, markers in probes:
         if any(marker.casefold() in sample for marker in markers):
             return kind, ARTIFACT_STAGE[kind]
@@ -152,6 +161,8 @@ def load_artifact(path: Path) -> Artifact:
         kind = "change_package"
     if not kind and (metadata.get("run_id") or metadata.get("acceptance_run_id")):
         kind = "acceptance_run"
+    if kind and metadata.get("artifact_role") == "supporting":
+        return Artifact(path, text, metadata, kind, stage or "supporting", "declared")
     if kind in ARTIFACT_STAGE:
         mapped = ARTIFACT_STAGE[kind]
         if kind in {"requirement_card", "unified_prd", "unified_requirement_prd"} and stage in {"specify", "review", "baseline"}:
@@ -159,6 +170,8 @@ def load_artifact(path: Path) -> Artifact:
         return Artifact(path, text, metadata, kind, mapped, "declared")
     if stage in STAGE_INDEX:
         return Artifact(path, text, metadata, kind or "stage_artifact", stage, "declared")
+    if kind:
+        return Artifact(path, text, metadata, kind, "unknown", "declared")
     kind, stage = infer_legacy(path, text)
     return Artifact(path, text, metadata, kind, stage, "legacy_inferred")
 
@@ -166,7 +179,7 @@ def load_artifact(path: Path) -> Artifact:
 def finding(severity: str, code: str, artifact: Path, message: str, fix: str) -> dict[str, Any]:
     message_en, fix_en = EN_GUIDANCE.get(
         code,
-        (f"{code} violates the stage artifact contract.", "Use the matching v5.4 template and repair the referenced contract."),
+        (f"{code} violates the stage artifact contract.", "Repair the referenced declaration in the existing artifact; a matching template is optional."),
     )
     return {
         "severity": severity,
@@ -211,7 +224,7 @@ def require_anchors(artifact: Artifact, names: tuple[str, ...], findings: list[d
             findings.append(finding(
                 "BLOCK", "STAGE-ANCHOR-MISSING", artifact.path,
                 f"缺少稳定语义锚点 ADS:{name}",
-                f"使用对应 5.4 模板补充 <!-- ADS:{name} --> 及其真实内容；标题语言可以自定义。",
+                f"在现有内容位置补充 <!-- ADS:{name} --> 以供该结构检查定位；标题语言可以自定义，无需新增重复章节。",
             ))
 
 
@@ -440,7 +453,7 @@ def validate_resume(artifact: Artifact) -> list[dict[str, Any]]:
     if context in (None, {}):
         return findings
     if not isinstance(context, dict):
-        return [finding("BLOCK", "STAGE-RESUME-INVALID", artifact.path, "resume_context 必须是对象", "按 5.4 模板重建 resume_context。")]
+        return [finding("BLOCK", "STAGE-RESUME-INVALID", artifact.path, "resume_context 必须是对象", "核对现有 resume_context 声明；不使用续跑时可省略，不需要套用固定版本模板。")]
     completed = context.get("completed_stages", [])
     if not isinstance(completed, list) or any(item not in STAGE_INDEX for item in completed):
         findings.append(finding("BLOCK", "STAGE-RESUME-STAGES", artifact.path, "completed_stages 含无效阶段", f"只使用：{', '.join(STAGES)}。"))
@@ -534,7 +547,8 @@ def gate_clarify(artifact: Artifact, has_decision_sidecar: bool = False) -> list
 
 def validate_decision_sidecar(sidecar: Artifact, brief: Artifact) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
-    require_anchors(sidecar, ("decision_log", "rejected_options", "unknowns", "accepted_risks", "next_step"), findings)
+    # A concise decision table is a current supported record. Legacy ADS
+    # markers remain readable but do not mandate five new sections.
     decision_ids = set(re.findall(r"DEC-[A-Z0-9-]+", sidecar.text, re.I))
     if not decision_ids:
         findings.append(finding("BLOCK", "DEC-RECORD-EMPTY", sidecar.path, "决策侧车没有 DEC-*", "至少记录决策、选项与取舍、依据和决策人。"))
@@ -542,7 +556,7 @@ def validate_decision_sidecar(sidecar: Artifact, brief: Artifact) -> list[dict[s
     missing = sorted(item.upper() for item in brief_refs - decision_ids)
     if missing:
         findings.append(finding("BLOCK", "DEC-RECORD-UNBOUND", sidecar.path, f"需求简报引用了未登记决策：{', '.join(missing)}", "补入决策侧车，或移除无效引用。"))
-    if not re.search(r"决策人|decision owner", sidecar.text, re.I):
+    if not re.search(r"决策人|有权决定者|decision owner|authorized decision maker", sidecar.text, re.I):
         findings.append(finding("BLOCK", "DEC-OWNER-MISSING", sidecar.path, "决策记录缺少决策人字段", "为每个 DEC-* 记录有权责任人。"))
     if decision_ids and not re.search(r"取舍|未采用|未选|而非|trade[ -]?off|alternative|option", sidecar.text, re.I):
         findings.append(finding("GAP", "DEC-NO-TRADEOFF", sidecar.path, "决策记录没有可审计的选项与取舍", "补充已选方案、被拒方案、拒绝原因和反转条件。"))
@@ -684,6 +698,88 @@ def run_gate(args: argparse.Namespace) -> int:
     return code
 
 
+def route_cycle(artifacts: list[Artifact], findings: list[dict[str, Any]]) -> tuple[list[Artifact], Artifact | None]:
+    """Select a declared cycle, never order arbitrary version labels or mtimes.
+
+    The supplied documents remain the source: references can live in an existing
+    PRD/change record. Supporting material cannot by itself advance a lifecycle.
+    """
+    known = [item for item in artifacts if item.stage in STAGE_INDEX
+             and item.metadata.get("artifact_role") != "supporting"]
+    if not known:
+        return [], None
+
+    def scalar(item: Artifact, key: str) -> str:
+        value = item.metadata.get(key)
+        return str(value).strip() if isinstance(value, (str, int, float)) else ""
+
+    def refs(item: Artifact) -> set[str]:
+        result: set[str] = set()
+        for key in ("requirement_refs", "scope_refs", "affected_refs"):
+            value = item.metadata.get(key, [])
+            if isinstance(value, list):
+                result.update(v for v in value if isinstance(v, str) and v)
+        return result
+
+    projects = {scalar(item, "project_id") for item in known} - {""}
+    scopes = [refs(item) for item in known if refs(item)]
+    if len(projects) > 1 or (scopes and not set.intersection(*scopes)):
+        findings.append(finding(
+            "BLOCK", "ROUTE-SCOPE-AMBIGUOUS", Path("<route>"),
+            "输入包含不同项目或无共同需求范围，不能合并推断当前进度。",
+            "一次只传入本轮范围的已有产物；如确属同一变更，在现有记录中标明其 requirement_refs/scope_refs 关系。不要求新建生命周期文件。",
+        ))
+        return known, None
+
+    changes = [item for item in known if item.stage == "change" and
+               scalar(item, "status") not in {"closed", "rejected", "cancelled", "superseded"}]
+    versions = {scalar(item, "baseline_version") for item in known} - {""}
+
+    def ambiguous(message: str):
+        findings.append(finding(
+            "BLOCK", "ROUTE-CYCLE-AMBIGUOUS", Path("<route>"), message,
+            "只传入当前基线/变更链的已有产物，或核对已有 baseline_version、target_version、change_ref 引用。旧验收不能代替本轮评审；不要求额外台账。",
+        ))
+
+    if len(changes) > 1:
+        ambiguous("输入含多条未结束变更，无法确定本轮处理哪条变更。")
+        return known, None
+    if not changes:
+        candidates = [item for item in known if item.stage != "change"]
+        if len(versions) > 1:
+            ambiguous("输入含多个基线版本，没有声明本轮变更关系；不能按阶段序号选择旧验收。")
+            return candidates, None
+        return candidates, max(candidates, key=lambda item: STAGE_INDEX[item.stage]) if candidates else None
+
+    change = changes[0]
+    source, target = scalar(change, "baseline_version"), scalar(change, "target_version")
+    change_id = scalar(change, "change_id")
+
+    def linked(item: Artifact) -> bool:
+        many = item.metadata.get("change_refs", [])
+        return bool(change_id and (scalar(item, "change_ref") == change_id or
+                    isinstance(many, list) and change_id in many))
+
+    selected = [change]
+    for item in known:
+        if item is change or item.stage == "change":
+            continue
+        version = scalar(item, "baseline_version")
+        if linked(item) or (target and version == target):
+            selected.append(item)
+        elif version and version == source:
+            # An accepted source baseline is useful history, not new-cycle proof.
+            continue
+        elif not version and not source and not target and item.stage != "acceptance":
+            # Existing unversioned, single-cycle inputs remain supported.
+            selected.append(item)
+        else:
+            ambiguous(f"无法确认 {item.path.name} 属于当前变更 {change_id or change.path.name} 的哪一轮；其阶段不计入本轮前置证明。")
+    reached = [item for item in selected if item.stage in {"baseline", "acceptance"}]
+    current = max(reached, key=lambda item: STAGE_INDEX[item.stage]) if reached else change
+    return selected, current
+
+
 def run_route(args: argparse.Namespace) -> int:
     artifacts: list[Artifact] = []
     findings: list[dict[str, Any]] = []
@@ -695,13 +791,12 @@ def run_route(args: argparse.Namespace) -> int:
         except (OSError, UnicodeError, ValueError) as exc:
             findings.append(finding("BLOCK", "ROUTE-ARTIFACT-READ", path, f"无法读取已有产物：{exc}", "检查路径、UTF-8 编码、二进制内容和文件大小。"))
     target = args.target
-    known = [item for item in artifacts if item.stage in STAGE_INDEX]
-    current = max(known, key=lambda item: STAGE_INDEX[item.stage]) if known else None
+    known, current = route_cycle(artifacts, findings)
     stages_present = {item.stage for item in known}
     already_reached = bool(
         current
         and STAGE_INDEX[current.stage] >= STAGE_INDEX[target]
-        and not (current.stage == "change" and target == "baseline")
+        and (current.stage != "change" or target == "change")
     )
     missing: set[str] = set()
     if not already_reached:
@@ -739,7 +834,8 @@ def run_route(args: argparse.Namespace) -> int:
         "recommended_entry_stage": entry,
         "path": path,
         "current_artifact_stage": current.stage if current else None,
-        "artifacts": [{"path": str(item.path), "artifact": item.kind, "stage": item.stage, "confidence": item.confidence} for item in artifacts],
+        "artifacts": [{"path": str(item.path), "artifact": item.kind, "stage": item.stage, "confidence": item.confidence,
+                       "selected_cycle": item in known, "applicable_stages": item.metadata.get("applicable_stages", [])} for item in artifacts],
         "findings": findings,
         "rule": "显式 target_stage 由用户/Agent 的语义判断提供；本工具不读取自然语言关键词，也不覆盖否定约束。",
     }
@@ -753,7 +849,7 @@ def run_route(args: argparse.Namespace) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="AI Delivery Spec 5.4 stage contract helper")
+    parser = argparse.ArgumentParser(description="AI Delivery Spec stage contract helper")
     sub = parser.add_subparsers(dest="command", required=True)
     gate = sub.add_parser("gate")
     gate.add_argument("--profile", choices=EARLY_PROFILES, required=True)

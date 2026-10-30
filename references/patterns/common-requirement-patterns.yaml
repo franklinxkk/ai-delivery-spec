@@ -31,7 +31,7 @@ patterns:
     required_questions: [功能权和数据权如何组合, 数据范围的组织层级是什么, 字段级限制是什么, 兼任委托离职如何处理]
     behavior_contract: [服务端授权, 查询过滤, 写入守卫, 越权审计, UI 显示仅作体验]
     exception_contract: [角色变更缓存, 跨组织引用, 导出泄露, 聚合小样本泄露]
-    acceptance_blueprints: [同角色不同范围, 跨租户拒绝, 字段脱敏, 权限变更生效]
+    acceptance_blueprints: [同角色不同范围, 跨租户拒绝, 字段脱敏, 身份切换或权限变更后草稿与在途请求及已打开页面的隔离]
     anti_patterns: [隐藏按钮等于权限, 管理员默认全权, 只验页面不验接口]
   - id: PAT-IMPORT-EXPORT-001
     name: 导入导出

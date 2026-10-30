@@ -1,3 +1,7 @@
+artifact: stage0_inventory
+artifact_role: supporting
+applicable_stages: [frame, explore, clarify, specify, change]
+applies_when: 对存量系统盘点可观察事实与推断；引用变更编号不代表已进入变更阶段。
 # Stage 0 存量盘点台账 / Stage 0 Brownfield Inventory
 # schema: schemas/stage0-inventory.schema.json
 schema_version: 5.4.1
@@ -5,144 +9,16 @@ inventory_id: INV-PROJECT-001
 inventory_status: in_progress   # in_progress | inventory_complete；complete 只证明来源与分类齐全
 target_status: draft            # 全部 inferred 项闭合前不得声明 baseline_ready
 
-# 已有正向 PRD 时声明基线；此后反推观察项只用 INV-*，不得另造 REQ-*
+# 已有基线时填入真实 REQ-*；观察项使用 INV-*，不能把观察当批准。
 baseline_requirement_refs: []
-
-# 推断项按责任人归入确认批次，在 baseline_ready 前批量确认、否决或转未知
-review_batches:
-  - id: RBATCH-CHECKOUT-001
-    owner: "{责任人}"
-    scope: "{批次范围}"
-    status: open
-
+review_batches: []
 items:
-  - id: INV-VIEW-ORDER-LIST
-    type: view                # view / action / handler / state / role / object / field / metric / handoff
-    source_ref: SRC-LEGACY-APP-001
-    source_location: "app/order/list.html"
-    classification: confirmed # confirmed | inferred | unknown | defect_candidate
-    core_behavior: true
-    # 存量页面处置方式（5.4.1 起建议 view 类条目必填）：
-    #   adopt_page          整页直接采用
-    #   inherit_layout      保留布局重做视觉
-    #   rebuild_interaction 保留业务流程重做交互
-    #   reuse_component     仅复用局部组件
-    #   discard             废弃重画（移除行为须有已批 CHG-* 或明确缩减范围）
-    disposition: inherit_layout
-    # 已有基线时 confirmed/inferred 项必须声明映射：
-    mapping_status: not_applicable   # mapped | unmapped | not_applicable
-    target_refs: []                  # mapped 时必须指向 baseline_requirement_refs 中的 REQ-*
-  - id: INV-ACT-ORDER-EXPORT
-    type: action
-    source_ref: SRC-LEGACY-APP-001
-    source_location: "app/order/list.html#export"
-    classification: inferred
-    core_behavior: true
-    disposition: rebuild_interaction
-    review_batch_ref: RBATCH-CHECKOUT-001   # inferred 项必须可归入确认批次
-  - id: INV-HANDLER-ORDER-EXPORT
-    type: handler
-    source_ref: SRC-LEGACY-APP-001
-    source_location: "app/order/export.js#handleExport"
-    classification: confirmed
-  - id: INV-OBJ-EXPORT-FILE
-    type: object
-    source_ref: SRC-LEGACY-APP-001
-    source_location: "app/order/export.js#result"
-    classification: inferred
-    review_batch_ref: RBATCH-CHECKOUT-001
-  - id: INV-STATE-EXPORT-READY
-    type: state
-    source_ref: SRC-LEGACY-APP-001
-    source_location: "app/order/export.js#ready"
-    classification: inferred
-    review_batch_ref: RBATCH-CHECKOUT-001
-  - id: INV-IDENTITY-EXPORT-ID
-    type: identity
-    source_ref: SRC-LEGACY-APP-001
-    source_location: "app/order/export.js#exportId"
-    classification: inferred
-    review_batch_ref: RBATCH-CHECKOUT-001
-  - id: INV-GUARD-ORDER-EXPORT
-    type: guard
-    source_ref: SRC-LEGACY-APP-001
-    source_location: "app/order/export.js#canExport"
-    classification: inferred
-    review_batch_ref: RBATCH-CHECKOUT-001
-  - id: INV-STATE-ORDER-ARCHIVED
-    type: state
-    source_ref: SRC-LEGACY-APP-001
-    source_location: "app/order/store.js"
+  - id: INV-ITEM-001
+    type: "{观察对象类型}"
+    source_ref: SRC-PROJECT-001
+    source_location: "{实际文件与位置}"
     classification: unknown
-    core_behavior: true
-    # 核心未知项必须登记 P0 UNK-*、owner 和 blocks_stage
-    unknown:
-      id: UNK-ORDER-ARCHIVED-001
-      priority: P0
-      owner: "{责任人}"
-      blocks_stage: baseline
-
-# 只为本轮必须走通的关键存量链声明；旧台账可暂时省略，但有 core action/handler 时门禁会返回 GAP。
-# 一旦声明，必须逐链盘点 action → handler/系统处理 → 输出对象/状态/版本/身份 → 下一入口/守卫，
-# 并显式审计 failure / return / retry / compensation。这里记录“观察到什么”，不决定目标状态机。
-critical_chains:
-  - id: INV-CHAIN-ORDER-EXPORT
-    title: "订单导出到结果领取"
-    source_ref: SRC-LEGACY-APP-001
-    source_location: "app/order/list.html#export"
-    assessment_status: assessed   # in_progress | assessed；assessed 也可得出 broken/unknown
-    links:
-      - id: INV-LINK-ORDER-EXPORT
-        action_ref: INV-ACT-ORDER-EXPORT
-        processing_refs: [INV-HANDLER-ORDER-EXPORT]
-        outputs:
-          objects: {status: observed, refs: [INV-OBJ-EXPORT-FILE]}
-          states: {status: observed, refs: [INV-STATE-EXPORT-READY]}
-          versions: {status: not_applicable, refs: [], note: "源处理器未观察到版本语义"}
-          identities: {status: observed, refs: [INV-IDENTITY-EXPORT-ID]}
-        next_entry: {status: unknown, refs: [], note: "源码未发现结果领取入口"}
-        next_guard: {status: unknown, refs: [], note: "下一入口未知，守卫无法确认"}
-        reachability: unknown      # reachable | broken | unknown | terminal
-        source_ref: SRC-LEGACY-APP-001
-        source_location: "app/order/export.js#handleExport"
-        break_refs: [INV-BREAK-ORDER-EXPORT-NEXT]
-    recovery_paths:
-      failure:
-        status: observed
-        entry_refs: [INV-VIEW-ORDER-LIST]
-        guard_refs: [INV-GUARD-ORDER-EXPORT]
-        outcome_refs: []
-        break_refs: []
-        source_ref: SRC-LEGACY-APP-001
-        source_location: "app/order/export.js#onError"
-      return: {status: not_applicable, entry_refs: [], guard_refs: [], outcome_refs: [], break_refs: [], note: "源流程无独立退回动作"}
-      retry:
-        status: observed
-        entry_refs: [INV-VIEW-ORDER-LIST]
-        guard_refs: [INV-GUARD-ORDER-EXPORT]
-        outcome_refs: []
-        break_refs: []
-        source_ref: SRC-LEGACY-APP-001
-        source_location: "app/order/list.html#export"
-      compensation: {status: not_applicable, entry_refs: [], guard_refs: [], outcome_refs: [], break_refs: [], note: "源处理器未观察到跨对象写入"}
-    break_refs: [INV-BREAK-ORDER-EXPORT-NEXT]
-
-# 只有所有 declared chain 均已证据化评估且没有 missing/unknown/broken 时才允许为空。
-reachability_breaks:
-  - id: INV-BREAK-ORDER-EXPORT-NEXT
-    chain_ref: INV-CHAIN-ORDER-EXPORT
-    link_ref: INV-LINK-ORDER-EXPORT
-    path_kind: next_entry
-    classification: unknown       # unknown | defect_candidate；仍只是盘点结论，不是目标需求
-    source_ref: SRC-LEGACY-APP-001
-    source_location: "app/order/export.js#handleExport"
-    description: "导出完成后没有观察到用户可继续领取结果的入口及守卫"
-    unknown:
-      id: UNK-ORDER-EXPORT-NEXT
-      priority: P0
-      owner: "{责任人}"
-      blocks_stage: baseline
-
-# 多版本 PRD/原型候选基线；超过一个时由 DEC-CONFLICT-* 裁决
+# 实际观察后再填 action → 处理 → 输出 → 下一入口/守卫，以及失败、退回、重试与补偿。
+# critical_chains: 按实际观察添加关键链；未观察不能填 assessed/observed。
+reachability_breaks: []
 canonical_candidates: []
-# conflict_decision_ref: DEC-CONFLICT-XXX   # 候选基线超过一个时必填

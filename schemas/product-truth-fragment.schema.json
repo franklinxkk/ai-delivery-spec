@@ -6,6 +6,10 @@
   "additionalProperties": false,
   "required": ["schema_version", "fragment_id", "truth_id", "content"],
   "properties": {
+    "artifact": {"const": "product_truth_fragment"},
+    "artifact_role": {"const": "supporting"},
+    "applicable_stages": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["frame", "explore", "intake", "clarify", "specify", "review", "baseline", "implementation", "change", "acceptance", "closed"]}},
+    "applies_when": {"type": "string", "minLength": 1},
     "schema_version": { "enum": ["5.0.2", "5.1.0"] },
     "fragment_id": { "type": "string", "pattern": "^FRAG-[A-Z0-9-]+$" },
     "truth_id": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$" },

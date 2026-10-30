@@ -1,4 +1,9 @@
 ---
+artifact: unified_prd
+artifact_role: main
+stage: specify
+applicable_stages: [specify]
+applies_when: 需求需要多模块说明时使用；沿用现有骨架、就地集中规则。
 artifact_mode: prd
 baseline_version: "0.1-draft"
 status: draft

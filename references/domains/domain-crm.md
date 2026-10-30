@@ -7,6 +7,12 @@ Use this file for CRM, sales pipeline, customer service, partner service, custom
 
 This file validates that the domain module contract can migrate beyond traffic safety.
 
+## 中文导读
+
+覆盖线索、客户、商机、合同、回款、服务工单与续约。重点检查对象转化、归属与协作、金额和状态的一致性，避免把签约、开票、回款及收入确认当成同一结果。
+
+常用名称：客户管理、销售管理、CRM、客户关系、销售漏斗。以下中文提示是现有章节的阅读入口，不新增项目规则；需要详细依据时阅读对应原文和来源。
+
 ## Contents
 
 - Domain Purpose
@@ -90,6 +96,10 @@ operating response, not from a list of tables or fashionable AI features.
 
 ## Aggregates and Entities
 
+**中文阅读提示**
+
+**客户去重**（重复客户、合并客户、deduplication、dedupe、customer deduplication、customer dedupe、customer dedup、dedup）：合并客户前确定身份依据与关联数据归属，名称相同不等于同一客户。
+
 | Aggregate | Owns | Key States | Notes |
 |---|---|---|---|
 | Lead | source, owner, first response, qualification | new / assigned / contacted / converted / invalid |
@@ -129,6 +139,10 @@ events:
 
 ## State Machines
 
+**中文阅读提示**
+
+**商机阶段**（商机、销售阶段、赢单、丢单、opportunity、pipeline）：阶段变化要说明允许者、必要条件和结果；概率不是已经实现的收入。
+
 ```text
 Lead: new -> assigned -> contacted -> converted | invalid
 Opportunity: qualified -> proposal -> poc -> negotiation -> won | lost
@@ -142,6 +156,12 @@ Demand: new -> reviewed -> scheduled -> released | rejected
 ```
 
 ## Metric / Indicator Governance
+
+**中文阅读提示**
+
+**客户续约**（续费、流失、续签、renewal、churn）：明确到期范围、续约窗口、客户去重与合同金额，不把活跃等同续约。
+
+**合同回款**（应收、收款、回款核销、payment、collection）：合同额、已收款、应收余额与收入分别计算，退款和撤销需回到原交易核对。
 
 | Metric | Caliber | Source | Owner |
 |---|---|---|---|
@@ -182,6 +202,12 @@ Demand: new -> reviewed -> scheduled -> released | rejected
 
 ## Core Workflows
 
+**中文阅读提示**
+
+**客户工单**（售后、客诉、投诉、服务单、ticket、complaint）：服务请求从受理到分派、解决、关闭应有责任人与可核验结果。
+
+**销售线索**（线索、潜客、潜在客户、lead）：说明线索如何分配、去重、转为客户或商机，失败与重复转化不能制造重复对象。
+
 | Workflow | Trigger | End State |
 |---|---|---|
 | lead response | lead imported/created | contacted or invalid |
@@ -194,6 +220,10 @@ Demand: new -> reviewed -> scheduled -> released | rejected
 | renewal/churn intervention | renewal risk signal appears | renewal plan closed as renewed/churned |
 
 ## Role Path Patterns
+
+**中文阅读提示**
+
+**客户归属**（客户负责人、客户池、公海池、customer ownership、account hierarchy）：客户负责人、共享协作与可见范围分别定义，转交后核对旧负责人权限。
 
 | Role | Entry | Core Actions | Forbidden Actions | Exit |
 |---|---|---|---|---|

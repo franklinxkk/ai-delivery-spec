@@ -1,3 +1,8 @@
+artifact: change_request
+artifact_role: main
+stage: change
+applicable_stages: [change]
+applies_when: 已定基线发生变更时记录影响与授权。
 schema_version: 5.1.0
 change_id: CHG-CORE-001
 title: "{change title}"
@@ -9,9 +14,8 @@ target_version: "1.1"
 decision_owner: "{decision owner}"
 request:
   requester: "{requester}"
-  requested_at: "2026-01-01T00:00:00Z"
+  # requested_at: 仅填写实际提出时间
   authority: "{minutes/contract/approved request}"
-  urgency: normal
   seed_refs: [REQ-CORE-001]
   before: "{approved behavior}"
   after: "{proposed behavior}"
@@ -48,11 +52,7 @@ compatibility:
   consumer_actions: []
 approvals: []
 synchronization: []
-audit_log:
-  - actor: "{requester}"
-    action: submitted
-    at: "2026-01-01T00:00:00Z"
-    reason: "{change reason}"
+audit_log: []
 verification:
   acceptance_refs: []
   regression_refs: []

@@ -10,6 +10,12 @@ and enterprise intelligent office scenarios.
 This is a replaceable domain module. Public protocol files must stay
 domain-neutral.
 
+## 中文导读
+
+覆盖组织权限、待办审批、公文、会议、任务督办、知识与电子签章。重点是工作对象、责任交接和正式结果，区分通知、审批、发文、签署及归档。
+
+常用名称：办公、协同办公、OA、办公自动化、组织管理、政务办公。以下中文提示是现有章节的阅读入口，不新增项目规则；需要详细依据时阅读对应原文和来源。
+
 ## Contents
 
 - Domain Purpose
@@ -177,6 +183,10 @@ events:
 
 ## State Machines
 
+**中文阅读提示**
+
+**审批流转**（审批、会签、或签、加签、退回、approval、workflow）：节点处理者、允许动作、条件和流转结果需一致；通知到达不等于审批完成。
+
 ```text
 WorkItem: pending -> read -> processing -> closed
 WorkItem: pending | processing -> overdue -> escalated -> closed
@@ -265,6 +275,12 @@ ai_office_context_source:
 
 ## Content / Knowledge Assets
 
+**中文阅读提示**
+
+**公文管理**（发文、收文、拟稿、签发、official document）：文稿、正式编号、签发和发布有不同权威；历史证据与当前修改分开。
+
+**档案归档**（归档、档案、保管期限、archive、retention）：归档对象、正式版本、保管和更正需要可追溯，不能只用文件名判断权威。
+
 | Asset | Use | Governance |
 |---|---|---|
 | workflow templates | request/approval lifecycle | owner, version, effective date, deprecation |
@@ -288,6 +304,12 @@ is deliberately deferred.
 
 ## Core Workflows
 
+**中文阅读提示**
+
+**报销费用**（报销、费用申请、差旅、reimbursement、expense）：申请、审批、付款和入账分别有结果，失败重试须避免重复支付。
+
+**任务督办**（待办、催办、办结、任务闭环、task、supervision）：任务分派、处理、验收和关闭需要可见证据，超期或拒绝须能继续处理。
+
 | Workflow | Actors | Trigger | State Change | Success Result |
 |---|---|---|---|---|
 | unified todo handling | employee/manager | todo created by workflow/document/task | pending -> processing -> closed | work item closed with evidence |
@@ -302,6 +324,10 @@ is deliberately deferred.
 | mobile approval | mobile employee/manager | todo opened on mobile | pending -> processed | server-validated action with fallback |
 
 ## Role Path Patterns
+
+**中文阅读提示**
+
+**委托交办**（临时授权、代办、转交、改派、delegation、assignment）：委托对象、范围、生效和到期分别定义，旧待办和正在提交的动作需要重查资格。
 
 | Role | Entry | Core Actions | Forbidden Actions | Exit |
 |---|---|---|---|---|
@@ -352,6 +378,12 @@ Mobile rules:
   data permission, and domain events.
 
 ## Policy / Privacy Constraints
+
+**中文阅读提示**
+
+**组织权限**（机构、部门、超管、超级管理员、数据范围、租户隔离、org permission、access control、administrator）：分别说明组织边界、角色、数据范围与动作授权；权限名称不能代替具体授权条件，继承和例外以项目确认的规则为准。
+
+**电子签章**（用印、盖章、电子签名、e-signature、seal）：印章或签名使用需明确操作者、对象及授权，不能把预览当正式签署。
 
 - Data minimization: every role path must justify access to org, person,
   document, approval opinion, finance, HR, legal, or meeting content.

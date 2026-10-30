@@ -110,7 +110,7 @@ def test_release_package_rejects_dirty_or_untraceable_source() -> None:
 def test_turn_budget_fails_closed() -> None:
     with tempfile.TemporaryDirectory(prefix='ads-deadlock-') as temp:
         work = Path(temp)
-        contract = yaml.safe_load((ROOT / 'references/templates/discovery-contract-template.yaml').read_text(encoding='utf-8'))
+        contract = yaml.safe_load((ROOT / 'maintainer/examples/discovery-contract-example.yaml').read_text(encoding='utf-8'))
         contract.update({'contract_id': 'DISC-DEADLOCK-001', 'project_id': 'deadlock-test'})
         contract['sources'][0].update({'id': 'SRC-DEADLOCK-001', 'path': 'test input'})
         contract['unknowns'][0].update({'id': 'UNK-DEADLOCK-001', 'owner': 'test owner'})
@@ -164,7 +164,7 @@ def test_invalid_change_does_not_replace_stable_checkpoint() -> None:
         run(MANAGER, 'verify', '--state', str(state0))
 
 def test_structured_clarification_closes_only_named_unknowns() -> None:
-    contract = yaml.safe_load((ROOT / 'references/templates/discovery-contract-template.yaml').read_text(encoding='utf-8'))
+    contract = yaml.safe_load((ROOT / 'maintainer/examples/discovery-contract-example.yaml').read_text(encoding='utf-8'))
     contract.update({'contract_id': 'DISC-X', 'project_id': 'test'})
     contract['sources'][0].update({'id': 'SRC-X', 'path': 'input'})
     contract['unknowns'][0].update({'id': 'UNK-X', 'owner': 'owner'})

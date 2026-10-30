@@ -1,3 +1,10 @@
+---
+artifact: decision_record
+artifact_role: supporting
+applicable_stages: [explore, clarify, specify, review, baseline, change]
+applies_when: 确需独立记录选择理由与授权时使用；已有模块内决定优先复用。
+---
+
 # 决策记录：{议题}
 
 优先复用现有PRD、变更单或评审记录中的DEC；确有独立记录用途时才使用本文件。同一决定只维护一处。

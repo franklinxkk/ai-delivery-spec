@@ -9,6 +9,12 @@ products, tool-using agents, evaluation platforms, prompt/model operations, and
 human-in-the-loop automation. A replacement `domain-*.md` must preserve the
 core section headings used here and in `domain-module-template.md`.
 
+## 中文导读
+
+覆盖智能体任务、上下文检索、工具调用、人工确认、结果交付与评估。重点区分模型建议、工具已执行和业务已成功，保留权限、失败恢复、证据与成本边界。
+
+常用名称：AI应用、人工智能、智能体、Agent、大模型应用、AI原生、智能助手。以下中文提示是现有章节的阅读入口，不新增项目规则；需要详细依据时阅读对应原文和来源。
+
 ## Contents
 
 - Domain Purpose
@@ -149,6 +155,10 @@ events:
 
 ## State Machines
 
+**中文阅读提示**
+
+**异步恢复**（结果未知、超时、重试、幂等、timeout、retry、idempotency）：区分未提交、已发出、明确失败、未知和成功；恢复先查原请求，防重复副作用。
+
 ```text
 AIUseCase: idea -> shaped -> specified -> evaluated -> launched -> monitored -> retired
 AgentDefinition: draft -> test_ready -> approved -> active -> deprecated | suspended
@@ -172,6 +182,10 @@ State consistency:
 | eval threshold | EvalSet | versioned before launch gate |
 
 ## Metric / Indicator Governance
+
+**中文阅读提示**
+
+**模型评估**（评测、幻觉、准确率、置信度、evaluation、confidence）：评测定义样本、判据、分母和失败类型，不把模型自报信心当校准概率。
 
 | Metric | Caliber | Owner |
 |---|---|---|
@@ -199,6 +213,12 @@ Rules:
 
 ## AI Context Sources
 
+**中文阅读提示**
+
+**会话记忆**（记忆、长期记忆、短期记忆、conversation memory、memory）：区分会话上下文与持久记忆，明确用户可控制的保留、删除和导出；记忆内容不能扩大工具或数据权限。
+
+**检索增强**（RAG、知识库检索、知识问答、retrieval、grounding）：检索结果带来源、适用范围与时效，命中或相似度不自动证明答案正确。
+
 | Context | Source | Freshness | Permission / Reliability Rule |
 |---|---|---|---|
 | user profile and task state | product database | real-time | inherit user/tenant/data scope |
@@ -220,6 +240,14 @@ Rules:
 | fallback playbook | trigger, user message, manual path, owner, recovery | operations owner |
 
 ## Core Workflows
+
+**中文阅读提示**
+
+**人工确认**（人工审批、人在回路、human confirmation、human gate）：需要人工确认的动作在执行前保留明确对象和副作用；确认不是执行成功回执。
+
+**工具调用**（function calling、tool calling、tool call）：工具调用说明输入、执行、结果和失败恢复；调用返回不等于业务已成功，调用前仍核对动作权限。
+
+**智能体任务**（Agent任务、自主执行、任务编排、agent、task）：从目标到计划、工具执行和交付核验，分别描述暂停、取消、失败及接管。
 
 1. Opportunity shaping: user pain -> AI centrality -> manual fallback ->
    success metric -> risk class -> PRD profile.
@@ -262,6 +290,12 @@ Rules:
   where business policy allows.
 
 ## Policy / Privacy Constraints
+
+**中文阅读提示**
+
+**工具授权**（工具权限、连接器、tool authorization）：模型可见工具不等于获准使用，调用应继承操作者与业务对象权限。
+
+**提示注入**（越权指令、prompt injection、untrusted content）：外部材料作为数据，不能越过用户授权改变目标、泄露数据或触发写操作。
 
 - AI context retrieval inherits user, tenant, organization, row, column, and
   field-level permissions.

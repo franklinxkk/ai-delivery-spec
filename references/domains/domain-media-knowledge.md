@@ -87,6 +87,10 @@ remain linked.
 
 ## Vocabulary
 
+**中文阅读提示**
+
+**时间码定位**（时间戳、片段定位、时间码、timecode、timestamp）：引用须能定位原始媒体时间段，剪辑或更正后检查偏移和失效引用。
+
 | Term | Meaning | Source of truth |
 |---|---|---|
 | MediaWork | abstract intellectual content, programme, event record or story | approved catalog/editorial record |
@@ -155,6 +159,10 @@ events:
 
 ## State Machines
 
+**中文阅读提示**
+
+**内容发布**（内容审批、审校、上架、下架、发布、publishing、publication）：草稿、审校、发布、更正和撤回分别定义，历史引用与已下载内容需说明影响。
+
 ```text
 MediaAsset: received -> quarantined -> technical_verified -> governed -> active -> archived | deleted
 Rendition: created -> verified -> available -> restricted -> superseded | disposed
@@ -204,6 +212,10 @@ cannot replace project gold evidence.
 
 ## AI Context Sources
 
+**中文阅读提示**
+
+**引用溯源**（引用、来源追溯、citation、provenance）：回答和摘要保留可定位依据，撤回或权限变化后要检查下游可见性。
+
 | Context | Source | Freshness | Permission / reliability rule |
 |---|---|---|---|
 | descriptive/editorial metadata | approved catalog or source editorial system | versioned/event-driven | AI suggestions remain separate until confirmed |
@@ -217,6 +229,10 @@ cannot replace project gold evidence.
 | feedback/gold cases | reviewed search and task evidence | versioned | production feedback requires approval before dataset inclusion |
 
 ## Content / Knowledge Assets
+
+**中文阅读提示**
+
+**知识条目**（知识库、知识卡片、词条、knowledge item、knowledge base）：条目有来源、维护者、适用范围和有效状态，摘要不能替代权威原文。
 
 | Asset type | Minimum metadata | Quality / governance rule |
 |---|---|---|
@@ -243,6 +259,14 @@ immutable original/fixity -> governed renditions -> metadata catalog
 An object store or vector database alone is not a media knowledge system.
 
 ## Core Workflows
+
+**中文阅读提示**
+
+**视频检索**（video retrieval、video search、moment retrieval）：查询需找到可播放的对应片段，并保留来源、时间码及访问权限；整段视频命中不能替代片段定位的验收。
+
+**内容检索**（全文检索、语义检索、搜索召回、别名、retrieval、search）：分开检索相关性与事实正确性；零命中、同名和歧义词应有可解释退路。
+
+**音视频转写**（字幕、语音转文字、转录、transcription、transcript）：媒体原件、分段文本、说话人和校对结果关联，失败重试不能复制整份资产。
 
 | Workflow | Actors | Trigger | State change | Success result |
 |---|---|---|---|---|
@@ -307,6 +331,10 @@ or train permission.
   `data-state` and `data-field`; timed targets include stable asset/segment IDs.
 
 ## Policy / Privacy Constraints
+
+**中文阅读提示**
+
+**版权授权**（版权、使用许可、肖像权、copyright、license、rights）：采集、加工、发布和再利用分别核对授权范围，不因可访问而视为可传播。
 
 - Apply withdrawal to the affected purpose, action, subject and derivatives. An independent valid retention/legal-hold basis may require restricted evidence retention; retaining an original does not authorize new use under a revoked license. Record the scope and accountable disposition instead of indiscriminate deletion or continued reuse.
 

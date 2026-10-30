@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import importlib.metadata
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -78,45 +79,66 @@ def object_hash(value: dict[str, Any], hash_field: str) -> str:
 
 def skill_version(path: Path) -> str:
     manifest = path / "SKILL.md" if path.is_dir() else path
-    match = re.search(r"\bv?(\d+\.\d+\.\d+)\b", manifest.read_text(encoding="utf-8"))
+    match = re.search(r"\bv?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)\b", manifest.read_text(encoding="utf-8"))
     return match.group(1) if match else "unknown"
 
 
 def git_commit() -> str:
-    result = subprocess.run(
-        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True, encoding="utf-8", capture_output=True, check=False
-    )
-    return result.stdout.strip() if result.returncode == 0 else "unavailable"
+    # ROOT may be a package inside another Git repository. A sibling project's
+    # commit is not a new version of this skill.
+    try:
+        result = subprocess.run(
+            ["git", "log", "-1", "--format=%H", "--", "."], cwd=ROOT,
+            text=True, encoding="utf-8", capture_output=True, check=False,
+        )
+    except OSError:
+        return "unavailable"
+    return result.stdout.strip() if result.returncode == 0 and result.stdout.strip() else "unavailable"
 
 
 def repository_fingerprint() -> tuple[str, bool]:
-    status = subprocess.run(
-        ["git", "status", "--porcelain=v1", "--untracked-files=all"],
-        cwd=ROOT, text=True, encoding="utf-8", capture_output=True, check=False,
-    )
-    diff = subprocess.run(
-        ["git", "diff", "--binary", "HEAD"], cwd=ROOT, capture_output=True, check=False
-    )
-    if status.returncode != 0:
-        entries: list[str] = []
-        for path in sorted(ROOT.rglob("*")):
-            if not path.is_file() or any(part in {".git", ".github", "__pycache__"} for part in path.parts):
-                continue
-            if path.suffix.lower() == ".pyc":
-                continue
-            entries.append(f"{path.relative_to(ROOT).as_posix()}:{sha256_file(path)}")
-        raw = "\n".join(entries).encode("utf-8")
-        return hashlib.sha256(raw).hexdigest(), False
-    status_text = status.stdout
-    extra: list[str] = []
-    for line in status_text.splitlines():
-        if not line.startswith("?? "):
-            continue
-        path = ROOT / line[3:]
-        if path.is_file():
-            extra.append(f"{line[3:]}:{sha256_file(path)}")
-    payload = status_text.encode("utf-8") + diff.stdout + "\n".join(extra).encode("utf-8")
-    return hashlib.sha256(payload).hexdigest(), bool(status_text.strip())
+    """Fingerprint this skill's files, not the enclosing repository's activity.
+
+    ls-files emits paths relative to its working directory; -z disables Git's
+    quoted-path presentation. Hash actual contents even when a file remains ??
+    across edits. Tracked deletions remain visible in the cached path listing.
+    """
+    try:
+        status = subprocess.run(
+            ["git", "status", "--porcelain=v1", "-z", "--untracked-files=all", "--", "."],
+            cwd=ROOT, capture_output=True, check=False,
+        )
+        files = subprocess.run(
+            ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "."],
+            cwd=ROOT, capture_output=True, check=False,
+        )
+        use_git = status.returncode == 0 and files.returncode == 0
+    except OSError:
+        use_git = False
+    if use_git:
+        names = {os.fsdecode(name) for name in files.stdout.split(b"\0") if name}
+        paths = [ROOT / name for name in names]
+        dirty = bool(status.stdout)
+    else:
+        paths = [path for path in ROOT.rglob("*")
+                 if not any(part in {".git", "__pycache__"} for part in path.relative_to(ROOT).parts)
+                 and path.suffix.lower() != ".pyc" and (path.is_file() or path.is_symlink())]
+        dirty = False
+    entries: list[tuple[str, str, str]] = []
+    for path in sorted(paths):
+        name = path.relative_to(ROOT).as_posix()
+        if path.is_symlink():
+            entries.append((name, "symlink", os.readlink(path)))
+        elif path.is_file():
+            entries.append((name, "file", sha256_file(path)))
+        elif not path.exists():
+            entries.append((name, "missing", ""))
+        else:
+            # A tracked gitlink/directory is still an explicit manifest entry;
+            # arbitrary sibling folders never enter this list.
+            entries.append((name, "directory", ""))
+    payload = json.dumps(entries, ensure_ascii=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest(), dirty
 
 
 def dependency_versions() -> dict[str, str]:

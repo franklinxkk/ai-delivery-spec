@@ -133,7 +133,7 @@ def test_one_review_cannot_launder_other_scopes_or_versions():
     doc = {"risk_facets": ["metric"], "baseline_version": "1.0", "requirement_ids": ["REQ-A", "REQ-B"],
            "semantic_reviews": [review()]}
     findings, routing = check_spec(doc, BODY)
-    assert any(f["ref"] == "metric_definition" and "REQ-B" in f["message"] for f in findings)
+    assert any(f["ref"].startswith("metric_definition:") and "REQ-B" in f["message"] for f in findings)
     assert routing["semantic_coverage"]["declared_covered"] == {"metric_definition": ["REQ-A"]}
     doc["semantic_reviews"] = [review(baseline_version="0.9")]
     assert "SPEC-REVIEW-BASELINE" in codes(doc)
@@ -145,7 +145,7 @@ def test_exclusion_is_scoped_and_does_not_prove_execution():
     doc = {"risk_facets": ["metric"], "baseline_version": "1.0", "requirement_ids": ["REQ-A"],
            "semantic_reviews": [review(result="not_applicable", reason="只调整标签，不改口径")]}
     findings, routing = check_spec(doc, BODY)
-    assert not any(f["ref"] == "metric_definition" for f in findings)
+    assert not any(f["ref"].startswith("metric_definition") for f in findings)
     assert "not independently authenticated" in routing["semantic_coverage"]["proof"]
     assert "implementation" in routing["not_proven"]
     del doc["semantic_reviews"][0]["reason"]

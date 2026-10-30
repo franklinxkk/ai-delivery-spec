@@ -1,6 +1,9 @@
-schema_version: 5.5.0
 artifact: requirement_intake
+artifact_role: main
 stage: intake
+applicable_stages: [intake]
+applies_when: 登记已知需求事实并判断下一步；不虚构优先级或负责人。
+schema_version: 5.5.0
 title: "{本次需要达成的结果}"
 # 只填已知事实。没有优先级、负责人、迭代或口径时不要制造默认值。
 # artifact_mode: direct # direct | card | prd；呈现方式与风险、治理分开

@@ -153,6 +153,7 @@ function renderReview(){
  all('[data-review-tab]').forEach(n=>n.hidden=n.dataset.reviewTab!==review.tab);
  all('[data-review-tab-target]').forEach(n=>n.setAttribute('aria-current',String(n.dataset.reviewTabTarget===review.tab)));
  all('[data-review-point],[data-review-example],[data-review-semantic-ref]').forEach(n=>n.hidden=n.dataset.reviewContext!==context);
+ all('.marker[data-review-context]').forEach(n=>n.hidden=n.dataset.reviewContext!==context);
  syncReviewDiagramContext(context);
  const count=records.filter(x=>['confirmed','accepted_with_gap'].includes(x.disposition)).length;
  q('[data-review-progress]').dataset.reviewProgressResolved=count;

@@ -1035,6 +1035,7 @@ class HandoffChecks:
             )
         expected_prd_hash = self._sha256(prd)
         prd_baseline_ids = collect_defined_ids(prd)
+        section_projection_paths=set()
         for review_path, review_document in self.review_workspace_contracts:
             if review_path not in prototype_resolved:
                 continue
@@ -1047,6 +1048,19 @@ class HandoffChecks:
                     str(baseline.get("requirement_ref", "")) if isinstance(baseline, dict) else "baseline",
                     affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
                 )
+            source_file = baseline.get("source_file") if isinstance(baseline, dict) else None
+            if source_file:
+                source_path = (review_path.parent / source_file).resolve()
+                import hashlib
+                if not source_path.is_file() or hashlib.sha256(source_path.read_bytes()).hexdigest() != baseline.get("source_file_sha256"):
+                    self.add("BLOCK", "PROTO-REVIEW-SOURCE-FILE-DRIFT", review_path,
+                             "权威源文件字节指纹不一致；不能用文本投影指纹代替 DOCX 指纹", str(source_file))
+            presentation=review_document.get('presentation',{})
+            if presentation.get('renderer')=='contextual-v1' and presentation.get('source_mode')=='document_sections':
+                from validators.contextual_review import check_document_sections
+                check_document_sections(self,review_path,prd,review_document)
+                section_projection_paths.add(review_path.resolve())
+                continue
             for point in review_document.get("review_points", []) or []:
                 if not isinstance(point, dict):
                     continue
@@ -1143,6 +1157,10 @@ class HandoffChecks:
                         related_refs=(coverage_id, point_ref),
                     )
 
+        # Explicit human-document mode is a different claim, not a successful
+        # synthetic ID join. Mixed/structured artifacts still take the full path.
+        if section_projection_paths==prototype_resolved:
+            return
         frontmatter = self._frontmatter(prd)
         declared_views = {str(item).upper() for item in frontmatter.get("page_contract_view_ids", []) if item}
         prd_actions = {item.upper() for item in re.findall(r"\bACT-[A-Z0-9-]+\b", prd, re.I)}
@@ -1176,7 +1194,7 @@ class HandoffChecks:
             prototype_metrics.update(item.upper() for item in re.findall(r"\bdata-metric\s*=\s*['\"](METRIC-[A-Z0-9-]+)['\"]", tags, re.I))
 
         for action in sorted(prototype_actions - prd_actions):
-            self.add("BLOCK", "HANDOFF-PROTOTYPE-ACTION-NOT-IN-PRD", prd_path, "prototype action is absent from the PRD baseline", action)
+            self.add("BLOCK", "HANDOFF-PROTOTYPE-ACTION-NOT-IN-PRD", prd_path, "prototype action ID has no mapping in the PRD baseline; this does not prove that its business behavior is undescribed", action)
         for ac_id in sorted(prototype_acs - prd_ac_refs):
             self.add("BLOCK", "HANDOFF-PROTOTYPE-AC-NOT-IN-PRD", prd_path, "prototype AC is absent from the PRD baseline", ac_id)
         if level in {"L2", "L3", "L4"}:

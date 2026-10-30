@@ -1,6 +1,9 @@
 ---
 artifact: requirement_brief
+artifact_role: main
 stage: clarify
+applicable_stages: [clarify]
+applies_when: 进入详细描述前，澄清范围、已定选择及仍影响实现的未知项。
 schema_version: 5.4.0
 version: "0.1"
 status: draft

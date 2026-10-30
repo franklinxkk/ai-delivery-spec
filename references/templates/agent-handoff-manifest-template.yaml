@@ -1,3 +1,7 @@
+artifact: agent_handoff_manifest
+artifact_role: supporting
+applicable_stages: [baseline, implementation, acceptance]
+applies_when: 仅在交接需要机器可消费的边界与引用时使用。
 schema_version: 5.3.0
 status: draft
 engineering_baseline_ref: null

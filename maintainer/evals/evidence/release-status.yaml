@@ -1,5 +1,5 @@
 schema_version: 5.3.0
-skill_version: 5.5.5
+skill_version: 5.5.6
 runtime: pure_v5
 domain_packs:
   count: 8
@@ -29,8 +29,20 @@ trace_release_proxy:
   effectiveness_limit: deterministic/private calibration repaired gaps; blind A/B,
     token/time and human ratings remain incomplete
 release_evidence:
+  verified_at: '2026-10-30'
+  scope: CR1 bounded repair of template neutrality, team reuse, package links,
+    Chinese retrieval and actionable diagnostics; local candidate, not publication
+  results:
+    initial_full_suite: 732_passed_2_skipped_15_subtests
+    independent_customization: original_failures_retained_repaired_and_retested
+    final_validation: see_CR1_delivery_receipt_and_evidence
+    model_generation: bounded_forward_trials_record_first_attempt_and_continuation_separately
+  evidence_boundary: No universal model reliability, real team conversion, production,
+    official TRACE rating or all-host upgrade guarantee. Two symlink tests need host
+    privileges; do not count skipped tests as passed.
+historical_556_pre_cr1_release_evidence:
   verified_at: '2026-10-26'
-  scope: 5.5.5 bounded cross-industry maintenance closure; deterministic tooling plus
+  scope: 5.5.6 bounded cross-industry maintenance closure; deterministic tooling plus
     synthetic model/UI evidence, not universal model or production certification
   results:
     pytest: 477_passed_15_subtests_48.72s
@@ -56,7 +68,7 @@ known_limitations:
   exposed impossible acceptance setup and swallowed persistence errors. Metric prototype
   did not close independently. Fault injection is controlled browser evidence, not
   real backend acceptance. Unequal harnesses are not a strict model benchmark.
-- 5.5.5 one-scenario comparison is not strictly blind. Single-run quick receiver tests
+- 5.5.6 one-scenario comparison is not strictly blind. Single-run quick receiver tests
   and project calibration do not establish stable benefit or human handoff quality.
   Not all 101 sources were reread; 18 stale records were resolved within their documented
   scope.
@@ -110,7 +122,7 @@ historical_554_release_evidence:
     publication: not_run
 historical_555_release_evidence:
   verified_at: '2026-10-25'
-  scope: 5.5.5 local maintenance; reading guidance, template and example. No new tests,
+  scope: 5.5.6 local maintenance; reading guidance, template and example. No new tests,
     installation, public release or customer acceptance.
   results:
     architecture: passed_2498_of_2500_entry_12611_of_13000_daily
@@ -129,7 +141,7 @@ historical_555_release_evidence:
     full release did not pass.
 historical_555_publication_maintenance:
   verified_at: '2026-10-26'
-  scope: 5.5.5 publication maintenance; final isolated full release checks; prior
+  scope: 5.5.6 publication maintenance; final isolated full release checks; prior
     bounded model evidence retained, not rerun or production acceptance
   results:
     pytest: 404_passed_final_isolated_release
@@ -145,3 +157,22 @@ historical_555_publication_maintenance:
   evidence_boundary: Full release validates scripts, references and package structure.
     Bounded generation/receiver evidence is retained locally; no stable relative benefit
     or human receiver benefit is claimed.
+
+internal_iteration_policy:
+  version: 5.5.6
+  decided_at: '2026-10-28'
+  authority: maintainer_explicit_instruction
+  publish_requires: maintainer_confirmation_of_github_submission
+  iteration_identity: build_date_and_file_hashes
+  note: Former local 5.5.7 content retained under 5.5.6 internal; old receipts are historical, not overwritten.
+
+current_candidate_review_20261030:
+  version: 5.5.6
+  status: release_prepared_not_published
+  targeted_tool_regressions: passed
+  browser_paths: notification_guards_state_axes_review_targets_readme_responsive
+  independent_receiver: partial_generation_and_template_migration_evidence
+  evidence_scope: bounded_local_checks_not_production_acceptance
+  current_official_rating: not_available
+  score_above_4_8: not_proven
+  publication: not_run

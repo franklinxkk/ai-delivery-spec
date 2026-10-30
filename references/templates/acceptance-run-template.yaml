@@ -1,13 +1,16 @@
+artifact: acceptance_run
+artifact_role: main
+stage: acceptance
+applicable_stages: [acceptance]
+applies_when: 记录已执行的验收及证据；不把计划当验收完成。
 schema_version: 5.1.0
 run_id: ARUN-CORE-001
 baseline_version: "1.0"
 environment: "{acceptance environment}"
 executor: "{executor}"
-executed_at: "2026-01-01T00:00:00Z"
-evidence_catalog:
-  - id: EVD-CORE-001
-    uri: https://example.invalid/evidence/EVD-CORE-001
-# pass 时先登记：{id: EVD-CORE-001, uri: evidence/AC-CORE-001.png, sha256: 可选}
+executed_at: null # 未执行不填写时间；执行后填写实际时间
+evidence_catalog: []
+# 执行后登记真实证据：id、uri（及可选 sha256）。
 items:
   - id: ARITEM-CORE-001
     acceptance_ref: AC-CORE-001
@@ -17,26 +20,9 @@ items:
     actual_result: ""
     evidence_refs: []
     defect_refs: []
-# residual_issues 为对象数组；每项必填 id/description/owner/disposition，
-# disposition ∈ fix_before_acceptance | accepted_risk | deferred | rejected。
-residual_issues:
-  - id: DEFECT-CORE-001
-    description: "{residual issue}"
-    owner: "{owner}"
-    disposition: deferred
-    due_criterion: "{closure criterion}"
+residual_issues: []
+# 已发现问题才填写 description、owner 和真实决定的 disposition，不能默认延期。
 conclusion: pending
-# conditions 为对象数组；每项必填 description/owner/due_criterion。
-conditions:
-  - description: "{acceptance condition}"
-    owner: "{owner}"
-    due_criterion: "{due criterion}"
-# sign_offs 为对象数组；每项必填 role/actor/decision/at，
-# decision ∈ approve | approve_with_conditions | reject。
-sign_offs:
-  - role: 客户验收人
-    actor: "{actor}"
-    decision: approve
-    at: "2026-01-01T00:00:00Z"
-    evidence_ref: EVD-CORE-001
-# accepted 时每条签署必须填写 evidence_ref，并能解析到 evidence_catalog 或本地相对路径。
+conditions: []
+sign_offs: []
+# 签认后填写 role、actor、decision、at；接受结论须绑定真实 evidence_ref。

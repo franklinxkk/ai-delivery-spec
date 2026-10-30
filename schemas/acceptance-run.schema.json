@@ -5,13 +5,26 @@
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "run_id", "baseline_version", "environment", "executor", "executed_at", "items", "conclusion", "sign_offs"],
+  "allOf": [{
+    "if": {"anyOf": [
+      {"required": ["items"], "properties": {"items": {"contains": {"required": ["result"], "properties": {"result": {"enum": ["pass", "fail", "blocked"]}}}}}},
+      {"required": ["conclusion"], "properties": {"conclusion": {"enum": ["accepted", "accepted_with_conditions", "rejected"]}}},
+      {"required": ["sign_offs"], "properties": {"sign_offs": {"minItems": 1}}}
+    ]},
+    "then": {"properties": {"executed_at": {"type": "string", "format": "date-time"}}}
+  }],
   "properties": {
+    "artifact": {"const": "acceptance_run"},
+    "artifact_role": {"const": "main"},
+    "applicable_stages": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["frame", "explore", "intake", "clarify", "specify", "review", "baseline", "implementation", "change", "acceptance", "closed"]}},
+    "applies_when": {"type": "string", "minLength": 1},
+    "stage": {"enum": ["acceptance"]},
     "schema_version": { "const": "5.1.0" },
     "run_id": { "type": "string", "pattern": "^ARUN-[A-Z0-9-]+$" },
     "baseline_version": { "type": "string", "minLength": 1 },
     "environment": { "type": "string", "minLength": 1 },
     "executor": { "type": "string", "minLength": 1 },
-    "executed_at": { "type": "string", "format": "date-time" },
+    "executed_at": { "type": ["string", "null"], "format": "date-time" },
     "evidence_catalog": {
       "type": "array",
       "items": {

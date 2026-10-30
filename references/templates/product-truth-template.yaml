@@ -1,3 +1,7 @@
+artifact: product_truth
+artifact_role: supporting
+applicable_stages: [specify, review, baseline, change, acceptance]
+applies_when: 明确需要机器治理的统一结构时使用；普通 PRD 不必另建。
 schema_version: 5.1.0
 truth_id: TRUTH-PRODUCT-001
 
@@ -33,19 +37,17 @@ sources:
     kind: user_input
     title: "{source title}"
     location: "{path, URL, meeting, or owner}"
-    content_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
     sensitivity: internal
-    credential_status: clear
     secret_refs: []
-    authority: accountable
-    status: active
+    authority: unknown
+    status: unknown
     disposition: embedded
     owner: "{source owner}"
 
 assertions:
   - id: AST-SCOPE-001
     statement: "{material product assertion}"
-    status: verified
+    status: proposed
     source_refs: [SRC-PROJECT-001]
     affected_refs: [MOD-CORE-001]
     owner: "{decision owner}"
@@ -63,9 +65,9 @@ roles:
 
 requirements:
   - id: REQ-CORE-001
-    title: "{approved requirement}"
-    stage: baselined
-    priority: P0
+    title: "{requirement under specification}"
+    stage: submitted
+    # priority: 仅录入已确定的优先级
     source_refs: [SRC-PROJECT-001]
     behavior_refs: [MOD-CORE-001, FLOW-CORE-001, VIEW-CORE-001, ACT-CORE-SUBMIT]
     acceptance_refs: [AC-CORE-001]
@@ -73,7 +75,7 @@ requirements:
     change_refs: []
     owner: "{product owner}"
     iteration: "{iteration}"
-    baseline_version: "1.0"
+    baseline_version: "{baseline version when known}"
     outcome: "{observable requirement result}"
 
 modules:
@@ -190,7 +192,7 @@ integrations: []
 acceptance:
   - id: AC-CORE-001
     title: "{acceptance scenario}"
-    priority: P0
+    # priority: 仅录入已确定的优先级
     type: happy
     preconditions: ["{role, data, state}"]
     steps: ["{action sequence}"]

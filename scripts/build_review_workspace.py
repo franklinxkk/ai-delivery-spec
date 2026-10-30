@@ -1,4 +1,4 @@
-"""Editable worked starter and deterministic offline HTML assembly; no business authoring."""
+"""Local contextual notes, worked review starter and offline assembly; no business authoring."""
 from __future__ import annotations
 import argparse
 import hashlib
@@ -16,7 +16,7 @@ GUIDE = '''# 可运行评审起点 / Runnable review starter
 1. requirement.md：先确定当前模块的任务、入口、字段规则、动作结果、拒绝/恢复和可判验收。内容必须来自本项目授权来源。
 2. layout.html + runtime.js：产品与业务模拟；先跑通一个完整主链及失败恢复，再扩展其他模块。保留实际存量功能，不为适配样例删页面。
 3. layout.html 的 aside：按当前动作写就近业务说明、前端反馈、后端守卫与写入、测试的具体输入和结果。review.json 是同一说明的机器映射；不是另一份业务真相。
-4. review.json：替换上下文、评审点、语义覆盖、来源/验收引用；保留通用合同。示例是 R1；R0 仅需就近阅读时按 references/review-workspace.md 裁剪辅助功能。
+4. review.json：替换上下文、评审点、语义覆盖、来源/验收引用；保留通用合同。init 可选 --review-level R0，自动省去分享、签署记录与进度；默认 R1 保留这些协作能力。
 5. style.css：根据本项目的布局约定调整，不改造成第二套产品。
 
 用 build 命令拼回单 HTML，自动绑定 requirement.md 的 UTF-8 文本 SHA256（CRLF/CR 归一化 LF）。不要手算 hash、整段重写大 HTML 或逆向检查器。分块编辑不影响最终单文件交付。
@@ -31,7 +31,11 @@ def text_hash(text: str) -> str:
     return hashlib.sha256(text.replace('\r\n', '\n').replace('\r', '\n').encode('utf-8')).hexdigest()
 
 
-def init_project(target: Path) -> dict:
+def init_project(target: Path, review_level: str = "R1", presentation_mode: str = "tabs") -> dict:
+    if presentation_mode not in {"tabs", "contextual"}:
+        raise ValueError("presentation_mode must be tabs or contextual")
+    if review_level not in {"R0", "R1"}:
+        raise ValueError("review_level must be R0 or R1")
     target = target.resolve()
     if target.exists() and (not target.is_dir() or any(target.iterdir())):
         raise ValueError('目标必须是不存在或为空的目录；不会覆盖现有成果 / destination must be empty')
@@ -48,13 +52,43 @@ def init_project(target: Path) -> dict:
     target.mkdir(parents=True, exist_ok=True)
     values = {'layout.html': layout, 'style.css': css[1], 'runtime.js': code[1],
               'review.json': json.dumps(json.loads(manifest[1]), ensure_ascii=False, indent=2) + '\n',
-              'requirement.md': (sample / 'requirement.md').read_text(encoding='utf-8'), 'EDITING.md': GUIDE}
+              'requirement.md': (sample / 'requirement.md').read_text(encoding='utf-8').replace('(review-prototype.html)', '(prototype.html)'), 'EDITING.md': GUIDE}
+    # The worked example's cold-read targets are not project decisions.
+    doc = json.loads(values['review.json'])
+    for key in ('time_limit_seconds', 'declared_point_recall_min', 'critical_point_recall'):
+        doc['cold_read_contract'].pop(key, None)
+    values['review.json'] = json.dumps(doc, ensure_ascii=False, indent=2) + '\n'
+    if review_level == "R0":
+        doc = json.loads(values['review.json'])
+        doc['workspace']['review_level'] = 'R0'
+        for key in ('share_contract', 'review_record_contract', 'progress_contract'):
+            doc.pop(key, None)
+        values['review.json'] = json.dumps(doc, ensure_ascii=False, indent=2) + '\n'
+        layout = values['layout.html'].replace('data-review-level="R1"', 'data-review-level="R0"')
+        layout = re.sub(r'<button\b[^>]*data-action="UIACT-REVIEW-(?:SHARE|RECORD|EXPORT|IMPORT)"[^>]*>.*?</button>', '', layout, flags=re.S)
+        layout = re.sub(r'<div\b[^>]*data-review-progress[^>]*>.*?</div>', '', layout, flags=re.S)
+        layout = re.sub(r'<fieldset id="record-editor">.*?</fieldset>|<div data-review-records>.*?</div>|<textarea id="review-json"[^>]*>.*?</textarea>', '', layout, flags=re.S)
+        values['layout.html'] = layout
+        values['requirement.md'] = values['requirement.md'].replace('或登记评审结论', '').replace(
+            '需求评审结论和业务完成记录是两个对象。前者按需求基线、上下文、评审点保存，可导入导出；不同基线不得复用。仅浏览评审点不计确认。刷新后工单数据与评审记录分别恢复；本地存储失败必须提示，不能宣称已经保存。',
+            '本次不登记或分享需求评审结论，不统计确认进度。业务工单及审计仍使用原有本地模拟存储；刷新后恢复业务数据，本地存储失败必须提示，不能宣称已经保存。')
+
+        runtime = values['runtime.js']
+        runtime = '\n'.join(line for line in runtime.splitlines() if not any(term in line for term in (
+            "q('[data-review-progress]')", "q('[data-review-records]')", "'UIACT-REVIEW-SHARE':", "'UIACT-REVIEW-RECORD':", "'UIACT-REVIEW-EXPORT':", "'UIACT-REVIEW-IMPORT':")))
+        # Keep unreachable helpers for shared source compatibility; no UI, handler or load can activate them.
+        runtime = runtime.replace('loadReviewRecords();renderProduct();hydrateLocator();', 'renderProduct();').replace('业务数据已重置；评审记录独立保留。','业务数据已重置。')
+        runtime = runtime.replace('fingerprint:captureProductFingerprint,shareLocator,resolveReviewTarget', 'fingerprint:captureProductFingerprint,resolveReviewTarget')
+        values['runtime.js'] = runtime
+    if presentation_mode == "contextual":
+        from contextual_starter import contextual_values
+        values = contextual_values(values)
     for name, text in values.items():
         (target / name).write_text(text, encoding='utf-8', newline='\n')
     return {'status': 'example_initialized_not_project_accepted', 'directory': str(target), 'files': list(values)}
 
 
-def build_project(directory: Path, output: Path | None = None) -> dict:
+def build_project(directory: Path, output: Path | None = None, source_document: Path | None = None) -> dict:
     directory = directory.resolve()
     output = (output or directory / 'prototype.html').resolve()
     inputs = {name: directory / name for name in FILES}
@@ -77,13 +111,27 @@ def build_project(directory: Path, output: Path | None = None) -> dict:
         document['cold_read_contract'].update(status='pending', evidence_refs=[])
     document['baseline']['hash'] = text_hash(contents['requirement.md'])
     document['baseline']['requirement_ref'] = 'requirement.md'
+    if source_document is not None:
+        source_document = source_document.resolve()
+        if not source_document.is_file() or not source_document.is_relative_to(directory):
+            raise ValueError('source document must be an existing file inside the project')
+        document['baseline']['source_file'] = source_document.relative_to(directory).as_posix()
+        document['baseline']['source_file_sha256'] = hashlib.sha256(source_document.read_bytes()).hexdigest()
+    elif document['baseline'].get('source_file'):
+        source = (directory / document['baseline']['source_file']).resolve()
+        if not source.is_relative_to(directory) or not source.is_file():
+            raise ValueError('source document missing or outside project')
+        document['baseline']['source_file_sha256'] = hashlib.sha256(source.read_bytes()).hexdigest()
+
     if output.parent != directory:
         raise ValueError('单文件输出放在输入目录以保持 PRD 引用有效 / output must stay beside requirement.md')
     if re.search(r'</script\b', contents['runtime.js'], re.I) or re.search(r'</style\b', contents['style.css'], re.I):
         raise ValueError('JS/CSS 包含会提前关闭内嵌资源的结束标签；请转义 / unsafe inline closing tag')
     values = {'@@ADS_MANIFEST@@': json.dumps(document, ensure_ascii=False).replace('<', '\\u003c'),
-              '@@ADS_STYLE@@': contents['style.css'], '@@ADS_RUNTIME@@': contents['runtime.js']}
+              '@@ADS_STYLE@@': contents['style.css'], '@@ADS_RUNTIME@@': (ROOT / 'scripts/review_target_runtime.js').read_text(encoding='utf8') + '\n' + contents['runtime.js']}
     layout = contents['layout.html']
+    if document.get("workspace", {}).get("presentation_mode") == "contextual" and 'data-review-tab-target=' in layout:
+        raise ValueError("contextual 声明与三页签导航不一致；build 仅装配，请编辑实际布局或使用 init --presentation-mode contextual")
     for token in values:
         if layout.count(token) != 1:
             raise ValueError('layout.html 须且仅须包含一个 ' + token)
@@ -98,11 +146,24 @@ def build_project(directory: Path, output: Path | None = None) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     subs = parser.add_subparsers(dest='command', required=True)
-    init = subs.add_parser('init'); init.add_argument('--output', type=Path, required=True)
-    build = subs.add_parser('build'); build.add_argument('--project', type=Path, required=True); build.add_argument('--output', type=Path)
+    init = subs.add_parser('init'); init.add_argument('--output', type=Path, required=True); init.add_argument('--review-level', choices=['R0', 'R1'], default='R1')
+    init.add_argument('--presentation-mode', choices=['tabs', 'contextual'], default='tabs',
+                      help='Review presentation: tabbed workspace or contextual right drawer')
+    build = subs.add_parser('build'); build.add_argument('--project', type=Path, required=True); build.add_argument('--output', type=Path); build.add_argument('--source-document', type=Path)
+    attach = subs.add_parser('attach', help='Attach project Markdown notes to an unchanged local product; not a formal R0/R1 workspace')
+    attach.add_argument('--prototype', type=Path, required=True)
+    attach.add_argument('--notes', type=Path, required=True)
+    attach.add_argument('--output', type=Path)
+    attach.add_argument('--language', choices=['zh', 'en'], default='zh')
     args = parser.parse_args()
     try:
-        result = init_project(args.output) if args.command == 'init' else build_project(args.project, args.output)
+        if args.command == 'attach':
+            from context_notes import attach_notes
+            result = attach_notes(args.prototype, args.notes, args.output, args.language)
+        elif args.command == 'init':
+            result = init_project(args.output, args.review_level, args.presentation_mode)
+        else:
+            result = build_project(args.project, args.output, args.source_document)
     except (OSError, ValueError, TypeError, KeyError) as exc:
         print('BLOCKED REVIEW-BUILD: ' + str(exc)); return 2
     print(json.dumps(result, ensure_ascii=False, indent=2)); return 0

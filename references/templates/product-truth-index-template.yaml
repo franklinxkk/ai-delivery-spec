@@ -1,3 +1,7 @@
+artifact: product_truth_index
+artifact_role: supporting
+applicable_stages: [specify, review, baseline, change, acceptance]
+applies_when: 已选择分片治理时定位片段；索引不代表阶段完成。
 schema_version: 5.1.0
 target_schema_version: 5.1.0
 truth_id: TRUTH-PRODUCT-001

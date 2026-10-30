@@ -22,6 +22,10 @@
     { "required": ["features"], "properties": { "features": { "minItems": 1 } } }
   ],
   "properties": {
+    "artifact": {"const": "product_truth"},
+    "artifact_role": {"const": "supporting"},
+    "applicable_stages": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["frame", "explore", "intake", "clarify", "specify", "review", "baseline", "implementation", "change", "acceptance", "closed"]}},
+    "applies_when": {"type": "string", "minLength": 1},
     "schema_version": { "enum": ["5.0.0", "5.1.0"] },
     "truth_id": { "$ref": "#/$defs/stableId" },
     "product": {
@@ -271,7 +275,7 @@
     "requirement": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "title", "stage", "priority", "source_refs", "behavior_refs", "acceptance_refs", "baseline_version"],
+      "required": ["id", "title", "stage", "source_refs", "behavior_refs", "acceptance_refs", "baseline_version"],
       "properties": {
         "id": { "$ref": "#/$defs/stableId" },
         "title": { "type": "string", "minLength": 1 },
@@ -291,7 +295,7 @@
     "feature": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "title", "scope_status", "priority", "source_refs", "behavior_refs", "acceptance_refs"],
+      "required": ["id", "title", "scope_status", "source_refs", "behavior_refs", "acceptance_refs"],
       "properties": {
         "id": { "$ref": "#/$defs/stableId" },
         "title": { "type": "string", "minLength": 1 },
@@ -493,7 +497,7 @@
     },
     "acceptance": {
       "type": "object",
-      "required": ["id", "title", "priority", "preconditions", "steps", "expected_visible", "expected_domain", "evidence_required"],
+      "required": ["id", "title", "preconditions", "steps", "expected_visible", "expected_domain", "evidence_required"],
       "properties": {
         "id": { "$ref": "#/$defs/stableId" },
         "title": { "type": "string" },

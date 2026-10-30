@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Validate the engineering annex inside one unified requirement PRD."""
+"""Use the current PRD contract by default; legacy annex rules are opt-in."""
 
 from __future__ import annotations
 
 import argparse
 import re
+import sys
 from pathlib import Path
 
 import yaml
@@ -99,10 +100,27 @@ def ai_contract_applicable(raw: str) -> bool:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("document", type=Path)
-    parser.add_argument("--level", choices=["L0", "L1", "L2", "L3", "L4"], default="L2")
+    parser.add_argument("--level", choices=["auto", "L0", "L1", "L2", "L3", "L4"], default="auto")
     parser.add_argument("--profile", choices=["full_prd", "slice"], default="full_prd")
     parser.add_argument("--domain-rules", type=Path)
+    parser.add_argument("--legacy", action="store_true", help="Explicitly run the historical annex/section-count contract")
+    parser.add_argument("--stage", default="specify", choices=["specify", "review", "baseline", "implementation", "acceptance", "closed"])
     args = parser.parse_args()
+    if not args.legacy:
+        if args.domain_rules:
+            parser.error("--domain-rules belongs to the legacy checker; pass --legacy explicitly, or review domain behavior with the current PRD gate")
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+        from quality_gate import Gate
+        gate = Gate()
+        gate.check_prd(args.document, level=args.level, stage=args.stage)
+        for item in gate.findings:
+            print(f"{item.severity} {item.code} {item.ref}: {item.message}")
+        blocks = any(item.severity == "BLOCK" for item in gate.findings)
+        gaps = any(item.severity == "GAP" for item in gate.findings)
+        print("BLOCKED" if blocks else "REVIEW_COMPLETE_WITH_GAPS" if gaps else "PASS: current scoped PRD contract")
+        return 2 if blocks else 1 if gaps else 0
+    if args.level == "auto":
+        args.level = "L2"
     raw = args.document.read_text(encoding="utf-8")
     text = raw.lower()
     failures: list[str] = []
@@ -154,7 +172,7 @@ def main() -> int:
         for failure in failures:
             print(f"FAIL: {failure}")
         return 1
-    print(f"PASS: unified PRD engineering annex satisfies current {args.level} requirement contract")
+    print(f"PASS: explicitly selected legacy {args.level} engineering-annex contract")
     return 0
 
 

@@ -7,6 +7,12 @@ Use this replaceable domain module for data-resource inventory and registration,
 
 This module is intentionally broader than a data mart checklist. It treats data products as an end-to-end system: source acquisition -> processing -> governance -> storage/retrieval -> semantic/ontology layer -> analytics/BI -> AI agents -> action/decision loop -> operations/evaluation.
 
+## 中文导读
+
+覆盖数据接入、清洗治理、数仓与检索、指标语义、报表分析、数据服务和智能问数。关注来源、粒度、维度、质量、权限与消费链路，避免列名相同就被当成同一业务含义。
+
+常用名称：数据、数据底座、数仓、数据中台、数据治理、数据产品、数据湖、BI、ChatBI。以下中文提示是现有章节的阅读入口，不新增项目规则；需要详细依据时阅读对应原文和来源。
+
 ## Contents
 
 - Domain Purpose
@@ -132,6 +138,10 @@ warehouse, or chatbot label.
 
 ## Aggregates and Entities
 
+**中文阅读提示**
+
+**维度建模**（维度列、维度、事实表、聚合根、dimension、grain、entity）：标识列用于定位主体，维度用于分组和过滤；维度相同不代表同一事实粒度。
+
 | Layer | Aggregates / Entities | Key Invariants |
 |---|---|---|
 | Source and ingestion | DataSource, Connector, SyncJob, StreamTopic, FileImport, Credential, BackfillTask | every ingest path has owner, auth, schema, cadence, idempotency, retry, and failure quarantine |
@@ -173,6 +183,10 @@ warehouse, or chatbot label.
 | ModelFeedbackAccepted | evaluated application feedback is approved as a dataset change | sampling backlog, label review, new dataset version; never mutate the old version |
 
 ## State Machines
+
+**中文阅读提示**
+
+**历史快照**（快照、历史取值、历史口径、snapshot、version）：区分当前定义、当时证据与当前观察；历史是否重算和变更何时生效由项目决定。
 
 Data source:
 
@@ -248,6 +262,12 @@ For each in-scope transition, define authority, preconditions, resulting data/st
 
 ## Metric / Indicator Governance
 
+**中文阅读提示**
+
+**数据质量**（缺数、空值、缺失、异常值、时效、quality、freshness）：区分零、缺失、异常、陈旧和无权限；有效性与业务正常是两个判断。
+
+**指标口径**（指标库、指标、指标值列、统计主体列、统计口径、单值、多值、metric、indicator、metric definition、indicator definition）：明确统计主体、粒度、指标值、维度、单位、周期和空零；配置保存后必须由实际查询或判定消费。
+
 AI+Data PRDs must separate data correctness from business meaning. For every trusted metric, specify all layers below.
 
 ### Indicator Layering
@@ -302,6 +322,10 @@ AI+Data PRDs must separate data correctness from business meaning. For every tru
 | history data recalculates | keep old/new version markers and user-facing explanation |
 
 ## AI Context Sources
+
+**中文阅读提示**
+
+**数据血缘**（依赖分析、影响分析、血缘、lineage、data lineage）：来源、变换、指标和报表之间保留依赖，定义变化后核对实际消费者。
 
 Data agents and ChatBI must be grounded in governed context rather than raw table guessing.
 
@@ -360,6 +384,12 @@ data_agent_contract:
 
 ## Content / Knowledge Assets
 
+**中文阅读提示**
+
+**高质量数据集**（数据标注、训练集、测试集、dataset、annotation）：训练、验证、测试与反馈样本分开，记录来源、授权、标注和评估污染边界。
+
+**数据资产**（数据目录、元数据、数据登记、catalog、metadata、registration）：登记和目录有助定位来源，不自动证明权属、质量或可用范围。
+
 | Asset | Required Metadata |
 |---|---|
 | Source catalog | source name, system, credential owner, schema, cadence, SLA, classification |
@@ -383,6 +413,12 @@ data_agent_contract:
 | Runbook | freshness, incident, rollback, cost, access review, retirement |
 
 ## Core Workflows
+
+**中文阅读提示**
+
+**智能问数**（自然语言查数、问数、NL2SQL、ChatBI、Data Agent）：问题先对应已确认的指标与维度，展示来源和口径，写入动作另校验权限和确认。
+
+**数据接入**（取数、SQL、数据源、批量扫描、刷新频率、ingestion、connector、batch）：取数计划、增量或全量、失败重试和后续消费分开描述，查询失败不能当作零值。
 
 | Workflow | Minimum Steps |
 |---|---|
@@ -450,6 +486,10 @@ data_agent_contract:
 | fill-in mobile | task card, sys locked values, ext editable cells, save/submit | filling/submitted/returned/overdue/offline |
 
 ## Policy / Privacy Constraints
+
+**中文阅读提示**
+
+**数据权限**（行权限、列权限、数据范围、租户、机构隔离、row-level、column-level、RBAC、ABAC）：数据范围在查询、导出、缓存和智能回答中保持一致，不能只在前端隐藏。
 
 - Apply row-level, column-level, action-level, and agent-tool-level permissions before query generation, aggregation, export, or writeback.
 - Do not let agents bypass semantic model, source freshness, lineage, sensitivity labels, or user data scope.

@@ -16,6 +16,12 @@ rule, cross-border data rule, or local policy threshold must be verified against
 the latest official source and the hospital's accountable governance owner
 before PRD signoff.
 
+## 中文导读
+
+覆盖患者与就诊、医嘱、检验检查、病历、结算和医疗数据交换。重点是患者身份、临床责任、状态回执和敏感数据授权；软件流程不能替代医疗判断。
+
+常用名称：医疗、医院、医疗信息化、院内系统、HIS、EMR。以下中文提示是现有章节的阅读入口，不新增项目规则；需要详细依据时阅读对应原文和来源。
+
 ## Contents
 
 - Domain Purpose
@@ -115,6 +121,10 @@ clinical workflow, and legally traceable evidence.
 
 ## Aggregates and Entities
 
+**中文阅读提示**
+
+**患者身份**（病人、患者、就诊人、patient、patient identity）：区分自然人、就诊记录和住院记录，核对合并身份及重复登记后的数据归属。
+
 | Aggregate | Owns | Key States | Notes |
 |---|---|---|---|
 | Patient | identity, MPI link, demographics, contact, consent | active / merged / archived / restricted | patient identity must be deduplicated and auditable |
@@ -162,6 +172,10 @@ events:
 ```
 
 ## State Machines
+
+**中文阅读提示**
+
+**医嘱执行**（医嘱、处方、开单、order、prescription）：下达、审核、执行、撤销与回执状态分别判断，执行过的动作不能仅删除界面记录。
 
 ```text
 Encounter: registered -> in_consultation -> completed -> archived
@@ -248,6 +262,10 @@ medical_ai_context_source:
 
 ## Content / Knowledge Assets
 
+**中文阅读提示**
+
+**电子病历**（病历、病案、EMR、electronic medical record）：病历草稿、签署、归档及更正的责任和读取范围不同，不能把保存当签署。
+
 | Asset | Use | Governance |
 |---|---|---|
 | clinical guidelines and pathways | CDSS, patient education, record review | approved version, effective date, owner department |
@@ -258,6 +276,12 @@ medical_ai_context_source:
 | de-identification rules | research and data export | privacy owner, irreversible/reversible rule, audit proof |
 
 ## Core Workflows
+
+**中文阅读提示**
+
+**检验检查**（化验、检查报告、检验报告、laboratory、diagnostic）：申请、采样、执行、结果审核与发布须保持对象一致，迟到或更正结果保留来源。
+
+**医疗结算**（医保、费用结算、退费、billing、settlement）：收费、支付、退费与结算回执分别说明，失败及未知结果避免重复扣费。
 
 | Workflow | Happy Path | Required Exceptions |
 |---|---|---|
@@ -310,6 +334,12 @@ Mobile/field rules:
   signature, prescription, and research export must wait for server validation.
 
 ## Policy / Privacy Constraints
+
+**中文阅读提示**
+
+**医疗互认**（结果互认、检查互认、mutual recognition）：区分可交换、可读取与可用于医疗决策；适用范围和来源有效性需要核实。
+
+**医疗隐私**（健康数据、医疗数据、患者隐私、health data）：读取、导出、共享和代理访问须继承患者数据权限及用途边界。
 
 - Minimum necessary data: every role path must state why the user can access
   the patient, encounter, department, or dataset.

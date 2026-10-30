@@ -1,0 +1,47 @@
+# Synthetic worked example for lifecycle regressions; not a project decision.
+artifact: discovery_contract
+artifact_role: supporting
+applicable_stages: [frame, explore, intake, clarify]
+applies_when: 复杂澄清需保存问题边界、来源和未决事项时使用。
+schema_version: 5.1.0
+contract_id: DISC-PROJECT-001
+project_id: project-001
+product:
+  name: "{product or project name}"
+  outcome: "{known outcome or empty while unresolved}"
+  outcome_status: unknown
+  scope: []
+  scope_status: unknown
+delivery_context:
+  lifecycle_stage: intake
+  shape: greenfield
+  mode: standard
+  tier: L2
+  ai: false
+  workflow: false
+  info: missing
+  consumers: [product]
+  governance_profiles: []
+  domain_packs: []
+sources:
+  - id: SRC-PROJECT-001
+    path: "{source path, URL, meeting, or owner}"
+    authority: accountable
+    status: active
+    disposition: embedded
+    owner: "{source owner}"
+unknowns:
+  - id: UNK-SCOPE-001
+    question: "{material question}"
+    impact: scope
+    priority: P0
+    question_kind: direction
+    owner: "{decision owner}"
+    affected_refs: [SRC-PROJECT-001]
+    blocks_stage: specify
+    recommendation: "{agent recommendation, bounded by evidence}"
+    recommendation_evidence_refs: [SRC-PROJECT-001]
+    tradeoff: "{benefit, cost, and rejected alternative}"
+    reversal_path: "{how to revisit safely if the recommendation is rejected}"
+    status: open
+discovery_decision: BLOCKED_BY_P0_UNKNOWN

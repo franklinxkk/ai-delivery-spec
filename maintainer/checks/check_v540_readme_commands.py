@@ -16,7 +16,7 @@ def run(*args):
 def main():
     failures = []
     version = run("version")
-    expected = re.search(r"^# AI Delivery Spec (\d+\.\d+\.\d+)", (ROOT / "SKILL.md").read_text(encoding="utf-8"), re.M).group(1)
+    expected = re.search(r"^# AI Delivery Spec (\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)", (ROOT / "SKILL.md").read_text(encoding="utf-8"), re.M).group(1)
     if version.returncode or version.stdout.strip() != expected:
         failures.append("public version command failed")
     result = run("triage", "--input", "examples/minimal-v5/intake.yaml", "--format", "json")

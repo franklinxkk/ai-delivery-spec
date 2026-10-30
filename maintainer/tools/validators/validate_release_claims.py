@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[3]
 def main():
     failures = []
     skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
-    version = re.search(r"^# AI Delivery Spec (\d+\.\d+\.\d+)", skill, re.M).group(1)
+    version = re.search(r"^# AI Delivery Spec (\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)", skill, re.M).group(1)
     status = yaml.safe_load((ROOT / "maintainer/evals/evidence/release-status.yaml").read_text(encoding="utf-8"))
     config = yaml.safe_load((ROOT / "examples/spec.config.example.yaml").read_text(encoding="utf-8"))
     if status.get("skill_version") != version or config["execution"]["expected_skill_version"] != version:
