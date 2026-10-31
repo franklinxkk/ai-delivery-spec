@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 from collections import Counter, defaultdict
+from dataclasses import dataclass
 from html import unescape
 from html.parser import HTMLParser
 from pathlib import Path
@@ -28,11 +29,285 @@ from extract_interaction_ledger import (
     _lexical_scope_at,
     _mask_javascript_literals,
     attribute_inventory,
+    dynamic_attribute_fragments,
     extract_dynamic_anchor_actions,
     extract_handler_actions,
     inspect_runtime_action_assignments,
 )
 from validate_acceptance_run import validate_evidence_refs
+
+
+@dataclass(frozen=True)
+class InlineHandlerCollision:
+    line: int
+    column: int
+    tag: str
+    identifier: str
+    event: str
+    callee: str
+    origin: str
+
+
+class _InlineHandlerCollisionParser(HTMLParser):
+    """Two observed inline scope risks, never a general JavaScript validator.
+
+    `form` can resolve on a form-associated control; `close` can resolve on
+    document before the intended global function. Explicit namespaces/listeners
+    and handler-local declarations are outside this narrow candidate check.
+    """
+
+    def __init__(self, raw, origin="DOM", positions=None):
+        super().__init__(convert_charrefs=True)
+        self.raw = raw
+        self.origin = origin
+        self.positions = positions
+        self.fragment = ""
+        self.candidates = []
+        self.scripts = []
+        self.in_script = False
+
+    def feed(self, data):
+        self.fragment = data
+        super().feed(data)
+
+    def source_position(self):
+        line, column = self.getpos()
+        if self.positions is None:
+            return line, column + 1
+        offset = sum(len(part) for part in self.fragment.splitlines(keepends=True)[:line - 1]) + column
+        source_offset = self.positions[offset]
+        return self.raw.count("\n", 0, source_offset) + 1, source_offset - self.raw.rfind("\n", 0, source_offset)
+
+    def handle_starttag(self, tag, attrs):
+        attributes = dict(attrs)
+        if tag == "script":
+            self.in_script = attributes.get("type", "").casefold() in {"", "module", "text/javascript", "application/javascript"}
+        for key, value in attrs:
+            if not key.startswith("on") or not value:
+                continue
+            masked = _mask_javascript_literals(value)
+            call = re.match(r"^\s*(?:return\s+)?(form|close)\s*\(", masked)
+            if not call:
+                continue
+            callee = call.group(1)
+            if callee == "form" and tag not in {"button", "input", "select", "textarea", "fieldset", "output", "object"}:
+                continue
+            # Handler-local function declarations are hoisted. A comment or
+            # string containing the same declaration does not create a binding.
+            if re.search(rf"\bfunction\s+{callee}\s*\(|\b(?:const|let|var)\s+{callee}\b", masked):
+                continue
+            line, column = self.source_position()
+            self.candidates.append(InlineHandlerCollision(
+                line, column, tag, attributes.get("id") or attributes.get("data-action") or "", key, callee, self.origin,
+            ))
+
+    def handle_data(self, data):
+        if self.in_script and self.origin == "DOM":
+            line, column = self.getpos()
+            offset = sum(len(part) for part in self.raw.splitlines(keepends=True)[:line - 1]) + column
+            self.scripts.append((offset, data))
+
+    def handle_endtag(self, tag):
+        if tag == "script":
+            self.in_script = False
+
+
+def _direct_html_literal(source, start):
+    """Read only the first literal at an HTML assignment, retaining source offsets.
+
+    No dataflow or expression evaluation: a template stops at its first ${...},
+    so only complete static tags before it can be candidates. Later concatenated
+    literals, variables, encoded escapes and computed property writes are not
+    resolved. Unknown content must not be joined into a seemingly static tag.
+    """
+    while start < len(source):
+        if source[start].isspace():
+            start += 1
+        elif source.startswith("/*", start):
+            end = source.find("*/", start + 2)
+            if end < 0:
+                return None
+            start = end + 2
+        elif source.startswith("//", start):
+            end = source.find("\n", start + 2)
+            if end < 0:
+                return None
+            start = end + 1
+        else:
+            break
+    if start >= len(source) or source[start] not in "\"'`":
+        return None
+    quote = source[start]
+    text, positions = [], []
+    index = start + 1
+    escapes = {"n": "\n", "r": "\r", "t": "\t", "b": "\b", "f": "\f", "v": "\v", "\\": "\\", "'": "'", '"': '"', "`": "`"}
+    while index < len(source):
+        char = source[index]
+        if char == quote or (quote == "`" and source.startswith("${", index)):
+            return "".join(text), positions
+        if char == "\\":
+            if index + 1 >= len(source):
+                return None
+            following = source[index + 1]
+            if following in "\r\n":
+                index += 2 + (following == "\r" and source[index + 2:index + 3] == "\n")
+                continue
+            if following not in escapes:
+                return None
+            text.append(escapes[following])
+            positions.append(index)
+            index += 2
+        else:
+            text.append(char)
+            positions.append(index)
+            index += 1
+    return None
+
+
+def _mask_html_sink_scripts(source):
+    """Hide nested template boundaries before using the existing JS masker.
+
+    The shared masker treats a whole backtick literal as opaque, but a nested
+    backtick in ${...} can make it lose the boundary of later real code. This
+    small lexical pass only balances templates/interpolation; it never evaluates
+    expressions or follows their HTML. Unbalanced/deep templates hide the tail
+    conservatively. String/comment/regex recognition stays with the shared tool.
+    """
+    def is_code(prefix):
+        return _mask_javascript_literals(prefix + " @").endswith("@")
+
+    def template_end(start, depth):
+        if depth > 24:
+            return None
+        cursor = start + 1
+        while cursor < len(source):
+            if source[cursor] == "\\":
+                cursor += 2
+            elif source[cursor] == "`":
+                return cursor + 1
+            elif source.startswith("${", cursor):
+                cursor = interpolation_end(cursor + 2, depth + 1)
+                if cursor is None:
+                    return None
+            else:
+                cursor += 1
+        return None
+
+    def interpolation_end(start, depth):
+        cursor, braces, pieces = start, 1, []
+        while cursor < len(source):
+            marker = re.search(r"[{}`]", source[cursor:])
+            if marker is None:
+                return None
+            at = cursor + marker.start()
+            pieces.append(source[cursor:at])
+            if not is_code("".join(pieces)):
+                pieces.append(source[at])
+                cursor = at + 1
+                continue
+            if source[at] == "`":
+                end = template_end(at, depth)
+                if end is None:
+                    return None
+                # At a proven code boundary, only the last expression token
+                # is needed by the shared masker's regex/division heuristic.
+                pieces = ["0"]
+                cursor = end
+            else:
+                braces += 1 if source[at] == "{" else -1
+                if braces == 0:
+                    return at + 1
+                pieces = [source[at]]
+                cursor = at + 1
+        return None
+
+    shadow = list(source)
+    cursor = 0
+    prefix_start, prefix_token = 0, ""
+    while (at := source.find("`", cursor)) >= 0:
+        if not is_code(prefix_token + source[prefix_start:at]):
+            cursor = at + 1
+            continue
+        end = template_end(at, 0)
+        if end is None:
+            end = len(source)
+        for position in range(at, end):
+            if shadow[position] not in "\r\n":
+                shadow[position] = " "
+        # Preserve an expression token for regex-versus-division classification.
+        shadow[at] = "0"
+        cursor = end
+        prefix_start, prefix_token = end, "0"
+    return _mask_javascript_literals("".join(shadow))
+
+
+def inline_handler_collisions(raw):
+    parser = _InlineHandlerCollisionParser(raw)
+    parser.feed(raw)
+    for script_offset, script in parser.scripts:
+        masked = _mask_html_sink_scripts(script)
+        for write in re.finditer(r"\.(innerHTML|outerHTML)\s*\+?=(?!=|>)", masked):
+            literal = _direct_html_literal(script, write.end())
+            if literal is None:
+                continue
+            fragment, offsets = literal
+            dynamic = _InlineHandlerCollisionParser(raw, write.group(1) + " literal", [script_offset + offset for offset in offsets])
+            dynamic.feed(fragment)
+            parser.candidates.extend(dynamic.candidates)
+    return parser.candidates
+
+def compact_schema_error(error):
+    # Do not serialize an entire PRD/example inventory into one diagnostic.
+    if error.validator in {"maxItems", "minItems"} and isinstance(error.instance, list):
+        return f"{error.validator}: actual {len(error.instance)}, required {error.validator_value}"
+    message = error.message
+    return message if len(message) <= 500 else message[:480] + "… (see instance path)"
+
+
+def _has_context_event_listener(scripts: str, event_name: str) -> bool:
+    """Recognize a literal event or an accessible literal-bound identifier.
+
+    A binding need not be the first item in a const/let/var declaration. Mask
+    non-code before locating calls/assignments, then inspect only their literal
+    values in the original source. This is a bounded wiring clue, not proof
+    that the handler executes or resolves overlays correctly in a browser.
+    """
+    if not event_name:
+        return False
+    masked = _mask_javascript_literals(scripts)
+    identifier = r"[A-Za-z_$][\w$]*"
+    literal = re.compile(r"(['\"`])" + re.escape(event_name) + r"\1(?=\s*[,;)\r\n}]|$)")
+    calls = re.finditer(r"\baddEventListener\s*\(\s*", masked)
+    for call in calls:
+        # The mask blanks a literal argument as whitespace; locate the argument
+        # from the opening parenthesis instead of using the greedy match end.
+        opening = masked.index("(", call.start(), call.end())
+        argument_start = opening + 1
+        while argument_start < len(scripts) and scripts[argument_start].isspace():
+            argument_start += 1
+        direct = literal.match(scripts, argument_start)
+        if direct and re.match(r"\s*,", masked[direct.end():]):
+            return True
+        argument = re.match(rf"({identifier})\s*,", masked[argument_start:])
+        if not argument:
+            continue
+        name = argument.group(1)
+        writes = []
+        for assignment in re.finditer(rf"(?<![\w$.]){re.escape(name)}\b\s*=(?!=|>)", masked[:call.start()]):
+            scope = _lexical_scope_at(scripts, assignment.start())
+            if scope[0] <= call.start() < scope[1]:
+                writes.append((scope[0], assignment.start(), assignment.end()))
+        if not writes:
+            continue
+        # Do not borrow a same-named binding from another function/block or an
+        # earlier value superseded by a visible assignment before registration.
+        _scope, _start, value_start = max(writes)
+        while value_start < len(scripts) and scripts[value_start].isspace():
+            value_start += 1
+        if literal.match(scripts, value_start):
+            return True
+    return False
+
 
 REVIEW_WORKSPACE_SCHEMA = SCRIPT_DIR.parent / "schemas" / "review-workspace.schema.json"
 
@@ -731,6 +1006,30 @@ def _unreachable_hidden_surfaces(tag_source: str, scripts: str) -> list[str]:
     return sorted(set(unreachable))
 
 
+def consequential_action_candidate(ref: str, description: str) -> bool:
+    """Bounded clues about object and effect, not a universal action-name list.
+
+    A normal logout, UI toggle or unqualified export stays advisory. An
+    administrator terminating another session, rotating credentials or exporting
+    sensitive/bulk records needs an explicit review mapping, regardless of ID.
+    """
+    text = re.sub(r'[-_]', ' ', ref + ' ' + description)
+    if re.search(r'仅预览|^(?:查看|阅读).{0,16}说明$|^(?:preview|help|documentation)\b', description.strip(), re.I):
+        return False
+    return any(re.search(pattern, text, re.I) for pattern in (
+        r'(?:密钥|凭据|令牌).{0,15}(?:轮换|吊销|重置)|(?:轮换|吊销|重置).{0,15}(?:密钥|凭据|令牌)',
+        r'(?=.*\b(?:rotate|revoke|reset)\b)(?=.*\b(?:key|keys|credential|credentials|token|tokens)\b)',
+        r'(?:强制|踢出).{0,18}(?:登出|退出|会话)|管理员.{0,12}(?:其他|全部|所选|指定).{0,12}(?:会话|登出|退出)',
+        r'\b(?:force|forced|kick)\b.{0,35}\b(?:logout|log out|session|sessions)\b|\badmin\b.{0,25}\b(?:other|all|selected)\b.{0,25}\bsessions?\b',
+        r'(?:停用|禁用|启用|解锁|冻结|解冻).{0,12}(?:用户|账号|账户)|(?:用户|账号|账户).{0,12}(?:停用|禁用|启用|解锁|冻结|解冻)',
+        r'(?=.*\b(?:disable|enable|unlock|freeze|unfreeze)\b)(?=.*\b(?:account|accounts|user|users)\b)',
+        r'(?:批量|全部|敏感|客户|个人).{0,18}导出|导出.{0,18}(?:全部|批量|敏感|客户|个人)',
+        r'\bexport\b.{0,35}\b(?:all|bulk|sensitive|customer|customers|personal)\b',
+        r'\b(?:all|bulk|sensitive|customer|customers|personal)\b.{0,35}\bexport\b',
+        r'\bpurge\b.{0,25}\b(?:data|records|accounts)\b|清空.{0,12}(?:业务数据|全部记录)',
+    ))
+
+
 class _ReviewFinalParser(HTMLParser):
     """Collect the context-scoped 5.4.7-5.4.9 review projection."""
 
@@ -776,6 +1075,8 @@ class _ReviewFinalParser(HTMLParser):
         self.product_overlays: list[dict[str, str]] = []
         self.targets: dict[str, Counter[str]] = defaultdict(Counter)
         self.visible_targets: dict[str, Counter[str]] = defaultdict(Counter)
+        self.target_labels: dict[tuple[str, str], str] = defaultdict(str)
+        self.active_target_labels: list[dict] = []
         self.unbound_metric_like: Counter[str] = Counter()
         self.content_owners: list[tuple[str, str]] = []
         self.workspace_roots: list[dict[str, str]] = []
@@ -985,6 +1286,10 @@ class _ReviewFinalParser(HTMLParser):
         if active_context:
             for target_ref in self._target_refs(attr_map):
                 self.targets[active_context][target_ref] += 1
+                if target_ref.startswith('ACT-'):
+                    key = (active_context, target_ref)
+                    self.target_labels[key] += ' ' + ' '.join(attr_map.get(a, '') for a in ('aria-label', 'title', 'value'))
+                    self.active_target_labels.append({'depth': depth, 'key': key})
                 if not hidden:
                     self.visible_targets[active_context][target_ref] += 1
             class_tokens = {item.casefold() for item in attr_map.get("class", "").split()}
@@ -1004,6 +1309,9 @@ class _ReviewFinalParser(HTMLParser):
             return
         text = data.strip()
         current_hidden = self.stack[-1][1] if self.stack else False
+        if not current_hidden:
+            for target in self.active_target_labels:
+                self.target_labels[target['key']] += ' ' + text
         if self.workspace_depths and not self.trace_depths and not current_hidden:
             self.primary_review_text.append(text)
         for record in self.active_traces:
@@ -1027,6 +1335,7 @@ class _ReviewFinalParser(HTMLParser):
         if index is None:
             return
         closing_depth = index + 1
+        self.active_target_labels = [item for item in self.active_target_labels if item['depth'] < closing_depth]
         remaining_cards: list[dict[str, object]] = []
         for record in self.active_cards:
             if int(record["depth"]) < closing_depth:
@@ -1083,6 +1392,62 @@ def _review_final_projection(raw: str) -> _ReviewFinalParser:
     except Exception:
         pass
     return parser
+
+
+def _covered_semantic_ui_subjects(document: dict, projection: _ReviewFinalParser) -> set[tuple[str, str]]:
+    """Find closed UI-subject -> same-context formal-point declarations.
+
+    Called only after schema validation. This consumes the existing grouping
+    contract; it neither promotes Candidates nor proves the prose equivalent.
+    Invalid/missing projections remain findings in the normal contract checks
+    and must not hide the corresponding Candidate Diff observation.
+    """
+    contexts = document.get("review_contexts", [])
+    point_items = document.get("review_points", [])
+    points = {item["ref"]: item for item in point_items}
+    context_counts = Counter(item["context_ref"] for item in contexts)
+    point_counts = Counter(item["ref"] for item in point_items)
+    declared = Counter((context["context_ref"], ref) for context in contexts for ref in context["review_point_refs"])
+    declarations_per_point = Counter(ref for context in contexts for ref in context["review_point_refs"])
+    semantic_items = document.get("semantic_coverage_items", [])
+    semantic_counts = Counter(item["coverage_id"] for item in semantic_items)
+    semantic_keys = Counter((item["owner_context_ref"], item["subject_ref"]) for item in semantic_items)
+    surface_counts = Counter(item["ref"] for item in projection.semantic_surfaces)
+    surfaces = {item["ref"]: item for item in projection.semantic_surfaces}
+    card_counts = Counter((item["context"], item["ref"]) for item in projection.cards)
+    marker_counts = Counter((item["context"], item["ref"]) for item in projection.markers)
+    covered: set[tuple[str, str]] = set()
+    for item in semantic_items:
+        context, subject = item["owner_context_ref"], item["subject_ref"]
+        target, coverage = item.get("target_ref"), item["coverage_id"]
+        refs = item.get("review_point_refs", [])
+        if (item.get("coverage_status") != "covered" or not item.get("ui_grounded")
+                or context_counts[context] != 1 or not refs or not target
+                or semantic_counts[coverage] != 1 or semantic_keys[(context, subject)] != 1
+                or not projection.targets[context][subject] or projection.targets[context][target] != 1):
+            continue
+        surface = surfaces.get(coverage, {})
+        if (surface_counts[coverage] != 1 or surface.get("context") != context
+                or surface.get("owner") != item.get("detail_owner")
+                or not item.get("human_summary")
+                or item["human_summary"] not in projection.semantic_text.get(coverage, "")):
+            continue
+        if any(
+            point_counts[ref] != 1 or declared[(context, ref)] != 1 or declarations_per_point[ref] != 1
+            or points[ref].get("owner_context_ref") != context
+            or points[ref].get("business_status") != "confirmed"
+            or card_counts[(context, ref)] != 1
+            or points[ref].get("summary", "") not in projection.card_text.get(ref, "")
+            for ref in refs
+        ):
+            continue
+        if not any(
+            points[ref].get("target_ref") == target and points[ref].get("marker_required")
+            and marker_counts[(context, ref)] == 1 for ref in refs
+        ):
+            continue
+        covered.add((context, subject))
+    return covered
 
 
 class PrototypeChecks:
@@ -1209,13 +1574,17 @@ class PrototypeChecks:
                 location = ".".join(str(part) for part in error.path) or "<root>"
                 self.add(
                     "BLOCK", "PROTO-REVIEW-WORKSPACE-SCHEMA", path,
-                    error.message, location,
+                    compact_schema_error(error), location,
                     affected_consumers=("product", "frontend", "backend", "qa"),
                 )
         if schema_errors:
             return set()
 
         self.review_workspace_contracts.append((path.resolve(), document))
+        if (document.get("workspace", {}).get("presentation_mode") == "contextual"
+                and document.get("presentation", {}).get("renderer") == "contextual-v1"):
+            from validators.contextual_review import check_contextual
+            return check_contextual(self, path, raw, document)
         projection = _review_final_projection(raw)
         workspace_id = str(document.get("workspace_id", ""))
         workspace = document.get("workspace") or {}
@@ -1257,6 +1626,8 @@ class PrototypeChecks:
             "data-review-resizable": expected_resizable,
             "data-review-collapsible": "true",
         }
+        if workspace.get("presentation_mode") == "contextual":
+            required_root.pop("data-review-active-tab", None)
         for name, expected in required_root.items():
             if root.get(name, "") != expected:
                 self.add(
@@ -2069,7 +2440,7 @@ class PrototypeChecks:
         visible_tabs = [item.casefold() for item in re.findall(r"\bdata-review-tab\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)]
         tab_targets = {item.casefold() for item in re.findall(r"\bdata-review-tab-target\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)}
         required_tabs = {"overview", "function_flow", "boundary_acceptance"}
-        if review_level in {"R1", "R2"}:
+        if review_level in {"R1", "R2"} and workspace.get("presentation_mode", "tabs") == "tabs":
             if Counter(visible_tabs) != Counter({item: 1 for item in required_tabs}) or tab_targets != required_tabs:
                 self.add(
                     "BLOCK", "PROTO-REVIEW-LEVEL", path,
@@ -2206,16 +2577,22 @@ class PrototypeChecks:
                     )
 
         declared_targets = {
-            str(point.get(key, "")).upper()
+            (str(point.get("owner_context_ref", "")).upper(), str(point.get(key, "")).upper())
             for point in point_items for key in ("target_ref", "subject_ref")
             if point.get(key)
         }
+        declared_targets.update(_covered_semantic_ui_subjects(document, projection))
+        candidate_targets = {
+            (str(item.get("owner_context_ref", "")).upper(), str(item.get("subject_ref", "")).upper())
+            for item in candidate_items
+        }
         candidate_gap_refs: set[str] = set()
         candidate_block_refs: set[str] = set()
-        high_risk_action = re.compile(r"(?:SUBMIT|SAVE|DELETE|REMOVE|APPROVE|REJECT|PUBLISH|UPLOAD|IMPORT|SYNC|SEND|ASSIGN|CLOSE|CANCEL|REVOKE|PAY|REFUND)")
+        high_risk_action = re.compile(r"(?:^|-)(SUBMIT|SAVE|DELETE|REMOVE|APPROVE|REJECT|PUBLISH|UPLOAD|IMPORT|SYNC|SEND|ASSIGN|CLOSE|CANCEL|REVOKE|PAY|REFUND)(?=-|$)")
         for context_ref, target_counts in projection.targets.items():
             for target_ref in target_counts:
-                if target_ref in declared_targets or target_ref in candidate_subjects or target_ref.startswith("VIEW-"):
+                if ((context_ref, target_ref) in declared_targets
+                        or (context_ref, target_ref) in candidate_targets or target_ref.startswith("VIEW-")):
                     continue
                 # Closing a UI surface may merely dismiss it. The name alone
                 # cannot establish a business-state write; retain an advisory.
@@ -2226,7 +2603,9 @@ class PrototypeChecks:
                 )
                 if ui_close_candidate:
                     candidate_gap_refs.add(target_ref)
-                elif target_ref.startswith(("METRIC-", "STATE-")) or (target_ref.startswith("ACT-") and high_risk_action.search(target_ref)):
+                elif target_ref.startswith(("METRIC-", "STATE-")) or (target_ref.startswith("ACT-") and (
+                        high_risk_action.search(target_ref) or consequential_action_candidate(
+                            target_ref, projection.target_labels.get((context_ref, target_ref), '')))):
                     candidate_block_refs.add(target_ref)
                 elif target_ref.startswith(("ACT-", "FLD-", "REG-")):
                     candidate_gap_refs.add(target_ref)
@@ -2244,13 +2623,7 @@ class PrototypeChecks:
             )
 
         event_name = str((document.get("context_contract") or {}).get("product_context_event", "")) if isinstance(document.get("context_contract"), dict) else ""
-        event_aliases = re.findall(
-            r"\b(?:const|let|var)\s+(\w+)\s*=\s*['\"]" + re.escape(event_name) + r"['\"]", scripts,
-        ) if event_name else []
-        event_arguments = [r"['\"]" + re.escape(event_name) + r"['\"]", *map(re.escape, event_aliases)]
-        has_context_listener = bool(event_name and re.search(
-            r"addEventListener\s*\(\s*(?:" + "|".join(event_arguments) + r")\s*,", scripts,
-        ))
+        has_context_listener = _has_context_event_listener(scripts, event_name)
         runtime_contracts = {
             "PROTO-PRODUCT-LOCATION-MISMATCH": (
                 "resolveProductLocation" in scripts
@@ -2319,7 +2692,9 @@ class PrototypeChecks:
         if records_required:
             required_actions |= {"UIACT-REVIEW-RECORD", "UIACT-REVIEW-EXPORT", "UIACT-REVIEW-IMPORT"}
         if review_level in {"R1", "R2"}:
-            required_actions |= {"UIACT-REVIEW-TAB", "UIACT-REVIEW-COMPACT"}
+            required_actions.add("UIACT-REVIEW-COMPACT")
+            if workspace.get('presentation_mode', 'tabs') != 'contextual':
+                required_actions.add("UIACT-REVIEW-TAB")
         missing_actions = sorted(required_actions - review_actions)
         if missing_actions:
             self.add(
@@ -2413,11 +2788,23 @@ class PrototypeChecks:
         }
 
     def check_prototype(self, path: Path, level: str) -> None:
+        self.runtime_verified_actions=set()  # Evidence never carries across files.
         try:
             raw = self.read(path)
         except (OSError, UnicodeError) as exc:
             self.add("BLOCK", "PROTO-READ", path, f"prototype cannot be read: {exc}")
             return
+        for collision in inline_handler_collisions(raw):
+            handler = f"{collision.callee}()"
+            native = "控件原生 form 属性" if collision.callee == "form" else "document.close"
+            location = f"line {collision.line}, column {collision.column}: {collision.tag} {collision.identifier} {collision.event}={handler}; {collision.origin}"
+            self.add(
+                "GAP", "PROTO-INLINE-NATIVE-COLLISION", path,
+                f"{collision.event} 内联调用 {handler}，可能先解析为 {native}；请从所列位置的真实控件点击验证。显式命名空间或事件监听器须指向应用处理器，不能用直接调用函数替代入口验证。",
+                location,
+                affected_consumers=("frontend", "qa", "coding_agent"),
+                message_en=f"Inline {collision.event} calls {handler} at {location}; it may resolve to {'the control native form property' if collision.callee == 'form' else 'document.close'} before the application handler. Verify the actual click, not a direct function call.",
+            )
         # Restrict attribute discovery to actual HTML-like opening tags. Raw
         # regex over the whole document also matches JavaScript selectors such
         # as `[data-testid="page-X"]` and falsely reports duplicate pages.
@@ -2506,7 +2893,11 @@ class PrototypeChecks:
         testids = re.findall(r"\bdata-testid\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)
         action_values = set(re.findall(r"\bdata-action\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I))
         unstable_action_values = sorted(item for item in action_values if re.search(r"\$\{|\{\{|<%", item))
-        actions = sorted(action_values - set(unstable_action_values))
+        fragments = dynamic_attribute_fragments(raw, "data-action")
+        if fragments:
+            self.add("GAP", "PROTO-DYNAMIC-ACTION-FRAGMENT", path,
+                     "JS 拼接的动作前缀尚未解析为运行时 ID；需浏览器核对完整动作及处理器，不能将前缀当作非法完整 ID", ", ".join(fragments))
+        actions = sorted(action_values - set(unstable_action_values) - set(fragments))
         states = sorted(set(re.findall(r"\bdata-state\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
         fields = sorted(set(re.findall(r"\bdata-(?:field|bind)\s*=\s*['\"]([^'\"]+)['\"]", tag_source, re.I)))
         metric_bindings = _metric_bindings(raw)
@@ -3402,11 +3793,11 @@ class PrototypeChecks:
                 str(placeholder),
                 related_refs=related,
             )
-        orphan_handler_actions = sorted(handler_actions - {item.upper() for item in actions} - dynamic_anchor_actions)
+        orphan_handler_actions = sorted(handler_actions - {item.upper() for item in actions} - dynamic_anchor_actions - getattr(self, 'runtime_verified_actions', set()))
         for action in orphan_handler_actions:
             self.add(
                 "BLOCK", "PROTO-ORPHAN-HANDLER", path,
-                "动作注册表存在处理器，但源模板没有对应 data-action；可能是入口丢失、死代码或未批准删减",
+                "静态模板未识别处理器对应入口；先核对动态生成与真实操作，未识别不能直接证明入口不存在",
                 action,
                 affected_consumers=("product", "frontend", "qa", "coding_agent"),
             )
@@ -3491,6 +3882,24 @@ class PrototypeChecks:
             if action not in inline_action_tags and action.upper() not in id_bound_actions and not (has_listener and reads_action and dispatch_evidence):
                 self.add("BLOCK", "PROTO-UNHANDLED-ACTION", path, "no static event-handler evidence for data-action", action)
 
+        # A domain result can be a correctly filtered/read record; ACT-* and
+        # legacy L2-L4 do not imply a write. Only the current, schema-checked
+        # contract's explicit write/transition obligations justify this probe.
+        # Do not infer them from action names, prose, fingerprint field names,
+        # or a data-state display marker. No contract is required just for this
+        # probe: an absent declaration leaves semantic scope unassessed.
+        validated_workspace = any(
+            source.resolve() == path.resolve() and document is review_workspace
+            for source, document in self.review_workspace_contracts
+        )
+        write_obligations = [
+            item for item in (review_workspace or {}).get("semantic_coverage_items", [])
+            if isinstance(item, dict)
+            and item.get("semantic_type") in {"data_write", "state_transition"}
+            and item.get("coverage_status") == "covered"
+        ] if validated_workspace else []
+        write_refs = tuple(str(item["coverage_id"]) for item in write_obligations)
+        write_sources = tuple(sorted({str(ref) for item in write_obligations for ref in item.get("source_refs", [])}))
         durable_result = bool(re.search(
             r"\.(?:textContent|innerHTML|value)\s*=|insertAdjacentHTML|appendChild|replaceChildren|classList\.(?:add|remove|toggle)|setAttribute\s*\(|\b(?:render|navigate|showModal)\w*\s*\(|location\.(?:href|assign)|history\.pushState",
             scripts,
@@ -3500,14 +3909,27 @@ class PrototypeChecks:
         if actions and not durable_result and not transient_result:
             self.add("BLOCK", "PROTO-NO-VISIBLE-RESULT", path, "actions have no static visible-result mechanism")
         elif actions and transient_result and not durable_result:
-            self.add("GAP", "PROTO-TRANSIENT-ONLY", path, "only transient feedback is visible; core state changes need a durable result")
-        state_result = bool(states) and bool(re.search(
-            r"setAttribute\s*\(\s*['\"]data-state|dataset\.state\s*=|\b(?:globalState|state|entities)\b\s*[.\[]|\btransition\s*\(",
+            self.add("GAP", "PROTO-TRANSIENT-ONLY", path,
+                     "静态只发现短暂提示，未识别持续可见的结果。请就地核对动作是否兑现了需求中的结果；若结果本就仅为提示，记录该适用说明，不为门禁新增业务写入。",
+                     ", ".join(write_refs), related_refs=write_refs, binding_source_refs=write_sources,
+                     message_en="Only transient feedback was recognized, with no durable visible result. Check whether the action delivers its specified outcome. If feedback alone is intended, record that scope; do not add business writes merely to satisfy the gate.")
+        state_result = bool(re.search(
+            r"setAttribute\s*\(\s*['\"]data-state|dataset\.state\s*=(?!=)|"
+            r"\b(?:globalState|state|entities)\b(?:\s*\.[\w$]+|\s*\[[^\]\n]+\])+\s*(?:=(?!=)|\+=|-=|\+\+|--)|\btransition\s*\(",
             scripts,
             re.I,
         ))
-        if actions and level in {"L2", "L3", "L4"} and not state_result:
-            self.add("GAP", "PROTO-NO-DOMAIN-STATE", path, "static scan found no explicit data-state/domain-state mutation; bind core actions to a durable domain result or prove them in browser evidence")
+        if write_obligations and not state_result:
+            self.add("GAP", "PROTO-NO-DOMAIN-STATE", path,
+                     "合同明确要求这些业务写入/状态转换，但静态未识别其变化机制。先核对已声明结果及实际实现；外部或动态写入仍须实际验证。此项不消费业务写入运行证据，评审呈现证据也不能证明业务写入。",
+                     ", ".join(write_refs), related_refs=write_refs, binding_source_refs=write_sources,
+                     message_en="The contract explicitly requires these writes/transitions, but their mutation mechanism was not recognized statically. Check the declared result and implementation; external/dynamic writes remain unverified. This probe does not consume business-write runtime evidence, and review-presentation evidence cannot prove a business write.")
+        self.metrics["prototype_domain_write_check"] = {
+            "obligation_refs": list(write_refs),
+            "basis": "current schema-checked review manifest: covered data_write/state_transition",
+            "status": ("static_mechanism_observed_not_executed" if state_result else "declared_write_unproven") if write_obligations else "no_supplied_write_obligation",
+            "not_proven": "absence of declared writes does not prove read-only scope; static mechanisms do not prove action-specific effects or business acceptance",
+        }
 
         external_css: list[str] = []
         for tag in re.findall(r"<link\b[^>]*>", raw, re.I | re.S):

@@ -1,644 +1,230 @@
 # Changelog
 
+按版本记录功能、修复及兼容性变化；同版本内的修订合并说明。
+
+## 5.5.6 — 2026-10-31
+
+- README 以“让人和 AI，一起把产品做对”说明价值，用判断价值、选择方案、明确需求、验证结果的循环串起核心能力，并简化安装与试用入口。
+- 分诊识别中英文直接提出的业务疑问，逐项返回澄清候选；区分已有答案、界面文案和范围排除，不再依赖“待确认”标签。
+- 共性模式增加身份认证与会话决策提示，支持中文及 IAM、SSO、CAS、MFA 检索；提示单列，不计作行业来源或已批准政策。
+- 评审候选结合动作对象和界面说明识别凭据轮换、强制登出、账号状态变更及敏感/批量导出，保留普通退出和界面开关的区别。
+- 公共样例和初始化器将评审工具说明移出业务规格；原型就近关联需求版本，R0/R1 使用同一业务基线。交接修订稿补充稳定身份、取代关系及可独立阅读的模块内容指引。
+- 支持沿用团队 PRD 模板、设计规范和参考原型；新增安装目录之外的项目绑定与单文档初始化，升级时保留团队资料。
+- 初始化模板不再预填批准、冻结、已验证、执行时间或未经决定的优先级；已有正式记录保持兼容。
+- 就近评审支持真实 contextual 抽屉布局；初始化、构建、运行探针和检查器使用一致的呈现约定与目标解析，区分缺失、重复、隐藏及有依据的不适用。
+- 提供轻量就近说明组件与文档章节追溯方式，可复用已有原型和 PRD 骨架；简单动作可共享有明确映射的说明，不要求重复标注。
+- 需求交付按完整用户任务组织，强调提交时重新核对权限与对象状态、区分业务状态与附加标记、保留旧对象及进行中请求；团队模板迁移保留有效决定、未决影响和验收条件。
+- 8 个领域增加中文导读、术语和领域内别名；提供中文导览及列表入口，改善完整短语、混合语言和同分结果排序，收窄跨领域误扩展。
+- 模板补齐类型、用途与适用阶段信息；辅助材料可适用多个阶段。四个快捷入口明确任务映射，明确小改继续使用最短路径。
+- 检查器识别标题空稿、正文开头的规则定义、显式“待确认却先默认执行”冲突及部分内联处理器名称遮蔽；语言漂移和语义待核查项提供可定位的修复提示。
+- 修正只读原型被要求业务写入、评审映射重复计缺口等误报；当前范围和基线决定证据适用性，旧验收记录不覆盖新变更。
+- Coding Agent 检查默认使用当前模块业务规格，历史工程附录规则仅通过 `--legacy` 显式启用；成功输出明确为范围内静态检查，不代表业务语义完整或工程验收。示例配置统一使用 5.5.6。
+- 安装包按实际包内链接检查分发内容，保留运行所需文件及公共示例，排除维护测试、缓存和私人项目资料。
+- 修复非 UTF-8 Windows 环境下评审构建命令输出中文诊断或中文路径时异常退出的问题，并补齐旧 PRD 检查命令的兼容入口说明。
+- 更新媒体领域 NVIDIA VSS 官方文档入口，复核相关厂商资料的当前适用范围。
+
 ## 5.5.5 — 2026-10-26
 
-### 2026-10-26 跨行业验证后的维护收口
+- 日常交付收敛为直接回填、轻量需求卡和正式 PRD；其他模板按需选择。同对象字段按场景对照，动作、条件、结果和恢复写在所属模块。
+- 加强异步写入、原请求恢复、表单保存重开和配置实际消费的需求示例，区分业务约定与技术实现选择。
+- 改善领域检索中的混合语言、复数、连字符、重叠概念及审批别名，明确内置来源、项目授权和法域适用性的区别。
+- 错误提示提供中英文原因、位置与下一步；解析失败不回显含敏感内容的原始行。支持更多 DOM 薄封装、表单提交、ID 委派和场景编号定义。
+- 单独使用 CSS `!important` 改为人工复核提示；缺失处理器、目标断链和语法错误继续报告明确问题。更新领域来源和排错入口。
 
-- 模板分层：明确小改直接回填，轻量卡与正式PRD是日常两种入口；其余4份Markdown和13份YAML仅按实际需要选择，不是额外交付义务。复杂模块统一字段场景表、六列元素表与就地业务验收；不把规则解释变成新控件。
-- 领域检索：修复中英文混合、复数、连字符、部分重叠概念和审批/审核别名；无专包可继续通用需求工作，但明确不具备行业知识。保留来源核验限制，并解释origin=official仅表示内置目录；收窄无依据的默认人审、数值置信度与测试环境限制。仍8包、101条来源，本轮不伪造全量法规重读。
-- 诊断与验证：输入错误提供中英文原因、位置、下一步，不回显含密钥的原始解析行。补识别DOM id薄封装、表单提交、实际ID委派及明确“场景编号”定义；保留无处理器、缺失目标、仅引用和JS语法反例。单独!important改为人工复核GAP，不凭样式写法判功能失败；其余确定错误不降级。
-- 同版本新增73项维护测试，最终477项及15个subtests通过；运行源仍119份，入口2500/2500、日常引用12987/13000。无新增阶段、台账或默认门禁。
-- 完成24题双模型合成评审及4题短入口探针、两类原型真实浏览器验证。保留原始失败、输入澄清、误报裁决与辅助修复：DeepSeek指标样例未独立完成，预警样例末次又发现不可构造的验收前提与吞掉存储异常；最终均由GPT-6.1-sol辅助修复并复验。不是全行业专业验收、严格模型排名或Skill稳定增益证明。详见IMPLEMENTATION.md。
-- ClawHub公开下载统计本轮为3,096；SkillHub 4.6/5属于5.5.3，不能迁移给5.5.5。纯净包仍为5.5.5，本地交付不等于渠道已上传。
+## 5.5.4 — 2026-10-21
 
-### 2026-10-26 较早发布核验记录
+- 配置需求串联字段维护、操作入口、持久化与实际消费，增加可配置能力的完整示例。
+- 按相同条件交叉核对正文、状态表和原型，区分当前交付指针、历史证据及独立模拟结果。
+- 复杂交接按业务风险选择核对范围，保留用户已有单册文档和分发约定。
 
-- 发布前维护：按公开旧版评测复核入口、报错与来源边界；补“直接说任务、不必读完目录”的上手路径、混合语言说明及已有错误解释命令入口。
-- 短入口及已有合成案例补最终处理器、旧报告复验、文字投影与原件区别、拒绝后被动写入反例；无新增功能验证器、测试、阶段、台账或默认门禁。运行源文件仍119；不把旧版第三方评分迁移为新版评分。
-- ClawHub下载统计更新为3,094（2026-10-26）；验证和打包边界见IMPLEMENTATION.md。
+## 5.5.3 — 2026-10-11
 
-### 2026-10-25 同版本改进
+- 区分已决定、已同步和已验证；合并稿回填同主题旧条目，配置变化核对生效时点与旧实例行为。
+- 新增可选 `check-examples`，依据指定 JSON Schema 和实例检查正反结果、拒绝原因与输入身份。
+- 修订领域资料中示例、完整契约、正常路径、人审、签署及配置运行边界的表述，更新失效来源。
+- 许可证改为 MIT 标准文本，并同步入口元数据与 README 标识。
 
-- 加强异步写入、不完整回执与原请求恢复的合成示例；明示测试业务结果与等价技术投影的边界。
-- 表单复核覆盖编辑后首次提交、失焦重绘、写入与重开；长表单截图如实标范围。
-- 机器交接复用正文真实定义，按每项检查包内引用及需求定义；不新增阶段、台账或默认全局门禁。
-- 运行源文件仍119，新增5项维护回归；404项测试通过。单场景对照与快测见IMPLEMENTATION.md，完整release检查通过；不宣称稳定收益。
-- README痛点优先并更新ClawHub统计；8个领域包整理，来源101；18条过期来源补核，失效泛微PDF替换为范围更窄的官方资料，保留证据范围。
+## 5.5.2 — 2026-09-30
 
-### 模块可读性与交接改进
-
-- 将模块可读性落实到短入口、PRD骨架和合成前后示例：同对象字段场景对齐，动作/条件/结果/恢复就地组织，多个对象分开描述状态，不堆平行同义表。
-- 复杂交接按独立接收任务检查必须猜的业务选择、同条件冲突与证据夸大；计数可选，不新增阶段、台账或默认门禁。
-- 恢复可复制的full命令；修正5.5.4变更日志标题和118→119的运行包说明。运行文件仍119；该部分未新增验证器，维护回归见上。
-- Schema兼容5.5.5并保留旧版本；模板与既有合成案例同步，私人领域规则不进入公共默认。
-- 验证与限制见IMPLEMENTATION.md。不声称稳定相对增益或真人免澄清。
-
-## 5.5.4 · 2026-10-21（本地维护版）
-
-- 改复杂交接的取样方法，按不同业务风险验证接收能力。
-- 将字段维护、用户操作入口、配置持久化与实际消费连起来验证。
-- 增加同条件跨正文/状态表/原型核对及独立模拟证据层。
-- 当前交付指针与历史证据分开；单册交付尊重用户约定。
-- 添加脱敏合成配置案例；保留旧版 Schema 取值并接纳 5.5.4，既有原型不变。
-- 运行包从118增至119份，新增按需合成配置案例；无新增门禁或测试。未做受控对照，无稳定模型增益或真人接收效率结论；未公开发布。
-
-
-## 5.5.3 — 2026-10-11（本地迭代）
-
-- Why：多系统规格真实交接中，正文修订未回填附录/示例/验收，同一配置出现相反实现；预置应用演示不能证明平台可配置，合法JSON不能证明样例约束生效。
-- What：模块先用实例核对职责与事实权威；合并稿回填同主题旧条目；区分已决、已同步和已验证；交接做有界冷读；配置平台验证变值、生效及旧实例。新增可选 `check-examples`，引用权威JSON Schema与实例，实际检查正反结果及拒绝原因，记录输入哈希。
-- Scope：未增加阶段、必填台账或默认门禁；复用已有脚本，运行文件预算118、入口2500和日常引用13000字符预算不变。私人项目规则不进入公共默认值；现有ID投影检查继续兼容。
-- License：依维护者明确决定，5.5.3改用MIT标准文本，保留2026 Li Kang版权署名，更新入口元数据和README标识；不改写历史版本记录或第三方许可。
-- Source maintenance：17条到期来源先完成官方原文核验，其余5条后经权威替代全文交叉核对并记录原入口限制；新增医学伦理审查适用性来源，99条来源登记检查通过，未延长周期或删除约束来消除失败。
-- Domain review：修正8包示例误作完整契约、正常状态路径、人审/签署技术泛化、同意与伦理适用性、配置与运行混同等问题。补48组192项阶段反例，独立审阅保留190/192首次标签一致及2处题库判据修正，不把模型判断当真人/专家验收；新增维护评分工具的10项防失真回归，完整release现为399项pytest通过。
-- Validation：见 [5.5.3 验证记录](maintainer/evals/evidence/v553-validation.md)。确定性工具不判断任意自然语言矛盾，独立模型样本不代表真人接收或稳定相对增益；未自动公开发布或替换全局安装。
-
-## 5.5.2 — 2026-09-30（双语入口与发布前复核）
-
-- Why：四个意图快捷入口缺少可复制用法；英文倒装的自动发信、员工离职率及模糊抱怨可能漏提示，中文明确保留降序却被追问，部分领域常用词无法跨语言检索。
-- What：README 补齐中英文快捷入口、预期结果与宿主边界，保持角色价值先于上手；修正上述有界探针，补齐报销、人工确认、工具授权、媒资及指标术语别名；贡献指南同步双语反馈方式与真实运行预算。
-- Scope：不新增阶段、必填项或产物；入口、日常引用与 118 份运行源码预算不变。别名命中仅为候选来源，不代表同义政策、法域适用或授权。
-- Validation：完整 release 检查退出 0，361 项 pytest 通过；14 条分诊与 16 次领域检索完成中英文复测。Kimi 16 条短回答可复核，但 CLI 异常退出且个别答案扩写规则，不能宣称首次稳定交付。社区历史数据不冒充当前平台评分。详见 [验证记录](maintainer/evals/evidence/v552-validation.md)。
-
-## 5.5.2 — 2026-09-29（收口修订）
-
-- Why：条件渲染目标、UI 关闭动作及浮层引用被静态检查误判；评审动作绑定到所在区域后仍被重复算遗漏。
-- What：区分未证明的动态 GAP 与实际数量/绑定错误；识别声明的业务 subject 及 DRAWER/MODAL/POPOVER 定义；复核三条到期供应商资料，暂移除无法复核的非约束性标准计划观察项，保留恢复说明。
-- Scope：不新增强制文档或字段，运行源码仍 118 份。未缩短业务验证范围，也不把静态不确定性升级为 PASS。
-- Validation：完整 release 检查退出 0，333 项 pytest；Kimi 与 DeepSeek 原生失败、宿主时限、根修订及剩余 GAP 分开记录。修订副本分别 78/78、66/66 浏览器与模拟服务检查；不同快照、宿主及后验修复不能证明同条件 A/B 增益或跨模型首次稳定。详见 IMPLEMENTATION.md。
-
-## 5.5.2 — 2026-09-28（业务优先与最终回归修订）
-
-- Why：模板把稳定 ID 带入业务标题；模型把精力投入机器装配时，仍可能漏掉业务守卫、错误样例与对象上下文。单文件无引用提示诱发无效补写，非活动上下文的合法说明又被误判不可读。
-- What：业务标题与引用分开，入口明确按依赖推进，交接区分业务决定/未决/研发选择；单文件孤立定义改为有边界的 INFO；支持明确服务端身份与对象范围检查的自然表述；非活动上下文只在 manifest 同工作区明确绑定时纳入 authored text，不把它当运行可见性证据。
-- Scope：不新增日常产物、编号台账或模板必填义务；真实导航断链、任意隐藏内容、未知及权限检查保留。入口 2490/2500、日常引用 12930/13000、运行文件 118。维护测试仅在源码内复现，不进入运行包。
-- Validation：完整 release 检查退出 0，322 项 pytest；Skill Creator 结构校验通过。独立 CRM 的人工修订副本 66/66 浏览器、6/6 上下文说明隔离；原生 DeepSeek 失败与 Kimi 配额阻塞如实保留。未证明稳定跨模型生成、最新指引的独立 A/B 增益、真人免澄清或生产验收。详见 IMPLEMENTATION.md。
-
-## 5.5.2 — 2026-09-27（本地复测修订）
-
-- Why：跨模型和真实项目发现声明正确但运行守卫失效、评审合同组装成本高、排版改变诊断、正文探针误报及同一规则跨产物漂移。
-- What：增加已验证示例的拆分/合成工具，统一文本哈希且使旧运行证据失效；修复分诊正文槽位、兼容性误扩展、原型 CSS 控件误伤、静态/动态重复锚点口径、失效排障提示，以及 UNK 粗体/关闭依据、Markdown 粗体 ID 和结构化附录引用。补状态转移与跨来源映射、实际运行结果对照、可构造验收数据、模式库入口及门禁失败时的独立验证路径。
-- Scope：不增加全局八大件、双写台账、所有阈值可配置或通用运行断言 DSL；R0 仍按实际启用能力检查。运行源码 118 份，只新增一个构建工具；入口和日常引用预算不变。子合同版本不机械随 Skill 升级。
-- Validation：该基线完整 release 检查退出 0，296 项 pytest；pytest 与 release 检查需检出对应源码复现，精简运行包不包含维护者测试套件。构建器实际产物 37/37 浏览器检查。跨模型及外部报告的原生结果、后验修复和未证明范围分开记录，见源码验证记录及本地视检包。私人原文与凭据不进运行包；未据此宣称真人无需澄清、普遍跨模型稳定、生产验收或平台新评分。
-
-## 5.5.2 — 2026-09-19（本地候选）
-
-- Why：正式 PRD 的规则与验收分散，接收方需跨表拼接；导读型评审样例不能证明真实交互；普通原型检查可能被误用为已完成评审态交付，安装后正常生成的 Python 缓存又会触发完整性误报。
-- What：正式交接按模块就近组织条件、字段、状态、权限、数据结果、恢复、验收与待决；反例应能区分正确和相似错误实现。以同源设备维修 PRD 和完整可运行 R1 评审原型替换旧导读，提供前端/后端/测试说明及实际浏览器验证。增加 `--require-review-workspace` 绑定明确交付要求，保留已声明源码的正常字节码缓存，补中英文无具体目标反馈的分诊。
-- Scope：小改仍走最短路径，不强制长 PRD 或机器附录。R0 未启用分享、记录、进度时可省略对应合同；已启用的能力及 R1/R2 继续检查。产品上下文事件有效时不强制 MutationObserver。既有完整 RC4 合同兼容，精简 R0 需使用 5.5.2 检查器。运行源码预算从 116 增至 117，仅增加示例 PRD；入口和日常引用预算不变。
-- Validation：完整 release 检查通过，207 项 pytest；正式示例 PRD 联合门禁 0 BLOCK / 0 GAP，37 项浏览器检查通过。四题三组前向对照完成产物复核，修复后的新版实验原型 18 项浏览器检查通过，但仍有 42 BLOCK / 6 GAP，不能作为合格机器交接物。未证明稳定优于纯模型、真人返工减少或生产可用；详见源码仓库中的 `IMPLEMENTATION.md`。安装包与提交身份以随包 manifest 为准，发布另行记录。
+- 正式规格按模块集中呈现字段、条件、状态、权限、数据结果、恢复、验收和未决，业务标题与机器引用分开。
+- 增加示例拆分与合成工具，统一文本哈希并使不再适用的运行证据失效；提供同源设备维修 PRD 与可操作评审样例。
+- 新增 `--require-review-workspace`，将明确要求交付评审态的任务与普通原型检查区分；R0 仅检查实际启用的可选能力。
+- 修正条件渲染目标、UI 关闭动作、浮层引用、非活动上下文说明及重复锚点的误判；有正确上下文事件时不强制增加观察器。
+- 修复分诊正文槽位、兼容性误扩展、粗体 ID、未知项关闭依据及结构化附录引用的识别，改善中英文短需求和领域术语检索。
+- 补充中英文快捷入口、自然语言等价调用、可构造验收数据及存量状态映射；安装完整性检查允许正常生成的 Python 缓存。
 
 ## 5.5.1 — 2026-09-13
 
-- Why：交接中仍可能漏掉守卫和派生值的真实输入，规则、原型反馈与 AC 各自正确但互不相容；旧 P0 诊断计数易被误读为未决数量，英文短需求和中英文长句检索表现不一致。
-- What：规格补强关键依赖的含义/来源/提供时点，按需提供角色阅读导航、页面关系、业务所需非功能约束和分范围交接。用同一输入反查来源、规则、AC、原型和实现，验证后改动使相应旧证据失效。评审态补强对所指对象的实施/测试解释，修复隐藏节点、脚本及模板内容充当可读角色详情或验收结果的绕过。工具增加分范围/阶段的去重未知项统计，保留旧 JSON 字段与退出码；默认分诊先给可读建议及问题，正文候选提供具体双语修复提示。领域检索在长句中识别受控双语短语，按共同概念排序，零命中提供下一步。
-- Scope：不增加固定章节、强制 NFR 数值、全角色台账或第二套机器交接合同；不把技术选择、已登记未知、实现偏差都算成 PRD 遗漏。仍按旧输入合同兼容 5.4.x/5.5.0，新的统计为附加字段；正文探针是有边界的候选提示，不证明授权真伪或自然语言完整性。运行文件预算保持 116，日常引用预算保持 13,000 字符。
-- Validation：脱敏正反例覆盖未知统计、独立未知诊断、中英文发布/退回/重试、AI 写入和只读边界、领域长句与误扩展；正式执行结果及独立交接样本范围见 [实施记录](IMPLEMENTATION.md)。官方 SkillHub 新分数须由平台重新评测，本地检查不代替平台评分。
+- 规格明确关键依赖的含义、来源和提供时点，按需提供角色阅读入口、页面关系、非功能约束和分范围交接。
+- 评审说明须解释所指对象的实际行为，防止隐藏节点、脚本或模板内容冒充可读说明和验收结果。
+- 工具按范围、阶段去重统计未知项，保留旧 JSON 字段和退出码；分诊与领域长句检索提供双语候选提示及下一步。
 
 ## 5.5.0 — 2026-09-08
 
-- Why：真实 JS 渲染原型的指标盘点静默归零；UNK 表头未识别被误当作者未写，正文冲突被误指向 frontmatter；代理商与 AI、业务待确认与需求未决混淆，影响评审精度。
-- What：账本与原型门禁共用动态声明候选盘点，保留来源与未证明 DOM 范围；UNK 支持有语义的混合表头、缺失定位 GAP、带来源和行号的字段冲突；导航按容器和祖先关系计数。未定位评审卡片时保留覆盖阻断，去掉依赖卡片解析的状态轴和摘要重复报错。收窄正文误报，补 CE7 中文表达及台账/报销/里程/活跃短语检索，防止英文反义词子串和中文长词误扩展。
-- Scope：不因弹窗次级引用恢复跨页图强制；不把动态候选升级为已渲染事实；不新增业务文档义务。原始私人材料只读，公开回归使用合成输入。本轮按用户要求直接审源码和运行脚本，没有调用 Skill。
-- Validation：新增集中正反例覆盖动态声明、候选证据边界、UNK 来源/闭合、导航容器、业务角色/状态消歧与别名；真实输入与冻结 r4 对照重跑。完整检查和本地提交结果记录在本地审查报告；不自动安装、release、push 或上架。
-- Community review：核对 TRACE 官方说明及公开条目，将 SkillHub 历史 AI 评分明确归属 v5.4.8；README 前移业务分歧示例、集中双语 FAQ，并说明候选 ZIP 不随源码自动更新。SKILL 元数据显式声明与现有 LICENSE 一致的 Apache-2.0，不改变许可条款。
-- README positioning：以“帮你管清需求，让产研和 AI 少猜、少漏、少返工”说明需求管理内核的用户价值；判断、规则交接与变更影响是核心，需求卡、PRD、原型和验收条件按任务选用。角色价值与核心能力放在安装上手之前，安装说明面向可加载 Agent Skills 的开发与办公宿主，社区渠道保留独立身份。同步中英文表达，保留按需双态评审与现有效果证据边界；本次只改文档，不改变运行规则或宿主能力。
-
-## 5.5.0 — 2026-09-07（复测与双语入口修订候选，r4）
-
-- Why：中文 Windows 运行检查可能解码异常却报成功；真实导航被误计为双导航；旧未知状态与重复记录制造噪声；英文领域语料难以被中文问题找到，来源版本和真实验收映射仍有落差。
-- What：统一检查子进程 UTF-8 输出并容错捕获，保留失败退出；导航容器排除交互子项；partial 等旧状态兼容为 open 并合并相同诊断；增加中英文检索别名、候选命中解释、完整来源及法域信息；取值政策缺依据仅 advisory WARN，显式未决冲突为 GAP。行业问题按需读取切片和来源基线，再核对官方原文与版本。
-- Scope：README 重构首屏价值、角色入口、可复制首问、中英文使用指南及社区入口；社区数字标明维护者快照。隐式范围包含办公业务规则与微小改动，纯翻译、排版及既定执行交给对应工具；澄清不附加未来问卷。交接区分断言数、唯一 AC 和语义已验证行为，不新增全套文档或默认门禁。
-- Validation：完整 release 检查及 155 项 pytest 通过；新增 15 项回归涵盖编码、导航正反例、partial 去重/冲突、政策提示与双语检索。六组中文关键词恢复候选命中；七次独立 Kimi CLI 会话观察到办公隐式调用、翻译负对照及中英文领域路径，英文重跑回到当前来源基线，但样本不足以宣称稳定命中或专家级正确。真实工程隔离复跑也证实测试编号一致不等于业务语义覆盖；私人原始材料不进入公共包。最终运行包、安装及剩余问题另记本地交付报告；未自动公开发布。
-
-## 5.5.0 — 2026-09-07（外部测评修订候选，r2）
-
-- Why：外部真实使用与独立新样本暴露声明自洽但正文风险漏判、模板未知项被误当关闭、误报导致不必要补写的问题。
-- What：triage/PRD/歧义扫描复用有界正文疑点检查；未知项支持正文与翻译标签并校验关闭依据；AI 写入范围缺省保持未知；支持双位置变更种子及冲突拒绝；修复处理器变量名与候选 selector 盘点不一致；增加领域关键词检索、中文章节别名和切片证据边界。
-- Scope：保持 direct/card/prd 与按需专业工具；取消 state 自动附带 recovery、非导航 ID 的补表 WARN，以及仅因业务浮层存在而强制跨页图与样例。恢复面向业务/产品、设计、研发/Agent、QA 的角色价值入口。5.4.9/RC4 是继续兼容的评审子合同版本。
-- Validation：公共入口正反例、原始外部输入前后复跑、独立微型需求及两份真实原型静态复核；具体记录见源码维护说明和本地交付报告。正文 GAP 不是自动裁决，声明来源未鉴伪，未据此声称真人接收、浏览器/生产验收或稳定优于纯模型。此修订另行打包并记录提交与哈希，不覆盖原始测评包，不自动公开发布。
-
-## 5.5.0 — 2026-09-06（本地候选）
-
-- Why：减少需求工作的格式与流程负担，把注意力放回当前决定、关键业务语义及变更后的有效性。
-- What：精简 Skill、阶段参考与模板；呈现/风险/治理分开；triage 与 PRD gate 共用内核；支持范围/版本约束的语义声明、建议处置与有路径的候选影响。
-- Scope：小改不默认全流程/长 PRD/双态；既有专业原型、评审、Truth、handoff 合同按需保留。旧等级/章节义务及旧 triage 输出键退役，兼容边界见 README。
-- Validation：新增行为回归、保留的专业合同、独立前向测试与有限同任务接收试验；详细结果见源码维护记录。本地候选未自动安装或公开发布，不声明稳定优于纯模型或已经客户验收。
-
-## 5.4.9 - 2026-09-01
-
-- **Why**：5.4.8 的公开入口与主合同已经稳定，但真实 CRM、AI Native、跨系统批量上报和中型评审样例仍复现了四类“自检绿、用户路径失败”：`prototype --prd` 静默忽略跨产物交接、字段/指标投影漂移未阻断、模型用语法检查冒充正式 PASS，以及业务抽屉在窄屏遮住评审态重新展开入口。黄金 PRD 同时残留 19 条悬空引用 WARN，削弱样例可信度。
-- **Frozen-kernel stability patch**：不新增工作站、Schema、下游格式或工件语义。`prototype` profile 显式收到 PRD 时会同时执行 PRD 与 handoff 校验；L2+ handoff 增加 `FLD-*`、`METRIC-*` 与 PRD 合同的一致性检查。纯产品态、未传 PRD 的小原型仍保持轻量。
-- **Clarification and evidence discipline**：跨系统批量“部分失败”被收紧为隔离粒度、批次/记录状态、幂等键、可重报范围、聚合回执五项不可分 P0 组。任何 PASS 声明必须来自实际目标 profile，并报告退出码和 `not_proven`；HTML/JS 语法检查不能替代需求、原型或交接门禁。
-- **Review runtime and golden examples**：中型评审样例修复窄屏业务抽屉遮挡重新展开入口；黄金 PRD 就近补齐来源、指标、流程、集成、状态、规则与 AC 定义，不再以 dangling-reference WARN 冒充干净样例。README 的角色价值、快速入口、生命周期、三种表面、门禁与边界均增加紧邻英文说明，并删除重复的 GitHub 表格入口。
-- **Validation**：Kimi K3 与 DeepSeek V4 Pro 在相同脱敏材料上完成 CRM/AI Native 四角色冷读；修复前反例分别被候选门禁拦截 13 项与 14 项，修复后两组正例均为 `PASS / blockers=0 / gaps=0`。独立 Codex Coding Agent 只读 CRM 正例完成有界服务实现，主代理复跑 25/25 自动化测试通过。当前评审工作台专项 31/31、全量 pytest 84/84；此前 fixture 创建前的权限错误经宿主临时目录复跑确认属于 Windows ACL 环境伪失败。两个本地主安装目录均升级为 5.4.9 并通过结构校验；评审后“1—4 修改、5 删除、6 新增”正例在安装版 CLI 下 PASS，标号断链反例按预期 BLOCKED，浏览器证明 marker/card/target 双向同步与业务动作隔离。完整发布门禁、Skill Creator、运行包和安全扫描结果见 Release Notes。
-- **Evidence boundary**：上述证据证明确定性合同、模型冷读和有界 Coding Agent 实现，不证明真人团队完整盲审、真实数据库/接口/IAM、AI 模型效果、性能、安全、客户签认或生产稳定性。AI Native 本轮未执行盲实现；CRM 原始评测工件在 390px 下仍有 63px 横向溢出，未包装成公共运行时已全面解决。
-- **Human-first review projection patch（同版本）**：R1/R2 右栏收敛为“总览 / 功能与流转 / 边界与验收”。复杂模块在总览展示核心流程并高亮当前页面；功能点默认使用自然语言，前端、后端与测试细节按需展开；边界页只在跨页、跨角色、跨系统或关键状态流转时显示状态/数据图，并配少量可执行正反例。稳定 ID、字段枚举与技术链路移入默认收起的“技术追溯”，简单 CRUD 不机械画图。
-- **Review-change lifecycle patch（同版本）**：评审后的“修改、删除、新增标注”必须先进入 `CHG-*` 与澄清决定，再同步 PRD、语义覆盖分母、ReviewPoint Declaration、DOM marker/card/target、验收与回归。被删除的稳定身份保留在变更记录中但退出新基线分母；新增项取得新稳定身份；可见序号按新 Declaration 重排，不能把序号当永久业务 ID。旧 baseline 的评审记录和分享定位不得静默复用于新 baseline。
-- **Pitfall discoverability patch（同版本）**：不新增流程或运行文件，将现有排障、FAQ 与反模式重构为顶部可扫读的双语“避坑指南”，集中索引简单需求过度治理、原型目标提前停止、未知项伪确认、评审态默认开启、Product Truth 过早启用、双 PRD 漂移、伪造门禁、证据越级、跨基线复用和领域来源过时等高频误用。README 60 秒入口与 SKILL 路由均可直接到达，并增加回归防止入口再次隐藏；社区评分按 2026-09-02 的 SkillHub 4.7/5 当前值更新。
-
-## 5.4.8 - 2026-08-26
-
-- **Why**：真实 CRM 评审态再次暴露“页面可走、单点按钮有说明，但指标口径、泳道迁移、需求卡二级抽屉和简单功能点仍需产品经理口头补充”的缺口；SkillHub 反馈同时指出首屏文档过重、文件说明重复、新手缺少中等需求参照。根因不是继续增加角色页签，而是评审点 Declaration 只能证明已声明点没有断链，不能证明“所有影响实施与验收的页面语义”都已进入覆盖分母。
-- **Semantic Coverage Contract**：评审工作台 Schema 升级为 `5.4.8 / RC3`，保留 `5.4.7-final` 兼容读取；新增 `semantic_coverage_contract`、`semantic_coverage_items`、页面 `surface_types` 和 `secondary_context_refs`。每个页面必须声明 `PAGE-CONTRACT`；指标、状态迁移、权限、数据写入、事件、错误恢复、业务浮层和角色路径必须映射到 PRD 稳定 ID、可见说明与 RVP，或带来源说明为不适用。P0/P1 未覆盖直接阻断，简单功能允许一句话或等价规则组，不要求给装饰元素编号。
-- **Review Gate**：新增指标口径、状态路径、二级业务上下文、页面合同和语义引用的确定性门禁；业务弹窗/抽屉若没有独立 CurrentContext，指标页没有 `METRIC-*` 口径，泳道页没有受守卫迁移，均不能静默通过。语义项与候选观察物理分离，机器 handoff 复用 PRD 权威定义核对来源、目标和未知项。
-- **Four Thin Shortcuts**：新增 `/ads`、`/dig`、`/prd`、`/proto` 四个意图别名，宿主不支持斜杠时自然语言等价。它们只改变当前停止点和提问策略，不复制生命周期、模板或 CLI。`/dig` 自适应使用战略、系统、行为心理（只看可观察动机）和反方挑战四镜头，一次只问一个会改变决策的问题，结果仍写回既有 `DEC/UNK/ASM/REQ/RULE/AC`，不生成脱离交付的独立报告。
-- **Onboarding Subtraction**：README 收敛为问题定位、60 秒入口、角色价值、产品态/评审态/机器合同、门禁与边界；去掉易过期的硬编码社区数字。新增一个匿名中等交互样例，集中展示驾驶舱指标口径、泳道状态规则、卡片进入任务拆解抽屉以及右栏收起/恢复；同时移出已不再引用的生命周期 SVG，运行包仍保持 114 文件，并明确样例不是完整发布 Schema 夹具。
-- **Scope / Unchanged**：没有增加生命周期阶段，没有把评审态设为默认，没有把右栏变成 Coding Agent 唯一合同，没有接管排期、编码、部署或领域签署。存量 `5.4.7-final` 评审 manifest 继续可读；只有新生成的 5.4.8 工件强制 RC3 语义覆盖。
-- **Release and Compatibility Hardening**：运行包新增 `--release` 干净来源硬门禁，dirty、短 SHA 或不可追溯来源不能生成正式包，CI 在干净 checkout 上执行同一检查；阶段合同补齐 5.4.6 旧评审叠加、5.4.7 普通工件/`5.4.7-final` 和 5.4.8/RC3 的兼容与迁移矩阵，回归证明旧工件只在原合同范围内读取，不能靠降版本逃避新语义覆盖。
-- **Validation（本地候选）**：完整 pytest `78/78`，其中 5.4.8 评审态专项正反例 `25/25`、产品体验合同 `10/10`；完整 release gate、发布声明、README 首次使用、发布包路径与校验器接线、运行包 114 文件、维护区 55 文件且低于 450,000B、JSON/Python/示例 JavaScript 语法和 Skill Creator UTF-8 检查通过，脏工作树正式打包反例按预期失败。中等 HTML 静态原型门禁 PASS，动作具备可观察业务状态。本地 HTTP 浏览器实测覆盖右栏收起/恢复、标号—说明—目标双向框选、二级上下文切换和产品/评审并行；另用匿名 AI Native 与 CRM 主线执行桌面浏览器全链，发现并修复了比较符被解析为标签、marker 越界和弹窗横向滚动。Codex 项目 Skill 的 `/ads`、`/dig`、`/prd` 语义冒烟通过，`/proto` 受传输超时阻断；Kimi 受提供方额度阻断，WorkBuddy 裸别名被宿主拦截且显式 Skill 调用受本地认证阻断，因此不宣称跨宿主原生注册。上述受控测试仍不证明领域正确、真人冷读、真实实现、窄屏、客户验收或跨模型长期稳定性。
-- **Onboarding reliability patch（发布前）**：最小示例的 `delivery_level` 与分诊统一为 L0，README 原命令进入真实正向与五类反例门禁，并在解压运行包中复核；Product Truth 快速链明确脚手架须先补业务事实。`trace` 对缺失、不可读、非法 YAML 和非对象根节点返回可操作 `BLOCKED`/exit 2，不再泄漏堆栈；公开与运行时文档统一使用 `python`，仅在平台需要时替换为 `python3`。本补丁不在 release command 列表重复同一入门命令。
-- **媒体资产与多模态知识领域补丁**：新增独立 `media-knowledge` 领域包，覆盖采集隔离、原始件/保存主版/代理版、时间空间片段、ASR/OCR/视觉/音频标注、人工复核、词法/向量/图索引、精准时刻检索、媒体 RAG、剪辑/发布/训练用途以及权利撤回级联。把“相关性不等于授权”“C2PA 有效不等于内容为真”“AI 标注不静默覆盖确认事实”固化为合同；补入 C2PA、IPTC、W3C、IIIF、PBCore、PREMIS/FADGI、MPEG-7、中国现行法规/广电视听标准及三类厂商模式，并用 `binding_baseline / design_guidance / product_pattern` 限制证据效力。`/ads`、`/dig`、`/prd`、`/proto` 按需组合 `media-knowledge + ai-native + data-product + 行业包`；3 个反例夹具覆盖未授权相关命中、权利撤回传播和来源真实性边界。该包仅晋升为 `contract_tested / knowledge_only`，不宣称真人行为、领域专家、法律适用或生产效果已经验证。
-- **七个存量领域包复核补丁**：再次核验交通、CRM、教育、OA、医疗、数据产品与 AI Native 的当前基线和变化观察；补入 2026 修订《道路货物运输及站场管理规定》、《智能体规范应用与创新发展实施意见》和仍处立项公示阶段的办公智能体接口规范，并分别限定为适用后绑定基线、设计指导和 `change_watch`。99 条来源现全部显式声明 `effect_class`，不再由模型把法规、标准、厂商材料或草案临时推断为同等证据；来源校验器会阻断缺失或非法分级。ISO 10002:2018 仍为 ISO 当前确认版本；教育、数据与 AI 方向的 2026 新基线已在既有包中承接；未找到国家卫健委公开发布的“数智医院”替代评价标准，医疗包继续保留换轨预警而不虚构强制要求。
-- **领域补丁验证**：权威来源、成熟度、领域合同、精确章节查询、组合查询、未知章节失败和上下文路由均通过；完整 pytest `78/78`、完整 release gate、Skill Creator UTF-8 校验与 115 文件运行包检查通过。维护区仍为 55 文件/449,985B，未提高 56 文件/450,000B 预算。公开包未引入客户项目名称、本地路径或凭据；现有黄金 PRD 的 19 条非阻断悬空引用 WARN 仍如实保留，本补丁未把它们伪装为已修复。
-
-## 5.4.7 - 2026-08-22
-
-- Semantic closure guard（同版本发布后补丁，2026-08-26）：关闭六个可由合法 Schema 结构绕过的评审语义缺口。`context_root` 只允许 `VIEW/REG`，动作、字段、指标和状态必须在 CurrentContext 内唯一定位；Candidate 与正式 Declaration 的 `subject_ref` 必须互斥；R1/R2 冷读不能用 `not_applicable` 逃避；分享定位必须打开即 hydration。ReviewPoint 的 subject、来源、前置、双结果、边界、目标和 AC 统一复用 PRD 语义解析器核对权威定义位，仅在正文提及幽灵 ID 仍会阻断。旧 Preview finding 的 CLI 修复建议统一迁移到 Final CurrentContext 三页签，不再指导恢复 Journey/STEP/Role 模式。聚焦回归 21/21、完整 pytest 71/71、完整 release gate 通过；维护区仍为 56 文件/449,738 bytes，未提高预算。静态与受控夹具不证明真人冷读、业务规则正确、真实实现或客户验收。
-- Final release guard（同版本发版前修复，2026-08-26）：一句话要求 HTML 默认保持“可实施产品原型”为停止点，分批关闭原型阶段 P0 后继续生成，不再停在需求清单或无解释地不出产物；明确“先看效果/概念原型/允许合理假设”才允许先交带假设与 GAP 的 `concept_candidate`，且不得冒充基线、可开发、已评审或已验收。仅要求 HTML 时不机械附送 PRD，中英文语义等价。
-- Review linkage guard：有可见 UI 目标的正式 ReviewPoint 必须在产品目标旁显示同号 marker；点击左侧 marker 或右侧卡片时，真实 target、marker、card 三处同步框选并双向定位。新增 `selection_contract`、`PROTO-REVIEW-MARKER-REQUIRED` 与 `PROTO-REVIEW-SELECTION-NOT-SYNCED`；右栏存在 `1/2/3` 而左侧无落点、只有滚动没有目标焦点环、收起后无反向展开入口均不得交付。业务浮层可正确继承 `menu_exempt` 父页面，不再被迫伪造菜单路径。
-- Baseline truth guard：新增 `PRD-STATUS-CONTRADICTION`，阻断 frontmatter 声称 `baseline/ready`、但 `baseline_version` 或文档控制仍明确为 `draft/草稿/待评审` 的矛盾工件。脱敏真实缺陷样本已复现并由新门禁阻断。
-- Final validation：一句话路由与评审联动正反例并入既有集中测试，不新增维护文件；全量 pytest `74 passed`，完整 release gate、发布包路径检查、校验器接线和 Skill Creator UTF-8 校验通过。受控浏览器夹具验证 marker/card/target 双向框选、评审栏收起恢复与业务浮层上下文往返；维护区保持 56 文件/449,081 bytes，未提高既有预算。静态与受控浏览器夹具仍不证明领域正确、真人冷读、真实实现或客户验收。
-- Final RC2 protocol/runtime correction（同版本待发补丁）：人工复核确认 RC1 仍存在“合同写对、执行器未完全照做”。正式 Declaration 与 `candidate_review_points[]` 物理分离；存量小写动作只生成带理由的 `PROTO-OBS-*` 候选；Target 在 CurrentContext 内执行 exactly-one，零/多命中均阻断且禁止 first/index/root 回退；业务浮层由 Manifest `detectionSelector` 与继承模式驱动；评审记录 `RVP-*` 与真实 `subject_ref` 分离，不再自动伪造 `REQ/RULE/STATE/AC`；Observed Product Fingerprint 接入可见运行门禁；收起→展开、分享定位刷新恢复进入浏览器往返。指标、规则字段、高风险动作和行为状态进入 Candidate Diff，未知业务口径保持 GAP。`resizable` 按实际实现声明为 false，删除旧重复 Runtime。33 项聚焦回归通过，三份完整原型的参数化浏览器 Runner 对 22/19/4 个主导航上下文、收起展开、页签与分享恢复通过；浮层核心链路另做浏览器实测。真人多角色冷读仍未执行，不能据此冻结 Final。
-- Product Location correction（同版本待发补丁）：真实项目冷读发现核心旅程虽可达，但简化评审壳的左侧菜单保持静态，产研与测试无法判断当前功能在系统中的真实入口。新增 `ProductLocation` 合同：每个 VIEW 必须绑定唯一菜单路径或具理由的独立入口，页面切换同步路由、活动菜单、父级展开、面包屑、标题与 CurrentContext；浮层继承父页面位置。Schema、静态运行时门禁、浏览器 ARUN 和冷读新增 `PROTO-PRODUCT-LOCATION-MISMATCH`，禁止用静态假菜单替代完整存量导航。
-- Full-product runtime correction（同版本待发补丁）：用匿名 CRM、出版服务后台和学员 H5 三份完整原型派生评审态时补齐真实运行边界：同页只保留一个可见评审事实面；评审事件不得进入业务 dispatcher；固定业务浮层在桌面止于产品区、窄屏恢复全屏；动态 `innerHTML` 重绘后恢复正式 marker；只显示 CurrentContext marker；标号避碰、完整落在视口内且不遮挡关键动作；右栏卡片默认摘要、按需展开。以上均进入浏览器 ARUN，静态声明不得冒充运行证明。
-- Final Review correction（同版本）：依据多模型产物人工冷读反证，撤销 Preview 中把 `orientation / journey / focus / page / acceptance` 与产品/前端/后端/测试角色镜头设为人类一级导航的设计。新合同遵守 `Review Explains, Product Operates`：完整产品自身承担动线，评审层跟随最上层业务浮层或活动 VIEW 的只读 `CurrentContext`。
-- Human projection：R1/R2 固定为“总览 / 功能与流转 / 边界与验收”三页签，R0 可省略可见页签；复杂度只增加信息深度。FLOW/STEP/EDGE/STATE/DATA/AC/TEST 继续保留在 PRD、Product Truth 与机器 handoff，并按当前上下文投影，不再控制人的导航。
-- Declaration and runtime safety：`review_contexts` 成为官方评审点与进度分母的唯一声明源；Candidate Diff 只报告遗漏且禁止自动晋级。新增上下文内重编号、marker/card 同源、当前上下文唯一目标解析、Product/Review Fingerprint 分离、非遮挡布局、Overlay 探测、分享定位和按 baseline 隔离的持久化评审记录合同。
-- Gate migration：`review-workspace.schema.json` 升级为 `5.4.7-final`，确定性门禁覆盖 context、denominator、point coverage、numbering、three-tab ownership、status axes、candidate diff、fingerprint mechanism、layout、overlay detection、target resolution、share/progress、record persistence 与 cold-read evidence；旧五模式 manifest 不再被 Final Schema 接受。
-- Coherence patch（同版本）：把用户可见工作量收敛为 `direct / standard / governed`，并将主产物形态、风险切面、证据等级拆成正交轴；L0-L4 仅作为旧 Schema/CLI 兼容映射，避免一个数字同时冒充文档深度、业务风险、原型复杂度和验收证据。
-- Runtime subtraction：重写精简 `SKILL.md` 主入口，删除 CRM 专属链路、固定 100KB/页面数量阈值和权限/同步等重复细则，改为按阶段引用；保留任意阶段进入、最轻路径、来源权威、P0 未知、Stage 0、统一 PRD、同源三投影、变更追溯和证据诚实等核心能力。
-- Upstream/source safety：来源类型新增业务机会、产品决定、工程约束和评测任务，禁止它们互相越权；来源登记支持 hash、敏感级别、凭据处置和 `SECRET-*` 引用。`check-distribution` 同时检查常见明文凭据且只报告位置/类型，不回显疑似秘密，并明确自动扫描不能证明无编码/图片/上下文秘密。
-- Execution boundary：把受保护表面、允许/禁止动作、环境/密钥引用、必需证据和回滚责任人作为可选 `execution_constraints` 合并进既有 Coding Agent handoff；不新增执行阶段，不扩张到 Sprint、编码、部署或运维。
-- Validation：新增工作深度正交性、来源分类/凭据引用、执行约束 Schema 与秘密不回显正反例；公开“最好”主张改为预注册盲测达标后才允许，本次静态回归不预支比较结论。
-- Maintainer subtraction：把强制“七阶段 × 九角色 × 每角色四项输出”的 456 行历史行业夹具改为 140 行风险镜头组合；过期文案关键词门禁改为能力/结构门禁，生成型 pytest 目录不再冒充运行时架构。完整 `check --profile release` 通过；维护区仍为 55 文件，降至 421,497B，未提高预算。
-- Why：结合 Kimi K3、QClaw/GLM、WorkBuddy/DeepSeek、Grok 四组最新独立方案、用户人工视检和存量双态原型反证，确认旧评审态主要按页面与按钮组织信息：接收者能勉强看懂单点，却无法沿真实业务旅程识别责任交接、状态可达性、数据变化和验收闭环。专家产物还暴露批量把未知升级为 confirmed、用自报冷读代替真人证据、技术伪精确和同一规则多版本冲突等风险。
-- Review Workspace：评审态改为导读、旅程、单步聚焦、按需页面定位、验收五种任务模式；编号只定位当前 `STEP-*`/页面入口，不再铺满全站。桌面画布与 STEP 双向定位并保持选中反馈，分享定位可恢复页面/步骤/角色上下文；窄屏在产品/评审间全屏切换。变更比较提升为 REQ/STEP/RULE/STATE/DFD/AC 业务 Diff；系统步骤、外部步骤与断点允许没有虚假的页面钉点。
-- Adaptive presentation：右侧评审栏不再是固定模板。每个进入聚焦评审的 `VIEW-*` 必须按指标/宽表、表单详情、流程画布、混合工作台或移动页面画像，显式选择侧边检查器、底部停靠、就地展开或全屏工作区，并登记业务浮层冲突策略；Schema、DOM 映射和正反例门禁共同阻止缺映射、漂移、重复和孤立页面。
-- Role Work Packets：每个原子 `STEP-*` 分别向产品、前端、后端、测试投影最小施工包，并保留上游、下游、分支、回退和未知项。前后端可见合同引用，测试可见 `TEST-* → AC-*`、前置、正反边界、双结果和证据要求；Coding Agent 不作为第五个人类镜头，继续读取同源 PRD/Truth、稳定 ID 与结构化 handoff。
-- Flow/State/Data：跨角色交接、受守卫状态、对象/系统数据流必须以相互独立且人眼可见的 FLOW/STM/DFD 投影呈现；确实不适用时显式 N/A。`EDGE-*` 支持 start/next/branch/parallel/join/return/error/compensate/finish，避免把并行、汇聚、错误与补偿压成固定“上一/下一”。
-- Evidence integrity：业务语义状态 `confirmed/proposed/inferred/unknown/conflict` 与验证状态 `not_run/static_checked/browser_checked/integration_checked/accepted/failed` 分轴；confirmed 必须绑定来源/决定，验证结论必须绑定证据。静态观察、评审导航可点击或模型自报均不能升级成业务批准、真实实现或验收。
-- Same-source contract：新增薄型 `schemas/review-workspace.schema.json` 与 `review-workspace-manifest`，只登记 baseline hash、FLOW/STEP/EDGE、角色槽位与引用、TEST/AC、UNK、证据状态和 machine handoff 状态，不复制业务规则正文。旧评审叠加在 prototype 单检中返回迁移 GAP，进入 handoff/full 则阻断；组合门禁核对评审基线与 PRD 内容哈希。
-- Runtime trust：补齐 `candidate validate --help`；runtime `check --profile fast` 真正校验 manifest/schema/config，缺维护资源的 release/status 非零阻断；PASS+INFO 不再输出“违反合同”；Stage 0 占位与 L1 缺少七段最小语义合同均阻断；Stage 0 明确检查跨动作状态可达性；`query-domain --section` 只返回请求切片。
-- Prototype accuracy：动态创建节点后赋予稳定字面量 `ACT-*`/`UIACT-*` 可被识别为有效入口；变量、字符串拼接和既有节点运行时补挂仍阻断。`.hidden` 仅按精确选择器/类判断，避免把 `.is-hidden` 等合法类误当隐藏污染；真实存量原型仍保留 4 个可证实孤儿动作，不用宽豁免制造绿灯。
-- Scope：评审态仍需用户明确要求或确认；小改动不生成全套投影，L1 只需七段短需求卡而非完整 PRD。不用关键词计数冒充角色质量，不强制每 STEP 仅一条用例，也不让评审原型发明 API、表结构、错误码或技术选型。
-- Validation：独立 P1 复审的 35 项聚焦回归通过；Stage 0 16 项、产品体验 8 项、动态锚点 5 项通过。维护区为 55 文件、449,228B，未提高 56/450,000B 预算。匿名跨模块前向夹具的 Stage 0 与 prototype 静态门禁 PASS，handoff 因 6 个真实 P0 未知保持 BLOCKED；纯模型隔离冷读发现的入口漂移、硬编码、输入丢失、领域结果不可见、状态矛盾、画布声明漂移、未知未结构化和 AC 过粗均已回馈修复。本地语料去重为 20 个项目族/46 个场景，只作为覆盖目录；两个学习平台候选仍被新门禁判为 migration GAP/BLOCK，未刷绿。真实浏览器、四位真人产品/前端/后端/测试隔离冷读、真实 Coding Agent 盲实现和客户验收仍未执行，不能由静态 PASS 或模型模拟代替。
-
-
-## 5.4.6 - 2026-08-12
-
-- Why：基于 WorkBuddy/DeepSeek、Kimi、QClaw 的真实评审态与 PRD 分发复现、用户人工复核、专家反例和 SkillHub 最新评价，修复“规则写了但弱执行模型仍会漏读、静态门禁仍会放行”的实施缺口；同时回应新手概念负担、小团队重量感和细反例占上下文的担忧。
-- Scope：不新增工作站、不默认生成评审态、不强迫小需求跑完整生命周期，也不把事故库、真实项目或全领域知识塞入运行时。细反例只留在脱敏维护回归；运行时按指标、评审、分发、组合交接、存量页面等脆弱表面选择性激活短合同。`SKILL.md` 由 5.4.5 的 6500 字符降至 6366 字符，维护区保持 56 文件并低于既有字节预算。
-- 指标在规格定稿/评审态生成前必须明确对象、公式/分子分母、时间窗、过滤、去重、权威源、时效、零值、单位与版本；无法确认则登记 `UNK-METRIC-*` 并按影响阶段阻断。PRD 门禁新增机器 frontmatter 与人类未知项表的优先级/状态/阻断阶段漂移检查。
-- 原型门禁新增三层指标防错：静态重复 ID 的语义碰撞、重复 ID 无可判定标签、动态指标工厂用固定 `METRIC-*` 承载多个运行时标签；同一指标可在不同位置重复展示，不同指标不能再压成一个通用 ID。
-- 评审态新增可执行联动合同：编号与说明卡共享 `data-review-id`/`data-review-target`，双侧选中态可访问且可同步；共识/前端/后端/测试控件与内容分别绑定 `data-review-role`/`data-review-lens`，只切按钮颜色而不切内容会阻断，并要求浏览器 ARUN 证明双向定位与产品态往返不变。
-- 新增 `project-human` 与 `check-distribution`：先从权威 Markdown 去除 YAML frontmatter/机器编辑注释，再转换并渲染 Word；分发检查可直接阻断 DOCX 顶部机器元数据和未被转换的 Markdown，且明确不证明版式、分页、字体或视觉质量。
-- 弱模型/长上下文执行不再反复重灌整套规则：连续漏读时缩小为单模块/单表面切片，完成后立即过对应确定性门禁；质量标准不因模型能力降低。领域知识继续按成熟度与当前项目来源取证，不用扩大公共包体积伪装行业深度。
-- 三类匿名真实项目复测不做失真平均：同基线 A/B 证明 5.4.6 增加评审联动、指标和状态可机检性；存量评审修补与多端验收包同时暴露“批量 UNK 只有编号”和“静态/浏览器证据越级宣传”风险。原型门禁新增 `PROTO-UNKNOWN-CONTRACT-INCOMPLETE`，评审态未知项必须绑定优先级、责任人、阻断阶段、影响引用和回退；验收规范新增静态→浏览器→业务确认→真实系统→客户验收五级证据上限。
-- 本地发布测评增加与 SkillHub TRACE 对齐的 Trust/Reliability/Adaptability/Convention/Effectiveness 五维代理清单，并显式声明它不是平台算法或 4.9 预测；私有校准只保存匿名汇总，公开包不携带原始项目材料。当前 Effectiveness 因缺少新鲜盲测重复、完整 token/耗时和版本化人评保持 `partial`。
-- Validation：5.4.6 集中正反例 12/12 通过；快速门禁通过；完整发布门禁通过；Skill Creator 在 UTF-8 模式校验有效。真实复现包中，旧 Word 被 `check-distribution` 阻断，旧 PRD 的 `UNK-003` P1/P0 漂移被阻断，旧 PC 评审原型的动态指标 ID 复用、编号/说明断链、角色镜头空转及 82 个无责任合同的未知指标均被阻断。上述结果只证明确定性合同与复现覆盖，不证明跨模型长期稳定性、领域专家正确性、真实实现、生产安全或客户验收。
-
+- 精简入口、阶段参考与模板，将交付形式、风险和治理分开；小改不默认执行全流程，专业原型、评审和机器交接能力按需启用。
+- 分诊、PRD 检查与歧义扫描复用有界正文疑点检查；未知项支持正文、翻译标签及关闭依据，缺省 AI 写入范围保持未知。
+- 改善动态指标和动作盘点、未知项混合表头、字段冲突行号、导航容器和业务角色消歧；候选声明与真实渲染事实分开记录。
+- 支持双位置变更种子，修复处理器变量名与选择器盘点不一致；中文 Windows 子进程统一 UTF-8，并保留真实失败退出。
+- 增加中文章节别名、中英文检索展开说明、完整来源及法域信息；零命中提供后续查找入口。
+- 办公业务规则和微小改动纳入适用范围，纯翻译、排版及既定执行由对应工具处理；README 按角色、任务与核心能力组织。
 
-## 5.4.5 - 2026-08-10
-
-- 重构维护验证的执行边界：把 15 个历史“独立运行、导入即执行”的发布脚本从 `maintainer/tests` 重分类到 `maintainer/checks`，保留仍有效的回归断言并由发布检查器显式调用；`maintainer/tests` 只保留可被 pytest 正常收集、失败可定位的测试，避免普通失败升级成 pytest `INTERNALERROR`。本次不靠提高文件/字节预算维持旧结构。
-- 从外部 Agent 真实使用暴露的问题、私域知识演练和反例对抗测试反推六类合同缺口；修复目标是让同一工件在不同入口一致受控，而不是增加生命周期步骤或文档数量。
-- 变更包校验器与影响分析器共享防御性读取/影响引用提取；`impacts` 错误嵌套返回精确非零失败，不再因无 `seed_refs` 的字符串列表泄漏 Traceback。官方模板同步给出对象项结构。
-- 私有规则增加 `domain/domains` 适用域与可重复 `gate --domain` 上下文；共享 `custom/` 可安全承载多个领域。缺少领域上下文或传入未注册领域会阻断，非当前领域规则被显式跳过并计入指标，旧的无作用域规则继续作为全局规则。
-- PRD 门禁只在结构化正文决策/未知项表内做精确主题冲突检查，并跨权威定义表阻断重复稳定 ID；合法正文引用、追溯表、映射表和索引表不按重复定义处理，避免用全局出现次数制造误报。
-- 原型门禁不再静默放行远程 iframe：不安全 scheme/HTTP 阻断；L2+ HTTPS 嵌入必须声明 INT-*、降级与浏览器安全属性；声明完整仍保留运行时未证明 GAP，要求目标网络和角色登录态的 ARUN 证据。
-- `explain-finding` 区分精确代码、已知家族和完全未知代码；未知 code 返回 `recognized=false`、明确双语原因与非零退出码，不再用通用文案伪装成有效诊断。
-- 新增一个集中式 5.4.5 不变量测试文件，覆盖合法/反例、跨入口、跨领域、产品正文权威面、远程信任边界和诊断诚实性；不为每个缺陷拆分维护文件。
-- CI 不再只编译测试并把快速检查误称为发布检查：Windows/Linux × Python 3.10–3.12 全矩阵实际执行 pytest，Ubuntu/Python 3.12 另跑一次完整发布门禁。
-- 发布前领域复核补齐现行《道路旅客运输企业安全管理规范》（交运规〔2023〕4号），纠正危货规范正式标题，并明确旅客与危货的适用范围、文号和人员/检查逻辑不得混用。
-- 发布前隐私复核将真实项目名称替换为匿名场景名；公开包不携带本地绝对路径、私人联系方式或客户项目标识。
-- 验证边界不变：确定性测试只能证明上述静态合同和受控失败，不能证明领域正确、真实浏览器行为、实现质量、生产安全或客户验收；Skill-vs-纯模型的新鲜独立重复仍需外部测试。
-
-
-## 5.4.4 - 2026-08-08
-
-- README 恢复问题导向首屏，按初中高级产品、产品负责人、前后端、测试和技术/架构角色说明价值，
-  覆盖从零发现到验收的完整需求生命周期；删除带项目指纹的单场景 Demo，仅保留通用生命周期图。
-- 发版前修复 Windows 旧代码页下澄清编译输出、稳定 ID 内 `TODO` 误判、`${act}` 模板引用污染、
-  高不确定性分诊空依据、运行包 dirty 来源标记和失效回归样例；动态 `act/add/confirmAction` 的字面量
-  入口不再被重复判为孤儿处理器，真实无入口处理器与动态锚点拼接仍独立阻断。
-- 实施步骤合同补齐对象计数单位、记录粒度、成功/失败/部分成功归集、权威源更新、
-  提交集合边界及处理完成后的下一可达入口。
-- 为实施可见性合同增加确定性守门：handoff 中的 `implementation_step_refs` 必须解析到 PRD 的完整
-  `STEP-*` 实施卡，开发就绪清单不得漏包；幽灵 STEP、工作包漏引和八类核心实施语义缺失均阻断。
-- 明确交互账本是派生覆盖清单而非需求权威源：纯界面动作使用 `UIACT-*`，业务 `ACT-*` 与 `AC-*`
-  仍须回到 PRD 基线，避免原型或账本自创规则后自证放行。
-- 独立交互账本/CSS 工具对缺失输入返回受控非零结果而不泄漏 traceback；领域章节查询失败同步列出
-  可用标题，早期续跑模板补充 `prior_artifacts` 对象示例。
-- 补接正式发布包的 PRD 语义、发布包完整性和校验器接线检查；运行包内 `check/status` 明确跳过维护侧资产，需求登记册、评审记录、追溯矩阵和 IA 骨架作为侧车进入公共门禁。
-- Markdown + frontmatter 被固定为早期产物和 PRD 的权威基线，DOCX/PDF 仅作为分发副本；模板中的签署、残余问题和有条件验收示例调整为可直接通过 Schema 的对象结构。
-- 中文及其他非英语交付的人类可见标题、表头、验收叙述、图节点和状态标签统一本地化；稳定 ID、API/字段、Schema 与机器枚举保持原值，并用“草稿（`draft`）”显式映射。
-- 权限从单一 `no_permission` 拆为页面入口、数据范围、动作/组件、字段四层：无页面权限默认无菜单/入口，深链/API仍拒绝；有页无数据使用空态；局部权限按隐藏、禁用、只读或脱敏表达。
-- 原型继续默认产品模式；显式要求评审版时直接生成，“交开发/给前后端测试看/开评审会”等消费方表达先确认一次，未确认不生成高 token 评审投影。评审版采用页面共识、编号标注和共识/前端/后端/测试最小说明，不复制整份 PRD，也不替代 Coding Agent handoff。
-- 一句话请求已把原型作为目标时，澄清与详细需求清单不再成为错误停止点；首次从澄清/规格/基线进入原型且评审偏好未表达时，只询问一次是否追加评审版，未回复仍先交付产品模式，明确拒绝后同一基线不重复询问。
-- 任务语言在完整需求生命周期内继承，“继续/下一步”不再重置；机器 YAML/JSON 保持键值原样，但阶段交付必须同时提供同语言的人类摘要。正式 review 工作站与可见原型评审模式分离，只有用户明确同意才出现评审投影。
-- “完整系统/客户全生命周期/端到端主链”增加范围声明门禁；单页或代表链路必须标为 `demo_slice`。CRM 显式核对线索到回款、工单到迭代及客户 360 聚合回显。
-- 跨页面/模块/角色主链、受守卫状态机、跨系统/双向数据流按条件提供核心流程图、状态转换图、数据流/血缘图；简单单页 CRUD 不机械加图。
-- 新增前端、后端、测试“只看交付物复述实现/测试计划”的交接检查，缺少入口权限、状态守卫、数据权威、失败恢复或证据时不得声明开发就绪。
-- 维护侧只新增一个 5.4.4 集中合同测试和独立外部验证报告，不把真实项目样本、对照产物或 maintainer 资产打入运行包。
-
-## 5.4.3 - 2026-07-30
-
-- 更新公开采用信号快照：ClawHub 1,364 次下载（约 1.4k）、SkillHub 696 次下载与 AI 评分 4.8/5.0；同步记录 SkillHub 两条安全测评为“安全，无风险”和 ClawHub 当前审计为 Review，不把采用数据或平台评分表述为质量排名。
-- 将真实项目复测后的触发、收敛、存量原型继承和根因诊断修复固化为 SkillHub 发布版本；不新增工作站或第二套交付流程。
-- 小功能、明确需求、存量页面小迭代仍必须触发 Skill，但按目标直达最小可用产物，不机械补跑阶段、建文件或重复澄清。
-- 模糊需求继续使用“发散 → 推荐聚焦 → 深化”首答闭环；存量 HTML、截图和批准页面继续作为视觉权威，跨页沿用视觉锁。
-- 发布包改用 allowlist 生成，排除 `maintainer/`、缓存和内部验证资产，并写入文件哈希与版本清单后执行解压自检。
-- 保持诚实验证边界：静态与跨平台回归通过不等同于领域正确、客户验收或跨模型用户评分。
-
-## 5.4.2 - 2026-07-28
-
-- 修复 P0 触发逃逸：Skill frontmatter 与平台入口均声明需求、PRD、原型、竞品和存量系统的新增/修改/评审/反推/验收必须先调用，不得以“功能简单”或“需求明确”跳过；调用后仍按目标选择轻量交付。
-- 阶段明确降级为路由地图而非执行清单：明确需求直达目标，不补跑无关前序；实时脑暴与澄清不机械建文件或逐站跑门禁。
-- 新增“发散 → 推荐聚焦 → 深化 → 继续”的首答收敛环；删除 L1/L2/L3 固定 3/6/8 批默认，改为明确任务 0 轮、普通模糊任务最多 2 个阻断决策轮、高风险任务最多 4 轮。
-- 对话与治理投影分离：直播对话不展示内部 `SRC/ASM/UNK/DEC/YAML`；跨会话、多人协作、审计或工具编译时才结构化持久化。
-- 原型视觉治理改为“视觉权威 + 视觉锁”：存量小迭代继承现有 HTML/截图，绿地内部工具允许克制可逆默认，只有品牌化或方向显著影响交付时才询问审美；跨页固定 tokens、typography、shell、components、density 与 taboos。
-- L3/L4 handoff 接受 `visual_authority + design_lock_ref` 或既有 `DEC-AESTHETIC-*`，不再强制所有高保真原型先暂停等待美学决策。
-- 门禁新增 `--diagnostics roots` 并设为公共默认：每个唯一 finding code 展示一次及重复数，JSON 保留完整明细；`first/summary/full` 继续兼容。
-- 同一企业约谈 PRD 的 62 条 finding 被压成 15 个根因组，默认人类可读输出从约 99,687 字符降到 3,696 字符，唯一根因覆盖从 1/15 提升为 15/15；检测结果没有被删除。
-- 新增触发召回、首答价值、首个可用结果耗时、澄清决策轮、无关阶段、过度解读、视觉锁一致性、根因覆盖、修复轮次和真实用户满意度指标；没有实际跨模型重复和用户评分时禁止宣称“评价最高”。
-- 新增明确小需求、模糊早期想法、存量原型小迭代和真实 PRD 门禁四类体验探针，以及 v5.4.2 体验合同回归测试。
-- 维护实验室从 84 个文件、694,739 字节收敛为 55 个文件、约 402 KB；9 个版本专属重复测试进一步合并为 2 个能力级回归套件。默认 `check` 从 45 项收敛为 10 项，完整回归仅在 `check --profile release` 运行。
-- 候选新会话探针捕获到一次工作区上下文污染：领域未明确的某存量监管产品被带入无关 CRM 客户/合同/回款语义；新增工作区隔离规则后同题复测改为条件分支与单一方向问题。四类 5.4.2 探针记为 `partial`，不冒充跨模型或真实用户反馈通过。
-
-## 5.4.1 - 2026-07-27
-
-- 修复首跑断裂：`gate --profile requirement` 按 `artifact: requirement_intake` 识别单需求准入卡并改用独立 intake schema 校验，不再把扁平 intake.yaml 误判为需求登记册；修复提示指向正确模板。
-- UI 动作与业务动作分层：纯界面动作使用 `UIACT-*`，豁免业务验收锚点与 PRD 动作回链；`ACT-*` 业务动作合同不变，handoff 不再把导航/关闭/页签切换当作业务缺口。
-- 原型门禁拦截演示脚手架与套壳：可见 UI 出现验收场景/体验身份/E2E 控制台/继承预览等演示元素报 `PROTO-DEMO-SCAFFOLDING-VISIBLE`；iframe 嵌入本地产品页报 `PROTO-NESTED-PRODUCT-IFRAME`。
-- CSS 扫描升级：HTML 交互元素类无样式定义报 `unstyled-control-class`，主文本字号低于 11px 报 `unreadable-type-scale`，并识别按钮无主次层级与同页双导航。
-- PRD 语义纯净检查：状态机状态列混入 API/字段/动作 ID 报 `PRD-STATE-SEMANTIC-POLLUTION`（"状态机 / API"等工程映射列不误判）；同一主题同时登记为已确认决策和开放未知项报 `PRD-CONFIRMED-OPEN-UNKNOWN-CONFLICT`；稳定 ID 内含 TODO 子串不再误判为未跟踪未知项。
-- 跨端绑定词一致性：PRD frontmatter `binding_terms`（法定名词、领域术语）必须同时出现在 PRD 正文与原型可见文本，缺失报 `HANDOFF-BINDING-TERM-MISSING`。
-- 美学方向前置：handoff/full 组合门禁要求高保真原型具备 `DEC-AESTHETIC-*` 美学决策记录（视觉方向、参考产品、禁止风格、字号层级、按钮体系、密度），未确认报 `HANDOFF-AESTHETIC-UNDECIDED`。
-- 存量资产处置契约：Stage 0 盘点条目支持 `disposition`（adopt_page/inherit_layout/rebuild_interaction/reuse_component/discard），整页采用、局部继承、重构、废弃成为正式处置方式。
-- Human-First 模板重构：统一 PRD 模板显式分层——正文面向业务/产品/开发/测试阅读（角色阅读入口、一事一处、密度控制），工程附录面向机器（稳定 ID、字段、API、机器验收）；ADS 锚点保持兼容。
-- 出口条件明确：单产物 PASS 不等于交付闭环，宣称最终完成前必须 `gate --profile full`（或 handoff）组合门禁通过；`not_proven` 边界声明不变。
-- quality_gate.py 按职责拆分为 PRD/原型/交接三个 mixin 模块，单文件回到行数预算内，`from quality_gate import Gate` 兼容不变。
-- 新 finding code 全部配备具体修复原因与示例，`explain-finding` 不再要求读源码猜合同。
-- H2 章节结构分析包含完整 H3/H4 子树，角色旅程等嵌套内容不再被截断。
-- `examples/minimal-v5/intake.yaml` 补齐 intake 必填字段，入门示例自身通过 `gate --profile requirement`。
-
-## 5.4.0 - 2026-07-25
-
-- 新增九个可进入、可停止、可续接的需求工作站；`frame/explore` 明确为准入前工作区，正式 `REQ-*` 生命周期仍从 intake 开始。
-- 路由改为语义目标优先：显式目标与否定约束高于关键词；确定性工具只检查已有产物、显式目标、前置条件与断点漂移，不解析用户自然语言。
-- 新增问题简报、方案草图、需求澄清简报三份轻量模板；假设寄存器仅在跨会话、跨角色或治理需要时侧车化，禁止为九阶段机械生成九份文件。
-- 增加语言无关 `ADS:*` 稳定锚点，使中文、英文和团队自定义标题可共用轻门禁；frame/explore/clarify 纳入正式 CLI 且复用现有四种全局门禁状态。
-- 增加可移植 `resume_context`：前序产物绑定相对路径、阶段和 SHA-256，目录越界、文件缺失和静默漂移均阻断；与大项目 execution-state/ID Slice 互补。
-- 新增 assumption register schema、显式阶段路由与早期产物门禁回归，覆盖 P0 未知项、旧 PRD 续接、直接阶段进入和无规格下游阻断。
-- README 增加业务、产品、设计、开发和测试按当前阶段进入的复制指令；运行时保持按需加载，不增加每次必跑脚本或多 Agent 税。
-- 发布文件预算保持严格少于 200；维护实验室不进入第三方运行包，静态 PASS 继续明确 `not_proven` 边界。
-- 修复 `init-custom` 时间戳被 YAML 解析为 datetime 的首次运行断点，并让正式 `intake.yaml` 通过独立 schema 和阶段路由识别。
-- P0 未知项改为按 `blocks_stage` 分阶段阻断；澄清阶段增加 `REQ-*`、上游 `ASM-*`、决策取舍和空范围的确定性追溯。
-- 早期工作站门禁支持 UTF-8 BOM/CRLF、二进制、损坏结构和超大输入的有界诊断，并按 `document_language` 输出中英文修复提示。
-- README 公共命令进入自动审计；Product Truth 示例补齐 compile 步骤并对齐实际 `CHG-CORE-001.yaml` 文件名。
-- 评审完成态新增 required_review_types 与逐角色 sign_offs，独立区分 architecture、engineering 与 delivery；缺席、拒绝或无证据签署不得基线。
-- 新增需求交付/技术负责人角色镜头与零模型需求池汇总，聚合优先级、复杂度带、依赖和迭代归属，但不接管 Sprint、人员、工期和容量。
-- 增加 Jira/Linear/Azure DevOps/TAPD/禅道交接映射、紧急变更补审规则和验收后反馈回流；坚持不把上线、监控和运营扩成第十阶段。
-- 为 15 个固定 GitHub 案例生成覆盖九阶段的一句话跨模型探针，记录 provider/model/client/设置/日期/耗时/产物数/门禁结果/输出引用；生成提示包本身不算模型通过证据。
-- 新增无人值守跨模型执行合同：只加载目标阶段切片和明确依赖，禁止 README/维护者目录/无关领域包及非必要外部调研，目标门禁得出结论后停止；行为正确性与执行成本分别记账。
-
-## 5.3.3 - 2026-07-22
-
-- 修复公共 CLI 将 `--acceptance-run` 错误转发为下划线参数的问题，并用真实公共入口建立回归。
-- ARUN 新增可解析 `evidence_catalog`：本地证据必须存在且不得越过验收目录，稳定 `EVD-*`、可选 SHA-256 和签署证据保持一致。
-- 本地多文件 HTML/CSS/JavaScript 原型进入同一静态扫描；缺失、绝对路径、目录逃逸和远程依赖均给出明确结论。
-- `not_proven` 根据有效 ARUN 收敛已证明范围，同时保留未覆盖视觉、可访问性、多端与业务权威边界。
-- `XCT-*` 横切工作包强制影响模块、全局不变量、执行点、例外/失败处理和 AC，不再只有空壳 schema。
-- `SKILL.md`、六份核心阶段规则、排障入口和工具适配完成中文优先改造，稳定 ID 与标准术语保持兼容。
-- 合并 v5.3 维护设计稿，保留决策摘要与 Git 历史，降低 GitHub/SkillHub 文件预算压力。
-- 分诊收到 Markdown 或损坏的 YAML/JSON 时返回中文可操作阻断，不再泄漏 Python 堆栈；明确 Markdown 需求说明与结构化 intake 的边界。
-- Stage 0 检测到 v5.3.0 早期按 roles/views/actions 分栏的台账时给出专用迁移诊断，不再用“items 为空”掩盖版本差异，也不静默晋升旧事实。
-- 增加五个真实项目衍生、共 10 个有界小功能的需求卡生命周期回归，覆盖直线关闭与变更重基线两条路径；验收证据强制标注为实验室模拟，避免把机制验证冒充真实开发验收。
-- 私域知识接入区分个人本地与团队私有仓库；候选知识新增使用记录与人工晋级评估，项目敏感候选默认不提交，工具永不自动晋级或联网外发。
-- 重写中文黄金入门示例并以正式分诊和门禁跑通第一次可验证交付，避免先让新用户理解模式、等级或 Product Truth。
-- 校验 15 个固定提交的 45 个本地源码文件，并补跑原矩阵 41 个 `not_run` 单元；矩阵现为 `45 partial / 0 not_run / 0 passed`，明确单会话探索不能冒充 release pass。
-- 从跨领域源码场景提炼长耗时任务、版本兼容、多平台差异归并和指标口径四个共性需求模式；只更新适用的现有领域包引用，不新增泛化领域包或自动提升成熟度。
-
-## 5.3.2 - 2026-07-22
-
-- 输出语言默认跟随用户当前请求，统一 PRD/需求卡声明 `document_language`；中英文标题结构均可校验，混杂漂移会被门禁拦截。
-- 统一 PRD 改为 30 秒摘要、任务阅读导航、业务旅程、模块纵向切片、跨切面合同和工程索引的渐进结构。
-- 每个 `MOD-*` 就近闭环目标、路径、页面/数据、权限、规则/状态、事件、指标、恢复、AC 和未知项，附录不再复制改写业务语义。
-- 需求卡采用条件规格；数据上报/统计口径、批量 I/O、审批审计、集成、高风险、迁移和跨角色/模块工作自动升级为统一 PRD。
-- 数据上报门禁新增来源映射、校验、提交状态、重试、幂等、审计、口径、时效和对账检查，保持零 LLM、单遍读取。
-
-## 5.3.1 - 2026-07-19
-
-- Replaced flat clarification with a dependency-aware decision tree: inspect
-  available evidence first, batch independent facts, traverse aesthetic/route/
-  conflict decisions serially, and attach a recommendation, evidence and
-  trade-off to every user-owned question.
-- Added explicit clarification exit conditions, P0/P1 follow-up bounds and an
-  unattended fallback that records owned assumptions, reversal paths and
-  `blocks_stage` instead of silently choosing defaults.
-- Added an aesthetic intent contract (`feeling + reference + taboo`) and a
-  one-screen direction confirmation loop using `DEC-AESTHETIC-*`/`UNK-*`.
-- Added L3/L4 region-anchor checks for complex, builder, portal and multi-view
-  prototypes, aligning the deterministic gate with the existing `REG-*` page
-  contract.
-- Reused existing `ARUN-*` acceptance records as the optional browser-evidence
-  input. L3/L4 prototypes without executed, evidenced `data-ac` coverage now
-  return `REVIEW_COMPLETE_WITH_GAPS` instead of appearing interaction-complete.
-- Documented exact-ID expansion, known dynamic-anchor heuristics and `--level
-  auto` semantics without adding model calls, subagents or a browser runtime to
-  the final gate.
-- Consolidated maintainer community copy into the lab README to preserve the
-  180-file repository budget and keep the runtime package below 100 files.
-
-## 5.3.0 - 2026-07-18
-
-- Replaced the public mode maze with a silent two-axis route: delivery shape
-  (`requirement_card`, `unified_prd`, `governed_truth`) and assurance profile;
-  L0—L4 remain compatible gate metadata instead of mandatory user vocabulary.
-- Added source-authority bootstrap and `DEC-CONFLICT-*` blocking for competing
-  canonical materials; Product Truth remains optional and requires an explicit
-  writing-surface and projection decision.
-- Added deterministic Stage 0 inventory checks for brownfield PRDs/prototypes,
-  including source locations, confirmed/inferred/unknown/defect classification,
-  owned P0 unknowns, and protection against silently promoting legacy defects.
-- Added composite page contracts (`primary + layout + surfaces`) so metrics,
-  lists, forms, preview, workflow and builder rules are required only when
-  applicable while preserving page-level implementation detail.
-- Added stage- and scope-aware P0 unknown handling with the distinct
-  `BLOCKED_BY_P0_UNKNOWN` status/exit code 3; structural blockers retain higher
-  precedence and all findings carry Chinese cause/fix plus consumer/source refs.
-- Added governed Coding-Agent handoff manifests with baseline hashes,
-  engineering-baseline references, `MOD/XCT/EDGE/HANDOFF` packets and embedded
-  QA projections; packet drift and unapproved proposals now block handoff.
-- Added opt-in, project-local domain candidate and usage-log schemas. Learning is
-  disabled/no-network by default and never auto-promotes project material.
-- Consolidated overlapping runtime references into lifecycle, specification,
-  page/prototype, context/handoff, change/acceptance and troubleshooting routes.
-- Added smart large-input rounds, source-expiry warnings, Windows-safe UTF-8 CLI
-  output, one canonical gate implementation and v5.3 deterministic regressions.
-- Introduced a maintainable full-repository budget and a runtime allowlist
-  packaging path for third-party platforms that should not ship the lab.
-- Refined README onboarding with concise English value anchors and refreshed
-  dated public adoption signals from ClawHub, skills.sh and SkillHub TRACE.
-- Closed the static-prototype blind spot for concatenated/runtime `data-action`
-  anchors at L2+, and exposed dynamic action candidates without pretending the
-  rendered controls were proven.
-- Required structured `UNK-*` records for every open P0 item, exact stable IDs
-  in all non-code baseline prose, and an owned L3/L4 acceptance plan.
-- Added honest `not_proven` gate output, Chinese cause/fix/repair examples and
-  regressions that keep official examples on the same user-facing gate kernel.
-- Added reverse-inventory `INV-* -> REQ-*` mapping plus owned confirmation
-  batches so reverse extraction cannot become a competing requirements baseline.
-- Added private-by-default `custom/` domains, inherited PRD overlays and
-  declarative validators; executable local validators and silent high-risk rule
-  overrides remain prohibited.
-- Added friendly dependency diagnostics and automatic discovery of the latest
-  conventional execution checkpoint for interrupted large-project work.
-- Made runtime archives allowlist-only and bytecode-free even after their
-  extracted self-check, with a regression that rejects `__pycache__`/`*.pyc`.
-- Replaced the command dump with a five-minute team onboarding path for local
-  project domains, company PRD overlays, declarative gates and first workspace.
-- Fixed project-facing CLI path resolution so relative `custom/`, `requirements/`
-  and artifact paths resolve from the user's project instead of the Skill folder.
-
-## 5.2.0 - 2026-07-16
-
-- Expanded the data-product pack from analytics/semantic governance to the full
-  data-value and AI-data supply chain: source/right evidence, public-data and
-  property registration, authorized operation, trusted data spaces, digital
-  contracts, data products/services, accounting separation, high-quality
-  datasets, labeling, train/validation/test/preference data, contamination,
-  model feedback and measurable value.
-- Added evidence-bounded 2026-2028 planning directions and current primary
-  sources from the National Data Administration, Ministry of Finance, Sichuan,
-  the EU and OECD without promoting domain maturity or turning policy direction
-  into universal product requirements.
-- Added section-level domain retrieval so large packs can be loaded by exact
-  heading instead of consuming the whole knowledge file.
-- Made final-gate findings actionable with deterministic cause, repair direction
-  and retry command fields; added the lightweight explain-finding command.
-- Exposed the existing tamper-evident checkpoint verification through one resume
-  command, preventing interrupted large projects from restarting or silently
-  continuing after source/version drift.
-- Centralized troubleshooting, recovery, Product Truth interruption guidance,
-  FAQ and anti-patterns in one runtime reference to improve first-use recovery
-  without expanding the default context.
-## 5.1.7 - 2026-07-15
-
-- Added dependency-layered one-sentence clarification with bounded answer batches,
-  durable `UNK/DEC/REQ` answer binding, option tradeoffs and a lightweight ToC
-  behavior-change route.
-- Added competitor-evidence discipline: versioned facts, claim limits, reusable
-  patterns, prohibited copying, positioning decisions and measurable differentiation.
-- Added brownfield triangulation across written requirements, observed behavior and
-  live engineering clarification; historical buildability no longer masquerades as
-  current contract conformance.
-- Added cross-module edge and successor-reachability contracts plus a reusable
-  object-conversion pattern, closing orphan drafts and missing intermediate hops.
-- Added the zero-model `handoff` gate for one PRD and multiple prototypes. It checks
-  view/action/AC/metric drift, exact machine AC coverage, source/P0 disposition,
-  stable `data-metric` anchors and explicit action-dispatch evidence.
-- Refined AI triage so reversible, human-gated read/draft assistance is not promoted
-  to L3 solely because AI is present, while consequential AI writes remain L3+.
-- Unified requirement lifecycle vocabulary with the register schema and clarified
-  `STM-*` (state machine) versus `STATE-*` (concrete state).
-
-## 5.1.6 - 2026-07-15
-
-- Added a role-to-work-surface closure matrix so a role task cannot terminate at
-  a summary count or unexplained handoff.
-- Added `managed_relation_view_ids` and `REL-*` contracts for parent-child or
-  many-to-many inventories, including source/inheritance, preflight, batch
-  adjust/revoke, partial failure, idempotency, downstream impact, API and AC.
-- Added a deterministic L3/L4 gate regression for managed relation contracts.
-- Scoped prototype attribute discovery to real HTML-like tags so JavaScript
-  selectors no longer create false duplicate-page findings.
-- Limited L3/L4 AI-runtime checks to positively applicable AI product behavior;
-  an explicit out-of-scope statement or the phrase "AI Coding" no longer creates
-  a false requirement for model, prompt, tool-policy and evaluation contracts.
-- Reworked the README around user roles, direct outcomes and copyable first-use
-  routes, without relying on any named customer-project claim.
-
-## 5.1.5 - 2026-07-15
-
-### Page-level engineering closure
-
-- Added `page-delivery-contract.md`: every implementation view must define local metric caliber, filters, columns, controls, validation, action guards, modal chains, pagination, import/export and UI states.
-- Added L3 `page_contract_view_ids` plus deterministic `PAGE-CONTRACT` coverage checks, so one global field/API appendix can no longer hide thin pages.
-- Tightened prototype L3 checks: block inline handlers, buttons without stable actions/AC trace, duplicate function overrides and runtime action-ID retrofits.
-- Added clean-rebuild guidance for legacy prototypes with stacked overrides or cross-entity modal routing, and a visual-design route combining a design skill with an enterprise component system.
-- Added a per-view four-lens walkthrough for frontend, backend, QA and Coding
-  Agents. L3/L4 gates now require concrete fields, actions, AC linkage and an
-  explicit view-to-API/no-write mapping for every declared page.
-- Extended CSS pollution checks beyond `.hidden` and `!important`: grouped
-  global state selectors such as `.published,.active` now fail because they can
-  silently recolor active pages, navigation and tabs.
-
-## 5.1.4 - 2026-07-14
-
-- Made selective domain lookup emit UTF-8 explicitly, so multilingual source
-  titles and known gaps work on Windows hosts with legacy console encodings.
-  The runtime-budget regression now forces `cp1252` and decodes UTF-8 on every
-  OS, preventing this CLI boundary from escaping local validation again.
-
-## 5.1.3 - 2026-07-14
-
-- Rebuilt the README first-use path around pain, outcome, honest public adoption
-  signals, two install routes, three copyable task routes, expected deliverables,
-  and concise answers to the four questions new users ask before adoption.
-- Completed the Windows encoding fix at the real boundary: JavaScript extracted
-  from multilingual prototypes is now sent to Node explicitly as UTF-8 instead
-  of inheriting a narrow runner locale. The existing `cp1252` regression covers
-  both JSON output and the nested Node syntax-check path.
-
-## 5.1.2 - 2026-07-14
-
-- Made machine-readable quality-gate JSON ASCII-safe so Chinese findings cannot
-  crash on Windows runners with a narrow default console encoding. The
-  lightweight-gate regression now forces `cp1252` output to reproduce this
-  cross-platform boundary on every OS.
-
-## 5.1.1 - 2026-07-14
-
-- Reduced the always-loaded Skill from about 3,590 to about 1,870 `o200k`
-  tokens and added selective domain lookup so runtime agents do not load the
-  full domain catalog or an entire domain pack by default.
-- Added a seven-seniority, eight-role, seven-stage playbook that defines
-  decision ownership, escalation, engineering/architecture review, no-guess
-  handoffs and acceptance accountability without taking over sprint work.
-- Replaced the blanket `experimental` label with evidence-bounded reusable-pack
-  maturity: `knowledge_backed`, `contract_tested`, `behavior_validated`,
-  `expert_reviewed`, and `audited`; delivery practice remains an independent axis.
-- Added zero-model contract regression for all seven built-in domains and 14
-  lifecycle/risk scenarios. All built-in packs are now `contract_tested`; none
-  falsely claims fresh-agent behavior, expert review, customer acceptance, or
-  production correctness.
-- Added OA source triangulation for law/standards plus Weaver, Seeyon, Landray,
-  DingTalk and Feishu official materials, with explicit boundaries separating
-  whitepapers, vendor cases, open platforms and public SDK/demo repositories
-  from binding rules or core-product open-source claims.
-
-## 5.1.0 - 2026-07-14
-
-- Narrowed the product from a full delivery-lifecycle kernel to a requirement-
-  management kernel with six governed concerns: intake, clarification,
-  specification, change, traceability and acceptance. Sprint/task management,
-  code, CI/CD, deployment execution and operations are explicit downstream
-  boundaries.
-- Added a requirement register with evidence-backed value, complexity bands,
-  priority, intake decision, iteration/dependency metadata, audit history and
-  external milestone references. Exact effort/cost remains engineering-owned.
-- Replaced separate Human-First and AI Coding PRDs with one unified PRD by
-  default: a sequential human reading path plus field/state/API/traceability/
-  machine-acceptance annexes in the same baseline.
-- Made independent Product Truth conditional on scale, repeated change,
-  multiple governed exports or audit. Bounded projects start from a focused
-  requirement workspace; large projects retain progressive fragments.
-- Added bidirectional traceability, deterministic change-impact traversal,
-  structured change diff/approval/synchronization, acceptance-run evidence and
-  reverse defect/test trace contracts.
-- Added guided ambiguity scanning, requirement-intake recommendations and a
-  focused `init-requirements` CLI route.
-- Added unified-PRD readability/engineering validators and CSS `!important` /
-  `.hidden` pollution scanning for interactive prototypes.
-- Migrated the publishing-learning golden example to `REQ-*` governance and one
-  unified PRD; added v5.1 regression coverage for the full requirement loop.
-- Added a seven-sector, seven-stage, eight-role offline assurance portfolio for
-  PRD/prototype/change regression without making multi-agent review a runtime tax.
-- Added a zero-LLM, single-read `gate` for requirement registers, unified PRDs
-  and static prototypes; it reports bounded findings and never authors fixes.
-- Closed three forward-test escapes: keyword-only PRD shells now fail structural
-  checks, change impact reads standard trace-ledger edges, and clarification scan
-  exposes actor/state/money/quantity/brownfield gaps beyond lexical ambiguity.
-- Added reusable quantity-lineage, money-settlement, accountable-decision,
-  statutory-service, partial-execution and cross-aggregate fulfillment patterns;
-  removed unsafe realtime exactly-once/offline-queue assumptions and turned
-  timing/retry values into project-confirmed variables.
-
-## 5.0.2 - 2026-07-12
-
-- Added Progressive Product Truth: checkpointable core/module fragments, index
-  schemas, deterministic compilation, CLI defaults, and lossless regression
-  coverage for Trae/WorkBuddy and other interruption-prone large-project flows.
-- Added a complete AI Coding PRD route based on a verified delivery failure:
-  repository baseline, page/field/state/data contracts, concrete API schemas and
-  errors, versioned event/integration contracts, metrics caliber, vertical file
-  dependencies, structured AC, migration/rollback, and operations are now L2
-  contract surfaces.
-- Replaced the keyword-only Coding Agent validator with structural L0-L4 checks
-  and a regression that rejects the former thin-summary pattern.
-- Separated `practice_status` from reusable domain-pack `maturity`; traffic,
-  CRM, education IT, data product, and AI Native now record accountable
-  production-practice attestation without claiming unearned validation/audit.
-- Rebuilt README around pain-first positioning, copyable 60-second routes, four
-  capabilities, ecosystem responsibility mapping, and evidence-bounded claims.
-- Reduced the root to six files/eight directories and grouped runtime/domain
-  references, validators, domestic adapters, community documents, config, and
-  requirements by responsibility.
-
-## 5.0.1 - 2026-07-12
-
-- Added Ultra-Light routing, smart recommendations/manual overrides, and smart
-  large-project Context Plan + ID Slice guidance.
-- Added 60-second onboarding, Mermaid generation, China-model/tool adapters,
-  ten-case triage benchmark, and v5-native L0-L4 validators.
-- Removed obsolete comparison artifacts and strengthened repository hygiene.
-
-## 5.0.0 - 2026-07-11
-
-### Architecture
-
-- Rebuilt the skill around one schema-governed Product Truth with Human-First,
-  prototype, coding-agent, QA, customer, and operations projections.
-- Added an honest Discovery Contract so incomplete requirements can enter the
-  lifecycle without fabricated Product Truth.
-- Added project-scoped Domain Capsules as the generic fallback when no dedicated
-  domain pack matches.
-- Added adaptive Context Plans, ID-based retrieval, versioned checkpoints,
-  stage gates, change impact, rollback, and evidence-bound completion states.
-- Removed release-specific legacy conversion and compatibility adapters. The
-  package is a pure v5 runtime; brownfield product/data migration remains a core
-  lifecycle capability.
-- Replaced customer-specific examples with reusable generic fixtures.
-- Broadened discovery and PRD triggering to lightweight ToC work while keeping
-  ToB/ToG as the deep-governance specialization.
-
-### Validation
-
-- Added schema/reference closure, projection consistency, domain maturity,
-  source freshness, GitHub-case, evaluation, public-claim, runtime duplication,
-  package cleanliness, and agent-entry checks.
-- Added versioned Discovery/Product Truth checkpoint tests and installed-package
-  fingerprint verification.
-- Added stage-turn convergence limits, 80% context-pressure actions, atomic
-  failed-checkpoint tests, Capsule namespace/slot/placeholder isolation, and a
-  structured clarification transcript compiler.
-- Added domain-to-evaluation cross-checks, an evidence-backed `status` command,
-  public-claim scanning, agent-entry alignment, and tracked-package hygiene.
-- Moved installation and natural-language first use above role detail, and
-  added a source-linked ecosystem-composition comparison without self-scored
-  quality or popularity claims.
-- Added baseline/candidate evaluation comparison with strict input, model,
-  settings, repository, and repetition comparability.
-- Added a dated, machine-readable ecosystem comparison across 12 product and
-  engineering skill projects, nine delivery dimensions, platform boundaries,
-  non-scoring activity signals, and an explicit user-reported model-label
-  attestation boundary.
-- Added Chinese lifecycle annotations to the public workflow, runtime entry,
-  and stage-gate contract; re-audited public paths and text for customer- or
-  project-specific naming before release.
-
-### Known Limitations
-
-- All seven built-in domain packs remain `experimental`; none authorizes a
-  production claim.
-- GitHub evaluations are pinned exploratory evidence. Most cells remain
-  `partial` or `not_run`, and no general performance improvement is proven.
-- Behavioral release claims require at least three comparable repetitions and
-  executed coding/acceptance evidence; current fixtures do not meet that bar.
-- Domain expert review, customer acceptance, legal applicability, safety,
-  financial correctness, and production behavior require accountable external
-  evidence.
-- Hash chaining detects local drift but is not an external signature service or
-  immutable audit store.
+## 5.4.9 — 2026-09-01
+
+- 原型检查显式收到 PRD 时，同时执行 PRD 与交接核对；L2 及以上交接增加字段和指标投影一致性检查。
+- 跨系统批量部分失败明确隔离粒度、批次与记录状态、重复处理边界、重报范围和聚合回执。
+- 修复窄屏业务抽屉遮挡评审入口，补齐示例中的来源、指标、流程、状态、规则及验收定义；统一双语使用说明。
+
+## 5.4.8 — 2026-08-26
+
+- 评审工作区引入页面语义覆盖：指标、状态、权限、写入、事件、恢复、浮层及角色路径须映射到需求和对应说明，简单功能可共享等价规则组。
+- 增加页面合同、二级上下文、指标口径和状态路径检查，区分候选观察与正式语义声明，并保留旧评审合同兼容。
+- 增加 `/ads`、`/dig`、`/prd`、`/proto` 四个意图别名，宿主不支持斜杠时可使用自然语言调用。
+- 正式打包要求干净且可追溯的 Git 来源；追溯命令对缺失文件、非法结构和不可读输入返回可操作诊断。
+- 新增媒体与知识管理领域，覆盖媒体采集、标注、检索、RAG、用途授权和撤回传播；领域来源增加约束基线、设计指导及产品模式分级。
+
+## 5.4.7 — 2026-08-22
+
+- 评审层随活动页面或业务浮层切换，支持侧栏、底部、就地展开和全屏呈现；流程、状态及数据流分别表达。
+- 建立评审工作区清单，绑定基线、流程步骤、角色说明、验收和未知项；编号、卡片、业务目标及分享定位保持一致。
+- 页面导航、菜单、面包屑和上下文统一定位；修复动态字面量动作入口及合法隐藏类的误判，强化重复、孤立和不可达对象诊断。
+- 将业务决定状态与验证状态分开，按角色提供工作包引用；来源分类、敏感信息引用和可选执行边界进入交接约定。
+- 精简常驻入口与维护结构，修正运行包检查和历史合同兼容提示。
+
+## 5.4.6 — 2026-08-12
+
+- 评审编号与说明卡共享目标，支持双向选择、角色内容切换及产品态往返检查。
+- 评审未知项记录优先级、责任、阻断阶段、影响范围和可继续的边界。
+- 静态、浏览器、业务确认和真实系统证据分别限定可支持的结论，防止评审交互被当成业务验收。
+
+## 5.4.5 — 2026-08-10
+
+- 变更校验与影响分析共用输入读取和引用提取，错误嵌套返回具体诊断；私有规则支持多领域作用域。
+- PRD 冲突检查限定权威定义位置，合法引用、映射和索引不再被误判为重复定义。
+- 远程 iframe 增加协议、集成声明、降级与浏览器安全属性检查；未知 finding code 提供明确诊断。
+- CI 执行跨平台维护检查，独立检查脚本与可收集测试分开；更新交通领域来源及公开包隐私处理。
+
+## 5.4.4 — 2026-08-08
+
+- 实施步骤补齐对象计数、记录粒度、部分成功、权威更新、提交范围和后续入口，并检查步骤与工作包引用。
+- 交互账本定位为派生清单，纯界面动作与业务动作分开；修复动态入口、稳定 ID 和缺失文件诊断。
+- 存量原型支持整页采用、局部继承、交互重构及废弃处置；跨模块场景按需提供流程、状态和数据流图。
+- 权限区分页面入口、数据范围、动作和字段；本地化标题、表头、图节点与状态说明，保留机器标识。
+- 原型默认产品态，评审态按用户意图提供；明确交付原型的任务不再止于澄清清单，后续对话继承当前语言。
+- 完整系统与代表性切片区分范围，接入需求登记、评审记录、追溯矩阵及信息架构骨架检查。
+
+## 5.4.3 — 2026-07-30
+
+- 明确小功能和存量页面迭代使用最短路径，模糊需求通过发散、聚焦和深化收敛；沿用存量页面视觉约定。
+- 运行包改用白名单构建，排除维护资料和缓存，包含版本及文件哈希清单。
+
+## 5.4.2 — 2026-07-28
+
+- 阶段作为任务路由，明确需求直接进入目标；对话不机械建文件或展示内部治理字段。
+- 需求澄清按阻断决策推进，修复无关工作区上下文污染；原型小改继承既有页面和视觉约定。
+- 门禁默认按根因聚合诊断，保留完整 JSON 明细；默认快速检查与完整维护检查分开。
+
+## 5.4.1 — 2026-07-27
+
+- 准入检查正确识别单需求卡；界面动作使用 `UIACT-*`，避免导航、关闭和页签切换被当成业务缺口。
+- 增加演示脚手架、嵌套产品页、无样式控件及不可读字号诊断；PRD 检查识别状态污染和已确认/未决冲突。
+- 业务术语可跨 PRD 与原型绑定核对；存量资产增加明确处置方式，需求正文与工程映射分层。
+- 门禁按 PRD、原型、交接职责拆分，保留导入兼容；诊断提供具体原因，嵌套章节读取不再截断。
+
+## 5.4.0 — 2026-07-25
+
+- 新增可进入、停止和续接的需求阶段，提供问题简报、方案草图与澄清简报；跨会话时按需保留假设与前序产物。
+- 增加语言无关内容锚点、显式目标路由和带路径/哈希的恢复上下文；P0 未知项按依赖阶段阻断。
+- 早期产物支持 BOM、CRLF、损坏结构及超大输入诊断，按语言输出修复提示。
+- 正式评审支持必要角色签署；需求池汇总优先级、复杂度、依赖和迭代归属，提供外部项目工具交接映射。
+- 明确紧急变更补审和验收反馈回流，修复自定义初始化时间戳及公开命令参数问题。
+
+## 5.3.3 — 2026-07-22
+
+- 验收记录支持可解析证据目录，检查路径范围、引用和签署关系；修复公共入口的验收参数转发。
+- 多文件 HTML、CSS、JavaScript 原型纳入统一静态扫描；横切工作包补齐影响模块、约束、生效位置、失败处理及验收。
+- 核心阶段说明改为中文优先，损坏分诊输入和旧版盘点结构提供明确诊断。
+- 私域知识区分个人资料与团队仓库，支持候选使用记录和人工晋级；新增入门示例及跨领域共性模式。
+
+## 5.3.2 — 2026-07-22
+
+- 输出语言跟随用户请求，需求卡和 PRD 声明文档语言。
+- PRD 增加摘要、阅读入口和模块切片，模块内组织规则、状态、权限、恢复、验收和未知项。
+- 数据上报检查覆盖来源映射、校验、提交状态、重试、审计、时效与对账。
+
+## 5.3.1 — 2026-07-19
+
+- 澄清先读取证据，独立事实可合并询问，互相依赖的决定顺序推进；未知项保留影响和阻断阶段。
+- 增加审美意图及方向确认约定，复杂原型支持区域锚点检查。
+- 原型可引用浏览器验收记录；动态锚点、精确 ID 展开和自动等级提供明确解释。
+
+## 5.3.0 — 2026-07-18
+
+- 交付形态与验证要求分开，保留旧等级兼容；Product Truth 按任务规模和治理需要启用。
+- 增加来源权威核对、冲突处理及存量资产盘点，区分已确认、推断、未知与缺陷。
+- 组合页面按实际表面检查指标、列表、表单和画布；未知项按范围、阶段提供阻断与定位。
+
+## 5.2.0 — 2026-07-16
+
+- 数据产品领域扩展到数据权属、授权运营、可信空间、数据产品、高质量数据集及模型数据反馈。
+- 领域检索支持按章节读取；门禁结果提供原因、修复方向和重试方式，新增 `explain-finding`。
+- 提供检查点恢复入口，集中排错与中断恢复说明。
+
+## 5.1.7 — 2026-07-15
+
+- 需求探索增加定位、价值与方案差异判断；存量系统通过需求、实际行为和工程说明交叉核对。
+- 补齐跨模块对象转换、后继可达性及交接关系；一个 PRD 可同时核对多份原型。
+- 区分 AI 辅助阅读/草稿与有后果的业务写入；统一生命周期和状态机标识。
+
+## 5.1.6 — 2026-07-15
+
+- 角色任务明确对应操作表面，父子关系和多对多管理补充继承、批量调整、失败与权限约定。
+- 缩小 HTML 属性发现范围，避免 JavaScript 选择器制造重复页面误报。
+- AI 产品合同仅在明确适用的业务能力上启用，排除仅作为消费方的 Coding Agent 和范围外 AI 功能。
+
+## 5.1.5 — 2026-07-15
+
+- 页面合同就近说明指标、筛选、字段、操作、校验、浮层、分页和导入导出行为。
+- 复杂页面增加稳定动作、验收映射与跨角色阅读检查；存量原型支持交互重构和组件复用。
+- 扩展 CSS 污染识别，防止全局业务状态类影响页面样式。
+
+## 5.1.4 — 2026-07-14
+
+- 领域检索显式使用 UTF-8 输出，兼容中文 Windows 的旧代码页环境。
+
+## 5.1.3 — 2026-07-14
+
+- README 按痛点、安装和可复制任务组织首次使用。
+- 原型 JavaScript 检查以 UTF-8 传递内容，修复多语言源码解码失败。
+
+## 5.1.2 — 2026-07-14
+
+- 门禁 JSON 输出兼容窄编码终端，避免中文诊断导致运行失败。
+
+## 5.1.1 — 2026-07-14
+
+- 精简常驻入口，领域知识改为按需读取。
+- 增加角色责任、决策升级和禁止猜测的交接说明；领域成熟度与项目实践状态分开。
+- OA 资料区分法律标准、厂商材料与公开接口来源的用途。
+
+## 5.1.0 — 2026-07-14
+
+- 范围收敛为需求准入、澄清、规格、变更、追溯和验收，工程排期、编码、部署与运营由下游工作流承接。
+- 新增需求登记、准入建议、双向追溯、变更影响和验收证据，默认统一人类与机器消费者的 PRD 基线。
+- Product Truth 按规模和持续变更需要使用；增加轻量检查、歧义扫描及配置、金额、数量、部分执行等共性模式。
+
+## 5.0.2 — 2026-07-12
+
+- Product Truth 支持核心/模块分片、索引、编译和检查点，改善长任务续接。
+- 增加面向 Coding Agent 的规格路径和结构检查，区分领域实践状态与可复用知识成熟度。
+- 调整目录职责，集中模板、适配、领域与验证资源。
+
+## 5.0.1 — 2026-07-12
+
+- 增加轻量路由、手动覆盖、上下文计划和 ID 切片。
+- 提供快速上手、流程图与国内宿主适配入口，清理废弃兼容材料。
+
+## 5.0.0 — 2026-07-11
+
+- 以 Product Truth 组织需求及其多种投影，增加发现约定、项目领域资料和阶段检查。
+- 支持上下文计划、ID 检索、检查点、变更影响与证据绑定；通用示例替换项目专属素材。
+- 增加来源、引用、版本和分发完整性检查，支持领域候选、使用记录及上下文恢复。

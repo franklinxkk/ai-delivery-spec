@@ -1,6 +1,8 @@
-schema_version: 5.4.0
 artifact: assumption_register
-stage: explore
+artifact_role: supporting
+applicable_stages: [explore, clarify, review, change]
+applies_when: 仅在需要集中跟踪待验证假设时使用，可复用现有记录。
+schema_version: 5.4.0
 register_id: ASM-REGISTER-001
 project_id: PROJECT-EXAMPLE
 version: "0.1"

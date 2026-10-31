@@ -14,6 +14,7 @@ import sys
 import shutil
 import zipfile
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 import yaml
 
@@ -78,6 +79,32 @@ def release_source_failures(source_commit: str, source_worktree_dirty: bool) -> 
     return failures
 
 
+def runtime_link_failures(root: Path) -> list[str]:
+    """Check local Markdown destinations in the staged package, not the source tree.
+
+    Maintenance-only evidence can exist in the checkout while being unavailable to
+    installed users. Code examples and external URLs are not distribution links.
+    This checks file presence; it does not claim to verify remote URLs or headings.
+    """
+    failures: list[str] = []
+    root = root.resolve()
+    for source in sorted(root.rglob("*.md")):
+        raw = source.read_text(encoding="utf-8")
+        raw = re.sub(r"(?ms)^\s*(`{3,}|~{3,})[^\n]*\n.*?^\s*\1\s*$", "", raw)
+        raw = re.sub(r"`[^`\n]+`", "", raw)
+        links = re.findall(r"!?\[[^\]\n]*\]\(\s*(<[^>]+>|[^\s)]+)(?:\s+[^)]*)?\)", raw)
+        links += re.findall(r"(?m)^\s{0,3}\[[^\]]+\]:\s*(<[^>]+>|\S+)", raw)
+        for link in links:
+            destination = link[1:-1] if link.startswith("<") else link
+            parsed = urlsplit(destination)
+            if parsed.scheme or parsed.netloc or not parsed.path:
+                continue
+            target = (source.parent / unquote(parsed.path)).resolve()
+            if not target.is_relative_to(root) or not target.exists():
+                failures.append(f"{source.relative_to(root).as_posix()}: runtime link target missing from package: {destination}")
+    return failures
+
+
 def self_check(root: Path) -> list[str]:
     failures: list[str] = []
     commands = (
@@ -125,6 +152,13 @@ def main() -> int:
     forbidden = [path for path in files if "maintainer" in path.relative_to(ROOT).parts]
     if forbidden:
         failures.append("maintainer files leaked into runtime package")
+    unsafe = [path for path in files if path.is_symlink() or not path.resolve().is_relative_to(ROOT.resolve())]
+    if unsafe:
+        failures.append("runtime selection contains symlinks or sources outside the package root")
+    if failures:
+        for failure in failures:
+            print("FAIL: " + failure)
+        return 1
     skill_heading = next(
         (line for line in (ROOT / "SKILL.md").read_text(encoding="utf-8").splitlines() if line.startswith("# AI Delivery Spec ")),
         "",
@@ -152,6 +186,8 @@ def main() -> int:
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(source.read_bytes())
         (temp / "runtime-manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        # Always check shipped links, even when callers skip executable smoke tests.
+        failures.extend(runtime_link_failures(temp))
         if args.check:
             failures.extend(self_check(temp))
         if args.output and not failures:

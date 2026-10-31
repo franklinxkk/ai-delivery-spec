@@ -7,21 +7,67 @@ Product Truth、结构化 handoff 或验收证据的权威边界。
 
 图的触发依据业务依赖：仅有弹窗、抽屉或 secondary_context 不自动等于跨页业务链，也不因此强制每个只读浮层补流程图和正反例。实际状态迁移、跨角色交接及显式复杂度仍需对应图与验收。
 
-先选使用方式：R0 用于当前功能的就近说明；R1 用于正式团队评审，包含三页签、记录/分享/进度与冷读；R2 为旧项目保留值，当前检查与 R1 相同，不暗含额外文档。新项目选 R0 或 R1；业务复杂不自动升级。三者都保留业务覆盖、真实上下文、准确定位、角色说明和无业务副作用。L0–L4 是另一条旧锚点兼容轴。
+日常只需阅读当前功能说明时，可先用下面的 `attach` 组件，不声明正式评审等级。需要正式合同再选：R0 用于当前功能的就近说明；R1 用于正式团队评审，包含记录/分享/进度与冷读；默认三页签，也可用当前上下文抽屉；R2 为旧项目保留值，当前检查与 R1 相同，不暗含额外文档。正式新项目选 R0 或 R1；业务复杂不自动升级。三者都保留业务覆盖、真实上下文、准确定位、角色说明和无业务副作用。L0–L4 是另一条旧锚点兼容轴。
+
+## 给现有项目附加就近说明
+
+无需复制维修示例或填写 manifest。保留项目自己的 `app.html` 和相对资源，在同目录写 `notes.md`，每个二级标题下面用一个注释绑定实际页面/浮层根元素的 CSS 选择器：
+
+```markdown
+# 预约管理说明
+
+## 提交会议室预约
+<!-- context: #reservation-page -->
+申请人填写日期和人数，校验通过后提交。人数不得超过所选会议室容量；拒绝时保留输入。
+
+### 验收
+- 选择容量 8 人的会议室，提交 9 人：拒绝，预约记录不增加。
+
+![预约处理流程](images/reservation-flow.svg)
+
+## 查看预约详情
+<!-- context: #reservation-detail -->
+只显示从预约列表实际打开的当前预约，关闭后返回原列表及筛选条件。
+```
+
+```powershell
+python scripts/build_review_workspace.py attach --prototype project/app.html --notes project/notes.md --output project/app-review.html
+# 英文界面用 --language en；说明正文由项目提供对应语言，工具不擅自翻译规则。
+```
+
+输出是**本地同源 HTTP 预览壳 + 原产品及其资源**，不是单 HTML 交付。返回值列出 `required_files` 和原资源依赖；图示内嵌，修改说明后重新运行命令即可。用已有本地服务器打开 `app-review.html`；直接双击 file URL 不支持上下文读取。仅支持 localhost / 127.0.0.1 / ::1，同源读取失败会显示不可用说明，原产品可单独打开。用户明确要单文件时，应把同等说明集成回原型或采用既有单文件工作台，并重新验证；不能把此预览壳冒充单文件。
+
+组件默认收起说明，原产品在独立 iframe 中运行；展开后右侧说明参与布局，窄屏切到说明面，返回时保留原表单和业务 DOM。它不改原 HTML、不生成业务入口、不发送业务点击，也不使用 `localStorage` 保存产品或评审数据。原产品依赖顶层窗口、禁止 iframe、跨源导航或自定义框架通信时，需要按该产品已有接口接入并验证，不能据此承诺所有 HTML 都兼容。生成文件可重复覆盖，其他已有文件和原产品不可覆盖；已有正式评审面时继续维护原评审面。
+
+上下文只读当前真实可见元素：先取业务 `dialog[open]`、可见 `role=dialog/alertdialog`、`aria-modal=true` 或打开的 popover，否则取当前映射页面。未映射浮层显示“尚无对应说明”，不会沿用父页面；多个同层目标无法确定时显示映射歧义。自定义无语义浮层/未映射页面可在既有根元素加 `data-ads-context` 使其进入检测；复杂路由可由**产品自己的上下文更新处**发 `window.dispatchEvent(new CustomEvent('ads:context', {detail:{selector:'#actual-context'}}))`，传 `selector:null` 恢复自动检测。不能从说明面触发业务路由。每个选择器必须恰好匹配一个可见根，隐藏页不会参与；没有足够业务标记时保留未验证，不从页面文案猜测。
+
+Markdown 支持二至六级标题、段落、无序列表、粗体、行内/围栏代码和独立图片行；原始 HTML 按文字显示。图片只读取说明目录内的本地 SVG/PNG/JPEG/GIF/WebP，不获取远程 URL。缩略图可点击放大，关闭按钮和 Escape 返回原说明。其他 Markdown 写法应转成这些可读块或沿用项目现有渲染器，不能假设复杂表格已被渲染。
+
+公开 CLI `attach` 复用 `scripts/context_notes.py` 的同一个 renderer；说明源只维护本项目事实。它不产生正式 manifest、语义覆盖分母、记录或签署，也不能用作 `--require-review-workspace` 已通过的证据。需要 R0/R1 时继续执行下文正式合同与 gate。浏览器至少核对当前页面→真实详情→返回、未映射浮层、表单值保持及图示开关；仅构建成功不表示这些行为已验证。
 
 ## 可生成起点
 
 ```powershell
-python scripts/build_review_workspace.py init --output review-project
+python scripts/build_review_workspace.py init --review-level R0 --presentation-mode contextual --output review-project
 python scripts/build_review_workspace.py build --project review-project
 python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype review-project/prototype.html --prd review-project/requirement.md --stage specify --require-review-workspace
 ```
 
 `init` 从已验证样例拆出可编辑的 PRD、页面/说明、样式、运行脚本和 manifest，`EDITING.md` 给编辑位置。它仍是设备维修教学业务，须替换成项目事实；不是空白项目过检证明。`build` 只拼接本地片段、绑定真实 PRD 的规范文本 hash、清空旧验证结论，输出离线单 HTML；不生成业务政策、不代替 gate/浏览器。大文件分块编辑后构建，避免单次输出截断；不能先写巨型 manifest 再缩业务来迁就它。
 
+### 呈现方式与实际证据（5.5.6 内测）
+
+`init --presentation-mode contextual` 会生成默认用户态、右侧就近说明及图示放大的真实布局；`tabs` 保留旧起点。R0、R1 均可选择。`build` 仍只装配，不能把任意旧 HTML 自动改成抽屉，也不能补写缺失业务。仅修改 manifest 的模式而保留三页签导航会被拒绝。现有项目可直接维护实际 HTML 与同源数据，不要求为迁就工具重建业务。
+
+动态 R0 可使用 `presentation.renderer: contextual-v1`：上下文呈现配置只引用正式评审点、例子和图资源，不另存一套标题/规则；模块实现与验收依据从同一来源章节展开。R1 的记录、分享及进度不能借此动态适配器省略，使用已实现这些合同的起点。
+
+静态检查无法识别动态内容时记“未验证”，不是推断内容不存在，也不是通过。实际缺失、重复定位、来源漂移或副作用仍阻断。通过真实业务入口打开页面、弹窗与条件分支，展开说明和正反例，点击图示，再用 `--review-runtime-evidence <file.json>` 绑定当前 HTML 与 manifest 指纹；修改后重采。`scripts/review_runtime_probe.cjs` 是 ADSReview 抽屉适配器，须由项目自己的浏览器操作脚本调用，不会自动导航或自动验收业务；其他渲染器需提供等价观察。可见 DOM 证据可澄清动态按钮的静态误报，但不等于业务提交成功。
+
+已有 Word PRD 不必为工具堆机器编号。动态 R0 可显式使用 `presentation.source_mode: document_sections`：PRD 规范文本以 `## [REQ-4-2] 4.2 模块名` 定位，`sections` 保留真实模块正文，`point_views.source` 绑定该章节。门禁逐节核对正文、评审来源及文档指纹；本地 UI/评审编号不冒充 PRD 定义。结果明确标记“文档章节追溯”，不声明结构化机器交接通过。结构化编号模式继续执行完整 ID 合同；正式签署不得采用此简化模式。原 Word 正文仍按模块供人阅读。
+
 生成顺序：先用一个完整任务写清“谁从哪进入 → 输入与条件 → 成功变化与下一入口 → 拒绝/恢复”，在 PRD 和产品上走通；再在对应动作旁展开同源说明和角色要点，最后映射上下文/评审点/语义项。先验证切片能被接手，再扩模块；已有业务基线不重写。
 
-业务与说明未成形时，不先铺全量 manifest 或反复跑全档门禁。快速原型先兑现可操作任务；需要就近解释选 R0，需要正式记录/分享才选 R1。静态装配失败与业务失败分别修复，不能为过检改政策。标题和卡片先说业务，技术编号收在追溯区；每个上下文只显示所属说明。接收者能说清触发、输入、前后变化和恢复，才说明标注有用；有卡片或通过 Schema 不等于内容充分。
+业务与说明未成形时，不先铺全量 manifest 或反复跑全档门禁。快速原型先兑现可操作任务；普通就近说明可用 attach，需正式追溯选 R0，需记录/分享选 R1。静态装配失败与业务失败分别修复，不能为过检改政策。标题和卡片先说业务，技术编号收在追溯区；每个上下文只显示所属说明。接收者能说清触发、输入、前后变化和恢复，才说明标注有用；有卡片或通过 Schema 不等于内容充分。
 
 机器字段查 `schemas/review-workspace.schema.json` 对应段，不必通读校验器：`baseline` 绑定来源；`review_contexts` 定页面/浮层；`review_points` 定动作说明；`semantic_coverage` 防字段/指标/系统规则漏项；`acceptance_examples` 定可执行输入与页面/业务结果。稳定 ID 的后缀用大写字母、数字、连字符，不用下划线。语义项为 gap 时，关联点须是 gap/pending_decision，不能仍宣称 confirmed；图按实际跨页/跨角色、状态及数据依赖选择，不能只为弹窗补图。
 
@@ -36,14 +82,13 @@ python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype revi
 业务弹窗、抽屉、气泡都必须覆盖影响实现/验收的功能语义；仍需作者补讲指标、流转、权限、数据写入、
 异常或二级页面功能即为 GAP。
 
-R1/R2 只有三个一级页签：
+以下三个内容域只有一个事实归属。R1/R2 默认用三个一级页签呈现：
 
 1. `overview`：总览；
 2. `function_flow`：功能与流转；
 3. `boundary_acceptance`：边界与验收。
 
-不得新增 Journey、Step Focus、Page、Acceptance 或产品/前端/后端/测试角色一级模式。复杂度只增加
-页签内信息深度，不增加导航维度。R0 快速评审可不渲染三个可见页签，但仍必须声明
+可声明 `workspace.presentation_mode: contextual`，用右侧抽屉内的标题或折叠区就近呈现上述内容域；三类内容仍须可达且来源唯一，不为凑页签打散页面。流程图、状态图、宽表先给缩略预览，再点开大弹窗，关闭后回到原位置。不要添加一套替代产品入口的 Journey/Step/Page/Role 导航。R0 快速评审可不渲染三个可见页签，但仍必须声明
 `CurrentContext`、`review_contexts` 分母并保证纯评审动作不改变 Product Fingerprint。
 
 5.5.2 的 R0 在用户仅需就近说明时，可省略 `progress_contract`、`share_contract`、`review_record_contract` 及对应功能，不为过门禁增建签署工作台。R0 若声明或展示分享、记录或确认进度，仍须兑现相应合同；确认进度依赖真实记录，浏览不计确认。R1/R2 保留这三项要求。旧检查器对轻量 R0 仍可能要求全量合同，需使用 5.5.2 检查；既有完整合同继续兼容。此裁剪不取消范围/语义覆盖、上下文、精确目标、角色说明或无业务副作用。
@@ -263,7 +308,7 @@ handoff，不从人类摘要推断实现。
   `position: fixed` 覆盖产品主操作区。
 - 产品弹窗、抽屉、Toast、全局错误和提交反馈的层级高于评审区；桌面固定业务浮层的右边界止于产品
   区，窄屏产品态恢复到视口右边界。评审区不得截获其点击或焦点。
-- 宽表、看板、画布等可在不丢产品状态时切换为底部或全屏评审表面，但三个信息页签和 CurrentContext
+- 宽表、看板、画布等可在不丢产品状态时切换为底部或全屏评审表面，但三个内容域和 CurrentContext
   语义不变；页面画像不能衍生为新的一级模式。
 - 窄屏允许“产品全屏 / 评审全屏”切换，必须保留 CurrentContext、产品状态、滚动位置和已选评审点。
 - `UIACT-REVIEW-*` 在进入产品业务 dispatcher 前必须停止传播，或由业务 dispatcher 显式排除；任何
@@ -347,7 +392,7 @@ HTML 内嵌唯一 `<script type="application/json" id="review-workspace-manifest
 R1/R2 至少执行并留证：
 
 1. 初始 VIEW CurrentContext 正确；
-2. 三页签可达且只改变 Review Fingerprint；
+2. 当前声明的呈现方式中各内容域可达，纯评审操作只改变 Review Fingerprint；
 3. marker → card/target 和 card → target/marker 双向联动；两向都同时框选 marker、card、真实目标；
 4. 打开 MODAL/DRAWER/POPOVER 后 Context 入栈并从 1 编号；
 5. 关闭 Overlay 后恢复父 Context、编号、选择与滚动；
@@ -356,7 +401,7 @@ R1/R2 至少执行并留证：
 8. 分享链接 hydration 到正确 Context/Point/Tab；
 9. 浏览不推进进度，提交评审处置才推进；
 10. Candidate Diff 不自动进入分母；
-11. 桌面不遮挡产品主区，业务 Overlay/Toast 高于评审区；
+11. 桌面不遮挡产品主区，业务 Overlay/Toast 高于评审区；点击定位后也要验证目标可见、可点，必要时暂收说明抽屉并保留所选条目，不能只做 scrollIntoView；
 12. 两个 Overlay 候选时按声明判定最上层，歧义被阻断；
 13. 隐藏目标、零目标和同 Context 多目标均按合同拒绝；
 14. 刷新后评审记录恢复，JSON 导出/导入可用；
@@ -375,19 +420,19 @@ R1/R2 至少执行并留证：
 27. 每个 VIEW 的 PAGE-CONTRACT 与 `surface_types` 一致；全部适用 `SCOV-*` 在右栏恰好出现一次；
 28. 指标页面逐个核对 `METRIC-*` 口径，工作流页面核对流转守卫，业务弹窗/抽屉进入独立 Context；
 29. 简单项合并后仍能逐项回溯语义分母，P0/P1 GAP 会阻断完整交接。
-30. 浏览器可见规则文本与 PRD 逐字核对；正文中的 `<`、`>` 等比较符必须使用 HTML 实体或安全文本写入，不能被浏览器误解析为标签而吞字。
+30. 浏览器说明与 PRD 核对业务语义、条件、边界和结果；允许准确简述，数字、比较符、状态和权限不能漂移；正文中的 `<`、`>` 等比较符必须使用 HTML 实体或安全文本写入，不能被浏览器误解析为标签而吞字。
 
 浏览器未执行时只能声明静态合同已通过并保留 ARUN GAP，不能称“可完美复现”“已验收”或“真实运行
 无副作用”。
 
 ## 13. 冷读门禁
 
-R1/R2 由未参与原讨论的产品、前端、后端、测试分别冷读。目标是在 3 分钟内沿产品入口找到当前功能，
-复述输入、处理、可见结果、领域结果、指标口径、允许状态流转、主要异常、二级页面和下一交接；声明
-评审点回忆率至少 80%，P0/P1 及核心角色路径为 100%。记录找到入口时间、误猜规则、首次澄清、阻断
-GAP 和证据。失败应修复信息投影、上下文或文字
-层级，不得增加 Journey/Step/Role 导航。R1/R2 的状态只能是 pending/passed/failed/blocked，不能用
+R1/R2 由独立接收方按开发和测试任务冷读，记录能否找到入口、复述条件与结果、写出正反例，以及误猜或需澄清的位置。时间和回忆率仅在项目明确采用并有实际测量时使用，不把 3 分钟、80% 或 100% 当通用合格线；旧合同中的数值视为项目自定目标。模拟角色或独立代理须如实标注，不能冒充真人评审。关键业务歧义不能被平均分抵消。失败优先修复所属模块的表述和定位，不加一套阅读导航。R1/R2 的状态只能是 pending/passed/failed/blocked，不能用
 `not_applicable` 逃避；只有 R0 可声明不适用。
+
+关键例子按实际模块和风险选择，不设全项目固定数量上限，也不靠增加例子数量证明覆盖。涉及并发或撤回时，验证“打开表单后对象改变”“别的来源随后写入”“改回原值”“只撤回部分维度”；检查入口、提交守卫和后续读取是否一致。机器检查区分确定冲突、缺映射和动态未证明，不把后两者直接叫业务缺失。
+
+`baseline.hash` 始终是 `requirement_ref` 指向文本的 UTF-8 SHA-256（换行归一 LF）。权威来源为 DOCX 等二进制文件时，另用 `source_file` / `source_file_sha256` 记录文件字节指纹；两者不互换，哈希相同也不证明文字抽取无损。
 
 ## 14. 迁移与完成条件
 
@@ -397,9 +442,15 @@ GAP 和证据。失败应修复信息投影、上下文或文字
 
 大规模存量分批顺序：先保留并回归产品路径 → 映射真实页面/浮层上下文 → 每条核心链补规则与角色说明 → 再补候选/语义映射和运行验证。批次写明已覆盖、待覆盖与源分母；不能把已完成子集说成全量。当前 manifest 的评审级别是工作区级，不支持同一工作区随意混用 R0/R1；可分独立范围交工作区并保留原产品全范围，不未经授权删页。ARUN 可复用已有浏览器测试产生的真实证据，不要求手写第二套点击日志；未执行项保留未执行。
 
-完成必须同时满足：需求内核无回归；CurrentContext 可确定；ProductLocation 与菜单/路由/标题同步；声明评审点唯一且分母稳定；R1/R2 只有三
-页签；纯评审动作产品指纹不变；Candidate Diff 不自动晋级；布局不遮挡；Overlay 可探测；目标在当前
+完成必须同时满足：需求内核无回归；CurrentContext 可确定；ProductLocation 与菜单/路由/标题同步；声明评审点唯一且分母稳定；R1/R2 的 `presentation_mode: tabs` 使用三个页签，`contextual` 在当前上下文就近呈现同一组内容域；纯评审动作产品指纹不变；Candidate Diff 不自动晋级；布局不遮挡；Overlay 可探测；目标在当前
 上下文唯一；启用的评审记录可持久化且不跨 baseline 污染；页面只有一个评审事实面；评审事件与业务事件隔离；
 动态重绘后标号恢复且只显示当前 Context；标号可见、避碰、不越界；业务浮层不覆盖评审区；
 PAGE-CONTRACT、语义分母、右栏最小说明和 marker 映射闭合；指标、工作流、二级 Context 与核心角色
 路径无静默遗漏。任何一项缺失都不得包装为 5.4.9 完整评审交接。
+
+
+### 条件隐藏与定位故障
+
+在当前业务上下文内定位；尚未打开的页面不参与本次检查。`scripts/review_target_runtime.js` 提供共享定位器，build 会注入它，contextual 起点直接消费。项目 renderer 调用 `ADSReviewTargets.resolve({root, selector, required, applicability})`，不能只复制其名称。`applicability` 可省略；条件型入口由项目实际状态产生 `applies`、`reason`、`source_refs` 和 `observed`，不执行字符串表达式、不用固定“按权限显示”冒充条件已满足。
+
+返回 `visible` 才能定位；`missing/ambiguous/invalid_selector/missing_context/condition_conflict` 明确报告故障；有来源及状态观察的 `not_applicable` 保留原说明与适用条件；`unverified` 保留未验证。观察器将这些结果写入当前文件的浏览器证据，文字说明本身不能豁免缺失。一次合法隐藏不证明目标出现时定位正确。修订时用正常、改名、重复与合法隐藏对照，检查说明原文仍能阅读。

@@ -5,6 +5,12 @@ Coverage and maturity: `references/domain-coverage.yaml`.
 
 Use this replaceable domain module for 运管、交通监管、道路运输企业安全生产、交通安全 SaaS、两客一危、普货、站场、维修、驾培、租赁、数据集市和指标库产品. A replacement `domain-*.md` must preserve the core section headings used here and in `domain-module-template.md`.
 
+## 中文导读
+
+围绕运输企业、车辆、驾驶员与监管机构，说明资质、安全检查、风险预警、隐患整改和教育培训怎样形成可追溯的业务闭环。适合监管端与企业端协同；行业指标和地方执行规则仍须按项目核实。
+
+常用名称：交通、道路运输、交通安全、运输监管、运管、交通运输、营运车辆。以下中文提示是现有章节的阅读入口，不新增项目规则；需要详细依据时阅读对应原文和来源。
+
 ## Contents
 
 - Domain Purpose
@@ -75,6 +81,14 @@ Traffic and road transport safety products start from accountable risk closure a
 
 ## Vocabulary
 
+**中文阅读提示**
+
+**出车安全告诫**（出车告诫、pre-trip safety briefing、pre-departure safety briefing）：出车安全告诫关联驾驶员、车辆和出车任务，确认已阅读与是否具备出车条件分别判断。
+
+**车辆三检**（三检、vehicle trip check、trip check）：区分出车前、行车中、收车后检查的任务与证据；检查时点和适用对象以项目确认的规则为准。
+
+**资质证照**（证件、许可证、营运证、资质到期、qualification、certificate）：区分证照有效性、适用对象与业务许可；临期、过期和未知不可混为正常。
+
 | Term | Meaning | Source Of Truth |
 |---|---|---|
 | Regulated Enterprise | enterprise within an institution/department supervision scope | enterprise master + org scope |
@@ -102,6 +116,12 @@ Traffic and road transport safety products start from accountable risk closure a
 | Report Task | period-specific execution using frozen template/indicator versions | report service |
 
 ## Aggregates and Entities
+
+**中文阅读提示**
+
+**车辆**（车牌、车牌号、营运车、vehicle、plate）：车辆识别与企业归属分别描述；车辆转籍或换牌时检查历史证据和当前责任范围。
+
+**运输企业**（道路运输企业、承运企业、车企、transport enterprise）：企业、车辆和驾驶员是不同对象；核对标识、归属和有效时间，不能凭名称合并。
 
 | Aggregate | Owns | Notes |
 |---|---|---|
@@ -175,6 +195,14 @@ events:
 
 ## State Machines
 
+**企业预警**（企业风险预警、enterprise alert、company risk warning）：区分企业级聚合提示与单条预警事件，按对象标识关联并说明去重、统计范围及处置入口；列表汇总不代替单条事件的证据和状态。
+
+Enterprise alert: distinguish an enterprise aggregate from an individual alert event. Relate stable object identifiers, deduplication, statistical scope and disposition entry; a summary does not replace event evidence or state.
+
+**中文阅读提示**
+
+**风险预警**（报警、告警、预警中心、risk alert、warning）：区分风险信号、预警事件与隐患记录；写明触发、重复观察、处置及关闭条件。
+
 ```text
 OnboardingProcess: draft -> reviewing -> testing -> training -> internship_or_probation -> pending_approval -> active | rejected | archived
 TrainingTask: draft -> published -> learning -> exam_pending -> completed | failed | overdue | cancelled
@@ -211,6 +239,16 @@ State consistency:
 | final report | report snapshot | dashboard/export/submission | immutable snapshot |
 
 ## Metric / Indicator Governance
+
+**中文阅读提示**
+
+**分心驾驶**（分心、distracted driving、distraction）：分心报警保留原始证据及复核结果；信号类型和有效性以接入来源确认，不由中文别名生成判定规则。
+
+**超速驾驶**（超速、speeding、overspeed）：超速信号需要对应监测来源及判定条件；不从报警名称推导统一阈值或自动处罚。
+
+**疲劳驾驶**（疲劳、fatigue driving、driver fatigue、fatigue）：疲劳报警是动态监测信号，核对来源、发生时间及主体；信号本身不等于已确认违法或已完成处置。
+
+**安全培训**（学时、月均学时、人均学时、training hours、safety training）：培训时长、完成率和考核结果的主体、周期、单位及缺数口径需可判定。
 
 ```yaml
 indicator:
@@ -254,6 +292,10 @@ Common categories:
 | Baseline | enterprises, vehicles, drivers, escorts, safety managers, modules, ARR/renewal cohort |
 
 ## AI Context Sources
+
+**中文阅读提示**
+
+**主动安全报警**（主防、主防报警、主动安全预警、active safety alarm、ADAS alarm、active-defense）：定位主动安全或动态监测来源，保留报警主体、时间与来源状态；报警类型不直接赋予处罚或停运权限。
 
 | Context | Source | Freshness | Permission / Reliability Rule |
 |---|---|---|---|
@@ -361,6 +403,26 @@ Scenic/tourism passenger transport should normally stay inside this traffic doma
 
 ## Core Workflows
 
+**安全例会**（安全会议、安全生产例会、safety meeting、regular safety meeting）：分别说明会议安排、参与记录、纪要和后续任务；开会、签到、完成培训与问题闭环是不同结果。会议频次及必到人员以项目依据为准。
+
+Safety meeting: distinguish scheduling, attendance, minutes and follow-up work. Attendance, training completion and issue closure are separate outcomes; use project authority for cadence and required participants.
+
+**安全会议签到**（例会签到、安全例会签到、safety meeting attendance、meeting check-in）：签到关联会议和人员标识，核对重复签到、补录与缺席口径；签到记录不能单独证明实际学习时长或考核通过。
+
+Safety meeting attendance: relate the meeting and person by stable identifiers; define duplicate check-in, corrections and absence. Attendance alone does not establish training duration or an examination pass.
+
+**专家检查**（专家安全检查、expert safety inspection、expert inspection）：区分专家提出的问题、企业整改和有权人员的复核结论；专业建议不自动成为处罚或重大隐患的最终认定。
+
+Expert safety inspection: separate expert observations, enterprise rectification and an authorized review conclusion. An expert recommendation is not automatically a penalty or final major-hazard classification.
+
+**线上检查**（线上安全检查、远程检查、online safety inspection、online inspection、remote inspection）：说明远程核查材料的来源与时点，区分证据不足、未检查与已发现问题；需要现场复核时保留交接和处理结果，不把未上传当合格。
+
+Online inspection: retain the source and time of remote evidence; distinguish insufficient evidence, not inspected and a detected issue. Preserve any handoff for an on-site review; missing uploads do not prove compliance.
+
+**中文阅读提示**
+
+**隐患整改**（隐患、整改闭环、销号、hazard、rectification）：整改、复核和关闭是有责任人的业务动作；拒绝或超期后仍需明确下一步。
+
 1. Enterprise initialization: transport-platform export or customer files -> AI/rule extraction -> validation -> human confirmation -> master-data import -> exception repair.
 2. Industry fit: enterprise license/business profile -> industry template selection -> required objects/certificates/workflows/rules -> owner confirmation -> activated customer instance.
 3. Driver lifecycle: candidate -> qualification review -> written/road/interview/medical/psychological checks where applicable -> onboarding/training -> internship/probation/substitute -> approval -> active duty -> transfer/resignation/archive.
@@ -376,6 +438,10 @@ Scenic/tourism passenger transport should normally stay inside this traffic doma
 13. Optional scenic transport pilot: inspect current records -> select the required source/check/maintenance data -> validate the agreed operational flow -> produce the authorized ledger or report -> review exceptions and outcome evidence. Source priority, AI features and benchmark materials remain project choices.
 
 ## Role Path Patterns
+
+**中文阅读提示**
+
+**驾驶员**（司机、从业人员、driver）：区分企业安全员、驾驶员和监管人员的读写范围，沿各自入口检查处理结果。
 
 | Level / Role | Data Scope | Allowed Actions | Forbidden Actions |
 |---|---|---|---|
@@ -409,6 +475,10 @@ Scenic/tourism passenger transport should normally stay inside this traffic doma
 - embedded third-party pages must not bypass tenant/data-scope and audit rules.
 
 ## Policy / Privacy Constraints
+
+**中文阅读提示**
+
+**监管范围**（区县、监管企业、有车企业、属地、regulator supervision）：明确机构及企业范围的来源，核对跨机构、委托和历史归属边界；不由页面筛选替代权限。
 
 - Province/city/district/enterprise/tenant data isolation applies to list, detail, export, statistics, AI context, and embedded third-party pages.
 - Identity, phone, certificate, trajectory, dangerous-goods waybill, training/exam, and enforcement evidence follow least access, masking, retention, and audit rules.

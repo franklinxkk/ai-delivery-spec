@@ -80,7 +80,7 @@ def test_state_columns_reject_api_ids() -> None:
     assert 'PRD-STATE-SEMANTIC-POLLUTION' in codes(gate)
 
 def stage0_chain_document() -> dict:
-    document = yaml.safe_load((ROOT / 'references/templates/stage0-inventory-template.yaml').read_text(encoding='utf-8'))
+    document = yaml.safe_load((ROOT / 'maintainer/examples/stage0-inventory-example.yaml').read_text(encoding='utf-8'))
     document.update({'inventory_id': 'INV-STAGE0-CHAIN-001', 'inventory_status': 'inventory_complete', 'target_status': 'draft', 'review_batches': [], 'reachability_breaks': []})
     document['items'] = document['items'][:7]
     for item in document['items']:

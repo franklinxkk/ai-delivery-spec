@@ -1,6 +1,9 @@
 ---
 artifact: solution_sketch
+artifact_role: main
 stage: explore
+applicable_stages: [explore]
+applies_when: 需要比较解决路径及验证假设时使用。
 schema_version: 5.4.0
 version: "0.1"
 status: draft

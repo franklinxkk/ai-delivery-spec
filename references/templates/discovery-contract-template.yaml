@@ -1,3 +1,7 @@
+artifact: discovery_contract
+artifact_role: supporting
+applicable_stages: [frame, explore, intake, clarify]
+applies_when: 复杂澄清需保存问题边界、来源和未决事项时使用。
 schema_version: 5.1.0
 contract_id: DISC-PROJECT-001
 project_id: project-001
@@ -21,22 +25,10 @@ delivery_context:
 sources:
   - id: SRC-PROJECT-001
     path: "{source path, URL, meeting, or owner}"
-    authority: accountable
-    status: active
+    authority: unknown
+    status: unknown
     disposition: embedded
     owner: "{source owner}"
-unknowns:
-  - id: UNK-SCOPE-001
-    question: "{material question}"
-    impact: scope
-    priority: P0
-    question_kind: direction
-    owner: "{decision owner}"
-    affected_refs: [SRC-PROJECT-001]
-    blocks_stage: specify
-    recommendation: "{agent recommendation, bounded by evidence}"
-    recommendation_evidence_refs: [SRC-PROJECT-001]
-    tradeoff: "{benefit, cost, and rejected alternative}"
-    reversal_path: "{how to revisit safely if the recommendation is rejected}"
-    status: open
-discovery_decision: BLOCKED_BY_P0_UNKNOWN
+unknowns: []
+# 实际未决项填写 id、question、impact、priority、owner、status、affected_refs、blocks_stage；不要预造 P0。
+# discovery_decision: 形成实际结论后填写，不预设放行或阻断。

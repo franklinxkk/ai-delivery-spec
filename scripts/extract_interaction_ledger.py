@@ -43,6 +43,15 @@ def _without_non_executable_content(html: str) -> str:
                   html, flags=re.I | re.S)
 
 
+def dynamic_attribute_fragments(html: str, attr: str) -> list[str]:
+    """Only recognize a quoted JS concatenation, never excuse a malformed static ID."""
+    scripts = list(re.finditer(r"<script\b[^>]*>(.*?)</script\s*>", _without_non_executable_content(html), re.I | re.S))
+    outside = re.sub(r"<script\b[^>]*>.*?</script\s*>", "", html, flags=re.I | re.S)
+    static = {row[attr] for row in extract_attrs(outside, [attr]) if attr in row}
+    pattern = re.compile(r"\b" + re.escape(attr) + r"\s*=\s*[\"']([A-Za-z0-9_-]+)[\"']\s*\+", re.I)
+    return sorted({m[1] for script in scripts for m in pattern.finditer(script[1]) if m[1] not in static})
+
+
 def attribute_inventory(html: str, attr: str) -> dict:
     """Inventory templates and unresolved JS declarations without claiming DOM evidence."""
     template_values = [row[attr] for row in extract_attrs(html, [attr]) if attr in row]

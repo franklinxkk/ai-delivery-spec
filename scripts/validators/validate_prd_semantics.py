@@ -217,6 +217,7 @@ def _collect_ids(raw: str) -> tuple[dict[str, tuple[int, str]], dict[str, list[t
         cells = [cell.strip() for cell in stripped.strip("|").split("|")] if is_table else []
         first_cell = cells[0].strip("`* ") if cells else ""
         list_lead = re.match(rf"^\s*[-*+]\s+(?:\*\*|__|`)?\s*((?:{_FAMILY})-[A-Z0-9][A-Z0-9_-]*)", line)
+        bare_def = re.match(rf"^\s*(?:\*\*|__|`)?((?:{_FAMILY})-[A-Z0-9][A-Z0-9_-]*)(?:\*\*|__|`)?\s*[：:]\s*\S", line)
         machine_def = re.match(rf"^\s*-?\s*id:\s*['\"]?((?:{_FAMILY})-[A-Z0-9][A-Z0-9_-]*)", line)
         # The current PRD template gives a scenario its ID on a labelled line.
         # Anchor the label and capture only its value: "参见 AC-*" and IDs later
@@ -258,6 +259,8 @@ def _collect_ids(raw: str) -> tuple[dict[str, tuple[int, str]], dict[str, list[t
                 elif token.startswith("VIEW-") and ("落点" in header_cell or "目标" in header_cell):
                     is_def, kind = True, "registry"
             if list_lead and list_lead.group(1).rstrip("-") == token and list_lead.start(1) == start:
+                is_def = True
+            if bare_def and bare_def.start(1) == start and bare_def.group(1).rstrip("-") == token:
                 is_def = True
             if machine_def and machine_def.group(1).rstrip("-") == token:
                 is_def = True
@@ -886,9 +889,24 @@ def check_enum_value_coverage(raw: str) -> list[SemFinding]:
     return findings
 
 
+def check_pending_execution(raw: str) -> list[SemFinding]:
+    """Narrow conflict probe; not a general detector of unauthorized defaults."""
+    findings = []
+    for n, line in _prose_lines(raw):
+        zh = re.search(r'(?:待确认|待复核|确认后才)[^。\n]{0,220}(?:在此之前|未确认前|确认之前)[，, ]*(?:实现|系统)?(?:须|必须|先|应)[^。\n]{0,60}(?:默认|执行)', line)
+        en = re.search(r'(?:pending (?:confirmation|approval)|awaiting approval)[^\n]{0,180}(?:in the meantime|before approval)[, ]*(?:implementation |the system )?(?:must|shall|will)[^.\n]{0,80}(?:default|execute|apply)', line, re.I)
+        # Quoted counterexamples, negation, and concept-only assumptions are not execution policy.
+        negated = re.search(r'(?:不得|不能|禁止|错误示例|反例|示例：|仅用于概念验证|已授权的临时方案|do not|must not|bad example|concept.only|authorized interim)', line, re.I)
+        if (zh or en) and not negated:
+            findings.append(SemFinding('BLOCK','PRD-PENDING-EXECUTION',
+                '同一处把业务选择标为待确认，又要求确认前按默认执行。删除相互冲突的实施承诺；已有授权则引用授权并同步状态，未决只限制依赖分支。',f'line {n}'))
+    return findings
+
+
 def run_semantic_checks(raw: str) -> list[SemFinding]:
     """Run bounded semantic invariants wired into ``gate --profile prd``."""
     return [
+        *check_pending_execution(raw),
         *check_dangling_refs(raw),
         *check_prefix_collision(raw),
         *check_state_count(raw),
@@ -917,7 +935,7 @@ def main() -> int:
     if any(item.severity == "BLOCK" for item in findings):
         return 1
     if not findings:
-        print("PASS: PRD 语义一致性检查通过（引用、ID、状态、决策与枚举合同一致）")
+        print("PASS: 本次静态检查未发现已覆盖类型的问题；业务正确性与实际执行仍需核对")
     return 0
 
 

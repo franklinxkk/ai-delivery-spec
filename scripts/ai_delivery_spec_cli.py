@@ -63,7 +63,7 @@ REQUIREMENT_DIRS = (
 
 def current_version() -> str:
     text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
-    match = re.search(r"AI Delivery Spec\s+(\d+\.\d+\.\d+)", text)
+    match = re.search(r"AI Delivery Spec\s+(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)", text)
     return match.group(1) if match else "unknown"
 
 
@@ -339,7 +339,13 @@ def check_distribution(args: argparse.Namespace) -> int:
 
 def init_custom(args: argparse.Namespace) -> int:
     """Create a private-by-default, declarative local extension workspace."""
+    from team_preferences import PreferenceError, outside_install
     target = args.output.resolve()
+    try:
+        outside_install(target, ROOT.resolve())
+    except PreferenceError as exc:
+        print(f"BLOCKED: {exc}；请用 --output 指定团队或项目外置目录 / choose an external team or project directory with --output")
+        return 2
     for rel in (
         "domains", "templates", "validators", "learning/candidates/project-local",
         "learning/candidates/review", "learning/usage",
@@ -376,7 +382,7 @@ def init_custom(args: argparse.Namespace) -> int:
             "source_refs: [SRC-MY-TEAM-001]\nevidence_refs: [EVD-MY-TEAM-001]\n"
             "applicability: [当前项目]\nexclusions: []\njurisdiction: null\n"
             "regulatory_version: null\nsensitive_data: false\n"
-            'created_at: "2026-01-01T00:00:00+08:00"\nexpires_at: null\n'
+            f'created_at: "{datetime.now(timezone.utc).isoformat()}"\nexpires_at: null\n'
         ),
     }
     for path, content in files.items():
@@ -386,6 +392,74 @@ def init_custom(args: argparse.Namespace) -> int:
         print(f"PASS: 已创建本地私有扩展目录 {target}；默认被 custom/.gitignore 阻止提交")
     else:
         print(f"PASS: 已创建团队私域扩展目录 {target}；只应提交到受控私有仓库，敏感证据仍被忽略")
+    return 0
+
+
+def bind_team(args: argparse.Namespace) -> int:
+    from team_preferences import PreferenceError, bind_preferences
+    try:
+        result = bind_preferences(args, ROOT)
+    except (PreferenceError, OSError) as exc:
+        print(f"BLOCKED: {exc}")
+        return 2
+    print(json.dumps({"status": "bound", **result}, ensure_ascii=False, indent=2))
+    return 0
+
+
+def show_team(args: argparse.Namespace) -> int:
+    from team_preferences import PreferenceError, resolve_preferences
+    try:
+        result = resolve_preferences(args.project, ROOT, explicit_profile=args.profile)
+    except (PreferenceError, OSError) as exc:
+        print(f"BLOCKED: {exc}")
+        return 2
+    print(json.dumps({"status": "resolved", **result}, ensure_ascii=False, indent=2))
+    return 0
+
+
+def init_prd(args: argparse.Namespace) -> int:
+    """Copy a selected template only; this does not author or approve a PRD."""
+    from team_preferences import PreferenceError, outside_install, resolve_preferences
+    try:
+        result = resolve_preferences(args.project, ROOT, explicit_profile=args.profile,
+                                     template_override=args.template_file)
+        source = Path(result["template"]) if result["template"] else ROOT / "references/templates/unified-requirement-prd-template.md"
+        output = args.output.resolve() if args.output else args.project.resolve() / ("PRD" + source.suffix.lower())
+        outside_install(output, ROOT.resolve())
+        protected = {source.resolve(), *(Path(p) for p in result["profiles"] + result["referenced_resources"])}
+        same_original = output in protected or (
+            output.exists() and any(p.exists() and output.samefile(p) for p in protected)
+        )
+        if same_original:
+            raise PreferenceError("不能覆盖团队原件或绑定 / output must not overwrite authoritative team assets or bindings")
+        if output.suffix.lower() != source.suffix.lower():
+            raise PreferenceError("输出扩展名须与模板一致；不自动转换格式 / output extension must match template; no implicit conversion")
+        if output.exists() and not args.force:
+            print(json.dumps({"status": "preserved", "output": str(output), "reason": "已有文件保持原样 / existing file unchanged", **result}, ensure_ascii=False, indent=2))
+            return 0
+        content = source.read_bytes()
+        if source.suffix.lower() == ".docx":
+            with zipfile.ZipFile(source) as archive:
+                if "word/document.xml" not in archive.namelist():
+                    raise PreferenceError("不是有效 DOCX 模板 / invalid DOCX template")
+        elif result["template"]:
+            overlay = content.decode("utf-8-sig")
+            if re.match(r"\s*<!--\s*extends:", overlay, re.I):
+                official = (ROOT / "references/templates/unified-requirement-prd-template.md").read_text(encoding="utf-8")
+                content = merge_markdown_template(official, overlay).encode("utf-8")
+        else:
+            text = content.decode("utf-8-sig")
+            text = re.sub(r"\A---\s*\n.*?\n---\s*\n", "", text, count=1, flags=re.S)
+            text = re.sub(r"<!--\s*ADS:[\s\S]*?-->", "", text, flags=re.I)
+            content = text.lstrip().encode("utf-8")
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_bytes(content)
+    except (PreferenceError, OSError, UnicodeError, zipfile.BadZipFile) as exc:
+        print(f"BLOCKED: {exc}")
+        return 2
+    print(json.dumps({"status": "template_only", "output": str(output), "template_source": str(source),
+                      "next": "按需求填写并验证；DOCX 原样复制不代表排版已验收 / author and verify the requirement; a copied DOCX is not rendered QA",
+                      **result}, ensure_ascii=False, indent=2))
     return 0
 
 
@@ -789,6 +863,7 @@ def quality_gate(args: argparse.Namespace) -> int:
         "prd": "--prd",
         "prototype": "--prototype",
         "prototype_baseline": "--prototype-baseline",
+        "review_runtime_evidence": "--review-runtime-evidence",
         "inventory": "--inventory",
         "manifest": "--manifest",
         "acceptance_run": "--acceptance-run",
@@ -817,6 +892,8 @@ def route_stage(args: argparse.Namespace) -> int:
 def query_domain(args: argparse.Namespace) -> int:
     values = ["--format", args.format, "--limit", str(args.limit),
               "--language", args.language, "--source-detail", args.source_detail]
+    if getattr(args, "list", False):
+        values.append("--list")
     if args.domain:
         values.extend(["--domain", args.domain])
     if args.search is not None:
@@ -1108,6 +1185,32 @@ def main() -> int:
     custom.add_argument("--force", action="store_true")
     custom.set_defaults(func=init_custom)
 
+    bind = sub.add_parser("bind-team", help=gate_help("Bind existing team templates and design assets outside the skill", "绑定现有团队模板与设计资料，独立于 skill 保存"))
+    bind.add_argument("--project", type=Path, default=Path("."))
+    bind.add_argument("--team", type=Path, help=gate_help("Team directory or .ads-profile.json to inherit", "继承的团队目录或 .ads-profile.json"))
+    bind.add_argument("--template-file", type=Path)
+    bind.add_argument("--design-file", type=Path, action="append")
+    bind.add_argument("--interaction-file", type=Path, action="append")
+    for field in ("team", "template", "design", "interaction"):
+        bind.add_argument("--clear-" + field, action="store_true")
+    bind.add_argument("--language", choices=["zh-CN", "en-US"], default="zh-CN")
+    bind.set_defaults(func=bind_team)
+
+    show = sub.add_parser("show-team", help=gate_help("Resolve active team assets and their authoritative source paths", "读取当前团队资料绑定及其原始文件位置"))
+    show.add_argument("--project", type=Path, default=Path("."))
+    show.add_argument("--profile", type=Path)
+    show.add_argument("--language", choices=["zh-CN", "en-US"], default="zh-CN")
+    show.set_defaults(func=show_team)
+
+    prd = sub.add_parser("init-prd", help=gate_help("Create only one PRD template copy using project/team defaults", "沿用项目／团队默认模板，只创建一份 PRD 骨架"))
+    prd.add_argument("--project", type=Path, default=Path("."))
+    prd.add_argument("--profile", type=Path)
+    prd.add_argument("--template-file", type=Path)
+    prd.add_argument("--output", type=Path)
+    prd.add_argument("--force", action="store_true", help=gate_help("Explicitly replace an existing output, never the source template", "显式替换已有输出，不得覆盖原模板"))
+    prd.add_argument("--language", choices=["zh-CN", "en-US"], default="zh-CN")
+    prd.set_defaults(func=init_prd)
+
     human = sub.add_parser("project-human", help=gate_help("Project canonical Markdown into a human-distribution Markdown copy", "将权威 Markdown 投影为不含机器 frontmatter 的人类分发副本"))
     human.add_argument("--input", type=Path, required=True)
     human.add_argument("--output", type=Path, required=True)
@@ -1139,6 +1242,7 @@ def main() -> int:
     gate.add_argument("--prd", type=Path)
     gate.add_argument("--prototype", type=Path, action="append", help="Repeat for admin/H5/multi-surface prototypes")
     gate.add_argument("--prototype-baseline", type=Path, help=gate_help("Existing HTML baseline; inherited issues become GAP while new regressions still block", "存量 HTML 基线；相同旧问题降为 GAP，本次新增回归仍阻断"))
+    gate.add_argument("--review-runtime-evidence", type=Path, help="当前原型的浏览器评审观察 JSON")
     gate.add_argument("--require-review-workspace", action="store_true", help=gate_help("The requested deliverable includes a review workspace; a plain prototype cannot satisfy it", "本次明确交付评审态；缺少评审合同不能以普通原型检查通过代替"))
     gate.add_argument("--inventory", type=Path, help="Stage 0 brownfield inventory YAML")
     gate.add_argument("--manifest", type=Path, help="Agent handoff manifest YAML")
@@ -1187,6 +1291,7 @@ def main() -> int:
     query.set_defaults(func=query_truth)
 
     domain = sub.add_parser("query-domain", help="Search Chinese/English domain terms or load a scoped source/section")
+    domain.add_argument("--list", action="store_true", help="查看领域中文简介、别名与文件入口")
     domain.add_argument("--domain")
     domain.add_argument("--search")
     domain.add_argument("--limit", type=int, default=12)

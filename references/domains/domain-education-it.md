@@ -7,6 +7,12 @@ Use this replaceable domain module for higher-education digital campus, vocation
 
 This module is distilled from multi-year higher-education informationization materials. Keep customer/project details out of the public protocol; preserve reusable domain rules only.
 
+## 中文导读
+
+覆盖学生与学籍、课程与班级、选课学习、考试成绩、补考及培训档案。重点是身份与学期、学习证据、成绩生效和角色边界；学校及行业政策不能由样例替代。
+
+常用名称：教育、教务、学工、教育信息化、校园、高校、培训平台、学习平台。以下中文提示是现有章节的阅读入口，不新增项目规则；需要详细依据时阅读对应原文和来源。
+
 ## Contents
 
 - Domain Purpose
@@ -178,6 +184,12 @@ events:
 
 ## State Machines
 
+**中文阅读提示**
+
+**学籍管理**（入学、转学、休学、复学、student status、enrollment）：学籍状态、学习资格和历史记录分开；变更要明确生效时点及下游影响。
+
+**考试成绩**（考试、分数、成绩单、grade、score、exam、成绩、academic grade、exam score、examination score）：原始成绩、审核、发布及更正分别描述，不能把暂存分数当正式结果。
+
 ```text
 TrainingPlan: draft -> reviewing -> published -> revised -> archived
 ProgramConstructionPlan: draft -> executing -> diagnosing -> improved -> archived
@@ -219,6 +231,10 @@ State consistency:
 | indicator/report result | indicator registry + frozen snapshot | dashboard, report, external evaluation | immutable snapshot |
 
 ## Metric / Indicator Governance
+
+**中文阅读提示**
+
+**学习进度**（学时、学分、学习完成率、learning progress、completion）：学时、学分和完成率分别注明有效证据、周期、分母及重复学习的处理。
 
 ```yaml
 indicator:
@@ -275,6 +291,10 @@ Common categories:
 
 ## Content / Knowledge Assets
 
+**中文阅读提示**
+
+**培训档案**（培训记录、继续教育、training record、continuing education）：档案连接人员、课程、时间和有效学习证据，支持核对来源与留存。
+
 | Asset Type | Examples | Tags | Quality Rule |
 |---|---|---|---|
 | policy/regulation | student handbook, teaching rules, academic status rules, aid policy | role, department, effective date | owner office review; versioned |
@@ -289,6 +309,12 @@ Common categories:
 | workflow/form template | leave, award, aid, repair, certificate, approval forms | process_key, version, fields | field dictionary and approval path required |
 
 ## Core Workflows
+
+**中文阅读提示**
+
+**课程选课**（排课、选课、退课、课程、course、registration）：课程、班级和一次开课不是同一对象，核对容量、冲突和取消后的结果。
+
+**补考重修**（补考、缓考、重修、retake、resit、补考成绩、重修成绩、retake grade、retake score、resit grade、resit score）：资格、次数、成绩取舍和生效范围以项目决定为准，不能自行采用最高分或最新分。
 
 | Workflow | Actors | Trigger | State Change | Success Result |
 |---|---|---|---|---|
@@ -341,6 +367,10 @@ Common categories:
 - role switch requirements: school leader, academic affairs, student affairs, research office, counselor, teacher, researcher/PI, student, quality office, data center/admin paths must be independently demoable when in scope.
 
 ## Policy / Privacy Constraints
+
+**中文阅读提示**
+
+**学生数据**（未成年人、教育数据、学生隐私、education data）：学生、教师、家长和管理人员的可见与可改范围分别核对，语言不决定适用法域。
 
 - KS-EDU-CLASSIFICATION-0661 (JY/T 0661—2025, effective 2026-02-18) applies to the stated education-data scope; it excludes state-secret data and directs health and other sector data to their applicable industry requirements. A campus location does not make every dataset ordinary education data.
 - Distinguish authorized automatic practice feedback/objective scoring from official grades, credit, graduation or disciplinary decisions. The latter retain institutional authority and required review; do not add per-answer human approval to an already authorized low-risk exercise.

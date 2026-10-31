@@ -6,6 +6,11 @@
   "additionalProperties": false,
   "required": ["schema_version", "review_id", "baseline_version", "review_type", "status", "reviewers", "findings"],
   "properties": {
+    "artifact": {"const": "review_record"},
+    "artifact_role": {"const": "main"},
+    "applicable_stages": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["frame", "explore", "intake", "clarify", "specify", "review", "baseline", "implementation", "change", "acceptance", "closed"]}},
+    "applies_when": {"type": "string", "minLength": 1},
+    "stage": {"enum": ["review"]},
     "schema_version": { "enum": ["5.1.0", "5.4.0"] },
     "review_id": { "type": "string", "pattern": "^REVIEW-[A-Z0-9-]+$" },
     "baseline_version": { "type": "string", "minLength": 1 },
@@ -26,7 +31,6 @@
     "reviewers": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
     "required_review_types": {
       "type": "array",
-      "minItems": 1,
       "uniqueItems": true,
       "items": { "enum": ["intake", "business", "product", "architecture", "engineering", "delivery", "qa", "customer", "compliance"] }
     },
@@ -76,6 +80,10 @@
     "conclusion": { "type": "string" }
   },
   "allOf": [
+    {
+      "if": { "properties": { "status": { "enum": ["in_review", "changes_requested", "completed"] } }, "required": ["status"] },
+      "then": { "required": ["required_review_types"], "properties": { "required_review_types": { "minItems": 1 } } }
+    },
     {
       "if": { "properties": { "schema_version": { "const": "5.4.0" } }, "required": ["schema_version"] },
       "then": { "required": ["requirement_refs", "reviewed_artifact_refs", "required_review_types", "sign_offs"] }

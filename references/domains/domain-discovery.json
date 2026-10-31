@@ -1,0 +1,1094 @@
+{
+  "schema_version": 1,
+  "section_aliases": {
+    "领域简介": "Domain Purpose",
+    "第一性原理": "First-Principles Domain Lens",
+    "术语": "Vocabulary",
+    "术语表": "Vocabulary",
+    "业务对象": "Aggregates and Entities",
+    "聚合与实体": "Aggregates and Entities",
+    "业务事件": "Domain Events",
+    "状态转换": "State Machines",
+    "指标口径": "Metric / Indicator Governance",
+    "上下文来源": "AI Context Sources",
+    "知识资产": "Content / Knowledge Assets",
+    "业务流程": "Core Workflows",
+    "角色路径": "Role Path Patterns",
+    "界面交互": "UI / Mobile Patterns",
+    "权限隐私": "Policy / Privacy Constraints",
+    "测试场景": "Domain Test Scenarios",
+    "评估范围": "Evaluation Profile",
+    "验收标准": "Acceptance Checklist"
+  },
+  "domains": [
+    {
+      "name_zh": "交通运输与安全监管",
+      "aliases": [
+        "交通",
+        "道路运输",
+        "交通安全",
+        "运输监管",
+        "运管",
+        "交通运输",
+        "营运车辆"
+      ],
+      "summary_zh": "围绕运输企业、车辆、驾驶员与监管机构，说明资质、安全检查、风险预警、隐患整改和教育培训怎样形成可追溯的业务闭环。适合监管端与企业端协同；行业指标和地方执行规则仍须按项目核实。",
+      "terms": [
+        [
+          "运输企业",
+          [
+            "道路运输企业",
+            "承运企业",
+            "车企",
+            "transport enterprise"
+          ],
+          "Aggregates and Entities",
+          "企业、车辆和驾驶员是不同对象；核对标识、归属和有效时间，不能凭名称合并。"
+        ],
+        [
+          "车辆",
+          [
+            "车牌",
+            "车牌号",
+            "营运车",
+            "vehicle",
+            "plate"
+          ],
+          "Aggregates and Entities",
+          "车辆识别与企业归属分别描述；车辆转籍或换牌时检查历史证据和当前责任范围。"
+        ],
+        [
+          "驾驶员",
+          [
+            "司机",
+            "从业人员",
+            "driver"
+          ],
+          "Role Path Patterns",
+          "区分企业安全员、驾驶员和监管人员的读写范围，沿各自入口检查处理结果。"
+        ],
+        [
+          "风险预警",
+          [
+            "报警",
+            "告警",
+            "预警中心",
+            "risk alert",
+            "warning"
+          ],
+          "State Machines",
+          "区分风险信号、预警事件与隐患记录；写明触发、重复观察、处置及关闭条件。"
+        ],
+        [
+          "隐患整改",
+          [
+            "隐患",
+            "整改闭环",
+            "销号",
+            "hazard",
+            "rectification"
+          ],
+          "Core Workflows",
+          "整改、复核和关闭是有责任人的业务动作；拒绝或超期后仍需明确下一步。"
+        ],
+        [
+          "资质证照",
+          [
+            "证件",
+            "许可证",
+            "营运证",
+            "资质到期",
+            "qualification",
+            "certificate"
+          ],
+          "Vocabulary",
+          "区分证照有效性、适用对象与业务许可；临期、过期和未知不可混为正常。"
+        ],
+        [
+          "安全培训",
+          [
+            "学时",
+            "月均学时",
+            "人均学时",
+            "training hours",
+            "safety training"
+          ],
+          "Metric / Indicator Governance",
+          "培训时长、完成率和考核结果的主体、周期、单位及缺数口径需可判定。"
+        ],
+        [
+          "监管范围",
+          [
+            "区县",
+            "监管企业",
+            "有车企业",
+            "属地",
+            "regulator supervision"
+          ],
+          "Policy / Privacy Constraints",
+          "明确机构及企业范围的来源，核对跨机构、委托和历史归属边界；不由页面筛选替代权限。"
+        ],
+        [
+          "疲劳驾驶",
+          [
+            "疲劳",
+            "fatigue driving",
+            "driver fatigue",
+            "fatigue"
+          ],
+          "Metric / Indicator Governance",
+          "疲劳报警是动态监测信号，核对来源、发生时间及主体；信号本身不等于已确认违法或已完成处置。"
+        ],
+        [
+          "超速驾驶",
+          [
+            "超速",
+            "speeding",
+            "overspeed"
+          ],
+          "Metric / Indicator Governance",
+          "超速信号需要对应监测来源及判定条件；不从报警名称推导统一阈值或自动处罚。"
+        ],
+        [
+          "分心驾驶",
+          [
+            "分心",
+            "distracted driving",
+            "distraction"
+          ],
+          "Metric / Indicator Governance",
+          "分心报警保留原始证据及复核结果；信号类型和有效性以接入来源确认，不由中文别名生成判定规则。"
+        ],
+        [
+          "车辆三检",
+          [
+            "三检",
+            "vehicle trip check",
+            "trip check"
+          ],
+          "Vocabulary",
+          "区分出车前、行车中、收车后检查的任务与证据；检查时点和适用对象以项目确认的规则为准。"
+        ],
+        [
+          "出车安全告诫",
+          [
+            "出车告诫",
+            "pre-trip safety briefing",
+            "pre-departure safety briefing"
+          ],
+          "Vocabulary",
+          "出车安全告诫关联驾驶员、车辆和出车任务，确认已阅读与是否具备出车条件分别判断。"
+        ],
+        [
+          "主动安全报警",
+          [
+            "主防",
+            "主防报警",
+            "主动安全预警",
+            "active safety alarm",
+            "ADAS alarm",
+            "active-defense"
+          ],
+          "AI Context Sources",
+          "定位主动安全或动态监测来源，保留报警主体、时间与来源状态；报警类型不直接赋予处罚或停运权限。"
+        ],
+        [
+          "安全例会",
+          [
+            "安全会议",
+            "安全生产例会",
+            "safety meeting",
+            "regular safety meeting"
+          ],
+          "Core Workflows",
+          "分别说明会议安排、参与记录、纪要和后续任务；开会、签到、完成培训与问题闭环是不同结果。会议频次及必到人员以项目依据为准。"
+        ],
+        [
+          "安全会议签到",
+          [
+            "例会签到",
+            "安全例会签到",
+            "safety meeting attendance",
+            "meeting check-in"
+          ],
+          "Core Workflows",
+          "签到关联会议和人员标识，核对重复签到、补录与缺席口径；签到记录不能单独证明实际学习时长或考核通过。"
+        ],
+        [
+          "专家检查",
+          [
+            "专家安全检查",
+            "expert safety inspection",
+            "expert inspection"
+          ],
+          "Core Workflows",
+          "区分专家提出的问题、企业整改和有权人员的复核结论；专业建议不自动成为处罚或重大隐患的最终认定。"
+        ],
+        [
+          "线上检查",
+          [
+            "线上安全检查",
+            "远程检查",
+            "online safety inspection",
+            "online inspection",
+            "remote inspection"
+          ],
+          "Core Workflows",
+          "说明远程核查材料的来源与时点，区分证据不足、未检查与已发现问题；需要现场复核时保留交接和处理结果，不把未上传当合格。"
+        ],
+        [
+          "企业预警",
+          [
+            "企业风险预警",
+            "enterprise alert",
+            "company risk warning"
+          ],
+          "State Machines",
+          "区分企业级聚合提示与单条预警事件，按对象标识关联并说明去重、统计范围及处置入口；列表汇总不代替单条事件的证据和状态。"
+        ]
+      ],
+      "domain_id": "traffic",
+      "knowledge_file": "references/domains/domain-traffic.md",
+      "name_en": "Road transport and safety supervision",
+      "summary_en": "Enterprise, vehicle and driver records; qualifications, inspections, monitoring signals, rectification and training. Distinguish regulator and enterprise workflows, and verify local applicability before adopting industry rules."
+    },
+    {
+      "name_zh": "客户关系与客户服务",
+      "aliases": [
+        "客户管理",
+        "销售管理",
+        "CRM",
+        "客户关系",
+        "销售漏斗"
+      ],
+      "summary_zh": "覆盖线索、客户、商机、合同、回款、服务工单与续约。重点检查对象转化、归属与协作、金额和状态的一致性，避免把签约、开票、回款及收入确认当成同一结果。",
+      "terms": [
+        [
+          "销售线索",
+          [
+            "线索",
+            "潜客",
+            "潜在客户",
+            "lead"
+          ],
+          "Core Workflows",
+          "说明线索如何分配、去重、转为客户或商机，失败与重复转化不能制造重复对象。"
+        ],
+        [
+          "商机阶段",
+          [
+            "商机",
+            "销售阶段",
+            "赢单",
+            "丢单",
+            "opportunity",
+            "pipeline"
+          ],
+          "State Machines",
+          "阶段变化要说明允许者、必要条件和结果；概率不是已经实现的收入。"
+        ],
+        [
+          "客户归属",
+          [
+            "客户负责人",
+            "客户池",
+            "公海池",
+            "customer ownership",
+            "account hierarchy"
+          ],
+          "Role Path Patterns",
+          "客户负责人、共享协作与可见范围分别定义，转交后核对旧负责人权限。"
+        ],
+        [
+          "合同回款",
+          [
+            "应收",
+            "收款",
+            "回款核销",
+            "payment",
+            "collection"
+          ],
+          "Metric / Indicator Governance",
+          "合同额、已收款、应收余额与收入分别计算，退款和撤销需回到原交易核对。"
+        ],
+        [
+          "客户工单",
+          [
+            "售后",
+            "客诉",
+            "投诉",
+            "服务单",
+            "ticket",
+            "complaint"
+          ],
+          "Core Workflows",
+          "服务请求从受理到分派、解决、关闭应有责任人与可核验结果。"
+        ],
+        [
+          "客户续约",
+          [
+            "续费",
+            "流失",
+            "续签",
+            "renewal",
+            "churn"
+          ],
+          "Metric / Indicator Governance",
+          "明确到期范围、续约窗口、客户去重与合同金额，不把活跃等同续约。"
+        ],
+        [
+          "客户去重",
+          [
+            "重复客户",
+            "合并客户",
+            "deduplication",
+            "dedupe",
+            "customer deduplication",
+            "customer dedupe",
+            "customer dedup",
+            "dedup"
+          ],
+          "Aggregates and Entities",
+          "合并客户前确定身份依据与关联数据归属，名称相同不等于同一客户。"
+        ]
+      ],
+      "domain_id": "crm",
+      "knowledge_file": "references/domains/domain-crm.md",
+      "name_en": "Customer relationships and service",
+      "summary_en": "Leads, customers, opportunities, contracts, collections, service tickets and renewals. Check identity, ownership, transitions and financial meanings; signing, invoicing, payment and revenue recognition are different outcomes."
+    },
+    {
+      "name_zh": "教育教学与培训",
+      "aliases": [
+        "教育",
+        "教务",
+        "学工",
+        "教育信息化",
+        "校园",
+        "高校",
+        "培训平台",
+        "学习平台"
+      ],
+      "summary_zh": "覆盖学生与学籍、课程与班级、选课学习、考试成绩、补考及培训档案。重点是身份与学期、学习证据、成绩生效和角色边界；学校及行业政策不能由样例替代。",
+      "terms": [
+        [
+          "学籍管理",
+          [
+            "入学",
+            "转学",
+            "休学",
+            "复学",
+            "student status",
+            "enrollment"
+          ],
+          "State Machines",
+          "学籍状态、学习资格和历史记录分开；变更要明确生效时点及下游影响。"
+        ],
+        [
+          "课程选课",
+          [
+            "排课",
+            "选课",
+            "退课",
+            "课程",
+            "course",
+            "registration"
+          ],
+          "Core Workflows",
+          "课程、班级和一次开课不是同一对象，核对容量、冲突和取消后的结果。"
+        ],
+        [
+          "学习进度",
+          [
+            "学时",
+            "学分",
+            "学习完成率",
+            "learning progress",
+            "completion"
+          ],
+          "Metric / Indicator Governance",
+          "学时、学分和完成率分别注明有效证据、周期、分母及重复学习的处理。"
+        ],
+        [
+          "考试成绩",
+          [
+            "考试",
+            "分数",
+            "成绩单",
+            "grade",
+            "score",
+            "exam",
+            "成绩",
+            "academic grade",
+            "exam score",
+            "examination score"
+          ],
+          "State Machines",
+          "原始成绩、审核、发布及更正分别描述，不能把暂存分数当正式结果。"
+        ],
+        [
+          "补考重修",
+          [
+            "补考",
+            "缓考",
+            "重修",
+            "retake",
+            "resit",
+            "补考成绩",
+            "重修成绩",
+            "retake grade",
+            "retake score",
+            "resit grade",
+            "resit score"
+          ],
+          "Core Workflows",
+          "资格、次数、成绩取舍和生效范围以项目决定为准，不能自行采用最高分或最新分。"
+        ],
+        [
+          "培训档案",
+          [
+            "培训记录",
+            "继续教育",
+            "training record",
+            "continuing education"
+          ],
+          "Content / Knowledge Assets",
+          "档案连接人员、课程、时间和有效学习证据，支持核对来源与留存。"
+        ],
+        [
+          "学生数据",
+          [
+            "未成年人",
+            "教育数据",
+            "学生隐私",
+            "education data"
+          ],
+          "Policy / Privacy Constraints",
+          "学生、教师、家长和管理人员的可见与可改范围分别核对，语言不决定适用法域。"
+        ]
+      ],
+      "domain_id": "education-it",
+      "knowledge_file": "references/domains/domain-education-it.md",
+      "name_en": "Education and training",
+      "summary_en": "Student status, courses, enrolment, learning evidence, examinations, retakes and training records. Check identity, term, grade authority and role boundaries; examples do not establish school or industry policy."
+    },
+    {
+      "name_zh": "协同办公与组织流程",
+      "aliases": [
+        "办公",
+        "协同办公",
+        "OA",
+        "办公自动化",
+        "组织管理",
+        "政务办公"
+      ],
+      "summary_zh": "覆盖组织权限、待办审批、公文、会议、任务督办、知识与电子签章。重点是工作对象、责任交接和正式结果，区分通知、审批、发文、签署及归档。",
+      "terms": [
+        [
+          "审批流转",
+          [
+            "审批",
+            "会签",
+            "或签",
+            "加签",
+            "退回",
+            "approval",
+            "workflow"
+          ],
+          "State Machines",
+          "节点处理者、允许动作、条件和流转结果需一致；通知到达不等于审批完成。"
+        ],
+        [
+          "组织权限",
+          [
+            "机构",
+            "部门",
+            "超管",
+            "超级管理员",
+            "数据范围",
+            "租户隔离",
+            "org permission",
+            "access control",
+            "administrator"
+          ],
+          "Policy / Privacy Constraints",
+          "分别说明组织边界、角色、数据范围与动作授权；权限名称不能代替具体授权条件，继承和例外以项目确认的规则为准。"
+        ],
+        [
+          "委托交办",
+          [
+            "临时授权",
+            "代办",
+            "转交",
+            "改派",
+            "delegation",
+            "assignment"
+          ],
+          "Role Path Patterns",
+          "委托对象、范围、生效和到期分别定义，旧待办和正在提交的动作需要重查资格。"
+        ],
+        [
+          "报销费用",
+          [
+            "报销",
+            "费用申请",
+            "差旅",
+            "reimbursement",
+            "expense"
+          ],
+          "Core Workflows",
+          "申请、审批、付款和入账分别有结果，失败重试须避免重复支付。"
+        ],
+        [
+          "公文管理",
+          [
+            "发文",
+            "收文",
+            "拟稿",
+            "签发",
+            "official document"
+          ],
+          "Content / Knowledge Assets",
+          "文稿、正式编号、签发和发布有不同权威；历史证据与当前修改分开。"
+        ],
+        [
+          "电子签章",
+          [
+            "用印",
+            "盖章",
+            "电子签名",
+            "e-signature",
+            "seal"
+          ],
+          "Policy / Privacy Constraints",
+          "印章或签名使用需明确操作者、对象及授权，不能把预览当正式签署。"
+        ],
+        [
+          "任务督办",
+          [
+            "待办",
+            "催办",
+            "办结",
+            "任务闭环",
+            "task",
+            "supervision"
+          ],
+          "Core Workflows",
+          "任务分派、处理、验收和关闭需要可见证据，超期或拒绝须能继续处理。"
+        ],
+        [
+          "档案归档",
+          [
+            "归档",
+            "档案",
+            "保管期限",
+            "archive",
+            "retention"
+          ],
+          "Content / Knowledge Assets",
+          "归档对象、正式版本、保管和更正需要可追溯，不能只用文件名判断权威。"
+        ]
+      ],
+      "domain_id": "oa",
+      "knowledge_file": "references/domains/domain-oa.md",
+      "name_en": "Office collaboration and organizational workflows",
+      "summary_en": "Organization permissions, approvals, documents, meetings, tasks, knowledge and electronic signatures. Make responsibility transfers and authoritative outcomes clear; notification, approval, issue, signature and archive are different actions."
+    },
+    {
+      "name_zh": "医院业务与医疗信息化",
+      "aliases": [
+        "医疗",
+        "医院",
+        "医疗信息化",
+        "院内系统",
+        "HIS",
+        "EMR"
+      ],
+      "summary_zh": "覆盖患者与就诊、医嘱、检验检查、病历、结算和医疗数据交换。重点是患者身份、临床责任、状态回执和敏感数据授权；软件流程不能替代医疗判断。",
+      "terms": [
+        [
+          "患者身份",
+          [
+            "病人",
+            "患者",
+            "就诊人",
+            "patient",
+            "patient identity"
+          ],
+          "Aggregates and Entities",
+          "区分自然人、就诊记录和住院记录，核对合并身份及重复登记后的数据归属。"
+        ],
+        [
+          "医嘱执行",
+          [
+            "医嘱",
+            "处方",
+            "开单",
+            "order",
+            "prescription"
+          ],
+          "State Machines",
+          "下达、审核、执行、撤销与回执状态分别判断，执行过的动作不能仅删除界面记录。"
+        ],
+        [
+          "检验检查",
+          [
+            "化验",
+            "检查报告",
+            "检验报告",
+            "laboratory",
+            "diagnostic"
+          ],
+          "Core Workflows",
+          "申请、采样、执行、结果审核与发布须保持对象一致，迟到或更正结果保留来源。"
+        ],
+        [
+          "电子病历",
+          [
+            "病历",
+            "病案",
+            "EMR",
+            "electronic medical record"
+          ],
+          "Content / Knowledge Assets",
+          "病历草稿、签署、归档及更正的责任和读取范围不同，不能把保存当签署。"
+        ],
+        [
+          "医疗互认",
+          [
+            "结果互认",
+            "检查互认",
+            "mutual recognition"
+          ],
+          "Policy / Privacy Constraints",
+          "区分可交换、可读取与可用于医疗决策；适用范围和来源有效性需要核实。"
+        ],
+        [
+          "医疗结算",
+          [
+            "医保",
+            "费用结算",
+            "退费",
+            "billing",
+            "settlement"
+          ],
+          "Core Workflows",
+          "收费、支付、退费与结算回执分别说明，失败及未知结果避免重复扣费。"
+        ],
+        [
+          "医疗隐私",
+          [
+            "健康数据",
+            "医疗数据",
+            "患者隐私",
+            "health data"
+          ],
+          "Policy / Privacy Constraints",
+          "读取、导出、共享和代理访问须继承患者数据权限及用途边界。"
+        ]
+      ],
+      "domain_id": "medical-hospital-it",
+      "knowledge_file": "references/domains/domain-medical-hospital-it.md",
+      "name_en": "Hospital workflows and health information systems",
+      "summary_en": "Patients, encounters, clinical orders, tests, records, settlement and data exchange. Check patient identity, clinical responsibility, receipts and sensitive-data permissions; software workflows do not replace clinical judgment."
+    },
+    {
+      "name_zh": "数据底座与数据产品",
+      "aliases": [
+        "数据",
+        "数据底座",
+        "数仓",
+        "数据中台",
+        "数据治理",
+        "数据产品",
+        "数据湖",
+        "BI",
+        "ChatBI"
+      ],
+      "summary_zh": "覆盖数据接入、清洗治理、数仓与检索、指标语义、报表分析、数据服务和智能问数。关注来源、粒度、维度、质量、权限与消费链路，避免列名相同就被当成同一业务含义。",
+      "terms": [
+        [
+          "指标口径",
+          [
+            "指标库",
+            "指标",
+            "指标值列",
+            "统计主体列",
+            "统计口径",
+            "单值",
+            "多值",
+            "metric",
+            "indicator",
+            "metric definition",
+            "indicator definition"
+          ],
+          "Metric / Indicator Governance",
+          "明确统计主体、粒度、指标值、维度、单位、周期和空零；配置保存后必须由实际查询或判定消费。"
+        ],
+        [
+          "维度建模",
+          [
+            "维度列",
+            "维度",
+            "事实表",
+            "聚合根",
+            "dimension",
+            "grain",
+            "entity"
+          ],
+          "Aggregates and Entities",
+          "标识列用于定位主体，维度用于分组和过滤；维度相同不代表同一事实粒度。"
+        ],
+        [
+          "数据接入",
+          [
+            "取数",
+            "SQL",
+            "数据源",
+            "批量扫描",
+            "刷新频率",
+            "ingestion",
+            "connector",
+            "batch"
+          ],
+          "Core Workflows",
+          "取数计划、增量或全量、失败重试和后续消费分开描述，查询失败不能当作零值。"
+        ],
+        [
+          "数据血缘",
+          [
+            "依赖分析",
+            "影响分析",
+            "血缘",
+            "lineage",
+            "data lineage"
+          ],
+          "AI Context Sources",
+          "来源、变换、指标和报表之间保留依赖，定义变化后核对实际消费者。"
+        ],
+        [
+          "数据质量",
+          [
+            "缺数",
+            "空值",
+            "缺失",
+            "异常值",
+            "时效",
+            "quality",
+            "freshness"
+          ],
+          "Metric / Indicator Governance",
+          "区分零、缺失、异常、陈旧和无权限；有效性与业务正常是两个判断。"
+        ],
+        [
+          "数据权限",
+          [
+            "行权限",
+            "列权限",
+            "数据范围",
+            "租户",
+            "机构隔离",
+            "row-level",
+            "column-level",
+            "RBAC",
+            "ABAC"
+          ],
+          "Policy / Privacy Constraints",
+          "数据范围在查询、导出、缓存和智能回答中保持一致，不能只在前端隐藏。"
+        ],
+        [
+          "智能问数",
+          [
+            "自然语言查数",
+            "问数",
+            "NL2SQL",
+            "ChatBI",
+            "Data Agent"
+          ],
+          "Core Workflows",
+          "问题先对应已确认的指标与维度，展示来源和口径，写入动作另校验权限和确认。"
+        ],
+        [
+          "历史快照",
+          [
+            "快照",
+            "历史取值",
+            "历史口径",
+            "snapshot",
+            "version"
+          ],
+          "State Machines",
+          "区分当前定义、当时证据与当前观察；历史是否重算和变更何时生效由项目决定。"
+        ],
+        [
+          "数据资产",
+          [
+            "数据目录",
+            "元数据",
+            "数据登记",
+            "catalog",
+            "metadata",
+            "registration"
+          ],
+          "Content / Knowledge Assets",
+          "登记和目录有助定位来源，不自动证明权属、质量或可用范围。"
+        ],
+        [
+          "高质量数据集",
+          [
+            "数据标注",
+            "训练集",
+            "测试集",
+            "dataset",
+            "annotation"
+          ],
+          "Content / Knowledge Assets",
+          "训练、验证、测试与反馈样本分开，记录来源、授权、标注和评估污染边界。"
+        ]
+      ],
+      "domain_id": "data-product",
+      "knowledge_file": "references/domains/domain-data-mart.md",
+      "name_en": "Data platforms and data products",
+      "summary_en": "Ingestion, transformation, governance, storage, retrieval, metrics, reporting and data services. Connect source, grain, dimensions, quality, permissions and consumption; identical column names do not establish identical business meaning."
+    },
+    {
+      "name_zh": "AI 应用与智能体",
+      "aliases": [
+        "AI应用",
+        "人工智能",
+        "智能体",
+        "Agent",
+        "大模型应用",
+        "AI原生",
+        "智能助手"
+      ],
+      "summary_zh": "覆盖智能体任务、上下文检索、工具调用、人工确认、结果交付与评估。重点区分模型建议、工具已执行和业务已成功，保留权限、失败恢复、证据与成本边界。",
+      "terms": [
+        [
+          "智能体任务",
+          [
+            "Agent任务",
+            "自主执行",
+            "任务编排",
+            "agent",
+            "task"
+          ],
+          "Core Workflows",
+          "从目标到计划、工具执行和交付核验，分别描述暂停、取消、失败及接管。"
+        ],
+        [
+          "工具调用",
+          [
+            "function calling",
+            "tool calling",
+            "tool call"
+          ],
+          "Core Workflows",
+          "工具调用说明输入、执行、结果和失败恢复；调用返回不等于业务已成功，调用前仍核对动作权限。"
+        ],
+        [
+          "检索增强",
+          [
+            "RAG",
+            "知识库检索",
+            "知识问答",
+            "retrieval",
+            "grounding"
+          ],
+          "AI Context Sources",
+          "检索结果带来源、适用范围与时效，命中或相似度不自动证明答案正确。"
+        ],
+        [
+          "人工确认",
+          [
+            "人工审批",
+            "人在回路",
+            "human confirmation",
+            "human gate"
+          ],
+          "Core Workflows",
+          "需要人工确认的动作在执行前保留明确对象和副作用；确认不是执行成功回执。"
+        ],
+        [
+          "模型评估",
+          [
+            "评测",
+            "幻觉",
+            "准确率",
+            "置信度",
+            "evaluation",
+            "confidence"
+          ],
+          "Metric / Indicator Governance",
+          "评测定义样本、判据、分母和失败类型，不把模型自报信心当校准概率。"
+        ],
+        [
+          "异步恢复",
+          [
+            "结果未知",
+            "超时",
+            "重试",
+            "幂等",
+            "timeout",
+            "retry",
+            "idempotency"
+          ],
+          "State Machines",
+          "区分未提交、已发出、明确失败、未知和成功；恢复先查原请求，防重复副作用。"
+        ],
+        [
+          "提示注入",
+          [
+            "越权指令",
+            "prompt injection",
+            "untrusted content"
+          ],
+          "Policy / Privacy Constraints",
+          "外部材料作为数据，不能越过用户授权改变目标、泄露数据或触发写操作。"
+        ],
+        [
+          "会话记忆",
+          [
+            "记忆",
+            "长期记忆",
+            "短期记忆",
+            "conversation memory",
+            "memory"
+          ],
+          "AI Context Sources",
+          "区分会话上下文与持久记忆，明确用户可控制的保留、删除和导出；记忆内容不能扩大工具或数据权限。"
+        ],
+        [
+          "工具授权",
+          [
+            "工具权限",
+            "连接器",
+            "tool authorization"
+          ],
+          "Policy / Privacy Constraints",
+          "模型可见工具不等于获准使用，调用应继承操作者与业务对象权限。"
+        ]
+      ],
+      "domain_id": "ai-native",
+      "knowledge_file": "references/domains/domain-ai-native.md",
+      "name_en": "AI applications and agents",
+      "summary_en": "Agent tasks, context retrieval, tool invocation, human confirmation, delivery and evaluation. Distinguish suggestions, tool execution and business success; retain permissions, recovery, evidence, memory controls and cost boundaries."
+    },
+    {
+      "name_zh": "内容生产与知识管理",
+      "aliases": [
+        "媒体",
+        "内容管理",
+        "知识管理",
+        "知识库",
+        "视频平台",
+        "内容生产",
+        "媒体知识"
+      ],
+      "summary_zh": "覆盖文档、音视频、转写、知识条目、审校发布和引用检索。重点保持内容、版本、权限、来源和时间码关系，区分草稿、已发布与已撤回。",
+      "terms": [
+        [
+          "内容发布",
+          [
+            "内容审批",
+            "审校",
+            "上架",
+            "下架",
+            "发布",
+            "publishing",
+            "publication"
+          ],
+          "State Machines",
+          "草稿、审校、发布、更正和撤回分别定义，历史引用与已下载内容需说明影响。"
+        ],
+        [
+          "音视频转写",
+          [
+            "字幕",
+            "语音转文字",
+            "转录",
+            "transcription",
+            "transcript"
+          ],
+          "Core Workflows",
+          "媒体原件、分段文本、说话人和校对结果关联，失败重试不能复制整份资产。"
+        ],
+        [
+          "时间码定位",
+          [
+            "时间戳",
+            "片段定位",
+            "时间码",
+            "timecode",
+            "timestamp"
+          ],
+          "Vocabulary",
+          "引用须能定位原始媒体时间段，剪辑或更正后检查偏移和失效引用。"
+        ],
+        [
+          "知识条目",
+          [
+            "知识库",
+            "知识卡片",
+            "词条",
+            "knowledge item",
+            "knowledge base"
+          ],
+          "Content / Knowledge Assets",
+          "条目有来源、维护者、适用范围和有效状态，摘要不能替代权威原文。"
+        ],
+        [
+          "版权授权",
+          [
+            "版权",
+            "使用许可",
+            "肖像权",
+            "copyright",
+            "license",
+            "rights"
+          ],
+          "Policy / Privacy Constraints",
+          "采集、加工、发布和再利用分别核对授权范围，不因可访问而视为可传播。"
+        ],
+        [
+          "引用溯源",
+          [
+            "引用",
+            "来源追溯",
+            "citation",
+            "provenance"
+          ],
+          "AI Context Sources",
+          "回答和摘要保留可定位依据，撤回或权限变化后要检查下游可见性。"
+        ],
+        [
+          "内容检索",
+          [
+            "全文检索",
+            "语义检索",
+            "搜索召回",
+            "别名",
+            "retrieval",
+            "search"
+          ],
+          "Core Workflows",
+          "分开检索相关性与事实正确性；零命中、同名和歧义词应有可解释退路。"
+        ],
+        [
+          "视频检索",
+          [
+            "video retrieval",
+            "video search",
+            "moment retrieval"
+          ],
+          "Core Workflows",
+          "查询需找到可播放的对应片段，并保留来源、时间码及访问权限；整段视频命中不能替代片段定位的验收。"
+        ]
+      ],
+      "domain_id": "media-knowledge",
+      "knowledge_file": "references/domains/domain-media-knowledge.md",
+      "name_en": "Media and knowledge management",
+      "summary_en": "Documents, audio, video, transcription, knowledge items, review, publication and retrieval. Preserve relationships among content, versions, permissions, sources and timecodes; drafts, published items and withdrawals differ."
+    }
+  ]
+}

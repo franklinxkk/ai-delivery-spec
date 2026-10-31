@@ -25,7 +25,7 @@ def load_declarations(raw: str) -> dict:
         raise ValueError("Declaration root must be an object")
     return value
 
-VERSION = "5.5.5"
+VERSION = "5.5.6"
 MODES = {"direct", "card", "prd"}
 RISK_SIGNALS = {
     "state": ("states", "cross_module_state", "approval", "workflow"),
@@ -50,6 +50,62 @@ CATEGORIES = {
     "permission_boundary": {"permission", "privacy"},
     "change_propagation": {"migration", "compatibility"},
 }
+# These prompts explain a declared review gap. They neither infer a new policy
+# nor certify that the named reviewer/source is authentic.
+SEMANTIC_REVIEW_GUIDANCE = {
+    "state_authority": ("状态与数据权威", "核对每条转换的前置条件、操作者、结果状态和写入方；用被拒绝的转换核验边界。", "State and data authority", "Check each transition's precondition, actor, resulting state and writer; use a refused transition to distinguish the boundary."),
+    "metric_definition": ("指标口径", "核对统计对象、分母、去重和时间窗口；用一个已知数值例及边界反例复算结果。", "Metric definition", "Check population, denominator, deduplication and time window; recalculate a known numerical example and a distinguishing boundary case."),
+    "recovery": ("失败与恢复", "核对失败、结果未知、重试与重复提交是否保留同一业务结果；沿提交及重新打开入口验证。", "Failure and recovery", "Check failure, unknown results, retry and duplicate submissions against the intended business result; exercise submission and reopening paths."),
+    "null_stale": ("缺失与失效数据", "核对缺失、零、失效数据分别如何参与判定与展示；按原始约定核验反例，不自行补过期政策。", "Missing and invalid data", "Check how missing, zero and invalid data affect decisions and display; verify counterexamples against the source without inventing an expiry policy."),
+    "permission_boundary": ("权限边界", "核对操作者、对象和数据范围；从直接入口及角色切换验证拒绝结果，不能只检查按钮隐藏。", "Permission boundary", "Check actor, object and data scope; exercise direct entry and role changes, rather than relying on hidden controls."),
+    "change_propagation": ("变更影响", "核对定义变更的生效时点、历史对象及下游消费者；验证受影响路径和一个应保持不变的路径。", "Change propagation", "Check effective time, historical objects and downstream consumers; verify an affected path and one path that should remain unchanged."),
+}
+
+
+def semantic_review_guidance(category: str, language: str = "zh-CN") -> tuple[str, str]:
+    item = SEMANTIC_REVIEW_GUIDANCE[category]
+    return item[2:] if language.casefold().startswith("en") else item[:2]
+
+
+def semantic_review_location(body: str, category: str, scope_refs: list[str]) -> tuple[str, str]:
+    """Locate real definitions/candidate prose, not fabricated rule IDs.
+
+    Declaration scopes remain scopes when the body has no matching definition.
+    Without IDs, lexical candidate locations help the reviewer find the prose;
+    they are explicitly not claims of ownership or semantic completeness.
+    """
+    rows, headings = [], []
+    for number, line in enumerate(prose_lines(body), 1):
+        match = re.match(r"^(#{1,6})\s+(.+?)\s*$", line)
+        if match:
+            level = len(match[1])
+            while headings and headings[-1][0] >= level:
+                headings.pop()
+            headings.append((level, match[2]))
+        rows.append((number, line, " / ".join(title for _, title in headings)))
+    if scope_refs:
+        positions = []
+        for ref in scope_refs:
+            # Heading or table definition only: a prose "see REQ-*" is not a definition.
+            row = next((r for r in rows if re.match(r"^\s*(?:#{1,6}\s|\|)", r[1]) and re.search(r"(?<![A-Z0-9_-])" + re.escape(ref) + r"(?![A-Z0-9_-])", r[1])), None)
+            positions.append(f"{ref} @line {row[0]} [{row[2]}]" if row else ref)
+        absent = [ref for ref, location in zip(scope_refs, positions) if "@line" not in location]
+        note_zh = "；正文未定位：" + ", ".join(absent) if absent else ""
+        note_en = "; not located in body: " + ", ".join(absent) if absent else ""
+        return "; ".join(positions) + note_zh, "; ".join(positions) + note_en
+    patterns = {
+        "state_authority": r"状态|转换|写入方|权威源|\bstate|transition|source of truth",
+        "metric_definition": r"指标|分母|去重|占比|统计|metric|denominator|deduplicat|population",
+        "recovery": r"重试|恢复|结果未知|提交|失败|retry|recover|unknown result|submit|failure",
+        "null_stale": r"缺失|空值|失效|过期|missing|null|stale|invalid data",
+        "permission_boundary": r"权限|越权|角色|数据范围|permission|authoriz|role|data scope",
+        "change_propagation": r"变更|历史|下游|生效|change|historical|downstream|effective",
+    }
+    candidates = [f"@line {n} [{heading}]" if heading else f"@line {n}" for n, line, heading in rows if re.search(patterns[category], line, re.I)]
+    if candidates:
+        shown = "; ".join(candidates[:6])
+        return "候选正文位置（归属待核对）：" + shown, "Candidate prose locations (ownership needs review): " + shown
+    return "声明中启用了该复核类别，但正文未定位；先确认它适用的模块或范围", "This category is declared, but its body location is unknown; first identify the applicable module or scope"
 STAGES = {s: n for n, s in enumerate(("frame", "explore", "intake", "clarify", "specify", "prototype", "review", "baseline", "implementation", "acceptance", "closed"))}
 STAGES["inventory"] = -1
 
@@ -167,7 +223,7 @@ def route(doc: dict[str, Any], legacy_level: str = "auto", *, body: str = "") ->
     if doc.get("change") or doc.get("seed_refs"):
         categories.add("change_propagation")
     declared_risks = sorted(risks)
-    content = inspect_content(body or intake_text(doc))
+    content = inspect_content(body or intake_text(doc), intake_questions=not bool(body))
     risks.update(content["risk_facets"])
     return {
         "schema_version": VERSION, "artifact_mode": mode, "risk_facets": sorted(risks),
@@ -179,6 +235,37 @@ def route(doc: dict[str, Any], legacy_level: str = "auto", *, body: str = "") ->
         "evidence_policy": "per_claim_scope_version", "authority": "recommendation_only",
         "not_proven": ["natural-language risk completeness", "business authorization", "implementation", "customer acceptance"],
     }
+
+
+def language_drift(doc: dict[str, Any], body: str) -> tuple[str, str] | None:
+    """Flag only obvious declared main-language mismatch, not language quality.
+
+    Technical names, quoted examples and code are not prose-language evidence.
+    A declared bilingual document intentionally has no single-language target.
+    """
+    declared = str(doc.get("document_language", "")).casefold()
+    if doc.get("bilingual") is True or isinstance(doc.get("document_languages"), list) and len(doc["document_languages"]) > 1:
+        return None
+    if declared not in {"zh", "zh-cn", "zh-tw", "en", "en-us", "en-gb"}:
+        return None
+    samples: list[tuple[int, str]] = []
+    for number, line in enumerate(prose_lines(body), 1):
+        if line.lstrip().startswith(("#", ">")):
+            continue
+        line = re.sub(r"`[^`]*`|https?://\S+|\b[A-Z][A-Z0-9]+(?:[-_][A-Z0-9]+)+\b", "", line)
+        line = re.sub(r"\[[^\]]*\]\([^)]*\)", lambda m: m[0].split("](")[0][1:], line)
+        if line.strip():
+            samples.append((number, line))
+    prose = "\n".join(line for _, line in samples)
+    chinese = len(re.findall(r"[\u4e00-\u9fff]", prose))
+    words = re.findall(r"\b[a-zA-Z][a-zA-Z']+\b", prose)
+    # Conservative mismatch evidence, not a target percentage or a scoring rule.
+    mismatch = (declared.startswith("zh") and chinese < 12 and len(words) >= 24
+                and len(re.findall(r"[.!?](?:\s|$)", prose)) >= 2)
+    mismatch |= declared.startswith("en") and chinese >= 40 and len(words) < 12
+    if not mismatch:
+        return None
+    return declared, "@line " + str(samples[0][0])
 
 
 def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope: tuple[str, ...] = (), legacy_level: str = "auto") -> tuple[list[dict], dict]:
@@ -202,6 +289,16 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
         add("BLOCK", "SPEC-STAGE", "Unknown target stage", str(stage))
     if not body.strip():
         add("BLOCK", "SPEC-EMPTY", "Requirement body is empty")
+    else:
+        visible = re.sub(r"<!--.*?-->", "", body, flags=re.S)
+        visible = re.sub(r"(?m)^\s*#{1,6}\s+[^\n]*$|^\s*[-=*_]{3,}\s*$", "", visible)
+        if not visible.strip():
+            add("BLOCK", "SPEC-EMPTY", "正文只有标题或空壳标记，没有可供实现和验收的需求。请补本次实际行为和可观察结果；不要求固定章节。", "body",
+                "The body contains only headings or empty markup. Add the actual behavior and observable result; fixed sections are not required.")
+    drift = language_drift(doc, body)
+    if drift:
+        add("GAP", "PRD-LANGUAGE-DRIFT", f"声明主语言为 {drift[0]}，可读取正文却明显使用另一语言。请核对正文或语言声明；刻意双语可声明 bilingual: true。代码、ID 和专名无需翻译。", drift[1],
+            f"Declared main language is {drift[0]}, but readable prose clearly uses another language. Review the prose or declaration; intentional bilingual documents may declare bilingual: true. Keep code, IDs and proper names unchanged.")
     if doc.get("status") in ("baseline", "baselined", "approved") and re.search(r"\bdraft\b", str(doc.get("baseline_version", "")), re.I):
         add("BLOCK", "PRD-STATUS-CONTRADICTION", "Baseline status contradicts draft version")
     for slot, pattern in {
@@ -336,7 +433,8 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
         refs = unknown.get("affected_refs", unknown.get("scope_refs", []))
         affected = ", ".join(refs) if string_list(refs, nonempty=True) else "scope not declared"
         add("BLOCK" if reached else "GAP", "SPEC-OPEN-DECISION",
-            f"Open decision; affected: {affected}; blocks from: {', '.join(stops) or 'not declared'}; current stage: {stage}. Resolve the source or authorized decision before implementing the dependent behavior.", identity)
+            f"{identity} 仍为 {status}；影响：{affected}；阻断起点：{', '.join(stops)}；当前阶段：{stage}。整体签认或验收记录不能代替该项决定。若实际已解决，补真实决定/来源引用并关闭此项；否则保留 open，明确本轮不受影响的范围或有授权的有限例外，不能自动放行依赖行为。", identity,
+            f"Open decision {identity} is still {status}; affected: {affected}; blocks from: {', '.join(stops)}; current stage: {stage}. A global signoff or acceptance record cannot resolve this item. If actually resolved, record its real decision/source and close it; otherwise retain it and identify unaffected scope or an authorized bounded exception. Do not automatically release dependent behavior.")
     resolved["unknown_summary"] = {
         "schema_version": 1, "stage": stage, "scope_refs": list(scope or []),
         "counts": {key: len(ids) for key, ids in buckets.items()},
@@ -397,6 +495,15 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
     for category in resolved["semantic_review_categories"]:
         missing = set(expected_scope) - covered.get(category, set())
         if not expected_scope or missing:
-            add("GAP", "SPEC-SEMANTIC-NOT-PROVEN", "Scoped semantic review is not evidenced: " + (", ".join(sorted(missing)) or "declare the evaluated scope"), category)
+            location_zh, location_en = semantic_review_location(body, category, sorted(missing))
+            title_zh, action_zh = semantic_review_guidance(category)
+            title_en, action_en = semantic_review_guidance(category, "en-US")
+            sources = doc.get("source_refs", [])
+            source_zh = "文档声明的来源（须核对本项适用性）：" + ", ".join(sources) if string_list(sources, nonempty=True) else "尚未定位本项原始来源，请回查已有约定"
+            source_en = "Document-declared sources (check applicability to this item): " + ", ".join(sources) if string_list(sources, nonempty=True) else "No source is located for this item; consult the existing agreement"
+            add("GAP", "SPEC-SEMANTIC-NOT-PROVEN",
+                f"{title_zh}尚无当前范围的复核证据。{location_zh}。{source_zh}。下一步：{action_zh}在已有模块或评阅记录中注明真实结论、所核对的来源及当前基线；未复核保持缺口，不能补写 pass。",
+                category + ": " + location_zh,
+                f"{title_en} lacks review evidence for the current scope. {location_en}. {source_en}. Next: {action_en} Record the actual result, checked source and current baseline in the existing module or review record; keep an unreviewed gap rather than fabricating a pass.")
     resolved["semantic_coverage"] = {"required": resolved["semantic_review_categories"], "expected_scope": expected_scope, "declared_covered": {k: sorted(v) for k, v in covered.items()}, "proof": "declaration_checks_only; references and reviewer claims are not independently authenticated"}
     return findings, resolved

@@ -1,6 +1,9 @@
 ---
 artifact: problem_brief
+artifact_role: main
 stage: frame
+applicable_stages: [frame]
+applies_when: 目标或问题尚不清楚，先核对事实、受影响人及结果。
 schema_version: 5.4.0
 version: "0.1"
 status: draft

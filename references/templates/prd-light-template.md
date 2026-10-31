@@ -1,4 +1,9 @@
 ---
+artifact: requirement_card
+artifact_role: main
+stage: specify
+applicable_stages: [specify]
+applies_when: 边界明确的小需求，以行为和验收就地说明。
 artifact_mode: card
 baseline_version: "0.1-draft"
 status: draft
