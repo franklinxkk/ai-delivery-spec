@@ -2,7 +2,7 @@
 
 # AI Delivery Spec
 
-**AI 写代码越来越快，需求里的空白也会越来越快地变成代码。**
+**这个需求值得做吗？要做成什么样？怎样判断做对了？**
 
 只有一句想法，不知道该问什么；PRD 写了几十页，开发仍在猜；需求改了一轮，文档、原型和 AI 实现又各说各话。
 
@@ -123,7 +123,7 @@ npx skills add franklinxkk/ai-delivery-spec
 <details>
 <summary><strong>English — get started</strong></summary>
 
-**AI writes code faster. Gaps in requirements become code faster, too.**
+**Is this worth building? What should it do? How will we know it is right?**
 
 **Help people and AI build the right product together.** AI Delivery Spec connects product decisions with requirements and verification: assess what is worth solving, compare approaches, define the expected behavior, and check actual results against the original intent. People retain the goals, constraints and key decisions. Start with an idea, existing artifacts or a change request; revisit affected decisions when feedback arrives. Small changes stay small, and approved decisions carry forward.
 
