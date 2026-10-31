@@ -1442,7 +1442,7 @@ sources:
     product_mapping: upload, transcription, OCR, face/speaker/topic insights, time-coded search and review
     evidence_role: official vendor product-pattern evidence
     claim_limit: Documentation proves described product behavior only; it does not prove project accuracy, compliance, rights, cost or superiority.
-    last_verified_at: 2026-09-29
+    last_verified_at: 2026-10-31
     refresh_days: 30
   - id: KS-MEDIA-NVIDIA-VSS-2026
     domains: [media-knowledge, ai-native]
@@ -1450,14 +1450,14 @@ sources:
     issuer: NVIDIA
     authority_type: vendor_product_docs
     effect_class: product_pattern
-    url: https://docs.nvidia.com/vss/3.0.0/overview/latest/
+    url: https://docs.nvidia.com/vss/
     status: current_vendor_docs_as_verified
     jurisdiction: global_product
     applicability: multimodal video ingestion, search, summarization, question answering and alert patterns
     product_mapping: stream/file ingestion, embeddings, retrieval, summaries, prompts, alerts and deployment components
     evidence_role: official vendor architecture and product-pattern evidence
     claim_limit: Vendor architecture is an option, not a universal design; it does not prove gold-query quality, lawful surveillance use, latency, cost or production fitness.
-    last_verified_at: 2026-09-29
+    last_verified_at: 2026-10-31
     refresh_days: 30
   - id: KS-MEDIA-TWELVELABS-SEARCH-2026
     domains: [media-knowledge, ai-native]
@@ -1472,7 +1472,7 @@ sources:
     product_mapping: index, natural-language or image query, multimodal moment result, relevance ranking and time range
     evidence_role: official vendor API and product-pattern evidence
     claim_limit: The guide demonstrates vendor capabilities; project recall, precision, localization, permissions and business value require independent evaluation.
-    last_verified_at: 2026-09-29
+    last_verified_at: 2026-10-31
     refresh_days: 30
 
   # 2026-08-29 legacy-pack freshness patch
