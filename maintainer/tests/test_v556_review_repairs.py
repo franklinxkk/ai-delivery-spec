@@ -15,7 +15,7 @@ def test_examples_scale_without_accepting_invalid_example(tmp_path):
     init_project(tmp_path);d=json.loads((tmp_path/'review.json').read_text(encoding='utf8'))
     row=d['acceptance_examples'][0]
     d['acceptance_examples']=[dict(row,example_ref=f'TEST-X-{i}') for i in range(42)]
-    validator=Draft202012Validator(json.loads((ROOT/'schemas/review-workspace.schema.json').read_text()))
+    validator=Draft202012Validator(json.loads((ROOT/'schemas/review-workspace.schema.json').read_text(encoding='utf-8')))
     assert not list(validator.iter_errors(d))
     d['acceptance_examples'][30].pop('expected_domain_result')
     assert any(list(e.path)[:2]==['acceptance_examples',30] for e in validator.iter_errors(d))

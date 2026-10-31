@@ -20,10 +20,10 @@ def test_contextual_initializer_changes_actual_layout(tmp_path):
  raw=(tmp_path/'prototype.html').read_text(encoding='utf8')
  assert 'data-review-tab-target=' not in raw and 'contextual-diagram-viewer' in raw
  assert 'body class="ads-collapsed"' in raw
- assert json.loads((tmp_path/'review.json').read_text())['workspace']['presentation_mode']=='contextual'
+ assert json.loads((tmp_path/'review.json').read_text(encoding='utf-8'))['workspace']['presentation_mode']=='contextual'
 
 def test_metadata_alone_cannot_convert_tabs(tmp_path):
- init_project(tmp_path);p=tmp_path/'review.json';d=json.loads(p.read_text());d['workspace']['presentation_mode']='contextual';p.write_text(json.dumps(d))
+ init_project(tmp_path);p=tmp_path/'review.json';d=json.loads(p.read_text(encoding='utf-8'));d['workspace']['presentation_mode']='contextual';p.write_text(json.dumps(d),encoding='utf-8')
  with pytest.raises(ValueError,match='contextual'):build_project(tmp_path)
 
 def fixture(tmp_path):

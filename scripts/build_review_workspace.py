@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -144,6 +145,9 @@ def build_project(directory: Path, output: Path | None = None, source_document: 
 
 
 def main() -> int:
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, 'reconfigure'):
+            stream.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description=__doc__)
     subs = parser.add_subparsers(dest='command', required=True)
     init = subs.add_parser('init'); init.add_argument('--output', type=Path, required=True); init.add_argument('--review-level', choices=['R0', 'R1'], default='R1')

@@ -1,6 +1,7 @@
 """The project-owned path must work without initializing the repair example."""
 from pathlib import Path
 import json
+import os
 import subprocess
 import sys
 
@@ -12,7 +13,8 @@ SCRIPT = ROOT / 'scripts/build_review_workspace.py'
 
 def run(*args):
     return subprocess.run([sys.executable, str(SCRIPT), *map(str, args)],
-                          capture_output=True, text=True, encoding='utf-8')
+                          capture_output=True, text=True, encoding='utf-8',
+                          env={**os.environ, 'PYTHONUTF8': '0', 'PYTHONIOENCODING': 'cp1252'})
 
 
 def inputs(tmp_path, notes='## Book a room\n<!-- context: #booking -->\nUp to **8** people.\n'):
@@ -26,6 +28,7 @@ def inputs(tmp_path, notes='## Book a room\n<!-- context: #booking -->\nUp to **
 @pytest.mark.parametrize('language', ['zh', 'en'])
 def test_project_cli_preserves_original_and_reports_actual_delivery(tmp_path, language):
     product, notes = inputs(tmp_path)
+    product = product.rename(tmp_path / '预约.html')
     original = product.read_bytes()
     result = run('attach', '--prototype', product, '--notes', notes, '--language', language)
     assert result.returncode == 0, result.stdout + result.stderr
