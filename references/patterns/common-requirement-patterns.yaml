@@ -1,6 +1,15 @@
 schema_version: 5.1.0
 library_id: PATLIB-COMMON-001
 patterns:
+  - id: PAT-IDENTITY-SESSION-001
+    name: 身份认证与会话
+    aliases: [统一身份认证, 单点登录, 登录会话, 身份治理, 登录失败, 异地登录, 多端在线, IAM, SSO, CAS, MFA, authentication, single sign-on, login session, concurrent sessions]
+    applies_when: 项目涉及身份认证、会话或接入变化；以下只提供决策提示，已有答案直接继承，不代表固定安全策略或法规要求
+    required_questions: [连续登录失败是否锁定及阈值时长由谁决定, 新设备或异地登录是否需要二次验证及适用范围, 同一账号多端会话是否共存及失效范围, 单点登出传播失败如何确认并恢复, 无标准客户端的历史系统采用何种接入或排除边界]
+    behavior_contract: [认证身份的权威来源, 允许与拒绝的项目条件, 会话生效与失效对象范围, 失败后的可见结果及原请求处理]
+    exception_contract: [仅部分系统登出成功, 身份提供方不可用, 账号停用后仍有旧会话, 重复回调, 身份切换时草稿和在途请求]
+    acceptance_blueprints: [已确认策略下正常登录, 被禁止的身份或会话被拒绝, 仅目标会话失效, 重试不重复执行原业务, 未决策略不被写成默认]
+    anti_patterns: [照抄锁定次数或MFA规则, 见登录就强制补整套安全问卷, 将标准或厂商建议冒充项目授权, 用页面退出代替已确认的会话失效]
   - id: PAT-APPROVAL-001
     name: 审批流
     applies_when: 业务对象必须经一个或多个有权角色确认后生效

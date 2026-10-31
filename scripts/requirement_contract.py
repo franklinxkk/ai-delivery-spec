@@ -223,7 +223,7 @@ def route(doc: dict[str, Any], legacy_level: str = "auto", *, body: str = "") ->
     if doc.get("change") or doc.get("seed_refs"):
         categories.add("change_propagation")
     declared_risks = sorted(risks)
-    content = inspect_content(body or intake_text(doc))
+    content = inspect_content(body or intake_text(doc), intake_questions=not bool(body))
     risks.update(content["risk_facets"])
     return {
         "schema_version": VERSION, "artifact_mode": mode, "risk_facets": sorted(risks),

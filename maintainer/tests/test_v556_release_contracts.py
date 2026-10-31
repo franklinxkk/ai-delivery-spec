@@ -171,7 +171,8 @@ def test_legacy_entry_defaults_to_current_contract_and_requires_opt_in(tmp_path)
     entry = ROOT / "scripts/validators/validate_coding_agent_contract.py"
     modern = command(entry, path, "--level", "L2")
     assert modern.returncode == 0, modern.stdout + modern.stderr
-    assert "current scoped PRD contract" in modern.stdout
+    assert "scoped PRD static checks" in modern.stdout
+    assert "does not prove business correctness" in modern.stdout
     legacy = command(entry, path, "--legacy")
     assert legacy.returncode == 1 and "need at least 14" in legacy.stdout
     compatible = command(entry, ROOT / "maintainer/tests/fixtures/coding-l2.md", "--legacy")

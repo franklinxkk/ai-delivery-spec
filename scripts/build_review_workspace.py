@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FILES = ('layout.html', 'style.css', 'runtime.js', 'review.json', 'requirement.md')
 GUIDE = '''# 可运行评审起点 / Runnable review starter
 
-这是设备维修教学样例，不是你的项目，也不是空白项目已通过验收。先读 requirement.md 并替换业务，不继承样例权限、状态、验收或来源。
+这是设备维修教学样例，不是你的项目，也不是空白项目已通过验收。先读 requirement.md 并替换业务，不继承样例权限、状态、验收或来源。业务规格只写业务；评审控件、模拟身份与测试工具留在本说明及原型的样例说明中。
 
 编辑顺序：
 1. requirement.md：先确定当前模块的任务、入口、字段规则、动作结果、拒绝/恢复和可判验收。内容必须来自本项目授权来源。
@@ -69,10 +69,10 @@ def init_project(target: Path, review_level: str = "R1", presentation_mode: str 
         layout = re.sub(r'<div\b[^>]*data-review-progress[^>]*>.*?</div>', '', layout, flags=re.S)
         layout = re.sub(r'<fieldset id="record-editor">.*?</fieldset>|<div data-review-records>.*?</div>|<textarea id="review-json"[^>]*>.*?</textarea>', '', layout, flags=re.S)
         values['layout.html'] = layout
-        values['requirement.md'] = values['requirement.md'].replace('或登记评审结论', '').replace(
-            '需求评审结论和业务完成记录是两个对象。前者按需求基线、上下文、评审点保存，可导入导出；不同基线不得复用。仅浏览评审点不计确认。刷新后工单数据与评审记录分别恢复；本地存储失败必须提示，不能宣称已经保存。',
-            '本次不登记或分享需求评审结论，不统计确认进度。业务工单及审计仍使用原有本地模拟存储；刷新后恢复业务数据，本地存储失败必须提示，不能宣称已经保存。')
-
+        # Review-level features belong to the tool, never to the business PRD.
+        values['layout.html'] = re.sub(r'<p data-review-tool-record-help>.*?</p>',
+            '<p data-review-tool-record-help>R0 仅提供就近阅读，不登记、导入导出或统计评审结论；工单本地模拟保持原行为。</p>',
+            values['layout.html'], flags=re.S)
         runtime = values['runtime.js']
         runtime = '\n'.join(line for line in runtime.splitlines() if not any(term in line for term in (
             "q('[data-review-progress]')", "q('[data-review-records]')", "'UIACT-REVIEW-SHARE':", "'UIACT-REVIEW-RECORD':", "'UIACT-REVIEW-EXPORT':", "'UIACT-REVIEW-IMPORT':")))

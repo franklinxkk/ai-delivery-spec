@@ -1006,6 +1006,30 @@ def _unreachable_hidden_surfaces(tag_source: str, scripts: str) -> list[str]:
     return sorted(set(unreachable))
 
 
+def consequential_action_candidate(ref: str, description: str) -> bool:
+    """Bounded clues about object and effect, not a universal action-name list.
+
+    A normal logout, UI toggle or unqualified export stays advisory. An
+    administrator terminating another session, rotating credentials or exporting
+    sensitive/bulk records needs an explicit review mapping, regardless of ID.
+    """
+    text = re.sub(r'[-_]', ' ', ref + ' ' + description)
+    if re.search(r'仅预览|^(?:查看|阅读).{0,16}说明$|^(?:preview|help|documentation)\b', description.strip(), re.I):
+        return False
+    return any(re.search(pattern, text, re.I) for pattern in (
+        r'(?:密钥|凭据|令牌).{0,15}(?:轮换|吊销|重置)|(?:轮换|吊销|重置).{0,15}(?:密钥|凭据|令牌)',
+        r'(?=.*\b(?:rotate|revoke|reset)\b)(?=.*\b(?:key|keys|credential|credentials|token|tokens)\b)',
+        r'(?:强制|踢出).{0,18}(?:登出|退出|会话)|管理员.{0,12}(?:其他|全部|所选|指定).{0,12}(?:会话|登出|退出)',
+        r'\b(?:force|forced|kick)\b.{0,35}\b(?:logout|log out|session|sessions)\b|\badmin\b.{0,25}\b(?:other|all|selected)\b.{0,25}\bsessions?\b',
+        r'(?:停用|禁用|启用|解锁|冻结|解冻).{0,12}(?:用户|账号|账户)|(?:用户|账号|账户).{0,12}(?:停用|禁用|启用|解锁|冻结|解冻)',
+        r'(?=.*\b(?:disable|enable|unlock|freeze|unfreeze)\b)(?=.*\b(?:account|accounts|user|users)\b)',
+        r'(?:批量|全部|敏感|客户|个人).{0,18}导出|导出.{0,18}(?:全部|批量|敏感|客户|个人)',
+        r'\bexport\b.{0,35}\b(?:all|bulk|sensitive|customer|customers|personal)\b',
+        r'\b(?:all|bulk|sensitive|customer|customers|personal)\b.{0,35}\bexport\b',
+        r'\bpurge\b.{0,25}\b(?:data|records|accounts)\b|清空.{0,12}(?:业务数据|全部记录)',
+    ))
+
+
 class _ReviewFinalParser(HTMLParser):
     """Collect the context-scoped 5.4.7-5.4.9 review projection."""
 
@@ -1051,6 +1075,8 @@ class _ReviewFinalParser(HTMLParser):
         self.product_overlays: list[dict[str, str]] = []
         self.targets: dict[str, Counter[str]] = defaultdict(Counter)
         self.visible_targets: dict[str, Counter[str]] = defaultdict(Counter)
+        self.target_labels: dict[tuple[str, str], str] = defaultdict(str)
+        self.active_target_labels: list[dict] = []
         self.unbound_metric_like: Counter[str] = Counter()
         self.content_owners: list[tuple[str, str]] = []
         self.workspace_roots: list[dict[str, str]] = []
@@ -1260,6 +1286,10 @@ class _ReviewFinalParser(HTMLParser):
         if active_context:
             for target_ref in self._target_refs(attr_map):
                 self.targets[active_context][target_ref] += 1
+                if target_ref.startswith('ACT-'):
+                    key = (active_context, target_ref)
+                    self.target_labels[key] += ' ' + ' '.join(attr_map.get(a, '') for a in ('aria-label', 'title', 'value'))
+                    self.active_target_labels.append({'depth': depth, 'key': key})
                 if not hidden:
                     self.visible_targets[active_context][target_ref] += 1
             class_tokens = {item.casefold() for item in attr_map.get("class", "").split()}
@@ -1279,6 +1309,9 @@ class _ReviewFinalParser(HTMLParser):
             return
         text = data.strip()
         current_hidden = self.stack[-1][1] if self.stack else False
+        if not current_hidden:
+            for target in self.active_target_labels:
+                self.target_labels[target['key']] += ' ' + text
         if self.workspace_depths and not self.trace_depths and not current_hidden:
             self.primary_review_text.append(text)
         for record in self.active_traces:
@@ -1302,6 +1335,7 @@ class _ReviewFinalParser(HTMLParser):
         if index is None:
             return
         closing_depth = index + 1
+        self.active_target_labels = [item for item in self.active_target_labels if item['depth'] < closing_depth]
         remaining_cards: list[dict[str, object]] = []
         for record in self.active_cards:
             if int(record["depth"]) < closing_depth:
@@ -2554,7 +2588,7 @@ class PrototypeChecks:
         }
         candidate_gap_refs: set[str] = set()
         candidate_block_refs: set[str] = set()
-        high_risk_action = re.compile(r"(?:SUBMIT|SAVE|DELETE|REMOVE|APPROVE|REJECT|PUBLISH|UPLOAD|IMPORT|SYNC|SEND|ASSIGN|CLOSE|CANCEL|REVOKE|PAY|REFUND)")
+        high_risk_action = re.compile(r"(?:^|-)(SUBMIT|SAVE|DELETE|REMOVE|APPROVE|REJECT|PUBLISH|UPLOAD|IMPORT|SYNC|SEND|ASSIGN|CLOSE|CANCEL|REVOKE|PAY|REFUND)(?=-|$)")
         for context_ref, target_counts in projection.targets.items():
             for target_ref in target_counts:
                 if ((context_ref, target_ref) in declared_targets
@@ -2569,7 +2603,9 @@ class PrototypeChecks:
                 )
                 if ui_close_candidate:
                     candidate_gap_refs.add(target_ref)
-                elif target_ref.startswith(("METRIC-", "STATE-")) or (target_ref.startswith("ACT-") and high_risk_action.search(target_ref)):
+                elif target_ref.startswith(("METRIC-", "STATE-")) or (target_ref.startswith("ACT-") and (
+                        high_risk_action.search(target_ref) or consequential_action_candidate(
+                            target_ref, projection.target_labels.get((context_ref, target_ref), '')))):
                     candidate_block_refs.add(target_ref)
                 elif target_ref.startswith(("ACT-", "FLD-", "REG-")):
                     candidate_gap_refs.add(target_ref)

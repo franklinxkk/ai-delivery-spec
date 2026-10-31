@@ -227,6 +227,17 @@ def term_matches(term: str, line: str) -> bool:
     return bool(term and re.search(term_pattern(term), line, re.I))
 
 
+def common_pattern_candidates(query: str) -> list[dict]:
+    """Return cross-domain decision aids separately from sourced domain hits."""
+    path = ROOT / 'references/patterns/common-requirement-patterns.yaml'
+    library = yaml.safe_load(path.read_text(encoding='utf-8'))
+    return [dict(pattern_ref=p['id'], name=p['name'], path=path.relative_to(ROOT).as_posix(),
+                 applies_when=p['applies_when'], questions=p['required_questions'],
+                 authority='decision_prompts_not_project_policy')
+            for p in library.get('patterns', [])
+            if any(term_matches(term, query) for term in [p['name'], *p.get('aliases', [])])][:3]
+
+
 def main() -> int:
     # Domain records intentionally contain multilingual source titles and gaps.
     # Emit a deterministic UTF-8 stream even when a Windows host exposes a
@@ -451,6 +462,7 @@ def main() -> int:
             if english else
             "本地语料未命中。尝试更短的业务词，或用 --domain <领域 ID> 查看相关包及章节；零命中不代表没有适用规则。")
         payload = {"query": args.search, "searched_domains": domain_ids, "total_matches": len(hits),
+                   "common_patterns": common_pattern_candidates(args.search),
                    "expanded_terms": list(dict.fromkeys(t for r in records for t in r.get('expanded_terms',[]))), "retrieval": "literal_with_domain_scoped_aliases_and_ranked_sections",
                    "retrieval_limit": ("query_coverage is lexical coverage, not semantic confidence. Negation and scope remain in the original query; a hit does not select or authorize a requirement."
                                        if english else "query_coverage 是查询字词覆盖度，不是语义置信度。否定与范围关系保留在原查询中；命中不表示采纳或授权该需求。"),
@@ -468,6 +480,11 @@ def main() -> int:
             print(f"# {'Domain search' if english else '领域检索'}: {args.search}\n\n{payload['source_usage_rule']}\n")
             print(f"{'Search terms' if english else '检索词'}: {', '.join(payload['expanded_terms'])}\n")
             print(payload["retrieval_limit"] + "\n")
+            for pattern in payload['common_patterns']:
+                print(f"- {pattern['pattern_ref']} / {pattern['path']}: {pattern['name']}")
+                print(('  Decision prompts only; inherit existing answers.' if english else '  共性决策提示，已有答案直接继承，不是项目政策。'))
+                for question in pattern['questions']:
+                    print('  - ' + question)
             for row in payload["domain_summaries"]:
                 name_key, summary_key = ("name_en", "summary_en") if english else ("name_zh", "summary_zh")
                 print(f"- {row.get(name_key, row['domain_id'])}: {row.get(summary_key, '')}")

@@ -29,6 +29,17 @@ trace_release_proxy:
   effectiveness_limit: deterministic/private calibration repaired gaps; blind A/B,
     token/time and human ratings remain incomplete
 release_evidence:
+  verified_at: '2026-10-31'
+  scope: Bounded expert-finding repairs for intake questions, action candidates,
+    example separation, handoff continuity and current version configuration
+  results:
+    targeted_regressions: focused intake and review positive/negative cases
+    browser: local HTTP example authority guide and simulated business/review paths
+    continuity: isolated Terra two-step document changes; initial revision-identity miss retained
+    distribution: see package receipt; GitHub publication not performed
+  evidence_boundary: Scoped observations only; no arbitrary-language semantic completeness,
+    production integration or universal cross-model reliability claim.
+historical_556_cr1_release_evidence:
   verified_at: '2026-10-30'
   scope: CR1 bounded repair of template neutrality, team reuse, package links,
     Chinese retrieval and actionable diagnostics; local candidate, not publication

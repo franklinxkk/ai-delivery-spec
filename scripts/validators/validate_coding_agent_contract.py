@@ -117,7 +117,8 @@ def main() -> int:
             print(f"{item.severity} {item.code} {item.ref}: {item.message}")
         blocks = any(item.severity == "BLOCK" for item in gate.findings)
         gaps = any(item.severity == "GAP" for item in gate.findings)
-        print("BLOCKED" if blocks else "REVIEW_COMPLETE_WITH_GAPS" if gaps else "PASS: current scoped PRD contract")
+        print("BLOCKED" if blocks else "REVIEW_COMPLETE_WITH_GAPS" if gaps else "PASS: scoped PRD static checks / 指定范围的需求静态检查通过")
+        print("This checks declared requirements; it does not prove business correctness, implementation readiness or acceptance. / 不代表业务语义完整、实现已完成或业务验收通过。")
         return 2 if blocks else 1 if gaps else 0
     if args.level == "auto":
         args.level = "L2"
@@ -172,7 +173,7 @@ def main() -> int:
         for failure in failures:
             print(f"FAIL: {failure}")
         return 1
-    print(f"PASS: explicitly selected legacy {args.level} engineering-annex contract")
+    print(f"PASS: explicitly selected legacy {args.level} annex structure checks; not engineering readiness or acceptance")
     return 0
 
 

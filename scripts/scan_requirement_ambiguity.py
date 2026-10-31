@@ -147,7 +147,43 @@ def _return_conflict(block: str) -> bool:
     return False
 
 
-def inspect_content(text: str) -> dict:
+def explicit_question_candidates(text: str) -> list[dict]:
+    """Find directly stated intake questions; do not infer missing domain policy.
+
+    Quoted UI copy, indirect checks, answered Q/A and explicit exclusions are
+    counterexamples. This bounded intake probe is not applied to PRD headings.
+    """
+    result = []
+    lines = prose_lines(text)
+    cue = re.compile(r"是否|能否|可否|如何|怎样|怎么|多少|几(?:次|天|个|家|分钟|小时)|由谁|何时|"
+                     r"要不要|需不需要|可不可以|能不能|吗(?:[?？]|$)|还是[^。；;]*[?？]|"
+                     r"(?:^|[:：])\s*(?:how|what|which|who|when|where|should|can|may|must|do|does|is|are|will)\b", re.I)
+    indirect = re.compile(r"(?:检查|校验|判断|检测|显示|记录|标记|选择|统计|返回|验证)\s*(?:是否|能否)|"
+                          r"\b(?:check|test|display|record|verify)\s+(?:whether|if)\b", re.I)
+    resolved = re.compile(r"(?:答(?:案)?|(?<!待)(?<!未)决定|已确认|已确定|已决定|answer|resolved)\s*[:：=]|"
+                          r"不在(?:本期|本次)范围|本期不做|out of scope", re.I)
+    for number, line in enumerate(lines, 1):
+        # Only UI copy is exempt. Quoting a business question does not answer it.
+        if re.search(r'按钮|文案|标签|列名|字段名|\b(?:button|label|caption|copy|column name)\b', line, re.I):
+            line = re.sub(r'“[^”]*”|「[^」]*」|"[^"\n]*"|`[^`\n]*`|\x27[^\x27\n]*\x27', '', line)
+        for clause in re.split(r"[。；;]|但是|\bbut\b", line):
+            clause = re.sub(r"^\s*(?:[-*]|\d+[.)、])\s*", '', clause).strip()
+            match = cue.search(clause)
+            if not match or indirect.search(clause) or resolved.search(clause):
+                continue
+            if re.search(r"(?:是否|能否).{0,32}(?:由.{1,20}(?:决定|配置|判断)|按.{1,20}执行|取决于)", clause):
+                continue
+            if number < len(lines) and re.match(r"\s*(?:答(?:案)?|answer)\s*[:：]", lines[number], re.I):
+                continue
+            question = clause.rstrip('？?。. ') + ('?' if not re.search(r'[\u4e00-\u9fff]', clause) else '？')
+            result.append({'kind': 'explicit-question', 'category': 'decision', 'facets': [],
+                           'line': number, 'text': clause[:240], 'context': clause[:240],
+                           'action': question, 'action_en': 'Resolve the stated business question: ' + question,
+                           'advisory': True})
+    return result
+
+
+def inspect_content(text: str, *, intake_questions: bool = False) -> dict:
     """Bounded Chinese/English probes, never an NLP completeness or truth proof.
 
     Findings survive a declared review pass. A contextual guard can suppress a
@@ -278,6 +314,15 @@ def inspect_content(text: str) -> dict:
         block = "\n".join(lines[start:end])
         if _return_conflict(block):
             add("return-conflict", "recovery", {"state"}, start, block, "同一段出现退回保留原单与关闭/新建两种路径；核实是否有明确分支条件和适用对象。")
+    if intake_questions:
+        direct = explicit_question_candidates(text)
+        # A concrete question replaces a generic pending-label prompt on that
+        # line, but never suppresses conflict/authorization findings.
+        direct_lines = {item['line'] for item in direct}
+        findings = [item for item in findings if not (item['kind'] == 'open-decision' and item['line'] in direct_lines)]
+        findings.extend(direct)
+        if direct:
+            categories.add('decision')
     return {"risk_facets": sorted(risks), "review_categories": sorted(categories), "findings": findings,
             "coverage": "bounded_probes; absence_of_findings_is_not_semantic_proof"}
 
