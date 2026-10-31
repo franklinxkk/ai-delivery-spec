@@ -36,7 +36,7 @@ release_evidence:
     targeted_regressions: focused intake and review positive/negative cases
     browser: local HTTP example authority guide and simulated business/review paths
     continuity: isolated Terra two-step document changes; initial revision-identity miss retained
-    distribution: see package receipt; GitHub publication not performed
+    distribution: clean-source runtime package checked before publication; final tag and asset identify the release
   evidence_boundary: Scoped observations only; no arbitrary-language semantic completeness,
     production integration or universal cross-model reliability claim.
 historical_556_cr1_release_evidence:
