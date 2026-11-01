@@ -46,7 +46,7 @@ if str(VALIDATOR_DIR) not in sys.path:
     sys.path.insert(0, str(VALIDATOR_DIR))
 
 from scan_prototype_css import scan as scan_prototype_css
-from validate_acceptance_run import execution_environment, acceptance_results
+from validate_acceptance_run import execution_environment, acceptance_results, summarize_acceptance_claims
 LEVELS = ("L0", "L1", "L2", "L3", "L4")  # Legacy specialized-tool compatibility only.
 from validators.validate_prd_semantics import run_semantic_checks
 from requirement_contract import SEMANTIC_REVIEW_GUIDANCE, semantic_review_guidance
@@ -1386,13 +1386,13 @@ def collect_acceptance_claims(gate: Gate, paths: list[Path]) -> dict[str, dict[s
             continue
         outcomes = acceptance_results(document)
         claims[run_id] = {
-            **outcomes, "path": path, "item_count": len(document["items"]),
+            **outcomes, "path": path, "items": document["items"], "item_count": len(document["items"]),
             "browser": browser, "integration": execution_environment(document)[1],
             "conclusive": conclusive, "conclusion": document["conclusion"],
             "baseline_version": str(document["baseline_version"]),
         }
     gate.metrics["acceptance_run_items"] = sum(item["item_count"] for item in claims.values())
-    gate.metrics["acceptance_run_evidenced_acs"] = len(set().union(*(item["passed_acs"] for item in claims.values())))
+    gate.metrics["acceptance_run_evidenced_acs"] = len(summarize_acceptance_claims(list(claims.values()))["passed_acs"])
     return claims
 
 
@@ -1409,8 +1409,8 @@ def check_browser_coverage(gate: Gate, claims: dict[str, dict[str, Any]], level:
                 gate.add("GAP", "PROTO-BROWSER-EVIDENCE-INCOMPLETE", path, "当前原型存在多个基线声明，先核对适用版本", "baseline")
             continue
         expected = next(iter(versions), fallback_baseline)
-        applicable = [item for item in claims.values() if item["browser"] and expected and item["baseline_version"] == expected]
-        passed = set().union(*(item["passed_acs"] for item in applicable))
+        applicable = [item for item in claims.values() if expected and item["baseline_version"] == expected]
+        passed = summarize_acceptance_claims(applicable)["browser_passed_acs"]
         missing = required_acs - passed
         complete.append(bool(required_acs) and bool(expected) and not missing)
         if level in {"L3", "L4"} and (missing or not required_acs or not expected):
@@ -1589,7 +1589,8 @@ def main() -> int:
                     str(item).upper() for item in point.get("acceptance_refs", []) or []
                     if str(item).upper().startswith("AC-")
                 }
-                covered_acs = set().union(*(item["covered_acs"] for item in resolved))
+                summary = summarize_acceptance_claims(resolved)
+                covered_acs = summary["covered_acs"]
                 if not required_acs or not required_acs <= covered_acs:
                     missing = required_acs - covered_acs
                     gate.add(
@@ -1600,9 +1601,9 @@ def main() -> int:
                     )
                     continue
                 supported_acs = (
-                    set().union(*(item["passed_acs"] for item in resolved))
+                    summary["passed_acs"]
                     if status == "passed" else
-                    set().union(*(item["failed_acs"] for item in resolved))
+                    summary["failed_acs"]
                 )
                 supported = required_acs <= supported_acs if status == "passed" else bool(required_acs & supported_acs)
                 if not supported:
@@ -1658,7 +1659,8 @@ def main() -> int:
                 )
                 and str(item.get("acceptance_ref", "")).upper().startswith("AC-")
             }
-            covered_acs = set().union(*(item["covered_acs"] for item in resolved))
+            summary = summarize_acceptance_claims(resolved)
+            covered_acs = summary["covered_acs"]
             if not required_acs or not required_acs <= covered_acs:
                 missing = required_acs - covered_acs
                 gate.add(
@@ -1669,13 +1671,13 @@ def main() -> int:
                 )
                 continue
             status_supported_acs = (
-                set().union(*(item["covered_acs"] for item in resolved if item["browser"]))
+                summary["browser_covered_acs"]
                 if status == "browser_checked" else
-                set().union(*(item["covered_acs"] for item in resolved if item["integration"]))
+                summary["integration_covered_acs"]
                 if status == "integration_checked" else
-                set().union(*(item["passed_acs"] for item in resolved if item["conclusive"] and item.get("conclusion") == "accepted"))
+                summary["accepted_acs"]
                 if status == "accepted" else
-                set().union(*(item["failed_acs"] for item in resolved))
+                summary["failed_acs"]
             )
             level_supported = (
                 bool(required_acs & status_supported_acs) if status == "failed"

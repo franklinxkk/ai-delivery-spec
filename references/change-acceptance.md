@@ -31,7 +31,7 @@
 
 断言数、唯一 AC 数和已验证行为分开；编号注释不算覆盖。按同一输入核对来源→PRD→原型实际操作→实现结果，检查对象/字段含义、状态、权限、口径、拒绝和副作用，允许有明确映射的不同命名。AC 前提须能独立造数或重置；删除对象使旧 AC 失效。声明可配置的规则，用改值前后样本验证各消费者响应及生效时点，不把所有阈值升级成配置平台。
 
-复用 ARUN/EVD；真实验收保留 acceptance_ref、requirement_refs、result、actual_result、evidence_refs；execution_type 按实际区分静态、模拟、浏览器及联调，未知不猜，见 [验收模板](templates/acceptance-run-template.yaml)。同一运行中，一个 AC 的各项全部通过才计为该 AC 通过；失败/阻塞写实际结果或原因。浏览器覆盖只汇总当前基线、对应 AC 的浏览器结果；实际执行与最终签署分别判断，不能相互顶替。同一 ARUN 编号不能由不同文件覆盖解释。本地证据可解析且不越出记录目录；远程链接或字符串不证明执行。
+复用 ARUN/EVD；真实验收保留 acceptance_ref、requirement_refs、result、actual_result、evidence_refs；execution_type 按实际区分静态、模拟、浏览器及联调，未知不猜，见 [验收模板](templates/acceptance-run-template.yaml)。一个 AC 的当前场景全部通过才计通过，拆到多个记录也一样；同一场景沿用 ARITEM id，独立场景用不同 id，失败/阻塞写实际结果。检查只提供本次适用记录；历史仍保留，不按时间或输入顺序自动取舍冲突结果。每个场景须有对应环境的执行证据，其他场景/环境不能补齐；实际执行与最终签署分别判断。同一 ARUN 编号不能由不同文件覆盖解释。本地证据可解析且不越出记录目录；远程链接或字符串不证明执行。
 
 ## 关闭
 

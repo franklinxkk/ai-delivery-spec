@@ -13,7 +13,8 @@ executed_at: null # 未执行不填写时间；执行后填写实际时间
 evidence_catalog: []
 # 执行后登记真实证据：id、uri（及可选 sha256）。
 items:
-  # 一个 AC 有多项时全部通过才计为该 AC 通过；失败/阻塞填写实际结果或原因。
+  # 一个 AC 的当前场景全部通过才计为该 AC 通过，拆到多个记录也一样；失败/阻塞写实际结果。
+  # 同一场景跨记录沿用 ARITEM id，不同场景使用不同 id；提供本次适用记录，不按时间自动替代历史结果。
   - id: ARITEM-CORE-001
     acceptance_ref: AC-CORE-001
     requirement_refs: [REQ-CORE-001]

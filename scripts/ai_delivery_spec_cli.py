@@ -202,6 +202,12 @@ def merge_markdown_template(base: str, overlay: str) -> str:
 def project_human(args: argparse.Namespace) -> int:
     """Create a human-distribution Markdown projection without machine frontmatter."""
     try:
+        if args.input.resolve() == args.output.resolve() or (
+            args.input.exists() and args.output.exists() and args.input.samefile(args.output)
+        ):
+            print("BLOCKED: 分发副本与权威源是同一文件；请选择另一个输出路径，源文件未修改。" if args.language == "zh-CN" else
+                  "BLOCKED: distribution copy and canonical source are the same file; choose a separate output path. Source unchanged.")
+            return 2
         raw = args.input.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as exc:
         print(f"BLOCKED: 无法读取权威 Markdown：{exc}" if args.language == "zh-CN" else f"BLOCKED: cannot read canonical Markdown: {exc}")

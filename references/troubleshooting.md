@@ -52,3 +52,38 @@ UNK 表支持 `| ID | 状态 | 关闭依据 |`：`UNK-X | closed | DEC-X`；粗�
 5.4.x 工件保留已批准业务事实。新版本不保证旧标题门禁、旧 triage 结果键或逐阶段脚手架的行为兼容。调用专业评审/Truth/handoff 时保留实际 Schema 版本，不把版本号改成 5.5.0 就当作完成迁移。
 
 高级 Schema 的结构通过不证明运行效果。外部链接存在、文件哈希匹配和签名字段完整也不能替代实际业务授权。详见 [当前工具](stages.md)、[变更与验收](change-acceptance.md)。
+
+## 契约样例校验
+
+已有机器契约需联调时，按需执行 `python scripts/ai_delivery_spec_cli.py check-examples --input cases.yaml --format json`。复用权威Schema及正反样例，核对拒绝原因；不自动加入PRD gate。输入直接引用同目录的现有 JSON Schema 与正反例；退出码 0=符合预期，1=与预期不符，2=输入/校验环境无效。它不证明自然语言一致性或运行行为，工具失败不能当合法拒绝。
+
+示例 `cases.yaml`（只有机器契约联调需要，不是 PRD 必填项）：
+
+```yaml
+contracts:
+  - id: name-required
+    schema: schema.json
+    cases:
+      - {id: valid-name, instance: valid.json, valid: true}
+      - id: missing-name
+        instance: invalid.json
+        valid: false
+        error: {keyword: required, instance_path: ""}
+```
+
+`schema.json` 声明 JSON Schema 2020-12、对象类型及必填 `name`；`valid.json` 为 `{"name":"工单"}`，`invalid.json` 为 `{}`。负例因指定约束被拒绝才算通过，读不到文件不算。路径在输入目录内解析，不访问远程 Schema。
+
+## 原型机器锚点与诊断
+
+| 属性 | 机器约定 |
+|---|---|
+| `data-action` | `ACT-<DOMAIN>-<NAME>`；纯界面用 `UIACT-*`，评审用 `UIACT-REVIEW-*`；后缀仅字母、数字、连字符，禁止下划线 |
+| `data-testid` | 页面 `page-VIEW-*`，浮层 `modal-MODAL-*` / `drawer-DRAWER-*`，区域 `region-REG-*`；稳定且当前 DOM 唯一 |
+| `data-metric` | `METRIC-*` 按业务含义分配；重复展示须同口径和 `data-metric-label` |
+
+```powershell
+python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype review.html --prd PRD.md --stage specify --require-review-workspace --format json --diagnostics full
+python scripts/scan_prototype_css.py app.html
+```
+
+正式评审带 `--require-review-workspace` 和实际基线。R*表示评审方式，旧L0–L4不决定篇幅或风险。无IA侧车仅表示未查。机器交接见 [context.md](context.md)。

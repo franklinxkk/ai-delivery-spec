@@ -40,23 +40,7 @@ PRD 标题自由，`ADS:scope/behavior/acceptance` 仅辅助定位；无法定�
 
 ## 契约样例校验
 
-已有机器契约需联调时，按需执行 `python scripts/ai_delivery_spec_cli.py check-examples --input cases.yaml --format json`。复用权威Schema及正反样例，核对拒绝原因；不自动加入PRD gate。输入直接引用同目录的现有 JSON Schema 与正反例；退出码 0=符合预期，1=与预期不符，2=输入/校验环境无效。它不证明自然语言一致性或运行行为，工具失败不能当合法拒绝。
-
-示例 `cases.yaml`（只有机器契约联调需要，不是 PRD 必填项）：
-
-```yaml
-contracts:
-  - id: name-required
-    schema: schema.json
-    cases:
-      - {id: valid-name, instance: valid.json, valid: true}
-      - id: missing-name
-        instance: invalid.json
-        valid: false
-        error: {keyword: required, instance_path: ""}
-```
-
-`schema.json` 声明 JSON Schema 2020-12、对象类型及必填 `name`；`valid.json` 为 `{"name":"工单"}`，`invalid.json` 为 `{}`。负例因指定约束被拒绝才算通过，读不到文件不算。路径在输入目录内解析，不访问远程 Schema。
+已有机器契约联调才用 `check-examples`，不加入默认 PRD gate。命令、输入样例、退出码及证据边界见[按需说明](troubleshooting.md#契约样例校验)。
 
 ## 领域检索
 

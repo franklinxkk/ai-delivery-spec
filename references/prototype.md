@@ -26,11 +26,7 @@
 
 字段共用定义：输入有维护入口，派生值有来源。依赖选择先选来源，换来源清失效引用、保留有效输入；节点配置消费真实上游字段，以标识而非名称区分。
 
-| 属性 | 机器约定 |
-|---|---|
-| `data-action` | `ACT-<DOMAIN>-<NAME>`；纯界面用 `UIACT-*`，评审用 `UIACT-REVIEW-*`；后缀仅字母、数字、连字符，禁止下划线 |
-| `data-testid` | 页面 `page-VIEW-*`，浮层 `modal-MODAL-*` / `drawer-DRAWER-*`，区域 `region-REG-*`；稳定且当前 DOM 唯一 |
-| `data-metric` | `METRIC-*` 按业务含义分配；重复展示须同口径和 `data-metric-label` |
+机器锚点格式见[按需说明](troubleshooting.md#原型机器锚点与诊断)。
 
 每个业务动作须有真实处理器、允许条件、结果和失败反馈。普通导航不强绑业务 AC。JS 模板保留完整字面量 `data-action`，不能删除锚点规避检查；静态候选可枚举不代表运行时可达，须从真实入口打开验证。
 
@@ -51,11 +47,6 @@
 
 从来源清点覆盖，不由 marker 决定。浏览器验证提交、重开及后续读取，入口报错先修；调函数仅算模拟，截图核对正文与遮挡。保持详情/浮层打开后切换身份或对象，再提交；同名不同ID仍独立。异步刷新查询原请求再测旧页，不抹掉历史编号；禁用按钮不证明旧请求被拒。记录动作、预期、前后数据及文件，改后复验，未执行/阻塞不记通过。
 
-```powershell
-python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype review.html --prd PRD.md --stage specify --require-review-workspace --format json --diagnostics full
-python scripts/scan_prototype_css.py app.html
-```
-
-正式评审带 `--require-review-workspace` 和实际基线。R*表示评审方式，旧L0–L4不决定篇幅或风险。无IA侧车仅表示未查。机器交接见 [context.md](context.md)。
+正式评审带实际需求基线；命令与层级说明见[原型诊断](troubleshooting.md#原型机器锚点与诊断)。
 
 原型内以可展开说明关联需求版本，区分业务、演示数据/身份与评审工具；工具不写成业务需求，新增行为不自动获得批准。

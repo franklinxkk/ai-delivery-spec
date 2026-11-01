@@ -7,11 +7,13 @@ import subprocess
 import sys
 
 import yaml
+import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 from quality_gate import Gate, collect_acceptance_claims, check_browser_coverage, repair_example_for
 from requirement_contract import check_spec
+from validate_acceptance_run import execution_environment, summarize_acceptance_claims
 
 
 def write_run(folder, name="one", *, ac="AC-X-SUBMIT", execution="browser", conclusion="pending"):
@@ -166,3 +168,108 @@ def test_real_gate_consumes_current_browser_records_without_inventing_signoff(tm
     assert payload["metrics"]["prototype_browser_evidence"] is True
     assert payload["metrics"]["acceptance_run_conclusive"] is False
     assert not any(item["code"].startswith("PROTO-BROWSER-EVIDENCE") for item in payload["findings"])
+
+
+def test_distribution_copy_protects_canonical_source_and_samefile_alias(tmp_path):
+    source = tmp_path / "source.md"
+    original = "---\nbaseline_version: v1\nunknowns: [{id: UNK-X, status: open}]\n---\n# 范围\n<!-- ADS:scope -->\n只改提示。\n"
+    source.write_text(original, encoding="utf-8")
+    copy = tmp_path / "copy.md"
+    assert run_cli("ai_delivery_spec_cli.py", "project-human", "--input", source, "--output", copy).returncode == 0
+    assert source.read_text(encoding="utf-8") == original and "baseline_version" not in copy.read_text(encoding="utf-8")
+    for target in (source, tmp_path / "." / "source.md"):
+        assert run_cli("ai_delivery_spec_cli.py", "project-human", "--input", source, "--output", target).returncode == 2
+        assert source.read_text(encoding="utf-8") == original
+    alias = tmp_path / "alias.md"
+    os.link(source, alias)
+    assert run_cli("ai_delivery_spec_cli.py", "project-human", "--input", source, "--output", alias).returncode == 2
+    assert source.read_text(encoding="utf-8") == original
+
+
+@pytest.mark.parametrize("kind,environment", [
+    ("browser", "browser unavailable"), ("browser", "Chrome (not executed)"),
+    ("browser", "Chrome, not executed"),
+    ("browser", "Browser testing was not run"), ("browser", "no real browser"),
+    ("browser", "未执行浏览器测试"), ("browser", "浏览器测试未执行"),
+    ("integration", "integration unavailable"), ("integration", "UAT (not executed)"),
+    ("integration", "未执行联调"),
+])
+def test_explicit_unexecuted_environment_is_not_upgraded_in_either_entry(tmp_path, kind, environment):
+    path, doc = write_run(tmp_path, conclusion="accepted")
+    doc.update(execution_type=kind, environment=environment)
+    save(path, doc)
+    result = run_cli("validators/validate_acceptance_run.py", path)
+    assert result.returncode == 1 and "ACCEPTANCE-EXECUTION-CONFLICT" in result.stdout
+    gate = Gate()
+    assert gate.check_acceptance_run(path) == (set(), False, False)
+    assert execution_environment(doc) == (False, False)
+    del doc["execution_type"]
+    assert execution_environment(doc) == (False, False)
+
+
+@pytest.mark.parametrize("environment", ["Chrome", "Chrome, no extensions", "Chrome; network unavailable", "Chrome without browser extensions"])
+def test_unrelated_negative_settings_do_not_deny_browser_execution(tmp_path, environment):
+    path, doc = write_run(tmp_path)
+    doc["environment"] = environment
+    save(path, doc)
+    assert run_cli("validators/validate_acceptance_run.py", path).returncode == 0
+    assert Gate().check_acceptance_run(path)[1]
+    del doc["execution_type"]
+    assert execution_environment(doc) == (True, False)
+
+
+def test_partitioning_current_cases_cannot_hide_failure_or_borrow_environment(tmp_path):
+    first, a = write_run(tmp_path, conclusion="accepted")
+    second, b = write_run(tmp_path, "two")
+    b["items"][0].update(id="ARITEM-X-B", result="fail", actual_result="Required scenario B failed")
+    save(second, b)
+    combined = copy.deepcopy(a)
+    combined.update(conclusion="pending", sign_offs=[])
+    combined["items"].append(b["items"][0])
+    joined = tmp_path / "combined.yaml"
+    save(joined, combined)
+    def summary(paths):
+        return summarize_acceptance_claims(list(collect_acceptance_claims(Gate(), paths).values()))
+    for paths in ([first, second], [second, first], [joined]):
+        result = summary(paths)
+        assert not result["passed_acs"] and not result["browser_passed_acs"] and not result["accepted_acs"]
+        assert result["browser_covered_acs"] == {"AC-X-SUBMIT"}  # Executed is distinct from passed.
+    b["items"][0].update(result="pass", actual_result="B passed after repair")
+    save(second, b)
+    assert summary([first, second])["browser_passed_acs"] == {"AC-X-SUBMIT"}
+    assert not summary([first, second])["accepted_acs"]  # Pending B cannot borrow A's sign-off.
+    # The old joined failure remains on disk; only explicitly supplied current evidence applies.
+    b.update(execution_type="simulation", environment="Node VM")
+    save(second, b)
+    assert not summary([first, second])["browser_covered_acs"]
+    # Same declared case also observed in a simulator does not cancel actual browser evidence.
+    b["items"][0]["id"] = a["items"][0]["id"]
+    save(second, b)
+    assert summary([first, second])["browser_passed_acs"] == {"AC-X-SUBMIT"}
+    assert summary([first, second])["accepted_acs"] == {"AC-X-SUBMIT"}  # Same passed case need not be signed twice.
+
+
+def test_passed_review_point_cannot_borrow_a_pass_from_another_current_case(tmp_path):
+    from test_review_workspace_contracts import manifest, review_html
+    doc = manifest("1" * 64)
+    first, a = write_run(tmp_path)
+    second, b = write_run(tmp_path, "two")
+    b["items"][0].update(id="ARITEM-X-B", result="fail", actual_result="Required second case failed")
+    for path, run in ((first, a), (second, b)):
+        run["baseline_version"] = doc["baseline"]["version"]
+        save(path, run)
+    point = doc["review_points"][0]
+    point.update(verification_status="passed", evidence_refs=[a["run_id"], b["run_id"]])
+    proto = tmp_path / "review.html"
+    proto.write_text(review_html(doc), encoding="utf-8")
+    result = run_cli("quality_gate.py", "--profile", "prototype", "--prototype", proto, "--level", "L2", "--format", "json", "--acceptance-run", first, "--acceptance-run", second)
+    assert "PROTO-REVIEW-VERIFICATION-LEVEL-UNPROVED" in {f["code"] for f in json.loads(result.stdout)["findings"]}
+
+
+@pytest.mark.parametrize("script", ["validate_unified_prd.py", "validate_prd_quality.py"])
+def test_compatibility_prd_entries_keep_static_limits(tmp_path, script):
+    path = tmp_path / "prd.md"
+    path.write_text("# 小改\n## 范围\n只改备注。\n## 行为\n最多120字。\n## 验收\n121字可以提交。", encoding="utf-8")
+    result = run_cli("validators/" + script, path, "--stage", "specify")
+    assert result.returncode == 0
+    assert "不代表业务验收通过" in result.stdout and "NOT_PROVEN" in result.stdout

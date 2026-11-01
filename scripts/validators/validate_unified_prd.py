@@ -12,7 +12,7 @@ SCRIPT_DIR = Path(__file__).resolve().parents[1]
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from quality_gate import Gate, result_payload  # noqa: E402
+from quality_gate import Gate, result_payload, resolve_output_language  # noqa: E402
 
 
 def main() -> int:
@@ -28,11 +28,13 @@ def main() -> int:
         gate.add("BLOCK", "GATE-NOT-FILE", args.document, "输入 PRD 不存在")
     else:
         gate.check_prd(args.document, args.level, stage=args.stage, scope_refs=tuple(args.scope_ref))
-    payload = result_payload(gate, "prd")
+    payload = result_payload(gate, "prd", output_language=resolve_output_language(gate, "auto"))
+    print(payload["assessment"]["label"])
     for item in gate.findings:
         print(f"{item.severity} {item.code} [{item.ref}]: {item.message}")
     if not gate.findings:
         print("PASS: unified PRD uses the same quality-gate kernel")
+    print("NOT_PROVEN: " + "; ".join(payload["not_proven"]))
     return int(payload["exit_code"])
 
 

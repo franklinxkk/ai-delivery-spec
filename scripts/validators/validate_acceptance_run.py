@@ -98,32 +98,80 @@ def validate_evidence_refs(document: dict, document_path: Path) -> list[str]:
     return failures
 
 
+def execution_denied(environment: str, kind: str) -> bool:
+    """Bounded explicit execution denial, not every occurrence of no/not."""
+    english = {
+        "browser": r"(?:browser|chrome|chromium|edge|firefox|safari|webkit|playwright)",
+        "integration": r"(?:integration|sit|uat|staging)",
+    }.get(kind)
+    chinese = {"browser": r"(?:浏览器|Chrome|Playwright)", "integration": r"(?:联调|集成|预发布)"}.get(kind)
+    if not english:
+        return False
+    text = environment.casefold()
+    for clause in re.split(r"[;；。\n]", text):
+        # Match the named execution environment, not unrelated settings like 'no extensions'.
+        if re.search(r"\b(?:(?:no|without)\s+(?:real\s+)?|not\s+(?:a\s+)?)" + english + r"\b(?:\s+(?:tests?|testing|execution|run))?(?=\s*[,.)]|\s*$)", clause):
+            return True
+        if re.search(r"\b" + english + r"\b\s*(?:(?:tests?|testing|execution)\s*)?(?:(?:was|is|were|are)\s*)?[(:,\-]?\s*(?:unavailable|unexecuted|not\s+(?:executed|run|performed|available))\b", clause):
+            return True
+        if re.search(r"\b(?:unavailable|unexecuted)\s+" + english + r"\b", clause):
+            return True
+        if re.search(r"未(?:进行|执行)?(?:真实)?\s*" + chinese + "|" + chinese + r"(?:测试|执行)?\s*(?:未执行|未运行|不可用)", clause, re.I):
+            return True
+    return False
+
+
 def execution_environment(doc: dict) -> tuple[bool, bool]:
     """Classify declarations, never infer execution from a keyword mention."""
     kind = doc.get("execution_type")
-    if kind is not None:
-        return kind == "browser", kind == "integration"
     environment = str(doc.get("environment", "")).strip().casefold()
+    if kind is not None:
+        return (kind == "browser" and not execution_denied(environment, "browser"),
+                kind == "integration" and not execution_denied(environment, "integration"))
     # Legacy free text is accepted only as an affirmative environment label.
-    if re.search(r"\b(?:no|not|without|unavailable|missing|unexecuted)\b|未|没有|仅|无法|不支持", environment):
+    if re.search(r"^(?:no|not|without|unavailable|missing|unexecuted)\b|^(?:未|没有|仅|无法|不支持)", environment):
         return False, False
     browser = bool(re.match(r"(?:browser\b|chrome\b|chromium\b|edge\b|firefox\b|safari\b|webkit\b|playwright\b|真实浏览器|浏览器)", environment))
     integration = bool(re.match(r"(?:integration\b|sit\b|uat\b|staging\b|集成|联调|预发布)", environment))
-    return browser, integration
+    return browser and not execution_denied(environment, "browser"), integration and not execution_denied(environment, "integration")
 
 
 def acceptance_results(doc: dict) -> dict[str, set[str]]:
     """An AC passes only when all its declared items pass in this run."""
-    groups: dict[str, list[dict]] = {}
-    for item in doc.get("items", []):
-        groups.setdefault(item["acceptance_ref"].upper(), []).append(item)
+    summary = summarize_acceptance_claims([doc])
+    return {key: summary[key] for key in ("covered_acs", "passed_acs", "failed_acs")}
+
+
+def summarize_acceptance_claims(claims: list[dict]) -> dict[str, set[str]]:
+    """Aggregate selected current records without discarding cases or their provenance."""
+    keys = ("covered_acs", "passed_acs", "failed_acs", "browser_covered_acs", "browser_passed_acs", "integration_covered_acs", "accepted_acs")
+    summary = {key: set() for key in keys}
+    groups = {}
+    for claim in claims:
+        for item in claim.get("items", []):
+            groups.setdefault((claim["baseline_version"], item["acceptance_ref"].upper()), []).append((item, claim))
     def observed(item):
         return item["result"] in {"pass", "fail"} and item["actual_result"].strip() and item["evidence_refs"]
-    return {
-        "covered_acs": {ref for ref, rows in groups.items() if all(observed(row) for row in rows)},
-        "passed_acs": {ref for ref, rows in groups.items() if all(row["result"] == "pass" and observed(row) for row in rows)},
-        "failed_acs": {ref for ref, rows in groups.items() if any(row["result"] in {"fail", "blocked"} and row["actual_result"].strip() for row in rows)},
-    }
+    for (_, ref), rows in groups.items():
+        cases = {}
+        for item, claim in rows:
+            cases.setdefault((item["id"], tuple(sorted(item["requirement_refs"]))), []).append((item, claim))
+        if all(observed(item) for item, _ in rows):
+            summary["covered_acs"].add(ref)
+        passed = all(item["result"] == "pass" and observed(item) for item, _ in rows)
+        if passed:
+            summary["passed_acs"].add(ref)
+        if any(item["result"] in {"fail", "blocked"} and item["actual_result"].strip() for item, _ in rows):
+            summary["failed_acs"].add(ref)
+        for key, environment, require_pass in (("browser_covered_acs", "browser", False), ("browser_passed_acs", "browser", True), ("integration_covered_acs", "integration", False)):
+            scoped = [[item for item, claim in entries if claim.get(environment)] for entries in cases.values()]
+            if all(entries and all(observed(item) and (not require_pass or item["result"] == "pass") for item in entries) for entries in scoped):
+                summary[key].add(ref)
+        signed_cases = all(any(claim.get("conclusive") and claim.get("conclusion") == "accepted" for _, claim in entries) for entries in cases.values())
+        opposing_conclusion = any(claim.get("conclusion") in {"accepted_with_conditions", "rejected"} for _, claim in rows)
+        if passed and signed_cases and not opposing_conclusion:
+            summary["accepted_acs"].add(ref)
+    return summary
 
 
 def validate_acceptance_document(doc: object, path: Path) -> list[dict[str, str]]:
@@ -137,12 +185,7 @@ def validate_acceptance_document(doc: object, path: Path) -> list[dict[str, str]
         return issues
     def add(code, message, ref=""):
         issues.append(dict(code=code, message=message, ref=ref))
-    negative_execution = {
-        'browser': r"\b(?:no|without)\s+(?:real\s+)?browser|\bnot\s+(?:a\s+)?browser|未(?:进行|执行)?(?:真实)?浏览器|浏览器.{0,5}未执行",
-        'integration': r"\b(?:no|without)\s+(?:real\s+)?integration|\bnot\s+integration|未(?:进行|执行)?(?:真实)?(?:联调|集成)|(?:联调|集成).{0,5}未执行",
-    }
-    negative_pattern = negative_execution.get(doc.get('execution_type'))
-    if negative_pattern and re.search(negative_pattern, str(doc.get('environment', '')), re.I):
+    if execution_denied(str(doc.get('environment', '')), doc.get('execution_type')):
         add("ACCEPTANCE-EXECUTION-CONFLICT", "execution_type 与环境中的未执行声明冲突；按实际执行修正，不升级证据等级")
     for message in validate_evidence_refs(doc, path):
         add("ACCEPTANCE-EVIDENCE-INVALID", message)
