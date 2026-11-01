@@ -23,17 +23,15 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlsplit
 
+from cli_support import dependency_message, shell_command, input_error_detail
+
 try:
     import yaml
     from jsonschema import Draft202012Validator, FormatChecker
 except ModuleNotFoundError as exc:  # pragma: no cover - exercised in a clean environment
     missing = getattr(exc, "name", "PyYAML/jsonschema")
     english_startup = any(value == "en-US" for value in sys.argv)
-    message = (
-        f"Missing runtime dependency {missing}. Run: python -m pip install -r scripts/requirements.txt"
-        if english_startup else
-        f"缺少运行依赖 {missing}。请先执行：python -m pip install -r scripts/requirements.txt"
-    )
+    message = dependency_message(getattr(exc, "name", "PyYAML/jsonschema"), "en-US" in sys.argv)
     print(message, file=sys.stderr)
     raise SystemExit(4) from exc
 
@@ -48,7 +46,7 @@ if str(VALIDATOR_DIR) not in sys.path:
     sys.path.insert(0, str(VALIDATOR_DIR))
 
 from scan_prototype_css import scan as scan_prototype_css
-from validate_acceptance_run import validate_evidence_refs
+from validate_acceptance_run import execution_environment
 LEVELS = ("L0", "L1", "L2", "L3", "L4")  # Legacy specialized-tool compatibility only.
 from validators.validate_prd_semantics import run_semantic_checks
 from requirement_contract import SEMANTIC_REVIEW_GUIDANCE, semantic_review_guidance
@@ -61,26 +59,14 @@ ROOT = SCRIPT_DIR.parent
 REGISTER_SCHEMA = ROOT / "schemas" / "requirement-register.schema.json"
 INTAKE_SCHEMA = ROOT / "schemas" / "requirement-intake.schema.json"
 HANDOFF_SCHEMA = ROOT / "schemas" / "agent-handoff.schema.json"
-ACCEPTANCE_SCHEMA = ROOT / "schemas" / "acceptance-run.schema.json"
 STATUSES = {
     0: "PASS",
     1: "REVIEW_COMPLETE_WITH_GAPS",
     2: "BLOCKED",
     3: "BLOCKED_BY_P0_UNKNOWN",
 }
-STAGE_ORDER = {
-    "frame": -2,
-    "explore": -1,
-    "inventory": 0,
-    "clarify": 1,
-    "specify": 2,
-    "review": 3,
-    "baseline": 4,
-    "prototype": 4,
-    "implementation": 5,
-    "acceptance": 6,
-    "closed": 7,
-}
+from stage_contract import GOVERNED_INDEX
+STAGE_ORDER = GOVERNED_INDEX
 
 NOT_PROVEN_BY_STATIC_GATE = (
     "业务与领域规则已经客户或权威来源确认",
@@ -136,6 +122,7 @@ class Finding:
 
 
 FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
+    "PRD-FRONTMATTER": ("PRD 的 YAML 元数据语法有误，尚未完成该输入的内容检查。", "按技术明细的行列检查括号、引号、缩进及结束分隔线；只修语法，不补写或改写业务规则。"),
     "PRD-PENDING-EXECUTION": (
         "同一处既写业务选择待确认，又要求确认前按默认值执行，实施依据可能互相冲突。",
         "按 ref 核对原句及授权来源。已有临时方案授权就注明来源并同步待决范围；否则取消依赖未决选择的执行承诺。反例和概念验证不应写成正式执行规则。",
@@ -239,8 +226,8 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
         "同步基数与枚举清单，并为每个业务枚举值补状态机或规则语义。",
     ),
     "PRD-NO-FRONTMATTER": (
-        "输入不是带 YAML frontmatter 的 Markdown，机器可校验性已经丢失。",
-        "先在 Markdown + frontmatter 形态完成基线，再导出 docx/PDF 分发副本。",
+        "当前结构检查未定位所需声明；这不说明原始文档无效。",
+        "保留现有交付格式；只为这项结构检查提供核对后的文本/必要声明，正文可用 PRD gate，Word/PDF 另查版式。",
     ),
     "HANDOFF-BINDING-TERM-MISSING": (
         "PRD 声明的绑定词没有同时出现在 PRD 正文和原型可见文本中，跨端用词不一致。",
@@ -433,8 +420,8 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
         "用 data-review-role 标记控件、data-review-lens 标记对应内容；镜头只改变密度，不得改变事实。",
     ),
     "PROTO-REVIEW-WORKSPACE-LEGACY": (
-        "旧评审叠加没有 CurrentContext、声明分母、三页签和产品副作用边界。",
-        "保留完整产品操作，迁移为上下文驱动的总览/功能与流转/边界与验收三页签，并嵌入同基线 manifest。",
+        "旧评审叠加缺少当前上下文、声明分母或产品副作用边界。",
+        "保留完整产品操作；按实际 presentation_mode 对齐同基线 manifest。contextual 用就近抽屉，tabs 用三页签，不为校验改业务布局。",
     ),
     "PROTO-REVIEW-WORKSPACE-MANIFEST-INVALID": (
         "评审工作台没有唯一、可解析的同源投影索引。",
@@ -445,12 +432,12 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-REVIEW-POINT-COVERAGE": ("声明评审点与可见卡片、落点或上下文归属不闭合。", "对齐 manifest、marker 和 card；无 UI 落点时显式 marker_required=false。"),
     "PROTO-REVIEW-CONTEXT-NUMBERING": ("评审编号没有在当前上下文内按声明顺序从 1 开始。", "按每个 Context 的 review_point_refs 重编号，Overlay 关闭后恢复父上下文编号。"),
     "PROTO-REVIEW-PRODUCT-FINGERPRINT-INVARIANT": ("纯评审动作缺少产品指纹不变量机制。", "分别捕获 Product/Review Fingerprint，并用浏览器证据证明 UIACT-REVIEW-* 前后产品指纹相同。"),
-    "PROTO-REVIEW-TAB-OWNERSHIP": ("三页签的信息所有权缺失、错位或重复。", "总览讲全局，功能与流转讲当前上下文，边界与验收持有规则/状态/指标/AC 详情。"),
+    "PROTO-REVIEW-TAB-OWNERSHIP": ("tabs 模式的信息所有权缺失、错位或重复。", "总览讲全局，功能与流转讲当前上下文，边界与验收持有规则/状态/指标/AC 详情。"),
     "PROTO-REVIEW-STATUS-AXES": ("评审卡没有同步显示业务状态、验证状态和证据来源。", "从同一 ReviewPoint 投影紧凑状态行，勿把三条轴合并或制造三套工作流。"),
     "PROTO-REVIEW-SHARE-LOCATOR": ("分享定位没有绑定 baseline/context/point/tab。", "移除 Journey/Step/Role 定位，首次 hydration 后再建立产品指纹基线。"),
     "PROTO-REVIEW-PROGRESS-DENOMINATOR": ("可见进度不是声明的适用评审点分母。", "浏览不推进进度；只有 confirmed 或 accepted_with_gap 评审处置计入完成。"),
     "PROTO-REVIEW-COLD-READ": ("冷读通过没有未参与者证据。", "让产品、前端、后端、测试分别在 3 分钟内冷读并记录召回、误猜和首次澄清。"),
-    "PROTO-REVIEW-LEVEL": ("评审层恢复了额外一级模式或缺少目标等级的必要入口。", "R1/R2 只保留总览、功能与流转、边界与验收；R0 也不得增加 Journey/Step/Page/Role 模式。"),
+    "PROTO-REVIEW-LEVEL": ("评审层恢复了额外一级模式或缺少目标等级的必要入口。", "核对实际评审等级和 presentation_mode；contextual 不要求三页签，tabs 才核对其页签归属。"),
     "PROTO-REVIEW-CANDIDATE-DIFF": ("Candidate Set 与声明评审点存在未裁决差集。", "人工决定声明或不适用并留依据；门禁不得自动改变官方分母。"),
     "PROTO-REVIEW-SEMANTIC-COVERAGE": ("影响实现或验收的页面语义没有完整映射到人类评审说明。", "从 PRD、Stage 0、页面合同和稳定锚点重建语义分母；每项映射 ReviewPoint 或给出有依据的不适用。"),
     "PROTO-REVIEW-HUMAN-COPY-LEAK": ("稳定 ID、字段名或机器枚举泄露到人类主阅读区。", "主阅读面改写成自然语言；技术标识统一移入默认收起的技术追溯。"),
@@ -612,6 +599,7 @@ PREFIX_GUIDANCE: tuple[tuple[str, str, str], ...] = (
 )
 
 EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
+    "PRD-FRONTMATTER": ("The PRD YAML metadata is malformed; its content check could not complete.", "Repair brackets, quoting, indentation or the closing delimiter at the reported location; do not rewrite business rules."),
     "PRD-PENDING-EXECUTION": (
         "The same passage leaves a choice pending yet requires execution with defaults before confirmation.",
         "Check the passage and its authority at ref. Cite an authorized interim decision and clarify what remains open, or remove the unsupported execution promise. Keep counterexamples and concept-only assumptions distinct from implementation policy.",
@@ -647,7 +635,7 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PRD-GUARD-CONTRADICTION": ("An action's allow set conflicts with its guard reject set.", "Align the allowed, rejected and illegal transition sets."),
     "PRD-ENUM-NOT-DEFINED": ("A cardinality or enum contract is incomplete or inconsistent.", "Align counts and define every business enum in a rule or state machine."),
     "PRD-DUPLICATE-STABLE-ID-DEFINITION": ("A stable ID is defined more than once across authoritative PRD tables.", "Keep one definition; turn other occurrences into references or assign a new stable ID."),
-    "PRD-NO-FRONTMATTER": ("The input is not Markdown with YAML front matter.", "Baseline in Markdown + front matter before exporting distribution copies."),
+    "PRD-NO-FRONTMATTER": ("The input is not Markdown with YAML front matter.", "Keep the delivery format; supply verified text/declarations only for this structural check, and inspect document layout separately."),
     "PRD-UNKNOWN-METADATA-DRIFT": ("The same unknown has conflicting fields at two located declarations.", "Inspect the sources, row numbers and field in the message; repair the actual conflict without adding duplicate declarations."),
     "SPEC-UNKNOWN-STATUS-UNLOCATED": ("The parser cannot locate the status of an existing unknown.", "Review the named row and column meaning; keep the gap instead of assuming the status is absent or closed."),
     "PROTO-DYNAMIC-DECLARATIONS": ("JS declarations were found without resolved template or DOM bindings.", "Verify the candidate IDs, rendered behavior and metric definitions; retain unresolved candidates until the relevant evidence exists."),
@@ -695,7 +683,7 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "PROTO-REVIEW-LINKAGE-MISSING": ("Review markers and note cards have no stable bidirectional link.", "For RC4, link marker data-review-ref to card data-review-point with matching context/number; data-review-id is legacy migration syntax. Verify both directions in a browser."),
     "PROTO-REVIEW-SELECTION-NOT-SYNCED": ("Review marker clicks do not expose a synchronized selection state.", "Read RC4 data-review-ref/data-review-point, update aria-current on both sides and the target outline, and verify click/scroll behavior. Do not add legacy data-review-id to a new workspace."),
     "PROTO-REVIEW-LENS-COSMETIC": ("Role lenses change controls but have no role-specific content projection.", "Bind data-review-role controls to matching data-review-lens content without changing shared facts."),
-    "PROTO-REVIEW-WORKSPACE-LEGACY": ("The legacy review overlay has no CurrentContext, declared denominator, three-tab projection, or product-effect boundary.", "Preserve the operable product and migrate to a context-driven Overview / Function & Flow / Boundary & Acceptance projection with a baseline-bound manifest."),
+    "PROTO-REVIEW-WORKSPACE-LEGACY": ("The legacy review overlay lacks a current-context, declared-denominator or product-effect contract.", "Preserve the operable product and migrate to a context-driven Overview / Function & Flow / Boundary & Acceptance projection with a baseline-bound manifest."),
     "PROTO-REVIEW-WORKSPACE-MANIFEST-INVALID": ("The review workspace has no unique parseable projection manifest.", "Embed one application/json review-workspace-manifest and validate it against the review-workspace schema."),
     "PROTO-REVIEW-CONTEXT-CONTRACT": ("The CurrentContext declaration or read-only binding is incomplete.", "Resolve the topmost business overlay or active VIEW and let only real product ACT-* actions change it."),
     "PROTO-REVIEW-DECLARED-DENOMINATOR": ("The official review-point denominator is duplicated or ambiguous.", "Use each context's ordered review_point_refs as the sole denominator; never auto-promote candidates."),
@@ -835,7 +823,7 @@ def guidance_for(code: str) -> tuple[str, str]:
     if _is_legacy_review_finding(code):
         return (
             "该 finding 属于 5.4.7 Preview 旧评审合同，原工件仍在使用 Journey/STEP/Role/自适应页面模式。",
-            "不要补旧模式；保留完整产品操作并整体迁移到 Final CurrentContext + 总览/功能与流转/边界与验收三页签投影。",
+            "保留完整产品操作，按当前选择的 contextual 抽屉或 tabs 模式对齐上下文和同基线 manifest；不为工具重建业务。",
         )
     if code in FINDING_GUIDANCE:
         return FINDING_GUIDANCE[code]
@@ -854,7 +842,7 @@ def english_guidance_for(code: str) -> tuple[str, str]:
     if _is_legacy_review_finding(code):
         return (
             "This finding belongs to the deprecated 5.4.7 Preview review contract using Journey/STEP/Role or adaptive page modes.",
-            "Do not repair the old modes; preserve the operable product and migrate the whole projection to Final CurrentContext plus Overview / Function & Flow / Boundary & Acceptance.",
+            "Preserve product behavior and align HTML with its current manifest: contextual drawers or explicitly chosen tabs.",
         )
     if code in EN_FINDING_GUIDANCE:
         return EN_FINDING_GUIDANCE[code]
@@ -907,7 +895,7 @@ REPAIR_EXAMPLES: tuple[tuple[str, str], ...] = (
 
 def repair_example_for(code: str) -> str:
     if _is_legacy_review_finding(code):
-        return "删除旧 Journey/STEP/Role/页面模式入口，生成 5.4.9/RC4 manifest，以真实产品 CurrentContext 驱动三页签和 ReviewPoint。"
+        return "按实际 presentation_mode 同步 HTML 与 manifest；contextual 使用就近抽屉，tabs 才使用三页签，保留原业务操作。"
     for prefix, example in REPAIR_EXAMPLES:
         if code.startswith(prefix):
             return example
@@ -916,7 +904,7 @@ def repair_example_for(code: str) -> str:
 
 def english_repair_example_for(code: str) -> str:
     if _is_legacy_review_finding(code):
-        return "Remove legacy Journey/STEP/Role/page-mode controls and generate a 5.4.9/RC4 manifest driven by the real product CurrentContext, three tabs, and ReviewPoints."
+        return "Align the chosen presentation_mode, actual HTML and baseline-bound manifest; contextual drawers do not require tabs."
     examples = (
         ("PROTO-INLINE-NATIVE-COLLISION", "For example, bind drawer closing to app.closeDrawer or addEventListener; do not blindly substitute window.close, which may close the browser window. Likewise, form must explicitly refer to the application function. Click the original control after repair."),
         ("PROTO-CSS-IMPORTANT-POLLUTION", 'For an [aria-invalid="true"] border override, verify the invalid border, correction/reset and visible focus outline; keep or adjust it based on the observed effect.'),
@@ -1161,7 +1149,7 @@ class Gate(PRDChecks, PrototypeChecks, HandoffChecks):
         try:
             value = yaml.safe_load(raw)
         except yaml.YAMLError as exc:
-            return None, f"{path.name} 不是有效 YAML：{exc}"
+            return None, f"{path.name} 不是有效 YAML：{input_error_detail(exc)}"
         if not isinstance(value, dict):
             return None, f"{path.name} 顶层必须是对象"
         return value, None
@@ -1307,7 +1295,7 @@ def result_payload(gate: Gate, profile: str, retry_command: str = "", output_lan
         "profile": profile,
         "output_language": output_language,
         "summary": {"blockers": blocks, "p0_unknowns": p0_unknowns, "gaps": gaps, "findings": len(gate.findings)},
-        "assessment": {"kind": "static_check", "label": ("Static checks complete; not business acceptance" if english else "静态检查完成；不代表业务验收通过")},
+        "assessment": {"kind": "static_check", "label": (("Input checks blocked; unread/unparsed content remains unverified" if english else "输入检查受阻；未读取或解析的内容仍未检查") if any(f.code in {"GATE-NOT-FILE", "GATE-MISSING-INPUT", "PRD-FRONTMATTER"} for f in gate.findings) else ("Static checks complete; not business acceptance" if english else "静态检查完成；不代表业务验收通过"))},
         "coverage": coverage,
         "not_proven": not_proven_for(gate, output_language),
         "retry_command": retry_command,
@@ -1321,7 +1309,7 @@ def diagnostic_roots(findings: list[Finding], limit: int) -> tuple[list[tuple[Fi
     """Compact repeated diagnostics; independent open decisions stay visible."""
     first, counts, order = {}, {}, []
     for item in findings:
-        key = (item.code, item.ref if item.code == "SPEC-OPEN-DECISION" else "")
+        key = (item.code, item.artifact, item.ref if item.code == "SPEC-OPEN-DECISION" else "")
         if key not in first:
             first[key] = item
             order.append(key)
@@ -1492,8 +1480,11 @@ def main() -> int:
         if not acceptance_run.is_file():
             gate.add("BLOCK", "GATE-NOT-FILE", acceptance_run, "input does not exist or is not a file", "acceptance-run")
             continue
-        valid_acceptance_runs.append(acceptance_run)
+        findings_before = len(gate.findings)
         passed, is_browser, is_conclusive = gate.check_acceptance_run(acceptance_run)
+        if any(item.severity == "BLOCK" for item in gate.findings[findings_before:]):
+            continue
+        valid_acceptance_runs.append(acceptance_run)
         try:
             run_document = yaml.safe_load(gate.read(acceptance_run)) or {}
         except yaml.YAMLError:
@@ -1502,18 +1493,18 @@ def main() -> int:
             run_id = str(run_document.get("run_id", "")).upper()
             if re.fullmatch(r"ARUN-[A-Z0-9-]+", run_id):
                 run_items = [item for item in run_document.get("items", []) or [] if isinstance(item, dict)]
-                environment = str(run_document.get("environment", "")).casefold()
                 acceptance_claims[run_id] = {
                     "browser": is_browser,
-                    "integration": bool(
-                        re.search(r"\b(?:integration|sit|uat|staging)\b", environment)
-                        or any(marker in environment for marker in ("集成", "联调", "预发布"))
-                    ),
+                    "integration": execution_environment(run_document)[1],
                     "conclusive": is_conclusive,
+                    "conclusion": run_document.get("conclusion"),
                     "baseline_version": str(run_document.get("baseline_version", "")),
                     "covered_acs": {
                         str(item.get("acceptance_ref", "")).upper()
-                        for item in run_items if str(item.get("acceptance_ref", "")).upper().startswith("AC-")
+                        for item in run_items
+                        if str(item.get("acceptance_ref", "")).upper().startswith("AC-")
+                        and item.get("result") in {"pass", "fail"}
+                        and str(item.get("actual_result", "")).strip() and item.get("evidence_refs")
                     },
                     "passed_acs": set(passed),
                     "failed_acs": {
@@ -1529,7 +1520,7 @@ def main() -> int:
                     ),
                 }
         evidenced_acs.update(passed)
-        browser_evidence = browser_evidence or is_browser
+        browser_evidence = browser_evidence or (is_browser and is_conclusive)
         conclusive_evidence = conclusive_evidence or is_conclusive
     for review_path, review_document in gate.review_workspace_contracts:
         expected_baseline_version = str((review_document.get("baseline") or {}).get("version", ""))
@@ -1655,7 +1646,7 @@ def main() -> int:
                 if status == "browser_checked" else
                 set().union(*(item["covered_acs"] for item in resolved if item["integration"]))
                 if status == "integration_checked" else
-                set().union(*(item["passed_acs"] for item in resolved if item["conclusive"]))
+                set().union(*(item["passed_acs"] for item in resolved if item["conclusive"] and item.get("conclusion") == "accepted"))
                 if status == "accepted" else
                 set().union(*(item["failed_acs"] for item in resolved))
             )
@@ -1703,7 +1694,12 @@ def main() -> int:
             "handoff": [args.manifest] if args.manifest and args.manifest.is_file() else [],
         }
         gate.check_custom_rules(custom_root, artifact_map, active_domains=tuple(args.domain))
-    retry_command = "python scripts/quality_gate.py " + subprocess.list2cmdline(sys.argv[1:])
+    path_values = {}
+    for value in vars(args).values():
+        for entry in value if isinstance(value, list) else [value]:
+            if isinstance(entry, Path):
+                path_values[str(entry)] = str(entry.resolve())
+    retry_command = shell_command([sys.executable, Path(__file__).resolve(), *[path_values.get(arg, arg) for arg in sys.argv[1:]]])
     output_language = resolve_output_language(gate, args.language)
     payload = result_payload(gate, args.profile, retry_command, output_language)
     if args.format == "json":
@@ -1725,7 +1721,6 @@ def main() -> int:
                   f": open={counts['open']} P0={counts['declared_open_p0']} blocking_now={counts['blocking_now']} " +
                   f"priority_unspecified={counts['open_priority_unspecified']} status_unresolved={counts['status_unresolved']}")
             print("p0_unknowns " + ("above counts legacy finding severity; it is not the count of open P0 decisions." if english else "仅为旧版诊断级别计数，不是未关闭 P0 决定数。"))
-        print("NOT_PROVEN: " + ("; " if english else "；").join(payload["not_proven"]))
         labels = ("Cause", "Fix", "Example") if english else ("原因", "修复", "示例")
         actionable_findings = [item for item in gate.findings if item.severity != "INFO"]
         information_findings = [item for item in gate.findings if item.severity == "INFO"]
@@ -1735,6 +1730,7 @@ def main() -> int:
                 ref = f" [{item.ref}]" if item.ref else ""
                 localized = localized_finding(item, output_language)
                 print(f"{item.severity} {item.code} x{count}{ref}: {localized['message']}")
+                print(f"  FILE: {item.artifact}")
                 print(f"  {labels[0]}: {localized['cause']}")
                 print(f"  {labels[1]}: {localized['how_to_fix']}")
                 print(f"  {labels[2]}: {localized['repair_example']}")
@@ -1752,6 +1748,7 @@ def main() -> int:
                 ref = f" [{item.ref}]" if item.ref else ""
                 localized = localized_finding(item, output_language)
                 print(f"{item.severity} {item.code}{ref}: {localized['message']}")
+                print(f"  FILE: {item.artifact}")
                 print(f"  {labels[0]}: {localized['cause']}")
                 print(f"  {labels[1]}: {localized['how_to_fix']}")
                 print(f"  {labels[2]}: {localized['repair_example']}")
@@ -1766,6 +1763,7 @@ def main() -> int:
             print(f"... {len(information_findings) - 5} additional INFO records; rerun with --format json")
         if actionable_findings:
             print(f"RETRY: {payload['retry_command']}")
+        print("NOT_PROVEN: " + ("; " if english else "；").join(payload["not_proven"]))
     return int(payload["exit_code"])
 
 

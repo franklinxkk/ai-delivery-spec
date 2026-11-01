@@ -8,8 +8,14 @@ import json
 from pathlib import Path
 from typing import Any
 
-import yaml
-from jsonschema import Draft202012Validator, FormatChecker
+import sys
+from cli_support import dependency_message, run_cli
+try:
+    import yaml
+    from jsonschema import Draft202012Validator, FormatChecker
+except ModuleNotFoundError as exc:
+    print(dependency_message(str(exc.name)), file=sys.stderr)
+    raise SystemExit(4) from exc
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -106,4 +112,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))

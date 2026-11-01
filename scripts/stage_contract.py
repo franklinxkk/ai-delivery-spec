@@ -12,14 +12,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from cli_support import dependency_message, shell_command, input_error_detail
+
 try:
     import yaml
 except ModuleNotFoundError as exc:  # pragma: no cover - clean-machine path
-    message = (
-        "Missing runtime dependency PyYAML. Run: python -m pip install -r scripts/requirements.txt"
-        if any(value == "en-US" for value in sys.argv) else
-        "缺少运行依赖 PyYAML。请执行：python -m pip install -r scripts/requirements.txt"
-    )
+    message = dependency_message(getattr(exc, "name", "PyYAML/jsonschema"), "en-US" in sys.argv)
     print(message, file=sys.stderr)
     raise SystemExit(4) from exc
 
@@ -32,8 +30,22 @@ if hasattr(sys.stderr, "reconfigure"):
 STAGES = ("frame", "explore", "intake", "clarify", "specify", "review", "baseline", "change", "acceptance")
 EARLY_PROFILES = ("frame", "explore", "clarify")
 STAGE_INDEX = {name: index for index, name in enumerate(STAGES)}
-GOVERNED_ORDER = ("frame", "explore", "intake", "clarify", "specify", "review", "baseline", "implementation", "change", "acceptance", "closed")
+# Activities prototype/change are recognized but are not automatic lifecycle successors.
+GOVERNED_ORDER = ("inventory", "frame", "explore", "intake", "clarify", "specify", "prototype", "review", "baseline", "implementation", "change", "acceptance", "closed")
 GOVERNED_INDEX = {name: index for index, name in enumerate(GOVERNED_ORDER)}
+def blocking_relation(current: str, stop: str) -> bool | None:
+    """True: dependency reached; False: not yet; None: an activity needs explicit scope."""
+    if stop == "none":
+        return False
+    if current not in GOVERNED_INDEX or stop not in GOVERNED_INDEX:
+        return None
+    if current == stop:
+        return True
+    if {current, stop} & {"prototype", "change"}:
+        return None
+    return GOVERNED_INDEX[current] >= GOVERNED_INDEX[stop]
+
+
 MAX_ARTIFACT_BYTES = 8 * 1024 * 1024
 TEXT_ARTIFACT_SUFFIXES = {".md", ".markdown", ".yaml", ".yml", ".json"}
 FRONTMATTER_REQUIRED_MESSAGE = (
@@ -43,6 +55,7 @@ FRONTMATTER_REQUIRED_MESSAGE = (
 FRONTMATTER_REQUIRED_FIX = "保留现有交付格式；若要运行本项结构检查，提供提取后核对过的文本及本阶段必要声明。PRD 正文可用 gate --profile prd 检查，Word/PDF 另核对版式和图片。无需为此重写需求。"
 EN_GUIDANCE = {
     "GATE-NOT-FILE": ("The artifact cannot be read.", "Check the path, UTF-8 encoding, binary content and size."),
+    "STAGE-PARSE": ("Artifact declarations could not be parsed.", "Fix brackets, quotes and indentation at the reported location; business content has not been checked. Do not invent business rules to resolve syntax errors."),
     "STAGE-NO-FRONTMATTER": ("This structured stage check needs readable Markdown metadata or YAML/JSON declarations; the input format is unsupported by this check.", "Keep the delivery format. Supply verified extracted text and necessary declarations for this check, or use the PRD gate for prose; inspect Word/PDF layout and images separately. No rewrite is required."),
     "GATE-MISSING-INPUT": ("The selected profile has no artifact.", "Provide the main artifact for this stage."),
     "STAGE-ARTIFACT-TYPE": ("The artifact type does not match this stage.", "Provide the matching existing artifact and declare its actual type/stage; templates are optional starting points."),
@@ -98,15 +111,23 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+class ArtifactFormatError(ValueError):
+    pass
+
+
 def markdown_frontmatter(text: str) -> dict[str, Any]:
     match = re.match(r"\A---\s*\n(.*?)\n---\s*(?:\n|\Z)", text, re.S)
     if not match:
+        if re.match(r"\A---\s*\n", text):
+            raise ArtifactFormatError("frontmatter 未闭合 / closing separator missing")
         return {}
     try:
         value = yaml.safe_load(match.group(1)) or {}
-    except yaml.YAMLError:
-        return {}
-    return value if isinstance(value, dict) else {}
+    except yaml.YAMLError as exc:
+        raise ArtifactFormatError(input_error_detail(exc, 1)) from exc
+    if not isinstance(value, dict):
+        raise ArtifactFormatError("frontmatter 顶层必须是对象 / mapping required")
+    return value
 
 
 def infer_legacy(path: Path, text: str) -> tuple[str, str]:
@@ -146,9 +167,11 @@ def load_artifact(path: Path) -> Artifact:
     if path.suffix.casefold() in {".yaml", ".yml", ".json"}:
         try:
             value = json.loads(text) if path.suffix.casefold() == ".json" else yaml.safe_load(text)
-            metadata = value if isinstance(value, dict) else {}
-        except (json.JSONDecodeError, yaml.YAMLError):
-            metadata = {}
+            if not isinstance(value, dict):
+                raise ArtifactFormatError("产物顶层必须是对象 / mapping required")
+            metadata = value
+        except (json.JSONDecodeError, yaml.YAMLError) as exc:
+            raise ArtifactFormatError(input_error_detail(exc)) from exc
     else:
         metadata = markdown_frontmatter(text)
     kind = str(metadata.get("artifact", "")).strip().casefold()
@@ -181,6 +204,8 @@ def finding(severity: str, code: str, artifact: Path, message: str, fix: str) ->
         code,
         (f"{code} violates the stage artifact contract.", "Repair the referenced declaration in the existing artifact; a matching template is optional."),
     )
+    if code == "STAGE-PARSE":
+        message_en += " " + message
     return {
         "severity": severity,
         "code": code,
@@ -389,15 +414,18 @@ def validate_unknowns(artifact: Artifact, current_stage: str) -> list[dict[str, 
             ))
             continue
         blocks_stage = contract_token(row["blocks_stage"])
-        if blocks_stage not in GOVERNED_INDEX:
+        if blocks_stage not in GOVERNED_INDEX and blocks_stage != "none":
             findings.append(finding("BLOCK", "CLARIFY-UNKNOWN-STAGE", artifact.path, f"{row['id']} 的 blocks_stage 无效：{blocks_stage}", f"使用：{', '.join(GOVERNED_ORDER)}。"))
             continue
         priority = row.get("priority", "P1").strip().upper()
-        if priority == "P0" and GOVERNED_INDEX[current_stage] >= GOVERNED_INDEX[blocks_stage]:
+        relation = blocking_relation(current_stage, blocks_stage)
+        if relation is None:
+            findings.append(finding("GAP", "CLARIFY-UNKNOWN-ACTIVITY-SCOPE", artifact.path, f"{row['id']}: {blocks_stage} 与 {current_stage} 不是可按先后推断的依赖", "保留未知；按本次目标明确它阻断的活动/阶段，不为通过而改业务含义。"))
+        elif priority == "P0" and relation:
             findings.append(finding("P0_UNKNOWN", "CLARIFY-P0-UNKNOWN", artifact.path, f"{row['id']} 已阻断 {current_stage}", "由责任人关闭，或记录安全缩范围/回退路径。"))
         elif priority == "P0":
             findings.append(finding("GAP", "CLARIFY-P0-NOT-YET-BLOCKING", artifact.path, f"{row['id']} 必须在 {blocks_stage} 前关闭", "保留责任人和回退路径，并在 blocks_stage 前关闭。"))
-        elif GOVERNED_INDEX[current_stage] >= GOVERNED_INDEX[blocks_stage]:
+        elif relation:
             findings.append(finding("BLOCK", "CLARIFY-UNKNOWN-BLOCKING", artifact.path, f"{row['id']} 已到达阻断阶段 {blocks_stage}", "解决依赖决定或明确缩小交付范围；优先级不能覆盖阻断阶段。"))
         else:
             findings.append(finding("GAP", "CLARIFY-UNKNOWN-OPEN", artifact.path, f"{row['id']} 仍未关闭", "按责任人与 blocks_stage 跟踪关闭，不得静默推断。"))
@@ -594,6 +622,11 @@ def validate_assumption_sidecar(sidecar: Artifact, solution: Artifact) -> list[d
         findings.append(finding("BLOCK", "ASM-REGISTER-UNBOUND", sidecar.path, f"方案草图引用了未登记假设：{', '.join(missing)}", "补入寄存器，或移除无效引用。"))
     return findings + validate_resume(sidecar)
 
+def retry_command(profile, language, paths):
+    return shell_command([sys.executable, Path(__file__).with_name("ai_delivery_spec_cli.py"), "gate", "--profile", profile, "--language", language,
+                          *[token for path in paths for token in ("--artifact", path.resolve())]])
+
+
 def result(profile: str, findings: list[dict[str, Any]], artifacts: list[Artifact], language: str = "zh-CN") -> tuple[int, dict[str, Any]]:
     localize_findings(findings, language)
     english = language.casefold().startswith("en")
@@ -609,7 +642,7 @@ def result(profile: str, findings: list[dict[str, Any]], artifacts: list[Artifac
         "summary": {"blockers": blocks, "p0_unknowns": p0, "gaps": gaps, "findings": len(findings)},
         "coverage": ("Deterministic stage structure, ADS anchors and checkpoint hashes; not business correctness or approval" if english else "确定性阶段产物结构、稳定锚点和断点哈希；不判断业务正确性，不替代责任人评审"),
         "not_proven": (["customer/domain correctness", "solution value", "implementation/runtime behavior", "real acceptance"] if english else ["客户/领域正确性", "方案价值", "实现与运行时行为", "真实验收"]),
-        "retry_command": "python scripts/ai_delivery_spec_cli.py gate --profile " + profile + " --language " + ("en-US" if english else "zh-CN") + " " + " ".join(f"--artifact {item.path}" for item in artifacts),
+        "retry_command": retry_command(profile, "en-US" if english else "zh-CN", [item.path for item in artifacts]),
         "metrics": {"artifact_count": len(artifacts), "artifact_kinds": [item.kind for item in artifacts]},
         "findings": findings,
     }
@@ -617,11 +650,12 @@ def result(profile: str, findings: list[dict[str, Any]], artifacts: list[Artifac
 
 def diagnostic_roots(findings: list[dict[str, Any]], limit: int) -> tuple[list[tuple[dict[str, Any], int]], int]:
     """Compact repeated findings by stable root-cause code, preserving first-seen order."""
-    first: dict[str, dict[str, Any]] = {}
-    counts: dict[str, int] = {}
-    order: list[str] = []
+    first: dict[tuple[str, str, str], dict[str, Any]] = {}
+    counts: dict[tuple[str, str, str], int] = {}
+    order: list[tuple[str, str, str]] = []
     for item in findings:
-        code = str(item["code"])
+        unknown = re.search(r"\bUNK-[A-Z0-9-]+", str(item.get("message", "")), re.I) if "UNKNOWN" in item["code"] else None
+        code = (str(item["code"]), str(item.get("artifact", "")), unknown[0] if unknown else "")
         if code not in first:
             first[code] = item
             order.append(code)
@@ -639,6 +673,8 @@ def run_gate(args: argparse.Namespace) -> int:
             continue
         try:
             artifacts.append(load_artifact(path))
+        except ArtifactFormatError as exc:
+            findings.append(finding("BLOCK", "STAGE-PARSE", path, str(exc), "修复所示行列的格式；尚未检查业务，不补写业务规则来消除语法错误。"))
         except (OSError, UnicodeError, ValueError) as exc:
             findings.append(finding("BLOCK", "GATE-NOT-FILE", path, f"无法读取产物：{exc}", "检查路径、UTF-8 编码、二进制内容和文件大小。"))
     if not artifacts:
@@ -670,18 +706,18 @@ def run_gate(args: argparse.Namespace) -> int:
     if language == "auto":
         language = str(primary.metadata.get("document_language", "zh-CN")) if artifacts else "zh-CN"
     code, payload = result(args.profile, findings, artifacts, language)
+    payload["retry_command"] = retry_command(args.profile, payload["output_language"], args.artifact)
     english = language.casefold().startswith("en")
     if args.format == "json":
         print(json.dumps(payload, ensure_ascii=False, indent=2))
     else:
         summary = payload["summary"]
         print(f"{payload['status']} profile={args.profile} blockers={summary['blockers']} p0_unknowns={summary['p0_unknowns']} gaps={summary['gaps']}")
-        print("NOT_PROVEN: " + ("; " if english else "；").join(payload["not_proven"]))
         fix_label = "Fix" if english else "修复"
         if args.diagnostics == "roots":
             roots, unique_count = diagnostic_roots(findings, args.max_findings)
             for item, count in roots:
-                print(f"{item['severity']} {item['code']} x{count}: {item['message']}\n  {fix_label}: {item['how_to_fix']}")
+                print(f"{item['severity']} {item['code']} x{count}: {item['message']}\n  FILE: {item['artifact']}\n  {fix_label}: {item['how_to_fix']}")
             print(
                 f"ROOT_GROUPS shown={len(roots)} unique={unique_count} "
                 f"repeated_findings_compacted={len(findings) - len(roots)}"
@@ -692,9 +728,10 @@ def run_gate(args: argparse.Namespace) -> int:
         else:
             limit = 1 if args.diagnostics == "first" else 12 if args.diagnostics == "summary" else args.max_findings
             for item in findings[:max(limit, 0)]:
-                print(f"{item['severity']} {item['code']}: {item['message']}\n  {fix_label}: {item['how_to_fix']}")
+                print(f"{item['severity']} {item['code']}: {item['message']}\n  FILE: {item['artifact']}\n  {fix_label}: {item['how_to_fix']}")
         if findings:
             print("RETRY: " + payload["retry_command"])
+        print("NOT_PROVEN: " + ("; " if english else "；").join(payload["not_proven"]))
     return code
 
 

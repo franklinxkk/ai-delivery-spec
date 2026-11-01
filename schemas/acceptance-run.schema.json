@@ -22,6 +22,7 @@
     "schema_version": { "const": "5.1.0" },
     "run_id": { "type": "string", "pattern": "^ARUN-[A-Z0-9-]+$" },
     "baseline_version": { "type": "string", "minLength": 1 },
+    "execution_type": {"enum": ["static", "simulation", "browser", "integration", "unknown"]},
     "environment": { "type": "string", "minLength": 1 },
     "executor": { "type": "string", "minLength": 1 },
     "executed_at": { "type": ["string", "null"], "format": "date-time" },

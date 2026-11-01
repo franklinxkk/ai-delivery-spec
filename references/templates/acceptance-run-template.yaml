@@ -7,6 +7,7 @@ schema_version: 5.1.0
 run_id: ARUN-CORE-001
 baseline_version: "1.0"
 environment: "{acceptance environment}"
+execution_type: unknown # 执行后按实际填写 static / simulation / browser / integration
 executor: "{executor}"
 executed_at: null # 未执行不填写时间；执行后填写实际时间
 evidence_catalog: []

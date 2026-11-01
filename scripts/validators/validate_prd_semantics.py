@@ -556,43 +556,51 @@ def _confirmed_status(value: str) -> bool:
 
 
 def check_body_decision_conflicts(raw: str) -> list[SemFinding]:
-    """D6: exact-topic conflicts across canonical human decision tables.
-
-    This is deliberately table-bounded rather than broad prose matching, so a
-    product manager's authoritative decision/unknown tables are checked without
-    pretending to understand unrelated natural-language paragraphs. Decisions
-    and unknowns may be split across sections, so collection is document-wide.
-    """
-    findings: list[SemFinding] = []
-    decided: dict[str, tuple[str, int]] = {}
-    opened: dict[str, tuple[str, int]] = {}
-    for _heading, header, rows in _markdown_tables(raw):
-        lowered = [cell.casefold() for cell in header]
-        id_col = next((i for i, cell in enumerate(lowered) if re.search(r"\b(?:unk|dec)(?:\s*/\s*(?:unk|rev|dec))*\s*id\b", re.sub(r"[`*_]", "", cell), re.I)), None)
+    """Compare explicit topic AND applicability; ambiguous joins remain candidates."""
+    records = []
+    dimensions = {
+        "scope": ("适用范围", "范围", "scope", "市场", "market", "租户", "tenant"),
+        "object": ("业务对象", "对象", "object", "subject"),
+        "version": ("适用版本", "版本", "version", "baseline"),
+        "period": ("生效时间", "适用时间", "effective", "period"),
+    }
+    for heading, header, rows in _markdown_tables(raw):
+        lowered = [re.sub(r"[`*_]", "", cell).strip().casefold() for cell in header]
+        id_col = next((i for i, cell in enumerate(lowered) if re.search(r"\b(?:unk|dec)(?:\s*/\s*(?:unk|rev|dec))*\s*id\b", cell, re.I)), None)
         topic_col = next((i for i, cell in enumerate(lowered) if any(term in cell for term in ("问题", "冲突", "topic", "question"))), None)
         status_col = next((i for i, cell in enumerate(lowered) if any(term in cell for term in ("结论", "状态", "status", "decision"))), None)
-        if id_col is None or topic_col is None or status_col is None:
+        if None in (id_col, topic_col, status_col):
             continue
+        columns = {key: next((i for i, cell in enumerate(lowered) if cell in aliases), None) for key, aliases in dimensions.items()}
         for line_no, cells in rows:
             if max(id_col, topic_col, status_col) >= len(cells):
                 continue
-            item_id = cells[id_col].strip("`* ").upper()
-            topic = _normalized_topic(cells[topic_col])
+            identity = cells[id_col].strip("`* ").upper()
             status = _normalized_topic(cells[status_col])
-            if not topic:
+            confirmed = identity.startswith("DEC-") and _confirmed_status(status)
+            opened = identity.startswith("UNK-") and any(word in status for word in ("未关闭", "开放", "阻断", "待确认", "open", "blocked", "unresolved", "pending"))
+            if not (confirmed or opened):
                 continue
-            if item_id.startswith("DEC-") and _confirmed_status(status):
-                decided[topic] = (item_id, line_no)
-            elif item_id.startswith("UNK-") and any(term in status for term in ("未关闭", "开放", "阻断", "待确认", "open", "blocked", "unresolved", "pending")):
-                opened[topic] = (item_id, line_no)
-    for topic in sorted(set(decided) & set(opened)):
-        decision_id, decision_line = decided[topic]
-        unknown_id, unknown_line = opened[topic]
-        findings.append(SemFinding(
-            "BLOCK", "PRD-CONFIRMED-OPEN-UNKNOWN-CONFLICT",
-            f"正文决策表的同一问题同时登记为已确认决策 {decision_id} 和未关闭未知项 {unknown_id}；关闭其中一个并同步 frontmatter/附录",
-            f"{decision_id}@line {decision_line} vs {unknown_id}@line {unknown_line}",
-        ))
+            scope = {key: _normalized_topic(cells[col]) for key, col in columns.items() if col is not None and col < len(cells) and cells[col].strip() not in {"", "-", "待定", "unknown"}}
+            records.append((identity, line_no, _normalized_topic(cells[topic_col]), confirmed, scope))
+    findings = []
+    for decision in [x for x in records if x[3]]:
+        for unknown in [x for x in records if not x[3]]:
+            if not decision[2] or decision[2] != unknown[2]:
+                continue
+            shared = set(decision[4]) & set(unknown[4])
+            differing = [key for key in shared if decision[4][key] != unknown[4][key]]
+            broad = {"全部", "所有", "通用", "全国", "all", "global", "*"}
+            if differing and all(decision[4][key] not in broad and unknown[4][key] not in broad for key in differing):
+                continue  # Explicit distinct applicability labels, not one decision.
+            uncertain = bool(differing or set(decision[4]) != set(unknown[4]))
+            findings.append(SemFinding(
+                "GAP" if uncertain else "BLOCK",
+                "PRD-DECISION-SCOPE-UNRESOLVED" if uncertain else "PRD-CONFIRMED-OPEN-UNKNOWN-CONFLICT",
+                "同主题的决定与未知项缺少可比的适用范围；先核对对象、范围和版本，不能直接关闭未知项" if uncertain else
+                f"同一适用范围的问题同时为已确认 {decision[0]} 和未关闭 {unknown[0]}；核对现行依据并同步实际状态，不为通过检查改写决定",
+                f"{decision[0]}@line {decision[1]} vs {unknown[0]}@line {unknown[1]}",
+            ))
     return findings
 
 

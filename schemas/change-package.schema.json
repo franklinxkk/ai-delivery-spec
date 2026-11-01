@@ -75,7 +75,8 @@
           "type": "object",
           "required": ["required", "strategy", "rollback"],
           "properties": {
-            "required": { "type": "boolean" },
+            "required": { "enum": [true, false, "unknown", null] },
+            "decision_ref": { "type": "string" },
             "strategy": { "type": "string" },
             "rollback": { "type": "string" },
             "reconciliation": { "type": "string" }
@@ -86,7 +87,7 @@
     "compatibility": {
       "type": "object",
       "properties": {
-        "stable_ids_preserved": { "type": "boolean" },
+        "stable_ids_preserved": { "enum": [true, false, "unknown", null] },
         "deprecated_ids": { "type": "array", "items": { "type": "string" } },
         "replacement_map": { "type": "object", "additionalProperties": { "type": "string" } },
         "consumer_actions": { "type": "array", "items": { "type": "string" } }

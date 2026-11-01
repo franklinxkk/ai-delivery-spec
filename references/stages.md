@@ -28,6 +28,8 @@ python scripts/ai_delivery_spec_cli.py impact --truth product-truth.yaml --chang
 
 PRD 标题自由，`ADS:scope/behavior/acceptance` 仅辅助定位；无法定位返回待评阅，不判缺失。不强制篇幅、附录、API路径或元数据；使用 frontmatter 时须为 YAML 对象。见[模板](templates/unified-requirement-prd-template.md)及[声明校验](../scripts/requirement_contract.py)。
 
+阶段名称由同一词表识别。`prototype`、`change` 是活动，不自动排在其他阶段前后；未知项阻断这些活动时按本次实际依赖判断，不确定保留 GAP。路由工具支持的目标子集见 `route-stage --help`。
+
 `--scope-ref` 仅限制已明确归属的未知/审查，不过滤无归属风险。静态 PASS 只说明指定声明未发现阻断；GAP与未执行证据保留，不代表业务/浏览器/客户验收。
 
 `gate --profile prd --stage frame|explore` 检查分析结论，省略阶段按baseline。triage不能解析全部排除条件；候选已明确属于另一需求时保留归属、继续当前目标，不照单追问。
@@ -38,7 +40,23 @@ PRD 标题自由，`ADS:scope/behavior/acceptance` 仅辅助定位；无法定�
 
 ## 契约样例校验
 
-已有机器契约需联调时，按需执行 `python scripts/ai_delivery_spec_cli.py check-examples --input cases.yaml --format json`。复用权威Schema及正反样例，核对拒绝原因；不自动加入PRD gate。输入、边界及退出码见 [用法](../README.md#契约样例校验--contract-examples)。它不证明自然语言一致性或运行行为，工具失败不能当合法拒绝。
+已有机器契约需联调时，按需执行 `python scripts/ai_delivery_spec_cli.py check-examples --input cases.yaml --format json`。复用权威Schema及正反样例，核对拒绝原因；不自动加入PRD gate。输入直接引用同目录的现有 JSON Schema 与正反例；退出码 0=符合预期，1=与预期不符，2=输入/校验环境无效。它不证明自然语言一致性或运行行为，工具失败不能当合法拒绝。
+
+示例 `cases.yaml`（只有机器契约联调需要，不是 PRD 必填项）：
+
+```yaml
+contracts:
+  - id: name-required
+    schema: schema.json
+    cases:
+      - {id: valid-name, instance: valid.json, valid: true}
+      - id: missing-name
+        instance: invalid.json
+        valid: false
+        error: {keyword: required, instance_path: ""}
+```
+
+`schema.json` 声明 JSON Schema 2020-12、对象类型及必填 `name`；`valid.json` 为 `{"name":"工单"}`，`invalid.json` 为 `{}`。负例因指定约束被拒绝才算通过，读不到文件不算。路径在输入目录内解析，不访问远程 Schema。
 
 ## 领域检索
 

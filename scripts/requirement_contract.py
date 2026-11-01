@@ -4,7 +4,7 @@ import re
 from typing import Any
 import yaml
 from scan_requirement_ambiguity import inspect_content, prose_lines
-from stage_contract import unknown_rows, contract_token, OPEN_UNKNOWN, CLOSED_UNKNOWN
+from stage_contract import unknown_rows, contract_token, OPEN_UNKNOWN, CLOSED_UNKNOWN, GOVERNED_INDEX, blocking_relation
 
 
 def load_declarations(raw: str) -> dict:
@@ -106,8 +106,8 @@ def semantic_review_location(body: str, category: str, scope_refs: list[str]) ->
         shown = "; ".join(candidates[:6])
         return "候选正文位置（归属待核对）：" + shown, "Candidate prose locations (ownership needs review): " + shown
     return "声明中启用了该复核类别，但正文未定位；先确认它适用的模块或范围", "This category is declared, but its body location is unknown; first identify the applicable module or scope"
-STAGES = {s: n for n, s in enumerate(("frame", "explore", "intake", "clarify", "specify", "prototype", "review", "baseline", "implementation", "acceptance", "closed"))}
-STAGES["inventory"] = -1
+STAGES = GOVERNED_INDEX
+
 
 
 def string_list(value: Any, *, nonempty: bool = False) -> bool:
@@ -427,7 +427,10 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
             buckets["invalid_blocking_stage"].add(identity)
             add("BLOCK", "SPEC-UNKNOWN-STAGE", "Unrecognized blocking stage", str(unknown.get("id", "")))
             continue
-        reached = any(STAGES.get(stage, 0) >= STAGES[s] for s in stops if s in STAGES)
+        relations = [blocking_relation(stage, s) for s in stops]
+        reached = any(value is True for value in relations)
+        if not reached and None in relations:
+            add("GAP", "SPEC-UNKNOWN-ACTIVITY-SCOPE", "Prototype/change activities are not a linear stage order; retain the unknown and identify this delivery's actual dependencies", identity)
         if reached:
             buckets["blocking_now"].add(identity)
         refs = unknown.get("affected_refs", unknown.get("scope_refs", []))
@@ -462,7 +465,7 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
             if not conflict.get("resolution_ref"):
                 add("BLOCK", "SPEC-CONFLICT-CLOSURE", "Resolved conflict needs its decision reference", str(conflict.get("id", "")))
         else:
-            add("BLOCK" if STAGES.get(stage, 0) >= STAGES["baseline"] else "GAP", "SPEC-SOURCE-CONFLICT", "Resolve this topic before baselining", str(conflict.get("id", "")))
+            add("BLOCK" if blocking_relation(stage, "baseline") is True else "GAP", "SPEC-SOURCE-CONFLICT", "Resolve this topic before baselining", str(conflict.get("id", "")))
     covered: dict[str, set[str]] = {}
     expected_scope = list(scope) or doc.get("requirement_ids", doc.get("scope_refs", []))
     if not string_list(expected_scope):

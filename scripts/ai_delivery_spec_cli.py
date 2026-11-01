@@ -16,16 +16,14 @@ from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from xml.etree import ElementTree as ET
 
+from cli_support import dependency_message, shell_command
+
 try:
     import yaml
     from jsonschema import Draft202012Validator, FormatChecker
 except ModuleNotFoundError as exc:  # pragma: no cover - clean-machine path
     missing = getattr(exc, "name", "PyYAML/jsonschema")
-    message = (
-        f"Missing runtime dependency {missing}. Run: python -m pip install -r scripts/requirements.txt"
-        if any(value == "en-US" for value in sys.argv) else
-        f"缺少运行依赖 {missing}。请先执行：python -m pip install -r scripts/requirements.txt"
-    )
+    message = dependency_message(getattr(exc, "name", "PyYAML/jsonschema"), "en-US" in sys.argv)
     print(message, file=sys.stderr)
     raise SystemExit(4) from exc
 

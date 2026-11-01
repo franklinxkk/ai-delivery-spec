@@ -40,92 +40,96 @@ metrics:
   skill_trigger_recall:
     formula: matched requirement tasks that invoke the skill / all matched requirement tasks
     direction: higher_is_better
-    release_threshold: 1.0
+    evaluation_target: 1.0
   skill_trigger_precision:
     formula: correctly invoked requirement tasks / all skill invocations
     direction: higher_is_better
-    release_threshold: 1.0
+    evaluation_target: 1.0
   first_response_value_rate:
     formula: trials whose first response provides a useful result before asking / all trials
     direction: higher_is_better
-    release_threshold: 1.0
+    evaluation_target: 1.0
   time_to_first_usable_result_seconds:
     formula: seconds from request receipt to the first user-usable decision, specification slice or prototype change
     direction: lower_is_better
-    release_threshold: baseline_relative
+    evaluation_target: baseline_relative
   clarification_decision_turns:
     formula: assistant clarification turns before the target direction is decided
     direction: lower_is_better
-    release_threshold: clear_at_most_1_ambiguous_at_most_2_high_risk_at_most_4
+    evaluation_target: clear_at_most_1_ambiguous_at_most_2_high_risk_at_most_4
   unnecessary_stage_rate:
     formula: executed workstations not required by the explicit target / all executed workstations
     direction: lower_is_better
-    release_threshold: 0.0
+    evaluation_target: 0.0
   overinterpretation_rate:
     formula: unsupported scope, redesign or governance additions / delivered decisions and behaviors
     direction: lower_is_better
-    release_threshold: 0.0
+    evaluation_target: 0.0
   visual_lock_consistency_rate:
     formula: sampled pages matching the frozen tokens, shell, density and component variants / sampled pages
     direction: higher_is_better
-    release_threshold: 1.0
+    evaluation_target: 1.0
   gate_root_cause_coverage_rate:
     formula: unique finding codes shown in default concise diagnostics / all unique finding codes
     direction: higher_is_better
-    release_threshold: 1.0
+    evaluation_target: 1.0
   gate_diagnostic_compaction_ratio:
     formula: total findings / root-cause groups shown in the default concise diagnostics
     direction: higher_is_better
-    release_threshold: baseline_relative
+    evaluation_target: baseline_relative
   gate_repair_cycles:
     formula: gate executions from first failure to passing target milestone
     direction: lower_is_better
-    release_threshold: baseline_relative
+    evaluation_target: baseline_relative
   task_satisfaction_rate:
     formula: real users rating the result satisfied or very satisfied / users providing a rating
     direction: higher_is_better
-    release_threshold: baseline_relative
+    evaluation_target: baseline_relative
   contract_adherence_rate:
-    formula: satisfied obligation weight / total executed obligation weight
+    formula: satisfied checked obligation weight / total checked applicable obligation weight; not calculated when no obligations were checked
     direction: higher_is_better
-    release_threshold: 0.95
+    evaluation_target: 0.95
   p0_contract_adherence_rate:
-    formula: satisfied P0 obligation weight / total executed P0 obligation weight
+    formula: satisfied checked P0 obligation weight / total checked applicable P0 obligation weight; not calculated when none checked
     direction: higher_is_better
-    release_threshold: 1.0
+    evaluation_target: 1.0
   unsupported_invention_rate:
     formula: unsupported business behaviors / delivered business behaviors
     direction: lower_is_better
-    release_threshold: 0.0
+    evaluation_target: 0.0
   context_loss_rate:
-    formula: missing or conflict obligation weight / total executed obligation weight
+    formula: confirmed missing or conflicting checked obligation weight / total checked applicable obligation weight; report unchecked scope separately
     direction: lower_is_better
-    release_threshold: 0.05
+    evaluation_target: 0.05
   change_regression_rate:
     formula: failed impacted acceptance / impacted acceptance
     direction: lower_is_better
-    release_threshold: 0.0
+    evaluation_target: 0.0
   spec_rework_rate:
     formula: slices reopened for specification mismatch / delivered slices
     direction: lower_is_better
-    release_threshold: 0.05
+    evaluation_target: 0.05
   tokens_per_accepted_ac:
     formula: input plus output tokens / accepted acceptance paths
     direction: lower_is_better
-    release_threshold: baseline_relative
+    evaluation_target: baseline_relative
   human_navigation_seconds:
     formula: measured time for an intended reader to find the required behavior
     direction: lower_is_better
-    release_threshold: baseline_relative
+    evaluation_target: baseline_relative
   unknown_contract_completeness_rate:
     formula: prototype unknowns with priority, owner, blocks_stage, affected_refs and fallback / all prototype unknowns
     direction: higher_is_better
-    release_threshold: 1.0_at_review_or_later
+    evaluation_target: 1.0_at_review_or_later
   evidence_claim_honesty_rate:
     formula: public and delivery conclusions whose claim level does not exceed their cited evidence level / all sampled conclusions
     direction: higher_is_better
-    release_threshold: 1.0
-release_requirements:
+    evaluation_target: 1.0
+  obligation_coverage_rate:
+    formula: checked applicable obligation weight / frozen applicable obligation weight
+    direction: higher_is_better
+    evaluation_target: declare coverage and critical unchecked obligations; do not hide them in satisfaction rate
+effect_study_requirements:
   minimum_repetitions: 3
   required_stages: [requirement, design, coding_delivery]
   required_shapes: [greenfield, brownfield]
@@ -147,3 +151,10 @@ release_requirements:
     silent_truncation: 0
     coding_delivery_requires_executed_slice: true
     token_measurement_required: true
+
+metric_application: Evaluation targets guide the named study, not automatic release gates for every maintenance change. Use equal counts unless weights were justified before execution.
+
+engineering_release_requirements:
+- No known unresolved material contract contradiction in changed scope
+- Clean attributable runtime package and affected-path positive/negative verification
+- Report limitations; no efficacy claim from engineering checks alone

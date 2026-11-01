@@ -183,6 +183,42 @@ def explicit_question_candidates(text: str) -> list[dict]:
     return result
 
 
+def _bound_guard(line: str, context: str, trigger: str, guard: str) -> bool:
+    """Only consume an answer in the same clause/row or explicitly bound subject."""
+    def affirmed(value):
+        return any(_affirmative_match(piece, guard) for piece in re.split(r"[，,]", value)) and not re.search(r"是否|待确认|尚未决定|未明确|\b(?:whether|tentative|proposed|TBD)\b|to be confirmed", value, re.I)
+    clauses = [line] if line.lstrip().startswith("|") else re.split(r"[。；;\n]|(?<=[a-z])\.\s+", line)
+    for clause in clauses:
+        hit = re.search(trigger, clause, re.I)
+        if not hit:
+            continue
+        if affirmed(clause):
+            return True
+        # A semicolon may continue the same rule with an omitted object. Keep
+        # this narrow: a newly named business object is not a continuation.
+        tail = line[line.find(clause) + len(clause):]
+        continuation = re.match(r"^[；;]\s*((?:由|按|空值|发布|保留|retain\b|operators?\b|publication\b)[^。；;\n]*)", tail, re.I)
+        if continuation and affirmed(continuation[1]):
+            return True
+        refs = set(re.findall(r"\b(?:REQ|RULE|ACT|FLD)-[A-Z0-9-]+\b", clause, re.I))
+        prefix = re.sub(r"^[\s>*#-]+", "", clause[:hit.start()]).strip()
+        subject = re.sub(r"\s+(?:is|has|was|can|may)\s*$", "", prefix, flags=re.I)
+        # A short explicit noun label, never a generic nearby paragraph.
+        if not re.fullmatch(r"[\w\u4e00-\u9fff ]{2,24}", subject) or subject in {"当", "如果", "系统", "the", "when", "if"}:
+            subject = ""
+        for candidate in re.split(r"[。；;\n]", context):
+            bound = bool(refs & set(re.findall(r"\b(?:REQ|RULE|ACT|FLD)-[A-Z0-9-]+\b", candidate, re.I)))
+            bound = bound or bool(subject and re.match(r"^\s*(?:[-*]\s*)?" + re.escape(subject) + r"(?=\b|[\u4e00-\u9fff])", candidate, re.I))
+            applicability = r"(?:版本|version\s*|\bv)\s*\d[\w.]*|市场\s*[A-Za-z0-9]+"
+            source_scope = set(re.findall(applicability, clause, re.I))
+            candidate_scope = set(re.findall(applicability, candidate, re.I))
+            if (source_scope or candidate_scope) and source_scope != candidate_scope:
+                bound = False
+            if bound and affirmed(candidate):
+                return True
+    return False
+
+
 def inspect_content(text: str, *, intake_questions: bool = False) -> dict:
     """Bounded Chinese/English probes, never an NLP completeness or truth proof.
 
@@ -250,16 +286,16 @@ def inspect_content(text: str, *, intake_questions: bool = False) -> dict:
                 continue  # A scope reference does not redefine the metric contract.
             if re.search(trigger, line, re.I):
                 risks.update(facets)
-                guarded = bool(re.search(guard, context, re.I))
+                guarded = _bound_guard(line, context, trigger, guard)
                 if kind == "return-object":
-                    guarded = guarded or _affirmative_match(context, r"(?:仍用|沿用|保留)原\s*(?:ID|编号|合同号)|(?:ID\s*[/与和]\s*号|编号|合同号)不变")
+                    guarded = guarded or _bound_guard(line, context, trigger, r"(?:仍用|沿用|保留)原\s*(?:ID|编号|合同号)|(?:ID\s*[/与和]\s*号|编号|合同号)不变")
                     # A field row can itself state stable identity throughout
                     # return/resubmit; it need not repeat a recovery chapter.
                     identity_row = re.match(r"^\s*\|[^|]*(?:编号|身份|\bID\b)[^|]*\|", line, re.I)
                     guarded = guarded or bool(identity_row and _affirmative_match(
                         line, r"退回[^。；;|\n]{0,24}(?:全过程沿用|始终保留|始终不变)"))
                 if kind == "deep-link":
-                    guarded = (_affirmative_match(context, guard) or _explicit_deep_link_guard(line)
+                    guarded = (_bound_guard(line, context, trigger, guard) or _explicit_deep_link_guard(line)
                                or _affirmative_match(line, r"服务端[^。；;|\n]{0,8}验证[^。；;|\n]{0,8}身份[^。；;|\n]{0,8}对象范围"))
                 if not guarded:
                     add(kind, category, facets, i, line, action)

@@ -41,12 +41,13 @@ impacts:
   integrations: []
   documentation: []
   data_migration:
-    required: false
-    strategy: not_applicable
-    rollback: not_applicable
-    reconciliation: not_applicable
+    required: unknown # true / false / unknown；未评估不预填“不需要”
+    decision_ref: "" # 复用实际决定或来源；false 本身不是决定依据
+    strategy: ""
+    rollback: ""
+    reconciliation: ""
 compatibility:
-  stable_ids_preserved: true
+  stable_ids_preserved: unknown
   deprecated_ids: []
   replacement_map: {}
   consumer_actions: []

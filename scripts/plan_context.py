@@ -9,8 +9,14 @@ import math
 from pathlib import Path
 from typing import Any
 
-import yaml
-from jsonschema import Draft202012Validator
+import sys
+from cli_support import dependency_message, run_cli
+try:
+    import yaml
+    from jsonschema import Draft202012Validator
+except ModuleNotFoundError as exc:
+    print(dependency_message(str(exc.name)), file=sys.stderr)
+    raise SystemExit(4) from exc
 
 from validators.validate_spec_config import validate as validate_config
 
@@ -48,7 +54,10 @@ DOMAIN_FILES = {
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
-    return yaml.safe_load(path.read_text(encoding="utf-8"))
+    value = yaml.safe_load(path.read_text(encoding="utf-8-sig"))
+    if not isinstance(value, dict):
+        raise ValueError(f"{path}: expected a YAML object")
+    return value
 
 
 def estimate_tokens(document: dict[str, Any]) -> int:
@@ -303,4 +312,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))

@@ -52,7 +52,9 @@ class PRDChecks:
                 if not isinstance(metadata, dict):
                     raise ValueError("Frontmatter must be an object")
             except (yaml.YAMLError, ValueError) as exc:
-                self.add("BLOCK", "PRD-FRONTMATTER", path, str(exc))
+                mark = getattr(exc, "problem_mark", None)
+                message = f"YAML syntax invalid at document line {mark.line + 2}, column {mark.column + 1}; check brackets, quotes and indentation" if mark else str(exc)
+                self.add("BLOCK", "PRD-FRONTMATTER", path, message)
                 return
             body = "\n" * (end + 1) + "".join(lines[end + 1:])
         ownership = line_scopes(raw) if scope_refs else {}

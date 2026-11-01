@@ -8,7 +8,13 @@ import re
 from pathlib import Path
 from typing import Any
 
-import yaml
+import sys
+from cli_support import dependency_message, run_cli
+try:
+    import yaml
+except ModuleNotFoundError as exc:
+    print(dependency_message(str(exc.name)), file=sys.stderr)
+    raise SystemExit(4) from exc
 
 from manage_execution_state import load, sha256_file, verify_state_value
 
@@ -99,6 +105,8 @@ def main() -> int:
     args = parser.parse_args()
 
     truth = yaml.safe_load(args.truth.read_text(encoding="utf-8"))
+    if not isinstance(truth, dict):
+        raise ValueError(f"{args.truth}: expected a YAML object")
     allowed_ids: set[str] | None = None
     state_hash: str | None = None
     if args.execution_state:
@@ -133,4 +141,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(run_cli(main))
