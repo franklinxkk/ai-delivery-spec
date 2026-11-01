@@ -46,7 +46,7 @@ if str(VALIDATOR_DIR) not in sys.path:
     sys.path.insert(0, str(VALIDATOR_DIR))
 
 from scan_prototype_css import scan as scan_prototype_css
-from validate_acceptance_run import execution_environment
+from validate_acceptance_run import execution_environment, acceptance_results
 LEVELS = ("L0", "L1", "L2", "L3", "L4")  # Legacy specialized-tool compatibility only.
 from validators.validate_prd_semantics import run_semantic_checks
 from requirement_contract import SEMANTIC_REVIEW_GUIDANCE, semantic_review_guidance
@@ -143,6 +143,10 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "SPEC-CONTENT": ("正文中可能还有两种不同的业务理解。", "先读指出的原句及其规则引用，核实是否已有答案；确有缺口才补决定，不要只添加一条评阅通过记录。"),
     "SPEC-SEMANTIC-NOT-PROVEN": ("现有记录还不能证明这部分业务规则已被复核。", "按提示范围核对来源和关键反例，记录实际评阅结果；尚未评阅就保持缺口，不能补写虚构的通过。"),
     "SPEC-REVIEW-LOCATION": ("工具未定位到这部分内容，不等于作者没有写。", "先在原文定位相应目标、行为或验收；可在已有内容处加 ADS 标记帮助定位，无须增加同义章节。"),
+    "SPEC-EMPTY-SECTION": ("已找到标题或表格列，但其中没有实际说明。", "在原位置补齐本次范围、行为或可观察的验收结果；未知仍写未知，不复制一套章节。"),
+    "ACCEPTANCE-NO-EXECUTION": ("接受结论没有任何已执行项支持。", "保留 pending，实际执行后记录结果和证据；把项目改成可选不能替代执行。"),
+    "ACCEPTANCE-RESULT-MISSING": ("失败或阻塞只有标签，没有实际结果。", "填写观察到的失败结果或不能执行的原因；不要把未执行改成通过。"),
+    "ACCEPTANCE-DUPLICATE-RUN": ("多个文件声明同一验收运行编号，记录身份不明确。", "核对引用的是哪次真实执行；同一次执行只提供权威记录，不同执行使用不同编号并同步引用。"),
     "GATE-MISSING-INPUT": (
         "所选门禁缺少必需输入。",
         "按 finding 指示补充对应的 --requirement、--prd、--prototype、--inventory 或 --manifest 参数。",
@@ -368,8 +372,8 @@ FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
         "按原型内 data-ac 生成 ARUN-*，在真实浏览器执行后用 --acceptance-run 重新校验；缺证据时不得声明原型完成。",
     ),
     "PROTO-BROWSER-EVIDENCE-INCOMPLETE": (
-        "浏览器验收记录没有覆盖原型声明的全部 AC，或没有形成可接受结论。",
-        "补跑缺失 AC，填写 actual_result、evidence_refs、浏览器环境和签署结论，再重跑门禁。",
+        "当前原型的版本、AC 与实际浏览器结果尚未完整对应。",
+        "核对现有基线，补跑缺失 AC，记录 actual_result、evidence_refs 和实际环境；模拟结果不补浏览器覆盖，执行记录与最终验收签署分别判断。",
     ),
     "PROTO-UNHANDLED-ACTION": (
         "原型动作没有可观察的分发路径。",
@@ -624,6 +628,11 @@ EN_FINDING_GUIDANCE: dict[str, tuple[str, str]] = {
     "SPEC-CONTENT": ("The text may still allow different business interpretations.", "Read the cited sentence and its rule references first. Resolve a real gap or record why the candidate does not apply; do not merely add a review pass."),
     "SPEC-SEMANTIC-NOT-PROVEN": ("The records do not yet establish that this scope was reviewed.", "Review its sources and distinguishing counterexamples, then record the actual result. Do not fabricate a pass."),
     "SPEC-REVIEW-LOCATION": ("The tool could not locate this content; that does not prove it is missing.", "Locate the existing goal, behavior or acceptance text. An ADS marker can help without adding a duplicate section."),
+    "SPEC-EMPTY-SECTION": ("A heading or table column was found without substantive content.", "Fill the existing location with the scope, behavior or observable acceptance result; keep unknowns explicit."),
+    "ACCEPTANCE-NO-EXECUTION": ("Acceptance has no executed items to support it.", "Keep pending until actual execution is recorded; making items optional does not execute them."),
+    "ACCEPTANCE-RESULT-MISSING": ("A failed or blocked item has no observed outcome.", "Record the actual failure or blocking reason; do not mark an unexecuted item as passed."),
+    "ACCEPTANCE-DUPLICATE-RUN": ("Different files claim the same run identity.", "Resolve the authoritative record for this execution; separate executions need separate IDs and updated references."),
+    "PROTO-BROWSER-EVIDENCE-INCOMPLETE": ("Current prototype version, ACs and browser results are not fully matched.", "Check the existing baseline and execute missing ACs in a browser. Record actual outcomes, references and environment; simulation does not fill browser coverage, and execution is separate from sign-off."),
     "GATE-MISSING-INPUT": ("The selected gate is missing a required input.", "Provide the input named by the finding and rerun the same command."),
     "GATE-NOT-FILE": ("An input path is not a readable file.", "Correct the path, confirm the file exists, and rerun the same command."),
     "REQ-PARSE": ("The requirement register is not readable UTF-8 YAML.", "Repair YAML syntax or use the PRD profile for a Markdown artifact."),
@@ -856,6 +865,8 @@ def english_guidance_for(code: str) -> tuple[str, str]:
 
 
 REPAIR_EXAMPLES: tuple[tuple[str, str], ...] = (
+    ("SPEC-REVIEW-LOCATION", "例如先查看现有表格的「模块／调整后行为／验收」列；其他命名人工核对即可。可就地加定位标记，不新增同义章节或授权记录。"),
+    ("SPEC-EMPTY-SECTION", "例如「验收」列只有表头时，在原单元格补实际可观察结果；不要为填满表格编造已定规则。"),
     ("PROTO-INLINE-NATIVE-COLLISION", "例如把关闭抽屉绑定到 app.closeDrawer 或 addEventListener；不能不加核对地换成可能关闭浏览器窗口的 window.close。form 同样须明确指向应用函数；修复后点击原入口核对结果。"),
     ("PROTO-CSS-IMPORTANT-POLLUTION", '例如 [aria-invalid="true"] 的错误边框覆盖：核对非法输入变红、纠正后恢复及焦点 outline 仍可见；据实际影响决定保留或调整。'),
     ("SPEC-OPEN-DECISION", "分期期数未决时，合同查询可继续；付款计划生成保持受阻，等待原约定或授权决定。不能默认一期。"),
@@ -906,6 +917,8 @@ def english_repair_example_for(code: str) -> str:
     if _is_legacy_review_finding(code):
         return "Align the chosen presentation_mode, actual HTML and baseline-bound manifest; contextual drawers do not require tabs."
     examples = (
+        ("SPEC-REVIEW-LOCATION", "Locate the existing Module / After / Acceptance columns. Review other labels manually or add an in-place locator; do not add duplicate sections or authorization records."),
+        ("SPEC-EMPTY-SECTION", "If an Acceptance column only has a header, add the actual observable result in that cell; do not invent a settled rule to fill it."),
         ("PROTO-INLINE-NATIVE-COLLISION", "For example, bind drawer closing to app.closeDrawer or addEventListener; do not blindly substitute window.close, which may close the browser window. Likewise, form must explicitly refer to the application function. Click the original control after repair."),
         ("PROTO-CSS-IMPORTANT-POLLUTION", 'For an [aria-invalid="true"] border override, verify the invalid border, correction/reset and visible focus outline; keep or adjust it based on the observed effect.'),
         ("SPEC-OPEN-DECISION", "If installment terms are undecided, contract lookup can proceed; payment-plan generation waits for the agreement or authorized decision. Do not default to one installment."),
@@ -1071,6 +1084,8 @@ class Gate(PRDChecks, PrototypeChecks, HandoffChecks):
         self.findings: list[Finding] = []
         self.metrics: dict[str, Any] = {}
         self.prototype_acceptance_refs: set[str] = set()
+        self.prototype_acceptance_by_path: dict[Path, set[str]] = {}
+        self.acceptance_documents: dict[Path, dict] = {}
         self.prototype_baseline_signatures: Counter[tuple[str, str, str]] = Counter()
         self.prototype_inherited_findings = 0
         self.review_workspace_contracts: list[tuple[Path, dict[str, Any]]] = []
@@ -1287,8 +1302,8 @@ def result_payload(gate: Gate, profile: str, retry_command: str = "", output_lan
     )
     if consumed_browser_evidence:
         coverage += (
-            "; external real-browser ARUN structure, evidence and sign-off were validated"
-            if english else "；已校验外部真实浏览器 ARUN 的结构、证据与签署"
+            "; applicable browser execution records and evidence references were checked; acceptance is a separate conclusion"
+            if english else "；已校验适用的浏览器执行记录及证据引用，验收接受另行判断"
         )
     return {
         "status": STATUSES[code],
@@ -1343,6 +1358,67 @@ def run_sidecar_validator(gate: Gate, script: str, path: Path, code: str, extra:
         lines = [line for line in (result.stdout.strip() or result.stderr.strip()).splitlines() if line]
     for line in lines[:10] or [f"{script} 校验失败"]:
         gate.add("BLOCK", code, path, line)
+
+
+def collect_acceptance_claims(gate: Gate, paths: list[Path]) -> dict[str, dict[str, Any]]:
+    """Keep record identity, results and evidence context together at every consumer."""
+    claims, seen_ids, seen_paths = {}, {}, set()
+    for path in paths:
+        path = path.resolve()
+        if path in seen_paths:
+            continue
+        seen_paths.add(path)
+        if not path.is_file():
+            gate.add("BLOCK", "GATE-NOT-FILE", path, "input does not exist or is not a file", "acceptance-run")
+            continue
+        before = len(gate.findings)
+        _, browser, conclusive = gate.check_acceptance_run(path)
+        document = gate.acceptance_documents.get(path, {})
+        run_id = str(document.get("run_id", "")).upper()
+        if run_id in seen_ids:
+            claims.pop(run_id, None)
+            gate.add("BLOCK", "ACCEPTANCE-DUPLICATE-RUN", path,
+                     f"同一 ARUN 编号由多个文件声明：{seen_ids[run_id]} / {path}；核对真实记录并仅提供本次适用的一份，不能按输入顺序覆盖", run_id)
+            continue
+        if re.fullmatch(r"ARUN-[A-Z0-9-]+", run_id):
+            seen_ids[run_id] = path
+        if any(item.severity == "BLOCK" for item in gate.findings[before:]):
+            continue
+        outcomes = acceptance_results(document)
+        claims[run_id] = {
+            **outcomes, "path": path, "item_count": len(document["items"]),
+            "browser": browser, "integration": execution_environment(document)[1],
+            "conclusive": conclusive, "conclusion": document["conclusion"],
+            "baseline_version": str(document["baseline_version"]),
+        }
+    gate.metrics["acceptance_run_items"] = sum(item["item_count"] for item in claims.values())
+    gate.metrics["acceptance_run_evidenced_acs"] = len(set().union(*(item["passed_acs"] for item in claims.values())))
+    return claims
+
+
+def check_browser_coverage(gate: Gate, claims: dict[str, dict[str, Any]], level: str, fallback_baseline: str = "") -> bool:
+    """Coverage is per current prototype and AC; simulation or sign-off cannot fill it."""
+    complete = []
+    for path, required_acs in gate.prototype_acceptance_by_path.items():
+        versions = {str(doc.get("baseline", {}).get("version", ""))
+                    for source, doc in gate.review_workspace_contracts if source.resolve() == path}
+        versions.discard("")
+        if len(versions) > 1:
+            complete.append(False)
+            if level in {"L3", "L4"}:
+                gate.add("GAP", "PROTO-BROWSER-EVIDENCE-INCOMPLETE", path, "当前原型存在多个基线声明，先核对适用版本", "baseline")
+            continue
+        expected = next(iter(versions), fallback_baseline)
+        applicable = [item for item in claims.values() if item["browser"] and expected and item["baseline_version"] == expected]
+        passed = set().union(*(item["passed_acs"] for item in applicable))
+        missing = required_acs - passed
+        complete.append(bool(required_acs) and bool(expected) and not missing)
+        if level in {"L3", "L4"} and (missing or not required_acs or not expected):
+            code = "PROTO-BROWSER-EVIDENCE-INCOMPLETE" if claims else "PROTO-BROWSER-EVIDENCE-MISSING"
+            gate.add("GAP", code, path,
+                     f"当前原型的浏览器执行证据未完整覆盖；基线={expected or '未声明'}。模拟、未执行项及其他基线不能补齐。已执行但未签署不等于未执行；验收接受另行判断。",
+                     ", ".join(sorted(missing)) or "AC mapping missing")
+    return bool(complete) and all(complete)
 
 
 def main() -> int:
@@ -1471,57 +1547,8 @@ def main() -> int:
     if args.profile in {"handoff", "full"} and valid_prd and args.manifest and args.manifest.is_file():
         gate.check_manifest_prd_binding(valid_prd, args.manifest)
         gate.check_review_manifest_binding(args.manifest)
-    valid_acceptance_runs: list[Path] = []
-    acceptance_claims: dict[str, dict[str, Any]] = {}
-    evidenced_acs: set[str] = set()
-    browser_evidence = False
-    conclusive_evidence = False
-    for acceptance_run in args.acceptance_run or []:
-        if not acceptance_run.is_file():
-            gate.add("BLOCK", "GATE-NOT-FILE", acceptance_run, "input does not exist or is not a file", "acceptance-run")
-            continue
-        findings_before = len(gate.findings)
-        passed, is_browser, is_conclusive = gate.check_acceptance_run(acceptance_run)
-        if any(item.severity == "BLOCK" for item in gate.findings[findings_before:]):
-            continue
-        valid_acceptance_runs.append(acceptance_run)
-        try:
-            run_document = yaml.safe_load(gate.read(acceptance_run)) or {}
-        except yaml.YAMLError:
-            run_document = {}
-        if isinstance(run_document, dict):
-            run_id = str(run_document.get("run_id", "")).upper()
-            if re.fullmatch(r"ARUN-[A-Z0-9-]+", run_id):
-                run_items = [item for item in run_document.get("items", []) or [] if isinstance(item, dict)]
-                acceptance_claims[run_id] = {
-                    "browser": is_browser,
-                    "integration": execution_environment(run_document)[1],
-                    "conclusive": is_conclusive,
-                    "conclusion": run_document.get("conclusion"),
-                    "baseline_version": str(run_document.get("baseline_version", "")),
-                    "covered_acs": {
-                        str(item.get("acceptance_ref", "")).upper()
-                        for item in run_items
-                        if str(item.get("acceptance_ref", "")).upper().startswith("AC-")
-                        and item.get("result") in {"pass", "fail"}
-                        and str(item.get("actual_result", "")).strip() and item.get("evidence_refs")
-                    },
-                    "passed_acs": set(passed),
-                    "failed_acs": {
-                        str(item.get("acceptance_ref", "")).upper()
-                        for item in run_items
-                        if item.get("result") in {"fail", "blocked"}
-                        and str(item.get("acceptance_ref", "")).upper().startswith("AC-")
-                    },
-                    "failed": str(run_document.get("conclusion", "")).casefold() == "rejected"
-                    or any(
-                        isinstance(item, dict) and item.get("result") in {"fail", "blocked"}
-                        for item in run_document.get("items", []) or []
-                    ),
-                }
-        evidenced_acs.update(passed)
-        browser_evidence = browser_evidence or (is_browser and is_conclusive)
-        conclusive_evidence = conclusive_evidence or is_conclusive
+    acceptance_claims = collect_acceptance_claims(gate, args.acceptance_run or [])
+    conclusive_evidence = any(item["conclusive"] for item in acceptance_claims.values())
     for review_path, review_document in gate.review_workspace_contracts:
         expected_baseline_version = str((review_document.get("baseline") or {}).get("version", ""))
         if str(review_document.get("schema_version", "")) in {"5.4.7-final", "5.4.8"}:
@@ -1661,27 +1688,9 @@ def main() -> int:
                     f"{step_id}: {status}",
                     affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
                 )
-    if valid_prototypes and prototype_level in {"L3", "L4"}:
-        if not valid_acceptance_runs:
-            gate.add(
-                "GAP", "PROTO-BROWSER-EVIDENCE-MISSING", valid_prototypes[0],
-                "L3/L4 原型只完成静态检查；未提供 ARUN-* 浏览器逐动作证据",
-                affected_consumers=("product", "ux", "frontend", "qa", "customer_acceptor"),
-            )
-        else:
-            missing_acs = sorted(gate.prototype_acceptance_refs - evidenced_acs)
-            if missing_acs:
-                gate.add(
-                    "GAP", "PROTO-BROWSER-EVIDENCE-INCOMPLETE", valid_acceptance_runs[0],
-                    f"浏览器验收缺少 {len(missing_acs)} 个原型 AC",
-                    ", ".join(missing_acs[:20]), related_refs=tuple(missing_acs[:100]),
-                )
-            if not browser_evidence:
-                gate.add("GAP", "PROTO-BROWSER-EVIDENCE-INCOMPLETE", valid_acceptance_runs[0], "ARUN environment 未声明真实浏览器/浏览器自动化环境", "environment")
-            if not conclusive_evidence:
-                gate.add("GAP", "PROTO-BROWSER-EVIDENCE-INCOMPLETE", valid_acceptance_runs[0], "ARUN 尚未形成 accepted/accepted_with_conditions 且有签署的结论", "conclusion/sign_offs")
-    gate.metrics["prototype_browser_evidence"] = bool(valid_acceptance_runs and browser_evidence and conclusive_evidence)
-    gate.metrics["acceptance_run_conclusive"] = bool(valid_acceptance_runs and conclusive_evidence)
+    fallback_baseline = str(gate._frontmatter(gate.read(valid_prd)).get("baseline_version", "")) if valid_prd else ""
+    gate.metrics["prototype_browser_evidence"] = check_browser_coverage(gate, acceptance_claims, prototype_level, fallback_baseline)
+    gate.metrics["acceptance_run_conclusive"] = conclusive_evidence
     custom_root = args.custom_root
     if custom_root is None and (Path.cwd() / "custom").is_dir():
         custom_root = Path.cwd() / "custom"

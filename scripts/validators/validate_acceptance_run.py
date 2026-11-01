@@ -112,6 +112,20 @@ def execution_environment(doc: dict) -> tuple[bool, bool]:
     return browser, integration
 
 
+def acceptance_results(doc: dict) -> dict[str, set[str]]:
+    """An AC passes only when all its declared items pass in this run."""
+    groups: dict[str, list[dict]] = {}
+    for item in doc.get("items", []):
+        groups.setdefault(item["acceptance_ref"].upper(), []).append(item)
+    def observed(item):
+        return item["result"] in {"pass", "fail"} and item["actual_result"].strip() and item["evidence_refs"]
+    return {
+        "covered_acs": {ref for ref, rows in groups.items() if all(observed(row) for row in rows)},
+        "passed_acs": {ref for ref, rows in groups.items() if all(row["result"] == "pass" and observed(row) for row in rows)},
+        "failed_acs": {ref for ref, rows in groups.items() if any(row["result"] in {"fail", "blocked"} and row["actual_result"].strip() for row in rows)},
+    }
+
+
 def validate_acceptance_document(doc: object, path: Path) -> list[dict[str, str]]:
     """One semantic authority for the standalone CLI and the composed gate."""
     schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
@@ -140,8 +154,12 @@ def validate_acceptance_document(doc: object, path: Path) -> list[dict[str, str]
         seen.add(item['id'])
         if item.get('result') == 'pass' and not item.get('actual_result', '').strip():
             add("ACCEPTANCE-PASS-NO-EVIDENCE", "pass 项必须填写实际结果和证据引用", item['id'])
+        elif item.get('result') in {'fail', 'blocked'} and not item.get('actual_result', '').strip():
+            add("ACCEPTANCE-RESULT-MISSING", "失败或阻塞项须记录实际结果/阻塞原因，不能用空白结果升级验证状态", item['id'])
     conclusion = doc.get("conclusion")
     accepted = conclusion in {"accepted", "accepted_with_conditions"}
+    if accepted and not any(item['result'] in {'pass', 'fail'} for item in items):
+        add("ACCEPTANCE-NO-EXECUTION", "没有已执行项，不能形成验收接受结论；全部为可选项也不等于已经执行")
     incomplete = [item.get("id") for item in items if item.get("mandatory") and item.get("result") != "pass"]
     if accepted and incomplete:
         add("ACCEPTANCE-INCOMPLETE-CONCLUSION", "接受结论仍有未通过的 mandatory 项；条件不能代替关键验收", ", ".join(incomplete))

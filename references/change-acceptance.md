@@ -12,7 +12,7 @@
 
 推测消费者先记候选，核实或排除保留依据；核实不代表获准修改，未核实高影响依赖限制完成声明。
 
-`impact` 仅沿已登记关系找候选，暴露缺种子、未解析关系和深度截断；命令见 [工具](stages.md)，输入见 [变更模板](templates/change-request-template.yaml)。复杂审计才用 change-package Schema；小改写在当前产物。迁移未评估可记录 unknown；旧 true/false 继续可读，进入依赖它的批准/实施前须有真实决定依据，不能把默认 false 当授权。
+`impact` 仅沿已登记关系找候选，暴露缺种子、未解析关系和深度截断；命令见 [工具](stages.md)，输入见 [变更模板](templates/change-request-template.yaml)。复杂审计才用 change-package Schema；小改写在当前产物。迁移未评估可记录 unknown；已知需要迁移但方案未定，也可保留草稿，依赖它的批准/实施前再补方案与回退。旧格式继续可读，但批准、同步、验证等完成声明仍须有相应记录，不能把旧 false 或格式版本当授权。
 
 已有对象如何处理须依授权决定；不能默认全部迁移或沿用。局部界面改动先留真实旧对象/草稿/进行中请求样本，改后核对新功能及这些样本仍遵循原规则，不能刷新演示数据掩盖回退。记录仍适用和失效的证据。反馈区分规格缺陷、实现偏差、过期测试、工具故障与新增范围；正确拒绝且无不当副作用才是负例通过，不改业务迁就测试。
 
@@ -31,7 +31,7 @@
 
 断言数、唯一 AC 数和已验证行为分开；编号注释不算覆盖。按同一输入核对来源→PRD→原型实际操作→实现结果，检查对象/字段含义、状态、权限、口径、拒绝和副作用，允许有明确映射的不同命名。AC 前提须能独立造数或重置；删除对象使旧 AC 失效。声明可配置的规则，用改值前后样本验证各消费者响应及生效时点，不把所有阈值升级成配置平台。
 
-复用 ARUN/EVD；真实验收保留 acceptance_ref、requirement_refs、result、actual_result、evidence_refs；execution_type 按实际区分静态、模拟、浏览器及联调，未知不猜，见 [验收模板](templates/acceptance-run-template.yaml)。本地证据可解析且不越出记录目录；远程链接或字符串不证明执行。
+复用 ARUN/EVD；真实验收保留 acceptance_ref、requirement_refs、result、actual_result、evidence_refs；execution_type 按实际区分静态、模拟、浏览器及联调，未知不猜，见 [验收模板](templates/acceptance-run-template.yaml)。同一运行中，一个 AC 的各项全部通过才计为该 AC 通过；失败/阻塞写实际结果或原因。浏览器覆盖只汇总当前基线、对应 AC 的浏览器结果；实际执行与最终签署分别判断，不能相互顶替。同一 ARUN 编号不能由不同文件覆盖解释。本地证据可解析且不越出记录目录；远程链接或字符串不证明执行。
 
 ## 关闭
 

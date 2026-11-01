@@ -268,6 +268,36 @@ def language_drift(doc: dict[str, Any], body: str) -> tuple[str, str] | None:
     return declared, "@line " + str(samples[0][0])
 
 
+def table_content_locations(body: str) -> dict[str, bool]:
+    """Locate existing Markdown columns, without judging their business correctness."""
+    aliases = {
+        "scope": r"模块|功能(?:模块)?|页面|范围|目标|scope|module|feature|page",
+        "behavior": r"(?:调整后|修改后|变更后|目标)?行为|规则|需求(?:描述|说明)|功能(?:描述|说明)|调整后|after|(?:new |proposed )?behavior|rules?",
+        "acceptance": r"验收(?:标准|条件)?|验证(?:标准|结果)?|预期结果|acceptance(?: criteria)?|verification|expected (?:result|outcome)",
+    }
+    def cells(line):
+        return [re.sub(r"[*`]", "", c).strip() for c in re.split(r"(?<!\\)\|", line.strip().strip("|"))]
+    lines = prose_lines(body)
+    locations: dict[str, bool] = {}
+    for index in range(len(lines) - 1):
+        headers, separator = cells(lines[index]), cells(lines[index + 1])
+        if len(headers) < 2 or len(separator) != len(headers) or not all(re.fullmatch(r":?-{3,}:?", c) for c in separator):
+            continue
+        rows = []
+        for line in lines[index + 2:]:
+            row = cells(line)
+            if "|" not in line or len(row) != len(headers):
+                break
+            rows.append(row)
+        for slot, pattern in aliases.items():
+            columns = [i for i, label in enumerate(headers) if re.fullmatch(pattern, label, re.I)]
+            if not columns:
+                continue
+            populated = any(row[i] and not re.fullmatch(r"[-—–…\s]+|TBD|TODO|待补(?:充)?|待填写", row[i], re.I) for row in rows for i in columns)
+            locations[slot] = locations.get(slot, False) or populated
+    return locations
+
+
 def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope: tuple[str, ...] = (), legacy_level: str = "auto") -> tuple[list[dict], dict]:
     findings: list[dict] = []
     resolved = route(doc, legacy_level, body=body)
@@ -301,6 +331,7 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
             f"Declared main language is {drift[0]}, but readable prose clearly uses another language. Review the prose or declaration; intentional bilingual documents may declare bilingual: true. Keep code, IDs and proper names unchanged.")
     if doc.get("status") in ("baseline", "baselined", "approved") and re.search(r"\bdraft\b", str(doc.get("baseline_version", "")), re.I):
         add("BLOCK", "PRD-STATUS-CONTRADICTION", "Baseline status contradicts draft version")
+    table_locations = table_content_locations(body)
     for slot, pattern in {
         "scope": r"范围|目标|差异|scope|goal|delta",
         "behavior": r"行为|规则|变更|结果|behavior|rule|change|result",
@@ -308,7 +339,11 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
     }.items():
         found = re.search(r"<!--\s*ADS:" + slot + r"\s*-->", body, re.I) or re.search(r"(?im)^#{1,6}\s+[^\n]*(?:" + pattern + r")[^\n]*", body)
         if not found:
-            add("GAP", "SPEC-REVIEW-LOCATION", "Locate or manually review " + slot + "; free-form prose is not proved incomplete", slot)
+            if slot in table_locations:
+                if not table_locations[slot]:
+                    add("GAP", "SPEC-EMPTY-SECTION", "Located table column has no content", slot)
+            else:
+                add("GAP", "SPEC-REVIEW-LOCATION", "Locate or manually review " + slot + "; free-form prose is not proved incomplete", slot)
         else:
             tail = body[found.end():]
             heading = re.match(r"^\s*(#{1,6})[^\n]*\n", tail) if found.group().startswith("<!--") else re.match(r"(#{1,6})", found.group())

@@ -34,7 +34,7 @@ from extract_interaction_ledger import (
     extract_handler_actions,
     inspect_runtime_action_assignments,
 )
-from validate_acceptance_run import validate_acceptance_document, execution_environment
+from validate_acceptance_run import validate_acceptance_document, execution_environment, acceptance_results
 
 
 @dataclass(frozen=True)
@@ -2916,6 +2916,7 @@ class PrototypeChecks:
         page_testids = [item for item in testids if item.lower().startswith("page-")]
         region_testids = [item for item in testids if item.lower().startswith("region-")]
         self.prototype_acceptance_refs.update(item.upper() for item in acceptance_refs)
+        self.prototype_acceptance_by_path[path.resolve()] = {item.upper() for item in acceptance_refs}
         if not page_testids:
             self.add("BLOCK" if actions or level in {"L2", "L3", "L4"} else "GAP", "PROTO-NO-PAGE-ANCHOR", path, "no page-* data-testid root was found")
         static_anchors = _StaticAnchorParser()
@@ -4020,14 +4021,16 @@ class PrototypeChecks:
         if error or document is None:
             self.add("BLOCK", "ACCEPTANCE-PARSE", path, error or "验收记录无效")
             return set(), False, False
+        self.acceptance_documents[path.resolve()] = document
         issues = validate_acceptance_document(document, path)
         for issue in issues:
             self.add("BLOCK", issue["code"], path, issue["message"], issue["ref"])
         if issues:
             return set(), False, False
-        evidenced = {str(item["acceptance_ref"]).upper() for item in document["items"] if item["result"] == "pass"}
+        outcomes = acceptance_results(document)
+        evidenced = outcomes["passed_acs"]
         browser_environment, _integration = execution_environment(document)
-        browser_environment = browser_environment and any(item["result"] in {"pass", "fail"} and item["actual_result"].strip() for item in document["items"])
+        browser_environment = browser_environment and bool(outcomes["covered_acs"])
         conclusive = document["conclusion"] in {"accepted", "accepted_with_conditions"}
         self.metrics.update({
             "acceptance_run_items": self.metrics.get("acceptance_run_items", 0) + len(document["items"]),

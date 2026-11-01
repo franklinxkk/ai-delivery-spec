@@ -42,31 +42,30 @@ def main() -> int:
 
     status = document.get("status")
     result = document.get("verification", {}).get("result")
+    decided = {"approved", "synchronized", "verified", "baselined", "implemented", "released"}
     if status in {"verified", "baselined", "released"} and result != "passed":
         failures.append(f"{status} change requires passed verification, got {result}")
-    if document.get("schema_version") == "5.1.0":
-        approvals = document.get("approvals", [])
-        if status in {"approved", "synchronized", "verified", "baselined", "implemented", "released"} and not approvals:
-            failures.append(f"{status} change requires approval records")
-        invalid_approvals = [item.get("role") for item in approvals if item.get("decision") not in {"approved", "approved_with_conditions"}]
-        if status in {"approved", "synchronized", "verified", "baselined", "implemented", "released"} and invalid_approvals:
-            failures.append("change has non-approved decisions: " + ", ".join(invalid_approvals))
-        if status in {"approved", "synchronized", "verified", "baselined", "implemented", "released"} and not document.get("diff"):
-            failures.append(f"{status} change requires a before/after diff")
-        if status in {"synchronized", "verified", "baselined", "implemented", "released"}:
-            synchronization = document.get("synchronization", [])
-            if not synchronization:
-                failures.append(f"{status} change requires versioned consumer synchronization records")
-            pending = [item.get("consumer") for item in synchronization if item.get("status") not in {"sent", "acknowledged"}]
-            if pending:
-                failures.append("change has unsynchronized consumers: " + ", ".join(pending))
-        if status == "baselined" and document.get("baseline_version") == document.get("target_version"):
-            failures.append("baselined change must advance target_version from baseline_version")
+    approvals = document.get("approvals", [])
+    if status in decided and not approvals:
+        failures.append(f"{status} change requires approval records")
+    invalid_approvals = [item.get("role") for item in approvals if item.get("decision") not in {"approved", "approved_with_conditions"}]
+    if status in decided and invalid_approvals:
+        failures.append("change has non-approved decisions: " + ", ".join(invalid_approvals))
+    if status in decided and not document.get("diff"):
+        failures.append(f"{status} change requires a before/after diff")
+    if status in decided - {"approved"}:
+        synchronization = document.get("synchronization", [])
+        if not synchronization:
+            failures.append(f"{status} change requires versioned consumer synchronization records")
+        pending = [item.get("consumer") for item in synchronization if item.get("status") not in {"sent", "acknowledged"}]
+        if pending:
+            failures.append("change has unsynchronized consumers: " + ", ".join(pending))
+    if status == "baselined" and document.get("baseline_version") == document.get("target_version"):
+        failures.append("baselined change must advance target_version from baseline_version")
     migration = document.get("impacts", {}).get("data_migration", {})
     required = migration.get("required")
-    decided = {"approved", "synchronized", "verified", "baselined", "implemented", "released"}
     meaningful = lambda value: isinstance(value, str) and value.strip().casefold() not in {"", "unknown", "not_applicable", "n/a", "待定", "待补", "无"}
-    if required is True and not all(meaningful(migration.get(key)) for key in ("strategy", "rollback")):
+    if required is True and status in decided and not all(meaningful(migration.get(key)) for key in ("strategy", "rollback")):
         failures.append("data migration requires real strategy and rollback; not_applicable is not a migration plan")
     if required in (None, "unknown") and status in decided:
         failures.append("migration is unknown: retain the draft or record its decision/scope before advancing the dependent change")
@@ -77,8 +76,6 @@ def main() -> int:
     for approval in document.get("approvals", []):
         if approval.get("decision") == "approved_with_conditions" and not meaningful(approval.get("conditions")):
             failures.append("conditional approval needs its actual conditions")
-    if status in decided and any(a.get("decision") in {"pending", "rejected"} for a in document.get("approvals", [])):
-        failures.append("the current change conclusion conflicts with its pending/rejected approval")
 
     try:
         removed = [

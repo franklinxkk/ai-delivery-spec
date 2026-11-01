@@ -43,7 +43,7 @@ impacts:
   data_migration:
     required: unknown # true / false / unknown；未评估不预填“不需要”
     decision_ref: "" # 复用实际决定或来源；false 本身不是决定依据
-    strategy: ""
+    strategy: "" # 已知需要迁移但方案未定可保留草稿；依赖它的批准前补齐方案与回退
     rollback: ""
     reconciliation: ""
 compatibility:
