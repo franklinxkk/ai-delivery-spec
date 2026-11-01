@@ -7,10 +7,10 @@
 AI Delivery Spec 帮你判断需求价值、挖透业务细节，形成产品能确认、开发能实现、测试能验收的需求与原型，让团队和 AI Coding Agent 据此协作。
 
 [![ClawHub: 3,139 downloads](https://img.shields.io/badge/ClawHub-3%2C139_downloads-2563eb)](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec)
-[![SkillHub: 4.6/5 for v5.5.5](https://img.shields.io/badge/SkillHub-4.6%2F5_%C2%B7_v5.5.5-15803d)](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)
+[![SkillHub: 4.9/5 for v5.5.6](https://img.shields.io/badge/SkillHub-4.9%2F5_%C2%B7_v5.5.6-15803d)](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)
 [![License: MIT](https://img.shields.io/badge/License-MIT-64748b)](LICENSE)
 
-<sub>ClawHub 累计下载：2026-10-30 核实。SkillHub 对 5.5.5 的历史评测：4.6/5，评级「优秀」。</sub>
+<sub>ClawHub 累计下载：2026-10-30 核实。SkillHub 对 5.5.6 的历史评测：4.9/5，评级「优秀」。</sub>
 
 **[能帮我做什么](#scenarios) · [开始试用 →](#install) · [看交付示例](#examples) · [English](#en)**
 
