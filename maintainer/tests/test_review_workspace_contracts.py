@@ -636,8 +636,14 @@ def test_repaired_cli_and_query_surfaces_are_truthful() -> None:
     assert section.returncode == 0 and "Domain Events" in section.stdout and "Compact context" not in section.stdout
     for code in ("PROTO-REVIEW-MODE-MISSING", "PROTO-REVIEW-LENS-NOT-INTERACTIVE"):
         explained = run("scripts/ai_delivery_spec_cli.py", "explain-finding", code, "--format", "json")
-        payload = explained.stdout
-        assert explained.returncode == 0 and "CurrentContext" in payload and "orientation/journey/focus/page" not in payload
+        assert explained.returncode == 0
+        payload = json.loads(explained.stdout)
+        assert payload["recognized"] and payload["code"] == code
+        # Legacy findings explain the chosen current contract, not a mandatory
+        # component name or a return to the old multi-mode layout.
+        for field in ("how_to_fix", "repair_example"):
+            assert all(term in payload[field] for term in ("contextual", "tabs", "manifest"))
+            assert "orientation/journey/focus/page" not in payload[field]
 
 
 def test_prototype_cannot_label_one_value_confirmed_and_unknown(tmp_path: Path) -> None:

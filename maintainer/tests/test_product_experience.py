@@ -28,9 +28,10 @@ def run(*parts: str) -> subprocess.CompletedProcess[str]:
 
 
 def test_root_diagnostics_compact_repetition() -> None:
-    findings = [Finding('BLOCK', 'CODE-A', 'a', 'one'), Finding('BLOCK', 'CODE-A', 'b', 'two'), Finding('GAP', 'CODE-B', 'c', 'three')]
+    findings = [Finding('BLOCK', 'CODE-A', 'a', 'one'), Finding('BLOCK', 'CODE-A', 'a', 'one again'), Finding('BLOCK', 'CODE-A', 'b', 'two'), Finding('GAP', 'CODE-B', 'c', 'three')]
     roots, unique = quality_roots(findings, 20)
-    assert unique == 2 and [(item.code, count) for item, count in roots] == [('CODE-A', 2), ('CODE-B', 1)]
+    # Compact repetitions within an artifact, without hiding a second artifact.
+    assert unique == 3 and [(item.code, item.artifact, count) for item, count in roots] == [('CODE-A', 'a', 2), ('CODE-A', 'b', 1), ('CODE-B', 'c', 1)]
     roots, _ = quality_roots([Finding('BLOCK', 'CODE-C', 'x', 'shell', '${act}'), Finding('BLOCK', 'CODE-C', 'x', 'real', 'ACT-SAVE')], 20)
     assert roots[0][0].ref == 'ACT-SAVE'
     roots, unique = stage_roots([{'code': 'CODE-A'}, {'code': 'CODE-A'}, {'code': 'CODE-B'}], 20)

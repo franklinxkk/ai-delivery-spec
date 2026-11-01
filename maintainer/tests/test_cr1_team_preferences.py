@@ -216,7 +216,8 @@ def test_core_upgrade_leaves_external_bindings_and_files_readable(tmp_path):
     # A different installed-core directory must read the same external profile.
     core = tmp_path / "upgraded-core"
     (core / "scripts").mkdir(parents=True)
-    for name in ("ai_delivery_spec_cli.py", "team_preferences.py"):
+    # Include the CLI's runtime dependency; a truncated install is not an upgrade.
+    for name in ("ai_delivery_spec_cli.py", "team_preferences.py", "cli_support.py"):
         shutil.copy2(ROOT / "scripts" / name, core / "scripts" / name)
     write(core / "SKILL.md", "# AI Delivery Spec 5.5.6-cr1\n")
     result = ok("init-prd", "--project", team / "new-project", cli=core / "scripts/ai_delivery_spec_cli.py")
