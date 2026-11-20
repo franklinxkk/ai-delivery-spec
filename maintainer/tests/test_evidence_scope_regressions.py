@@ -16,9 +16,9 @@ from requirement_contract import check_spec
 from validate_acceptance_run import execution_environment, summarize_acceptance_claims
 
 
-def write_run(folder, name="one", *, ac="AC-X-SUBMIT", execution="browser", conclusion="pending"):
+def write_run(folder, name="one", *, ac="AC-X-SUBMIT", execution="browser", conclusion="pending", baseline="1.1"):
     doc = yaml.safe_load((ROOT / "references/templates/acceptance-run-template.yaml").read_text(encoding="utf-8"))
-    doc.update(run_id="ARUN-" + name.upper(), baseline_version="1.1", execution_type=execution,
+    doc.update(run_id="ARUN-" + name.upper(), baseline_version=baseline, execution_type=execution,
                environment="Chrome" if execution == "browser" else "Node simulation", executor="fixture",
                executed_at="2026-11-01T15:00:00+08:00", conclusion=conclusion)
     doc["items"][0].update(acceptance_ref=ac, result="pass", actual_result="Synthetic observation", evidence_refs=["evidence.txt"])
@@ -156,18 +156,33 @@ def test_legacy_completion_needs_records_but_unfinished_migration_is_valid_in_a_
         assert "non-approved decisions" in run_cli("validators/validate_change_package.py", path).stdout
 
 
-def test_real_gate_consumes_current_browser_records_without_inventing_signoff(tmp_path):
-    paths = [write_run(tmp_path)[0], write_run(tmp_path, "two", ac="AC-X-CONFIRM")[0]]
+@pytest.mark.parametrize("variant", ["current", "stale", "simulation"])
+def test_real_gate_consumes_current_browser_records_without_inventing_signoff(tmp_path, variant):
+    example = ROOT / "examples" / "medium-review-handoff"
+    prd = (example / "requirement.md").read_text(encoding="utf-8")
+    baseline = yaml.safe_load(prd.split("---", 2)[1])["baseline_version"]
+    paths = [
+        write_run(tmp_path, baseline=baseline)[0],
+        write_run(
+            tmp_path, "two", ac="AC-X-CONFIRM",
+            baseline="stale-fixture" if variant == "stale" else baseline,
+            execution="simulation" if variant == "simulation" else "browser",
+        )[0],
+    ]
     args = ["gate", "--profile", "prototype", "--level", "L3", "--prototype",
-            ROOT / "examples/medium-review-handoff/review-prototype.html", "--format", "json"]
+            example / "review-prototype.html", "--format", "json"]
     for path in paths:
         args += ["--acceptance-run", path]
     result = run_cli("ai_delivery_spec_cli.py", *args)
     payload = json.loads(result.stdout)
     # This sample has unrelated L3 findings: inspect only the changed evidence claim.
-    assert payload["metrics"]["prototype_browser_evidence"] is True
+    assert payload["metrics"]["prototype_browser_evidence"] is (variant == "current")
     assert payload["metrics"]["acceptance_run_conclusive"] is False
-    assert not any(item["code"].startswith("PROTO-BROWSER-EVIDENCE") for item in payload["findings"])
+    evidence_gaps = [item for item in payload["findings"] if item["code"].startswith("PROTO-BROWSER-EVIDENCE")]
+    if variant == "current":
+        assert not evidence_gaps
+    else:
+        assert [item["ref"] for item in evidence_gaps] == ["AC-X-CONFIRM"]
 
 
 def test_distribution_copy_protects_canonical_source_and_samefile_alias(tmp_path):

@@ -1816,33 +1816,14 @@ class PrototypeChecks:
                 "three_plus_dependent_steps": {"core_flow"},
                 "critical_state_transition": {"state"},
             }
-            semantic_types_for_context: dict[str, set[str]] = defaultdict(set)
-            for semantic in semantic_items:
-                semantic_types_for_context[str(semantic.get("owner_context_ref", "")).upper()].add(
-                    str(semantic.get("semantic_type", ""))
-                )
             complex_contexts: set[str] = set()
             for decision in decisions:
                 context_ref = str(decision.get("context_ref", "")).upper()
                 drivers = {str(item) for item in decision.get("complexity_drivers", []) or []}
-                context = contexts.get(context_ref, {})
-                inferred_drivers: set[str] = set()
-                # An overlay is a location, not by itself a cross-page business
-                # dependency. Actual declared drivers and state/role semantics
-                # still require their diagrams and counterexamples.
-                surface_types = {str(item) for item in context.get("surface_types", []) or []}
-                semantic_types_here = semantic_types_for_context.get(context_ref, set())
-                if "workflow" in surface_types or "state_transition" in semantic_types_here:
-                    inferred_drivers.add("critical_state_transition")
-                if semantic_types_here & {"event_handoff", "role_path"}:
-                    inferred_drivers.add("cross_role")
-                if not inferred_drivers.issubset(drivers):
-                    self.add(
-                        "BLOCK", "PROTO-REVIEW-DIAGRAM-DECISION", path,
-                        "页面合同和语义账本已经触发复杂图，不能在 diagram_contract 中降级为简单 CRUD",
-                        f"{context_ref}: missing={sorted(inferred_drivers - drivers)}",
-                        affected_consumers=("product", "frontend", "backend", "qa"),
-                    )
+                # A semantic category does not establish a complexity driver:
+                # role_path may have one actor; event_handoff may stay within
+                # one role; a state change need not be critical. Validate the
+                # explicitly declared, source-grounded business dependency.
                 declared_types = {str(item) for item in decision.get("required_types", []) or []}
                 expected_types: set[str] = set()
                 for driver in drivers:
@@ -2313,17 +2294,11 @@ class PrototypeChecks:
                             f"{coverage_id}->{point_ref}",
                             affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
                         )
-                    elif status == "gap" and str(point.get("business_status", "")) not in {"gap", "pending_decision"}:
+                    elif status != "not_applicable" and str(point.get("business_status", "")) in {"gap", "pending_decision"}:
                         self.add(
-                            "BLOCK", "PROTO-REVIEW-SEMANTIC-COVERAGE", path,
-                            "开放语义缺口不能映射到已确认 ReviewPoint",
-                            f"{coverage_id}->{point_ref}",
-                            affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
-                        )
-                    elif status == "covered" and str(point.get("business_status", "")) != "confirmed":
-                        self.add(
-                            "BLOCK", "PROTO-REVIEW-SEMANTIC-COVERAGE", path,
-                            "已覆盖语义项必须映射到已确认 ReviewPoint；待决内容应保持 gap",
+                            "BLOCK" if criticality in {"P0", "P1"} else "GAP",
+                            "PROTO-REVIEW-SEMANTIC-COVERAGE", path,
+                            "业务决定仍未明确；说明覆盖不解除该项依赖的交接限制",
                             f"{coverage_id}->{point_ref}",
                             affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
                         )
@@ -2383,7 +2358,7 @@ class PrototypeChecks:
                     severity = "BLOCK" if criticality in {"P0", "P1"} else "GAP"
                     self.add(
                         severity, "PROTO-REVIEW-SEMANTIC-COVERAGE", path,
-                        "关键实现/验收语义仍未关闭，不能以结构完整替代业务完整",
+                        "评审说明覆盖仍有缺口，限制本次完整交接；不改变已有业务决定或产品发布规则",
                         f"{coverage_id}/{criticality}",
                         affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
                         related_refs=tuple(filter(None, (coverage_id, subject_ref, str(item.get("unknown_ref", "") or "")))),

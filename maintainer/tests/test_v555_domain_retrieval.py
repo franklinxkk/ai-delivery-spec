@@ -88,8 +88,12 @@ class DomainRetrievalTests(unittest.TestCase):
     def test_full_source_detail_exposes_verification_limits(self):
         data = query("--domain", "data-product", "--source-detail", "full", "--language", "en-US")
         source = next(s for s in data["source_refs"] if s["id"] == "KS-DATA-EU-AI-AMEND-2026")
-        assert "verification_evidence" in source
-        assert "JavaScript" in source["verification_evidence"]["method_and_limit"]
+        registry = yaml.safe_load((ROOT / "references/domains/domain-sources.yaml").read_text(encoding="utf-8"))
+        original = next(record for record in registry["sources"] if record["id"] == source["id"])
+        evidence = source["verification_evidence"]
+        assert evidence == original["verification_evidence"]
+        assert evidence["full_text_url"] and evidence["corroboration_url"]
+        assert "No exhaustive consolidated legal review" in evidence["method_and_limit"]
         assert all(s["binding_use"] == "prohibited" for s in data["source_refs"]
                    if s["effect_class"] in {"product_pattern", "change_watch"})
 

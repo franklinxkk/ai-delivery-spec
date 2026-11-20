@@ -5,7 +5,7 @@ Product Truth、结构化 handoff 或验收证据的权威边界。
 
 5.5.2 继续读取 `5.4.9 / RC4` 评审合同；这是子合同版本，不是 Skill 版本漂移。正式 manifest 以 `schemas/review-workspace.schema.json` 为准。下面的 DOM 片段仅解释绑定方式，不是完整可直接过门禁的实现。
 
-图的触发依据业务依赖：仅有弹窗、抽屉或 secondary_context 不自动等于跨页业务链，也不因此强制每个只读浮层补流程图和正反例。实际状态迁移、跨角色交接及显式复杂度仍需对应图与验收。
+图的触发依据业务依赖：仅有弹窗、抽屉或 secondary_context 不自动等于跨页业务链，也不因此强制每个只读浮层补流程图和正反例。`role_path` 不证明跨角色，`event_handoff` 不一定跨角色，普通状态变化或 `workflow` 表面也不自动等于关键状态迁移。按来源声明实际跨页、跨角色、跨系统依赖或关键状态等复杂度；已声明的复杂依赖仍须对应图与验收，静态分类不能代替这项判断。
 
 日常只需阅读当前功能说明时，可先用下面的 `attach` 组件，不声明正式评审等级。需要正式合同再选：R0 用于当前功能的就近说明；R1 用于正式团队评审，包含记录/分享/进度与冷读；就近阅读优先选当前上下文抽屉（init 显式指定 `--presentation-mode contextual`）；兼容入口未指定时仍为 tabs，按实际模式核对；R2 为旧项目保留值，当前检查与 R1 相同，不暗含额外文档。正式新项目选 R0 或 R1；业务复杂不自动升级。三者都保留业务覆盖、真实上下文、准确定位、角色说明和无业务副作用。L0–L4 是另一条旧锚点兼容轴。
 
@@ -69,7 +69,7 @@ python scripts/ai_delivery_spec_cli.py gate --profile prototype --prototype revi
 
 业务与说明未成形时，不先铺全量 manifest 或反复跑全档门禁。快速原型先兑现可操作任务；普通就近说明可用 attach，需正式追溯选 R0，需记录/分享选 R1。静态装配失败与业务失败分别修复，不能为过检改政策。标题和卡片先说业务，技术编号收在追溯区；每个上下文只显示所属说明。接收者能说清触发、输入、前后变化和恢复，才说明标注有用；有卡片或通过 Schema 不等于内容充分。
 
-机器字段查 `schemas/review-workspace.schema.json` 对应段，不必通读校验器：`baseline` 绑定来源；`review_contexts` 定页面/浮层；`review_points` 定动作说明；`semantic_coverage` 防字段/指标/系统规则漏项；`acceptance_examples` 定可执行输入与页面/业务结果。稳定 ID 的后缀用大写字母、数字、连字符，不用下划线。语义项为 gap 时，关联点须是 gap/pending_decision，不能仍宣称 confirmed；图按实际跨页/跨角色、状态及数据依赖选择，不能只为弹窗补图。
+机器字段查 `schemas/review-workspace.schema.json` 对应段，不必通读校验器：`baseline` 绑定来源；`review_contexts` 定页面/浮层；`review_points` 定动作说明；`semantic_coverage` 防字段/指标/系统规则漏项；`acceptance_examples` 定可执行输入与页面/业务结果。稳定 ID 的后缀用大写字母、数字、连字符，不用下划线。说明覆盖、业务决定和执行证据分别判断；说明缺口不撤销已确认政策，说明完整也不批准未决政策。图按实际跨页/跨角色、关键状态及数据依赖选择，不能只为弹窗补图。
 
 > **Review Explains, Product Operates.** 左侧始终是完整可操作产品；右侧只解释真实产品动作产生的当前
 > 上下文。Context 定位置，Declaration 定评审点分母，Semantic Coverage 定功能完整性分母，Candidate Diff 防漏，Fingerprint 定副作用边界，
@@ -207,11 +207,11 @@ ReviewPoint。每个适用项必须在人类右栏恰好出现一次最小说明
 - `role_path`：核心角色从入口到结果的操作路径。
 
 每项状态只能是 `covered`、`gap` 或 `not_applicable`：`covered` 必须映射同 Context 的正式 RVP 并显示
-一句最小充分说明；`gap` 还必须绑定 `UNK-*`，P0/关键 P1 阻断完整交接；`not_applicable` 必须有来源和
+一句最小充分说明；`gap` 还必须绑定 `UNK-*`，写清缺的是说明、依据还是业务决定，P0/P1 缺口阻断该范围的完整评审交接，不自动成为产品发布门槛；`not_applicable` 必须有来源和
 理由且不能占用右栏。一个 ReviewPoint 只在语义项对象、规则、结果和验收等价时才可合并多项；不能用
 “页面入口”“核心操作”“处理结果”三个泛化点代替页面功能。
 
-`coverage_id` 与 `(owner_context_ref, subject_ref)` 各自唯一；同一对象的多个语义维度在该记录内说明。`gap` 语义项只能映射业务状态同为 `gap` 的评审点，不能借 confirmed 的卡片覆盖未定规则。
+`coverage_id` 与 `(owner_context_ref, subject_ref)` 各自唯一；同一对象的多个语义维度在该记录内说明。`coverage_status` 只说明交付内容的覆盖，`business_status` 依有效决定记录；已确认规则的说明不完整时可保留 `gap + confirmed`，不重开政策。未决规则即使说明完整仍保持 `pending_decision/gap` 并引用原 `UNK-*`；P0/P1 依赖不能因覆盖完整而宣称交接就绪。
 
 每个 `VIEW-*` 必须用 `PAGE-CONTRACT` 的 `surfaces` 与 Context 的 `surface_types` 双向对齐。声明
 `metrics` 就必须逐项存在 `METRIC-*` 语义；声明 `workflow` 就必须有状态流转；声明 `drawer_form` 就
@@ -354,7 +354,7 @@ Expected ProductLocation 另行逐字段 diff。违规必须进入 `window.__ADS
 
 ## 11. Manifest 与 DOM 最小合同
 
-`baseline.hash` 对 UTF-8 文本读取后的内容计算 SHA-256，通用换行会归一化为 LF，再编码 UTF-8；它不是原文件字节哈希。包完整性哈希另按原始字节计算，二者不能混用。页签之外还需实际提供 `data-review-progress`、`data-review-progress-denominator`、`data-review-share-locator`、`data-review-records`，并按 Schema/诊断核对 PAGE-CONTRACT、内容 owner 与语义分母；不要靠补无关 DOM 锚点修复 JSON 字段错误。
+`baseline.hash` 对 UTF-8 文本读取后的内容计算 SHA-256，通用换行会归一化为 LF，再编码 UTF-8；它不是原文件字节哈希。包完整性哈希另按原始字节计算，二者不能混用。R1/R2 及实际启用相应能力的 R0 提供 `data-review-progress`、`data-review-progress-denominator`、`data-review-share-locator`、`data-review-records` 中对应的表面；轻量 R0 按 §1 省略未启用项。按 Schema/诊断核对 PAGE-CONTRACT、内容 owner 与语义分母，不靠补无关 DOM 锚点修复 JSON 字段错误。
 
 HTML 内嵌唯一 `<script type="application/json" id="review-workspace-manifest">`，按
 `schemas/review-workspace.schema.json` 登记合同，不复制 PRD 正文。

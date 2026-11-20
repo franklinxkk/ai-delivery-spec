@@ -127,6 +127,16 @@ def main() -> int:
             for field in ("evidence_role", "claim_limit"):
                 if not source.get(field):
                     failures.append(f"{source_id} vendor evidence missing {field}")
+        elif authority_type == "official_project_release":
+            parts = parsed.path.strip("/").split("/")
+            if host != "github.com" or len(parts) != 5 or parts[:4] != [
+                "modelcontextprotocol", "servers", "releases", "tag"
+            ] or not parts[4]:
+                failures.append(f"{source_id} uses an unregistered project release: {url}")
+            if source.get("effect_class") != "design_guidance" or not (
+                source.get("claim_limit") and source.get("verification_evidence", {}).get("method_and_limit")
+            ):
+                failures.append(f"{source_id} project release needs bounded guidance and verification evidence")
         elif not government_or_standard:
             failures.append(f"{source_id} uses an unregistered authority host: {host}")
         if url in seen_urls:

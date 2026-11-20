@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from truth_references import iter_references
 
 
 def load_truth(path: Path) -> dict[str, Any] | None:
@@ -45,17 +46,26 @@ def relation(key: str) -> str:
 
 def build(document: dict[str, Any], baseline: str) -> dict[str, Any]:
     ids = {node["id"] for node in walk(document) if isinstance(node.get("id"), str)}
+    targets = set(ids)
+    if isinstance(document.get("truth_id"), str):
+        targets.add(document["truth_id"])
     edges: dict[tuple[str, str, str], dict[str, str]] = {}
-    for node in walk(document):
-        owner = node.get("id")
-        if not isinstance(owner, str):
+    unresolved = []
+    external = []
+    for ref in iter_references(document, document.get("truth_id")):
+        if ref.external:
+            if ref.valid_locator:
+                external.append(ref.record())
+            else:
+                unresolved.append(ref.record())
             continue
-        for key, value in node.items():
-            refs = [value] if key.endswith("_ref") and isinstance(value, str) else value if key.endswith("_refs") and isinstance(value, list) else []
-            for ref in refs:
-                if isinstance(ref, str) and ref in ids:
-                    rel = relation(key)
-                    edges[(owner, ref, rel)] = {"from_id": owner, "to_id": ref, "relation": rel, "source": key}
+        if ref.target not in targets or ref.owner is None:
+            unresolved.append(ref.record())
+            continue
+        edges[(ref.owner, ref.target, ref.field)] = {
+            "from_id": ref.owner, "to_id": ref.target,
+            "relation": relation(ref.field), "source": ref.field,
+        }
     forward: dict[str, list[str]] = defaultdict(list)
     reverse: dict[str, list[str]] = defaultdict(list)
     for edge in edges.values():
@@ -75,6 +85,8 @@ def build(document: dict[str, Any], baseline: str) -> dict[str, Any]:
         "forward_index": {key: sorted(set(values)) for key, values in sorted(forward.items())},
         "reverse_index": {key: sorted(set(values)) for key, values in sorted(reverse.items())},
         "orphans": orphans,
+        "unresolved_refs": unresolved,
+        "unverified_external_refs": external,
     }
 
 
@@ -97,7 +109,12 @@ def main() -> int:
     result = build(document, args.baseline_version)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(yaml.safe_dump(result, allow_unicode=True, sort_keys=False), encoding="utf-8", newline="\n")
-    print(f"PASS: wrote {len(result['edges'])} trace edges and {len(result['orphans'])} orphans to {args.output}")
+    print(f"Wrote {len(result['edges'])} trace edges, {len(result['orphans'])} orphans, "
+          f"{len(result['unverified_external_refs'])} unverified external locators to {args.output}")
+    for ref in result["unresolved_refs"]:
+        print(f"FAIL: {ref['from_id']} {ref['path']} -> {ref['to_id']} (unresolved reference)")
+    if result["unresolved_refs"]:
+        return 1
     return 0
 
 

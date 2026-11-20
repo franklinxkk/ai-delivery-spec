@@ -28,7 +28,7 @@ CONTENT_QUESTIONS_EN = {
     "publication": "Who publishes after approval, and when? Distinguish permission to publish from the publication event.",
     "return-object": "After return, is the same record edited or a new one created? What happens to its ID, history and resubmission destination?",
     "null-meaning": "Does null mean unknown, not applicable or not yet collected? How does it differ from zero in calculations?",
-    "metric-population": "Define the population, denominator, deduplication and time window, including departures and late data.",
+    "metric-population": "Check whether this is a new metric definition or a reference. Locate the existing definition for a reference; for a new metric, clarify population, denominator, deduplication and time window only where applicable. This candidate does not require new configuration fields.",
     "retry-result": "Could the failed request already have written data? How will a retry identify the existing result and avoid duplicate side effects?",
     "state-ordinal": "Which filters, reports, interfaces and historical records consume the changed state identity? Verify each dependency.",
     "rule-consumers": "Which consumers and historical interpretations depend on the changed definition? Verify the dependency before changing them.",
@@ -187,7 +187,7 @@ def _bound_guard(line: str, context: str, trigger: str, guard: str) -> bool:
     """Only consume an answer in the same clause/row or explicitly bound subject."""
     def affirmed(value):
         return any(_affirmative_match(piece, guard) for piece in re.split(r"[，,]", value)) and not re.search(r"是否|待确认|尚未决定|未明确|\b(?:whether|tentative|proposed|TBD)\b|to be confirmed", value, re.I)
-    clauses = [line] if line.lstrip().startswith("|") else re.split(r"[。；;\n]|(?<=[a-z])\.\s+", line)
+    clauses = [line] if _table_cells(line) else re.split(r"[。；;\n]|(?<=[a-z])\.\s+", line)
     for clause in clauses:
         hit = re.search(trigger, clause, re.I)
         if not hit:
@@ -197,7 +197,7 @@ def _bound_guard(line: str, context: str, trigger: str, guard: str) -> bool:
         # A semicolon may continue the same rule with an omitted object. Keep
         # this narrow: a newly named business object is not a continuation.
         tail = line[line.find(clause) + len(clause):]
-        continuation = re.match(r"^[；;]\s*((?:由|按|空值|发布|保留|retain\b|operators?\b|publication\b)[^。；;\n]*)", tail, re.I)
+        continuation = re.match(r"^[；;]\s*((?:由|按|空值|发布|保留|统计人群|分母|denominator\b|population\b|retain\b|operators?\b|publication\b)[^。；;\n]*)", tail, re.I)
         if continuation and affirmed(continuation[1]):
             return True
         refs = set(re.findall(r"\b(?:REQ|RULE|ACT|FLD)-[A-Z0-9-]+\b", clause, re.I))
@@ -219,6 +219,12 @@ def _bound_guard(line: str, context: str, trigger: str, guard: str) -> bool:
     return False
 
 
+def _table_cells(line: str) -> list[str]:
+    # Word text projections can omit the outer pipes of a table row.
+    cells = [cell.strip() for cell in re.split(r'(?<!\\)\|', line.strip().strip('|'))]
+    return cells if len(cells) >= 3 or (len(cells) == 2 and line.lstrip().startswith('|')) else []
+
+
 def inspect_content(text: str, *, intake_questions: bool = False) -> dict:
     """Bounded Chinese/English probes, never an NLP completeness or truth proof.
 
@@ -234,7 +240,7 @@ def inspect_content(text: str, *, intake_questions: bool = False) -> dict:
         ("publication", "state_authority", {"state"}, r"(?:审批|审核)通过.{0,15}(?:可|可以|允许)发布|\bapprov(?:al|ed)\b[^.;\n]{0,45}\b(?:can|may|eligible|allowed)\b[^.;\n]{0,25}\bpublish|\b(?:can|may|eligible|allowed)\b[^.;\n]{0,25}\bpublish[^.;\n]{0,25}\bafter approval\b", r"(?:手动|人工|点击|定时|自动|发布人|发布角色|不立即|不会自动).{0,25}发布|发布.{0,20}(?:手动|人工|角色|时机)|\b(?:manual(?:ly)?|automatic(?:ally)?|scheduled|publisher)\b[^.;\n]{0,35}\bpublish|\b(?:publish\w*|publication)\b[^.;\n]{0,35}\b(?:manual(?:ly)?|automatic(?:ally)?|scheduled|role)\b", "通过后谁在什么条件下发布？区分发布资格与实际发布事件。"),
         ("return-object", "recovery", {"state"}, r"退回(?!历史|记录|原因)[^。；;|\n]{0,20}(?:重新|再次|重提|提交)|\breturn(?:ed)?\b[^.;\n]{0,50}\bresubmit|\bresubmit\w*\b[^.;\n]{0,35}\breturn(?:ed)?\b", r"原单|原对象|新单|新对象|同一.{0,8}(?:ID|编号)|保留.{0,8}(?:ID|编号)|\b(?:same|original|new)\s+(?:record|object|request|ID)\b|\b(?:keep|retain|preserve)\w*\s+(?:the\s+)?(?:ID|identifier)\b", "退回后修改原对象还是新建？原编号、历史及再次提交去向如何处理？"),
         ("null-meaning", "null_stale", set(), r"字段.{0,12}(?:可空|为空)|允许.{0,8}空值|未采集.{0,10}(?:按|计为|记为)\s*(?:数值\s*)?0", r"(?:空值|为空|未采集).{0,30}(?:表示|代表|区别|不等于|未知|不适用)|(?:不|不得|不能)按\s*0", "空值在此字段代表未知、不适用还是尚未采集？是否与零不同，如何参与计算？"),
-        ("metric-population", "metric_definition", {"metric"}, r"完成率|通过率|离职率|活跃用户|completion rate|pass rate|active users|\b(?:employee|staff)\s+turnover\b|\bturnover\b(?=[^.;\n]{0,100}\b(?:employee|staff|departures)\b)", r"分母|统计人群|纳入.{0,20}(?:用户|人员)|去重.{0,12}(?:用户|人员)|denominator|population", "说明统计对象、去重/时间窗和分母；离职、退出与晚到数据如何计入？"),
+        ("metric-population", "metric_definition", {"metric"}, r"完成率|通过率|离职率|活跃用户|completion rate|pass rate|active users|\b(?:employee|staff)\s+turnover\b|\bturnover\b(?=[^.;\n]{0,100}\b(?:employee|staff|departures)\b)", r"分母|统计人群|纳入.{0,20}(?:用户|人员)|去重.{0,12}(?:用户|人员)|denominator|population", "先区分新增指标定义与引用：引用先定位既有定义，新定义再核对适用的对象、分母、去重及时间窗；不因命中候选而新增配置字段。"),
         ("retry-result", "recovery", set(), r"(?:提交|保存|写入|支付)失败.{0,12}(?:重试|再试)|\b(?:submit|save|write|payment)\w*\b[^.;\n]{0,20}\bfail\w*\b[^.;\n]{0,25}\bretry|\bretry\b[^.;\n]{0,25}\bfailed\s+(?:submit|save|write|payment)", r"幂等|重复.{0,12}(?:不|防止)|未写入|已写入|保留.{0,10}输入|查询.{0,10}结果|\bidempot\w*|\b(?:avoid|prevent)\w*\s+duplicate|\balready\s+(?:written|saved|paid)|\bquery\w*[^.;\n]{0,20}\bresult", "失败时是否已产生副作用？再次提交会重复写入吗，如何确认与恢复？"),
         ("state-ordinal", "change_propagation", {"migration", "state"}, r"(?:已完成|状态).{0,35}第\s*[一二三四五六七八九十\d]+\s*(?:个)?(?:状)?态.{0,15}(?:改|变|调整)|(?:插入|新增).{0,10}状态.{0,20}(?:序号|编号)", r"稳定.{0,10}(?:键|编码|标识)|不使用.{0,10}(?:序号|顺序)|(?:消费者|筛选|报表|过滤).{0,30}(?:同步|映射|迁移|更新)", "状态序号改变会影响哪些筛选、报表、接口和历史对象？使用稳定含义并逐项核实消费者。"),
         ("rule-consumers", "change_propagation", {"migration"}, r"(?:定义|口径).{0,20}从.{0,50}(?:改为|调整为|变为)", r"(?:消费者|依赖|报表|看板).{0,30}(?:核实|验证|同步|保留|候选|回归)", "口径变更后哪些读写者、指标和历史解释可能受影响？先查依赖依据，再确认变更范围。"),
@@ -299,6 +305,18 @@ def inspect_content(text: str, *, intake_questions: bool = False) -> dict:
                                or _affirmative_match(line, r"服务端[^。；;|\n]{0,8}验证[^。；;|\n]{0,8}身份[^。；;|\n]{0,8}对象范围"))
                 if not guarded:
                     add(kind, category, facets, i, line, action)
+                    if kind == "metric-population":
+                        # Classify explicit evidence in the same clause/row only.
+                        # Never dismiss a gap because a nearby metric is a demo.
+                        cells = _table_cells(line)
+                        contexts = [line] if cells else re.split(r'[。；;\n]', line)
+                        hits = [part for part in contexts if re.search(trigger, part, re.I)]
+                        marker = r"演示|示例|待完善|已停用|沿用|引用既有|\b(?:demo|example|disabled|existing definition)\b"
+                        repeated_label = bool(cells and len(cells) >= 3 and cells[0] == cells[1] and len(re.findall(trigger, cells[0], re.I)) == 1 and len(re.findall(trigger, line, re.I)) == 2)
+                        if len(hits) == 1 and (len(re.findall(trigger, hits[0], re.I)) == 1 or repeated_label) and re.search(marker, hits[0], re.I):
+                            findings[-1]['candidate_context'] = 'example_or_reference'
+                            findings[-1]['action'] = '此处同句或同行标明演示、停用或既有引用。先核对其实际用途与定义来源；演示参数不变成正式政策，停用项不阻断无依赖能力。若本次新增正式计算，再在所属模块补适用口径。候选仍待核实，标签本身不证明无缺口。'
+                            findings[-1]['action_en'] = 'This clause or row labels an example, disabled item or existing reference. Verify its actual use and definition source first. Do not turn demo parameters into policy or block unrelated capabilities. Clarify applicable rules if this introduces a real calculation. The label alone does not resolve this candidate.'
         ai_actor = r"(?<![A-Za-z0-9_-])(?:AI(?!\s*(?:coding|编程|开发))|LLM|模型|智能体|agent|置信度|confidence)(?![A-Za-z0-9_-])"
         automatic_write = r"(?:自动|直接|无需人工|\bautomatically\b|\bdirectly\b)[^。；;\n]{0,50}(?:发信|发送|创建|新建|更新|修改|保存|写回|删除|支付|退款|扣款|执行|\b(?:send|email|create|update|save|write|delete|pay|refund|execute)\w*\b)"
         # The confidence/AI cue may follow the action in the same sentence.
@@ -371,6 +389,17 @@ def scan(text: str) -> list[dict[str, object]]:
                 if kind == "undefined-default":
                     before = re.split(r"[。；;]", line[:match.start()])[-1]
                     after = line[match.end():match.end() + 18]
+                    if match[0] == "默认" and re.match(
+                        r"\s*(?:(?:最多|最少)?[+-]?\d+(?:\.\d+)*(?::\d+)?(?:\s*[×xX]\s*\d+)?(?:\s*(?:%|次|秒|分钟|天|条|行|页|像素|px))?|全量|全选)"
+                        r"(?=\s*(?:[，,。；;、|（(）)\]]|$))", line[match.end():]
+                    ):
+                        continue
+                    # A default named in a table and explained by the adjacent cell
+                    # is already defined locally (e.g. "默认左 | 左连接…").
+                    cell_value = re.match(r"\s*([^，,。；;|\s]{1,30})\s*\|\s*([^|]+)", line[match.end():])
+                    if (match[0] == "默认" and cell_value and cell_value[2].lstrip().startswith(cell_value[1])
+                            and not re.search(r"待定|未定|不明|根据情况|待确认|TBD", cell_value[1], re.I)):
+                        continue
                     if re.search(r"(?:不|不会|不得|不能|没有|无需|禁止|当|若|后|时|仅)", before) or re.match(r"(?:选择|选中|显示|全部|关闭|开启|为|[:：])", after):
                         continue
                 if kind == "vague-capability" and re.search(r"(?:仅|只)(?:需|要)?$", line[max(0, match.start() - 3):match.start()]):
@@ -381,7 +410,8 @@ def scan(text: str) -> list[dict[str, object]]:
                     "line": line_no,
                     "text": match.group(0),
                     "context": line.strip()[:240],
-                    "action": "replace with actor/condition/threshold/result/exception that can be accepted",
+                    "advisory": True,
+                    "action": "check the cited context; clarify only a decision still missing",
                 })
     return findings
 
@@ -455,7 +485,7 @@ def main() -> int:
     if args.format == "json":
         rendered = json.dumps({"findings": findings}, ensure_ascii=False, indent=2) + "\n"
     else:
-        rendered = f"# Ambiguity Scan\n\nFindings: **{len(findings)}**\n\n"
+        rendered = f"# Ambiguity Scan\n\nReview candidates (核对原文后再决定是否追问): **{len(findings)}**\n\n"
         rendered += "".join(
             f"- `{item['id']}` line {item['line']} `{item['kind']}`: {item['context']}\n"
             for item in findings

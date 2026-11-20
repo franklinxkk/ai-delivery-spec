@@ -80,6 +80,8 @@ as mandatory features for every project.
 | product_pattern | `KS-DATASET-PLATFORM-2026`, `KS-DATA-SECURITY-CASES-2026`, `KS-DATA-COMPLIANCE-SANDBOX-2026` | learn dataset cards, participant identity, digital contracts, usage control, audit, bounded experiments and exit; cases do not prove a universal architecture |
 | change_watch | sector rules, regional exchange mechanics, price/settlement, accounting and cross-border scope remain project-specific | register jurisdiction and accountable-source gaps; never let a dataset card, sandbox or registration credential silently prove rights, quality, value or lawful use |
 
+Partial source review 2026-11-13: `KS-DATA-LABEL-DEMAND-20261031` reinforces demand-led datasets and application-effect follow-up in the named pilot program. For an in-scope dataset supply workflow, relate the demand, delivered dataset version, quality evidence and observed application outcome. This corroborates the existing feedback loop; the meeting report does not mandate registration by every dataset owner or prove a completed outcome.
+
 ### AI Transformation Horizon
 
 | Axis | From -> toward | Non-negotiable product guard |
@@ -108,6 +110,8 @@ warehouse, or chatbot label.
 | Value proof | What measurable public, operational or commercial outcome justifies continued supply? | beneficiary, baseline, outcome metric, cost/revenue and attribution limits are declared |
 
 ## Vocabulary
+
+**公共数据**（public data）：分别核对资源登记、授权运营（authorized operation）和披露的对象、责任主体与适用条件。
 
 | Term | Meaning | PRD Requirement |
 |---|---|---|
@@ -267,6 +271,8 @@ For each in-scope transition, define authority, preconditions, resulting data/st
 **数据质量**（缺数、空值、缺失、异常值、时效、quality、freshness）：区分零、缺失、异常、陈旧和无权限；有效性与业务正常是两个判断。
 
 **指标口径**（指标库、指标、指标值列、统计主体列、统计口径、单值、多值、metric、indicator、metric definition、indicator definition）：明确统计主体、粒度、指标值、维度、单位、周期和空零；配置保存后必须由实际查询或判定消费。
+
+**指标目录**（指标库）：按目录查找指标定义、计量单位、统计粒度及负责人。
 
 AI+Data PRDs must separate data correctness from business meaning. For every trusted metric, specify all layers below.
 

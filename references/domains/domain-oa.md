@@ -78,6 +78,8 @@ domain-neutral.
 | product_pattern | existing OA vendor and open-component evidence | learn object-centric low-code work, automation, AI assistance and collaborative views; vendor capability is not outcome or open-core proof |
 | change_watch | `KS-OA-ARCHIVE-STANDARD-GUIDE-2026` names single-copy archives, long-term preservation, data governance and AI topics | create a re-verification item for future standards; a project guide or consultation is not a final standard and cannot block delivery by itself |
 
+Partial source review 2026-11-13: for archival meeting recordings or other audiovisual archives, consult `KS-MEDIA-ARCHIVE-ASR-110-2026` and the media-knowledge module. Its recommended status and archive-specific scope do not make every office transcription feature a statutory requirement; obtain the selected text before defining detailed acceptance.
+
 ### AI Transformation Horizon
 
 Durable judgment: AI office is becoming the organization's **system of action**; OA does not disappear. It becomes the permission, transaction, evidence and archive control plane that makes agent action trustworthy.
@@ -314,7 +316,7 @@ is deliberately deferred.
 |---|---|---|---|---|
 | unified todo handling | employee/manager | todo created by workflow/document/task | pending -> processing -> closed | work item closed with evidence |
 | workflow approval | submitter/approver/admin | form submitted | draft -> running -> completed/returned/rejected | decision, opinion, audit, notification |
-| official document issue | drafter/document officer/leader | document draft submitted | draft -> reviewing -> issued -> archived | numbered, distributed, archived document |
+| **公文流转** / official document issue | drafter/document officer/leader | document draft submitted | draft -> reviewing -> issued -> archived | numbered, distributed, archived document |
 | meeting to resolution | organizer/participant/resolution owner | meeting ends | minutes_pending -> closed; tasks created | resolutions assigned and traceable |
 | supervision follow-up | executive office/target org | key task created or overdue | executing -> completed/closed | deadline, reminders, evidence, closure |
 | knowledge Q&A | employee/AI assistant | question submitted | generated -> reviewed/used | cited answer or safe refusal |

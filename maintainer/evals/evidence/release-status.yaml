@@ -1,5 +1,5 @@
 schema_version: 5.3.0
-skill_version: 5.5.6
+skill_version: 5.5.7
 runtime: pure_v5
 domain_packs:
   count: 8
@@ -29,6 +29,14 @@ trace_release_proxy:
   effectiveness_limit: deterministic/private calibration repaired gaps; blind A/B,
     token/time and human ratings remain incomplete
 release_evidence:
+  verified_at: '2026-11-20'
+  scope: Two local first-pass evaluations with Astra and Sol, with and without the skill. One shared-workstation browser task and two small specification tasks.
+  results:
+    browser: The named sheet's non-default dashboard was acknowledged on submission. The receiver saw the default dashboard on both first open and reopen after reload.
+    specification: First response described recording, detail display and historical records. No developer implementation or end-user acceptance was exercised.
+    held_out: Both pure-model answers made new records optional. Both skill-assisted answers left the new-record policy open and specified the independently deliverable behavior.
+  evidence_boundary: These are observations on the supplied local tasks. The candidate has no new rating, customer sign-off or demonstrated stable comparative gain. Release provenance and validation belong to the release receipt.
+historical_556_release_evidence:
   verified_at: '2026-10-31'
   scope: Bounded expert-finding repairs for intake questions, action candidates,
     example separation, handoff continuity and current version configuration
@@ -169,7 +177,7 @@ historical_555_publication_maintenance:
     Bounded generation/receiver evidence is retained locally; no stable relative benefit
     or human receiver benefit is claimed.
 
-internal_iteration_policy:
+historical_556_internal_iteration_policy:
   version: 5.5.6
   decided_at: '2026-10-28'
   authority: maintainer_explicit_instruction
@@ -177,7 +185,7 @@ internal_iteration_policy:
   iteration_identity: build_date_and_file_hashes
   note: Former local 5.5.7 content retained under 5.5.6 internal; old receipts are historical, not overwritten.
 
-current_candidate_review_20261030:
+historical_556_candidate_review_20261030:
   version: 5.5.6
   status: release_prepared_not_published
   targeted_tool_regressions: passed

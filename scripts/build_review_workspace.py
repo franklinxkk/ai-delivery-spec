@@ -9,6 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FILES = ('layout.html', 'style.css', 'runtime.js', 'review.json', 'requirement.md')
+EXAMPLE_ASSETS = ('ticket-model.js', 'product-prototype.html', 'product-list.png', 'product-detail.png')
 GUIDE = '''# 可运行评审起点 / Runnable review starter
 
 这是设备维修教学样例，不是你的项目，也不是空白项目已通过验收。先读 requirement.md 并替换业务，不继承样例权限、状态、验收或来源。业务规格只写业务；评审控件、模拟身份与测试工具留在本说明及原型的样例说明中。
@@ -86,14 +87,16 @@ def init_project(target: Path, review_level: str = "R1", presentation_mode: str 
         values = contextual_values(values)
     for name, text in values.items():
         (target / name).write_text(text, encoding='utf-8', newline='\n')
-    return {'status': 'example_initialized_not_project_accepted', 'directory': str(target), 'files': list(values)}
+    for name in EXAMPLE_ASSETS:
+        (target / name).write_bytes((sample / name).read_bytes())
+    return {'status': 'example_initialized_not_project_accepted', 'directory': str(target), 'files': [*values, *EXAMPLE_ASSETS]}
 
 
 def build_project(directory: Path, output: Path | None = None, source_document: Path | None = None) -> dict:
     directory = directory.resolve()
     output = (output or directory / 'prototype.html').resolve()
     inputs = {name: directory / name for name in FILES}
-    if output in {path.resolve() for path in inputs.values()}:
+    if output in {(directory / name).resolve() for name in (*FILES, *EXAMPLE_ASSETS)}:
         raise ValueError('输出不能覆盖输入片段 / output cannot replace an input')
     missing = [name for name, path in inputs.items() if not path.is_file()]
     if missing:
@@ -131,6 +134,16 @@ def build_project(directory: Path, output: Path | None = None, source_document: 
     values = {'@@ADS_MANIFEST@@': json.dumps(document, ensure_ascii=False).replace('<', '\\u003c'),
               '@@ADS_STYLE@@': contents['style.css'], '@@ADS_RUNTIME@@': (ROOT / 'scripts/review_target_runtime.js').read_text(encoding='utf8') + '\n' + contents['runtime.js']}
     layout = contents['layout.html']
+    model_tag = '<script src="ticket-model.js"></script>'
+    if model_tag in layout:
+        model_path = (directory / 'ticket-model.js').resolve()
+        if not model_path.is_relative_to(directory) or not model_path.is_file():
+            raise ValueError('样例业务模型缺失 / missing example model: ticket-model.js')
+        model = model_path.read_text(encoding='utf-8')
+        if re.search(r'</script\b', model, re.I):
+            raise ValueError('业务模型含未转义的脚本结束标签 / unsafe inline closing tag')
+        # The standalone review and the editable product example use the same local source.
+        values[model_tag] = '<script>' + model + '</script>'
     if document.get("workspace", {}).get("presentation_mode") == "contextual" and 'data-review-tab-target=' in layout:
         raise ValueError("contextual 声明与三页签导航不一致；build 仅装配，请编辑实际布局或使用 init --presentation-mode contextual")
     for token in values:

@@ -26,6 +26,15 @@
             "findings": { "type": "integer", "minimum": 0 }
           }
         },
+        "assessment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "label"],
+          "properties": {
+            "kind": { "enum": ["static_check", "input_error"] },
+            "label": { "type": "string" }
+          }
+        },
         "coverage": { "type": "string" },
         "not_proven": { "type": "array", "minItems": 1, "items": { "type": "string" } },
         "retry_command": { "type": "string" },

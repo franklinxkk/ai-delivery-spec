@@ -6,6 +6,35 @@ import shlex
 import sys
 
 
+class InputReadError(OSError):
+    """A recoverable artifact input failure, distinct from a product finding."""
+
+    def __init__(self, path: Path, code: str, detail: str):
+        self.path = path.resolve()
+        self.code = code
+        self.detail = detail
+        super().__init__(f"{self.path}: {detail}")
+
+
+def read_utf8_input(path: Path) -> str:
+    """Read a text artifact without guessing encodings or converting originals."""
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        raise InputReadError(path, "GATE-INPUT-READ", str(exc)) from exc
+    binary_suffixes = {".docx", ".docm", ".doc", ".xlsx", ".xls", ".pptx", ".ppt", ".pdf", ".zip"}
+    if path.suffix.casefold() in binary_suffixes or raw.startswith((b"PK\x03\x04", b"%PDF-", b"\xd0\xcf\x11\xe0")):
+        raise InputReadError(path, "GATE-INPUT-FORMAT", "Binary/office input is not a supported text artifact")
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise InputReadError(path, "GATE-INPUT-ENCODING", f"Not UTF-8 text (byte offset {exc.start})") from exc
+    if "\x00" in text:
+        raise InputReadError(path, "GATE-INPUT-ENCODING", "NUL bytes indicate binary or non-UTF-8 text")
+    # Match Path.read_text's universal-newline behavior used by existing hashes.
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
 def shell_command(parts) -> str:
     values = [str(value) for value in parts]
     if os.name == "nt":

@@ -157,6 +157,9 @@ def render_markdown(result: dict) -> str:
              ("Suggested artifact: " if english else "建议产物：") + mode + ".", ""]
     if result.get("complexity_advice"):
         lines += [result["complexity_advice"], ""]
+    if result["declared_risk_facets"]:
+        label = "Review the declared risks in scope: " if english else "本次需核对已声明的风险范围："
+        lines += [label + "、".join(result["declared_risk_facets"]), ""]
     if result["next_questions"]:
         lines += [("Start with the applicable questions below; reuse answers already in your sources." if english else "先处理下面适用的问题；已有来源回答过的直接继承。"), ""]
         lines += ["- " + question for question in result["next_questions"][:3]]

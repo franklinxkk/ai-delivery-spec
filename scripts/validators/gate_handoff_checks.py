@@ -37,6 +37,45 @@ def _placeholder_paths(value: object, prefix: str = "") -> list[str]:
 
 
 class HandoffChecks:
+    def ready_handoff_scope(self, path: Path, prd_path: Path) -> tuple[str, ...]:
+        """Routing only; check_agent_handoff still validates all declarations."""
+        try:
+            doc = yaml.safe_load(self.read(path))
+            if not isinstance(doc, dict) or doc.get("status") != "ready_for_implementation":
+                return ()
+            baseline = doc.get("baseline")
+            if not isinstance(baseline, dict) or not isinstance(baseline.get("requirement_ref"), str):
+                return ()
+            if (path.parent / baseline["requirement_ref"]).resolve() != prd_path.resolve():
+                return ()
+            packets = doc.get("packets")
+            if not isinstance(packets, list) or not packets:
+                return ()
+            refs = []
+            for packet in packets:
+                if not isinstance(packet, dict) or not isinstance(packet.get("scope_refs"), list):
+                    return ()
+                values = packet["scope_refs"]
+                if not values or not all(isinstance(ref, str) and ref.strip() for ref in values):
+                    return ()
+                refs.extend(values)
+            # A view/action ID alone does not establish the parent requirement.
+            # For a declared single-requirement document the ownership is exact;
+            # otherwise keep an unlocatable slice broad rather than skip policy.
+            raw = self.read(prd_path)
+            front = re.match(r"\A---\s*\n(.*?)\n---(?:\s*\n|$)", raw, re.S)
+            metadata = yaml.safe_load(front.group(1)) if front else {}
+            owners = metadata.get("requirement_ids", []) if isinstance(metadata, dict) else []
+            if isinstance(owners, list) and len(owners) == 1 and isinstance(owners[0], str):
+                if owners[0] in refs or not any(ref.startswith("REQ-") for ref in refs):
+                    body = raw[front.end():] if front else raw
+                    refs.extend([owners[0], *collect_defined_ids(body)])
+            if not any(ref.startswith("REQ-") for ref in refs):
+                return ()
+            return tuple(sorted(set(refs)))
+        except (OSError, UnicodeError, yaml.YAMLError):
+            return ()
+
     def check_stage0(self, path: Path) -> None:
         try:
             raw = self.read(path)
@@ -761,12 +800,16 @@ class HandoffChecks:
             return
         if HANDOFF_SCHEMA.is_file():
             schema = json.loads(HANDOFF_SCHEMA.read_text(encoding="utf-8"))
-            for schema_error in sorted(
+            schema_errors = sorted(
                 Draft202012Validator(schema).iter_errors(document),
                 key=lambda item: tuple(str(part) for part in item.path),
-            ):
+            )
+            for schema_error in schema_errors:
                 location = ".".join(str(part) for part in schema_error.path) or "<root>"
                 self.add("BLOCK", "HANDOFF-SCHEMA", path, schema_error.message, location)
+            # Malformed containers must produce a diagnostic, not an exception.
+            if any(error.validator == "type" for error in schema_errors):
+                return
         baseline = document.get("baseline") or {}
         baseline_hash = str(baseline.get("hash", "")) if isinstance(baseline, dict) else ""
         ready = str(document.get("status", "draft")) == "ready_for_implementation"
@@ -776,7 +819,11 @@ class HandoffChecks:
         requirement_steps: set[str] = set()
         requirement_step_sections: dict[str, str] = {}
         if requirement_ref and requirement_path.is_file():
-            requirement_raw = self.read(requirement_path)
+            try:
+                requirement_raw = self.read(requirement_path)
+            except (OSError, UnicodeError) as exc:
+                self.add("BLOCK", "HANDOFF-READ", path, f"需求基线无法读取：{exc}", requirement_ref)
+                return
             if baseline_hash != self._sha256(requirement_raw):
                 self.add("BLOCK", "HANDOFF-REQUIREMENT-HASH-DRIFT", path, "需求基线文件与 baseline.hash 不一致", requirement_ref)
             step_matches = list(re.finditer(
@@ -793,15 +840,21 @@ class HandoffChecks:
             self.add("BLOCK", "HANDOFF-REQUIREMENT-NOT-LOCAL", path, "开发交接的需求基线文件不可访问", requirement_ref or "baseline.requirement_ref")
         elif requirement_ref:
             self.add("GAP", "HANDOFF-REQUIREMENT-NOT-LOCAL", path, "草稿清单的需求基线文件不在当前目录", requirement_ref)
-        engineering_ref = str(document.get("engineering_baseline_ref", ""))
-        if ready and not engineering_ref:
-            self.add(
-                "BLOCK", "HANDOFF-NO-ENGINEERING-BASELINE", path,
-                "开发交接缺少 engineering_baseline_ref",
-                affected_consumers=("architect", "frontend", "backend", "qa", "coding_agent"),
-            )
-        elif engineering_ref and not (path.parent / engineering_ref).is_file():
+        engineering_ref = (document.get("engineering_baseline_ref") or "").strip()
+        # Product readiness does not invent an engineering artifact. An explicitly
+        # supplied reference still receives the existing reachability diagnostic.
+        if engineering_ref and not (path.parent / engineering_ref).is_file():
             self.add("GAP", "HANDOFF-ENGINEERING-BASELINE-NOT-LOCAL", path, "工程基线引用不在当前交接目录，接收方需确认可访问", engineering_ref)
+        if ready and not document.get("packets"):
+            self.add("BLOCK", "HANDOFF-EMPTY-READY", path,
+                     "已声明可开工，但没有实际工作范围。引用现有模块及验收形成工作包，或保留 draft；不要填空标签凑数。", "packets")
+        if ready:
+            placeholders = _placeholder_paths({"engineering_baseline_ref": engineering_ref,
+                                               "packets": document.get("packets", [])})
+            if placeholders:
+                self.add("BLOCK", "HANDOFF-READY-PLACEHOLDER", path,
+                         "可开工交接仍有占位内容；补真实范围、接收责任或引用，未确定部分保持草稿。",
+                         ", ".join(placeholders))
         packet_ids: set[str] = set()
         referenced_steps: set[str] = set()
         for packet in document.get("packets", []) or []:
@@ -908,22 +961,8 @@ class HandoffChecks:
                     step_id,
                     affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
                 )
-        if ready and requirement_steps:
-            for packet in document.get("packets", []) or []:
-                if isinstance(packet, dict) and not packet.get("implementation_step_refs"):
-                    self.add(
-                        "BLOCK", "HANDOFF-STEP-CONTRACT-MISSING", path,
-                        "ready_for_implementation 工作包必须声明 implementation_step_refs",
-                        str(packet.get("id", "<unknown>")),
-                        affected_consumers=("frontend", "backend", "qa", "coding_agent"),
-                    )
-            for step_id in sorted(requirement_steps - referenced_steps):
-                self.add(
-                    "BLOCK", "HANDOFF-PRD-STEP-NOT-PACKETED", path,
-                    "PRD 实施步骤未被任何工作包接收",
-                    step_id,
-                    affected_consumers=("product", "frontend", "backend", "qa", "coding_agent"),
-                )
+        # STEP facets apply only to explicitly received implementation_step_refs.
+        # A heading in the PRD alone is not an opt-in to a second package contract.
         for envelope in document.get("handoffs", []) or []:
             if not isinstance(envelope, dict):
                 continue
@@ -939,6 +978,11 @@ class HandoffChecks:
             "handoff_prd_steps": len(requirement_steps),
             "handoff_referenced_steps": len(referenced_steps),
         })
+        if ready and requirement_raw and document.get("packets"):
+            # Reuse the current PRD contract, scoped to the actual packets. A
+            # valid manifest/hash cannot bypass unresolved business decisions.
+            scope = self.ready_handoff_scope(path, requirement_path)
+            self.check_prd(requirement_path, stage="implementation", scope_refs=scope)
 
     def check_manifest_prd_binding(self, prd_path: Path, manifest_path: Path) -> None:
         """Ensure a combined handoff does not pair a manifest with another PRD."""
@@ -1270,7 +1314,7 @@ class HandoffChecks:
         config_path = custom_root / "config.yaml"
         if config_path.is_file():
             try:
-                config = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+                config = yaml.safe_load(self.read(config_path)) or {}
                 if not isinstance(config, dict):
                     self.add("BLOCK", "CUSTOM-CONFIG-SHAPE", config_path, "本地扩展配置顶层必须是对象")
                     config = {}
@@ -1297,7 +1341,7 @@ class HandoffChecks:
         skipped_domain_rules = 0
         for rule_file in sorted(rule_dir.glob("*.yaml")):
             try:
-                document = yaml.safe_load(rule_file.read_text(encoding="utf-8")) or {}
+                document = yaml.safe_load(self.read(rule_file)) or {}
             except (OSError, UnicodeError, yaml.YAMLError) as exc:
                 self.add("BLOCK", "CUSTOM-RULE-PARSE", rule_file, f"本地校验规则不可读：{exc}")
                 continue

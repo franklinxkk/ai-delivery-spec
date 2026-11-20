@@ -32,7 +32,7 @@ python scripts/ai_delivery_spec_cli.py bind-team --project /other/project-b --te
 
 同项目的新对话读取已有绑定；同父目录的新项目继承父目录默认。其他目录的新项目必须显式链接，没有机器全局隐式设置。`init-prd --template-file /path/本次模板.md` 只覆盖本次模板，不修改团队默认；`--profile` 可显式读取另一绑定文件。解析顺序为父目录 → 当前项目 → 显式 profile → 本次模板。绑定中路径相对其声明文件，因此整体移动共同目录后仍可解析；跨磁盘保留绝对路径，移动后需重新绑定。
 
-团队 Markdown 只有明确写了 `<!-- extends: unified-requirement-prd-template.md -->` 才按同名二级标题扩展内置骨架，否则全量采用。Word 不做自动转 Markdown；用宿主文档工具编辑副本，保留模板的段落及字符直接格式，不能只比对样式定义文件。渲染后对照封面、表格、页眉页脚和实际目录；目录域存在或“打开后更新”提示不等于已形成可传阅导航。旧 `init-requirements --custom-root … --template …` 仍是显式创建机器交接工作区的高级入口，不用于普通模板导入。
+团队 Markdown 只有明确写了 `<!-- extends: unified-requirement-prd-template.md -->` 才按同名二级标题扩展内置骨架，否则全量采用。Word 不做自动转 Markdown；用宿主文档工具编辑副本，保留模板的段落及字符直接格式，不能只比对样式定义文件。按实际文档用途核对标题样式、需要的目录、图表及分节，渲染后检查正文、附录、页眉页脚和导航；目录域存在或“打开后更新”提示不等于可传阅。短文不强加目录；多节 Word 的段落级 sectPr 可合法存在，最终 body 级节属性须位于正文末尾。结构检查由文档工具承担，不能只看 XML 或渲染成功就判内容齐全；重复图片也应先核用途，不能只按哈希去重。旧 `init-requirements --custom-root … --template …` 仍是显式创建机器交接工作区的高级入口，不用于普通模板导入。
 
 ## 设计资源怎样真正生效
 

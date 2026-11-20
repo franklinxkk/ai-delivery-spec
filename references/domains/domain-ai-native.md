@@ -60,6 +60,8 @@ core section headings used here and in `domain-module-template.md`.
 | change_watch | `KS-AI-NIST-AGENT-STANDARDS-2026` and `KS-AI-AGENT-SECURITY-DRAFT-2026` signal stronger identity, permission, tool, data, log and shutdown controls | use them for threat modeling and re-verification only; initiatives, consultations and draft projects cannot create a compliance hard stop |
 | compatibility guard | the official versioning page still lists MCP 2026-07-28 as current; deprecated features remain supported during their stated transition | never silently break older clients; record supported versions, deprecated paths, fallback and coexistence evidence; protocol status does not prove a particular SDK or host has migrated |
 
+**MCP Windows 安全边界** — Partial source review 2026-11-13: `KS-AI-MCP-SERVERS-SECURITY-20261111` separates protocol compatibility from implementation safety. Record the deployed package/version, OS and relevant advisory; a read-only tool or allowed directory is not proof of confinement. Validate untrusted repository configuration, symlink/junction boundaries and fetch network destinations where those tools are used. A fixed version does not prove every platform boundary is closed. This does not require every AI product to use these servers.
+
 ### AI Transformation Horizon
 
 | Axis | From -> toward | Non-negotiable product guard |
@@ -297,6 +299,7 @@ Rules:
 
 **提示注入**（越权指令、prompt injection、untrusted content）：外部材料作为数据，不能越过用户授权改变目标、泄露数据或触发写操作。
 
+- 欧盟 **合成内容** 的 **标注过渡期** (EU synthetic-content transition): `KS-DATA-EU-AI-AMEND-2026` Article 1(39)(b), inserting Article 111(4), gives systems placed on the market before 2026-08-02 until 2026-12-02 to comply with Article 50(2). Confirm EU scope, provider role, system placement date and the actual marking duty; the high-risk timetable extension is not a blanket labeling deferral. Media use cases follow this same source, not a separate assumed date.
 - AI context retrieval inherits user, tenant, organization, row, column, and
   field-level permissions.
 - Tool calls must declare read/write scope, idempotency, side effects, timeout,
@@ -316,7 +319,7 @@ Rules:
 
 | Scenario | Role | Expected Result |
 |---|---|---|
-| grounded answer with citations | end user | answer cites permitted context refs and freshness |
+| **知识库问答** / grounded answer with citations | end user | answer cites permitted context refs and freshness |
 | unauthorized data request | end user | refusal without leaking hidden fields |
 | tool write requires approval | expert reviewer | writeback waits for approval and logs decision |
 | stale knowledge base | end user | answer warns stale source or routes to manual path |
@@ -329,6 +332,7 @@ Rules:
 | repeated propose-reject loop | accountable user | loop stops at configured limit and hands control to a human/manual path |
 | healthy long-running child is quiet | parent agent | explicit liveness distinguishes running from stalled; parent does not duplicate the task or token spend |
 | cross-model regression run | QA / AI engineer | evidence records provider, runtime model ID, client version, settings and date; an unverified marketing version is rejected |
+| MCP implementation confinement | security reviewer | on an applicable filesystem/git/fetch deployment, test untrusted repository configuration and out-of-scope path/network targets on the deployed OS; retain no-unauthorized-access evidence, package/advisory versions, residual limits and remediation |
 
 ## Cross-Domain Requirement Patterns
 

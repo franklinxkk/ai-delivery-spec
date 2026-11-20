@@ -53,6 +53,8 @@ Use this replaceable domain module for 运管、交通监管、道路运输企�
 | product_pattern | `KS-TRAFFIC-SMART-PILOTS-2026` | learn regional coordination, infrastructure and scenario patterns; never infer that every transport product needs the same cockpit, data scope or integration |
 | change_watch | ministry/local rules, inspection-code practices and pilot outputs continue to evolve | re-verify before each regulated baseline; local procurement/news evidence cannot override national rules or customer source systems |
 
+**驾驶员 63岁从业资格与4500千克普通货运例外** — Partial source review 2026-11-13: `KS-TRAFFIC-PRACTITIONERS-2026` (Ministry Order No. 4 of 2026, effective 2026-03-20) changes the age limits for the named practitioner roles from 60 to 63. Bind any eligibility rule to the exact role and effective version; Article 52 excludes drivers of ordinary freight vehicles of total mass 4,500 kg or below. Do not generalize this limit to every transport worker or silently rewrite historical eligibility results.
+
 ### AI Transformation Horizon
 
 | Axis | From -> toward | Non-negotiable product guard |
@@ -429,7 +431,7 @@ Online inspection: retain the source and time of remote evidence; distinguish in
 4. Training and education: target population -> course/task assignment -> learning/exam -> evidence capture -> overdue handling -> compliance report. Treat training as an entry workflow, not the whole product.
 5. Qualification management: enterprise/person/vehicle certificate registration -> OCR/import -> validity and missing-item rule check -> reminder/task -> renewal evidence -> audit.
 6. Pre-trip safety briefing and vehicle trip check: trigger -> mobile acknowledgement/check -> normal completion or exception disposition -> linked fault/hidden-danger work where needed -> evidence archive; release-to-duty authority remains distinct.
-7. Dual prevention: risk source -> risk classification/control measure -> hidden-danger investigation -> rectification task -> acceptance/return -> statistics and report.
+7. **双重预防机制** (dual prevention): risk source -> risk classification/control measure -> hidden-danger investigation -> rectification task -> acceptance/return -> statistics and report.
 8. Dangerous goods sample path: vehicle/driver/escort/cargo/tank/e-waybill/context -> AI/rule pre-check -> missing or conflict item -> human confirmation -> task/stop-risk suggestion -> evidence archive.
 9. Safety inspection: create -> execute -> evidence/signatures -> no-issue conclusion or issue/rectification -> enterprise submission where needed -> accept/return -> archive.
 10. Special campaign: publish scope/deadline -> enterprises self-check/report -> rectification -> regulator/enterprise progress review -> summary.

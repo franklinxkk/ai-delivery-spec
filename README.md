@@ -6,6 +6,8 @@
 
 AI Delivery Spec 帮你判断需求价值、挖透业务细节，形成产品能确认、开发能实现、测试能验收的需求与原型，让团队和 AI Coding Agent 据此协作。
 
+工作方法随模型能力和任务变化；Skill 持续保留的是业务依据、决定边界、存量约定和可核对的交付结果。领域资料、模板和检查工具按需调用。判断一次迭代是否有效，要看它是否减少误解、遗漏和返工，同时计入阅读、澄清与执行成本；规则数量和产物数量不代表收益。
+
 [![ClawHub: 3,139 downloads](https://img.shields.io/badge/ClawHub-3%2C139_downloads-2563eb)](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec)
 [![SkillHub: 4.9/5 for v5.5.6](https://img.shields.io/badge/SkillHub-4.9%2F5_%C2%B7_v5.5.6-15803d)](https://skillhub.cn/skills/user_12c92261/ai-delivery-spec)
 [![License: MIT](https://img.shields.io/badge/License-MIT-64748b)](LICENSE)
@@ -83,12 +85,16 @@ npx skills add franklinxkk/ai-delivery-spec
 
 ## 看看团队能拿到什么
 
+交给开发时，按用户或团队约定及接收需要选择规格、原型等产物，不自动成套增加附件；关键业务条件、验收、决定和演示替代物仍须清楚。机器交接清单、工程基线和评审工作台按需使用。示例请保留完整目录及相对资源。
+
 | 交付示例 | 接手的人可以看到什么 |
 |---|---|
 | [一项筛选改动](examples/minimal-v5/requirement-card.md) | 产品和业务用一份简短需求卡确认规则与验收 |
 | [工单模块 PRD](examples/medium-review-handoff/requirement.md) | 研发、测试按模块连续阅读角色、动作、状态与异常 |
+| [纯产品态原型](examples/medium-review-handoff/product-prototype.html) | 只呈现工单列表与详情，两态加载同目录 ticket-model.js 共用处理器 |
 | [可操作评审原型](examples/medium-review-handoff/review-prototype.html) | 下载示例目录后操作模拟业务，设计和评审人员就近查看功能说明 |
-| [配置如何产生真实行为](examples/configuration-to-consumption.md) | 研发与 AI Coding Agent 从配置保存核对到实际执行、结果与反例 |
+| [已有文档如何归并](examples/consolidate-existing-module.md) | 对照改前改后，保留独有条件，理顺实际处理器 |
+| [机制取舍与实际消费](examples/configuration-to-consumption.md) | 机制取舍、配置实际生效和评审误报的脱敏案例；保留必要保障，区分操作量与已证明结果，复杂案例按需查看 |
 
 <a id="customization"></a>
 
@@ -96,7 +102,7 @@ npx skills add franklinxkk/ai-delivery-spec
 
 提供团队现有 PRD 模板、组件规范或参考原型，说一句“本项目沿用这些资料”，就按你们已有的文档和交互习惯工作。需要以后复用时，由 Agent 在团队或项目目录记录引用；原件保存在 Skill 安装目录之外，升级后继续读取。[查看团队定制](references/team-customization.md)
 
-内置交通、CRM、教育、OA、医疗、数据产品、AI 原生、媒体与知识管理资料，支持中文摘要、术语与别名检索；也可接入私有领域资料。[打开领域导览](references/domains/中文导览.md)
+内置交通、CRM、教育、OA、医疗、数据产品、AI 原生、媒体与知识管理资料，支持中文摘要、术语与别名检索；也可接入私有领域资料。[打开领域导览](references/domains/domain-guide.md)
 
 <a id="faq"></a>
 
@@ -123,6 +129,8 @@ npx skills add franklinxkk/ai-delivery-spec
 
 AI Delivery Spec helps you assess whether a need is worth pursuing, explore the business details, and turn decisions into requirements and interactive prototypes. Product teams can confirm the intent, developers and Coding Agents can implement the behavior, and testers can derive acceptance cases.
 
+Methods adapt to the task and model capability. The durable constraints preserve business evidence, decision authority, existing agreements and verifiable outcomes; references and tools are optional. Judge revisions by reduced errors and rework alongside reading, clarification and execution cost, not by rule or artifact counts.
+
 Start with an idea, confirmed requirements, an existing system or review feedback. Compare options, clarify questions that affect the decision, and check results against the original intent. People retain the key decisions, and small changes stay small.
 
 Install with `npx skills add franklinxkk/ai-delivery-spec`, then try:
@@ -146,4 +154,6 @@ Browse the [requirement card](examples/minimal-v5/requirement-card.md), [modular
 
 欢迎带着脱敏案例、预期与实际差异来[反馈问题](https://github.com/franklinxkk/ai-delivery-spec/issues)或[参与贡献](https://github.com/franklinxkk/ai-delivery-spec/blob/main/.github/CONTRIBUTING.md)。如果它帮到了你，欢迎 [Star ⭐](https://github.com/franklinxkk/ai-delivery-spec)。
 
-**5.5.6** · [MIT](LICENSE) · [返回顶部](#top)
+已启用版本锁定的项目在采用本版时填写 `expected_skill_version: 5.5.7`，新检查点关联本次安装包的 SHA-256。旧检查点保留原验证记录。普通需求编写可以直接使用。
+
+**5.5.7** · [MIT](LICENSE) · [返回顶部](#top)

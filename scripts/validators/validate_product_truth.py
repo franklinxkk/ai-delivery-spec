@@ -16,6 +16,8 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA_PATH = ROOT / "schemas" / "product-truth.schema.json"
+sys.path.insert(0, str(ROOT / "scripts"))
+from truth_references import iter_references
 
 
 def load_document(path: Path) -> Any:
@@ -42,26 +44,18 @@ def collect_ids(document: Any) -> tuple[set[str], list[str]]:
     return set(values), duplicates
 
 
-def collect_references(document: Any) -> list[tuple[str, str]]:
-    references: list[tuple[str, str]] = []
-    for node in walk(document):
-        for key, value in node.items():
-            if key.endswith("_ref") and isinstance(value, str):
-                references.append((key, value))
-            elif key.endswith("_refs") and isinstance(value, list):
-                references.extend((key, item) for item in value if isinstance(item, str))
-    return references
-
-
 def semantic_failures(document: dict[str, Any]) -> list[str]:
     failures: list[str] = []
     identifiers, duplicates = collect_ids(document)
     if duplicates:
         failures.append("duplicate stable IDs: " + ", ".join(sorted(duplicates)))
 
-    for key, reference in collect_references(document):
-        if reference not in identifiers:
-            failures.append(f"unresolved {key}: {reference}")
+    for ref in iter_references(document, document.get("truth_id")):
+        if ref.external:
+            if not ref.valid_locator:
+                failures.append(f"invalid external locator at {ref.path}")
+        elif ref.target not in identifiers:
+            failures.append(f"unresolved {ref.field}: {ref.target} at {ref.path}")
 
     actions = {item["id"]: item for item in document.get("actions", [])}
     events = {item["id"]: item for item in document.get("events", [])}
@@ -196,11 +190,14 @@ def validate(path: Path) -> int:
 
     identifiers, _ = collect_ids(document)
     print(
-        "PASS: Product Truth is schema-valid and reference-closed "
+        "PASS: Product Truth is schema-valid and its local references are closed "
         f"({len(identifiers)} stable IDs, {len(document.get('requirements', []))} requirements, "
         f"{len(document.get('features', []))} features, "
         f"{len(document.get('acceptance', []))} acceptance paths)"
     )
+    external_count = sum(ref.external for ref in iter_references(document))
+    if external_count:
+        print(f"INFO: {external_count} external locators are unverified")
     return 0
 
 

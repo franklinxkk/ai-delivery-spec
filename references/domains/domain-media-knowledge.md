@@ -46,9 +46,13 @@ Does not apply when:
 | Evidence class | Current signal | Requirement effect |
 |---|---|---|
 | binding_baseline | China personal-information, face-recognition, copyright, network-data and AI-generated-content-labeling rules | verify jurisdiction, role, media subject, purpose, allowed action, consent/legal basis, labeling and retention before retrieval, training, export or publication |
-| design_guidance | IPTC VMH 1.7, C2PA 2.4, W3C Media Fragments/Web Annotation, IIIF 3.0, PBCore, PREMIS/FADGI, MPEG-7 and current China audiovisual metadata standards | use stable asset/instance/segment identities, time-space selectors, provenance, rights and preservation mappings; adopt only the profiles needed by the product |
+| design_guidance | IPTC VMH 1.7, C2PA 2.5 (with 2.4 retained only for selected legacy profiles), W3C Media Fragments/Web Annotation, IIIF 3.0, PBCore, PREMIS/FADGI, MPEG-7 and current China audiovisual metadata standards | use stable asset/instance/segment identities, time-space selectors, provenance, rights and preservation mappings; adopt only the profiles needed by the product |
 | product_pattern | Azure AI Video Indexer, NVIDIA VSS and Twelve Labs expose ingestion, scene/shot/moment analysis, multimodal search and video Q&A patterns | discover options and evaluation slices only; vendor features or accuracy claims cannot become a project requirement without evidence |
 | change_watch | metadata, content-credential, AI-labeling, preservation format and multimodal-model versions continue to change | record source/model/index/profile versions and reverify before high-risk use; never freeze a vendor model name as permanent domain truth |
+
+Partial source review 2026-11-13: `KS-MEDIA-C2PA-2.5` is the current entry-point version (October 2026); retain explicit legacy 2.4 profiles and verify generator/validator compatibility before migration. A version upgrade is not a truth or rights guarantee.
+
+**DA/T 110—2026 录音录像档案语音识别转写** — Partial source review 2026-11-13: `KS-MEDIA-ARCHIVE-ASR-110-2026` is an effective recommended industry standard for archive-room/archive-institution speech transcription and related systems. An attributable municipal-archives full-text copy has now been verified against the official catalog. When this standard is adopted, use its complete scope and clauses for source/transcript linkage, timecodes, correction, quality and acceptance; do not generalize its conditional thresholds to every transcription product. EU synthetic-media systems also use the Article 50(2) transition in the AI-native Policy / Privacy Constraints section (`KS-DATA-EU-AI-AMEND-2026`).
 
 ### AI Transformation Horizon
 
@@ -58,7 +62,7 @@ Does not apply when:
 | M1 governed assets | folders -> Work/Asset/Rendition/Track lifecycle | source, hash, master/proxy, rights, retention and audit are reliable |
 | M2 searchable moments | filename/transcript search -> lexical + metadata + multimodal moment retrieval | real queries find the correct time range without unauthorized exposure |
 | M3 knowledge | tags -> entities/events/concepts linked to exact media evidence | important claims replay the supporting moment and evidence state |
-| M4 AI applications | manual review/edit -> grounded Q&A, summarization, clipping, recommendation | task success, citation, rights and cost beat the agreed baseline |
+| M4 AI applications | manual review/edit -> **知识库问答** (grounded Q&A), summarization, clipping, recommendation | task success, citation, rights and cost beat the agreed baseline |
 | M5 bounded agents | user performs every handoff -> agent proposes or executes permitted reversible actions | tool scope, approval, rollback, incident and trace evidence pass |
 
 ## First-Principles Domain Lens

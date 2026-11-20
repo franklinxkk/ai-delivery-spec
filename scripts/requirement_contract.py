@@ -25,7 +25,7 @@ def load_declarations(raw: str) -> dict:
         raise ValueError("Declaration root must be an object")
     return value
 
-VERSION = "5.5.6"
+VERSION = "5.5.7"
 MODES = {"direct", "card", "prd"}
 RISK_SIGNALS = {
     "state": ("states", "cross_module_state", "approval", "workflow"),
@@ -187,7 +187,14 @@ def route(doc: dict[str, Any], legacy_level: str = "auto", *, body: str = "") ->
         notes.append("AI write scope is undeclared; this is not evidence of consequential execution")
     if doc.get("reversible") is False:
         risks.add("irreversible")
-    extra = risks - RISK_SIGNALS.keys()
+    # Normalize explicit declarations for review while preserving the user's terms.
+    declared_aliases = {"权限": "permission", "租户隔离": "permission",
+                        "隐私": "privacy", "患者隐私": "privacy", "个人隐私": "privacy",
+                        "数据口径": "metric", "指标口径": "metric",
+                        "合规": "regulated", "监管合规": "regulated", "医疗安全": "regulated",
+                        "资金结算": "irreversible"}
+    review_risks = {declared_aliases.get(facet, facet) for facet in risks}
+    extra = review_risks - RISK_SIGNALS.keys()
     if extra:
         notes.append("Additional facets require scoped review: " + ", ".join(sorted(extra)))
     shape = doc.get("delivery_shape")
@@ -217,7 +224,7 @@ def route(doc: dict[str, Any], legacy_level: str = "auto", *, body: str = "") ->
     else:
         complexity_band = None
     governed = bool(doc.get("governed_truth_requested") is True or shape == "governed_truth" or doc.get("governed") is True)
-    categories = {name for name, facets in CATEGORIES.items() if facets & risks}
+    categories = {name for name, facets in CATEGORIES.items() if facets & review_risks}
     if doc.get("nullable_fields") or doc.get("stale_data"):
         categories.add("null_stale")
     if doc.get("change") or doc.get("seed_refs"):
@@ -298,6 +305,65 @@ def table_content_locations(body: str) -> dict[str, bool]:
     return locations
 
 
+def prose_content_locations(body: str) -> dict[str, bool]:
+    """Locate content, not business truth; retain numeric Word projection hierarchy."""
+    patterns = {
+        "scope": r"范围|目标|差异|scope|goal|delta",
+        "behavior": r"行为|规则|变更|结果|新增|编辑|派生|操作|流程|behavior|rule|change|result|create|edit|derive|workflow",
+        "acceptance": r"验收|验证|acceptance|verification",
+    }
+    masked = prose_lines(body)
+    lines = body.splitlines()
+    locator_lines = prose_lines(re.sub(r"<!--\s*ADS:(scope|behavior|acceptance)\s*-->", r"ADSLOC:\1:", body, flags=re.I))
+    headings = []
+    for i, line in enumerate(masked):
+        match = re.match(r"^\s*(#{1,6})\s+(.+)", line)
+        if not match:
+            continue
+        title = re.sub(r"^\[[^\]]+\]\s*", "", match[2])
+        number = re.match(r"^(\d+(?:\.\d+)*)(?:[.)、]?\s+)", title)
+        headings.append((i, len(match[1]), tuple(number[1].split('.')) if number else (), title))
+
+    def has_content(start: int, end: int) -> bool:
+        value = '\n'.join(masked[start:end])
+        value = re.sub(r"(?m)^\s*#{1,6}\s+[^\n]*$", "", value)
+        value = re.sub(r"[\s*`_#|:：—–.\-]+|TBD|TODO|待补(?:充)?|待填写", "", value, flags=re.I)
+        return bool(value)
+
+    def heading_end(index: int) -> int:
+        _, depth, number, _ = headings[index]
+        for pos, other_depth, other_number, _ in headings[index + 1:]:
+            if other_depth > depth:
+                continue
+            # DOCX projection may put 4.4 and 4.4.1 at the same Markdown level.
+            if other_depth == depth and number and other_number[:len(number)] == number and len(other_number) > len(number):
+                continue
+            return pos
+        return len(lines)
+
+    locations = table_content_locations(body)
+    for slot, pattern in patterns.items():
+        for index, (pos, _, _, title) in enumerate(headings):
+            if re.search(pattern, title, re.I):
+                locations[slot] = locations.get(slot, False) or has_content(pos + 1, heading_end(index))
+        # Markers are optional locators for existing text, never a completeness claim.
+        for pos, line in enumerate(locator_lines):
+            if not re.search(r"ADSLOC:" + slot + r":", line, re.I):
+                continue
+            following = next((n for n in range(pos, len(lines)) if masked[n].strip()), len(lines))
+            index = next((n for n, h in enumerate(headings) if h[0] == following), None)
+            end = heading_end(index) if index is not None else next((h[0] for h in headings if h[0] > pos), len(lines))
+            next_marker = next((n for n in range(pos + 1, len(lines)) if re.search(r'ADSLOC:(?:scope|behavior|acceptance):', locator_lines[n], re.I)), len(lines))
+            locations[slot] = locations.get(slot, False) or has_content(pos, min(end, next_marker))
+    # Module-local acceptance prose is valid; a mention in an introduction is not a locator.
+    for line in masked:
+        match = re.match(r"^\s*(?:[-*]\s+)?(?:\*\*)?(?:验收(?:要点|场景|条件|标准)?|验证(?:场景|标准|结果)?|acceptance(?: criteria| scenario)?\b|verification\b)[^：:\n]{0,60}[：:]\s*(.*)", line, re.I)
+        if match:
+            content = re.sub(r"[\s*`—–.\-]+|TBD|TODO|待补(?:充)?|待填写", "", match[1], flags=re.I)
+            locations['acceptance'] = locations.get('acceptance', False) or bool(content)
+    return locations
+
+
 def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope: tuple[str, ...] = (), legacy_level: str = "auto") -> tuple[list[dict], dict]:
     findings: list[dict] = []
     resolved = route(doc, legacy_level, body=body)
@@ -331,29 +397,12 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
             f"Declared main language is {drift[0]}, but readable prose clearly uses another language. Review the prose or declaration; intentional bilingual documents may declare bilingual: true. Keep code, IDs and proper names unchanged.")
     if doc.get("status") in ("baseline", "baselined", "approved") and re.search(r"\bdraft\b", str(doc.get("baseline_version", "")), re.I):
         add("BLOCK", "PRD-STATUS-CONTRADICTION", "Baseline status contradicts draft version")
-    table_locations = table_content_locations(body)
-    for slot, pattern in {
-        "scope": r"范围|目标|差异|scope|goal|delta",
-        "behavior": r"行为|规则|变更|结果|behavior|rule|change|result",
-        "acceptance": r"验收|验证|acceptance|verification",
-    }.items():
-        found = re.search(r"<!--\s*ADS:" + slot + r"\s*-->", body, re.I) or re.search(r"(?im)^#{1,6}\s+[^\n]*(?:" + pattern + r")[^\n]*", body)
-        if not found:
-            if slot in table_locations:
-                if not table_locations[slot]:
-                    add("GAP", "SPEC-EMPTY-SECTION", "Located table column has no content", slot)
-            else:
-                add("GAP", "SPEC-REVIEW-LOCATION", "Locate or manually review " + slot + "; free-form prose is not proved incomplete", slot)
-        else:
-            tail = body[found.end():]
-            heading = re.match(r"^\s*(#{1,6})[^\n]*\n", tail) if found.group().startswith("<!--") else re.match(r"(#{1,6})", found.group())
-            level = len(heading[1]) if heading else 6
-            if found.group().startswith("<!--") and heading:
-                tail = tail[heading.end():]
-            section = re.split(r"(?m)^#{1," + str(level) + r"}\s|<!--\s*ADS:", tail, maxsplit=1)[0]
-            section = re.sub(r"(?m)^#{1,6}[^\n]*$", "", section)
-            if not re.sub(r"<!--.*?-->|\s", "", section, flags=re.S):
-                add("GAP", "SPEC-EMPTY-SECTION", "Located section has no content", slot)
+    locations = prose_content_locations(body)
+    for slot in ('scope', 'behavior', 'acceptance'):
+        if slot not in locations:
+            add("GAP", "SPEC-REVIEW-LOCATION", "Locate or manually review " + slot + "; free-form prose is not proved incomplete", slot)
+        elif not locations[slot]:
+            add("GAP", "SPEC-EMPTY-SECTION", "Matched headings, columns or labels have no located content; verify the original before adding text", slot)
 
     def objects(key: str) -> list[dict]:
         value = doc.get(key, [])
@@ -471,8 +520,8 @@ def check_spec(doc: dict[str, Any], body: str, *, stage: str = "specify", scope:
         refs = unknown.get("affected_refs", unknown.get("scope_refs", []))
         affected = ", ".join(refs) if string_list(refs, nonempty=True) else "scope not declared"
         add("BLOCK" if reached else "GAP", "SPEC-OPEN-DECISION",
-            f"{identity} 仍为 {status}；影响：{affected}；阻断起点：{', '.join(stops)}；当前阶段：{stage}。整体签认或验收记录不能代替该项决定。若实际已解决，补真实决定/来源引用并关闭此项；否则保留 open，明确本轮不受影响的范围或有授权的有限例外，不能自动放行依赖行为。", identity,
-            f"Open decision {identity} is still {status}; affected: {affected}; blocks from: {', '.join(stops)}; current stage: {stage}. A global signoff or acceptance record cannot resolve this item. If actually resolved, record its real decision/source and close it; otherwise retain it and identify unaffected scope or an authorized bounded exception. Do not automatically release dependent behavior.")
+            f"{identity} 仍为 {status}；影响：{affected}；阻断起点：{', '.join(stops)}；当前阶段：{stage}。整体签认或验收记录不能代替该项决定。若实际已解决，补真实决定/来源引用并关闭此项；否则保留 open，明确本轮不受影响的范围或有授权的有限例外。本项只限制受影响范围的规格结论，不代表产品运行或发布应新增拦截。", identity,
+            f"Open decision {identity} is still {status}; affected: {affected}; blocks from: {', '.join(stops)}; current stage: {stage}. A global signoff or acceptance record cannot resolve this item. If actually resolved, record its real decision/source and close it; otherwise retain it and identify unaffected scope or an authorized bounded exception. This finding limits the specification conclusion for the affected scope; it does not establish a product runtime or release gate.")
     resolved["unknown_summary"] = {
         "schema_version": 1, "stage": stage, "scope_refs": list(scope or []),
         "counts": {key: len(ids) for key, ids in buckets.items()},

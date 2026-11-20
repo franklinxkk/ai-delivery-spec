@@ -105,12 +105,20 @@ sources:
     issuer: 中华人民共和国交通运输部
     authority_type: department_rule
     effect_class: binding_baseline
-    url: https://xxgk.mot.gov.cn/gz/202602/t20260213_4200291.html
+    url: https://xxgk.mot.gov.cn/jigou/fgs/202602/t20260213_4200283.html
     status: active_as_verified
     jurisdiction: China
     applicability: road transport practitioners and qualification lifecycle
     product_mapping: practitioner file, qualification, validity, renewal and audit
-    last_verified_at: 2026-10-11
+    last_verified_at: 2026-11-13
+    issued_at: 2026-02-06
+    published_at: 2026-02-13
+    effective_at: 2026-03-20
+    accessed_at: 2026-11-13
+    document_no: 交通运输部令2026年第4号
+    claim_limit: The amendment changes the stated age limits from 60 to 63 for named roles, not every transport worker. Article 52 excludes drivers of ordinary freight vehicles of total mass 4500 kg or below; reconcile category and other applicable rules before eligibility decisions.
+    verification_evidence:
+      method_and_limit: Read issuer amendment, effective date and republished body including Articles 9-14, 32 and 52; annex forms and local implementation were not reviewed.
     refresh_days: 90
   - id: KS-TRAFFIC-DANGEROUS-2026
     domains: [traffic]
@@ -206,15 +214,20 @@ sources:
     authority_type: ministry_notice
     effect_class: binding_baseline
     url: https://www.nhc.gov.cn/yzygj/c100068/202506/c68abee7c54b4651a774cd533761780b.shtml
-    status: active_as_verified
+    status: active_authoritative_republication_verified
     jurisdiction: China
     applicability: medical-institution EMR information use and permission management
     product_mapping: role/permission, creation, modification, storage, transfer and accountability
-    last_verified_at: 2026-10-11
+    last_verified_at: 2026-11-13
+    document_no: 国卫办医政函〔2025〕262号
+    issued_at: 2025-06-23
+    published_at: 2025-06-30
+    accessed_at: 2026-11-13
     refresh_days: 90
     verification_evidence:
       full_text_url: https://app.www.gov.cn/govdata/gov/202507/01/531972/article.html
-      method_and_limit: Government full-text republication attributed to NHC; matched 2025 No.262 notice and date. Checked use permissions, operation logs, sharing authorization and incoming-record verification; canonical retrieval failed.
+      corroboration_url: https://www.pudong.gov.cn/zwgk/14557.gkml_ywl_yzgl/2025/245/345047.html
+      method_and_limit: On 2026-11-13 read the State Council client full-text republication attributed to NHC, with matching title, No.262 and 2025-06-23 signature date; checked scope, graded access and expiry, temporary personnel and vendor permissions, traceability, sharing and incoming-record verification. Pudong notice subsection II.5 explicitly cites No.262 and corroborates access and traceability duties. NHC canonical URL returned 412; republication date is 2025-07-01, distinct from issuer publication 2025-06-30. No exhaustive supersession or local-implementation review.
   - id: KS-MEDICAL-CYBERSECURITY-2022
     domains: [medical-hospital-it]
     title: 医疗卫生机构网络安全管理办法
@@ -823,11 +836,16 @@ sources:
     url: https://xxgk.mot.gov.cn/xzgfxwj/202410/t20241009_4157562.html
     status: active_as_verified
     jurisdiction: China
-    applicability: road transport enterprise principal and safety manager assessment governance
+    applicability: "principals and safety managers of road passenger and freight operators and road passenger station operators"
     product_mapping: personnel role, assessment proof, validity, responsible enterprise, query and warning rules
     claim_limit: Apply only after enterprise type, role, local implementation and effective-state checks.
-    last_verified_at: 2026-08-09
+    last_verified_at: "2026-11-20"
     refresh_days: 90
+    effective_at: "2024-10-01"
+    accessed_at: "2026-11-20"
+    verification_evidence:
+      full_text_url: https://xxgk.mot.gov.cn/xzgfxwj/202410/t20241009_4157562.html
+      method_and_limit: "Opened the Ministry of Transport issuance notice for 交运规〔2024〕8号 and the issuer's linked interpretation, which gives the 2024-10-01 effective date and explains role-specific assessment and certificate changes. The notice links the measures and syllabus as Word files. The measures attachment could not be read directly in the web tool, so Articles 2-3, 14-17 and 21-23 were checked against the text republished at https://www.xjhc.gov.cn/xjhc/c113468/202505/46ec253b6c134b1bb2d3c2cc4cbf189f.shtml. It covers principals and safety managers of road passenger and freight operators, including dangerous-goods operators, and road passenger station operators. Article 22 allows named related businesses to refer to the measures. This check did not review the syllabus or local implementation details."
   - id: KS-TRAFFIC-DANGEROUS-SAFETY-2025
     domains: [traffic]
     title: 危险货物道路运输企业安全管理规范（交运规〔2025〕6号）
@@ -837,11 +855,15 @@ sources:
     url: https://xxgk.mot.gov.cn/xzgfxwj/202510/t20251029_4178955.html
     status: active_as_verified
     jurisdiction: China
-    applicability: dangerous-goods road transport enterprise safety management
+    applicability: "safety management of commercial road carriers of dangerous goods, with reference use by noncommercial operators under Article 74"
     product_mapping: organization, personnel, vehicle, operation, training, inspection, hazard and emergency controls
     claim_limit: Do not copy an item into every transport industry; verify dangerous-goods scope and local rules.
-    last_verified_at: 2026-08-10
+    last_verified_at: "2026-11-20"
     refresh_days: 90
+    accessed_at: "2026-11-20"
+    verification_evidence:
+      full_text_url: https://xxgk.mot.gov.cn/xzgfxwj/202510/t20251029_4178955.html
+      method_and_limit: "Opened the issuing notice and body of 交运规〔2025〕6号 on the Ministry of Transport site. Confirmed joint issuance by the Ministries of Transport, Public Security and Emergency Management. Article 2 covers enterprises engaged in commercial road transport of dangerous goods. Article 74 permits noncommercial operators to refer to the standard, and Article 75 specifies effect from issuance. Checked the staffing and training provisions and the risk and hazard management chapter. The six annexes and local implementation were outside this check."
   - id: KS-TRAFFIC-PASSENGER-SAFETY-2023
     domains: [traffic]
     title: 道路旅客运输企业安全管理规范（交运规〔2023〕4号）
@@ -851,11 +873,15 @@ sources:
     url: https://xxgk.mot.gov.cn/2020/jigou/ysfws/202311/t20231123_3952565.html
     status: active_as_verified
     jurisdiction: China
-    applicability: road passenger transport enterprise safety management
+    applicability: "safety management of commercial road passenger carriers within Article 2"
     product_mapping: organization, safety staffing, personnel assessment, vehicle, driver, operation, training, risk and hidden-danger controls
     claim_limit: Apply only to road passenger enterprises after vehicle count, role, effective status and local implementation are verified; do not reuse the dangerous-goods rule number.
-    last_verified_at: 2026-08-10
+    last_verified_at: "2026-11-20"
     refresh_days: 90
+    accessed_at: "2026-11-20"
+    verification_evidence:
+      full_text_url: https://xxgk.mot.gov.cn/2020/jigou/ysfws/202311/t20231123_3952565.html
+      method_and_limit: "Opened the issuing notice and body of 交运规〔2023〕4号 on the Ministry of Transport site. Confirmed joint issuance by the Ministries of Transport, Public Security and Emergency Management. Article 2 covers enterprises engaged in commercial road passenger transport. Articles 6-9 address staffing by fleet size, assessment and training. Article 83 states that the standard takes effect on issuance and repeals 交运发〔2018〕55号. The driving-log annex and local implementation were outside this check."
   - id: KS-TRAFFIC-SMART-PILOTS-2026
     domains: [traffic]
     title: 第二批公路水路交通基础设施数字化转型升级示范区域名单
@@ -878,30 +904,40 @@ sources:
     issuer: Microsoft
     authority_type: vendor_product_docs
     effect_class: product_pattern
-    url: https://learn.microsoft.com/en-us/dynamics365/release-plan/2026wave1/sales/dynamics365-sales/
-    status: current_vendor_roadmap_as_verified
+    url: https://learn.microsoft.com/en-us/previous-versions/dynamics365/release-plan/2026wave1/sales/dynamics365-sales/
+    status: archived_historical_vendor_roadmap
     jurisdiction: global
     applicability: enterprise sales automation and agent-assisted CRM pattern research
     product_mapping: system-of-action, unified context, seller agents, governed automation and human handoff
     evidence_role: official vendor roadmap and product-pattern evidence
-    claim_limit: Roadmap content may change and does not prove customer outcome, independent superiority, or mandatory scope.
-    last_verified_at: 2026-08-09
+    claim_limit: Archived since October 2026 and no longer maintained; use only as historical product-pattern evidence. Follow its current-roadmap link and verify actual availability before product commitments; no independent outcome or mandatory scope follows.
+    last_verified_at: 2026-11-13
+    last_updated_at: 2026-03-25
+    publication_date_note: Original publication date not stated; archived since October 2026.
+    accessed_at: 2026-11-13
+    verification_evidence:
+      method_and_limit: Read the archived vendor page including its October 2026 archive warning and the linked current roadmap notice that estimated dates may change; individual feature availability and accounts were not tested.
     refresh_days: 90
   - id: KS-CRM-SALESFORCE-CONTACT-CENTER-2026
     domains: [crm]
-    title: Agentforce Contact Center announcement
+    title: "Introducing the Agentic Contact Center: AI, Channels, CRM All in One"
     issuer: Salesforce
     authority_type: vendor_product_docs
     effect_class: product_pattern
-    url: https://www.salesforce.com/news/stories/agentforce-contact-center-announcement/the-worlds-first-end-to-end-agentic-contact-center-is-here_-delivering-the-first-agentic-solution-unifying-ai-voice-and-crm-3/
+    url: "https://www.salesforce.com/news/stories/agentforce-contact-center-announcement/"
     status: vendor_announcement_as_verified
-    jurisdiction: global
+    jurisdiction: "vendor-described patterns globally, announcement availability limited to US and Canada"
     applicability: customer-service, channel, AI-agent and human-handoff pattern research
     product_mapping: unified customer context, voice/channel orchestration, agent-to-human transfer and service accountability
     evidence_role: official vendor product-announcement evidence
     claim_limit: Vendor claims are not independent performance proof and cannot create acceptance criteria without project evidence.
-    last_verified_at: 2026-08-09
+    last_verified_at: "2026-11-20"
     refresh_days: 90
+    accessed_at: "2026-11-20"
+    verification_evidence:
+      previous_url: https://www.salesforce.com/news/stories/agentforce-contact-center-announcement/the-worlds-first-end-to-end-agentic-contact-center-is-here_-delivering-the-first-agentic-solution-unifying-ai-voice-and-crm-3/
+      full_text_url: https://www.salesforce.com/news/stories/agentforce-contact-center-announcement/
+      method_and_limit: "Read Salesforce's canonical announcement on voice, customer context and handoff to human agents. Availability is described at publication as an add-on in the US and Canada. No performance or account entitlement was tested."
   - id: KS-CRM-HUBSPOT-SMART-CRM
     domains: [crm]
     title: HubSpot Smart CRM
@@ -915,38 +951,51 @@ sources:
     product_mapping: customer context, lifecycle automation, embedded AI and approachable user experience
     evidence_role: official vendor product-pattern evidence
     claim_limit: Product-page claims do not prove implementation quality, suitability, or business outcomes for another project.
-    last_verified_at: 2026-08-09
+    last_verified_at: "2026-11-20"
     refresh_days: 90
+    accessed_at: "2026-11-20"
+    verification_evidence:
+      full_text_url: https://www.hubspot.com/products/crm/ai-crm
+      method_and_limit: "Read HubSpot's public Smart CRM overview for its description of unified customer data and AI assistance. Individual subscriptions, configuration, performance and business results were outside this check."
 
   # 2026-08-09 systematic refresh: education
   - id: KS-EDU-AI-PLUS-2026
     domains: [education-it]
-    title: “人工智能+教育”行动计划（教科信〔2026〕1号）
+    title: "教育部等五部门关于印发《“人工智能+教育”行动计划》的通知（教科信〔2026〕1号）"
     issuer: 中华人民共和国教育部等五部门
     authority_type: national_action_plan
     effect_class: binding_baseline
     url: https://www.moe.gov.cn/srcsite/A16/s3342/202604/t20260410_1433240.html
-    status: active_as_verified
+    status: "active_authoritative_republication_verified"
     jurisdiction: China
     applicability: education digitalization and artificial-intelligence planning across education stages and governance
     product_mapping: AI literacy, teacher capability, education scenarios, platform capacity, model review, data and safety governance
     claim_limit: It is a national policy baseline, not a universal feature checklist; project level, institution type and local implementation still control scope.
-    last_verified_at: 2026-08-09
+    last_verified_at: "2026-11-20"
     refresh_days: 90
+    accessed_at: "2026-11-20"
+    verification_evidence:
+      full_text_url: https://edu.dg.gov.cn/gkmlpt/content/4/4525/post_4525772.html
+      method_and_limit: "Read the Dongguan Education Bureau's full republication of the five-agency action plan signed 2026-04-02, document 教科信〔2026〕1号, and matched the Ministry of Education's indexed notice. The plan addresses differentiated education stages, teacher development, AI models, data and safety oversight. Project obligations depend on institutional scope and applicable implementation measures. Direct Ministry retrieval encountered a redirect loop."
   - id: KS-EDU-AI-GUIDANCE-2025
     domains: [education-it]
-    title: 国家智慧教育平台2.0智能版及2025年人工智能教育应用指南综述
-    issuer: 中华人民共和国教育部
-    authority_type: official_policy_and_program_summary
+    title: "用好人工智能这把“钥匙”"
+    issuer: "中国教育报（教育部网站转载）"
+    authority_type: "ministry_republished_program_reporting"
     effect_class: design_guidance
     url: https://www.moe.gov.cn/jyb_xwfb/xw_zt/moe_357/2026/2026_zt03/lhjy/lhsy/202603/t20260303_1429844.html
     status: published_as_verified
     jurisdiction: China
-    applicability: K-12, vocational and teacher generative-AI application planning
+    applicability: "historical summary of platform 2.0 and announced 2025 guidance for K-12, vocational institutions and teachers"
     product_mapping: age-appropriate use, teacher responsibility, content review, privacy, safety and platform-assisted learning
     claim_limit: Use the referenced guideline set only after retrieving the exact applicable text; this summary page is not a substitute for project source review.
-    last_verified_at: 2026-08-09
+    last_verified_at: "2026-11-20"
     refresh_days: 90
+    published_at: "2026-03-01"
+    accessed_at: "2026-11-20"
+    verification_evidence:
+      full_text_url: https://paper.jyb.cn/zgjyb/html/2026-03/01/content_144741_19329059.htm
+      method_and_limit: "Matched the indexed Ministry of Education republication to Gao Yizhe's original China Education Daily report dated 2026-03-01, 用好人工智能这把“钥匙”. Read the original's account of the platform 2.0 launch and publication of four guides for schools, vocational institutions and teachers. This verifies the historical summary. Specific age, privacy or review obligations require the relevant guideline and version. Direct Ministry retrieval encountered a redirect loop."
   - id: KS-EDU-DIGITAL-CASES-2026
     domains: [education-it]
     title: 世界数字教育创新十大案例（2026）
@@ -979,8 +1028,8 @@ sources:
   # 2026-08-09 systematic refresh: OA and collaborative work
   - id: KS-OA-ARCHIVE-STANDARD-GUIDE-2026
     domains: [oa]
-    title: 2026年度国家档案标准制修订项目立项指南
-    issuer: 国家档案局
+    title: "2026年档案行业标准立项指南"
+    issuer: "国家档案局办公室"
     authority_type: official_standard_program_guide
     effect_class: change_watch
     url: https://www.saac.gov.cn/daj/tzgg/202603/0a5646f9bd5a4fafb5b46e87ef72d04b.shtml
@@ -989,8 +1038,14 @@ sources:
     applicability: archive standards roadmap and future-proofing for OA projects
     product_mapping: single-copy electronic archives, long-term preservation, data governance and AI-assisted archive management
     claim_limit: A project guide announces standardization direction; it is not a published standard and cannot create a hard requirement.
-    last_verified_at: 2026-08-09
+    last_verified_at: "2026-11-20"
     refresh_days: 90
+    issued_at: "2026-03-13"
+    published_at: "2026-03-18"
+    accessed_at: "2026-11-20"
+    verification_evidence:
+      full_text_url: https://www.saac.gov.cn/daj/tzgg/202603/0a5646f9bd5a4fafb5b46e87ef72d04b.shtml
+      method_and_limit: "Read the National Archives Administration Office notice signed 2026-03-13, posted 2026-03-18. The exact guide title is 2026年档案行业标准立项指南. It invites industry-standard proposals covering single-set electronic archives, long-term preservation, data governance and AI. The notice establishes proposal priorities only. Adoption of subsequent standards requires separate evidence."
   - id: KS-OA-ARCHIVE-PLAN-2026
     domains: [oa]
     title: “十五五”全国档案事业发展规划
@@ -1013,13 +1068,20 @@ sources:
     authority_type: national_implementation_opinion
     effect_class: binding_baseline
     url: https://www.nhc.gov.cn/guihuaxxs/c100133/202511/d1a42ae835c743b9b3e83ac0253c3e9f.shtml
-    status: active_as_verified
+    status: active_authoritative_republication_verified
     jurisdiction: China
     applicability: AI application, data, safety and governance in healthcare and health services
     product_mapping: prevention, diagnosis support, rehabilitation, health management, high-quality data, model safety and accountable deployment
     claim_limit: It sets national direction and safeguards; diagnosis, treatment and institution-specific implementation remain under applicable clinical and local rules.
-    last_verified_at: 2026-08-09
+    last_verified_at: 2026-11-13
+    document_no: 国卫办规划发〔2025〕30号
+    issued_at: 2025-10-20
+    published_at: 2025-11-04
+    accessed_at: 2026-11-13
     refresh_days: 90
+    verification_evidence:
+      full_text_url: https://policy.mofcom.gov.cn/claw/clawContent.shtml?id=104035
+      method_and_limit: Read the Ministry of Commerce full-text republication attributed to NHC, matching title, No.30, five issuing offices, scope and 2025-10-20 signature date; checked scenario applications, evaluation, risk classification and privacy sections. NHC search identity corroborates 2025-11-04 publication, but direct NHC access returned 412. The republication metadata says effective 2024-10-20, inconsistent with its own 2025 signature; that field is excluded and no exact effective date is claimed. No exhaustive replacement review.
   - id: KS-MEDICAL-MUTUAL-RECOGNITION-2024
     domains: [medical-hospital-it]
     title: 关于进一步推进医疗机构检查检验结果互认的指导意见（国卫医政发〔2024〕37号）
@@ -1027,13 +1089,18 @@ sources:
     authority_type: national_guidance
     effect_class: binding_baseline
     url: https://www.nhc.gov.cn/yzygj/c100068/202411/e26dde958ae74bf5b8f4fe97d83253c7.shtml
-    status: active_as_verified
+    status: "active_authoritative_republication_verified"
     jurisdiction: China
     applicability: medical examination and laboratory result mutual recognition
     product_mapping: recognized-item list, negative list, result quality, regional exchange, clinical judgment, trace and exception
     claim_limit: Mutual recognition is conditional; clinician judgment, excluded scenarios, quality and regional readiness must remain visible.
-    last_verified_at: 2026-08-09
+    last_verified_at: "2026-11-20"
     refresh_days: 90
+    issued_at: "2024-11-08"
+    accessed_at: "2026-11-20"
+    verification_evidence:
+      full_text_url: https://www.nhc.gov.cn/wjw/c100197/202503/dc49d1ddfeac4881ab72f83449649119/files/1743415148675_84938.pdf
+      method_and_limit: "The registered NHC HTML returned HTTP 412. Read the National Health Commission Gazette, 2024 issue 11, pp. 2-4, and checked it against the Liaoning Health Commission republication at https://wsjk.ln.gov.cn/wsjk/zfxxgk/zc/gjjwj/2024121819592553064/index.shtml. Confirmed 国卫医政发〔2024〕37号, the NHC and six co-issuers, and the signature date of 2024-11-08. Sections I-III cover mutual recognition of medical examination and laboratory results, including clinician judgment, covered items and institutions, exclusions, quality controls and regional exchange. Local lists and actual rollout were outside this check."
   - id: KS-MEDICAL-TERTIARY-EVAL-2025
     domains: [medical-hospital-it]
     title: 三级医院评审标准（2025年版）
@@ -1041,32 +1108,45 @@ sources:
     authority_type: national_evaluation_standard
     effect_class: binding_baseline
     url: https://www.nhc.gov.cn/yzygj/c100067/202506/0795d62eece44307915d639486263a39.shtml
-    status: current_as_verified
+    status: "issuance_and_interpretation_verified"
     jurisdiction: China
-    applicability: tertiary hospital evaluation within the stated scope
+    applicability: "2025 tertiary hospital evaluation framework and monitoring scope described by the issuing notice and interpretation"
     product_mapping: data-based monitoring, quality, safety, management and evidence traceability
     claim_limit: Verify hospital class, local implementation and evaluation cycle; do not transform every evaluation point into software scope.
-    last_verified_at: 2026-08-09
+    last_verified_at: "2026-11-20"
     refresh_days: 90
+    issued_at: "2025-05-29"
+    accessed_at: "2026-11-20"
+    verification_evidence:
+      full_text_url: https://wjw.fj.gov.cn/xxgk/fgwj/gjwj/202506/t20250611_6923805.htm
+      method_and_limit: "The registered NHC policy interpretation and the NHC issuing notice both returned HTTP 412 on direct access. Read the Fujian Health Commission republication of the NHC issuing notice and checked it against the NHC Gazette, 2025 issue 5, p. 12. Confirmed NHC issuance of 国卫医政发〔2025〕4号 on 2025-05-29 for the 2025 edition of the tertiary hospital evaluation standard and the repeal of the 2022 edition and its implementing rules. Read the NHC interpretation republished at https://wsjk.ln.gov.cn/wsjk/index/syxwxx/zcjd/2025061921031047960/index.shtml, which covers evaluation scope, care quality and routine data monitoring. The national standard attachment timed out, so individual criteria, local implementation and evaluation cycles were not reviewed."
   - id: KS-MEDICAL-THREE-IN-ONE-2025
     domains: [medical-hospital-it]
-    title: 国家卫生健康委关于“三位一体”智慧医院建设有关建议的公开答复
-    issuer: 国家卫生健康委
-    authority_type: official_public_response
+    title: "国家三级公立医院绩效监测操作手册（2025版）"
+    issuer: "国家卫生健康委办公厅印发，国家卫生健康委三级公立医院绩效监测工作领导小组编制"
+    authority_type: "national_monitoring_manual"
     effect_class: design_guidance
-    url: https://www.nhc.gov.cn/wjw/jiany/202508/b9a23ad761124c71a1111545580dd756.shtml
-    status: current_public_position_as_verified
+    url: "https://www.nhc.gov.cn/yzygj/c100068/202506/6a97e937c58b413d8a0ffdcc23d325d4/files/%E3%80%8A%E5%9B%BD%E5%AE%B6%E4%B8%89%E7%BA%A7%E5%85%AC%E7%AB%8B%E5%8C%BB%E9%99%A2%E7%BB%A9%E6%95%88%E7%9B%91%E6%B5%8B%E6%93%8D%E4%BD%9C%E6%89%8B%E5%86%8C%EF%BC%882025%E7%89%88%EF%BC%89%E3%80%8B-20250626185206294.pdf"
+    status: "2025_edition_selected_passage_verified"
     jurisdiction: China
-    applicability: public understanding of smart medical service, smart clinical care and smart hospital management tracks
-    product_mapping: maintain track-specific evidence while supporting cross-system data and service coordination
-    claim_limit: A public response explains current policy position; it is not a replacement evaluation standard.
-    last_verified_at: 2026-08-09
+    applicability: "smart hospital construction tracks in the context of the 2025 tertiary public hospital performance monitoring manual, with a separate manual for tertiary public TCM hospitals"
+    product_mapping: "distinguish electronic medical records, smart services and smart management when interpreting indicator 24"
+    claim_limit: "Page 72 supports the three construction directions in the context of the electronic medical record indicator. Deriving requirements for an individual hospital or evaluation criteria for all three areas requires additional evidence."
+    last_verified_at: "2026-11-20"
     refresh_days: 90
+    issued_at: "2025-06-24"
+    document_no: "国卫办医政函〔2025〕268号"
+    accessed_at: "2026-11-20"
+    verification_evidence:
+      original_response_url: https://www.nhc.gov.cn/wjw/jiany/202508/b9a23ad761124c71a1111545580dd756.shtml
+      corroboration_url: https://wjw.fujian.gov.cn/xxgk/fgwj/gjwj/202506/t20250630_6959165.htm
+      full_text_url: https://www.nhc.gov.cn/yzygj/c100068/202506/6a97e937c58b413d8a0ffdcc23d325d4/files/%E3%80%8A%E5%9B%BD%E5%AE%B6%E4%B8%89%E7%BA%A7%E5%85%AC%E7%AB%8B%E5%8C%BB%E9%99%A2%E7%BB%A9%E6%95%88%E7%9B%91%E6%B5%8B%E6%93%8D%E4%BD%9C%E6%89%8B%E5%86%8C%EF%BC%882025%E7%89%88%EF%BC%89%E3%80%8B-20250626185206294.pdf
+      method_and_limit: "Read the NHC manual cover and printed page 72, where indicator 24 cites 国办发〔2021〕18号 and names three smart hospital construction directions. The introduction provides for a separate TCM manual. Cross-checked the issuing notice against the Fujian Health Commission republication. The previous NHC public response returned HTTP 412 and could not be reverified. Retain the stable source ID for this independently verified passage only."
   # 2026-08-09 systematic refresh: data products
   - id: KS-DATA-CIRCULATION-SERVICES-2026
     domains: [data-product]
     title: 关于培育数据流通服务机构 加快推进数据要素市场化价值化的意见
-    issuer: 国家数据局等部门
+    issuer: "国家数据局、工业和信息化部、公安部、中国证监会"
     authority_type: national_policy
     effect_class: binding_baseline
     url: https://www.nda.gov.cn/sjj/zwgk/zcfb/0205/20260205185635251370340_pc.html
@@ -1075,22 +1155,33 @@ sources:
     applicability: data circulation services and data-element market development
     product_mapping: datasets, analysis products, agents, service disclosure, evaluation, safety and accountable market roles
     claim_limit: Verify institution role, data category, sector rule and project authorization before converting policy direction into scope.
-    last_verified_at: 2026-08-09
+    last_verified_at: "2026-11-20"
     refresh_days: 90
+    issued_at: "2026-02-03"
+    document_no: "国数政策〔2026〕6号"
+    accessed_at: "2026-11-20"
+    verification_evidence:
+      full_text_url: https://www.nda.gov.cn/sjj/zwgk/zcfb/0205/20260205185635251370340_pc.html
+      method_and_limit: "Read the four-agency opinion, 国数政策〔2026〕6号, signed 2026-02-03. Sections II-IV distinguish exchanges, platform operators and data merchants, encourage datasets, analytics and agent-service exploration, and address disclosure and safety. Evaluate each provision against the institution's role, sector and data before deriving a project obligation."
   - id: KS-DATASET-PLATFORM-2026
     domains: [data-product]
-    title: 国家数据集管理平台上线
+    title: "国家数据集管理服务平台正式发布"
     issuer: 国家数据局
     authority_type: government_platform_announcement
     effect_class: product_pattern
     url: https://www.nda.gov.cn/sjj/zhuanti/ztszzh/0429/20260429223349173144038_pc.html
-    status: launched_as_verified
+    status: "trial_launch_as_announced"
     jurisdiction: China
     applicability: dataset registration, discovery, governance and ecosystem pattern research
-    product_mapping: dataset cards, catalog, supply-demand connection, lifecycle and quality signals
+    product_mapping: "catalogue aggregation, supply and demand posting, search, credential applications and lifecycle services"
     claim_limit: Platform existence reveals a national pattern; it does not mandate integration or prove dataset quality for a project.
-    last_verified_at: 2026-08-09
+    last_verified_at: "2026-11-20"
     refresh_days: 90
+    published_at: "2026-04-29"
+    accessed_at: "2026-11-20"
+    verification_evidence:
+      full_text_url: https://www.nda.gov.cn/sjj/zhuanti/ztszzh/0429/20260429223349173144038_pc.html
+      method_and_limit: "Read the National Data Administration announcement 国家数据集管理服务平台正式发布 dated 2026-04-29. The platform entered trial operation. Supply/demand posting, search and credential application were reported open at launch. The notice also describes catalogue and quality services. Present availability, a specific dataset's quality, a dataset-card schema and any mandatory project integration remain unverified."
   - id: KS-DATA-SECURITY-CASES-2026
     domains: [data-product]
     title: 2026年数据安全治理典型案例
@@ -1133,8 +1224,12 @@ sources:
     applicability: agent architecture, identity code/management, description, discovery, interaction and tool calling
     product_mapping: agent identity, capability metadata, discovery, protocol interaction, tool registration/calling and interoperability tests
     claim_limit: GB/Z is guiding technical documentation; verify the exact part, adopted profile and contract/procurement applicability before making it mandatory.
-    last_verified_at: 2026-08-09
+    last_verified_at: "2026-11-20"
     refresh_days: 90
+    accessed_at: "2026-11-20"
+    verification_evidence:
+      corroboration_url: https://openstd.samr.gov.cn/bzgk/std/nd?no=2781
+      method_and_limit: "Matched the registered standards catalogue entry to the national standards publication notice dated 2026-06-18. It lists GB/Z 185.1 through 185.7, each issued 2026-05-22, as guiding technical documents. Checked publication and subject coverage only. Conformance and contractual adoption require the applicable part and project evidence."
   - id: KS-AI-MCP-2026-07-28
     domains: [ai-native]
     title: Model Context Protocol specification release 2026-07-28
@@ -1156,18 +1251,23 @@ sources:
 
   - id: KS-AI-NIST-AGENT-STANDARDS-2026
     domains: [ai-native]
-    title: NIST AI Agent Standards Initiative
+    title: "SI Agent Standards Initiative"
     issuer: National Institute of Standards and Technology
     authority_type: government_standards_initiative
     effect_class: change_watch
-    url: https://www.nist.gov/artificial-intelligence/ai-agent-standards-initiative
+    url: "https://www.nist.gov/super-intelligence/si-agent-standards-initiative"
     status: active_initiative_not_final_standard
     jurisdiction: United_States_and_global_standards_ecosystem
     applicability: agent interoperability, identity, authority and security standards monitoring
     product_mapping: track emerging identity, authorization, interoperability, evaluation and security profiles
     claim_limit: An initiative signals direction and work items; it is not a final standard or binding control by itself.
-    last_verified_at: 2026-08-09
+    last_verified_at: "2026-11-20"
     refresh_days: 90
+    accessed_at: "2026-11-20"
+    verification_evidence:
+      previous_url: https://www.nist.gov/artificial-intelligence/ai-agent-standards-initiative
+      full_text_url: https://www.nist.gov/super-intelligence/si-agent-standards-initiative
+      method_and_limit: "Checked the redirected NIST page and its current title, SI Agent Standards Initiative. It describes a standards-development initiative. Binding requirements and conformance cannot be derived from the initiative page alone."
   - id: KS-AI-AGENT-SECURITY-DRAFT-2026
     domains: [ai-native]
     title: 智能体应用安全基本要求国家标准项目（20263116-Q-252）
@@ -1296,12 +1396,12 @@ sources:
     authority_type: protocol_specification_release
     effect_class: design_guidance
     url: https://spec.c2pa.org/specifications/specifications/2.4/specs/C2PA_Specification.html
-    status: current_as_verified
+    status: previous_version_retained_for_compatibility
     jurisdiction: global_protocol_ecosystem
     applicability: cryptographically verifiable content provenance and ingredient relationships
     product_mapping: signed assertions, claim generator, ingredients, transformations, validation status and trust-chain evidence
-    claim_limit: A valid manifest can support provenance integrity; it does not prove that depicted events, assertions, ownership or permitted use are true.
-    last_verified_at: 2026-08-29
+    claim_limit: Official current entry points now resolve to 2.5; retain 2.4 only for explicitly selected legacy profiles and compatibility. A valid manifest can support provenance integrity; it does not prove that depicted events, assertions, ownership or permitted use are true.
+    last_verified_at: 2026-11-13
     refresh_days: 90
   - id: KS-MEDIA-W3C-FRAGMENTS
     domains: [media-knowledge]
@@ -1534,15 +1634,17 @@ sources:
     jurisdiction: "European-Union"
     applicability: "AI Act amendments, including data governance and category-dependent application dates"
     product_mapping: "amended Article 10 and Article 113; version, role, risk-category and transition checks"
-    claim_limit: "Article 1(40) moves Chapter III sections 1-3 (except Article 6(5)) to 2027-12-02 for Article 6(2)/Annex III and 2028-08-02 for Article 6(1)/Annex I. This is not a delay of every AI Act obligation. Article 10 is amended; verify other applicable provisions and project scope."
+    claim_limit: "Article 1(40) moves Chapter III sections 1-3 (except Article 6(5)) to 2027-12-02 for Article 6(2)/Annex III and 2028-08-02 for Article 6(1)/Annex I. This is not a delay of every AI Act obligation. Article 1(39)(b) adds Article 111(4), requiring systems generating synthetic audio/image/video/text placed on the market before 2026-08-02 to comply with Article 50(2) by 2026-12-02. Article 10 is amended; verify other applicable provisions and project scope."
     issued_at: "2026-07-08"
     published_at: "2026-07-24"
     last_verified_at: "2026-10-25"
+    effective_at: 2026-07-27
+    accessed_at: 2026-11-13
     refresh_days: 90
     verification_evidence:
       full_text_url: "https://www.boe.es/doue/2026/1744/L00001-00041.pdf"
       corroboration_url: "https://ai-act-service-desk.ec.europa.eu/en/faq"
-      method_and_limit: "Read official BOE republication pp.19,35,41 for Article 10, Article 113 and entry into force; EUR-Lex search identity and Commission FAQ corroborate. Direct EUR-Lex text retrieval hit a JavaScript challenge. No exhaustive consolidated legal review."
+      method_and_limit: "Read official BOE republication pp.19,35,41 for Article 10, Article 113 and entry into force; EUR-Lex search identity and Commission FAQ corroborate. On 2026-11-13 directly read EUR-Lex identity, in-force status, Article 1(39)-(40) and Article 4 entry into force; the earlier access challenge did not recur. No exhaustive consolidated legal review."
 
   - id: KS-DATA-PUBLIC-DISCLOSURE-2026
     domains: ["data-product"]
@@ -1564,3 +1666,84 @@ sources:
     verification_evidence:
       full_text_url: "https://www.nda.gov.cn/sjj/zwgk/tzgg/0210/20260210160454974499283_pc.html"
       method_and_limit: "Read official notice body for roles, annual period, deadline and channel. Annexes are images and were not inspected; no complete annex-field or local implementation verification."
+
+  - id: KS-AI-MCP-SERVERS-SECURITY-20261111
+    domains: [ai-native]
+    title: MCP reference servers v2.4.0 security release
+    issuer: Model Context Protocol project
+    authority_type: official_project_release
+    effect_class: design_guidance
+    url: https://github.com/modelcontextprotocol/servers/releases/tag/v2.4.0
+    status: published_security_release
+    jurisdiction: global_protocol_ecosystem
+    applicability: deployments using the affected filesystem, git or fetch reference-server packages; exact package and OS matter
+    published_at: 2026-11-11
+    accessed_at: 2026-11-13
+    last_verified_at: 2026-11-13
+    refresh_days: 30
+    product_mapping: dependency inventory, read-side effects, path and repository confinement, network destinations, residual platform risks and regression evidence
+    claim_limit: Release fixes six issues across three servers; filesystem 2.3.0 and git/fetch 2026.11.11 are named fixed releases, not universal versions for every MCP implementation. Windows race/junction limitations are explicitly retained. No installed deployment was inspected or patched.
+    verification_evidence:
+      method_and_limit: Read the official security-fix table, platform limitations and package-version migration note. Release assertions were not independently exploit-tested.
+  - id: KS-MEDIA-ARCHIVE-ASR-110-2026
+    domains: [oa, media-knowledge]
+    title: DA/T 110—2026 录音录像档案语音识别转写工作规范
+    issuer: 国家档案局
+    authority_type: recommended_industry_standard
+    effect_class: design_guidance
+    url: https://std.samr.gov.cn/hb/search/stdHBDetailed?id=582ED3A642259CAEE06397BE0A0A4644
+    status: effective_recommended_authoritative_full_text_verified
+    jurisdiction: China
+    applicability: machine speech transcription of audiovisual archives and related systems in archive institutions and rooms, in the stated language scope
+    published_at: 2026-06-22
+    effective_at: 2026-09-01
+    accessed_at: 2026-11-13
+    last_verified_at: 2026-11-13
+    refresh_days: 180
+    product_mapping: selected archive-transcription profile and source verification before detailed quality or acceptance rules
+    claim_limit: Official catalog and an attributable Wuhan Municipal Archives 14-page full-text copy were checked. Recommended status does not automatically make the standard mandatory for every office transcription product. Detailed requirements must follow the selected scope and full clauses, not a universal accuracy threshold.
+    verification_scope: identity_and_selected_clauses_not_exhaustive_conformity_review
+    verification_evidence:
+      issuer_text_url: https://www.saac.gov.cn/daj/hybz/202608/aa66694db2c24938bc01f23736546b92.shtml
+      corroboration_url: https://www.saac.gov.cn/daj/tzgg/202606/56475eb586eb4a45bc7924ba9021243e.shtml
+      full_text_url: https://www.whda.org.cn/dafw/xzzq/202609/P020260908560350314240.pdf
+      republication_page_url: https://www.whda.org.cn/dafw/xzzq/202609/t20260908_2844913.shtml
+      method_and_limit: On 2026-11-13 read the attributable municipal-archives PDF; cover number, issuer, publication and implementation dates and clause 1 scope match the official standards catalog. Read clauses 4-8 including linkage, timecodes, correction, quality, acceptance and access. Issuer page remains inaccessible. Numerical requirements were not generalized into the domain pack; no system implementation or conformity test was run.
+  - id: KS-DATA-LABEL-DEMAND-20261031
+    domains: [data-product]
+    title: 国家数据局数据标注先行先试工作座谈会：以需定供、以用促建
+    issuer: 国家数据局
+    authority_type: official_program_report
+    effect_class: product_pattern
+    url: https://www.nda.gov.cn/sjj/jgsz/jld/xb/xbldhd/1031/20261031150813942057163_mobile.html
+    status: published_program_direction
+    jurisdiction: China
+    applicability: data-labeling pilot program and demand/application-led dataset-supply pattern research
+    event_at: 2026-10-27
+    published_at: 2026-10-31
+    accessed_at: 2026-11-13
+    last_verified_at: 2026-11-13
+    refresh_days: 180
+    product_mapping: demand map, dataset quality evidence, application follow-up and effective reuse
+    claim_limit: A meeting report supports program direction, not a new generally binding registration duty, proven project benefit or universal platform integration.
+    verification_evidence:
+      method_and_limit: Read official report body and distinguish meeting date from publication date; no pilot results or registrations were independently tested.
+
+  - id: KS-MEDIA-C2PA-2.5
+    domains: [media-knowledge]
+    title: C2PA Technical Specification 2.5
+    issuer: Coalition for Content Provenance and Authenticity
+    authority_type: technical_specification
+    effect_class: design_guidance
+    url: https://spec.c2pa.org/specifications/specifications/2.5/specs/C2PA_Specification.html
+    status: current_entry_version_as_verified
+    jurisdiction: global_voluntary_standard
+    applicability: implementations selecting C2PA 2.5 content-credential and validation profiles
+    published_month: 2026-10
+    accessed_at: 2026-11-13
+    last_verified_at: 2026-11-13
+    refresh_days: 90
+    product_mapping: versioned provenance profile, selected asset formats, validator compatibility and migration evidence
+    claim_limit: New version existence does not require every project to upgrade or prove SDK conformance. Provenance integrity does not establish factual truth or legal rights. Exact release day was not confirmed.
+    verification_evidence:
+      method_and_limit: Read current index, introduction and Appendix F.1 version-history summary identifying October 2026. Did not exhaustively compare schemas, audit cryptography or test a validator.

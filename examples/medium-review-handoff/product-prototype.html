@@ -1,0 +1,73 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>设备维修工单 · 产品原型</title><meta name="requirement-source" content="requirement.md"><meta name="prototype-backend" content="local-mock"><style>:root{font-family:system-ui,"Microsoft YaHei",sans-serif;color:#1b2c3b;background:#f3f6fa}*{box-sizing:border-box}body{margin:0;min-height:100vh}[hidden]{display:none}#product{padding:32px;max-width:1080px;margin:auto}header{border-bottom:1px solid #d9e1eb;margin-bottom:24px;padding-bottom:18px}h1{font-size:30px;margin:8px 0}h2{font-size:21px}small{color:#597083}button,input,textarea{font:inherit}button{border:1px solid #c7d3e0;background:white;border-radius:6px;padding:8px 12px;cursor:pointer;color:#194058}button:hover{background:#e7eef8}button:disabled{opacity:.48;cursor:not-allowed}button.active,[aria-current=true]{background:#e0ebff;border-color:#517dc7}[data-action="ACT-X-SUBMIT"],[data-action="ACT-X-CONFIRM"]{background:#2764b3;color:white;border-color:#2764b3}label{display:block;margin:12px 0}textarea{padding:10px;border:1px solid #bbcbdc;border-radius:6px;display:block;width:100%;resize:vertical}.actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:18px 0}.order-card{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:20px;background:white;border:1px solid #d9e1eb;border-radius:8px;margin-top:20px}#drawer{background:white;border:1px solid #7e9abb;border-radius:8px;padding:24px;margin-top:24px}#feedback{padding:14px;background:#e8eff7;border-radius:6px;white-space:pre-wrap}#breadcrumb{font-size:13px;color:#587187}@media(max-width:700px){#product{padding:16px}.order-card{grid-template-columns:1fr;gap:8px}.table-wrap{font-size:14px}}.table-wrap{overflow:auto;background:white;border:1px solid #d9e1eb;border-radius:8px}table{width:100%;border-collapse:collapse}th,td{padding:12px 14px;text-align:left;border-bottom:1px solid #e5ebf2}th{background:#eef3f9;color:#445b75;font-size:14px}tr.selected{background:#eef5ff}td:last-child{white-space:nowrap}button:focus-visible{outline:3px solid #90b4ec;outline-offset:2px}#drawer{position:fixed;right:0;top:0;height:100vh;width:min(520px,100vw);z-index:10;overflow:auto;box-shadow:-8px 0 30px #173b6626;margin:0;border-radius:0}#drawer[hidden]{display:none}#drawer-feedback{padding:12px;background:#fff3e8;border:1px solid #edc29b;border-radius:6px;white-space:pre-wrap}</style><script src="ticket-model.js"></script></head><body><div id="product"><header><small>设备维修</small><h1>设备维护</h1><p>当前用户：<span id="current-actor"></span></p></header>
+<nav><button class="active" data-action="ACT-X-NAVIGATE" data-view-target="VIEW-X">工单列表</button></nav>
+<p id="breadcrumb">设备维护 / 工单列表</p><h2 id="page-title">工单列表</h2>
+
+<!-- PAGE-CONTRACT: VIEW-X; primary=list; layout=composite; surfaces=list,drawer_form -->
+<main data-testid="page-VIEW-X">
+<div class="table-wrap"><table aria-label="工单列表"><thead><tr><th>工单编号</th><th>设备</th><th>状态</th><th>维修员</th><th>完成说明</th><th>操作</th></tr></thead><tbody id="order-list"></tbody></table></div>
+<section class="order-card"><div><small>当前工单</small><h2 id="order-name"></h2><p id="order-status" data-domain-state data-state="pending"></p></div><div><small>维修员</small><h3 id="assignee"></h3><p id="result-note"></p></div></section>
+<div class="actions"><span class="anchor-wrap"><button data-action="ACT-X-SUBMIT" data-ac="AC-X-SUBMIT">指派给林工</button></span><button id="open-detail" data-target="drawer">打开详情</button><button id="refresh-list-order">刷新工单</button></div></main>
+<section id="drawer" hidden role="dialog" aria-label="工单详情" data-testid="drawer-DRAWER-X"><h2 id="drawer-title">工单详情</h2><p id="detail-summary"></p><p id="drawer-feedback" role="status" hidden></p><label>完成说明（去除首尾空白后 1—100 字符）<textarea id="completion-note" rows="4"></textarea></label><div class="actions"><span class="anchor-wrap"><button data-action="ACT-X-CONFIRM" data-ac="AC-X-CONFIRM">完成工单</button></span><button id="refresh-order">刷新工单</button><button id="close-detail">返回列表</button></div></section>
+<p id="feedback" role="status">请选择工单后操作。</p></div><script>
+const q=s=>document.querySelector(s), all=s=>[...document.querySelectorAll(s)];
+const productContextEvent='product-context-change';
+const names={dispatcher:'调度员',lin:'林工',chen:'陈工'}, states={pending:'待处理',assigned:'已指派',closed:'已完成'};
+const seed=()=>({orders:[{id:'001',name:'水泵异响',status:'pending',assignee:null,note:'',version:1},{id:'002',name:'风机振动',status:'assigned',assignee:'chen',note:'',version:1}],audit:[]});
+
+// Fixture context only; production identity comes from authenticated services.
+const fixtureActor=new URLSearchParams(location.search).get('actor');
+let database=seed(), activeView='VIEW-X', selectedBusinessObject='001',
+    actor=Object.hasOwn(names,fixtureActor)?fixtureActor:'dispatcher', readVersion=1;
+const dbKey='ads-product-work-orders-v1';
+function say(text){q('#feedback').textContent=text;const feedback=q('#drawer-feedback');if(feedback&&!q('#drawer').hidden){feedback.textContent=text;feedback.hidden=false}}
+function currentOrder(){return database.orders.find(x=>x.id===selectedBusinessObject)}
+function saveDatabase(candidate){try{localStorage.setItem(dbKey,JSON.stringify(candidate));database=candidate;return true}catch(e){say('保存失败，未提交本次变更；输入已保留，请恢复存储后重试。');return false}}
+function readDatabase(){try{database=RepairExample.readStored(localStorage,dbKey,seed);return true}catch(e){say('无法读取最新工单，未提交变更；请恢复本地存储后刷新。');return false}}
+readDatabase();
+// Local service simulator. A production service must derive actor from authentication.
+function request(action,input={}){
+ const command={id:selectedBusinessObject,actor,version:readVersion,note:q('#completion-note').value,action,...input};
+ if(!readDatabase())return {ok:false,message:'无法读取最新工单，未提交变更；请恢复本地存储后刷新。'};
+ return RepairExample.request(database,command,saveDatabase);
+}
+function renderProduct(){
+ const row=currentOrder(), drawer=!q('#drawer').hidden;
+ q('#order-name').textContent=row.id+' · '+row.name;
+ q('#order-status').textContent=states[row.status]+' · 版本 '+row.version;
+ q('#order-status').dataset.state=row.status;
+ q('#assignee').textContent=names[row.assignee]||'尚未指派';
+ q('#result-note').textContent=row.note||'尚无完成说明';
+ q('#detail-summary').textContent=row.id+' · '+row.name+' / '+states[row.status]+' / '+(names[row.assignee]||'尚未指派');
+ q('[data-action="ACT-X-SUBMIT"]').disabled=actor!=='dispatcher'||row.status!=='pending';
+ q('[data-action="ACT-X-CONFIRM"]').disabled=actor!==row.assignee||row.status!=='assigned';
+ q('#completion-note').readOnly=row.status!=='assigned'||actor!==row.assignee;
+ q('#breadcrumb').textContent='设备维护 / 工单列表'+(drawer?' / 工单 '+row.id+' 详情':'');
+ q('#page-title').textContent=drawer?'工单 '+row.id+' 详情':'工单列表';
+ q('#drawer-title').textContent='工单 '+row.id+' 详情';
+ if(q('#audit'))q('#audit').textContent=JSON.stringify(database.audit,null,2);
+ const rows=q('#order-list');rows.replaceChildren();
+ database.orders.forEach(order=>{
+  const tr=document.createElement('tr');tr.className=order.id===selectedBusinessObject?'selected':'';
+  for(const value of [order.id,order.name,states[order.status],names[order.assignee]||'尚未指派',order.note||'—']){const td=document.createElement('td');td.textContent=value;tr.append(td)}
+  const td=document.createElement('td'),button=document.createElement('button');button.textContent='选择工单';button.dataset.orderId=order.id;button.setAttribute('aria-pressed',String(order.id===selectedBusinessObject));td.append(button);tr.append(td);rows.append(tr);
+ });
+ if(q('#actor'))q('#actor').value=actor;
+ window.dispatchEvent(new Event(productContextEvent));
+}
+function applyBusiness(action){const result=request(action);say(result.message);if(result.ok){readVersion=currentOrder().version;if(action==='complete')q('#drawer').hidden=true}renderProduct();return result}
+function openDetail(){if(!readDatabase())return;q('#drawer').hidden=false;readVersion=currentOrder().version;q('#completion-note').value=currentOrder().note;q('#drawer-feedback').hidden=true;renderProduct()}
+function refreshOrder(){if(!readDatabase())return;readVersion=currentOrder().version;renderProduct();say('已读取最新版本，说明已保留，请重新确认。')}
+
+const actionRegistry={
+ 'ACT-X-NAVIGATE':()=>{q('#drawer').hidden=true;renderProduct()},
+ 'ACT-X-SUBMIT':()=>applyBusiness('assign'),
+ 'ACT-X-CONFIRM':()=>applyBusiness('complete')
+};
+document.addEventListener('click',event=>{const node=event.target.closest('[data-action]');if(node)actionRegistry[node.dataset.action]?.(node)});
+q('#order-list').addEventListener('click',e=>{const button=e.target.closest('[data-order-id]');if(!button)return;selectedBusinessObject=button.dataset.orderId;readVersion=currentOrder().version;q('#drawer').hidden=true;q('#completion-note').value='';renderProduct()});
+q('#open-detail').onclick=openDetail;
+q('#close-detail').onclick=()=>{q('#drawer').hidden=true;renderProduct()};
+q('#refresh-order').onclick=refreshOrder;q('#refresh-list-order').onclick=refreshOrder;
+q('#current-actor').textContent=names[actor];
+renderProduct();
+</script></body></html>

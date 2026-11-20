@@ -53,7 +53,7 @@ This file validates that the domain module contract can migrate beyond traffic s
 | Evidence class | Current signal | Requirement effect |
 |---|---|---|
 | design_guidance | `KS-CRM-COMPLAINT-10002` | complaint intake, response, escalation, closure and learning need accountable ownership and evidence when this standard is adopted |
-| product_pattern | `KS-CRM-MICROSOFT-ACTION-2026`, `KS-CRM-SALESFORCE-CONTACT-CENTER-2026`, `KS-CRM-HUBSPOT-SMART-CRM` | current leaders are shifting from passive records to action-centric CRM with unified context, governed agents and explicit AI-to-human handoff |
+| product_pattern | `KS-CRM-MICROSOFT-ACTION-2026`, `KS-CRM-SALESFORCE-CONTACT-CENTER-2026`, `KS-CRM-HUBSPOT-SMART-CRM` | vendor evidence suggests action-centric CRM with unified context, governed agents and AI-to-human handoff; the Microsoft wave-1 page was archived in October 2026, so use it as historical pattern evidence and verify the linked current roadmap before promising availability |
 | change_watch | vendor roadmaps and AI claims change faster than customer lifecycle physics | never copy a vendor module list or claim “best practice” without project evidence; customer truth, state ownership and human commitments remain primary |
 
 ### AI Transformation Horizon
@@ -114,6 +114,8 @@ operating response, not from a list of tables or fashionable AI features.
 | Demand | source ticket/customer, value, review, roadmap link | new / reviewed / scheduled / released / rejected |
 
 ## Domain Events
+
+**线索分配**（`LeadAssigned`）记录线索的归属人、分配人和分配时间。
 
 ```yaml
 events:

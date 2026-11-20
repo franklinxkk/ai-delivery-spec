@@ -57,7 +57,7 @@ TRUNC_TEMPLATE_RE = re.compile(
     r"([A-Z]{2,8})-\{[^{}]{0,80}?(?:前\s*([0-9]+|[一二三四五六七八九十])\s*(?:位|个字符|个字)|截取|截断)[^{}]{0,60}?\}"
 )
 ENUM_RE = re.compile(r"枚举[值]?[：:]\s*([a-z][a-z0-9_]*(?:\s*[/、,，]\s*[a-z][a-z0-9_]*){2,})")
-STATE_CLAIM_RE = re.compile(r"([0-9]+|[一二三四五六七八九十])\s*(态|个状态|种状态)")
+STATE_CLAIM_RE = re.compile(r"(?<![0-9])([0-9]+|[一二三四五六七八九十])\s*(态|个状态|种状态)")
 STATE_TOKEN_RE = re.compile(r"[a-z][a-z0-9_]*")
 SNAKE_TOKEN_RE = re.compile(r"(?<![A-Za-z0-9_])[a-z][a-z0-9]*_[a-z0-9_]*")
 
@@ -70,7 +70,7 @@ _GUARD_DENY_SET_RE = re.compile(
     r"state\s*∉\s*[\{（(]?\s*([a-z][a-z0-9_]*(?:\s*[/、,，]\s*[a-z][a-z0-9_]*)+)"
 )
 _GUARD_DENY_CN_RE = re.compile(
-    r"([a-z][a-z0-9_]*(?:\s*[/、,，]\s*[a-z][a-z0-9_]*)+)\s*不可\s*([一-龥]{2,4})"
+    r"(?<![a-z0-9_])([a-z][a-z0-9_]*(?:\s*[/、,，]\s*[a-z][a-z0-9_]*)+)\s*不可\s*([一-龥]{2,4})"
 )
 _GUARD_ID_RE = re.compile(r"(?<![A-Za-z0-9-])(?:RULE|ACT)-[A-Z0-9](?:[A-Z0-9_-]*[A-Z0-9])?")
 
@@ -107,9 +107,13 @@ def _headings(lines: list[str]) -> list[tuple[int, str, int]]:
         if stripped.startswith("```") or stripped.startswith("~~~"):
             in_fence = not in_fence
         elif not in_fence:
-            match = re.match(r"^(#{1,6})[ \t]+(.+?)\s*$", line)
+            match = re.match(r"^(#{1,6})[ \t]+(.+)", line.rstrip())
             if match:
-                title = re.sub(r"\s+#+\s*$", "", match.group(2)).strip()
+                title = match.group(2).strip()
+                if title.endswith("#"):
+                    prefix = title.rstrip("#")
+                    if prefix and prefix[-1].isspace():
+                        title = prefix.rstrip()
                 headings.append((len(match.group(1)), title, index))
     return headings
 
@@ -242,6 +246,7 @@ def _collect_ids(raw: str) -> tuple[dict[str, tuple[int, str]], dict[str, list[t
                     if not re.match(rf"(?:{_FAMILY})-", part):
                         define(f"{head}-{part.rstrip('-')}", line_no, "registry")
         backtick_spans = [(m.start(), m.end()) for m in re.finditer(r"`[^`]*`", line)]
+        has_label_annotation = "」" in line
         for token, start, end in occurrences:
             is_def = False
             kind = "prose"
@@ -268,7 +273,8 @@ def _collect_ids(raw: str) -> tuple[dict[str, tuple[int, str]], dict[str, list[t
                 is_def, kind = True, "registry"
             if end < len(line) and line[end] in "（(":
                 is_def = True  # ID（…）注解定义
-            if re.search(rf"」\s*[（(][^（）()]{{0,60}}{re.escape(token)}\b", line):
+            # Headings and other definition sites already establish this ID.
+            if not is_def and has_label_annotation and re.search(rf"」\s*[（(][^（）()]{{0,60}}{re.escape(token)}\b", line):
                 is_def = True  # 「控件标签」（ID…）定义
             if any(lo <= start < hi for lo, hi in enum_ranges):
                 is_def, kind = True, "registry"  # 动作：/事件：枚举定义
@@ -677,13 +683,34 @@ def check_confirmed_decision_authority(raw: str) -> list[SemFinding]:
 
 
 def check_acceptance_falsifiability(raw: str) -> list[SemFinding]:
-    """D9: canonical AC rows must expose dual results, a counterexample and evidence."""
+    """Check recognized acceptance forms; this is not semantic or runtime proof."""
     findings: list[SemFinding] = []
     weak = re.compile(r"^(?:正常|功能正常|处理成功|显示正确|符合预期|可正常使用|pass|passed|ok|无|暂无|n/?a)$", re.I)
     for _heading, header, rows in _markdown_tables(raw):
         normalized = [re.sub(r"[`*_\s]", "", cell).casefold() for cell in header]
         id_col = next((i for i, cell in enumerate(normalized) if cell in {"acid", "验收id"}), None)
         if id_col is None:
+            # Human-facing cases have no mandatory AC ID, per-row evidence or
+            # separate negative column: rejection cases are ordinary case rows.
+            human_aliases = {
+                "case": {"用例", "验收场景", "case", "scenario"},
+                "steps": {"前置", "前提", "前置数据与操作", "前提与操作", "precondition", "preconditionsandactions"},
+                "visible": {"页面结果", "界面结果", "visibleresult", "pageresult"},
+                "domain": {"业务结果", "领域结果", "businessresult", "domainresult"},
+            }
+            human_columns = {key: next((i for i, cell in enumerate(normalized) if cell in aliases), None)
+                             for key, aliases in human_aliases.items()}
+            if any(index is None for index in human_columns.values()):
+                continue
+            for line_no, cells in rows:
+                failed = [key for key, index in human_columns.items()
+                          if index >= len(cells) or not cells[index].strip()
+                          or weak.fullmatch(re.sub(r"[`*_。.!！]", "", cells[index]).strip())]
+                if failed:
+                    label = cells[human_columns["case"]] if human_columns["case"] < len(cells) else "未命名用例"
+                    findings.append(SemFinding("BLOCK", "PRD-AC-NOT-FALSIFIABLE",
+                        f"验收场景 {label} 缺少可判定的前置/页面/业务结果：{', '.join(failed)}",
+                        f"{label}@line {line_no}"))
             continue
         aliases = {
             "steps": ("步骤/输入", "步骤", "输入", "steps/input", "steps"),
@@ -716,6 +743,29 @@ def check_acceptance_falsifiability(raw: str) -> list[SemFinding]:
                     f"验收标准 {item_id} 缺少可执行、可证伪的双结果/反例/证据：{', '.join(failures)}",
                     f"{item_id}@line {line_no}",
                 ))
+    # Recommended inline scene form. Keep this conservative: only explicitly
+    # titled acceptance scenes are inspected; other prose is not an empty test.
+    lines = raw.splitlines()
+    headings = _headings(lines)
+    label = re.compile(r"^\s*(?:\d+[.、]\s*)?(?:\*\*)?(?:预期结果|Expected result)(?:\*\*)?\s*[:：]\s*(.*)", re.I)
+    next_label = re.compile(r"^\s*(?:\d+[.、]\s*)?(?:\*\*)?(?:场景编号|前提|操作|预期结果|Scenario ID|Preconditions?|Action|Expected result)(?:\*\*)?\s*[:：]", re.I)
+    for index, (level, title, start) in enumerate(headings):
+        if level < 2 or not re.search(r"验收场景|Acceptance scenario", title, re.I):
+            continue
+        end = headings[index + 1][2] if index + 1 < len(headings) else len(lines)
+        section = lines[start + 1:end]
+        result = next(((offset, match[1]) for offset, line in enumerate(section)
+                       if (match := label.match(line))), None)
+        if result is None:
+            continue
+        offset, value = result
+        if not value.strip():
+            continuation = next((line for line in section[offset + 1:] if line.strip()), "")
+            value = "" if next_label.match(continuation) else continuation
+        if not value.strip() or weak.fullmatch(re.sub(r"[`*_。.!！]", "", value).strip()):
+            findings.append(SemFinding("BLOCK", "PRD-AC-NOT-FALSIFIABLE",
+                "验收场景的预期结果不能只写功能正常或符合预期；写可观察、可判定的结果。",
+                f"{title}@line {start + offset + 2}"))
     return findings
 
 

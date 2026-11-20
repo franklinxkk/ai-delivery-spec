@@ -55,6 +55,21 @@ def test_id_embedded_in_heading_resolves_table_navigation():
     assert not check_dangling_refs(text)
 
 
+def test_title_ids_and_control_label_annotations_are_definitions():
+    text = """## 检查计划和审核状态机（REQ-CHECK、STM-CHECK）
+点击「提交」（控件标识 ACT-SUBMIT）后进入待审核。
+计划详见 `REQ-CHECK`。
+状态详见 `STM-CHECK`。
+动作详见 `ACT-SUBMIT`。
+"""
+    assert not check_dangling_refs(text)
+
+    plain_reference = text.replace("点击「提交」（控件标识 ACT-SUBMIT）", "点击提交按钮 ACT-SUBMIT")
+    findings = check_dangling_refs(plain_reference)
+    missing = [item for item in findings if item.code == "PRD-DANGLING-REF"]
+    assert [(item.severity, item.ref.split("@")[0]) for item in missing] == [("BLOCK", "ACT-SUBMIT")]
+
+
 @pytest.mark.parametrize('wrapper',['{}','**{}**','__{}__','`{}`'])
 @pytest.mark.parametrize('header',['resolution_ref','决议 / 来源'])
 def test_unknown_closure_is_not_changed_by_markdown(wrapper,header):

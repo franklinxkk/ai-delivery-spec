@@ -26,6 +26,16 @@
     },
     "forward_index": { "$ref": "#/$defs/index" },
     "reverse_index": { "$ref": "#/$defs/index" },
+    "unresolved_refs": {
+      "description": "Internal references without a defined target or owner, and malformed external locators.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/locatedReference" }
+    },
+    "unverified_external_refs": {
+      "description": "External record identifiers recorded by shape only. Their targets have not been verified.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/locatedReference" }
+    },
     "orphans": {
       "type": "array",
       "items": {
@@ -41,6 +51,17 @@
     }
   },
   "$defs": {
+    "locatedReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from_id", "to_id", "source", "path"],
+      "properties": {
+        "from_id": { "anyOf": [{ "$ref": "#/$defs/stableId" }, { "type": "null" }] },
+        "to_id": { "type": "string" },
+        "source": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1 }
+      }
+    },
     "stableId": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$" },
     "index": {
       "type": "object",

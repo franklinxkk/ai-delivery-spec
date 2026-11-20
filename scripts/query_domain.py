@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import unicodedata
-from datetime import date, datetime
+from datetime import date, timedelta
 import re
 import sys
 from pathlib import Path
@@ -38,12 +38,11 @@ SECTION_ALIASES = {
 
 SECTION_ALIASES.update(DISCOVERY_DATA.get("section_aliases", {}))
 
-def stale(last_verified_at: object, refresh_days: object) -> bool:
+def review_due_date(last_verified_at: object, refresh_days: object) -> date | None:
     try:
-        checked = datetime.strptime(str(last_verified_at), "%Y-%m-%d").date()
-        return (date.today() - checked).days > int(refresh_days)
-    except (TypeError, ValueError):
-        return True
+        return date.fromisoformat(str(last_verified_at)) + timedelta(days=int(refresh_days))
+    except (TypeError, ValueError, OverflowError):
+        return None
 
 
 def effect_class(source: dict[str, object]) -> str:
@@ -58,10 +57,12 @@ def effect_class(source: dict[str, object]) -> str:
     return "authoritative_reference"
 
 
-def binding_use(source: dict[str, object]) -> str:
+def binding_use(source: dict[str, object], overdue: bool) -> str:
     classification = effect_class(source)
     if classification in {"product_pattern", "change_watch"}:
         return "prohibited"
+    if overdue:
+        return "reverify_source_before_use"
     return "verify_applicability"
 
 
@@ -120,7 +121,7 @@ def term_pattern(term: str) -> str:
 
 def generic_fallback(domain_id: str | None, available: list[str], english: bool, pack_available: bool | None = False) -> dict[str, object]:
     """Offer the generic workflow without inventing an unsupported domain pack."""
-    return {
+    fallback = {
         "mode": "generic_requirement_patterns",
         "pattern_file": "references/patterns/common-requirement-patterns.yaml",
         "requested_domain": domain_id,
@@ -137,6 +138,12 @@ def generic_fallback(domain_id: str | None, available: list[str], english: bool,
             "此退路及跨行业 Mock 均不证明已有专用领域知识、专家审查或法规适用。"
         ),
     }
+    if pack_available:
+        fallback["next_action"] = (
+            "The requested pack exists. Inspect its vocabulary and workflows. For an uncovered topic, collect project evidence and applicable sources."
+            if english else "所查领域有专用包。可查看术语和流程章节，未覆盖的业务问题从项目材料和适用来源补证。"
+        )
+    return fallback
 
 
 def recognized_concepts(query: str, aliases: dict) -> tuple[dict[str, list[str]], list[tuple[int, int, str]]]:
@@ -198,7 +205,8 @@ def rank_hits(hits: list[dict]) -> list[dict]:
     """Diversify ties only; never demote a stronger match below weak matches."""
     for hit in hits:
         hit["score"] = (hit["query_coverage"] + (12 if hit["match_type"] == "literal" else 0)
-                        + 5 * len(hit["matched_concepts"]) + 6 * bool(hit.get("domain_matches")))
+                        + 5 * len(hit["matched_concepts"]) + 6 * bool(hit.get("domain_matches"))
+                        + 3 * bool(hit.get("matches_vocabulary_section")))
         if hit["excerpt"].startswith("**"):
             hit["score"] += 2
         if hit["section"] in {"", "Contents", "中文导读"}:
@@ -286,6 +294,17 @@ def main() -> int:
         "检索命中与领域经验只是候选，不是项目已批准规则。核实法域、适用对象、生效版本与来源权威；提问语言不决定适用法域。origin=official表示Skill内置目录，不代表政府权威或强制效力；须查看各source_ref的权威与效力分类并核对原文。"
     )
     official = {item["domain_id"]: item for item in catalog.get("domains", [])}
+    source_due_dates = {
+        src["id"]: review_due_date(src.get("last_verified_at"), src.get("refresh_days"))
+        for src in sources.get("sources", [])
+    }
+    today = date.today()
+    due_for_review = {key: due.isoformat() if due else None for key, due in source_due_dates.items()
+                      if due is None or today > due}
+    refresh_warning = (
+        "Source review is overdue or undated. Recheck the original and its applicability before using it as a current constraint."
+        if english else "以下来源已到复核期或缺少日期。用于当前约束前，请重新核对原文和适用范围。"
+    )
     custom_root = args.custom_root.resolve()
     custom_config = {}
     if (custom_root / "config.yaml").is_file():
@@ -311,6 +330,7 @@ def main() -> int:
         item = official.get(domain_id)
         if item is not None:
             domain_sources = [source for source in sources.get("sources", []) if domain_id in source.get("domains", [])]
+            domain_reviews = {s["id"]: due_for_review[s["id"]] for s in domain_sources if s["id"] in due_for_review}
             record: dict[str, object] = {
                 "domain_id": item["domain_id"],
                 "origin": "official",
@@ -325,6 +345,7 @@ def main() -> int:
                 "production_claim": item.get("production_claim", "prohibited"),
                 "last_verified_at": item.get("last_verified_at"),
                 "source_catalog": "references/domains/domain-sources.yaml",
+                "source_reviews_due": domain_reviews,
                 "jurisdictions": sorted({str(s["jurisdiction"]) for s in domain_sources if s.get("jurisdiction")}),
             }
             if args.source_detail == "full":
@@ -333,9 +354,9 @@ def main() -> int:
                         "id": source["id"], "title": source["title"],
                         "url": source.get("url"), "jurisdiction": source.get("jurisdiction"),
                         "applicability": source.get("applicability"), "status": source.get("status"),
-                        "effect_class": effect_class(source), "binding_use": binding_use(source),
+                        "effect_class": effect_class(source), "binding_use": binding_use(source, source["id"] in due_for_review),
                         "last_verified_at": source.get("last_verified_at"), "refresh_days": source.get("refresh_days"),
-                        "stale": stale(source.get("last_verified_at"), source.get("refresh_days")),
+                        "review_due_at": source_due_dates[source["id"]], "stale": source["id"] in due_for_review,
                         **({"claim_limit": source["claim_limit"]} if source.get("claim_limit") else {}),
                         **({key: source[key] for key in ("verification_evidence", "verification_attempt") if source.get(key)}),
                     }
@@ -348,10 +369,7 @@ def main() -> int:
                     for kind in ("binding_baseline", "design_guidance", "product_pattern", "change_watch")
                     if any(effect_class(source) == kind for source in domain_sources)
                 }
-                record["stale_source_refs"] = [
-                    source["id"] for source in domain_sources
-                    if stale(source.get("last_verified_at"), source.get("refresh_days"))
-                ]
+                record["stale_source_refs"] = list(domain_reviews)
                 limits = {source["id"]: source["claim_limit"] for source in domain_sources if source.get("claim_limit")}
                 if limits:
                     record["source_claim_limits"] = limits
@@ -399,9 +417,7 @@ def main() -> int:
         record.update({k: guide[k] for k in ("name_zh", "summary_zh", "name_en", "summary_en", "aliases") if k in guide})
         if guide: record["vocabulary"] = [{"term": t[0], "aliases": t[1], "section": t[2]} for t in guide["terms"]]
         record["source_refresh_warning"] = (
-            ("Some sources are stale or undated; recheck them before using them as constraints." if english else
-             "存在超过刷新周期或缺少日期的来源；使用其作约束前必须重新核验")
-            if record.get("stale_source_refs") or any(
+            refresh_warning if record.get("source_reviews_due") or any(
                 source.get("stale") for source in record.get("source_refs", []) if isinstance(source, dict)
             ) else None
         )
@@ -412,6 +428,7 @@ def main() -> int:
             section = ""
             matches = []
             local_aliases = dict(aliases)
+            vocabulary_sections = {term: section for term, _, section, _ in guide.get("terms", [])}
             # Domain-scoped expansions prevent e.g. education credit from becoming a finance obligation.
             for term, variants, _section, _note in guide.get("terms", []):
                 local_aliases[term] = list(dict.fromkeys([*local_aliases.get(term, []), *variants]))
@@ -428,11 +445,16 @@ def main() -> int:
                 if matched:
                     matched_concepts = [key for key, group in local_concepts.items() if any(term_matches(term, line) for term in group)]
                     literal = term_matches(args.search, line)
+                    # Attribute only IDs explicitly cited in this passage, including cross-pack references.
+                    cited = [s for s in dict.fromkeys(re.findall(r"\bKS-[A-Za-z0-9]+(?:[.\-][A-Za-z0-9]+)*", line))
+                             if s in source_due_dates]
                     matches.append({"domain_id": domain_id, "section": section, "line": number,
                                     "knowledge_file": record["knowledge_file"], "excerpt": line.strip()[:300],
                                     "status": "candidate", "origin": record["origin"],
                                     "matched_terms": matched,
+                                    "source_refs": cited,
                                     "matched_concepts": matched_concepts,
+                                    "matches_vocabulary_section": any(vocabulary_sections.get(k) == section for k in matched_concepts),
                                     "domain_matches": domain_matches,
                                     "query_coverage": query_coverage(args.search, concept_spans, matched_concepts, literal),
                                     "match_type": "literal" if literal else "alias"})
@@ -457,6 +479,11 @@ def main() -> int:
     if args.search:
         hits = [hit for record in records for hit in record.get("search_hits", [])]
         hits = rank_hits(hits)
+        shown = hits[:args.limit]
+        shown_domains = {h["domain_id"] for h in shown}
+        domain_reviews = {r["domain_id"]: r["source_reviews_due"] for r in records
+                          if r["domain_id"] in shown_domains and r.get("source_reviews_due")}
+        cited_reviews = {src: due_for_review[src] for h in shown for src in h["source_refs"] if src in due_for_review}
         next_action = None if hits else (
             "No local passage matched. Try a shorter business term, or use --domain <id> to inspect a relevant pack and its sections; no hit does not prove no applicable rule."
             if english else
@@ -469,7 +496,10 @@ def main() -> int:
                    "domain_expansions": {r['domain_id']:r.get('expanded_terms',[]) for r in records},
                    "matched_concepts": list(dict.fromkeys(k for h in hits for k in h["matched_concepts"])), "next_action": next_action,
                    "domain_summaries": [{k: r[k] for k in ("domain_id", "name_zh", "summary_zh", "name_en", "summary_en") if k in r} for r in records if r.get("search_hits")],
-                   "truncated": len(hits) > args.limit, "hits": hits[:args.limit],
+                   "truncated": len(hits) > args.limit, "hits": shown,
+                   "domain_source_reviews_due": domain_reviews,
+                   "cited_source_reviews_due": cited_reviews,
+                   "source_refresh_warning": refresh_warning if domain_reviews or cited_reviews else None,
                    "source_usage_rule": usage_rule}
         if not hits:
             availability = all(record["origin"] != "generic_fallback" for record in records) if args.domain else None
@@ -480,6 +510,13 @@ def main() -> int:
             print(f"# {'Domain search' if english else '领域检索'}: {args.search}\n\n{payload['source_usage_rule']}\n")
             print(f"{'Search terms' if english else '检索词'}: {', '.join(payload['expanded_terms'])}\n")
             print(payload["retrieval_limit"] + "\n")
+            if payload["source_refresh_warning"]:
+                print(payload["source_refresh_warning"])
+                for domain_id, reviews in domain_reviews.items():
+                    print(f"- {domain_id}: " + ", ".join(f"{src} ({due or '?'})" for src, due in reviews.items()))
+                if cited_reviews:
+                    print(("- Cited in passages: " if english else "- 命中段落直接引用：") + ", ".join(cited_reviews))
+                print()
             for pattern in payload['common_patterns']:
                 print(f"- {pattern['pattern_ref']} / {pattern['path']}: {pattern['name']}")
                 print(('  Decision prompts only; inherit existing answers.' if english else '  共性决策提示，已有答案直接继承，不是项目政策。'))
@@ -501,7 +538,7 @@ def main() -> int:
     if args.section:
         if args.format == "yaml":
             slices = [
-                {key: record.get(key) for key in ("domain_id", "origin", "knowledge_file", "maturity", "practice_status", "production_claim", "jurisdictions", "source_catalog", "source_refs", "source_refresh_warning", "source_usage_rule", "selected_sections", "unavailable_sections", "fallback") if key in record}
+                {key: record.get(key) for key in ("domain_id", "origin", "knowledge_file", "maturity", "practice_status", "production_claim", "jurisdictions", "source_catalog", "source_refs", "source_reviews_due", "source_refresh_warning", "source_usage_rule", "selected_sections", "unavailable_sections", "fallback") if key in record}
                 for record in records
             ]
             payload: object = slices[0] if len(slices) == 1 else {"domains": slices}
@@ -510,6 +547,8 @@ def main() -> int:
             for index, record in enumerate(records):
                 print(f"<!-- {record['domain_id']} | maturity={record['maturity']} | practice={record['practice_status']} | production_claim={record['production_claim']} -->")
                 print(f"> {record['source_usage_rule']}" + (f"；{record['source_refresh_warning']}" if record['source_refresh_warning'] else "") + "\n")
+                if record.get("source_reviews_due"):
+                    print(", ".join(f"{src} ({due or '?'})" for src, due in record["source_reviews_due"].items()) + "\n")
                 if record.get("fallback"):
                     print(record["fallback"]["next_action"] + "\n" + record["fallback"]["claim_limit"] + "\n")
                 if len(records) > 1:
@@ -542,6 +581,9 @@ def main() -> int:
             print(f"- Knowledge: {record['knowledge_file']}")
             print(f"- Maturity: {record['maturity']}")
             print(f"- Production claim: {record['production_claim']}")
+            if record.get("source_refresh_warning"):
+                print(record["source_refresh_warning"])
+                print(", ".join(f"{src} ({due or '?'})" for src, due in record.get("source_reviews_due", {}).items()))
             if record.get("fallback"):
                 print(record["fallback"]["next_action"] + "\n" + record["fallback"]["claim_limit"])
             for section in record.get("selected_sections", []):
