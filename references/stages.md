@@ -56,8 +56,6 @@ PRD 标题自由，`ADS:scope/behavior/acceptance` 仅辅助定位；无法定�
 
 `common_patterns` 单列身份/会话等共性决策提示，不计入行业来源命中；不自动成为政策，已有答案直接继承。
 
-`common_patterns` 单列身份/会话等共性决策提示，不计入行业来源命中；不自动成为政策，已有答案直接继承。
-
 ```bash
 python scripts/ai_delivery_spec_cli.py query-domain --search "安全考核" --format yaml
 python scripts/ai_delivery_spec_cli.py query-domain --domain medical-hospital-it --section "Policy / Privacy Constraints" --source-detail full --language en-US --format yaml

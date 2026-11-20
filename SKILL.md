@@ -23,12 +23,12 @@ description: Clarify, create, review or change product, service and office workf
 | 当前需要 | 可选资源 |
 |---|---|
 | 判断机会、比较方案、澄清关键未知 | [discover](references/discover.md) |
-| 写模块规则、正式角色权限或可验收规格 | [specify](references/specify.md) |
+| 写业务规则、正式角色权限、办公流程或验收规格 | [specify](references/specify.md) |
 | 选演示权限、修改页面或检查配置能否实际使用 | [prototype](references/prototype.md)；[机制取舍与消费示例](examples/configuration-to-consumption.md) |
 | 找受影响入口、复核测试记录或判断能否宣称闭环 | [change-acceptance](references/change-acceptance.md) |
-| 大材料恢复或开发测试交接 | [context](references/context.md) |
+| 恢复大材料、交接或接着按规格开发 | [context](references/context.md) |
 | 团队资料、评审工作台或显式生命周期 | [team-customization](references/team-customization.md)、[review-workspace](references/review-workspace.md)、[lifecycle](references/lifecycle.md) |
-| 适配接收工具或比较模型需要的帮助 | [tool-adapters](references/tool-adapters.md) |
+| 长任务反复漏项、适配接收工具或比较模型 | [tool-adapters](references/tool-adapters.md) |
 | 核对阶段输入输出、领域知识或已有契约 | [stages](references/stages.md)；`python scripts/query_domain.py --list`，不需通读目录 |
 
 ## 按接收者下一步交付
@@ -37,4 +37,4 @@ description: Clarify, create, review or change product, service and office workf
 
 跨文件冲突、复杂角色链或明显接收歧义可用独立冷读；要求逐模块审查时覆盖全部约定模块，代表任务不能代替。其余按风险取样，不强制小改全角色、全页面复核。局部结论不扩大到全项目；缺少某项检查证据不等于用户未做测试，也不自动新增产品发布门槛。
 
-`/ads`、`/dig`、`/prd`、`/proto`及宿主支持见[README](README.md#shortcuts)。工程实施、发布、正式文档渲染及运营使用相应工作流，完成声明分别给出证据。
+`/ads`、`/dig`、`/prd`、`/proto`见[README](README.md#shortcuts)。用户接着要求开发时，以原规格为准，转工程流程实现已定部分。发布、文档渲染及运营沿用相应流程，各按实证交付。

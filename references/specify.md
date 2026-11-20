@@ -4,7 +4,7 @@
 
 ## 沿实际任务组织
 
-小改回填原处。正式PRD先述目标、范围、角色、主链和通用约定，再按页面/对象展开。指定单册时精确机器规则在同册尾部，不能依赖另一册才能开发；交付形式遵从用户约定。
+小改回填原处。工作发生在原表、邮件或线下时，沿用该载体，写清结果交给谁、拿来做什么。正式PRD先述目标、范围、角色、主链和通用约定，再按页面/对象展开。指定单册时精确机器规则在同册尾部，不能依赖另一册才能开发；交付形式遵从用户约定。
 
 配置组合或下游消费仍有歧义时，可查[配置到消费](../examples/configuration-to-consumption.md)；需要写法参照时取[工单样例](../examples/medium-review-handoff/requirement.md)、[需求卡](templates/prd-light-template.md)或[PRD骨架](templates/unified-requirement-prd-template.md)。已有材料足够时无需补读范例；问题、方案与澄清可同册回填。
 
