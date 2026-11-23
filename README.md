@@ -35,13 +35,7 @@ AI Delivery Spec 帮你判断需求价值、挖透业务细节，形成产品能
 
 ## 一分钟开始
 
-**安装到支持 Agent Skills 的工具：**
-
-```bash
-npx skills add franklinxkk/ai-delivery-spec
-```
-
-按提示选择你的 Agent。也可以[下载干净安装包](https://github.com/franklinxkk/ai-delivery-spec/releases/latest)，通过宿主的技能导入功能安装。[查看其他安装方式](references/tool-adapters.md)
+从 [5.5.8 正式发行页](https://github.com/franklinxkk/ai-delivery-spec/releases/tag/v5.5.8) 下载 `ai-delivery-spec-5.5.8.zip` 与 `SHA256SUMS.txt`。核对 ZIP 的 SHA-256 后，通过宿主的技能导入功能安装。Windows 可用 `Get-FileHash ./ai-delivery-spec-5.5.8.zip`，macOS/Linux 可用 `shasum -a 256 ./ai-delivery-spec-5.5.8.zip`。
 
 **然后，把真实问题交给它：**
 
@@ -133,7 +127,7 @@ Methods adapt to the task and model capability. The durable constraints preserve
 
 Start with an idea, confirmed requirements, an existing system or review feedback. Compare options, clarify questions that affect the decision, and check results against the original intent. People retain the key decisions, and small changes stay small.
 
-Install with `npx skills add franklinxkk/ai-delivery-spec`, then try:
+Download the versioned ZIP and checksum from the [5.5.8 release](https://github.com/franklinxkk/ai-delivery-spec/releases/tag/v5.5.8), verify the SHA-256, and import the ZIP in your host. Then try:
 
 ```text
 Use ai-delivery-spec: customers say approvals are slow and want automatic approval.
@@ -154,6 +148,6 @@ Browse the [requirement card](examples/minimal-v5/requirement-card.md), [modular
 
 欢迎带着脱敏案例、预期与实际差异来[反馈问题](https://github.com/franklinxkk/ai-delivery-spec/issues)或[参与贡献](https://github.com/franklinxkk/ai-delivery-spec/blob/main/.github/CONTRIBUTING.md)。如果它帮到了你，欢迎 [Star ⭐](https://github.com/franklinxkk/ai-delivery-spec)。
 
-已启用版本锁定的项目在采用本版时填写 `expected_skill_version: 5.5.7`，新检查点关联本次安装包的 SHA-256。旧检查点保留原验证记录。普通需求编写可以直接使用。
+已启用版本锁定的项目在采用本版时填写 `expected_skill_version: 5.5.8`，新检查点关联本次安装包的 SHA-256。旧检查点保留原验证记录。普通需求编写可以直接使用。
 
-**5.5.7** · [MIT](LICENSE) · [返回顶部](#top)
+**5.5.8** · [MIT](LICENSE) · [返回顶部](#top)

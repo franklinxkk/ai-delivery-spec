@@ -48,7 +48,7 @@ class IntakeAndScan(unittest.TestCase):
             src.write_text('自动处理。','utf8')
             output=subprocess.check_output([sys.executable,'-B','-X','utf8',str(ROOT/'scripts/scan_requirement_ambiguity.py'),str(src),'--format','json'],text=True,encoding='utf8')
             self.assertTrue(json.loads(output)['findings'])
-        self.assertIn('5.5.7',subprocess.check_output([sys.executable,'-B',str(cli),'version'],text=True))
+        self.assertIn('5.5.8',subprocess.check_output([sys.executable,'-B',str(cli),'version'],text=True))
 
 if __name__=='__main__':
     unittest.main()

@@ -606,6 +606,9 @@ def main() -> int:
     if not html_path.is_file():
         print(f"FAIL: input HTML file not found: {html_path}", file=sys.stderr)
         return 2
+    if args.output != "-" and Path(args.output).exists() and html_path.samefile(args.output):
+        print("FAIL: choose a ledger output distinct from the source HTML.", file=sys.stderr)
+        return 2
     html = html_path.read_text(encoding="utf-8", errors="replace")
 
     data_rows = extract_attrs(

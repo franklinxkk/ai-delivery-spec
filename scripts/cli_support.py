@@ -6,6 +6,15 @@ import shlex
 import sys
 
 
+def validation_environment() -> dict[str, str]:
+    """Keep local tool discovery, system libraries and temporary storage available to validators."""
+    names = ("PATH", "SYSTEMROOT", "WINDIR", "TEMP", "TMP", "TMPDIR", "LANG", "LC_ALL",
+             "LC_CTYPE", "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA")
+    env = {name: os.environ[name] for name in names if name in os.environ}
+    env["PYTHONIOENCODING"] = "utf-8"
+    return env
+
+
 class InputReadError(OSError):
     """A recoverable artifact input failure, distinct from a product finding."""
 

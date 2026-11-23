@@ -7,7 +7,7 @@ applies_when: 进入详细描述前，澄清范围、已定选择及仍影响实
 schema_version: 5.4.0
 version: "0.1"
 status: draft
-document_language: zh-CN
+document_language: zh-CN  # 此示例使用中文；创建文档时按接收者要求填写，如 en-US。
 project_id: PROJECT-EXAMPLE
 requirement_refs: [REQ-CORE-001]
 assumption_refs: []

@@ -12,7 +12,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import os
 import re
 import shutil
 import subprocess
@@ -23,7 +22,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlsplit
 
-from cli_support import dependency_message, shell_command, input_error_detail, InputReadError, read_utf8_input
+from cli_support import validation_environment, dependency_message, shell_command, input_error_detail, InputReadError, read_utf8_input
 
 try:
     import yaml
@@ -1399,7 +1398,7 @@ def run_sidecar_validator(gate: Gate, script: str, path: Path, code: str, extra:
     result = subprocess.run(
         [sys.executable, str(VALIDATOR_DIR / script), str(path), *(extra or [])],
         capture_output=True, text=True, encoding="utf-8", errors="replace",
-        env={**os.environ, "PYTHONIOENCODING": "utf-8"},
+        env=validation_environment(),
     )
     if result.returncode == 0:
         return

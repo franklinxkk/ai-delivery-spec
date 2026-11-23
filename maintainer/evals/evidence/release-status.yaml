@@ -1,5 +1,5 @@
 schema_version: 5.3.0
-skill_version: 5.5.7
+skill_version: 5.5.8
 runtime: pure_v5
 domain_packs:
   count: 8
@@ -29,6 +29,13 @@ trace_release_proxy:
   effectiveness_limit: deterministic/private calibration repaired gaps; blind A/B,
     token/time and human ratings remain incomplete
 release_evidence:
+  verified_at: '2026-11-23'
+  scope: Local security maintenance of the 5.5.7 runtime. External verification is tracked separately for each release artifact.
+  results:
+    baseline: The two README commands used a mutable package and source. Three local validator launches copied the parent environment.
+    local: The release-profile check passed on Windows/Python 3.12. Regression cases exercised dead and live validator paths, child environment isolation, and distinct versus identical ledger outputs.
+  evidence_boundary: Local source review does not certify a ClawHub verdict or a production deployment.
+historical_557_release_evidence:
   verified_at: '2026-11-20'
   scope: Two local first-pass evaluations with Astra and Sol, with and without the skill. One shared-workstation browser task and two small specification tasks.
   results:

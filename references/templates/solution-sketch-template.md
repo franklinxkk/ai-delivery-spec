@@ -7,7 +7,7 @@ applies_when: 需要比较解决路径及验证假设时使用。
 schema_version: 5.4.0
 version: "0.1"
 status: draft
-document_language: zh-CN
+document_language: zh-CN  # 此示例使用中文；创建文档时按接收者要求填写，如 en-US。
 project_id: PROJECT-EXAMPLE
 resume_context:
   completed_stages: [frame]

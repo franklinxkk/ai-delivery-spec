@@ -23,6 +23,7 @@ for _candidate in (SCRIPT_DIR, SCRIPT_DIR / "validators"):
 
 from jsonschema import Draft202012Validator, FormatChecker
 
+from cli_support import validation_environment
 from scan_prototype_css import scan as scan_prototype_css
 from extract_interaction_ledger import (
     _javascript_brace_pairs,
@@ -3952,6 +3953,7 @@ class PrototypeChecks:
                 checked = subprocess.run(
                     command,
                     input=scripts,
+                    env=validation_environment(),
                     text=True,
                     encoding="utf-8",
                     capture_output=True,

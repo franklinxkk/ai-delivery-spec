@@ -1,12 +1,12 @@
 ---
 name: ai-delivery-spec
 license: MIT
-description: Clarify, create, review or change product, service and office workflow requirements, PRDs and interactive prototypes. Use for vague goals, process improvements, spreadsheet/form rules, small UI edits and changes to existing systems, even without the word requirement. 中文：产品、服务及办公流程的需求判断、深挖澄清、PRD、原型、变更与验收；一句话想法、表单/表格规则和微小改动也适用。明确的纯翻译、排版、抄录或既定步骤执行由对应工具直接处理。
+description: Clarify, create, review and change requirements, PRDs and prototypes for products, services and office workflows. Includes local project templates and validators. 中文：需求判断、澄清、PRD、原型、变更与验收；一句话想法、表单表格和微小改动也适用。纯翻译、排版、抄录或明确步骤交由对应工具。
 ---
 
-# AI Delivery Spec 5.5.7 — 需求判断与交付
+# AI Delivery Spec 5.5.8 — 需求判断与交付
 
-帮助团队做值得做的产品，让人和 AI 少猜、少返工。按当前目标选择方法与工具；本 Skill 保留业务事实、决定权和交付依据，不规定思考步骤、固定角色队列或整套产物。
+按当前目标选择方法与产物，保留业务事实、决定权和交付依据。
 
 ## 保留这些约束
 
@@ -16,9 +16,13 @@ description: Clarify, create, review or change product, service and office workf
 - **存量保真**：定位实际入口、对象、消费者和旧数据，保护未取消的路径、合法操作、字段含义及视觉约定。同一规则在受影响原处同步；新默认不自动改写旧对象，演示数据重置和文案修改不能掩盖执行问题。
 - **覆盖与完成**：长任务、跨模块多轮变更或明确逐一核验时，沿用计划或检查点记录来源、范围、完成条件、版本和证据；反查原始要求，不能只核对生成的计划。小改只处理受影响项，不新建过程文件。验证操作时，从约定入口按实际分工走到结果使用处。结论引用同一对象的操作与可复查结果；为绕过阻断而切身份、改道或代造状态，另记诊断结果。未到终点按实际进度报告。详见[覆盖记录](references/context.md#覆盖与执行)。
 
+## 工具与文件范围
+
+日常讨论只需阅读。可选 Python 工具读取指定材料、校验配置、向所选项目写入交付物或团队绑定。检查可调用本地 Python、Git 或 Node。安装由宿主负责；联网、凭据与发布遵循宿主权限和本次授权。
+
 ## 按具体缺口取参考
 
-按下一位使用者需要的结果选入口。跨阶段沿用有效决定与对象，带上实际证据及缺口；清晰小改直接回填。下表可按问题跳读。
+跨阶段沿用有效决定与对象，注明证据和缺口。小改直接回填。
 
 | 当前需要 | 可选资源 |
 |---|---|

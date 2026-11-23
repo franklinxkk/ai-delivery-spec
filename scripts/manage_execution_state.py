@@ -18,6 +18,7 @@ from typing import Any
 
 import yaml
 from jsonschema import Draft202012Validator, FormatChecker
+from cli_support import validation_environment
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -570,7 +571,7 @@ def check(gate_id: str, state: dict[str, Any], args: argparse.Namespace) -> list
             add("product_truth", False, "specify and later stages require an anchored Product Truth checkpoint")
         else:
             command = [sys.executable, str(ROOT / "scripts" / "validators" / "validate_product_truth.py"), truth_anchor["path"]]
-            result = subprocess.run(command, cwd=ROOT, text=True, encoding="utf-8", capture_output=True, check=False)
+            result = subprocess.run(command, cwd=ROOT, text=True, encoding="utf-8", capture_output=True, check=False, env=validation_environment())
             add("product_truth", result.returncode == 0, (result.stdout + result.stderr).strip())
             truth = load(Path(truth_anchor["path"]))
             requirements = truth.get("requirements", [])
@@ -590,7 +591,7 @@ def check(gate_id: str, state: dict[str, Any], args: argparse.Namespace) -> list
                 missing = sorted(required - set(re.findall(id_pattern, text)))
                 projection_result = subprocess.run(
                     [sys.executable, str(ROOT / "scripts" / "validators" / "validate_projection_consistency.py"), "--truth", truth_anchor["path"], "--projection", str(projection)],
-                    cwd=ROOT, text=True, encoding="utf-8", capture_output=True, check=False,
+                    cwd=ROOT, text=True, encoding="utf-8", capture_output=True, check=False, env=validation_environment(),
                 )
                 passed = not missing and projection_result.returncode == 0
                 message = f"missing in-scope {owner_label}: " + (", ".join(missing) or "none")

@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import os
 import re
 import shutil
 import subprocess
@@ -16,7 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from xml.etree import ElementTree as ET
 
-from cli_support import dependency_message, shell_command
+from cli_support import validation_environment, dependency_message, shell_command
 
 try:
     import yaml
@@ -607,7 +606,7 @@ def run_check(args: argparse.Namespace) -> int:
             text=True,
             encoding="utf-8",
             errors="replace",
-            env={**os.environ, "PYTHONIOENCODING": "utf-8"},
+            env=validation_environment(),
             capture_output=True,
         )
         if config_result.returncode:
@@ -616,7 +615,7 @@ def run_check(args: argparse.Namespace) -> int:
             truth_result = subprocess.run(
                 [sys.executable, str(ROOT / "scripts" / "validators" / "validate_product_truth.py"), str(args.product_truth)],
                 cwd=Path.cwd(), text=True, encoding="utf-8", errors="replace",
-                env={**os.environ, "PYTHONIOENCODING": "utf-8"}, capture_output=True,
+                env=validation_environment(), capture_output=True,
             )
             if truth_result.returncode:
                 failures.append("product truth validation failed: " + ((truth_result.stdout or "") + (truth_result.stderr or "")).strip())
@@ -671,7 +670,7 @@ def run_script(script: str, values: list[str]) -> int:
     # the installed Skill directory. Bundled resources are located via __file__.
     return subprocess.run(
         [sys.executable, str(ROOT / "scripts" / script), *values],
-        cwd=Path.cwd(), text=True,
+        cwd=Path.cwd(), text=True, env=validation_environment(),
     ).returncode
 
 
