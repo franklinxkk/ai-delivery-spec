@@ -63,6 +63,23 @@ def checkpoint(tmp_path, skill):
     return state
 
 
+def test_git_metadata_processes_receive_only_runtime_environment(nested_skill, monkeypatch):
+    run = subprocess.run
+    observed = []
+    monkeypatch.setenv("ADS_SYNTHETIC_PRIVATE_SETTING", "test")
+
+    def observe(command, **kwargs):
+        observed.append(command[1])
+        assert kwargs["env"] == execution.validation_environment()
+        assert "ADS_SYNTHETIC_PRIVATE_SETTING" not in kwargs["env"]
+        return run(command, **kwargs)
+
+    monkeypatch.setattr(execution.subprocess, "run", observe)
+    assert execution.git_commit() != "unavailable"
+    assert execution.repository_fingerprint()[1] is False
+    assert observed == ["log", "status", "ls-files"]
+
+
 def test_sibling_dirty_files_and_commits_do_not_invalidate_skill_checkpoint(nested_skill, tmp_path):
     repo, skill = nested_skill
     state = checkpoint(tmp_path, skill)

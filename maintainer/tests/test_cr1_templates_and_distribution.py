@@ -115,6 +115,25 @@ def builder():
     return module
 
 
+@pytest.mark.parametrize(("code", "output", "accepted"), [
+    (0, '{"profile":"prototype","status":"PASS"}', True),
+    (1, "", False),
+    (1, '{"profile":"prototype","status":"GAP"}', False),
+    (0, "invalid report", False),
+    (0, '{"profile":"prd","status":"PASS"}', False),
+])
+def test_packager_checks_prototype_smoke_result(tmp_path, monkeypatch, code, output, accepted):
+    build = builder()
+
+    def invoke(command, **kwargs):
+        if command[1] == "scripts/quality_gate.py":
+            return subprocess.CompletedProcess(command, code, output, "")
+        return subprocess.CompletedProcess(command, 0, "", "")
+
+    monkeypatch.setattr(build.subprocess, "run", invoke)
+    assert (not build.self_check(tmp_path)) == accepted
+
+
 def test_packager_rejects_source_only_link_before_zip_creation(tmp_path, monkeypatch):
     build = builder()
     repo = tmp_path / "repo"
@@ -133,6 +152,7 @@ def test_packager_rejects_source_only_link_before_zip_creation(tmp_path, monkeyp
     (repo / "README.md").write_text("[Start](SKILL.md#start)\n", encoding="utf-8")
     assert build.main() == 0
     with zipfile.ZipFile(archive) as package:
+        assert all(info.date_time == (1980, 1, 1, 0, 0, 0) for info in package.infolist())
         assert "SKILL.md" in package.namelist() and "maintainer/evidence.md" not in package.namelist()
 
 

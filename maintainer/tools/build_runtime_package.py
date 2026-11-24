@@ -128,7 +128,12 @@ def self_check(root: Path) -> list[str]:
         env=clean_env,
     )
     prototype.unlink(missing_ok=True)
-    if result.returncode not in {0, 1}:  # explicit-state GAP is acceptable for this minimal package smoke test
+    try:
+        report = json.loads(result.stdout)
+    except ValueError:
+        report = None
+    if (result.returncode != 0 or not isinstance(report, dict)
+            or report.get("profile") != "prototype" or report.get("status") != "PASS"):
         failures.append("runtime gate smoke test: " + result.stdout + result.stderr)
     return failures
 
@@ -193,10 +198,13 @@ def main() -> int:
         if args.output and not failures:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             with zipfile.ZipFile(args.output, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-                for source in files:
-                    relative = source.relative_to(ROOT).as_posix()
-                    archive.write(temp / relative, relative)
-                archive.write(temp / "runtime-manifest.json", "runtime-manifest.json")
+                members = [source.relative_to(ROOT).as_posix() for source in files]
+                for relative in [*members, "runtime-manifest.json"]:
+                    # Host filesystem timestamps and permissions are not release inputs.
+                    info = zipfile.ZipInfo(relative, date_time=(1980, 1, 1, 0, 0, 0))
+                    info.create_system = 3
+                    info.external_attr = 0o100644 << 16
+                    archive.writestr(info, (temp / relative).read_bytes(), compress_type=zipfile.ZIP_DEFLATED)
     finally:
         shutil.rmtree(temp, ignore_errors=True)
         try:

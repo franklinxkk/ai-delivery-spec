@@ -90,7 +90,7 @@ def git_commit() -> str:
     try:
         result = subprocess.run(
             ["git", "log", "-1", "--format=%H", "--", "."], cwd=ROOT,
-            text=True, encoding="utf-8", capture_output=True, check=False,
+            text=True, encoding="utf-8", capture_output=True, check=False, env=validation_environment(),
         )
     except OSError:
         return "unavailable"
@@ -107,11 +107,11 @@ def repository_fingerprint() -> tuple[str, bool]:
     try:
         status = subprocess.run(
             ["git", "status", "--porcelain=v1", "-z", "--untracked-files=all", "--", "."],
-            cwd=ROOT, capture_output=True, check=False,
+            cwd=ROOT, capture_output=True, check=False, env=validation_environment(),
         )
         files = subprocess.run(
             ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "."],
-            cwd=ROOT, capture_output=True, check=False,
+            cwd=ROOT, capture_output=True, check=False, env=validation_environment(),
         )
         use_git = status.returncode == 0 and files.returncode == 0
     except OSError:
