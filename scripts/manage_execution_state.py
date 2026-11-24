@@ -9,7 +9,7 @@ import importlib.metadata
 import json
 import os
 import re
-import shutil
+import stat
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -283,12 +283,45 @@ def anchor(kind: str, path: Path) -> dict[str, str]:
     return {"kind": kind, "path": str(path.resolve()), "sha256": sha256_file(path.resolve())}
 
 
-def snapshot(path: Path, output: Path, revision: int, label: str) -> Path:
+class SnapshotError(OSError):
+    pass
+
+
+def is_link(info: os.stat_result) -> bool:
+    return stat.S_ISLNK(info.st_mode) or bool(
+        getattr(info, "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT
+    )
+
+
+def snapshot(path: Path, output: Path) -> Path:
     directory = output.resolve().parent / "snapshots"
-    directory.mkdir(parents=True, exist_ok=True)
-    suffix = path.suffix.lower() if path.suffix else ".yaml"
-    target = directory / f"{revision:03d}-{label}{suffix}"
-    shutil.copyfile(path.resolve(), target)
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+        info = directory.lstat()
+        if is_link(info) or not stat.S_ISDIR(info.st_mode):
+            raise SnapshotError(f"snapshot directory must be a real directory: {directory}")
+
+        content = path.read_bytes()
+        digest = hashlib.sha256(content).hexdigest()
+        suffix = path.suffix.lower() or ".yaml"
+        target = directory / f"{digest}{suffix}"
+        try:
+            stream = target.open("xb")
+        except FileExistsError:
+            info = target.lstat()
+            if is_link(info) or not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or target.read_bytes() != content:
+                raise SnapshotError(f"existing snapshot cannot be reused: {target}")
+        else:
+            try:
+                with stream:
+                    stream.write(content)
+            except OSError:
+                target.unlink(missing_ok=True)
+                raise
+    except SnapshotError:
+        raise
+    except OSError as exc:
+        raise SnapshotError(str(exc)) from exc
     return target
 
 
@@ -357,9 +390,9 @@ def create_state(args: argparse.Namespace) -> int:
     timestamp = now()
     tree_hash, repository_dirty = repository_fingerprint()
     output = args.output.resolve()
-    contract_snapshot = snapshot(contract_path, output, 0, kind.replace("_", "-"))
-    config_snapshot = snapshot(config_path, output, 0, "spec-config")
-    coverage_snapshot = snapshot(coverage_path, output, 0, "domain-coverage")
+    contract_snapshot = snapshot(contract_path, output)
+    config_snapshot = snapshot(config_path, output)
+    coverage_snapshot = snapshot(coverage_path, output)
     anchors = [anchor(kind, contract_snapshot), anchor("spec_config", config_snapshot), anchor("domain_coverage", coverage_snapshot)]
     if args.assurance_evidence:
         evidence_failures = schema_failures(project_evidence, "assurance-evidence.schema.json")
@@ -367,7 +400,7 @@ def create_state(args: argparse.Namespace) -> int:
             for failure in evidence_failures:
                 print(f"FAIL: assurance evidence: {failure}")
             return 1
-        assurance_snapshot = snapshot(args.assurance_evidence.resolve(), output, 0, "assurance-evidence")
+        assurance_snapshot = snapshot(args.assurance_evidence.resolve(), output)
         anchors.append(anchor("assurance_evidence", assurance_snapshot))
     stage = normalized_stage(contract, kind)
     domains = domain_snapshot(contract, coverage, project_evidence)
@@ -716,12 +749,12 @@ def checkpoint_state(args: argparse.Namespace) -> int:
 
     revision = state["revision"] + 1
     output = args.output.resolve()
-    contract_snapshot = snapshot(contract_path, output, revision, kind.replace("_", "-"))
-    config_snapshot = snapshot(config_path, output, revision, "spec-config")
-    coverage_snapshot = snapshot(coverage_path, output, revision, "domain-coverage")
+    contract_snapshot = snapshot(contract_path, output)
+    config_snapshot = snapshot(config_path, output)
+    coverage_snapshot = snapshot(coverage_path, output)
     anchors = [anchor(kind, contract_snapshot), anchor("spec_config", config_snapshot), anchor("domain_coverage", coverage_snapshot)]
     if assurance_path:
-        assurance_snapshot = snapshot(assurance_path, output, revision, "assurance-evidence")
+        assurance_snapshot = snapshot(assurance_path, output)
         anchors.append(anchor("assurance_evidence", assurance_snapshot))
 
     previous = state["state_hash"]
@@ -892,7 +925,11 @@ def main() -> int:
     advance.add_argument("--output", type=Path, required=True)
     advance.set_defaults(func=advance_state)
     args = parser.parse_args()
-    return args.func(args)
+    try:
+        return args.func(args)
+    except SnapshotError as exc:
+        print(f"FAIL: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

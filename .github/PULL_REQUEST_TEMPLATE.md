@@ -38,4 +38,5 @@ What reusable behavior becomes better, and for whom?
 - [ ] Golden examples/eval catalog are updated where relevant.
 - [ ] README, agent metadata, version, and CHANGELOG agree.
 - [ ] `python scripts/ai_delivery_spec_cli.py check` passes.
+- [ ] For a GitHub release candidate, link the [release evaluation](../maintainer/release-evaluation.md) record for this candidate, including changed-behavior regressions, all three models with and without the Skill, cross-model cold reads, and platform scan status. Keep private inputs outside the PR.
 - [ ] The protected branch requires the `required-gate` status before merge.
