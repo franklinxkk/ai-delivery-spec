@@ -177,6 +177,12 @@ def test_structured_clarification_closes_only_named_unknowns() -> None:
         run(COMPILER, '--contract', str(contract_path), '--transcript', str(transcript_path), '--decision', 'READY_FOR_PRODUCT_TRUTH', '--output', str(output))
         compiled = yaml.safe_load(output.read_text(encoding='utf-8'))
         assert compiled['unknowns'][0]['status'] == 'answered'
+        original_transcript = transcript_path.read_bytes()
+        blocked_output = run(CLI, 'compile-discovery', '--contract', str(contract_path),
+                             '--transcript', str(transcript_path), '--decision', 'READY_FOR_PRODUCT_TRUTH',
+                             '--output', str(transcript_path), expected=2)
+        assert 'clarification transcript' in blocked_output.stderr
+        assert transcript_path.read_bytes() == original_transcript
         bad_contract = yaml.safe_load(contract_path.read_text(encoding='utf-8'))
         bad_contract['unknowns'].append({'id': 'UNK-Y', 'question': 'Which authority?', 'impact': 'data', 'priority': 'P1', 'owner': 'owner', 'status': 'open', 'recommendation': 'Keep read-only.', 'recommendation_evidence_refs': ['meeting'], 'tradeoff': 'Submit blocked.'})
         bad_path = work / 'bad-contract.yaml'

@@ -98,3 +98,31 @@ def test_explicit_output_language_preserves_business_result_and_declared_languag
     result = run(path, "--format", "json", "--language", "en-US")
     assert result.returncode == 0 and json.loads(result.stdout)["output_language"] == "en-US"
     assert hashlib.sha256(path.read_bytes()).hexdigest() == before
+
+
+@pytest.mark.parametrize("target", ["input", "path_alias", "hardlink", "separate"])
+def test_public_triage_output_preserves_input(tmp_path, target):
+    path = tmp_path / "intake.yaml"
+    source = b"title: Add a visible sorting option\n"
+    path.write_bytes(source)
+    output = tmp_path / "result.json"
+    if target == "input":
+        output = path
+    elif target == "path_alias":
+        output = tmp_path / "nested" / ".." / path.name
+    elif target == "hardlink":
+        try:
+            output.hardlink_to(path)
+        except (PermissionError, NotImplementedError):
+            pytest.skip("Hard-link creation unavailable")
+    else:
+        output.write_text("previous result", encoding="utf-8")
+
+    result = run(path, "--format", "json", "--output", str(output))
+    assert path.read_bytes() == source and result.stdout == ""
+    if target == "separate":
+        assert result.returncode == 0 and result.stderr == ""
+        assert json.loads(output.read_bytes())["recommendation"] == "accept"
+    else:
+        assert result.returncode == 2 and "TRIAGE-OUTPUT" in result.stderr
+        assert not (tmp_path / "nested").exists()

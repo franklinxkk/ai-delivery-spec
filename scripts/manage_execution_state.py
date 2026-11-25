@@ -18,7 +18,7 @@ from typing import Any
 
 import yaml
 from jsonschema import Draft202012Validator, FormatChecker
-from cli_support import validation_environment
+from cli_support import output_conflicts, validation_environment
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -78,9 +78,12 @@ def object_hash(value: dict[str, Any], hash_field: str) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def skill_manifest(path: Path) -> Path:
+    return path / "SKILL.md" if path.is_dir() else path
+
+
 def skill_version(path: Path) -> str:
-    manifest = path / "SKILL.md" if path.is_dir() else path
-    match = re.search(r"\bv?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)\b", manifest.read_text(encoding="utf-8"))
+    match = re.search(r"\bv?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)\b", skill_manifest(path).read_text(encoding="utf-8"))
     return match.group(1) if match else "unknown"
 
 
@@ -287,6 +290,22 @@ class SnapshotError(OSError):
     pass
 
 
+def checked_output(path: Path, *inputs: Path | None, state: dict | None = None) -> Path:
+    output = path.resolve()
+    protected = [ROOT / "SKILL.md", ROOT / "references" / "domain-coverage.yaml", *inputs]
+    if state:
+        protected.extend(Path(item["path"]) for item in state["anchors"])
+        protected.extend(Path(ref) for ref in state["gate_result_refs"])
+        protected.append(skill_manifest(Path(state["versions"]["installed_skill_path"])))
+    if output_conflicts(output, *protected):
+        raise SnapshotError(f"output would overwrite a protected input: {output}")
+    # An older execution may still refer to these immutable files.
+    snapshot_name = r"(?:[a-f0-9]{64}|\d{3,}-(?:product-truth|discovery-contract|spec-config|domain-coverage|assurance-evidence))"
+    if output.parent.name.casefold() == "snapshots" and re.fullmatch(snapshot_name, output.stem.casefold()):
+        raise SnapshotError(f"output would overwrite a reserved snapshot: {output}")
+    return output
+
+
 def is_link(info: os.stat_result) -> bool:
     return stat.S_ISLNK(info.st_mode) or bool(
         getattr(info, "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT
@@ -377,6 +396,7 @@ def create_state(args: argparse.Namespace) -> int:
     config_path = args.config.resolve()
     installed = args.installed_skill.resolve()
     coverage_path = (ROOT / "references" / "domain-coverage.yaml").resolve()
+    output = checked_output(args.output, contract_path, config_path, skill_manifest(installed), args.assurance_evidence)
     contract = load(contract_path)
     config = load(config_path)
     coverage = load(coverage_path)
@@ -389,7 +409,6 @@ def create_state(args: argparse.Namespace) -> int:
     environment = args.environment or config["execution"]["environment"]
     timestamp = now()
     tree_hash, repository_dirty = repository_fingerprint()
-    output = args.output.resolve()
     contract_snapshot = snapshot(contract_path, output)
     config_snapshot = snapshot(config_path, output)
     coverage_snapshot = snapshot(coverage_path, output)
@@ -655,6 +674,7 @@ def check(gate_id: str, state: dict[str, Any], args: argparse.Namespace) -> list
 
 def gate_state(args: argparse.Namespace) -> int:
     state = load(args.state.resolve())
+    output = checked_output(args.output, args.state, args.human_approval, *args.projection, state=state)
     checks = (
         [{"id": "validator_service", "passed": False, "message": "validator service outage declared; no silent pass"}]
         if args.service_outage
@@ -698,7 +718,7 @@ def gate_state(args: argparse.Namespace) -> int:
         for failure in failures:
             print(f"FAIL: {failure}")
         return 1
-    dump(args.output.resolve(), payload)
+    dump(output, payload)
     print(f"{result.upper()}: {args.gate_id} -> {args.output.resolve()}")
     return 0 if result in {"passed", "approved_with_gap"} else 1
 
@@ -748,7 +768,7 @@ def checkpoint_state(args: argparse.Namespace) -> int:
             return 1
 
     revision = state["revision"] + 1
-    output = args.output.resolve()
+    output = checked_output(args.output, contract_path, config_path, assurance_path, state=state)
     contract_snapshot = snapshot(contract_path, output)
     config_snapshot = snapshot(config_path, output)
     coverage_snapshot = snapshot(coverage_path, output)
@@ -812,13 +832,14 @@ def record_turn(args: argparse.Namespace) -> int:
         for failure in schema_issues:
             print(f"FAIL: {failure}")
         return 1
-    dump(args.output.resolve(), state)
+    dump(checked_output(args.output, state=state), state)
     print(f"PASS: recorded stage turn {next_turn}/{limit} -> {args.output.resolve()}")
     return 0
 
 
 def advance_state(args: argparse.Namespace) -> int:
     state = load(args.state.resolve())
+    output = checked_output(args.output, *args.gate_result, state=state)
     failures = verify_state_value(state)
     target_index = STAGES.index(args.to_stage)
     current_index = STAGES.index(state["stage"]["current"])
@@ -862,7 +883,7 @@ def advance_state(args: argparse.Namespace) -> int:
         for failure in failures:
             print(f"FAIL: {failure}")
         return 1
-    dump(args.output.resolve(), state)
+    dump(output, state)
     print(f"PASS: advanced to {args.to_stage}; previous state {previous[:12]}")
     return 0
 

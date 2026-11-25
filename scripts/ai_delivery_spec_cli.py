@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from xml.etree import ElementTree as ET
 
-from cli_support import validation_environment, dependency_message, shell_command
+from cli_support import validation_environment, dependency_message, output_conflicts, shell_command
 
 try:
     import yaml
@@ -962,6 +962,9 @@ def schema_failures(document: dict, schema_name: str) -> list[str]:
 
 
 def record_candidate_usage(args: argparse.Namespace) -> int:
+    if output_conflicts(args.output, args.candidate):
+        print("BLOCKED: 使用记录不能覆盖候选知识原件，请另选输出文件。")
+        return 2
     candidate, failures = load_yaml_object(args.candidate, "候选知识")
     if candidate is not None:
         failures.extend(schema_failures(candidate, "domain-candidate.schema.json"))
@@ -1005,6 +1008,9 @@ def assess_candidate(args: argparse.Namespace) -> int:
         else:
             usage_paths.append(value)
     usages: list[dict] = []
+    if args.output and output_conflicts(args.output, args.candidate, *usage_paths):
+        print("BLOCKED: 评估报告不能覆盖候选知识或使用记录，请另选输出文件。")
+        return 2
     for path in usage_paths:
         usage, read_failures = load_yaml_object(path, f"使用记录 {path}")
         failures.extend(read_failures)

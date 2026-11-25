@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 import yaml
 from change_package_contract import ChangeContractError, extract_seed_refs, load_yaml_mapping
+from cli_support import output_conflicts
 
 
 def dependency_graph(document: dict[str, Any]) -> tuple[dict[str, set[str]], dict, list[dict]]:
@@ -146,6 +147,8 @@ def main() -> int:
                          load_yaml_mapping(args.change, label="change package"), args.max_depth)
         rendered = yaml.safe_dump(result, allow_unicode=True, sort_keys=False)
         if args.output:
+            if output_conflicts(args.output, args.truth, args.change):
+                raise ChangeContractError("choose an output file separate from the truth and change inputs")
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(rendered, encoding="utf-8", newline="\n")
             print(f"WROTE: {len(result['affected'])} dependency candidates to {args.output}; not an approved impact list")

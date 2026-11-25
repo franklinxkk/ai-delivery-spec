@@ -6,6 +6,8 @@
 
 AI Delivery Spec 帮你判断需求价值、挖透业务细节，形成产品能确认、开发能实现、测试能验收的需求与原型，让团队和 AI Coding Agent 据此协作。
 
+安装后，在 AI 助手的聊天框里写下你的需求，或附上想修改的文档。
+
 工作方法随模型能力和任务变化；Skill 持续保留的是业务依据、决定边界、存量约定和可核对的交付结果。领域资料、模板和检查工具按需调用。判断一次迭代是否有效，要看它是否减少误解、遗漏和返工，同时计入阅读、澄清与执行成本；规则数量和产物数量不代表收益。
 
 [![ClawHub: 3,139 downloads](https://img.shields.io/badge/ClawHub-3%2C139_downloads-2563eb)](https://clawhub.ai/franklinxkk/skills/ai-delivery-spec)
@@ -122,6 +124,8 @@ AI Delivery Spec 帮你判断需求价值、挖透业务细节，形成产品能
 **Build what matters, with less guesswork and rework for your team and AI.**
 
 AI Delivery Spec helps you assess whether a need is worth pursuing, explore the business details, and turn decisions into requirements and interactive prototypes. Product teams can confirm the intent, developers and Coding Agents can implement the behavior, and testers can derive acceptance cases.
+
+After installation, describe your need in your AI assistant’s chat or attach the document you want to revise.
 
 Methods adapt to the task and model capability. The durable constraints preserve business evidence, decision authority, existing agreements and verifiable outcomes; references and tools are optional. Judge revisions by reduced errors and rework alongside reading, clarification and execution cost, not by rule or artifact counts.
 

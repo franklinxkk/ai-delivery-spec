@@ -12,6 +12,7 @@ import argparse
 import json
 import re
 from pathlib import Path
+from cli_support import output_conflicts
 
 
 PATTERNS = {
@@ -474,6 +475,8 @@ def main() -> int:
     parser.add_argument("--output", type=Path)
     parser.add_argument("--fail-on-findings", action="store_true")
     args = parser.parse_args()
+    if args.output and output_conflicts(args.output, args.document):
+        parser.error("Choose a report path separate from the source document.")
     text = args.document.read_text(encoding="utf-8")
     findings = []
     if args.profile in {"lexical", "full"}:

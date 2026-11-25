@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from cli_support import output_conflicts
 from truth_references import iter_references
 
 
@@ -96,6 +97,9 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--baseline-version", default="unversioned")
     args = parser.parse_args()
+    if output_conflicts(args.output, args.truth):
+        print("BLOCKED: trace ledger output must differ from its Product Truth source")
+        return 2
     document = load_truth(args.truth)
     if document is None:
         return 2
@@ -103,7 +107,7 @@ def main() -> int:
         import sys
         sys.path.insert(0, str(Path(__file__).resolve().parent))
         from compile_product_truth import compile_index
-        document, failures = compile_index(args.truth, validate_final=False)
+        document, failures = compile_index(args.truth, validate_final=False, index=document, output=args.output)
         if failures:
             raise SystemExit("\n".join(f"FAIL: {item}" for item in failures))
     result = build(document, args.baseline_version)

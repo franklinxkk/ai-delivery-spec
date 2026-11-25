@@ -3,8 +3,11 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 import yaml
+from cli_support import output_conflicts
 def main()->int:
     p=argparse.ArgumentParser();p.add_argument("--truth",type=Path,required=True);p.add_argument("--output",type=Path,required=True);a=p.parse_args()
+    if output_conflicts(a.output, a.truth):
+        p.error("Choose a flow diagram path separate from the source specification.")
     doc=yaml.safe_load(a.truth.read_text(encoding="utf-8")); lines=["flowchart LR"]
     for f in doc.get("flows",[]):
         fid=f.get("id","FLOW"); name=str(f.get("name",fid)).replace('"',"'")

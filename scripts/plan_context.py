@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import sys
-from cli_support import dependency_message, run_cli
+from cli_support import dependency_message, output_conflicts, run_cli
 try:
     import yaml
     from jsonschema import Draft202012Validator
@@ -71,6 +71,10 @@ def estimate_text_tokens(text: str) -> int:
     ascii_chars = sum(ord(char) < 128 for char in text)
     non_ascii = len(text) - ascii_chars
     return max(1, math.ceil(ascii_chars / 4 + non_ascii / 1.5))
+
+
+def runtime_references(stage_refs: list[str], domain_files: list[str]) -> list[Path]:
+    return [ROOT / relative for relative in ("SKILL.md", *stage_refs, *domain_files)]
 
 
 def classify(truth: dict[str, Any]) -> tuple[int, list[str], str, list[str]]:
@@ -190,11 +194,9 @@ def build_plan(truth: dict[str, Any], config: dict[str, Any], seed_ids: list[str
     domain_files = domain_files_all[:max_domains]
     deferred_domain_files = domain_files_all[max_domains:]
 
-    selected_runtime_files = ["SKILL.md", *stage_refs, *domain_files]
     reference_tokens = sum(
-        estimate_text_tokens((ROOT / relative).read_text(encoding="utf-8"))
-        for relative in selected_runtime_files
-        if (ROOT / relative).exists()
+        estimate_text_tokens(path.read_text(encoding="utf-8"))
+        for path in runtime_references(stage_refs, domain_files) if path.exists()
     )
     total_selected_tokens = truth_tokens + reference_tokens
 
@@ -295,7 +297,8 @@ def main() -> int:
             print(f"FAIL: config {item}")
         return 1
     plan = build_plan(truth, config, args.seed_id)
-    schema = json.loads((ROOT / "schemas/context-plan.schema.json").read_text(encoding="utf-8"))
+    schema_path = ROOT / "schemas/context-plan.schema.json"
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
     errors = list(Draft202012Validator(schema).iter_errors(plan))
     if errors:
         for error in errors:
@@ -303,6 +306,12 @@ def main() -> int:
         return 1
     rendered = yaml.safe_dump(plan, allow_unicode=True, sort_keys=False)
     if args.output:
+        selection = plan["selection"]
+        references = runtime_references(selection["stage_references"], selection["domain_packs"])
+        if output_conflicts(args.output, args.truth, args.config, schema_path,
+                            ROOT / "schemas/spec-config.schema.json", *references):
+            print("BLOCKED: choose a context plan output separate from its inputs")
+            return 2
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(rendered, encoding="utf-8", newline="\n")
         print(f"PASS: wrote context plan to {args.output}")

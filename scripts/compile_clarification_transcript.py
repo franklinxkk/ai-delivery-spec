@@ -10,6 +10,7 @@ from pathlib import Path
 
 import yaml
 from jsonschema import Draft202012Validator
+from cli_support import output_conflicts
 
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -40,6 +41,8 @@ def main() -> int:
     parser.add_argument("--decision", choices=[*sorted(READY), "REVIEW_COMPLETE_WITH_GAPS", "BLOCKED_BY_P0_UNKNOWN"], required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    if output_conflicts(args.output, args.transcript):
+        parser.error("The compiled contract must not replace the clarification transcript.")
     try:
         contract = yaml.safe_load(args.contract.read_text(encoding="utf-8"))
         transcript = yaml.safe_load(args.transcript.read_text(encoding="utf-8"))

@@ -9,14 +9,14 @@ from pathlib import Path
 from typing import Any
 
 import sys
-from cli_support import dependency_message, run_cli
+from cli_support import dependency_message, output_conflicts, run_cli
 try:
     import yaml
 except ModuleNotFoundError as exc:
     print(dependency_message(str(exc.name)), file=sys.stderr)
     raise SystemExit(4) from exc
 
-from manage_execution_state import load, sha256_file, verify_state_value
+from manage_execution_state import ROOT, checked_output, load, sha256_file, verify_state_value
 
 
 ID_PATTERN = re.compile(r"^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+$")
@@ -107,6 +107,9 @@ def main() -> int:
     truth = yaml.safe_load(args.truth.read_text(encoding="utf-8"))
     if not isinstance(truth, dict):
         raise ValueError(f"{args.truth}: expected a YAML object")
+    if output_conflicts(args.output, args.truth, args.execution_state):
+        print("BLOCKED: choose a slice output separate from the truth and execution state")
+        return 2
     allowed_ids: set[str] | None = None
     state_hash: str | None = None
     if args.execution_state:
@@ -116,6 +119,7 @@ def main() -> int:
             for failure in failures:
                 print(f"FAIL: execution state: {failure}")
             return 1
+        checked_output(args.output, ROOT / "schemas/execution-state.schema.json", state=state)
         truth_anchor = next((item for item in state["anchors"] if item["kind"] == "product_truth"), None)
         if not truth_anchor or sha256_file(args.truth.resolve()) != truth_anchor["sha256"]:
             print("FAIL: requested Product Truth content is not the execution state's anchored checkpoint")

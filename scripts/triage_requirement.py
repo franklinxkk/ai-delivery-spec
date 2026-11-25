@@ -6,6 +6,7 @@ import re
 import sys
 from pathlib import Path
 import yaml
+from cli_support import output_conflicts
 from requirement_contract import route, load_declarations, intake_text
 from scan_requirement_ambiguity import scan
 
@@ -208,6 +209,12 @@ def main() -> int:
         for issue in result["errors"]:
             rendered += "- BLOCKED: " + issue + "\n"
     if args.output:
+        if output_conflicts(args.output, args.input):
+            message = ("Choose an output file separate from the input."
+                       if result["output_language"] == "en-US"
+                       else "请选择与输入文件不同的输出文件。")
+            print("BLOCKED TRIAGE-OUTPUT: " + message, file=sys.stderr)
+            return 2
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(rendered, encoding="utf-8", newline="\n")
     else:

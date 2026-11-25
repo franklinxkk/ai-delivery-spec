@@ -15,6 +15,19 @@ def validation_environment() -> dict[str, str]:
     return env
 
 
+def output_conflicts(output: Path, *sources: Path | None) -> bool:
+    """Return whether a proposed output would replace a supplied source file."""
+    target = output.resolve()
+    for source in sources:
+        if source is None:
+            continue
+        if target == source.resolve():
+            return True
+        if target.exists() and source.exists() and target.samefile(source):
+            return True
+    return False
+
+
 class InputReadError(OSError):
     """A recoverable artifact input failure, distinct from a product finding."""
 
