@@ -14,6 +14,7 @@ for _candidate in (SCRIPT_DIR, SCRIPT_DIR / "validators"):
 
 import yaml
 from jsonschema import Draft202012Validator
+from requirement_contract import string_list
 from validate_prd_semantics import collect_defined_ids
 
 
@@ -856,12 +857,31 @@ class HandoffChecks:
                          "可开工交接仍有占位内容；补真实范围、接收责任或引用，未确定部分保持草稿。",
                          ", ".join(placeholders))
         packet_ids: set[str] = set()
+        decisions = self._frontmatter(requirement_raw).get("decisions", [])
+        declared_decisions = {}
+        for decision in decisions if isinstance(decisions, list) else []:
+            if isinstance(decision, dict) and isinstance(decision.get("id"), str):
+                key = decision["id"]
+                declared_decisions[key] = decision if key not in declared_decisions else {}
         referenced_steps: set[str] = set()
         for packet in document.get("packets", []) or []:
             if not isinstance(packet, dict):
                 continue
             packet_id = str(packet.get("id", "<unknown>"))
             packet_ids.add(packet_id)
+            if ready:
+                for ref in packet.get("decision_refs", []):
+                    decision = declared_decisions.get(ref, {})
+                    actor, sources = decision.get("actor"), decision.get("source_refs")
+                    scope = decision.get("affected_refs", decision.get("scope_refs", []))
+                    matches = string_list(scope) and (not scope or bool(set(scope) & set(packet.get("scope_refs", []))))
+                    if (decision.get("status") not in ("confirmed", "approved")
+                            or not isinstance(actor, str) or not actor.strip()
+                            or not string_list(sources, nonempty=True)
+                            or not matches):
+                        self.add("BLOCK", "HANDOFF-DECISION-UNRESOLVED", path,
+                                 "工作包引用的决定未在当前规格中确认、缺少决定人或依据，或适用范围不匹配。",
+                                 f"{packet_id}->{ref}")
             if packet.get("baseline_hash") != baseline_hash:
                 self.add("BLOCK", "HANDOFF-PACKET-BASELINE-DRIFT", path, "工作包 baseline_hash 与清单不一致", packet_id)
             packet_path = path.parent / str(packet.get("path", ""))

@@ -24,5 +24,6 @@ baseline:
 # draft 可为空；ready_for_implementation 至少有一个真实 packet，并按实施范围复核未决项。
 # scope_refs/acceptance_refs 必须对应 requirement_ref 中真实定义；每项都进入相应包。
 # 内容哈希只核对漂移；业务反例与证据真实性由接收复核，不把空标签当语义。
+# 工作包涉及新的业务决定时可加 decision_refs: [DEC-…]，指向当前 PRD 中的已确认决定、决定人及来源。
 packets: []
 handoffs: []

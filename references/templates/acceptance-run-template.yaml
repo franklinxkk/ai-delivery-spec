@@ -6,6 +6,8 @@ applies_when: 记录已执行的验收及证据；不把计划当验收完成。
 schema_version: 5.1.0
 run_id: ARUN-CORE-001
 baseline_version: "1.0"
+# 跨版本或供自动化复用时，填写 baseline_hash，取核对过的 Markdown 规格全文的 SHA-256（UTF-8，换行统一 LF）。
+# Word 原件仍是业务依据。核对文本与原件一致后再取摘要。每项必验通过结果附记录目录内的执行证据或外部回执副本。
 environment: "{acceptance environment}"
 execution_type: unknown # 执行后按实际填写 static / simulation / browser / integration
 executor: "{executor}"

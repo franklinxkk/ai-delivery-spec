@@ -23,13 +23,18 @@ if hasattr(sys.stderr, "reconfigure"):
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
-from cli_support import input_error_detail
+from cli_support import input_error_detail, read_utf8_input
+from stage_contract import markdown_frontmatter
+from validators.validate_prd_semantics import collect_defined_ids
 SCHEMA = ROOT / "schemas" / "acceptance-run.schema.json"
 
 
-def _local_evidence_path(document_path: Path, uri: str) -> tuple[Path | None, str | None]:
+def local_evidence_path(document_path: Path, uri: str) -> tuple[Path | None, str | None]:
     """Resolve a local evidence URI without allowing it to escape the ARUN directory."""
-    parsed = urlsplit(uri)
+    try:
+        parsed = urlsplit(uri)
+    except ValueError as exc:
+        return None, f"无效的证据引用：{uri} ({exc})"
     if parsed.scheme in {"http", "https"} and parsed.netloc:
         return None, None
     if parsed.scheme or parsed.netloc:
@@ -48,7 +53,7 @@ def _local_evidence_path(document_path: Path, uri: str) -> tuple[Path | None, st
     return candidate, None
 
 
-def validate_evidence_refs(document: dict, document_path: Path) -> list[str]:
+def validate_evidence_refs(document: dict, document_path: Path, *, verify_local: bool = False) -> list[str]:
     """Validate direct paths/URLs and EVD-* references declared by one ARUN."""
     failures: list[str] = []
     catalog: dict[str, dict] = {}
@@ -71,17 +76,20 @@ def validate_evidence_refs(document: dict, document_path: Path) -> list[str]:
                 return False
             uri = str(entry.get("uri", ""))
             expected_hash = str(entry.get("sha256", ""))
-        local_path, error = _local_evidence_path(document_path, uri)
+        local_path, error = local_evidence_path(document_path, uri)
         if error:
             failures.append(f"{owner}：{error}")
             return False
-        if local_path is not None and expected_hash:
-            actual_hash = hashlib.sha256(local_path.read_bytes()).hexdigest()
-            if actual_hash != expected_hash:
+        if local_path is not None:
+            if verify_local and not readable_receipt(document_path, local_path):
+                failures.append(f"{owner} 的本地回执为空、不可读或指回记录自身：{ref}")
+                return False
+            if expected_hash and hashlib.sha256(local_path.read_bytes()).hexdigest() != expected_hash:
                 failures.append(f"{owner} 的证据哈希不一致：{ref}")
                 return False
-        return True
+        return local_path is not None
 
+    accepted = document.get("conclusion") in {"accepted", "accepted_with_conditions"}
     for item in document.get("items", []) or []:
         if not isinstance(item, dict):
             continue
@@ -89,13 +97,27 @@ def validate_evidence_refs(document: dict, document_path: Path) -> list[str]:
         refs = item.get("evidence_refs", []) or []
         if item.get("result") == "pass" and not refs:
             failures.append(f"{item_id} 结果为 pass，但没有证据引用")
-        for ref in refs:
-            resolve(str(ref), item_id)
+        local_refs = [resolve(str(ref), item_id) for ref in refs]
+        if verify_local and (item.get("mandatory") or accepted) and item.get("result") == "pass" and not any(local_refs):
+            failures.append(f"{item_id} 的通过结论缺少可在本次读取的证据；可引用本地结果或已保存的外部执行回执。")
     for sign_off in document.get("sign_offs", []) or []:
         if not isinstance(sign_off, dict) or not sign_off.get("evidence_ref"):
             continue
-        resolve(str(sign_off["evidence_ref"]), f"签署人 {sign_off.get('actor', '<unknown>')}")
+        owner = f"签署人 {sign_off.get('actor', '<unknown>')}"
+        local = resolve(str(sign_off["evidence_ref"]), owner)
+        if verify_local and accepted and not local:
+            failures.append(f"{owner} 的接受结论缺少可读取的本地签认回执。")
     return failures
+
+
+def readable_receipt(record: Path, path: Path) -> bool:
+    try:
+        if path.samefile(record):
+            return False
+        with path.open("rb") as stream:
+            return bool(stream.read(1))
+    except OSError:
+        return False
 
 
 def execution_denied(environment: str, kind: str) -> bool:
@@ -174,7 +196,7 @@ def summarize_acceptance_claims(claims: list[dict]) -> dict[str, set[str]]:
     return summary
 
 
-def validate_acceptance_document(doc: object, path: Path) -> list[dict[str, str]]:
+def validate_acceptance_document(doc: object, path: Path, baseline: Path | None = None) -> list[dict[str, str]]:
     """One semantic authority for the standalone CLI and the composed gate."""
     schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
     issues = [
@@ -185,9 +207,24 @@ def validate_acceptance_document(doc: object, path: Path) -> list[dict[str, str]
         return issues
     def add(code, message, ref=""):
         issues.append(dict(code=code, message=message, ref=ref))
+    if baseline is not None:
+        try:
+            raw = read_utf8_input(baseline)
+            metadata = markdown_frontmatter(raw.lstrip("\ufeff"))
+        except (OSError, ValueError) as exc:
+            add("ACCEPTANCE-BASELINE-READ", f"无法读取指定的需求基线：{exc}", str(baseline))
+            return issues
+        if hashlib.sha256(raw.encode("utf-8")).hexdigest() != doc.get("baseline_hash"):
+            add("ACCEPTANCE-BASELINE-HASH", "本次规格与记录中的 baseline_hash 不匹配或记录缺少摘要。", "baseline_hash")
+        if str(metadata.get("baseline_version", "")) != doc["baseline_version"]:
+            add("ACCEPTANCE-BASELINE-VERSION", "指定规格与验收记录的 baseline_version 不一致或规格未声明版本。", "baseline_version")
+        defined = collect_defined_ids(raw.lstrip("\ufeff"))
+        for item in doc["items"]:
+            if item["acceptance_ref"] not in defined:
+                add("ACCEPTANCE-BASELINE-AC", "在指定规格中找不到该验收条件的定义。", item["acceptance_ref"])
     if execution_denied(str(doc.get('environment', '')), doc.get('execution_type')):
         add("ACCEPTANCE-EXECUTION-CONFLICT", "execution_type 与环境中的未执行声明冲突；按实际执行修正，不升级证据等级")
-    for message in validate_evidence_refs(doc, path):
+    for message in validate_evidence_refs(doc, path, verify_local=baseline is not None):
         add("ACCEPTANCE-EVIDENCE-INVALID", message)
     items = doc.get("items", [])
     seen = set()
@@ -236,18 +273,20 @@ def validate_acceptance_document(doc: object, path: Path) -> list[dict[str, str]
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("document", type=Path)
+    parser.add_argument("--baseline", type=Path, help="compare a current Markdown requirement, its version, hash and acceptance references")
     args = parser.parse_args()
     try:
         doc = yaml.safe_load(args.document.read_text(encoding="utf-8-sig"))
     except (OSError, UnicodeError, yaml.YAMLError) as exc:
         print(f"FAIL: ACCEPTANCE-INPUT {args.document}: {input_error_detail(exc)}; 检查路径、UTF-8 编码及 YAML 缩进后重跑。")
         return 1
-    issues = validate_acceptance_document(doc, args.document)
+    issues = validate_acceptance_document(doc, args.document, args.baseline)
     if issues:
         for item in issues:
             print(f"FAIL: {item['code']} {item['ref']}: {item['message']}")
         return 1
-    print(f"PASS: 验收执行记录 {doc.get('run_id')} 的声明与引用检查通过（{doc.get('conclusion')}）；未核实执行及签认的真实性")
+    scope = "已比对指定规格并核对适用的本地回执引用" if args.baseline else "仅检查记录中的声明与引用，未比对当前规格"
+    print(f"PASS: {doc.get('run_id')} {scope}（记录结论：{doc.get('conclusion')}）；未核实执行及签认的真实性")
     return 0
 
 

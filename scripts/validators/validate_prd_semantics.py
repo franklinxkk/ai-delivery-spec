@@ -951,7 +951,7 @@ def check_pending_execution(raw: str) -> list[SemFinding]:
     """Narrow conflict probe; not a general detector of unauthorized defaults."""
     findings = []
     for n, line in _prose_lines(raw):
-        zh = re.search(r'(?:待确认|待复核|确认后才)[^。\n]{0,220}(?:在此之前|未确认前|确认之前)[，, ]*(?:实现|系统)?(?:须|必须|先|应)[^。\n]{0,60}(?:默认|执行)', line)
+        zh = re.search(r'(?:待确认|待复核|确认后才)[^。\n]{0,220}?(?:。\s*)?(?:在此之前|未确认前|确认之前|确认前)[，, ]*(?:实现|系统)?(?:须|必须|先|应)[^。\n]{0,60}(?:默认|执行)', line)
         en = re.search(r'(?:pending (?:confirmation|approval)|awaiting approval)[^\n]{0,180}(?:in the meantime|before approval)[, ]*(?:implementation |the system )?(?:must|shall|will)[^.\n]{0,80}(?:default|execute|apply)', line, re.I)
         # Quoted counterexamples, negation, and concept-only assumptions are not execution policy.
         negated = re.search(r'(?:不得|不能|禁止|错误示例|反例|示例：|仅用于概念验证|已授权的临时方案|do not|must not|bad example|concept.only|authorized interim)', line, re.I)

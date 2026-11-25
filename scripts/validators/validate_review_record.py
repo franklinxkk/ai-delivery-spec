@@ -6,12 +6,17 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import sys
 
 import yaml
 from jsonschema import Draft202012Validator, FormatChecker
 
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts"))
+from cli_support import input_error_detail
+from validators.validate_acceptance_run import local_evidence_path, readable_receipt
+
 SCHEMA = ROOT / "schemas/review-record.schema.json"
 APPROVING_DECISIONS = {"approve", "approve_with_conditions"}
 
@@ -19,8 +24,13 @@ APPROVING_DECISIONS = {"approve", "approve_with_conditions"}
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("document", type=Path)
+    parser.add_argument("--verify-evidence", action="store_true", help="check local receipts for completed review findings and sign-offs")
     args = parser.parse_args()
-    doc = yaml.safe_load(args.document.read_text(encoding="utf-8"))
+    try:
+        doc = yaml.safe_load(args.document.read_text(encoding="utf-8-sig"))
+    except (OSError, UnicodeError, yaml.YAMLError) as exc:
+        print(f"FAIL: REVIEW-INPUT {args.document}: {input_error_detail(exc)}")
+        return 1
     schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
     failures = [
         f"schema {'.'.join(str(part) for part in error.path) or '<root>'}: {error.message}"
@@ -60,6 +70,19 @@ def main() -> int:
 
         required_types = set(doc.get("required_review_types") or [])
         sign_offs = doc.get("sign_offs") or []
+        if args.verify_evidence:
+            closed = [item for item in findings if item.get("status") in {"resolved", "deferred", "rejected"}]
+            for item in closed + sign_offs:
+                owner = item.get("id") or item.get("actor")
+                readable = False
+                for ref in item.get("evidence_refs", []):
+                    local, error = local_evidence_path(args.document, ref)
+                    if error:
+                        failures.append(f"{owner}: {error}")
+                    if local and readable_receipt(args.document, local):
+                        readable = True
+                if not readable:
+                    failures.append(f"{owner}: no readable local review receipt")
         if not required_types:
             failures.append("completed review must declare required_review_types from the approved review plan")
         approving_types = {
@@ -98,9 +121,10 @@ def main() -> int:
         for item in failures:
             print(f"FAIL: {item}")
         return 1
+    check_scope = " Checked local receipt references for this completed review." if args.verify_evidence and doc.get("status") == "completed" else ""
     print(
-        f"PASS: Review Record {doc.get('review_id')} has honest finding closure "
-        "and required-role sign-offs"
+        f"PASS: Review Record {doc.get('review_id')} passed declaration checks. "
+        f"Reviewer independence, actual review and sign-off authenticity were not verified.{check_scope}"
     )
     return 0
 

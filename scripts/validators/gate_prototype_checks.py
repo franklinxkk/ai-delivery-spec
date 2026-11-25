@@ -3987,7 +3987,7 @@ class PrototypeChecks:
             "prototype_incomplete_unknown_contracts": len(incomplete_unknowns),
         })
 
-    def check_acceptance_run(self, path: Path) -> tuple[set[str], bool, bool]:
+    def check_acceptance_run(self, path: Path, baseline: Path | None = None) -> tuple[set[str], bool, bool]:
         """Validate one ARUN and return evidenced ACs, browser environment, conclusion."""
         try:
             raw = self.read(path)
@@ -3999,7 +3999,12 @@ class PrototypeChecks:
             self.add("BLOCK", "ACCEPTANCE-PARSE", path, error or "验收记录无效")
             return set(), False, False
         self.acceptance_documents[path.resolve()] = document
-        issues = validate_acceptance_document(document, path)
+        bound = "baseline_hash" in document
+        issues = validate_acceptance_document(document, path, baseline if bound else None)
+        if bound and baseline is None:
+            self.add("BLOCK", "ACCEPTANCE-BASELINE-MISSING", path,
+                     "验收记录指定了规格摘要。请一并传入 --prd 比对本次规格，再使用该记录的结论。")
+            return set(), False, False
         for issue in issues:
             self.add("BLOCK", issue["code"], path, issue["message"], issue["ref"])
         if issues:

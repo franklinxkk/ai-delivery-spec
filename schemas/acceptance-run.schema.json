@@ -22,6 +22,7 @@
     "schema_version": { "const": "5.1.0" },
     "run_id": { "type": "string", "pattern": "^ARUN-[A-Z0-9-]+$" },
     "baseline_version": { "type": "string", "minLength": 1 },
+    "baseline_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$", "description": "Optional SHA-256 of the UTF-8 requirement with LF line endings, as in the handoff manifest." },
     "execution_type": {"enum": ["static", "simulation", "browser", "integration", "unknown"]},
     "environment": { "type": "string", "minLength": 1 },
     "executor": { "type": "string", "minLength": 1 },

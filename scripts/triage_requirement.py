@@ -124,6 +124,21 @@ def recommend(doc: dict, output_language: str = "auto") -> dict:
         advice = "clarify"
         reasons.append("The task goal is missing." if english else "任务目标尚未给出")
     next_questions = list(dict.fromkeys(item["action_en"] if english else item["action"] for item in required_questions))
+    if advice == "clarify":
+        default = next((hit for hit in lexical if hit["kind"] == "undefined-default"), None)
+        ai_write = next((hit for hit in questions if hit.get("kind") == "ai-write"), None)
+        if ai_write:
+            action = ai_write["action_en"] if english else ai_write["action"]
+            if action not in next_questions:
+                next_questions.append(action)
+        if default and (not next_questions or ("超时" in default["context"] or "逾期" in default["context"])):
+            context = default["context"]
+            if re.search(r"超时|逾期", context) and re.search(r"审批|通过", context):
+                next_questions.append("When does the clock start and how long is the timeout? Who decides whether an unanswered request may be approved automatically?"
+                                      if english else "从什么时候开始、过多久算超时？无人处理时能否自动通过，由谁决定？")
+            else:
+                next_questions.append(f'Which condition triggers “{context}”, and what should change when it is met?'
+                                      if english else f'“{context}”在什么条件下生效，生效后具体改变什么？')
     if advice == "clarify" and not next_questions:
         next_questions.append(
             "Who is trying to do what, and what current problem should this change solve?" if english else

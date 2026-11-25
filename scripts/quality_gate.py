@@ -1409,7 +1409,7 @@ def run_sidecar_validator(gate: Gate, script: str, path: Path, code: str, extra:
         gate.add("BLOCK", code, path, line)
 
 
-def collect_acceptance_claims(gate: Gate, paths: list[Path]) -> dict[str, dict[str, Any]]:
+def collect_acceptance_claims(gate: Gate, paths: list[Path], baseline: Path | None = None) -> dict[str, dict[str, Any]]:
     """Keep record identity, results and evidence context together at every consumer."""
     claims, seen_ids, seen_paths = {}, {}, set()
     for path in paths:
@@ -1421,7 +1421,7 @@ def collect_acceptance_claims(gate: Gate, paths: list[Path]) -> dict[str, dict[s
             gate.add("BLOCK", "GATE-NOT-FILE", path, "input does not exist or is not a file", "acceptance-run")
             continue
         before = len(gate.findings)
-        _, browser, conclusive = gate.check_acceptance_run(path)
+        _, browser, conclusive = gate.check_acceptance_run(path, baseline)
         document = gate.acceptance_documents.get(path, {})
         run_id = str(document.get("run_id", "")).upper()
         if run_id in seen_ids:
@@ -1512,7 +1512,13 @@ def _run_checks(gate: Gate, args, required: tuple[str, ...], explicit_prototype_
         value = getattr(args, name)
         values = value if name == "prototype" and isinstance(value, list) else [value]
         if not value:
-            gate.add("BLOCK", "GATE-MISSING-INPUT", Path("<input>"), f"--{name} is required for profile={args.profile}", name)
+            message = f"--{name} is required for profile={args.profile}"
+            if args.profile == "handoff" and name == "prototype":
+                gate.add("BLOCK", "GATE-MISSING-INPUT", Path("<input>"),
+                         message + "。本项对照 PRD 与原型。约定只交需求文档时使用 --profile prd；已有 Agent 交接清单用 --profile agent_handoff。",
+                         name, message_en=message + ". This profile compares both artifacts. Use --profile prd for a PRD alone, or --profile agent_handoff to check an existing manifest.")
+                continue
+            gate.add("BLOCK", "GATE-MISSING-INPUT", Path("<input>"), message, name)
             continue
         for item in values:
             if not item.is_file():
@@ -1576,7 +1582,7 @@ def _run_checks(gate: Gate, args, required: tuple[str, ...], explicit_prototype_
     if args.profile in {"handoff", "full"} and valid_prd and args.manifest and args.manifest.is_file():
         gate.check_manifest_prd_binding(valid_prd, args.manifest)
         gate.check_review_manifest_binding(args.manifest)
-    acceptance_claims = collect_acceptance_claims(gate, args.acceptance_run or [])
+    acceptance_claims = collect_acceptance_claims(gate, args.acceptance_run or [], valid_prd)
     conclusive_evidence = any(item["conclusive"] for item in acceptance_claims.values())
     for review_path, review_document in gate.review_workspace_contracts:
         expected_baseline_version = str((review_document.get("baseline") or {}).get("version", ""))

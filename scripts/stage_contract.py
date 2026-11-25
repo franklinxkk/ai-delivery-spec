@@ -54,6 +54,7 @@ FRONTMATTER_REQUIRED_MESSAGE = (
 )
 FRONTMATTER_REQUIRED_FIX = "保留现有交付格式；若要运行本项结构检查，提供提取后核对过的文本及本阶段必要声明。PRD 正文可用 gate --profile prd 检查，Word/PDF 另核对版式和图片。无需为此重写需求。"
 EN_GUIDANCE = {
+    "ROUTE-UNKNOWN-ACCEPTANCE-INPUT": ("An explicitly supplied acceptance input has an unrecognized artifact type and stage.", "Identify the intended baseline or mark reference material as supporting."),
     "GATE-NOT-FILE": ("The artifact cannot be read.", "Check the path, UTF-8 encoding, binary content and size."),
     "STAGE-PARSE": ("Artifact declarations could not be parsed.", "Fix brackets, quotes and indentation at the reported location; business content has not been checked. Do not invent business rules to resolve syntax errors."),
     "STAGE-NO-FRONTMATTER": ("This structured stage check needs readable Markdown metadata or YAML/JSON declarations; the input format is unsupported by this check.", "Keep the delivery format. Supply verified extracted text and necessary declarations for this check, or use the PRD gate for prose; inspect Word/PDF layout and images separately. No rewrite is required."),
@@ -828,6 +829,12 @@ def run_route(args: argparse.Namespace) -> int:
         except (OSError, UnicodeError, ValueError) as exc:
             findings.append(finding("BLOCK", "ROUTE-ARTIFACT-READ", path, f"无法读取已有产物：{exc}", "检查路径、UTF-8 编码、二进制内容和文件大小。"))
     target = args.target
+    if target == "acceptance":
+        for item in artifacts:
+            if item.metadata.get("artifact") and item.stage == "unknown" and item.metadata.get("artifact_role") != "supporting":
+                findings.append(finding("BLOCK", "ROUTE-UNKNOWN-ACCEPTANCE-INPUT", item.path,
+                                        f"未识别参与本次验收比对的产物类型：{item.kind}。",
+                                        "核对本次规格的类型或阶段；仅供参考的资料可声明为 supporting。"))
     known, current = route_cycle(artifacts, findings)
     stages_present = {item.stage for item in known}
     already_reached = bool(
@@ -869,6 +876,8 @@ def run_route(args: argparse.Namespace) -> int:
         "status": "BLOCKED" if blocks else "PASS",
         "target_stage": target,
         "recommended_entry_stage": entry,
+        "assessment": {"kind": "route_check", "label": "本次仅检查阶段入口及其声明。"},
+        "not_proven": ["业务授权", "实际执行", "业务签收"],
         "path": path,
         "current_artifact_stage": current.stage if current else None,
         "artifacts": [{"path": str(item.path), "artifact": item.kind, "stage": item.stage, "confidence": item.confidence,
@@ -880,6 +889,7 @@ def run_route(args: argparse.Namespace) -> int:
         print(json.dumps(payload, ensure_ascii=False, indent=2))
     else:
         print(f"{payload['status']} target={target} entry={entry} path={' -> '.join(path)}")
+        print(payload["assessment"]["label"])
         for item in findings:
             print(f"{item['severity']} {item['code']}: {item['message_zh']}")
     return 2 if blocks else 0
