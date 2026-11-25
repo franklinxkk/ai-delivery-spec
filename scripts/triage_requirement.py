@@ -162,7 +162,7 @@ def recommend(doc: dict, output_language: str = "auto") -> dict:
 def render_markdown(result: dict) -> str:
     english = str(result.get("output_language", result["document_language"])).casefold().startswith("en")
     advice = {
-        "accept": ("可以进入需求整理；本次扫描不证明信息已完整。", "Proceed to specification; this scan does not prove completeness."),
+        "accept": ("可以进入需求整理。改写稿中若有影响结果且尚未确认的规则，直接向当前操作者问清该项。", "Proceed to specification. If a consequential rule in a rewrite is unclear, ask the current operator about that rule."),
         "clarify": ("先澄清会改变实现的业务选择。", "Clarify the business choices that would change implementation."),
         "reject": ("建议核对后不纳入本次范围，尚未作出拒绝决定。", "Consider excluding this after verification; no rejection decision has been made."),
         "defer": ("建议先解决依赖，暂缓不等于已批准延期。", "Consider resolving the dependency first; no deferral has been approved."),
