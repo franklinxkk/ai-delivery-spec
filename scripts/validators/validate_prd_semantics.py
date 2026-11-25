@@ -947,17 +947,59 @@ def check_enum_value_coverage(raw: str) -> list[SemFinding]:
     return findings
 
 
+_BEFORE_APPROVAL = r"(?:在此之前|(?:在|未)?确认(?:之)?前|in the meantime\b|before (?:approval|confirmation)\b|until then\b)"
+_PENDING = re.compile(r"(.*?)(?:仍待确认|待确认|待复核|\b(?:pending (?:approval|confirmation)|awaiting approval))$", re.I)
+_QUOTED_EXAMPLE = re.compile(
+    r"(?:反例|示例|引用|摘录|example|quotation|quote)(?:为|如下)?\s*[:：]?\s*"
+    r'(?:“[^”]*”|「[^」]*」|"[^"]*")'
+)
+
+
+def _executes_pending_topic(topic: str, directive: str) -> bool:
+    """Accept an immediate anaphoric command or an execution verb with a matching object."""
+    topic = re.split(r"[:：]", topic)[-1].strip()
+    zh = re.fullmatch(r"(?:系统|实现)?(?:必须|须|应该|应|先)(?:先)?(?:按默认(?:值|规则)?|默认)?(.*)", directive)
+    if zh:
+        action = zh[1]
+        if re.fullmatch(r"(?:执行|实施|应用)(?:该规则|该方案|该决定)?|按该(?:规则|方案)执行|采用默认值", action):
+            return True
+        target = re.fullmatch(r"(?:执行|实施|应用|发起|办理|采用)?(?:全额|部分)?(.+)", action)
+        return bool(target and target[1] in (topic, re.sub(r"(?:金额|规则|方案|策略)$", "", topic)))
+
+    en = re.fullmatch(r"(?:(?:the system|implementation) )?(?:must|shall|will) (.+)", directive)
+    if not en:
+        return False
+    action = en[1].removesuffix(" by default")
+    if re.fullmatch(r"(?:apply|execute|implement) (?:(?:the )?defaults?(?: value)?|it|this rule)", action):
+        return True
+    target = re.fullmatch(r"(?:apply defaults? to|apply|execute|implement|issue) (?:(?:the|a) )?(?:full |partial )?(.+)", action)
+    topic = re.sub(r"^(?:the|a) | (?:is|remains)$", "", topic)
+    return bool(target and target[1] in (topic, re.sub(r" (?:amount|rule|policy|decision)$", "", topic)))
+
+
 def check_pending_execution(raw: str) -> list[SemFinding]:
-    """Narrow conflict probe; not a general detector of unauthorized defaults."""
+    """Bounded check of adjacent clauses. Unknown object relationships require human review."""
     findings = []
     for n, line in _prose_lines(raw):
-        zh = re.search(r'(?:待确认|待复核|确认后才)[^。\n]{0,220}?(?:。\s*)?(?:在此之前|未确认前|确认之前|确认前)[，, ]*(?:实现|系统)?(?:须|必须|先|应)[^。\n]{0,60}(?:默认|执行)', line)
-        en = re.search(r'(?:pending (?:confirmation|approval)|awaiting approval)[^\n]{0,180}(?:in the meantime|before approval)[, ]*(?:implementation |the system )?(?:must|shall|will)[^.\n]{0,80}(?:default|execute|apply)', line, re.I)
-        # Quoted counterexamples, negation, and concept-only assumptions are not execution policy.
-        negated = re.search(r'(?:不得|不能|禁止|错误示例|反例|示例：|仅用于概念验证|已授权的临时方案|do not|must not|bad example|concept.only|authorized interim)', line, re.I)
-        if (zh or en) and not negated:
+        if line.lstrip().startswith(">"):
+            continue
+        line = _QUOTED_EXAMPLE.sub("…", line.casefold())
+        line = line.translate(str.maketrans("", "", '“”「」"'))
+        # Leave a temporal lead-in and its optional comma attached to the command.
+        line = re.sub(rf"({_BEFORE_APPROVAL})\s*[,，]\s*", r"\1 ", line)
+        clauses = [part.strip() for part in re.split(r"[。.!?！？；;，,|]", line)]
+        for pending, instruction in zip(clauses, clauses[1:]):
+            claim = _PENDING.fullmatch(pending.lstrip("-* "))
+            before = re.match(_BEFORE_APPROVAL, instruction)
+            if not claim or not before:
+                continue
+            if re.search(r"(?:反例|示例|概念验证|example|concept.only)\s*[:：]|(?:不再|无需|并非|不是|\bnot|\bno longer)\s*$", claim[1]):
+                continue
+            if not _executes_pending_topic(claim[1].strip(), instruction[before.end():].strip()):
+                continue
             findings.append(SemFinding('BLOCK','PRD-PENDING-EXECUTION',
-                '同一处把业务选择标为待确认，又要求确认前按默认执行。删除相互冲突的实施承诺；已有授权则引用授权并同步状态，未决只限制依赖分支。',f'line {n}'))
+                '同一处把业务选择标为待确认，又要求确认前执行。删除相互冲突的实施承诺；已有授权则引用授权并同步状态，未决只限制依赖分支。',f'line {n}'))
+            break
     return findings
 
 

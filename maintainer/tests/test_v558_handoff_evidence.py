@@ -32,6 +32,22 @@ def test_triage_questions_follow_evidence_and_leave_small_edit_direct():
     ("退款规则待确认。付款确认前系统应按默认执行。", False),
     ("退款规则待确认。确认前不得按默认执行。", False),
     ("退款规则待确认。已授权的临时方案规定确认前系统必须按默认执行。", False),
+    ("申请人不得查看其他企业的账单。退款金额待确认。确认前系统必须默认执行全额退款。", True),
+    ("退款金额待确认。确认前系统必须默认执行全额退款，申请人不得查看其他企业的账单。", True),
+    ("退款金额待确认。确认前系统应默认保留草稿，沿用已批准的草稿保存规则，财务确认后才发起退款。", False),
+    ("退款规则待确认。确认前系统必须默认执行付款。", False),
+    ("退款金额待确认。确认前系统应默认全额退款。", True),
+    ("退款规则待确认。确认前系统应按该规则执行。", True),
+    ("退款规则无需待确认。确认前系统须按默认值执行。", False),
+    ("退款金额待确认。确认前系统必须按已批准的临时授权执行全额退款。", False),
+    ("原文反例为“退款金额待确认。确认前系统必须默认执行全额退款。”", False),
+    ("原文反例为“不可自动退款”。退款金额待确认。确认前系统必须默认执行全额退款。", True),
+    ("退款金额待确认。确认前系统必须默认执行“全额退款”。", True),
+    ("正式规则要求：“退款金额待确认。确认前系统必须默认执行全额退款。”", True),
+    ("Refund amount is pending approval. Before approval, the system must issue a full refund by default. Applicants must not view other bills.", True),
+    ("Refund amount is pending approval. Before approval, the system must apply defaults to draft storage.", False),
+    ("Refund amount is pending approval. Before approval, the system must not execute the refund.", False),
+    ("This policy is no longer pending approval. Before approval, the system must apply defaults.", False),
 ])
 def test_adjacent_explicit_instruction(text, blocked):
     assert bool(check_pending_execution(text)) == blocked
