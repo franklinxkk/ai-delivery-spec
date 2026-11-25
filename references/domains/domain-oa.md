@@ -94,7 +94,7 @@ Durable judgment: AI office is becoming the organization's **system of action**;
 | runtime | foreground session -> local/cloud managed runtimes for long tasks and event triggers | sandbox, secret isolation, checkpoints, trace, cancellation, retry and human takeover are required |
 | business model | OA seats/modules -> seats + governed compute + skill/connector ecosystem + measurable work outcomes | avoid lock-in by keeping portable work objects, APIs/protocols, evidence and export/exit paths |
 
-`KS-OA-WORKBUDDY-WMA-2026`, `KS-OA-QWEN-WORK-2026` and `KS-OA-FEISHU-DOUBAO-2026` support this product-pattern direction. Check their dated source and edition/client limits before making an availability claim: a whitelist beta, a forecast release and a dated scenario article do not establish general availability or customer outcomes.
+`KS-OA-WORKBUDDY-WMA-2026`, `KS-OA-QWEN-WORK-2026` and `KS-OA-FEISHU-DOUBAO-2026` support this product-pattern direction. Tencent documents a console public beta, Qwen documents client and edition differences, and Feishu describes dated office scenarios. Verify tenant access and observed outcomes for the intended deployment.
 
 ## First-Principles Domain Lens
 
